@@ -1,0 +1,15 @@
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+PIDFile=/run/targeting-search.pid
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/filed-targeting-search
+ExecStart=/home/ubuntu/env/bin/gunicorn --access_logfile /home/ubuntu/gunicorn-access.log --error-logfile /home/ubuntu/gunicorn-error.log --workers 3 --bind unix:/run/gunicorn.sock filed_targeting_search.wsgi:application
+ExecStop = /sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/targeting-search.pid
+
+[Install]
+WantedBy=multi-user.target

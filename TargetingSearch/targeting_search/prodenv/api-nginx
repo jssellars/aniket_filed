@@ -1,0 +1,24 @@
+server {
+    listen 80;
+    server_name 35.176.104.149;
+    charset utf-8;
+
+    client_max_body_size 75M;
+
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+
+    location /static/ {
+        alias /home/ubuntu/filed-targeting-search/static;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+
+    access_log /home/ubuntu/api-access.log;
+    access_log /home/ubuntu/api-error.log;
+}

@@ -1,0 +1,16 @@
+[0;1;31m●[0m gunicorn.service - gunicorn daemon
+   Loaded: loaded (/etc/systemd/system/gunicorn.service; disabled; vendor preset: enabled)
+   Active: [0;1;31mfailed[0m (Result: exit-code) since Sat 2019-05-11 18:50:44 UTC; 9s ago
+  Process: 13307 ExecStart=/home/ubuntu/env/bin/gunicorn --bind unix:/run/gunicorn.sock adpreview.wsgi:application [0;1;31m(code=exited, status=3)[0m
+ Main PID: 13307 (code=exited, status=3)
+
+May 11 18:50:44 ip-10-0-0-22 gunicorn[13307]:     raise ValueError('Invalid Django secret key')
+May 11 18:50:44 ip-10-0-0-22 gunicorn[13307]: ValueError: Invalid Django secret key
+May 11 18:50:44 ip-10-0-0-22 gunicorn[13307]: [2019-05-11 18:50:44 +0000] [13329] [INFO] Worker exiting (pid: 13329)
+May 11 18:50:44 ip-10-0-0-22 gunicorn[13307]: [2019-05-11 18:50:44 +0000] [13307] [INFO] Shutting down: Master
+May 11 18:50:44 ip-10-0-0-22 gunicorn[13307]: [2019-05-11 18:50:44 +0000] [13307] [INFO] Reason: Worker failed to boot.
+May 11 18:50:44 ip-10-0-0-22 systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+May 11 18:50:44 ip-10-0-0-22 systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Failed with result 'exit-code'.[0m
+May 11 18:50:44 ip-10-0-0-22 systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Start request repeated too quickly.[0m
+May 11 18:50:44 ip-10-0-0-22 systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Failed with result 'exit-code'.[0m
+May 11 18:50:44 ip-10-0-0-22 systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start gunicorn daemon.[0m

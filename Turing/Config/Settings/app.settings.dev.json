@@ -1,0 +1,67 @@
+{
+  "rabbitmq": {
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "dev2.filed.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "dev2.filed.turing.inbound",
+          "inbound_routing_key": "dev2.filed.turing.inbound.inbound.key",
+          "outbound": "dev2.filed.turing.outbound",
+          "outbound_routing_key": "dev2.filed.turing.outbound.key"
+        }
+      },
+      {
+        "name": "dev2.filed.facebook.turing.fanout",
+        "type": "fanout"
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v4.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+
+  "sql_server_database": {
+    "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "port": 1433,
+    "username": "admin",
+    "password": "F2!irf0q",
+    "name": "filed-facebook-tokens"
+  },
+
+  "mongo_database" : {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_sshuser": "mongo",
+    "mongo_sshpass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "insights_database_name": "Filed_Turing_Facebook_Insights",
+    "structures_database_name": "Filed_Turing_Facebook_Structures_Test"
+  },
+
+  "run_verbose": false,
+  "log_errors": true,
+  "environment": "dev",
+  "api_name": "Turing",
+  "api_version": "1.0.0",
+  "service_name": "Turing",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1"
+}
