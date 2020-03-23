@@ -13,7 +13,7 @@ class AdWordsBaseClient:
         self._client_secret = client_secret
 
         if client_id is None:
-            self._client = adwords.AdWordsClient.LoadFromStorage(config.client_config_path)
+            self._client = adwords.AdWordsClient.LoadFromStorage(path=config.client_config_path)
         else:
             self._client = self.__init_client_with_client_info()
 

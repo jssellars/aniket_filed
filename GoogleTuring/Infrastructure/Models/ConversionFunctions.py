@@ -1,5 +1,5 @@
 import pandas as pd
-from DbInstance import DbInstance
+from GoogleTuring.Infrastructure.PersistanceLayer.MongoIdToNameCache import MongoIdToNameCache
 
 
 def id_to_string(x):
@@ -20,6 +20,5 @@ def id_to_location_name(x):
     if x is pd.np.nan:
         return x
 
-    # TODO: refactor this
-    return DbInstance.get_id_to_location_dict()[int(x)]
+    return MongoIdToNameCache.id_to_name_cache[int(x)]
 
