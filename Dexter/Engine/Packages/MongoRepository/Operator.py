@@ -1,0 +1,12 @@
+class Operator:
+    IN = "$in"
+    NOT_IN = "$nin"
+    AND = "$and"
+    OR = "$or"
+    EQUALS = "$eq"
+    NOT_EQUAL = "$ne"
+    GREATER_THAN_EQUAL = "$gte"
+    GREATER_THAN = "$gt"
+    LESS_THAN_EQUAL = "$lte"
+    LESS_THAN = "$lt"
+    SET = "$set"
