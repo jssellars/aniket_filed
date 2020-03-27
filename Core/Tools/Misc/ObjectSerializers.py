@@ -13,4 +13,4 @@ def object_to_json(data: typing.Any = None) -> typing.Dict:
 
 
 def object_to_attribute_values_list(data: object) -> typing.List[typing.Dict]:
-    return [value for _, value in object_to_json(data).items()]
+    return [value for _, value in object_to_json(data).items() if value]

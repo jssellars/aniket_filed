@@ -1,5 +1,6 @@
 {
   "rabbitmq": {
+    "consumer_name": "dev.api.facebook.turing.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -61,5 +62,8 @@
   "api_version": "1.0.0",
   "service_name": "Turing",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "port": 47350,
+  "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
+  "debug_mode": true
 }

@@ -27,4 +27,4 @@ rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
 
 while True:
     if not rabbitmq_client.consumer_started:
-        rabbitmq_client.register_callback(callback).register_consumer(consumer_tag="potter.facebook.accounts.consumer").start_consuming()
+        rabbitmq_client.register_callback(callback).register_consumer(consumer_tag=startup.rabbitmq_config.consumer_name).start_consuming()

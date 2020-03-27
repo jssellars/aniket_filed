@@ -8,10 +8,10 @@ from flask_restful import Api
 from Potter.FacebookAccounts.Api.Controllers.AdAccountController import AdAccountInsightsEndpoint, AdAccountPagesEndpoint, AdAccountInstagramEndpoint, AdAccountPageInstagramEndpoint
 from Potter.FacebookAccounts.Api.Controllers.BusinessOwnerController import BusinessOwnerEndpoint
 from Potter.FacebookAccounts.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
-from Potter.FacebookAccounts.Api.Startup import startup, jwt_secret_key
+from Potter.FacebookAccounts.Api.Startup import startup
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else jwt_secret_key
+app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
 app.config["JWT_TOKEN_LOCATION"] = "headers"
 app.config["JWT_HEADER_NAME"] = "Authorization"
 app.config["JWT_HEADER_TYPE"] = "Bearer"
@@ -43,7 +43,7 @@ ad_account_controller = "{base_url}/facebook-accounts".format(base_url=startup.b
 ad_account_insights_controller = "{base_url}/facebook-accounts-insights".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountInsightsEndpoint, ad_account_insights_controller)
 
-# Pages controller
+#  Pages controller
 ad_account_pages_controller = "{base_url}/pages/<string:account_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountPagesEndpoint, ad_account_pages_controller)
 
@@ -55,7 +55,5 @@ api.add_resource(AdAccountInstagramEndpoint, ad_account_instagram_controller)
 ad_account_page_instagram_controller = "{base_url}/instagram-business-account/<string:page_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountPageInstagramEndpoint, ad_account_page_instagram_controller)
 
-
-
 if __name__ == "__main__":
-    app.run(debug=True, host="localhost", port="42000")
+    app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

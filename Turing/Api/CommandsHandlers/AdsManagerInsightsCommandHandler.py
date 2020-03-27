@@ -3,6 +3,7 @@ from Core.Tools.QueryBuilder.QueryBuilderRequestParser import QueryBuilderReques
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Turing.Api.Startup import startup
 from Turing.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
+from Turing.Infrastructure.Mappings.LevelMapping import Level
 
 
 class AdsManagerInsightsCommandHandler:
@@ -15,9 +16,12 @@ class AdsManagerInsightsCommandHandler:
         return query
 
     @classmethod
-    def get_insights(cls, query_json, business_owner_facebook_id):
+    def get_insights(cls, level, query_json, business_owner_facebook_id):
         business_owner_permanent_token = BusinessOwnerRepository(startup.Session).get_permanent_token(business_owner_facebook_id)
         query = cls.map_query(query_json, has_breakdowns=True)
+
+        if level == Level.ACCOUNT.value:
+            query.remove_structure_fields()
 
         response = GraphAPIInsightsHandler.get_insights(permanent_token=business_owner_permanent_token,
                                                         level=query.level,

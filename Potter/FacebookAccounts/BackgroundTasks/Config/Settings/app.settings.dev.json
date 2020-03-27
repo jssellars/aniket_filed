@@ -1,5 +1,6 @@
 {
   "rabbitmq": {
+    "consumer_name": "dev.bt.potter.facebook.accounts.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -7,13 +8,13 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "dev2.filed.direct",
+        "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev2.filed.facebook.accounts.worker.inbound",
-          "inbound_routing_key": "dev2.filed.facebook.accounts.worker.inbound.key",
-          "outbound": "dev2.filed.facebook.accounts.worker.outbound",
-          "outbound_routing_key": "dev2.filed.facebook.accounts.worker.outbound.key"
+          "inbound": "dev.facebook.accounts.inbound",
+          "inbound_routing_key": "dev.facebook.accounts.inbound.key",
+          "outbound": "dev.facebook.accounts.outbound",
+          "outbound_routing_key": "dev.facebook.accounts.outbound.key"
         }
       }
     ],

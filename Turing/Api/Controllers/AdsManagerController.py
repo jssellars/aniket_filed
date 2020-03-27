@@ -17,6 +17,7 @@ from Turing.Api.Mappings.AdsManagerSaveDraftCommandMapping import AdsManagerSave
 from Turing.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from Turing.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from Turing.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
+from Turing.Infrastructure.Mappings.LevelMapping import Level
 
 
 class AdsManagerCampaignTreeStructureEndpoint(Resource):
@@ -30,15 +31,40 @@ class AdsManagerCampaignTreeStructureEndpoint(Resource):
             abort(400, message=f"Could not retrieve tree for {facebook_id}. Error: {str(e)}")
 
 
-class AdsManagerGetStructuresEndpoint(Resource):
+class AdsManagerGetCampaignsEndpoint(Resource):
 
     @jwt_required
-    def get(self, level, ad_account_id):
+    def get(self, account_id):
+        level = Level.CAMPAIGN.value
         try:
-            response = AdsManagerGetStructuresQuery.get_structures(level, ad_account_id)
+            response = AdsManagerGetStructuresQuery.get_structures(level, account_id)
             return snake_to_camelcase(response)
         except Exception as e:
-            abort(400, message=f"Could not retrieve {level} for {ad_account_id}. Error: {str(e)}")
+            abort(400, message=f"Could not retrieve {level} for {account_id}. Error: {str(e)}")
+
+
+class AdsManagerGetAdSetsEndpoint(Resource):
+
+    @jwt_required
+    def get(self, account_id):
+        level = Level.ADSET.value
+        try:
+            response = AdsManagerGetStructuresQuery.get_structures(level, account_id)
+            return snake_to_camelcase(response)
+        except Exception as e:
+            abort(400, message=f"Could not retrieve {level} for {account_id}. Error: {str(e)}")
+
+
+class AdsManagerGetAdsEndpoint(Resource):
+
+    @jwt_required
+    def get(self, account_id):
+        level = Level.AD.value
+        try:
+            response = AdsManagerGetStructuresQuery.get_structures(level, account_id)
+            return snake_to_camelcase(response)
+        except Exception as e:
+            abort(400, message=f"Could not retrieve {level} for {account_id}. Error: {str(e)}")
 
 
 class AdsManagerEndpoint(Resource):

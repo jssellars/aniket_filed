@@ -18,12 +18,12 @@ class EnumerationBase(Enum):
 
     @classmethod
     def get_by_name(cls, name):
-        match = next(filter(lambda x: x.name.lower() == name, cls))
+        match = next(filter(lambda x: x.name.lower() == name, cls), None)
         return match.value if match else None
 
     @classmethod
     def get_enum_by_name(cls, name):
-        match = next(filter(lambda x: x.name == name, cls))
+        match = next(filter(lambda x: x.name == name, cls), None)
         return match if match else None
 
     @classmethod

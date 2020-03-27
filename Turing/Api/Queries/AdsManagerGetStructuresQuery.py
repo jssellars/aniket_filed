@@ -10,10 +10,10 @@ class AdsManagerGetStructuresQuery:
 
     @classmethod
     def get_structures(cls, level, ad_account_id):
-        collection_name = LevelManyToMongoCollectionEnum(level).name.lower()
+        collection_name = level
         ad_account_id = ad_account_id.split("_")[1]
-        id_key = LevelToFacebookIdKeyMapping.get_by_name(collection_name)
-        name_key = LevelToFacebookNameKeyMapping.get_by_name(collection_name)
+        id_key = LevelToFacebookIdKeyMapping.get_by_name(level)
+        name_key = LevelToFacebookNameKeyMapping.get_by_name(level)
 
         try:
             mongo_repository = MongoRepositoryBase(config=startup.mongo_config,
@@ -25,6 +25,8 @@ class AdsManagerGetStructuresQuery:
                                                                name_key=name_key)
             mongo_repository.connection_handler.close()
 
+            if response:
+                response = converter_dot_placeholder(response, convert_placeholder_to_key_dot)
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
             response = mapping.load(response, many=True)  # [{"facebookId": entry['id'], "name": entry["name"]} for entry in response]
             return response
@@ -33,7 +35,7 @@ class AdsManagerGetStructuresQuery:
 
     @classmethod
     def get_structure_details(cls, level, facebook_id):
-        collection_name = LevelToMongoCollectionEnum(level).value
+        collection_name = level
 
         try:
             mongo_repository = MongoRepositoryBase(config=startup.mongo_config,

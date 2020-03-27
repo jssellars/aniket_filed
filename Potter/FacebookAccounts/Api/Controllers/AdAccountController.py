@@ -47,7 +47,6 @@ class AdAccountPageInstagramEndpoint(Resource):
             return humps.camelize(response)
         except Exception as e:
             abort(400, message=f"Failed to retrieve pages for {page_id}. Error {str(e)}")
-        # page_id?fields=instagram_business_account{id,username}
         pass
 
 
