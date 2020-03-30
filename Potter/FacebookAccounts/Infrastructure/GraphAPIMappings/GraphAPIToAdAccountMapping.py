@@ -1,3 +1,4 @@
+import hashlib
 import typing
 
 from marshmallow import fields, EXCLUDE, pre_load
@@ -28,18 +29,28 @@ class GraphAPIToAdAccountMapping(MapperBase):
             data["owner_business_facebook_id"] = business_details.pop("id")
             data["owner_business_name"] = business_details.pop("name")
 
-            if "account_status" in data and data["account_status"]:
-                status = data.pop("account_status")
-                data["status"] = self.__map_facebook_status(status)
-            else:
-                # todo: ask Sebi / Razvan to allow for status == null
-                data["status"] = data.pop("account_status")
+        if "account_status" in data and data["account_status"]:
+            status = data.pop("account_status")
+            data["status"] = self.__map_facebook_status(status) if status else FiledEntityStatus.ACTIVE.value
+        else:
+            data["status"] = data.pop("account_status")
 
-            data["facebook_id"] = data.pop("id")
+        facebook_id = data.pop("id")
+        data["facebook_id"] = facebook_id if facebook_id else self.__create_hash_id(data["name"], data["currency"])
 
         return data
 
-    def __map_facebook_status(self, facebook_status):
+    @staticmethod
+    def __create_hash_id(facebook_name: typing.AnyStr = None,
+                         currency: typing.AnyStr = None) -> typing.AnyStr:
+
+        if not facebook_name:
+            facebook_name = "Unknown"
+
+        name_string = currency + facebook_name
+        return hashlib.sha1(name_string.encode('utf-8')).hexdigest()
+
+    def __map_facebook_status(self, facebook_status: int) -> int:
         facebook_to_filed_status_mapping = {
             '1': FiledEntityStatus.ACTIVE.value,
             '2': FiledEntityStatus.PAUSED.value,
@@ -50,7 +61,7 @@ class GraphAPIToAdAccountMapping(MapperBase):
             '100': FiledEntityStatus.PAUSED.value,
             '101': FiledEntityStatus.PAUSED.value,
             '201': FiledEntityStatus.ACTIVE.value,
-            '202': FiledEntityStatus.PAUSED.value
+            '202': FiledEntityStatus.PAUSED.value,
         }
 
         return facebook_to_filed_status_mapping[str(facebook_status)]

@@ -2,8 +2,8 @@ from Core.Tools.Misc.EnumerationBase import EnumerationBase
 
 
 class RequestTypeEnum(EnumerationBase):
-    pass
+    GET_ALL_APPS_REQUEST_HANDLER = "GetAllAppssMessageRequest"
 
 
 class ResponseTypeEnum(EnumerationBase):
-    pass
+    GET_ALL_APPS_REQUEST_HANDLER = "GetAllAppsMessageResponse"

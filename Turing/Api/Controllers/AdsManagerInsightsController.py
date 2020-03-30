@@ -16,6 +16,8 @@ class AdsManagerInsightsEndpoint(Resource):
         business_owner_facebook_id = extract_business_owner_facebook_id(get_jwt())
 
         try:
+            if "level" not in requestJson.keys():
+                requestJson["level"] = None
             response = AdsManagerInsightsCommandHandler.get_insights(requestJson["level"], requestJson["query"], business_owner_facebook_id)
             return response
         except Exception as e:

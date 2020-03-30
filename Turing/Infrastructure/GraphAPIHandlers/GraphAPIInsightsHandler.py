@@ -71,12 +71,14 @@ class GraphAPIInsightsHandler:
                           ad_account_id: typing.AnyStr = None,
                           fields: typing.List[typing.AnyStr] = None,
                           parameters: typing.Dict = None,
-                          requested_fields: typing.List[FacebookFieldsMetadata] = None)-> typing.Tuple[typing.List[typing.Dict], typing.List[typing.Dict]]:
+                          requested_fields: typing.List[FacebookFieldsMetadata] = None,
+                          add_totals: bool = False) -> typing.Tuple[typing.List[typing.Dict], typing.List[typing.Dict]]:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_insights_config(permanent_token=permanent_token,
                                                                 ad_account_id=ad_account_id,
                                                                 fields=fields,
-                                                                params=parameters)
+                                                                params=parameters,
+                                                                add_totals=add_totals)
 
         try:
             response, summary = graph_api_client.call_facebook()
@@ -140,25 +142,25 @@ class GraphAPIInsightsHandler:
                                  structure_fields: typing.List[typing.AnyStr] = None,
                                  requested_fields: typing.List[FacebookFieldsMetadata] = None) -> typing.Dict:
         # get data with breakdowns
-        insights, _ = cls.get_insights_base(permanent_token=permanent_token,
-                                            ad_account_id=ad_account_id,
-                                            fields=fields,
-                                            parameters=parameters,
-                                            requested_fields=requested_fields)
+        insights, summary = cls.get_insights_base(permanent_token=permanent_token,
+                                                  ad_account_id=ad_account_id,
+                                                  fields=fields,
+                                                  parameters=parameters,
+                                                  requested_fields=requested_fields,
+                                                  add_totals=True)
 
         if parameters["breakdowns"]:
             # get data without breakdowns
             parameters_without_breakdowns = copy.deepcopy(parameters)
             del parameters_without_breakdowns["action_breakdowns"]
             del parameters_without_breakdowns["breakdowns"]
-            insights_without_breakdowns, summary = cls.get_insights_base(permanent_token=permanent_token,
-                                                                         ad_account_id=ad_account_id,
-                                                                         fields=fields,
-                                                                         parameters=parameters_without_breakdowns,
-                                                                         requested_fields=requested_fields)
+            insights_without_breakdowns, _ = cls.get_insights_base(permanent_token=permanent_token,
+                                                                   ad_account_id=ad_account_id,
+                                                                   fields=fields,
+                                                                   parameters=parameters_without_breakdowns,
+                                                                   requested_fields=requested_fields)
         else:
             insights_without_breakdowns = []
-            summary = []
 
         # Combine insights without breakdowns with insights with breakdowns
         combined_insights = cls.join_insights(insights=insights, insights_without_breakdowns=insights_without_breakdowns)
