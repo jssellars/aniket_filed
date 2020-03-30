@@ -57,7 +57,7 @@ docs/_build/
 target/
 
 # Pycharm project
-.DS_Store
+*.DS_Store
 .idea
 
 # VS code
