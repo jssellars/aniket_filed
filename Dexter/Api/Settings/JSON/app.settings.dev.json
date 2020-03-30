@@ -11,5 +11,9 @@
     "remotePort": 27017,
     "recommendationDatabaseName": "Dexter_Fuzzy_Inference_Recommendations",
     "recommendationCollectionName": "recommendations"
+  },
+  "flaskApp": {
+    "flask_host": "localhost",
+    "flask_port": 47300
   }
 }

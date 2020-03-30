@@ -35,6 +35,7 @@
     <Compile Include="Models\Recommendation.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models\RecommendationMetric.py" />
     <Compile Include="Models\RecommendationStatus.py">
       <SubType>Code</SubType>
     </Compile>

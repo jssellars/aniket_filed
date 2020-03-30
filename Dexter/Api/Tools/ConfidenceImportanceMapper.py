@@ -1,7 +1,7 @@
 class ConfidenceImportanceMapper:
 
     @staticmethod
-    def getConfidenceImportanceString(confidence):
+    def get_confidence_importance_string(confidence):
         if (confidence == 1):
             return 'LOW'
         if (confidence == 2):
@@ -10,7 +10,7 @@ class ConfidenceImportanceMapper:
             return 'HIGH'
 
     @staticmethod
-    def getConfidenceImportanceValue(confidence):
+    def get_confidence_importance_value(confidence):
         if (confidence == 'LOW'):
             return 1
         if (confidence == 'MEDIUM'):

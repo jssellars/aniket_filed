@@ -35,6 +35,6 @@ class Recommendation(object):
                 self.__dict__['id'] = str((originDict[key]))
                 continue
             if (key in ['confidence', 'importance']):
-                self.__dict__[key] = ConfidenceImportanceMapper.getConfidenceImportanceString(originDict[key])
+                self.__dict__[key] = ConfidenceImportanceMapper.get_confidence_importance_string(originDict[key])
                 continue
             self.__dict__[key] = originDict[key]

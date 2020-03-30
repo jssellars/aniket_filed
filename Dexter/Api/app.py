@@ -48,7 +48,7 @@ def GetRecommendationsPage():
 
     filter = data['Filter'] if 'Filter' in data else None
 
-    if filter:
+    if filter is not None:
         channel = data['Filter']['channel'] if 'channel' in data['Filter'] else 'facebook'
 
     bad_filters = []
@@ -63,7 +63,7 @@ def GetRecommendationsPage():
             if key in ['confidence' , 'importance']:
                 mappedValues = []
                 for value in filter[key]:
-                    mappedValues.append(ConfidenceImportanceMapper.getConfidenceImportanceValue(value))
+                    mappedValues.append(ConfidenceImportanceMapper.get_confidence_importance_value(value))
                 filter[key] = mappedValues
                 
     
@@ -91,7 +91,7 @@ def GetRecommendationsPage():
             else:
                 mongoSort.append((key, -1))
 
-    recommendationsList = recommendationRepository.getRecommendationsPage(campaignIds, pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
+    recommendationsList = recommendation_repository.get_recommendations_page(campaignIds, pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
     response = make_response((json.dumps(recommendationsList)))
     response.headers['Content-Type'] = "application/json"
     return response
@@ -100,8 +100,8 @@ def GetRecommendationsPage():
 @app.route('/ApplyRecommendation', methods=['PATCH'])
 def applyRecommendation():
     id = request.args.get('id')
-    applieddRecommendation = recommendationRepository.setRecommendationStatus(id, RecommendationStatus.Applied.value)
-    if (applieddRecommendation['status'] == RecommendationStatus.Applied.value):
+    applieddRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
+    if (applieddRecommendation['status'] == RecommendationStatus.APPLIED.value):
         response = make_response({})
         response.headers['Content-Type'] = "application/json"
         return response
@@ -111,8 +111,8 @@ def applyRecommendation():
 @app.route('/DismissRecommendation', methods=['PATCH'])
 def dismissRecommendation():
     id = request.args.get('id')
-    dismmissedRecommendation = recommendationRepository.setRecommendationStatus(id, RecommendationStatus.Dismissed.value)
-    if (dismmissedRecommendation['status'] == RecommendationStatus.Dismissed.value):
+    dismmissedRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.DISMISSED.value)
+    if (dismmissedRecommendation['status'] == RecommendationStatus.DISMISSED.value):
         response = make_response({})
         response.headers['Content-Type'] = "application/json"
         return response
@@ -122,7 +122,7 @@ def dismissRecommendation():
 @app.route('/GetRecommendation')
 def GetRecommendationById():
     id = request.args.get('id')
-    recommendation = recommendationRepository.getRecommendationById(id)
+    recommendation = recommendation_repository.get_recommendation_by_id(id)
     response = make_response((json.dumps(recommendation)))
     response.headers['Content-Type'] = "application/json"
     return response    
@@ -131,7 +131,7 @@ def GetRecommendationById():
 def GetCampaings():    
     adAcccountId = request.args.get('adAccountId')
     channel = request.args.get('channel')
-    campaigns = recommendationRepository.getCampaigns(adAcccountId, channel)
+    campaigns = recommendation_repository.get_campaigns(adAcccountId, channel)
     response = make_response((json.dumps(campaigns)))
     response.headers['Content-Type'] = "application/json"
     return response
@@ -141,7 +141,7 @@ def GetRecommendations():
     adAcccountId = request.args.get('adAccountId')
     channel = request.args.get('channel')
     level = request.args.get('level')
-    recommendations = recommendationRepository.getRecommendationsByAdAccountAndLevel(adAcccountId, level, channel)
+    recommendations = recommendation_repository.get_recommendations_by_ad_account_and_level(adAcccountId, level, channel)
     response = make_response(json.dumps(recommendations))
     response.headers['Content-Type'] = "application/json"
     return response
@@ -150,18 +150,28 @@ def GetRecommendations():
 @app.route('/GetActionHistory')
 def GetActionHistory():
     structureId = request.args.get('structureId')
-    history = recommendationRepository.getActionHistory(structureId)
+    history = recommendation_repository.get_action_history(structureId)
     response = make_response(json.dumps(history))
     return response
 
+@app.route('/GetCountByMetricAndType', methods=['POST'])
+def getCountsByMetrics():
+    data = request.get_json()
+    campaign_ids = data['campaignIds']
+    channel = data['channel']
+    counts = recommendation_repository.get_counts(campaign_ids, channel)
+    response = make_response(json.dumps(counts))
+    return response
 if __name__ == '__main__':    
-    flask_host = os.environ.get('SERVER_HOST', 'localhost')
+    
 
     with open(path.abspath('Settings/JSON/app.settings.dev.json')) as appsettings:
         configDict = json.load(appsettings)
         mongoConfig = MongoConfig(configDict['mongoDatabase'])
-        recommendationRepository = RecommendationsRepository(mongoConfig)
-        
-    PORT = 42010
+        recommendation_repository = RecommendationsRepository(mongoConfig)
+        app_config = configDict['flaskApp']
+        flask_host = app_config['flask_host']
+        PORT = app_config['flask_port']        
+    
     app.run(flask_host, PORT)
     

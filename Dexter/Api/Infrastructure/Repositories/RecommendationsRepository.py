@@ -3,6 +3,7 @@ import pymongo
 from Models.Recommendation import Recommendation
 from Models.RecommendationType import RecommendationType
 from Models.RecommendationStatus import RecommendationStatus
+from Models.RecommendationMetric import RecommendationMetric
 from datetime import datetime
 from bson import ObjectId
 from sshtunnel import SSHTunnelForwarder
@@ -32,69 +33,70 @@ class RecommendationsRepository(object):
         self.database = self.client[self.database_name]
         self.collection = self.database[self.collection_name]
 
-    def getCampaigns(self, adAccountId, channel):
+    def get_campaigns(self, adAccountId, channel):
         campaigns = self.collection.find({'adAccountId' : adAccountId, 'channel' : channel }).distinct('campaignId')
         aggreagation = [ { '$group': {
                                     '_id': {
                                         'campaignId': "$campaignId",
                                         'campaignName': "$campaignName",
-                                        'channel' : '$channel'}
+                                        'channel' : '$channel',
+                                        'adAccountId': '$adAccountId'}
                                     }
                         }]
         cursor = self.collection.aggregate(aggreagation)
         campaigns = list(cursor)
-        # TODO: remove this hack, here we check so the channel is the one we want
-        campaigns = [campaign for campaign in campaigns if campaign['_id']['channel'] == channel]
+        # TODO: find a way to filter in the mongo aggregation pipeline
+        campaigns = [campaign for campaign in campaigns if (campaign['_id']['channel'] == channel and campaign['_id']['adAccountId'] == adAccountId)]
 
         distinct_campaigns = [ {'Id' : campaign['_id']['campaignId'] , 'name' : campaign['_id']['campaignName']} for campaign in campaigns ]
         return distinct_campaigns
 
-    def getRecommendationById(self, id: str):
+    def get_recommendation_by_id(self, id: str):
         recommendation = self.collection.find_one({'_id': ObjectId(id)})
-        recommendationDict = Recommendation(recommendation).__dict__
-        return recommendationDict    
+        recommendation_dict = Recommendation(recommendation).__dict__
+        return recommendation_dict    
 
-    def getRecommendationsPage(self, campaignIds, pagenumber, pagesize, channel, filter=None, sort=None, excludedIds=None):
-        skipped = (pagenumber - 1) * pagesize
-        querySort = [("createdAt", pymongo.DESCENDING)]
+    def get_recommendations_page(self, campaign_ids, page_number, page_size, channel, filter=None, sort=None, excluded_ids=None):
+        skipped = (page_number - 1) * page_size
+        query_sort = [("createdAt", pymongo.DESCENDING)]
         if (sort is not None):
-            querySort = sort        
-        if (excludedIds is None):
-            excludedIds = []
+            query_sort = sort        
+        if (excluded_ids is None):
+            excluded_ids = []
 
-        cursor, count = self.getRecommendationsByCampaignIds(campaignIds, filter, excludedIds)        
-        recommendations = list(cursor.sort(querySort).skip(skipped).limit(pagesize))
-        recommendationsAsDictList = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in recommendations]
-        responseDict = {}
-        responseDict['count'] = count
-        responseDict['recommendations'] = recommendationsAsDictList
-        countsByType = self.getCountsByType(campaignIds, channel);
-        responseDict['countsByType'] = countsByType
-        return responseDict
+        cursor, count = self.get_recommendations_by_campaign_ids(campaign_ids, filter, excluded_ids)        
+        recommendations = list(cursor.sort(query_sort).skip(skipped).limit(page_size))
+        recommendations_as_dict_list = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in recommendations]
+        response_dict = {}
+        response_dict['count'] = count
+        response_dict['recommendations'] = recommendations_as_dict_list
+        counts_by_type = self.get_counts_by_type(campaign_ids, channel);
+        response_dict['countsByType'] = counts_by_type
+        return response_dict
 
-    def getRecommendationsByAdAccountAndLevel(self, adAccountId, level, channel):
-        mongoFilter = { }
-        mongoFilter['adAccountId'] = adAccountId
-        mongoFilter['level'] = level
-        mongoFilter['channel'] = channel
-        mongoFilter['status'] = { '$nin' : [ RecommendationStatus.Dismissed.value, RecommendationStatus.Applied.value ] }
-        cursor = self.collection.find(mongoFilter)
+    def get_recommendations_by_ad_account_and_level(self, adAccountId, level, channel):
+        mongo_filter = { }
+        mongo_filter['adAccountId'] = adAccountId
+        mongo_filter['level'] = level
+        mongo_filter['channel'] = channel
+        mongo_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
+        cursor = self.collection.find(mongo_filter)
         recommendationsAsDictList = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in list(cursor)]
         return recommendationsAsDictList
 
-    def setRecommendationStatus(self, id:str, status:str):
-        recommendationObjectId = ObjectId(id)
+    def set_recommendation_status(self, id:str, status:str):
+        recommendation_objectId = ObjectId(id)
         now = datetime.now()
-        self.collection.update_one({"_id" :recommendationObjectId},{'$set' : {"status": status, "applicationDate": now, 'appliedBy': 'Dexter' }})
-        return Recommendation(self.collection.find_one({"_id" : recommendationObjectId})).__dict__
+        self.collection.update_one({"_id" :recommendation_objectId},{'$set' : {"status": status, "applicationDate": now, 'appliedBy': 'Dexter' }})
+        return Recommendation(self.collection.find_one({"_id" : recommendation_objectId})).__dict__
 
-    def getActionHistory(self, structureId: str):
-        cursor = self.collection.find({"structureId": structureId, "status" :{ "$in" : [RecommendationStatus.Applied.value, RecommendationStatus.Dismissed.value]}},
+    def get_action_history(self, structureId: str):
+        cursor = self.collection.find({"structureId": structureId, "status" :{ "$in" : [RecommendationStatus.APPLIED.value, RecommendationStatus.DISMISSED.value]}},
                                       {'applicationDetails': False})
         actionHistorysAsDictList = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in list(cursor)]
         return actionHistorysAsDictList
 
-    def getRecommendationsByCampaignIds(self, campaignIds, filter=None, excludedIds= None):        
+    def get_recommendations_by_campaign_ids(self, campaignIds, filter=None, excludedIds= None):        
         filterValues = {'$in' : campaignIds}
         queryFilter = {'campaignId' : filterValues}
         if (filter is not None):
@@ -111,39 +113,56 @@ class RecommendationsRepository(object):
                     queryFilter[key] = filter[key]
         if (excludedIds is not None):
             queryFilter['_id'] = {'$nin': [ ObjectId(id) for id in excludedIds ]}            
-        queryFilter['status'] = { '$nin' : [ RecommendationStatus.Dismissed.value, RecommendationStatus.Applied.value ] }
+        queryFilter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
                     
         projection = {'applicationDetails' : False, 'appliedBy': False, 'applicationDate': False, 'status': False}        
-        count = self.getCountByFilter(queryFilter)
+        count = self.get_count_by_filter(queryFilter)
         response = self.collection.find(queryFilter, projection)
         return response, count
 
-    def getCountsByType(self, campaignIds, channel):
-        filterValues = {'$in' : campaignIds}
-        queryFilter = {'campaignId' : filterValues}
-        countsByType = {}
-        for recoType in RecommendationType:
-            typedFilter = queryFilter
-            typedFilter['recommendationType'] = recoType.value
-            typedFilter['status'] = { '$nin' : [ RecommendationStatus.Dismissed.value, RecommendationStatus.Applied.value ] }
-            typeCount = self.getCountByFilter(typedFilter, channel)
-            countsByType[recoType.value] = typeCount
-        return countsByType
+    def get_counts_by_type(self, campaignIds, channel):
+        filter_values = {'$in' : campaignIds}
+        query_filter = {'campaignId' : filter_values}
+        counts_by_type = {}
+        for reco_type in RecommendationType:
+            typed_filter = query_filter
+            typed_filter['recommendationType'] = reco_type.value
+            typed_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
+            type_count = self.get_count_by_filter(typed_filter, channel)            
+            counts_by_type[reco_type.value] = type_count
+        return counts_by_type 
 
-    def getCountByFilter(self, filter = None, channel = None):
-        if channel:
-            if not isinstance(channel, list):
-                channel = [channel]
-            filterByChannel = {'channel' : {'$in': channel}}
+    def get_counts_by_metrics(self, campaignIds, channel):
+        filter_values = { '$in' : campaignIds }
+        query_filter = { 'campaignId' : filter_values}
+        counts_by_metrics = {}
+        # TODO: move the list of metrics to an outside resource
+        for metric in RecommendationMetric:
+            metric_filter = query_filter
+            metric_filter['metric'] = metric.value
+            metric_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
+            metric_count = self.get_count_by_filter(metric_filter, channel)
+            counts_by_metrics[metric.value] = metric_count
+        return counts_by_metrics
 
-            docs = self.collection.count_documents(filterByChannel)
-            if docs == 0:
-                return 0
+    def get_counts(self, campaignsIds, channel):
+        types = self.get_counts_by_type(campaignsIds, channel)
+        metrics = self.get_counts_by_metrics(campaignsIds, channel)
+        types.update(metrics)
+        return types
 
+    def get_count_by_filter(self, filter = None, channel = None):
+        count_filter = {}
         if (filter is not None):
-            return self.collection.count_documents(filter)
-            
-        return self.collection.count_documents()
+            count_filter = filter
+        if (channel is not None):
+            if (isinstance(channel, list)):
+                count_filter['channel'] = {'$in': channel}
+            else:
+                count_filter['channel'] = channel
+
+        count = self.collection.count_documents(count_filter)
+        return count
 
 
 
