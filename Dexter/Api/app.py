@@ -28,14 +28,7 @@ def hello():
 
 @app.route('/GetRecommendationsPage', methods = ['POST'])
 def GetRecommendationsPage():
-    data = request.get_json()
-
-    if ('CampaignIds' not in data):
-        return 'please provide Campaing Ids', 400
-        
-    campaignIds = data['CampaignIds']
-    if (campaignIds is None):
-        campaignIds = []
+    data = request.get_json()        
 
     pageNumber = data['PageNumber'] if 'PageNumber' in data else 1
     if (pageNumber is None):
@@ -56,7 +49,7 @@ def GetRecommendationsPage():
         if (isinstance(filter, dict) == False):
              return 'invalid filter', 400
         for key in filter:
-            if key not in ['source', 'level', 'confidence', 'importance', 'recommendationType', 'optimizationType', 'structureId', 'metric', 'channel', 'searchTerm']:
+            if key not in ['source', 'level', 'confidence', 'importance', 'recommendationType', 'optimizationType', 'structureId', 'metric', 'channel', 'searchTerm', 'adAccountId', 'campaignId']:
                 return f"invalid filter criterion {key}", 400            
             if filter[key] == []:
                 bad_filters.append(key)
@@ -91,7 +84,7 @@ def GetRecommendationsPage():
             else:
                 mongoSort.append((key, -1))
 
-    recommendationsList = recommendation_repository.get_recommendations_page(campaignIds, pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
+    recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
     response = make_response((json.dumps(recommendationsList)))
     response.headers['Content-Type'] = "application/json"
     return response
@@ -159,7 +152,19 @@ def getCountsByMetrics():
     data = request.get_json()
     campaign_ids = data['campaignIds']
     channel = data['channel']
-    counts = recommendation_repository.get_counts(campaign_ids, channel)
+    count_filter = {}
+
+    if (isinstance(campaign_ids, list)):
+        count_filter['campaignId'] = {'$in': campaign_ids}
+    else:
+        count_filter['campaignId'] = campaign_ids
+
+    if (isinstance(channel, list)):
+        count_filter['channel'] = {'$in': channel}
+    else:
+        count_filter['channel'] = channel
+
+    counts = recommendation_repository.get_counts(count_filter)
     response = make_response(json.dumps(counts))
     return response
 if __name__ == '__main__':    
