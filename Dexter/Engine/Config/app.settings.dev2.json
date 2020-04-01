@@ -27,7 +27,7 @@
   },
   "facebook": {
     "description": "Filed Live",
-    "apiVersion": "v4.0",
+    "apiVersion": "v5.0",
     "appId": "174014546372191",
     "appSecret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },

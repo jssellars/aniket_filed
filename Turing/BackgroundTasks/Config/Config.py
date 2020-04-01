@@ -1,6 +1,6 @@
 from string import Template
 
-from Turing.Config.BaseConfig import BaseConfig
+from Turing.BackgroundTasks.Config.BaseConfig import BaseConfig
 
 
 class FacebookConfig(BaseConfig):

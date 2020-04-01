@@ -1,4 +1,5 @@
 import json
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -49,7 +50,12 @@ class Startup(object):
 
 
 #  Initialize startup object
-with open('Config/Settings/app.settings.dev.json', 'r') as app_settings_json_file:
+env = os.environ.get("PYTHON_ENV")
+if not env:
+    env = "local"
+config_file = f"Config/Settings/app.settings.{env}.json"
+
+with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)

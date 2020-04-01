@@ -1,3 +1,13 @@
+# ====== CONFIGURE PATH TO SOLUTION - DO NOT DELETE ====== #
+import os
+import sys
+path = os.environ.get("PYTHON_SOLUTION_PATH")
+if path:
+    sys.path.append(path)
+else:
+    sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
+# ====== END OF CONFIG SECTION ====== #
+
 import json
 
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient

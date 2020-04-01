@@ -1,0 +1,21 @@
+# Structures
+[GET]
+<env>.api.facebook.turing.filed.com/api/v1/campaigns/<string:account_id>
+<env>.api.facebook.turing.filed.com/api/v1/adsets/<string:account_id>
+<env>.api.facebook.turing.filed.com/api/v1/ads/<string:account_id>
+
+# Campaign Tree
+[GET]
+<env>.api.facebook.turing.filed.com/api/v1/campaign-structure-tree/<string:level>/<string:facebook_id>
+
+# Structure details + updates
+[GET, PUT]
+<env>.api.facebook.turing.filed.com/api/v1/<string:level>/<string:facebook_id>
+
+# Duplicate
+[POST]
+<env>.api.facebook.turing.filed.com/api/v1/<string:level>/<string:facebook_id>/duplicate
+
+# Drafts
+[PUT, DELETE]
+<env>.api.facebook.turing.filed.com/api/v1/<string:level>/<string:facebook_id>/draft

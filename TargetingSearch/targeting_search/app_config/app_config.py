@@ -1,7 +1,7 @@
 FACEBOOK_CONFIG = {
     "__class": "FacebookConfig",
     "description": "Filed",
-    "api_version": "v4.0",
+    "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb",
     "business_owner_facebook_id": "1623950661230875",

@@ -1,13 +1,14 @@
 import json
+import os
 
 from kombu import Exchange, Queue
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from Turing.Config.Config import FacebookConfig
-from Turing.Config.Config import MongoConfig
-from Turing.Config.Config import RabbitMqConfig
-from Turing.Config.Config import SQLAlchemyConfig
+from Turing.BackgroundTasks.Config.Config import FacebookConfig
+from Turing.BackgroundTasks.Config.Config import MongoConfig
+from Turing.BackgroundTasks.Config.Config import RabbitMqConfig
+from Turing.BackgroundTasks.Config.Config import SQLAlchemyConfig
 
 
 class Startup(object):
@@ -54,8 +55,14 @@ class Startup(object):
     def CreateSqlSession(self):
         return sessionmaker(bind=self.engine)
 
+
 #  Initialize startup object
-#with open('Config/Settings/app.settings.dev.json', 'r') as app_settings_json_file:
-with open('/Users/luchicla/Work/Filed/Source/Filed.Turing/Filed.Turing.BackgroundTasks/Config/Settings/app.settings.dev.json', 'r') as appSettingsJsonFile:
-    appConfig = json.load(appSettingsJsonFile)
-startup = Startup(appConfig)
+env = os.environ.get("PYTHON_ENV")
+if not env:
+    env = "local"
+config_file = f"Config/Settings/app.settings.{env}.json"
+
+with open(config_file, 'r') as app_settings_json_file:
+    app_config = json.load(app_settings_json_file)
+
+startup = Startup(app_config)

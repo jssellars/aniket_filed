@@ -1,4 +1,12 @@
+# ====== CONFIGURE PATH TO SOLUTION - DO NOT DELETE ====== #
 import os
+import sys
+path = os.environ.get("PYTHON_SOLUTION_PATH")
+if path:
+    sys.path.append(path)
+else:
+    sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
+# ====== END OF CONFIG SECTION ====== #
 
 from flask import Flask
 from flask_cors import CORS

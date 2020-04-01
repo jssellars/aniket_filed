@@ -50,7 +50,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
     def _get_partial_graph_api_base(self, config):
         if config.request is None:
             # TODO: Log error
-            raise GraphAPIClientBaseException('Missing Fields API request. Please provide an appropriate FB API request and try again.')
+            raise Exception('Missing Fields API request. Please provide an appropriate FB API request and try again.')
 
         try:
             partial_responses = []
