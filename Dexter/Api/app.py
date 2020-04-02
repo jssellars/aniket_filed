@@ -49,7 +49,8 @@ def GetRecommendationsPage():
         if (isinstance(filter, dict) == False):
              return 'invalid filter', 400
         for key in filter:
-            if key not in ['source', 'level', 'confidence', 'importance', 'recommendationType', 'optimizationType', 'structureId', 'metric', 'channel', 'searchTerm', 'adAccountId', 'campaignId']:
+            if key not in ['source', 'level', 'confidence', 'importance', 'recommendationType', 'optimizationType', 'structureId', 'metric', 'channel',
+                          'searchTerm', 'adAccountId', 'campaignId', 'parentId']:
                 return f"invalid filter criterion {key}", 400            
             if filter[key] == []:
                 bad_filters.append(key)
@@ -83,92 +84,122 @@ def GetRecommendationsPage():
                 mongoSort.append((key, 1))
             else:
                 mongoSort.append((key, -1))
-
-    recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
-    response = make_response((json.dumps(recommendationsList)))
-    response.headers['Content-Type'] = "application/json"
-    return response
-
+    try :
+        recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
+        response = make_response((json.dumps(recommendationsList)))
+        response.headers['Content-Type'] = "application/json"
+        return response
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 @app.route('/ApplyRecommendation', methods=['PATCH'])
 def applyRecommendation():
     id = request.args.get('id')
-    applieddRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
-    if (applieddRecommendation['status'] == RecommendationStatus.APPLIED.value):
-        response = make_response({})
-        response.headers['Content-Type'] = "application/json"
-        return response
-    else:
-        return 'unable to apply recommendation', 500
+    try:
+        applieddRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
+        if (applieddRecommendation['status'] == RecommendationStatus.APPLIED.value):
+            response = make_response({})
+            response.headers['Content-Type'] = "application/json"
+            return response
+        else:
+            return 'unable to apply recommendation', 500
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 @app.route('/DismissRecommendation', methods=['PATCH'])
 def dismissRecommendation():
-    id = request.args.get('id')
-    dismmissedRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.DISMISSED.value)
-    if (dismmissedRecommendation['status'] == RecommendationStatus.DISMISSED.value):
-        response = make_response({})
-        response.headers['Content-Type'] = "application/json"
-        return response
-    else:
-        return 'unable to reject recommendation', 500
+    try:
+        id = request.args.get('id')
+        dismmissedRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.DISMISSED.value)
+        if (dismmissedRecommendation['status'] == RecommendationStatus.DISMISSED.value):
+            response = make_response({})
+            response.headers['Content-Type'] = "application/json"
+            return response
+        else:
+            return 'unable to reject recommendation', 500
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 @app.route('/GetRecommendation')
 def GetRecommendationById():
-    id = request.args.get('id')
-    recommendation = recommendation_repository.get_recommendation_by_id(id)
-    response = make_response((json.dumps(recommendation)))
-    response.headers['Content-Type'] = "application/json"
-    return response    
+    try:
+        id = request.args.get('id')
+        recommendation = recommendation_repository.get_recommendation_by_id(id)
+        response = make_response((json.dumps(recommendation)))
+        response.headers['Content-Type'] = "application/json"
+        return response
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 @app.route('/GetCampaigns')
-def GetCampaings():    
-    adAcccountId = request.args.get('adAccountId')
-    channel = request.args.get('channel')
-    campaigns = recommendation_repository.get_campaigns(adAcccountId, channel)
-    response = make_response((json.dumps(campaigns)))
-    response.headers['Content-Type'] = "application/json"
-    return response
+def GetCampaings():   
+    try:
+        adAcccountId = request.args.get('adAccountId')
+        channel = request.args.get('channel')
+        campaigns = recommendation_repository.get_campaigns(adAcccountId, channel)
+        response = make_response((json.dumps(campaigns)))
+        response.headers['Content-Type'] = "application/json"
+        return response
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 @app.route('/GetRecommendations')
 def GetRecommendations():
-    adAcccountId = request.args.get('adAccountId')
-    channel = request.args.get('channel')
-    level = request.args.get('level')
-    recommendations = recommendation_repository.get_recommendations_by_ad_account_and_level(adAcccountId, level, channel)
-    response = make_response(json.dumps(recommendations))
-    response.headers['Content-Type'] = "application/json"
-    return response
+    try:
+        adAcccountId = request.args.get('adAccountId')
+        channel = request.args.get('channel')
+        level = request.args.get('level')
+        recommendations = recommendation_repository.get_recommendations_by_ad_account_and_level(adAcccountId, level, channel)
+        response = make_response(json.dumps(recommendations))
+        response.headers['Content-Type'] = "application/json"
+        return response
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 
 @app.route('/GetActionHistory')
 def GetActionHistory():
-    structureId = request.args.get('structureId')
-    history = recommendation_repository.get_action_history(structureId)
-    response = make_response(json.dumps(history))
-    return response
+    try:
+        structureId = request.args.get('structureId')
+        history = recommendation_repository.get_action_history(structureId)
+        response = make_response(json.dumps(history))
+        return response
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
 
 @app.route('/GetCountByMetricAndType', methods=['POST'])
 def getCountsByMetrics():
-    data = request.get_json()
-    campaign_ids = data['campaignIds']
-    channel = data['channel']
-    count_filter = {}
+    try:
+        data = request.get_json()
+        campaign_ids = data['campaignIds']
+        channel = data['channel']
+        count_filter = {}
 
-    if (isinstance(campaign_ids, list)):
-        count_filter['campaignId'] = {'$in': campaign_ids}
-    else:
-        count_filter['campaignId'] = campaign_ids
+        if (isinstance(campaign_ids, list)):
+            count_filter['campaignId'] = {'$in': campaign_ids}
+        else:
+            count_filter['campaignId'] = campaign_ids
 
-    if (isinstance(channel, list)):
-        count_filter['channel'] = {'$in': channel}
-    else:
-        count_filter['channel'] = channel
+        if (isinstance(channel, list)):
+            count_filter['channel'] = {'$in': channel}
+        else:
+            count_filter['channel'] = channel
 
-    counts = recommendation_repository.get_counts(count_filter)
-    response = make_response(json.dumps(counts))
-    return response
-if __name__ == '__main__':    
-    
+        counts = recommendation_repository.get_counts(count_filter)
+        response = make_response(json.dumps(counts))
+        return response
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
+
+if __name__ == '__main__':        
 
     with open(path.abspath('Settings/JSON/app.settings.dev.json')) as appsettings:
         configDict = json.load(appsettings)
