@@ -48,7 +48,7 @@
     <Compile Include="Settings\MongoConfig.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Tools\ConfidenceImportanceMapper.py">
+    <Compile Include="Tools\ImportanceMapper.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

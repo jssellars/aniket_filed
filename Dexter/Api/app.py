@@ -10,7 +10,7 @@ from bson import BSON
 from Infrastructure.Repositories.RecommendationsRepository import RecommendationsRepository
 from flask_cors import CORS
 from Models.RecommendationStatus import RecommendationStatus
-from Tools.ConfidenceImportanceMapper import ConfidenceImportanceMapper
+from Tools.ImportanceMapper import ImportanceMapper
 
 app = Flask(__name__)
 CORS(app)
@@ -54,10 +54,10 @@ def GetRecommendationsPage():
                 return f"invalid filter criterion {key}", 400            
             if filter[key] == []:
                 bad_filters.append(key)
-            if key in ['confidence' , 'importance']:
+            if key in ['importance']:
                 mappedValues = []
                 for value in filter[key]:
-                    mappedValues.append(ConfidenceImportanceMapper.get_confidence_importance_value(value))
+                    mappedValues.append(ImportanceMapper.get_importance_value(value))
                 filter[key] = mappedValues
                 
     

@@ -124,7 +124,7 @@ class RecommendationsRepository(object):
             query_filter['_id'] = {'$nin': [ ObjectId(id) for id in excludedIds ]}            
         query_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
                     
-        projection = {'applicationDetails' : False, 'appliedBy': False, 'applicationDate': False, 'status': False}        
+        projection = {'appliedBy': False, 'applicationDate': False, 'status': False}        
         count = self.get_count_by_filter(query_filter)
         response = self.collection.find(query_filter, projection)
         return response, count
