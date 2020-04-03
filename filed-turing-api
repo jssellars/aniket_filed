@@ -1,0 +1,14 @@
+FROM tiangolo/uwsgi-nginx-flask:python3.7 AS build
+RUN apt-get update && apt-get install -y unixodbc-dev
+
+FROM build
+
+ENV LISTEN_PORT 43700
+EXPOSE 43700
+
+COPY ./Dexter/uwsgi.ini /app
+COPY ./Dexter/Api /app
+COPY ./Core /app/Core
+COPY ./requirements.txt /app
+
+RUN pip install --upgrade pip && pip3 install -r requirements.txt
