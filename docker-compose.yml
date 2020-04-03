@@ -1,0 +1,41 @@
+version: '3'
+services:
+
+########################### AsdPreview ############################
+
+  # Filed-AdPreview 
+  filed-adpreview:
+    image: ct.filed.com/filed-adpreview:v0.1
+    ports:
+     - "80:80" 
+    build:
+      context: .
+      dockerfile: filed-adpreview
+
+###################################################################
+
+########################### Potter ################################
+
+  # Potter-Facebook-Accounts-Api
+  potter-facebook-accounts-api:
+    image: ct.filed.com/potter-facebook-accounts-api:v0.1
+    ports:
+     - "80:80" 
+    build:
+      context: .
+      dockerfile: potter-facebook-accounts-api
+
+###################################################################
+
+########################### Potter ################################
+
+  # Potter-Facebook-Accounts-Api
+  filed-dexter-api:
+    image: ct.filed.com/filed-dexter-api:v0.1
+    ports:
+     - "43700:43700" 
+    build:
+      context: .
+      dockerfile: filed-dexter-api
+
+###################################################################

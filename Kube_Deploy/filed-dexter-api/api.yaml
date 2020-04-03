@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filed-dexter-api
+spec:
+  selector:
+    matchLabels:
+      run: filed-dexter-api
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1       
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: filed-dexter-api
+    spec:
+      containers:
+      - name: filed-dexter-api
+        image: ct.filed.com/filed-dexter-api:v0.1
+        imagePullPolicy: Always
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 80
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5  
+        ports: 
+        - containerPort : 43700
+      imagePullSecrets:
+        - name: regcred  

@@ -1,2 +1,5 @@
+flask_restful
+flask_jwt_simple
+flask_cors
 pymssql
 pyjwt
