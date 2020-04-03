@@ -1,6 +1,6 @@
 from datetime import datetime
 from bson.objectid import ObjectId
-from Tools.ConfidenceImportanceMapper import ConfidenceImportanceMapper
+from Tools.ImportanceMapper import ImportanceMapper
 
 class Recommendation(object):
     id = None
@@ -34,7 +34,7 @@ class Recommendation(object):
             if (isinstance(originDict[key], ObjectId)):
                 self.__dict__['id'] = str((originDict[key]))
                 continue
-            if (key in ['confidence', 'importance']):
-                self.__dict__[key] = ConfidenceImportanceMapper.getConfidenceImportanceString(originDict[key])
+            if (key == 'importance'):
+                self.__dict__[key] = ImportanceMapper.get_importance_string(originDict[key])
                 continue
             self.__dict__[key] = originDict[key]

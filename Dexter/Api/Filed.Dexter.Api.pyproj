@@ -35,6 +35,7 @@
     <Compile Include="Models\Recommendation.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models\RecommendationMetric.py" />
     <Compile Include="Models\RecommendationStatus.py">
       <SubType>Code</SubType>
     </Compile>
@@ -47,7 +48,7 @@
     <Compile Include="Settings\MongoConfig.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Tools\ConfidenceImportanceMapper.py">
+    <Compile Include="Tools\ImportanceMapper.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
