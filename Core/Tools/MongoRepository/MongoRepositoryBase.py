@@ -164,6 +164,9 @@ class MongoRepositoryBase:
         return list(results)
 
     def get_id_and_name_by_key(self, key=None, values=None, id_key="id", name_key="name"):
+        if not isinstance(values, list):
+            values = [values]
+
         query = {
             key: {
                 MongoOperator.IN.value: values

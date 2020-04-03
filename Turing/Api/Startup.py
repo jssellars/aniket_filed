@@ -1,4 +1,5 @@
 import json
+import os
 
 from kombu import Exchange, Queue
 from sqlalchemy import create_engine
@@ -12,16 +13,16 @@ from Turing.Api.Config.Config import SQLAlchemyConfig
 
 class Startup(object):
 
-    def __init__(self, appConfig=None):
-        assert appConfig is not None
+    def __init__(self, app_config=None):
+        assert app_config is not None
 
-        if not isinstance(appConfig, dict):
+        if not isinstance(app_config, dict):
             raise ValueError('Invalid app config JSON.')
 
-        self.rabbitmq_config = RabbitMqConfig(appConfig['rabbitmq'])
-        self.facebook_config = FacebookConfig(appConfig['facebook'])
-        self.database_config = SQLAlchemyConfig(appConfig['sql_server_database'])
-        self.mongo_config = MongoConfig(appConfig['mongo_database'])
+        self.rabbitmq_config = RabbitMqConfig(app_config['rabbitmq'])
+        self.facebook_config = FacebookConfig(app_config['facebook'])
+        self.database_config = SQLAlchemyConfig(app_config['sql_server_database'])
+        self.mongo_config = MongoConfig(app_config['mongo_database'])
 
         # Initialize connections to DB
         self.engine = create_engine(self.database_config.connection_string)
@@ -44,20 +45,27 @@ class Startup(object):
                                         type=fanout_exchange_config['type'])
 
         # Generic msrv configuration
-        self.environment = appConfig['environment']
-        self.service_name = appConfig['service_name']
-        self.service_version = appConfig['service_version']
-        self.api_name = appConfig['api_name']
-        self.api_version = appConfig['api_version']
-        self.base_url = appConfig['base_url']
+        self.environment = app_config['environment']
+        self.service_name = app_config['service_name']
+        self.service_version = app_config['service_version']
+        self.api_name = app_config['api_name']
+        self.api_version = app_config['api_version']
+        self.base_url = app_config['base_url']
+        self.port = app_config["port"]
+        self.jwt_secret_key = app_config["jwt_secret_key"]
+        self.debug_mode = app_config["debug_mode"]
 
     def create_sql_session(self):
         return sessionmaker(bind=self.engine)
 
 
 #  Initialize startup object
-with open('Config/Settings/app.settings.dev.json', 'r') as app_settings_json_file:
-    app_config = json.load(app_settings_json_file)
-startup = Startup(app_config)
+env = os.environ.get("PYTHON_ENV")
+if not env:
+    env = "local"
+config_file = f"Config/Settings/app.settings.{env}.json"
 
-jwt_secret_key = "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12"
+with open(config_file, 'r') as app_settings_json_file:
+    app_config = json.load(app_settings_json_file)
+
+startup = Startup(app_config)

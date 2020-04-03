@@ -35,6 +35,7 @@ class QueryBuilderRequestParser:
         self.__requested_columns = []
         self.level = None
         self.__structure_fields = []
+        self.__remove_structure_fields = False
 
     @property
     def parameters(self):
@@ -68,7 +69,8 @@ class QueryBuilderRequestParser:
 
     @property
     def structure_fields(self):
-        self.add_structure_meta_information()
+        if not self.__remove_structure_fields:
+            self.add_structure_meta_information()
         return list(set(self.__structure_fields))
 
     def add_structure_meta_information(self):
@@ -144,6 +146,10 @@ class QueryBuilderRequestParser:
         self.parse_query_columns(request.Columns, parse_breakdowns=parse_breakdowns, column_type=self.QueryBuilderColumnName.COLUMN)
         self.parse_query_columns(request.Dimensions, parse_breakdowns=parse_breakdowns, column_type=self.QueryBuilderColumnName.DIMENSION)
         self.parse_query_conditions(request.Conditions)
+
+    def remove_structure_fields(self):
+        self.__structure_fields = []
+        self.__remove_structure_fields = True
 
     def map(self, name):
         return next(filter(lambda x: x.name == name if isinstance(x, FacebookField) else None, FacebookFieldsMetadata.__dict__.values()), None)

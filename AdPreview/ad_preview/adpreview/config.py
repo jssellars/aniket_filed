@@ -2,7 +2,7 @@ class FacebookConfig(object):
 
     __class = "FacebookConfig"
     description = "Filed Live"
-    api_version = "v4.0"
+    api_version = "v5.0"
     app_id = "174014546372191"
     app_secret = "718ab2ca9cc128cf4b1b7793ecc116cb"
     user_id = "1623950661230875"
@@ -12,8 +12,8 @@ USER_TOKEN_CONNECTION_STRING = """Driver={driver};Server={server};Database={data
 
 DATABASE_CONFIG = {
     "driver": 'ODBC Driver 17 for SQL Server',
-    "server": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com,1433",
-    "username": "admin",
-    "password": "F2!irf0q",
-    "database": "filed-facebook-tokens"
+    "server": "dev.filed.com",
+    "username": "sa",
+    "password": "Parola@20",
+    "database": "Facebook.Potter.FacebookAccounts"
 }

@@ -1,4 +1,5 @@
 import json
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -40,15 +41,21 @@ class Startup(object):
         self.api_name = app_config['api_name']
         self.api_version = app_config['api_version']
         self.base_url = app_config['base_url']
+        self.port = app_config["port"]
+        self.jwt_secret_key = app_config["jwt_secret_key"]
+        self.debug_mode = app_config["debug_mode"]
 
     def create_sql_connection(self):
         return sessionmaker(bind=self.engine)
 
 
 #  Initialize startup object
-with open('Config/Settings/app.settings.dev.json', 'r') as app_settings_json_file:
+env = os.environ.get("PYTHON_ENV")
+if not env:
+    env = "local"
+config_file = f"Config/Settings/app.settings.{env}.json"
+
+with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)
-
-jwt_secret_key = "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12"

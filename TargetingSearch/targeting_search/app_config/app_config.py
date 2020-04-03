@@ -1,7 +1,7 @@
 FACEBOOK_CONFIG = {
     "__class": "FacebookConfig",
     "description": "Filed",
-    "api_version": "v4.0",
+    "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb",
     "business_owner_facebook_id": "1623950661230875",
@@ -13,11 +13,11 @@ USER_TOKEN_CONNECTION_STRING = """Driver={driver};Server={server};Database={data
 
 DATABASE_CONFIG = {
     "driver": 'SQL Server',
-    "server": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "server": "dev.filed.com",
     "port": 1433,
-    "username": "admin",
-    "password": "F2!irf0q",
-    "database": "filed-facebook-tokens"
+    "username": "sa",
+    "password": "Parola@20",
+    "database": "Facebook.Potter.FacebookAccounts"
 }
 
 FACEBOOK_SEARCH_URL = "https://graph.facebook.com/{api_version}/{ad_account_id}/targetingsearch?q={search_input}&access_token={token}&limit=5000"

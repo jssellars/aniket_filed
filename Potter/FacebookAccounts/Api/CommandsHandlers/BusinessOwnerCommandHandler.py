@@ -57,6 +57,7 @@ class BusinessOwnerCreateCommandHandler:
     def publish_response(cls, response):
         try:
             rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key)
+            response.requested_permissions = ",".join(response.requested_permissions)
             rabbitmq_client.publish(response)
         except Exception as e:
             raise e

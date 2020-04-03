@@ -5,7 +5,7 @@ class QueryBuilderFilter:
 
     def __init__(self, condition):
         self.field = condition.ColumnName
-        self.operator = QueryBuilderLogicalOperator(condition.Operator)
+        self.operator = QueryBuilderLogicalOperator(condition.Operator).name
         self.value = condition.Value
 
     def AsDict(self):

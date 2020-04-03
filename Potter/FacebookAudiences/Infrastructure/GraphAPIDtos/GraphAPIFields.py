@@ -1,0 +1,41 @@
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
+
+
+class GraphAPICustomAudienceFields(EnumerationBase):
+    ID = "id"
+    NAME = "name"
+    SUBTYPE = "subtype"
+    RULE = "rule"
+    ACCOUNT_ID = "account_id"
+    APPROXIMATE_COUNT = "approximate_count"
+    CUSTOMER_FILE_SOURCE = "customer_file_source"
+    DATA_SOURCE = "data_source"
+    DELIVERY_STATUS = "delivery_status"
+    DESCRIPTION = "description"
+    EXTERNAL_EVENT_SOURCE = "external_event_source"
+    IS_VALUE_BASED = "is_value_based"
+    LOOKALIKE_AUDIENCE_IDS = "lookalike_audience_ids"
+    LOOKALIKE_SPEC = "lookalike_spec"
+    OPERATION_STATUS = "operation_status"
+    OPT_OUT_LINK = "opt_out_link"
+    PERMISSIONS_FOR_ACTIONS = "permissions_for_actions"
+    PIXEL_ID = "pixel_id"
+    RULE_AGGREGATION = "rule_aggregation"
+    TIME_CONTENT_UPDATED = "time_content_updated"
+    TIME_CREATED = "time_created"
+    TIME_UPDATED = "time_updated"
+    RETENTION_DAYS = "retention_days"
+    SHARING_STATUS = "sharing_status"
+
+
+class GraphAPISavedAudienceFields(EnumerationBase):
+    APPROXIMATE_COUNT = "approximate_count"
+    ID = "id"
+    NAME = "name"
+    TARGETING = "targeting"
+    ACCOUNT = "account"
+    PERMISSION_FOR_ACTIONS = "permission_for_actions"
+    RUN_STATUS = "run_status"
+    SENTENCE_LINES = "sentence_lines"
+    TIME_CREATED = "time_created"
+    TIME_UPDATED = "time_updated"

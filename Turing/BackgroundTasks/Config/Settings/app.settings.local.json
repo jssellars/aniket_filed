@@ -1,0 +1,61 @@
+{
+  "rabbitmq": {
+    "consumer_name": "dev.api.facebook.potter.accounts.consumer",
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "dev.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "dev.facebook.accounts.inbound",
+          "inbound_routing_key": "dev.facebook.accounts.inbound.key",
+          "outbound": "dev.facebook.accounts.outbound",
+          "outbound_routing_key": "dev.facebook.accounts.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+
+  "sql_server_database": {
+    "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "port": 1433,
+    "username": "admin",
+    "password": "F2!irf0q",
+    "name": "filed-facebook-tokens"
+  },
+
+  "environment": "dev",
+  "api_name": "FacebookAccounts",
+  "api_version": "1.0.0",
+  "service_name": "FacebookAccounts",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "port": 47200,
+  "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
+  "debug_mode": true,
+
+  "external_services": {
+    "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://dev.filed.com:41000/api/v1/users/get-technical-jwt",
+    "subscription_update_business_owner_endpoint": "https://dev.filed.com:41010/api/v1/contacts/set-businessowner-facebook-id"
+  },
+
+  "admin_user": {
+    "email": "admin@filed.com",
+    "password": "Adm1n@Fil3ed"
+  }
+}

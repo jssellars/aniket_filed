@@ -8,6 +8,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+filed/
 build/
 develop-eggs/
 dist/
@@ -57,8 +58,11 @@ docs/_build/
 target/
 
 # Pycharm project
-.DS_Store
+*.DS_Store
 .idea
 
 # VS code
 .vs
+
+# Random folders
+Experiments/

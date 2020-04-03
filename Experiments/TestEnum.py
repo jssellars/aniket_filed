@@ -1,30 +1,22 @@
-from enum import Enum
+import itertools
+import operator
+from itertools import groupby
+from operator import itemgetter
 
-class EnumerationBase(Enum):
+from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelStatsDto import GraphAPIPixelStatsDto, GraphAPIPixelStatsDataDto
+from Potter.FacebookPixels.Infrastructure.Tools.Misc import flatten_pixel_stats
 
-    @classmethod
-    def values(cls):
-        return list(map(lambda v: v.value, cls))
+l = [
+    GraphAPIPixelStatsDto(aggregation="event", start_time="2020-03-24T00:00:00+0200", data=[GraphAPIPixelStatsDataDto(value="PageView", count=10),
+                                                                                            GraphAPIPixelStatsDataDto(value="Subscribe", count=10)]),
+    GraphAPIPixelStatsDto(aggregation="event", start_time="2020-03-23T00:00:00+0200", data=[GraphAPIPixelStatsDataDto(value="PageView", count=10),
+                                                                                            GraphAPIPixelStatsDataDto(value="Subscribe", count=10)]),
+    GraphAPIPixelStatsDto(aggregation="event", start_time="2020-03-22T00:00:00+0200", data=[GraphAPIPixelStatsDataDto(value="PageView", count=10)])
+]
 
-    @classmethod
-    def names(cls):
-        return list(map(lambda v: v.name, cls))
+f = flatten_pixel_stats(l)
 
-    @classmethod
-    def get_by_value(cls, value):
-        match = next(filter(lambda x: x.value == value, cls))
-        return match.name if match else None
+get_attr_func = operator.attrgetter('value')
+grouped_pixel_stats = {k: list(g) for k, g in itertools.groupby(sorted(f.stats, key=get_attr_func), get_attr_func)}
 
-
-class AdAccountField(EnumerationBase):
-    NAME = "name"
-    ACCOUNT_ID = "account_id"
-    ID = "id"
-    ACCOUNT_STATUS = "account_status"
-    CURRENCY = "currency"
-    BUSINESS = "business"
-
-
-a = AdAccountField
-
-print(hasattr(a, 'test'))
+print(f)

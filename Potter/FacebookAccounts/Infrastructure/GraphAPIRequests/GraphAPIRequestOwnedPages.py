@@ -3,7 +3,7 @@ from string import Template
 
 
 class GraphAPIRequestOwnedPages:
-    __default_api_version = "v4.0"
+    __default_api_version = "v5.0"
 
     def __init__(self,
                  access_token: typing.AnyStr = None,

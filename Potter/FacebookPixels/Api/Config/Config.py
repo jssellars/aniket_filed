@@ -1,30 +1,15 @@
 from string import Template
 
-from Turing.Config.BaseConfig import BaseConfig
+from Core.Tools.Config.BaseConfig import BaseConfig
 
 
 class FacebookConfig(BaseConfig):
-
-    __FACEBOOK_PERMISSIONS__ = ['email',
-                                'user_link',
-                                'user_location',
-                                'user_posts',
-                                'user_videos',
-                                'ads_management',
-                                'ads_read',
-                                'business_management',
-                                'manage_pages',
-                                'pages_manage_cta',
-                                'pages_show_list',
-                                'user_events',
-                                'instagram_basic',
-                                'leads_retrieval',
-                                'read_audience_network_insights',
-                                'read_insights',
-                                'instagram_manage_insights']
+    """Configuration for Facebook Graph API SDK"""
+    pass
 
 
 class RabbitMqConfig(BaseConfig):
+    """Configuration for RabbitMQ Client"""
 
     _MINIMUM_PUBLISH_INTERVAL = 5
     _MINIMUM_HEARTBEAT_ = 4
@@ -39,11 +24,10 @@ class RabbitMqConfig(BaseConfig):
                               port=self.port,
                               vhost=self.virtual_host)
 
-
     def get_exchange_details_by_name(self, exchange_name):
         return next(filter(lambda x: x["name"] == exchange_name, self.exchanges), None)
 
-    def GetExchangeDetailsByType(self, exchange_type):
+    def get_exchange_details_by_type(self, exchange_type):
         return next(filter(lambda x: x["type"] == exchange_type, self.exchanges), None)
 
 
@@ -61,6 +45,3 @@ class SQLAlchemyConfig(BaseConfig):
                                                                     database=self.name)
         return connection_string
 
-
-class MongoConfig(BaseConfig):
-    """Configuration for Mongo DB client"""
