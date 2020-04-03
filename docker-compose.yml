@@ -39,3 +39,16 @@ services:
       dockerfile: filed-dexter-api
 
 ###################################################################
+
+########################### Turing ################################
+
+  # Potter-Facebook-Accounts-Api
+  filed-turing-api:
+    image: ct.filed.com/filed-turing-api:v0.1
+    ports:
+     - "47350:47350" 
+    build:
+      context: .
+      dockerfile: filed-turing-api
+
+###################################################################

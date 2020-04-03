@@ -3,12 +3,18 @@ RUN apt-get update && apt-get install -y unixodbc-dev
 
 FROM build
 
-ENV LISTEN_PORT 43700
-EXPOSE 43700
+ENV LISTEN_PORT 47350
+EXPOSE 47350
+ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_ENV=dev
+ENV UWSGI_INI /app/Turing/Api/uwsgi.ini
 
-COPY ./Dexter/uwsgi.ini /app
-COPY ./Dexter/Api /app
+
+COPY ./Turing /app/Turing
 COPY ./Core /app/Core
-COPY ./requirements.txt /app
+COPY ./requirements.txt /app/Turing/Api
+COPY ./Turing/uwsgi.ini /app/Turing/Api
+
+WORKDIR /app/Turing/Api
 
 RUN pip install --upgrade pip && pip3 install -r requirements.txt
