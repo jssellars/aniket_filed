@@ -63,3 +63,6 @@ target/
 
 # VS code
 .vs
+
+# Random folders
+Experiments/

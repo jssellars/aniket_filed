@@ -31,11 +31,11 @@
   },
 
   "sql_server_database": {
-    "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "host": "dev.filed.com",
     "port": 1433,
-    "username": "admin",
-    "password": "F2!irf0q",
-    "name": "filed-facebook-tokens"
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Facebook.Potter.FacebookAccounts"
   },
 
   "environment": "dev",

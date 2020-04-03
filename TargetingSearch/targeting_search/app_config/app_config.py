@@ -13,11 +13,11 @@ USER_TOKEN_CONNECTION_STRING = """Driver={driver};Server={server};Database={data
 
 DATABASE_CONFIG = {
     "driver": 'SQL Server',
-    "server": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "server": "dev.filed.com",
     "port": 1433,
-    "username": "admin",
-    "password": "F2!irf0q",
-    "database": "filed-facebook-tokens"
+    "username": "sa",
+    "password": "Parola@20",
+    "database": "Facebook.Potter.FacebookAccounts"
 }
 
 FACEBOOK_SEARCH_URL = "https://graph.facebook.com/{api_version}/{ad_account_id}/targetingsearch?q={search_input}&access_token={token}&limit=5000"

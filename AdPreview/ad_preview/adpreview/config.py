@@ -12,8 +12,8 @@ USER_TOKEN_CONNECTION_STRING = """Driver={driver};Server={server};Database={data
 
 DATABASE_CONFIG = {
     "driver": 'ODBC Driver 17 for SQL Server',
-    "server": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com,1433",
-    "username": "admin",
-    "password": "F2!irf0q",
-    "database": "filed-facebook-tokens"
+    "server": "dev.filed.com",
+    "username": "sa",
+    "password": "Parola@20",
+    "database": "Facebook.Potter.FacebookAccounts"
 }
