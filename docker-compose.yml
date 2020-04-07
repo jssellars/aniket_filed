@@ -1,35 +1,59 @@
 version: '3'
 services:
 
-########################### AsdPreview ############################
-
-  # Filed-AdPreview 
-  filed-adpreview:
-    image: ct.filed.com/filed-adpreview:v0.1
-    ports:
-     - "80:80" 
-    build:
-      context: .
-      dockerfile: filed-adpreview
-
-###################################################################
-
 ########################### Potter ################################
 
   # Potter-Facebook-Accounts-Api
-  potter-facebook-accounts-api:
-    image: ct.filed.com/potter-facebook-accounts-api:v0.1
+  filed-potter-facebook-accounts-api:
+    image: ct.filed.com/filed-potter-facebook-accounts-api:v0.1
     ports:
-     - "80:80" 
+     - "47200:47200" 
     build:
       context: .
-      dockerfile: potter-facebook-accounts-api
+      dockerfile: filed-potter-facebook-accounts-api
+
+  # Potter-Facebook-Accounts-background-Tasks
+  filed-potter-facebook-accounts-background-tasks:
+    image: ct.filed.com/filed-potter-facebook-accounts-background-tasks:v0.1
+    ports:
+     - "42201:42201" 
+    build:
+      context: .
+      dockerfile: filed-potter-facebook-accounts-background-tasks
+
+
+  # Potter-Facebook-Audiences-Background-Tasks
+  filed-potter-facebook-audiences-background-tasks:
+    image: ct.filed.com/filed-potter-facebook-audiences-background-tasks:v0.1
+    ports:
+     - "47241:47241" 
+    build:
+      context: .
+      dockerfile: filed-potter-facebook-audiences-background-tasks
+
+  # Potter-Facebook-Pixels-Api
+  filed-potter-facebook-pixels-api:
+    image: ct.filed.com/filed-potter-facebook-pixels-api:v0.1
+    ports:
+     - "47250:47250" 
+    build:
+      context: .
+      dockerfile: filed-potter-facebook-pixels-api
+
+  # Potter-Facebook-Pixels-Background-Tasks
+  filed-potter-facebook-pixels-background-tasks:
+    image: ct.filed.com/filed-potter-facebook-pixels-background-tasks:v0.1
+    ports:
+     - "47251:47251" 
+    build:
+      context: .
+      dockerfile: filed-potter-facebook-pixels-background-tasks
 
 ###################################################################
 
-########################### Potter ################################
+########################### Dexter ################################
 
-  # Potter-Facebook-Accounts-Api
+  # Potter-Dexter-Api
   filed-dexter-api:
     image: ct.filed.com/filed-dexter-api:v0.1
     ports:
@@ -50,5 +74,31 @@ services:
     build:
       context: .
       dockerfile: filed-turing-api
+
+###################################################################
+
+########################### Ad-Preview ############################
+
+  # Filed-Ad-Preview
+  filed-ad-preview:
+    image: ct.filed.com/filed-ad-preview:v0.1
+    ports:
+     - "47221:47221" 
+    build:
+      context: .
+      dockerfile: filed-ad-preview
+
+###################################################################
+
+########################### Targeting-Search ######################
+
+  # Filed-Ad-Preview
+  filed-targeting-search:
+    image: ct.filed.com/filed-targeting-search:v0.1
+    ports:
+     - "47222:47222" 
+    build:
+      context: .
+      dockerfile: filed-targeting-search
 
 ###################################################################

@@ -1,0 +1,15 @@
+FROM tiangolo/uwsgi-nginx:python3.7 AS build
+RUN apt-get update && apt-get -y install unixodbc-dev
+
+FROM build
+
+ENV LISTEN_PORT 47221
+EXPOSE 47221
+ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_ENV=dev
+ENV UWSGI_INI /app/uwsgi.ini
+
+COPY ./AdPreview/ad_preview /app
+
+WORKDIR /app
+RUN pip install --upgrade pip && pip3 install -r requirements.txt

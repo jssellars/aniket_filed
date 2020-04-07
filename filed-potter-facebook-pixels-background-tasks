@@ -3,16 +3,15 @@ RUN apt-get update && apt-get install -y unixodbc-dev
 
 FROM build
 
-ENV LISTEN_PORT 47350
-EXPOSE 47350
+ENV LISTEN_PORT 47251
+EXPOSE 47251
 ENV PYTHON_SOLUTION_PATH=''
 ENV PYTHON_ENV=dev
-ENV UWSGI_INI /app/Turing/Api/uwsgi.ini
+ENV UWSGI_INI /app/Potter/FacebookPixels/BackgroundTasks/uwsgi.ini
 
-COPY ./Turing /app/Turing
+COPY ./Potter /app/Potter
 COPY ./Core /app/Core
-COPY ./requirements.txt /app/Turing/Api
-COPY ./Turing/uwsgi.ini /app/Turing/Api
+COPY ./requirements.txt /app/Potter/FacebookPixels/BackgroundTasks
 
-WORKDIR /app/Turing/Api
+WORKDIR /app/Potter/FacebookPixels/BackgroundTasks
 RUN pip install --upgrade pip && pip3 install -r requirements.txt
