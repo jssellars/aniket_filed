@@ -17,6 +17,8 @@ spec:
       labels:
         run: filed-potter-facebook-accounts-api
     spec:
+      imagePullSecrets:
+      - name: regcred        
       containers:
       - name: filed-potter-facebook-accounts-api
         image: ct.filed.com/filed-potter-facebook-accounts-api:v0.1
@@ -29,5 +31,10 @@ spec:
           periodSeconds: 5  
         ports: 
         - containerPort : 47200
-      imagePullSecrets:
-        - name: regcred  
+      #   volumeMounts:
+      #   - name: persistent-storage
+      #     mountPath: /app/Filed.Users.API/logs
+      # volumes:
+      # - name: persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: mss-logs-claim
