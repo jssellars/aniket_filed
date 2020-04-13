@@ -1,20 +1,20 @@
 {
   "rabbitmq": {
-    "consumer_name": "dev.api.facebook.potter.accounts.consumer",
-    "username": "ntvkpamp",
-    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
-    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "consumer_name": "prod.api.facebook.potter.accounts.consumer",
+    "username": "eirjtnyh",
+    "password": "cAFjL8M2hdTULtKSa7RgLMwgBGKWt3FZ",
+    "hostname": "frizzy-dragonfly.rmq.cloudamqp.com",
     "port": 5672,
-    "virtual_host": "ntvkpamp",
+    "virtual_host": "eirjtnyh",
     "exchanges": [
       {
-        "name": "dev.direct",
+        "name": "prod.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev.facebook.accounts.inbound",
-          "inbound_routing_key": "dev.facebook.accounts.inbound.key",
-          "outbound": "dev.facebook.accounts.outbound",
-          "outbound_routing_key": "dev.facebook.accounts.outbound.key"
+          "inbound": "prod.facebook.accounts.inbound",
+          "inbound_routing_key": "prod.facebook.accounts.inbound.key",
+          "outbound": "prod.facebook.accounts.outbound",
+          "outbound_routing_key": "prod.facebook.accounts.outbound.key"
         }
       }
     ],
@@ -31,14 +31,14 @@
   },
 
   "sql_server_database": {
-    "host": "dev.filed.com",
+    "host": "prod.filed.com",
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
     "name": "Facebook.Potter.FacebookAccounts"
   },
 
-  "environment": "dev",
+  "environment": "prod",
   "api_name": "FacebookAccounts",
   "api_version": "1.0.0",
   "service_name": "FacebookAccounts",
@@ -49,9 +49,9 @@
   "debug_mode": true,
 
   "external_services": {
-    "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://dev.filed.com:41000/api/v1/users/get-technical-jwt",
-    "subscription_update_business_owner_endpoint": "https://dev.filed.com:41010/api/v1/contacts/set-businessowner-facebook-id"
+    "users_signin_endpoint": "https://prod-api-users-filed.com/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://prod-api-users-filed.com/api/v1/users/get-technical-jwt",
+    "subscription_update_business_owner_endpoint": "https://prod-api-subscriptions-filed.com/api/v1/contacts/set-businessowner-facebook-id"
   },
 
   "admin_user": {
