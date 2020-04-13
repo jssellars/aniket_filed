@@ -1,6 +1,6 @@
 {
   "rabbitmq": {
-    "consumer_name": "dev.api.facebook.turing.consumer",
+    "consumer_name": "dev2.api.facebook.turing.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -8,13 +8,13 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "dev.direct",
+        "name": "dev2.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev.facebook.turing.inbound",
-          "inbound_routing_key": "dev.facebook.turing.inbound.inbound.key",
-          "outbound": "dev.facebook.turing.outbound",
-          "outbound_routing_key": "dev.facebook.turing.outbound.key"
+          "inbound": "dev2.facebook.turing.inbound",
+          "inbound_routing_key": "dev2.facebook.turing.inbound.inbound.key",
+          "outbound": "dev2.facebook.turing.outbound",
+          "outbound_routing_key": "dev2.facebook.turing.outbound.key"
         }
       }
     ],
@@ -31,7 +31,7 @@
   },
 
   "sql_server_database": {
-    "host": "dev.filed.com",
+    "host": "dev2.filed.com",
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
@@ -49,11 +49,11 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "insights_database_name": "dev_facebook_turing_insights",
-    "structures_database_name": "dev_facebook_turing_structures"
+    "insights_database_name": "dev2_facebook_turing_insights",
+    "structures_database_name": "dev2_facebook_turing_structures"
   },
 
-  "environment": "dev",
+  "environment": "dev2",
   "api_name": "Turing",
   "api_version": "1.0.0",
   "service_name": "Turing",
