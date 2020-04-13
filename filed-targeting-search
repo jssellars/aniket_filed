@@ -3,10 +3,11 @@ RUN apt-get update && apt-get -y install unixodbc-dev
 
 FROM build
 
+ARG STAGE
 ENV LISTEN_PORT 47222
 EXPOSE 47222
 ENV PYTHON_SOLUTION_PATH=''
-ENV PYTHON_ENV=dev
+ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/uwsgi.ini
 
 COPY ./TargetingSearch/targeting_search /app

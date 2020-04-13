@@ -1,9 +1,9 @@
 apiVersion: v1
 metadata:
-  name: filed-potter-facebook-accounts-api
+  name: dev2-filed-ad-preview
 kind: Service
 metadata:
-  name: filed-potter-facebook-accounts-api
+  name: dev2-filed-ad-preview
   annotations:
     # Note that the backend talks over HTTP.
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
@@ -14,15 +14,15 @@ metadata:
     # Redirect to HTTPS - not working !!! to be investigated
     service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
   labels:
-    run: filed-potter-facebook-accounts-api
+    run: dev2-filed-ad-preview
 spec:
   ports:
   # - name: http
   #   port: 80
-  #   targetPort: 47222
+  #   targetPort: 47221
   - name: https
     port: 443
-    targetPort: 47200
+    targetPort: 47221
   selector:
-    run: filed-potter-facebook-accounts-api
+    run: dev2-filed-ad-preview
   type: LoadBalancer  

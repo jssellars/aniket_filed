@@ -3,10 +3,11 @@ RUN apt-get update && apt-get install -y unixodbc-dev
 
 FROM build
 
+ARG STAGE
 ENV LISTEN_PORT 47200
 EXPOSE 47200
 ENV PYTHON_SOLUTION_PATH=''
-ENV PYTHON_ENV=dev
+ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookAccounts/Api/uwsgi.ini
 
 COPY ./Potter /app/Potter

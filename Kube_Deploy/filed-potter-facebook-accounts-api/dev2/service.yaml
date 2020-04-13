@@ -1,9 +1,9 @@
 apiVersion: v1
 metadata:
-  name: filed-dexter-api
+  name: dev2-filed-potter-facebook-accounts-api
 kind: Service
 metadata:
-  name: filed-dexter-api
+  name: dev2-filed-potter-facebook-accounts-api
   annotations:
     # Note that the backend talks over HTTP.
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
@@ -14,15 +14,15 @@ metadata:
     # Redirect to HTTPS - not working !!! to be investigated
     service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
   labels:
-    run: filed-dexter-api
+    run: dev2-filed-potter-facebook-accounts-api
 spec:
   ports:
   # - name: http
   #   port: 80
-  #   targetPort: 43700
+  #   targetPort: 47222
   - name: https
     port: 443
-    targetPort: 43700
+    targetPort: 47200
   selector:
-    run: filed-dexter-api
+    run: dev2-filed-potter-facebook-accounts-api
   type: LoadBalancer  

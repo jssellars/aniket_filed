@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-potter-facebook-accounts-api
+  name: dev2-filed-potter-facebook-accounts-api
 spec:
   selector:
     matchLabels:
-      run: filed-potter-facebook-accounts-api
+      run: dev2-filed-potter-facebook-accounts-api
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,13 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-potter-facebook-accounts-api
+        run: dev2-filed-potter-facebook-accounts-api
     spec:
       imagePullSecrets:
       - name: regcred        
       containers:
-      - name: filed-potter-facebook-accounts-api
-        image: ct.filed.com/filed-potter-facebook-accounts-api:v0.1
+      - name: dev2-filed-potter-facebook-accounts-api
+        image: ct.filed.com/dev2-filed-potter-facebook-accounts-api:v0.1
         imagePullPolicy: Always
         livenessProbe:
           httpGet:

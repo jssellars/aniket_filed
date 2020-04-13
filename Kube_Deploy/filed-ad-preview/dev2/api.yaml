@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-ad-preview
+  name: dev2-filed-ad-preview
 spec:
   selector:
     matchLabels:
-      run: filed-ad-preview
+      run: dev2-filed-ad-preview
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,11 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-ad-preview
+        run: dev2-filed-ad-preview
     spec:
+      imagePullSecrets:
+      - name: regcred         
       containers:
-      - name: filed-ad-preview
-        image: ct.filed.com/filed-ad-preview:v0.1
+      - name: dev2-filed-ad-preview
+        image: ct.filed.com/dev2-filed-ad-preview:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:
@@ -29,5 +31,10 @@ spec:
         #   periodSeconds: 5  
         ports: 
         - containerPort : 47221
-      imagePullSecrets:
-        - name: regcred  
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /app/logs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: dev2-mss-logs-claim

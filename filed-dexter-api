@@ -3,8 +3,11 @@ RUN apt-get update && apt-get install -y unixodbc-dev
 
 FROM build
 
+ARG STAGE
 ENV LISTEN_PORT 43700
 EXPOSE 43700
+ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_ENV=${STAGE}
 
 COPY ./Dexter/uwsgi.ini /app
 COPY ./Dexter/Api /app

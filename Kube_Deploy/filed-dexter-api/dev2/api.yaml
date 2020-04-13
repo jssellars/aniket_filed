@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-dexter-api
+  name: dev2-filed-dexter-api
 spec:
   selector:
     matchLabels:
-      run: filed-dexter-api
+      run: dev2-filed-dexter-api
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,11 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-dexter-api
+        run: dev2-filed-dexter-api
     spec:
+      imagePullSecrets:
+      - name: regcred          
       containers:
-      - name: filed-dexter-api
-        image: ct.filed.com/filed-dexter-api:v0.1
+      - name: dev2-filed-dexter-api
+        image: ct.filed.com/dev2-filed-dexter-api:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:
@@ -29,5 +31,10 @@ spec:
         #   periodSeconds: 5  
         ports: 
         - containerPort : 43700
-      imagePullSecrets:
-        - name: regcred  
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /app/logs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: dev2-mss-logs-claim

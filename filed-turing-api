@@ -3,10 +3,11 @@ RUN apt-get update && apt-get install -y unixodbc-dev
 
 FROM build
 
+ARG STAGE
 ENV LISTEN_PORT 47350
 EXPOSE 47350
 ENV PYTHON_SOLUTION_PATH=''
-ENV PYTHON_ENV=dev
+ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Turing/Api/uwsgi.ini
 
 COPY ./Turing /app/Turing
