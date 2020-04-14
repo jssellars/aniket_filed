@@ -1,6 +1,6 @@
-import Turing.Api.Catalogs.Breakdowns.ActionBreakdowns
-import Turing.Api.Catalogs.Breakdowns.DeliveryBreakdowns
-import Turing.Api.Catalogs.Breakdowns.TimeBreakdowns
+import FacebookTuring.Api.Catalogs.Breakdowns.ActionBreakdowns
+import FacebookTuring.Api.Catalogs.Breakdowns.DeliveryBreakdowns
+import FacebookTuring.Api.Catalogs.Breakdowns.TimeBreakdowns
 from Core.Tools.Misc.ObjectSerializers import object_to_json, object_to_attribute_values_list
 
 
@@ -9,9 +9,9 @@ class AdsManagerCatalogsBreakdownsDto:
     json_list_encoder = object_to_attribute_values_list
 
     __shared_state = {
-        "action": json_list_encoder(Turing.Api.Catalogs.Breakdowns.ActionBreakdowns.ActionBreakdowns()),
-        "delivery": json_list_encoder(Turing.Api.Catalogs.Breakdowns.DeliveryBreakdowns.DeliveryBreakdowns()),
-        "time": json_list_encoder(Turing.Api.Catalogs.Breakdowns.TimeBreakdowns.TimeBreakdowns())
+        "action": json_list_encoder(FacebookTuring.Api.Catalogs.Breakdowns.ActionBreakdowns.ActionBreakdowns()),
+        "delivery": json_list_encoder(FacebookTuring.Api.Catalogs.Breakdowns.DeliveryBreakdowns.DeliveryBreakdowns()),
+        "time": json_list_encoder(FacebookTuring.Api.Catalogs.Breakdowns.TimeBreakdowns.TimeBreakdowns())
     }
 
     def __init__(self):

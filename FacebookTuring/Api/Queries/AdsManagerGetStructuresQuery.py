@@ -3,7 +3,7 @@ from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
 from FacebookTuring.Api.Mappings.AdsManagerStructureMapping import AdsManagerStructureMapping
 from FacebookTuring.Api.Mappings.AdsManagerStructureMinimalMapping import AdsManagerStructureMinimalMapping
 from FacebookTuring.Api.Startup import startup
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToMongoCollectionEnum, LevelToFacebookIdKeyMapping, LevelManyToMongoCollectionEnum, LevelToFacebookNameKeyMapping
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookIdKeyMapping, LevelToFacebookNameKeyMapping
 
 
 class AdsManagerGetStructuresQuery:
