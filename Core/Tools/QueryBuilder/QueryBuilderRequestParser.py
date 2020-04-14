@@ -1,9 +1,9 @@
 from enum import Enum
 
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
-from Turing.Infrastructure.Mappings.LevelMapping import Level
-from Turing.Infrastructure.Models.FacebookField import FacebookField, FacebookFieldType
-from Turing.Infrastructure.Models.FacebookFieldsMetadata import FacebookFieldsMetadata
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 
 class QueryBuilderRequestParser:
@@ -75,32 +75,32 @@ class QueryBuilderRequestParser:
 
     def add_structure_meta_information(self):
         if self.level == Level.CAMPAIGN.value:
-            self.__structure_fields += [FacebookFieldsMetadata.account_name.name,
-                                        FacebookFieldsMetadata.ad_account_id.name,
-                                        FacebookFieldsMetadata.name.name,
-                                        FacebookFieldsMetadata.id.name]
+            self.__structure_fields += [FieldsMetadata.account_name.name,
+                                        FieldsMetadata.ad_account_id.name,
+                                        FieldsMetadata.name.name,
+                                        FieldsMetadata.id.name]
         elif self.level == Level.ADSET.value:
-            self.__structure_fields += [FacebookFieldsMetadata.account_name.name,
-                                        FacebookFieldsMetadata.ad_account_id.name,
-                                        FacebookFieldsMetadata.campaign_id.name,
-                                        FacebookFieldsMetadata.campaign_name.name,
-                                        FacebookFieldsMetadata.name.name,
-                                        FacebookFieldsMetadata.id.name]
+            self.__structure_fields += [FieldsMetadata.account_name.name,
+                                        FieldsMetadata.ad_account_id.name,
+                                        FieldsMetadata.campaign_id.name,
+                                        FieldsMetadata.campaign_name.name,
+                                        FieldsMetadata.name.name,
+                                        FieldsMetadata.id.name]
         elif self.level == Level.AD.value:
-            self.__structure_fields += [FacebookFieldsMetadata.account_name.name,
-                                        FacebookFieldsMetadata.ad_account_id.name,
-                                        FacebookFieldsMetadata.campaign_id.name,
-                                        FacebookFieldsMetadata.campaign_name.name,
-                                        FacebookFieldsMetadata.adset_id.name,
-                                        FacebookFieldsMetadata.adset_name.name,
-                                        FacebookFieldsMetadata.name.name,
-                                        FacebookFieldsMetadata.id.name]
+            self.__structure_fields += [FieldsMetadata.account_name.name,
+                                        FieldsMetadata.ad_account_id.name,
+                                        FieldsMetadata.campaign_id.name,
+                                        FieldsMetadata.campaign_name.name,
+                                        FieldsMetadata.adset_id.name,
+                                        FieldsMetadata.adset_name.name,
+                                        FieldsMetadata.name.name,
+                                        FieldsMetadata.id.name]
 
     def parse_query_columns(self, query_columns, parse_breakdowns=True, column_type=None):
-        non_fields_types = [FacebookFieldType.BREAKDOWN,
-                            FacebookFieldType.TIME_BREAKDOWN,
-                            FacebookFieldType.ACTION_BREAKDOWN,
-                            FacebookFieldType.STRUCTURE]
+        non_fields_types = [FieldType.BREAKDOWN,
+                            FieldType.TIME_BREAKDOWN,
+                            FieldType.ACTION_BREAKDOWN,
+                            FieldType.STRUCTURE]
 
         for entry in query_columns:
             mapped_entry = self.map(getattr(entry, column_type.value))
@@ -110,10 +110,10 @@ class QueryBuilderRequestParser:
             if mapped_entry and mapped_entry.field_type not in non_fields_types:
                 self.__fields += mapped_entry.fields
 
-            elif mapped_entry and mapped_entry.field_type == FacebookFieldType.STRUCTURE:
+            elif mapped_entry and mapped_entry.field_type == FieldType.STRUCTURE:
                 self.__structure_fields += mapped_entry.fields
 
-            elif mapped_entry and mapped_entry.field_type == FacebookFieldType.TIME_BREAKDOWN:
+            elif mapped_entry and mapped_entry.field_type == FieldType.TIME_BREAKDOWN:
                 self.time_increment = mapped_entry.action_field_name_value
                 self.__fields += mapped_entry.fields
 
@@ -131,15 +131,15 @@ class QueryBuilderRequestParser:
             elif entry.ColumnName == self.TimeIntervalEnum.DATE_STOP.value:
                 self.time_range[self.TimeRangeEnum.UNTIL.value] = entry.Value
 
-            elif mapped_condition and (mapped_condition.name == FacebookFieldsMetadata.ad_account_id.name or mapped_condition.name == FacebookFieldsMetadata.ad_account_structure_id.name):
+            elif mapped_condition and (mapped_condition.name == FieldsMetadata.ad_account_id.name or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name):
                 self.facebook_id = entry.Value
 
             elif entry.ColumnName == self.TimeIntervalEnum.TIME_INCREMENT.value:
                 self.time_increment = entry.Value
 
             else:
-                facebookFilter = QueryBuilderFilter(entry)
-                self.filtering.append(facebookFilter.AsDict())
+                facebook_filter = QueryBuilderFilter(entry)
+                self.filtering.append(facebook_filter.as_dict())
 
     def from_query(self, request, parse_breakdowns=True):
         self.level = request.get_level()
@@ -152,4 +152,4 @@ class QueryBuilderRequestParser:
         self.__remove_structure_fields = True
 
     def map(self, name):
-        return next(filter(lambda x: x.name == name if isinstance(x, FacebookField) else None, FacebookFieldsMetadata.__dict__.values()), None)
+        return next(filter(lambda x: x.name == name if isinstance(x, Field) else None, FieldsMetadata.__dict__.values()), None)

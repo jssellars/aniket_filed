@@ -1,0 +1,7 @@
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
+from FacebookDexter.Infrastructure.IntegrationEvents.TuringDataSyncCompletedEventHandler import TuringDataSyncCompletedEventHandler
+
+
+class HandlersEnum(EnumerationBase):
+    TURING_DATA_SYNC_COMPLETED = TuringDataSyncCompletedEventHandler
+

@@ -8,7 +8,7 @@ class QueryBuilderFilter:
         self.operator = QueryBuilderLogicalOperator(condition.Operator).name
         self.value = condition.Value
 
-    def AsDict(self):
+    def as_dict(self):
         filter_dict = {
             'field': self.field,
             'operator': self.operator,

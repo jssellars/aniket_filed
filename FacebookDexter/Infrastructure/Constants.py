@@ -1,0 +1,1 @@
+DEFAULT_DATETIME = "%Y-%m-%d"

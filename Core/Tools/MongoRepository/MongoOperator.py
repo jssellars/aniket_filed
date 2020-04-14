@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class MongoOperator(Enum):
+    DOLLAR_SIGN = "$"
     IN = "$in"
     NOTIN = "$nin"
     AND = "$and"
@@ -13,3 +14,9 @@ class MongoOperator(Enum):
     LESSTHANEQUAL = "$lte"
     LESSTHAN = "$lt"
     SET = "$set"
+    GROUP = "$group"
+    GROUP_KEY = "_id"
+    SORT = "$sort"
+    MATCH = "$match"
+    SUM = "$sum"
+    AVERAGE = "$avg"

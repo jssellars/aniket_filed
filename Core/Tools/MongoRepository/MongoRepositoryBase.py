@@ -27,7 +27,8 @@ class MongoRepositoryBase:
             self.connection_handler = None
 
         if config is not None:
-            self.connection_handler = MongoConnectionHandler(config)
+            self._config = config
+            self.connection_handler = MongoConnectionHandler(self._config)
             self._client = self.connection_handler.client
 
         self._database_name = database_name
@@ -155,9 +156,12 @@ class MongoRepositoryBase:
 
         return list(results)
 
-    def get(self, query=None):
+    def get(self, query=None, projection=None):
         try:
-            results = self.collection.find(query)
+            if not projection:
+                results = self.collection.find(query)
+            else:
+                results = self.collection.find(query, projection)
         except Exception as e:
             raise e
 

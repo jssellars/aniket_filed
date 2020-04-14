@@ -8,8 +8,6 @@ else:
     sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
 # ====== END OF CONFIG SECTION ====== #
 
-import json
-
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Potter.FacebookAccounts.BackgroundTasks.Startup import startup
 from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
@@ -23,7 +21,6 @@ def callback(ch, method, properties, body):
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
 
-        body = json.loads(body)
         request_handler.handle(body)
     except Exception as e:
         # todo: log error

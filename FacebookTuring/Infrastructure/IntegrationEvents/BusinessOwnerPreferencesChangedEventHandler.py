@@ -1,0 +1,2 @@
+class BusinessOwnerPreferencesChangedEventHandler:
+    pass
