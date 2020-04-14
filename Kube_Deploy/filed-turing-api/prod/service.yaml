@@ -1,9 +1,9 @@
 apiVersion: v1
 metadata:
-  name: filed-potter-facebook-audiences-background-tasks
+  name: prod-filed-turing-api
 kind: Service
 metadata:
-  name: filed-potter-facebook-audiences-background-tasks
+  name: prod-filed-turing-api
   annotations:
     # Note that the backend talks over HTTP.
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
@@ -14,15 +14,15 @@ metadata:
     # Redirect to HTTPS - not working !!! to be investigated
     service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
   labels:
-    run: filed-potter-facebook-audiences-background-tasks
+    run: prod-filed-turing-api
 spec:
   ports:
   # - name: http
   #   port: 80
-  #   targetPort: 47241
+  #   targetPort: 47350
   - name: https
     port: 443
-    targetPort: 47241
+    targetPort: 47350
   selector:
-    run: filed-potter-facebook-audiences-background-tasks
+    run: prod-filed-turing-api
   type: LoadBalancer  

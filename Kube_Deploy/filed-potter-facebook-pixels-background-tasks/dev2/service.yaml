@@ -1,9 +1,9 @@
 apiVersion: v1
 metadata:
-  name: filed-targeting-search
+  name: dev2-filed-potter-facebook-pixels-background-tasks
 kind: Service
 metadata:
-  name: filed-targeting-search
+  name: dev2-filed-potter-facebook-pixels-background-tasks
   annotations:
     # Note that the backend talks over HTTP.
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
@@ -14,15 +14,15 @@ metadata:
     # Redirect to HTTPS - not working !!! to be investigated
     service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
   labels:
-    run: filed-targeting-search
+    run: dev2-filed-potter-facebook-pixels-background-tasks
 spec:
   ports:
   # - name: http
   #   port: 80
-  #   targetPort: 47222
+  #   targetPort: 47251
   - name: https
     port: 443
-    targetPort: 47222
+    targetPort: 47251
   selector:
-    run: filed-targeting-search
+    run: dev2-filed-potter-facebook-pixels-background-tasks
   type: LoadBalancer  

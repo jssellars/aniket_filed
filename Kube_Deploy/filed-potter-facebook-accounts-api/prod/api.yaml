@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-filed-potter-facebook-accounts-api
+spec:
+  selector:
+    matchLabels:
+      run: prod-filed-potter-facebook-accounts-api
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1       
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: prod-filed-potter-facebook-accounts-api
+    spec:
+      imagePullSecrets:
+      - name: regcred        
+      containers:
+      - name: prod-filed-potter-facebook-accounts-api
+        image: ct.filed.com/prod-filed-potter-facebook-accounts-api:v0.1
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /api/v1/facebook-accounts/version
+            port: 47200
+          initialDelaySeconds: 5
+          periodSeconds: 5  
+        ports: 
+        - containerPort : 47200
+      #   volumeMounts:
+      #   - name: persistent-storage
+      #     mountPath: /app/Filed.Users.API/logs
+      # volumes:
+      # - name: persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: mss-logs-claim

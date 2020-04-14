@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-turing-api
+  name: prod-filed-potter-facebook-pixels-api
 spec:
   selector:
     matchLabels:
-      run: filed-turing-api
+      run: prod-filed-potter-facebook-pixels-api
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,11 +15,11 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-turing-api
+        run: prod-filed-potter-facebook-pixels-api
     spec:
       containers:
-      - name: filed-turing-api
-        image: ct.filed.com/filed-turing-api:v0.1
+      - name: prod-filed-potter-facebook-pixels-api
+        image: ct.filed.com/prod-filed-potter-facebook-pixels-api:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:
@@ -28,6 +28,6 @@ spec:
         #   initialDelaySeconds: 5
         #   periodSeconds: 5  
         ports: 
-        - containerPort : 47350
+        - containerPort : 47250
       imagePullSecrets:
         - name: regcred  

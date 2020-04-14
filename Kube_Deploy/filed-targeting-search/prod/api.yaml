@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-targeting-search
+  name: prod-filed-targeting-search
 spec:
   selector:
     matchLabels:
-      run: filed-targeting-search
+      run: prod-filed-targeting-search
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,11 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-targeting-search
+        run: prod-filed-targeting-search
     spec:
+      imagePullSecrets:
+      - name: regcred          
       containers:
-      - name: filed-targeting-search
-        image: ct.filed.com/filed-targeting-search:v0.1
+      - name: prod-filed-targeting-search
+        image: ct.filed.com/prod-filed-targeting-search:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:

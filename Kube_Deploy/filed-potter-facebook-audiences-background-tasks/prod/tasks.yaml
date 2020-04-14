@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-potter-facebook-audiences-background-tasks
+  name: prod-filed-potter-facebook-audiences-background-tasks
 spec:
   selector:
     matchLabels:
-      run: filed-potter-facebook-audiences-background-tasks
+      run: prod-filed-potter-facebook-audiences-background-tasks
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,11 +15,11 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-potter-facebook-audiences-background-tasks
+        run: prod-filed-potter-facebook-audiences-background-tasks
     spec:
       containers:
-      - name: filed-potter-facebook-audiences-background-tasks
-        image: ct.filed.com/filed-potter-facebook-audiences-background-tasks:v0.1
+      - name: prod-filed-potter-facebook-audiences-background-tasks
+        image: ct.filed.com/prod-filed-potter-facebook-audiences-background-tasks:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:

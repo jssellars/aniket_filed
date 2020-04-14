@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filed-potter-facebook-accounts-background-tasks
+  name: prod-filed-turing-api
 spec:
   selector:
     matchLabels:
-      run: filed-potter-facebook-accounts-background-tasks
+      run: prod-filed-turing-api
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,11 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        run: filed-potter-facebook-accounts-background-tasks
+        run: prod-filed-turing-api
     spec:
+      imagePullSecrets:
+      - name: regcred         
       containers:
-      - name: filed-potter-facebook-accounts-background-tasks
-        image: ct.filed.com/filed-potter-facebook-accounts-background-tasks:v0.1
+      - name: prod-filed-turing-api
+        image: ct.filed.com/prod-filed-turing-api:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:
@@ -28,6 +30,6 @@ spec:
         #   initialDelaySeconds: 5
         #   periodSeconds: 5  
         ports: 
-        - containerPort : 42201
+        - containerPort : 47350
       imagePullSecrets:
         - name: regcred  
