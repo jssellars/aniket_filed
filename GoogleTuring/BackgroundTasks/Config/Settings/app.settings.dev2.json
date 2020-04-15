@@ -1,0 +1,66 @@
+{
+  "rabbitmq": {
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "dev2.google.accounts.fanout",
+        "type": "direct",
+        "queues": {
+          "inbound": "dev2.google.turing.inbound",
+          "inbound_routing_key": "dev2.google.turing.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "apiVersion": "v4.0",
+    "appId": "174014546372191",
+    "appSecret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sqlServerDatabase": {
+    "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "port": 1433,
+    "username": "admin",
+    "password": "F2!irf0q",
+    "name": "filed-facebook-tokens"
+  },
+  "mongoDatabase": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "googleInsightsDatabaseName": "Filed_Turing_Google_Insights_Test",
+    "googleStructuresDatabaseName": "Filed_Turing_Google_Structures_Test",
+    "googleAccountsDatabaseName": "Filed_Turing_Google_Accounts",
+    "locationDataCollectionName": "location_data",
+    "accountsCollectionName": "google_accounts"
+  },
+    "google": {
+    "client_config_path": "Config/Settings/googleads.yaml",
+    "developer_token": "JcuH_-cVSK9CBVpRz3ZIIg",
+    "client_id": "17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
+    "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
+  },
+  "runVerbose": false,
+  "logErrors": true,
+  "environment": "dev2",
+  "apiName": "Turing",
+  "apiVersion": "1.0.0",
+  "serviceName": "Turing",
+  "serviceVersion": "1.0.0",
+  "baseUrl": "/api/v1"
+}

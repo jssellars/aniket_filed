@@ -1,6 +1,6 @@
 from string import Template
 
-from GoogleTuring.BackgroundTasks.Config.BaseConfig import BaseConfig
+from Core.Tools.Config.BaseConfig import BaseConfig
 
 
 class GoogleConfig(BaseConfig):

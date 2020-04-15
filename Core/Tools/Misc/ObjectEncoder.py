@@ -7,8 +7,6 @@ class ObjectEncoder(json.JSONEncoder):
     def default(self, obj):
         if hasattr(obj, "to_json"):
             return self.default(obj.to_json())
-        # elif isinstance(obj, dict):
-        #     return self.default(obj)
         elif hasattr(obj, "__dict__"):
             d = dict(
                 (key, value)

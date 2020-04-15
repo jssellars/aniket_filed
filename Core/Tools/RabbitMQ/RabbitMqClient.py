@@ -17,8 +17,8 @@ class RabbitMqClient:
 
     def __init__(self,
                  config: typing.Any,
-                 exchange_name: typing.AnyStr,
-                 outbound_routing_key: typing.AnyStr,
+                 exchange_name: typing.AnyStr = None,
+                 outbound_routing_key: typing.AnyStr = None,
                  inbound_queue: typing.AnyStr = None):
         self.__config = config
         self.__exchange_name = exchange_name

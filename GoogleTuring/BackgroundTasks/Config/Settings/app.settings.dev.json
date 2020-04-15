@@ -7,18 +7,12 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "dev2.filed.direct",
+        "name": "dev.google.accounts.fanout",
         "type": "direct",
         "queues": {
-          "inbound": "dev2.filed.turing.inbound",
-          "inbound_routing_key": "dev2.filed.turing.inbound.inbound.key",
-          "outbound": "dev2.filed.turing.outbound",
-          "outbound_routing_key": "dev2.filed.turing.outbound.key"
+          "inbound": "dev.google.turing.inbound",
+          "inbound_routing_key": "dev.google.turing.outbound.key"
         }
-      },
-      {
-        "name": "dev2.filed.facebook.turing.fanout",
-        "type": "fanout"
       }
     ],
     "publish_interval": 1,
@@ -27,7 +21,7 @@
   },
   "facebook": {
     "description": "Filed Live",
-    "apiVersion": "v5.0",
+    "apiVersion": "v4.0",
     "appId": "174014546372191",
     "appSecret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
@@ -51,10 +45,15 @@
     "remote_port": 27017,
     "googleInsightsDatabaseName": "Filed_Turing_Google_Insights_Test",
     "googleStructuresDatabaseName": "Filed_Turing_Google_Structures_Test",
-    "locationDataCollectionName": "location_data"
+    "googleAccountsDatabaseName": "Filed_Turing_Google_Accounts",
+    "locationDataCollectionName": "location_data",
+    "accountsCollectionName": "google_accounts"
   },
   "google": {
-    "client_config_path": "Config/Settings/googleads.yaml"
+    "client_config_path": "Config/Settings/googleads.yaml",
+    "developer_token": "JcuH_-cVSK9CBVpRz3ZIIg",
+    "client_id": "17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
+    "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
   "runVerbose": false,
   "logErrors": true,

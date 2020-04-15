@@ -1,9 +1,7 @@
 # todo: make this work with arbitrary objects that extend JsonType or dataclass
-from dataclasses import asdict
+import typing
 from datetime import datetime
 from enum import Enum
-
-import typing
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
@@ -144,8 +142,8 @@ class MongoRepositoryBase:
 
     def get_last_updated(self, last_updated_datetime=None):
         query = {
-            "last_updated": {
-                MongoOperator.GREATERTHANEQUAL.value: last_updated_datetime.strftime("%Y-%m-%dT%H:%M:%s")
+            "last_update_time": {
+                MongoOperator.GREATERTHANEQUAL.value: last_updated_datetime
             }
         }
 
@@ -209,7 +207,7 @@ class MongoRepositoryBase:
     def update_many(self, query_filter=None, query=None):
         try:
             result = self.collection.update_many(query_filter, query)
-            return result['nModified']
+            return result.modified_count
         except Exception as e:
             raise e
 

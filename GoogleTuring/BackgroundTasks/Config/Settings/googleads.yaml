@@ -7,7 +7,6 @@ adwords:
   #############################################################################
   # Optional Fields                                                           #
   #############################################################################
-  client_customer_id: 9959328642
   # user_agent: INSERT_USER_AGENT_HERE
   # partial_failure: True
   # validate_only: True
@@ -21,7 +20,6 @@ adwords:
   # flow.
   client_id: 17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com
   client_secret: bk0Gae3BgAkbbf63GD5kU4jq
-  refresh_token: 1//0cnSwfrXTM4rFCgYIARAAGAwSNwF-L9IrYWP3Dajw7CImOjMyh1boi1ryVgm1XhxvVL7biYKHpXbFSTBHx7BShy4Rt88zahcf0fo
   # The following values configure the client for the service account flow.
   # path_to_private_key_file: INSERT_PATH_TO_JSON_KEY_FILE_HERE
   # delegated_account: INSERT_DOMAIN_WIDE_DELEGATION_ACCOUNT

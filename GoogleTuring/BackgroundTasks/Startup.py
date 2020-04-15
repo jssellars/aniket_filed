@@ -1,4 +1,5 @@
 import json
+import os
 
 from kombu import Exchange, Queue
 from sqlalchemy import create_engine
@@ -31,14 +32,7 @@ class Startup:
                                         type=direct_exchange_config['type'])
         queue_details = direct_exchange_config['queues']
         self.direct_inbound_queue = Queue(queue_details['inbound'],
-                                          self.direct_exchange,
-                                          routing_key=queue_details['inbound_routing_key'])
-        self.direct_outbound_queue = {'name': queue_details['outbound'],
-                                      'key': queue_details['outbound_routing_key']}
-
-        fanout_exchange_config = self.rabbitmq_config.get_exchange_details_by_type("fanout")
-        self.fanout_exchange = Exchange(fanout_exchange_config['name'],
-                                        type=fanout_exchange_config['type'])
+                                          self.direct_exchange)
 
         # Generic msrv configuration
         self.environment = config['environment']
@@ -52,7 +46,13 @@ class Startup:
         return sessionmaker(bind=self.engine)
 
 
-with open(r'Config\Settings\app.settings.dev.json', 'r') as app_settings_json_file:
+#  Initialize startup object
+env = os.environ.get("PYTHON_ENV")
+if not env:
+    env = "local"
+config_file = f"Config/Settings/app.settings.{env}.json"
+
+with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)
