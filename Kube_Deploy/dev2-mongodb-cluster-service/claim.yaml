@@ -1,12 +1,11 @@
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: dev2-mongodb-storage
-  labels:
-    type: amazonEBS
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: ebs-sc
   resources:
     requests:
-      storage: 5Gi
+      storage: 40Gi      
