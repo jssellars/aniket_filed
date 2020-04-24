@@ -11,10 +11,10 @@
         "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev.facebook.audiences.inbound",
-          "inbound_routing_key": "dev.facebook.audiences.inbound.key",
-          "outbound": "dev.facebook.audiences.outbound",
-          "outbound_routing_key": "dev.facebook.audiences.outbound.key"
+          "inbound": "local.facebook.audiences.inbound",
+          "inbound_routing_key": "local.facebook.audiences.inbound.key",
+          "outbound": "local.facebook.audiences.outbound",
+          "outbound_routing_key": "local.facebook.audiences.outbound.key"
         }
       }
     ],

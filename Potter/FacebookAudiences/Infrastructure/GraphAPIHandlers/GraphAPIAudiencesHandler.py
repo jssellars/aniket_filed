@@ -67,8 +67,11 @@ class GraphAPIAudiencesHandler:
         return saved_audiences
 
     @classmethod
-    def __timestamp_to_datetime(cls, timestamp: int = None) -> typing.AnyStr:
-        return datetime.fromtimestamp(timestamp).strftime(cls.__datetime_format)
+    def __timestamp_to_datetime(cls, timestamp: typing.Union[int, str] = None) -> typing.AnyStr:
+        if isinstance(timestamp, int):
+            return datetime.fromtimestamp(timestamp).strftime(cls.__datetime_format)
+        else:
+            return timestamp
 
     @classmethod
     def __map_delivery_status(cls, delivery_status: OperationStatus) -> typing.AnyStr:
