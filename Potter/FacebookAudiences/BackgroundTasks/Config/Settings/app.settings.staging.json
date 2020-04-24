@@ -35,7 +35,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Facebook.Potter.FacebookAccounts"
+    "name": "Staging.Facebook.Potter.FacebookAccounts"
   },
 
   "environment": "staging",

@@ -35,7 +35,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Facebook.Potter.FacebookAccounts"
+    "name": "Dev.Facebook.Potter.FacebookAccounts"
   },
 
   "environment": "dev",
