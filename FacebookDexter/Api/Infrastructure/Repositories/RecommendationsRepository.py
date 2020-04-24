@@ -102,7 +102,7 @@ class RecommendationsRepository(object):
 
     def get_action_history(self, structureId: str):
         cursor = self.collection.find({"structureId": structureId, "status" :{ "$in" : [RecommendationStatus.APPLIED.value, RecommendationStatus.DISMISSED.value]}},
-                                      {'applicationDetails': False})
+                                      {'applicationDetails': False}).sort("applicationDate", pymongo.DESCENDING)
         actionHistorysAsDictList = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in list(cursor)]
         return actionHistorysAsDictList
 

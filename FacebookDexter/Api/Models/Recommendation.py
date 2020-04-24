@@ -18,6 +18,7 @@ class Recommendation(object):
     template = None
     metric = None
     applicationDetails = None
+    applicationDate = None
     channel = None
     parentName = None
     campaignName = None
