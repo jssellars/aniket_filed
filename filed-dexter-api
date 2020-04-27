@@ -9,8 +9,8 @@ EXPOSE 43700
 ENV PYTHON_SOLUTION_PATH=''
 ENV PYTHON_ENV=${STAGE}
 
-COPY ./Dexter/uwsgi.ini /app
-COPY ./Dexter/Api /app
+COPY ./FacebookDexter/uwsgi.ini /app
+COPY ./FacebookDexter/Api /app
 COPY ./Core /app/Core
 COPY ./requirements.txt /app
 

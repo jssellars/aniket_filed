@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       run: dev2-filed-potter-facebook-accounts-api
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:

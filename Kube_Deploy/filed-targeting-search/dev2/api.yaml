@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       run: dev2-filed-targeting-search
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:

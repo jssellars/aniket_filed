@@ -16,3 +16,8 @@ docker-compose push
 
 echo -e "Done..."
 
+echo -e "Image cleanup"
+
+docker image prune -f
+
+echo -e "Done"
