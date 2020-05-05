@@ -23,12 +23,12 @@ spec:
       - name: dev2-filed-potter-facebook-accounts-api
         image: ct.filed.com/dev2-filed-potter-facebook-accounts-api:v0.1
         imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /api/v1/facebook-accounts/version
-            port: 47200
-          initialDelaySeconds: 5
-          periodSeconds: 5  
+      #  livenessProbe:
+      #    httpGet:
+      #      path: /api/v1/facebook-accounts/version
+      #      port: 47200
+      #    initialDelaySeconds: 5
+      #    periodSeconds: 5  
         ports: 
         - containerPort : 47200
       #   volumeMounts:
