@@ -332,6 +332,9 @@ class ViewColumnsMaster:
     status = ViewColumn(__id.increment_as_string(), display_name='status', primary_value=GoogleMetadataColumnsPool.status, type_id=ViewColumnType.text.id,
                         category_id=ViewColumnCategory.common.id, actions=[])
 
+    enable_pause_keyword = ViewColumn(__id.increment_as_string(), display_name='Enable/Pause', primary_value=GoogleMetadataColumnsPool.status, type_id=ViewColumnType.text.id,
+                                      category_id=ViewColumnCategory.common.id, actions=[])
+
     enable_pause_ad = ViewColumn(__id.increment_as_string(), display_name='Enable/Pause', primary_value=GoogleMetadataColumnsPool.status, type_id=ViewColumnType.text.id,
                                  category_id=ViewColumnCategory.common.id, actions=[])
 
@@ -499,7 +502,7 @@ class ViewColumnsMaster:
     total_amount = ViewColumn(__id.increment_as_string(), display_name='total_amount', primary_value=GoogleMetadataColumnsPool.total_amount, type_id=ViewColumnType.text.id,
                               category_id=ViewColumnCategory.common.id, actions=[])
 
-    approval_status = ViewColumn(__id.increment_as_string(), display_name='approval_status', primary_value=GoogleMetadataColumnsPool.approval_status, type_id=ViewColumnType.text.id,
+    approval_status = ViewColumn(__id.increment_as_string(), display_name='Policy Details', primary_value=GoogleMetadataColumnsPool.approval_status, type_id=ViewColumnType.text.id,
                                  category_id=ViewColumnCategory.common.id, actions=[])
 
     cpc_bid_source = ViewColumn(__id.increment_as_string(), display_name='cpc_bid_source', primary_value=GoogleMetadataColumnsPool.cpc_bid_source, type_id=ViewColumnType.text.id,
@@ -517,7 +520,7 @@ class ViewColumnsMaster:
     age_range = ViewColumn(__id.increment_as_string(), display_name='age_range', primary_value=GoogleMetadataColumnsPool.age_range, type_id=ViewColumnType.text.id,
                            category_id=ViewColumnCategory.common.id, actions=[])
 
-    keywords = ViewColumn(__id.increment_as_string(), display_name='keywords', primary_value=GoogleMetadataColumnsPool.keywords, type_id=ViewColumnType.text.id,
+    keywords = ViewColumn(__id.increment_as_string(), display_name='Keyword', primary_value=GoogleMetadataColumnsPool.keywords, type_id=ViewColumnType.text.id,
                           category_id=ViewColumnCategory.common.id, actions=[])
 
     criteria_destination_url = ViewColumn(__id.increment_as_string(), display_name='criteria_destination_url', primary_value=GoogleMetadataColumnsPool.criteria_destination_url,
@@ -537,7 +540,7 @@ class ViewColumnsMaster:
     final_mobile_urls = ViewColumn(__id.increment_as_string(), display_name='final_mobile_urls', primary_value=GoogleMetadataColumnsPool.final_mobile_urls, type_id=ViewColumnType.text.id,
                                    category_id=ViewColumnCategory.common.id, actions=[])
 
-    final_urls = ViewColumn(__id.increment_as_string(), display_name='final_urls', primary_value=GoogleMetadataColumnsPool.final_urls, type_id=ViewColumnType.text.id,
+    final_urls = ViewColumn(__id.increment_as_string(), display_name='Final URL', primary_value=GoogleMetadataColumnsPool.final_urls, type_id=ViewColumnType.text.id,
                             category_id=ViewColumnCategory.common.id, actions=[])
 
     first_page_cpc = ViewColumn(__id.increment_as_string(), display_name='first_page_cpc', primary_value=GoogleMetadataColumnsPool.first_page_cpc, type_id=ViewColumnType.text.id,

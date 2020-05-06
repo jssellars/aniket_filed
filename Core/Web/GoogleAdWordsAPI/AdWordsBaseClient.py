@@ -7,6 +7,7 @@ from Core.Web.GoogleAdWordsAPI.Enums.AdWordsServiceType import AdWordsServiceTyp
 
 
 class AdWordsBaseClient:
+    _CHUNK_SIZE = 16 * 1024
 
     def __init__(self, config, refresh_token=None):
         self._config = config

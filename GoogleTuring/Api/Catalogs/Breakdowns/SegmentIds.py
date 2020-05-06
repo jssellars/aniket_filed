@@ -1,9 +1,7 @@
-from Core.Tools.Misc.Autoincrement import Autoincrement
 from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.ViewColumnsMaster import ViewColumnsMaster
 
 
 class SegmentIds:
-    __id = Autoincrement(0)
     ad_network_type_1 = ViewColumnsMaster.ad_network_type_1.id
 
     ad_network_type_2 = ViewColumnsMaster.ad_network_type_2.id

@@ -1,6 +1,6 @@
 import typing
 
-from GoogleTuring.Infrastructure.AdwordsAPIHandlers.AdwordsAPISyncStructuresHandler import AdwordsAPISyncStructuresHandler
+from GoogleTuring.Infrastructure.AdwordsAPIHandlers.AdWordsAPISyncStructuresHandler import AdWordsAPISyncStructuresHandler
 from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import GoogleUserPreferencesUpdatedEvent
 from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEventMapping import GoogleUserPreferencesUpdatedEventMapping
 
@@ -11,7 +11,7 @@ class GoogleUserPreferencesUpdatedEventHandler:
         mapping = GoogleUserPreferencesUpdatedEventMapping(GoogleUserPreferencesUpdatedEvent)
         request = mapping.load(message)
 
-        AdwordsAPISyncStructuresHandler.handle(request)
+        AdWordsAPISyncStructuresHandler.handle(request)
 
     @classmethod
     def publish(cls, response):

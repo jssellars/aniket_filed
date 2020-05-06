@@ -3,7 +3,7 @@ from string import Template
 from Core.Tools.Config.BaseConfig import BaseConfig
 
 
-class FacebookConfig(BaseConfig):
+class GoogleConfig(BaseConfig):
     pass
 
 

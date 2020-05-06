@@ -1,29 +1,29 @@
-from GoogleTuring.Infrastructure.Domain.GoogleFieldMetadata import GoogleFieldMetadata
+from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
 AD_FIELDS = [
-    GoogleFieldMetadata.ad_id,
-    GoogleFieldMetadata.ad_name
+    GoogleFieldsMetadata.ad_id,
+    GoogleFieldsMetadata.ad_name
 ]
 
 AD_GROUP_FIELDS = [
-    GoogleFieldMetadata.ad_group_name,
-    GoogleFieldMetadata.ad_group_id,
+    GoogleFieldsMetadata.ad_group_name,
+    GoogleFieldsMetadata.ad_group_id,
 
     # GoogleFieldMetadata.effective_target_roas
 ]
 
 CAMPAIGN_FIELDS = [
-    GoogleFieldMetadata.maximize_conversion_value_target_roas
+    GoogleFieldsMetadata.maximize_conversion_value_target_roas
 ]
 
 BIDDING_FIELDS = [
-    GoogleFieldMetadata.bidding_strategy_name,
-    GoogleFieldMetadata.bidding_strategy_type
+    GoogleFieldsMetadata.bidding_strategy_name,
+    GoogleFieldsMetadata.bidding_strategy_type
 ]
 
 ENGAGEMENT_FIELDS = [
     # GoogleFieldMetadata.engagement_rate,
-    GoogleFieldMetadata.engagements
+    GoogleFieldsMetadata.engagements
 ]
 
 

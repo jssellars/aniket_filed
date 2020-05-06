@@ -1,18 +1,18 @@
-from GoogleTuring.Infrastructure.Domain.GoogleFieldMetadata import GoogleFieldMetadata
+from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
 BASE_FIELDS = [
-    GoogleFieldMetadata.external_customer_id,
-    GoogleFieldMetadata.account_descriptive_name,
-    GoogleFieldMetadata.campaign_name,
-    GoogleFieldMetadata.campaign_id,
-    GoogleFieldMetadata.cost,
-    GoogleFieldMetadata.impressions,
-    GoogleFieldMetadata.all_conversions,
-    GoogleFieldMetadata.conversions,
-    GoogleFieldMetadata.conversion_value,
-    GoogleFieldMetadata.clicks,
-    GoogleFieldMetadata.link_clicks,
-    GoogleFieldMetadata.leads,
-    GoogleFieldMetadata.purchases,
-    GoogleFieldMetadata.date
+    GoogleFieldsMetadata.external_customer_id,
+    GoogleFieldsMetadata.account_descriptive_name,
+    GoogleFieldsMetadata.campaign_name,
+    GoogleFieldsMetadata.campaign_id,
+    GoogleFieldsMetadata.cost,
+    GoogleFieldsMetadata.impressions,
+    GoogleFieldsMetadata.all_conversions,
+    GoogleFieldsMetadata.conversions,
+    GoogleFieldsMetadata.conversion_value,
+    GoogleFieldsMetadata.clicks,
+    GoogleFieldsMetadata.link_clicks,
+    GoogleFieldsMetadata.leads,
+    GoogleFieldsMetadata.purchases,
+    GoogleFieldsMetadata.date
 ]

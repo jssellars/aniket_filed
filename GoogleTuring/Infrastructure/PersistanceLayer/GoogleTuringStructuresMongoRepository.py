@@ -1,9 +1,17 @@
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
+from Core.Tools.MongoRepository.graceful_auto_reconnect import graceful_auto_reconnect
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
 
 
 class GoogleTuringStructuresMongoRepository(MongoRepositoryBase):
+
+    def update_removed_structures(self, deleted_customer_ids):
+        if deleted_customer_ids:
+            collection_names = self.database.list_collection_names()
+            for collection_name in collection_names:
+                self.collection = collection_name
+                self.change_status_many(ids=deleted_customer_ids, new_status=StructureStatus.REMOVED.value, id_key="account_id")
 
     def add_structures(self, structure_mapping):
         processed_entries = structure_mapping.process()

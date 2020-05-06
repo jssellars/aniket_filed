@@ -9,7 +9,7 @@ class StructureMappingFactory:
     def __init__(self, level_to_dependencies):
         self.__level_to_dependencies = level_to_dependencies
 
-    def get_structure_processor(self, level, business_owner_id, account_id, additional_info):
+    def get_structure_mapping(self, level, business_owner_id, account_id, additional_info):
         service, structure_fields = self.__level_to_dependencies[level]
 
         if level == StructureType.CAMPAIGN:

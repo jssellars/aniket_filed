@@ -10,3 +10,4 @@ class InsightsReportModel:
     table_name: str = None  # level = campaign, adset/adgroup, ad
     report_breakdowns: typing.List[str] = None  # only for Google -- defines the Google Report Type where the data are found
     columns: typing.List[ViewColumn] = None  # master view for the report
+    display_name: str = None

@@ -42,15 +42,17 @@ class GoogleTuringInsightsMongoRepository(MongoRepositoryBase):
         self.add_many(locations_to_be_added)
         MongoIdToNameCache.update_id_to_location_cache(locations_to_be_added)
 
-    def insert_insights_into_db(self, collection_name, df, fields, compound_fields):
+    def insert_insights_into_db(self, collection_name, df, fields, compound_fields, start_date, end_date):
         def custom_concat(series):
-            return reduce(lambda x, y: x + " " + y if x is not pd.np.nan and y is not pd.np.nan else pd.np.nan, series)
+            return reduce(lambda x, y: x + " " + y if x is not None and y is not None else None, series)
 
         self.collection = collection_name
 
         extra_fields_dict = {compound_field.name: compound_field.required_fields for compound_field in compound_fields}
         extra_fields = list(itertools.chain(*extra_fields_dict.values()))
-        df = df.replace(' --', pd.np.nan)
+
+        df = df.where(df != ' --', None)
+        df = df.where(pd.notnull(df), None)
 
         for field in fields:
             if field.conversion_function is not None:
@@ -59,6 +61,9 @@ class GoogleTuringInsightsMongoRepository(MongoRepositoryBase):
         for field_name, corresponding_fields in extra_fields_dict.items():
             corresponding_field_names = list(map(lambda x: x.name, corresponding_fields))
             df[field_name] = df[corresponding_field_names].agg(custom_concat, axis=1)
+
+        df['start_date'] = start_date
+        df['end_date'] = end_date
 
         extra_field_names = list(map(lambda x: x.name, extra_fields))
         df = df.drop(columns=extra_field_names)

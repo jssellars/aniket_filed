@@ -1,5 +1,5 @@
 from enum import Enum
-from GoogleTuring.Infrastructure.Domain.GoogleFieldMetadata import GoogleFieldMetadata
+from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
 
 class Breakdown(Enum):
@@ -26,13 +26,13 @@ class BreakdownType(Enum):
 
 
 DEFAULT_GEO_BREAKDOWN = Breakdown.COUNTRY
-DEFAULT_TIME_BREAKDOWN_FIELD = GoogleFieldMetadata.date
+DEFAULT_TIME_BREAKDOWN_FIELD = GoogleFieldsMetadata.date
 
 BREAKDOWN_TO_FIELD = {
-    Breakdown.AGE_RANGE: GoogleFieldMetadata.age_range,
-    Breakdown.GENDER: GoogleFieldMetadata.gender,
-    Breakdown.KEYWORDS: GoogleFieldMetadata.keywords,
-    Breakdown.REGION: GoogleFieldMetadata.region_name,
-    Breakdown.COUNTRY: GoogleFieldMetadata.country_name,
-    Breakdown.CITY: GoogleFieldMetadata.city_name
+    Breakdown.AGE_RANGE: GoogleFieldsMetadata.age_range,
+    Breakdown.GENDER: GoogleFieldsMetadata.gender,
+    Breakdown.KEYWORDS: GoogleFieldsMetadata.keywords,
+    Breakdown.REGION: GoogleFieldsMetadata.region_name,
+    Breakdown.COUNTRY: GoogleFieldsMetadata.country_name,
+    Breakdown.CITY: GoogleFieldsMetadata.city_name
 }

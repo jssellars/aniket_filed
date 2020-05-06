@@ -1,24 +1,30 @@
 from Core.Tools.Misc.ObjectSerializers import object_to_json, object_to_attribute_values_list
-from GoogleTuring.Api.Catalogs.BusinessViews.ViewCampaignPerformances import ViewCampaignPerformances, ViewCampaignGender
-from GoogleTuring.Api.Catalogs.BusinessViews.ViewAdGroup import ViewAdGroup, ViewAdGroupGender
+from GoogleTuring.Api.Catalogs.BusinessViews.ViewAd import ViewAd
+from GoogleTuring.Api.Catalogs.BusinessViews.ViewAdGroup import ViewAdGroup, ViewAdGroupKeywords, ViewAdGroupGender, ViewAdGroupAge
+from GoogleTuring.Api.Catalogs.BusinessViews.ViewCampaign import ViewCampaign, ViewCampaignGender, ViewCampaignKeywords, ViewCampaignAge
 
 
 class AdsManagerCatalogsViewsByLevelDto:
-
     json_encoder = object_to_json
     json_list_encoder = object_to_attribute_values_list
 
     campaign = [
-        ViewCampaignPerformances(),
-        ViewCampaignGender()
+        ViewCampaign(),
+        ViewCampaignKeywords(),
+        ViewCampaignGender(),
+        ViewCampaignAge()
     ]
 
     ad_group = [
         ViewAdGroup(),
-        ViewAdGroupGender()
+        ViewAdGroupKeywords(),
+        ViewAdGroupGender(),
+        ViewAdGroupAge()
     ]
 
-    ad = []
+    ad = [
+        ViewAd(),
+    ]
 
     def __init__(self):
         super().__init__()

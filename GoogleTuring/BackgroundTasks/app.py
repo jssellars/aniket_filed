@@ -1,3 +1,15 @@
+# ====== CONFIGURE PATH TO SOLUTION - DO NOT DELETE ====== #
+import os
+import sys
+import traceback
+
+path = os.environ.get("PYTHON_SOLUTION_PATH")
+if path:
+    sys.path.append(path)
+else:
+    sys.path.append(r"D:\Filed\Python-Google Turing\Filed.Python")
+# ====== END OF CONFIG SECTION ====== #
+
 import json
 import time
 from threading import Thread
@@ -5,7 +17,7 @@ from threading import Thread
 import schedule
 
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from GoogleTuring.BackgroundTasks.DailySyncJob import daily_sync_job
+from GoogleTuring.BackgroundTasks.SyncJobs.DailySyncJob import daily_sync_job
 from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
@@ -19,9 +31,8 @@ def sync_callback(ch, method, properties, body):
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
         message = json.loads(body)
         request_handler.handle(message)
-    except Exception as e:
-        # TODO: log exception
-        print(e.__str__())
+    except:
+        traceback.print_exc()
 
 
 rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
@@ -29,8 +40,8 @@ rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
 
 schedule.every().day.at("00:05").do(daily_sync_job)
 rabbit_thread = Thread(target=rabbitmq_client.register_callback(sync_callback)
-                                             .register_consumer(consumer_tag="google.turing")
-                                             .start_consuming)
+                       .register_consumer(consumer_tag="google.turing")
+                       .start_consuming)
 rabbit_thread.start()
 
 while True:

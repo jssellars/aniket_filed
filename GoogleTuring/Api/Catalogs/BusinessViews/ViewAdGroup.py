@@ -1,17 +1,21 @@
-from Core.Web.GoogleAdWordsAPI.Enums.AdWordsPerformanceReportType import AdWordsPerformanceReportType
+from GoogleTuring.Api.Catalogs.BusinessViews.TableEnum import TableEnum
 from GoogleTuring.Api.Catalogs.Views.GoogleView import GoogleView
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.AdGroupColumnsMaster import AdGroupColumnsMaster
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.GenderColumnsMaster import GenderColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.AdGroupColumnsMaster import AdGroupColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.AdGroupAgeRangeColumnsMaster import AdGroupAgeRangeColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Gender.AdGroupGenderColumnsMaster import AdGroupGenderColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Keywords.AdGroupKeywordsColumnsMaster import AdGroupKeywordsColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewTypeEnum import ViewTypeEnum
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 
 
 class ViewAdGroupBase(GoogleView):
-    table_name = "Ad Group Performances"
+    table_name = TableEnum.AD_GROUP_PERFORMANCES.value
 
 
 class ViewAdGroup(ViewAdGroupBase):
     view_name = "Ad Groups"
-    data_source_name = AdWordsPerformanceReportType.AD_GROUP.value
-    type = 1  # Fallback
+    data_source_name = FiledGoogleInsightsTableEnum.AD_GROUP.value
+    type = ViewTypeEnum.BUSINESS.value
     columns = [
         AdGroupColumnsMaster.enable_pause_ad_group.id,
         AdGroupColumnsMaster.ad_group_name.id,
@@ -32,21 +36,72 @@ class ViewAdGroup(ViewAdGroupBase):
 
 
 class ViewAdGroupGender(ViewAdGroupBase):
-    view_name = "Ad Groups - Gender"
-    data_source_name = AdWordsPerformanceReportType.GENDER.value
-    type = 2  # Business
+    view_name = "Demographics - Gender"
+    data_source_name = FiledGoogleInsightsTableEnum.GENDER.value
+    type = ViewTypeEnum.BUSINESS.value
     columns = [
-        GenderColumnsMaster.campaign_name.id,
-        GenderColumnsMaster.ad_group_name.id,
-        GenderColumnsMaster.status.id,
-        GenderColumnsMaster.average_cpv.id,
-        GenderColumnsMaster.bid_modifier.id,
-        GenderColumnsMaster.impressions.id,
-        GenderColumnsMaster.interactions.id,
-        GenderColumnsMaster.interaction_rate.id,
-        GenderColumnsMaster.average_cost.id,
-        GenderColumnsMaster.cost.id,
-        GenderColumnsMaster.conversion_rate.id,
-        GenderColumnsMaster.conversions.id,
-        GenderColumnsMaster.cost_per_conversion.id
+        AdGroupGenderColumnsMaster.enable_pause_ad_group.id,
+        AdGroupGenderColumnsMaster.gender.id,
+        AdGroupGenderColumnsMaster.campaign_name.id,
+        AdGroupGenderColumnsMaster.ad_group_name.id,
+        AdGroupGenderColumnsMaster.status.id,
+        AdGroupGenderColumnsMaster.average_cpv.id,
+        AdGroupGenderColumnsMaster.bid_modifier.id,
+        AdGroupGenderColumnsMaster.impressions.id,
+        AdGroupGenderColumnsMaster.interactions.id,
+        AdGroupGenderColumnsMaster.interaction_rate.id,
+        AdGroupGenderColumnsMaster.average_cost.id,
+        AdGroupGenderColumnsMaster.cost.id,
+        AdGroupGenderColumnsMaster.conversion_rate.id,
+        AdGroupGenderColumnsMaster.conversions.id,
+        AdGroupGenderColumnsMaster.cost_per_conversion.id
+    ]
+
+
+class ViewAdGroupKeywords(GoogleView):
+    table_name = TableEnum.AD_PERFORMANCES.value
+    view_name = "Search Keywords"
+    data_source_name = FiledGoogleInsightsTableEnum.KEYWORDS.value
+    type = ViewTypeEnum.BUSINESS.value
+    columns = [
+        AdGroupKeywordsColumnsMaster.enable_pause_keyword.id,
+        AdGroupKeywordsColumnsMaster.keyword.id,
+        AdGroupKeywordsColumnsMaster.campaign_name.id,
+        AdGroupKeywordsColumnsMaster.ad_group_name.id,
+        AdGroupKeywordsColumnsMaster.status.id,
+        AdGroupKeywordsColumnsMaster.cpc_bid.id,
+        AdGroupKeywordsColumnsMaster.approval_status.id,
+        AdGroupKeywordsColumnsMaster.final_urls.id,
+        AdGroupKeywordsColumnsMaster.impressions.id,
+        AdGroupKeywordsColumnsMaster.interactions.id,
+        AdGroupKeywordsColumnsMaster.interaction_rate.id,
+        AdGroupKeywordsColumnsMaster.average_cost.id,
+        AdGroupKeywordsColumnsMaster.cost.id,
+        AdGroupKeywordsColumnsMaster.conversion_rate.id,
+        AdGroupKeywordsColumnsMaster.conversions.id,
+        AdGroupKeywordsColumnsMaster.cost_per_conversion.id
+    ]
+
+
+class ViewAdGroupAge(GoogleView):
+    table_name = TableEnum.AD_PERFORMANCES.value
+    view_name = "Demographics - Age"
+    data_source_name = FiledGoogleInsightsTableEnum.AGE_RANGE.value
+    type = ViewTypeEnum.BUSINESS.value
+    columns = [
+        AdGroupAgeRangeColumnsMaster.enable_pause_ad_group.id,
+        AdGroupAgeRangeColumnsMaster.age_range.id,
+        AdGroupAgeRangeColumnsMaster.campaign_name.id,
+        AdGroupAgeRangeColumnsMaster.ad_group_name.id,
+        AdGroupAgeRangeColumnsMaster.status.id,
+        AdGroupAgeRangeColumnsMaster.average_cpv.id,
+        AdGroupAgeRangeColumnsMaster.bid_modifier.id,
+        AdGroupAgeRangeColumnsMaster.impressions.id,
+        AdGroupAgeRangeColumnsMaster.interactions.id,
+        AdGroupAgeRangeColumnsMaster.interaction_rate.id,
+        AdGroupAgeRangeColumnsMaster.average_cost.id,
+        AdGroupAgeRangeColumnsMaster.cost.id,
+        AdGroupAgeRangeColumnsMaster.conversion_rate.id,
+        AdGroupAgeRangeColumnsMaster.conversions.id,
+        AdGroupAgeRangeColumnsMaster.cost_per_conversion.id
     ]

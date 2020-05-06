@@ -28,20 +28,5 @@ class RabbitMqConfig(BaseConfig):
         return next(filter(lambda x: x["type"] == exchange_type, self.exchanges), None)
 
 
-class SQLAlchemyConfig(BaseConfig):
-    """Configuration for SQL Alchemy"""
-
-    connection_string_template = Template('mssql+pymssql://$username:$password@$host:$port/$database')
-
-    @property
-    def connection_string(self):
-        connection_string = self.connection_string_template.substitute(username=self.username,
-                                                                       password=self.password,
-                                                                       host=self.host,
-                                                                       port=self.port,
-                                                                       database=self.name)
-        return connection_string
-
-
 class MongoConfig(BaseConfig):
     """Configuration for Mongo DB client"""

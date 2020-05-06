@@ -1,4 +1,5 @@
 import humps
+from flask_jwt_simple import jwt_required
 from flask_restful import Resource, abort
 
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsInsightsReportByLevelDto import AdsManagerCatalogsInsightsReportByLevelDto
@@ -6,6 +7,7 @@ from GoogleTuring.Api.Dtos.AdsManagerCatalogsViewsByLevelDto import AdsManagerCa
 
 
 class AdsManagerCatalogsViewsByLevelEndpoint(Resource):
+    @jwt_required
     def get(self, level):
         try:
             response = AdsManagerCatalogsViewsByLevelDto.get(level)
@@ -15,6 +17,7 @@ class AdsManagerCatalogsViewsByLevelEndpoint(Resource):
 
 
 class AdsManagerCatalogsMetaColumnsEndpoint(Resource):
+    @jwt_required
     def get(self, level):
         try:
             response = AdsManagerCatalogsInsightsReportByLevelDto.get(level)

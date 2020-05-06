@@ -2,10 +2,8 @@ import json
 import os
 
 from kombu import Exchange, Queue
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from GoogleTuring.BackgroundTasks.Config.Config import GoogleConfig, MongoConfig, RabbitMqConfig, SQLAlchemyConfig
+from GoogleTuring.BackgroundTasks.Config.Config import GoogleConfig, MongoConfig, RabbitMqConfig
 
 
 class Startup:
@@ -18,12 +16,7 @@ class Startup:
 
         self.rabbitmq_config = RabbitMqConfig(config['rabbitmq'])
         self.google_config = GoogleConfig(config['google'])
-        self.database_config = SQLAlchemyConfig(config['sqlServerDatabase'])
-        self.mongo_config = MongoConfig(config['mongoDatabase'])
-
-        # Initialize connections to DB
-        self.engine = create_engine(self.database_config.connection_string)
-        self.Session = sessionmaker(bind=self.engine)
+        self.mongo_config = MongoConfig(config['mongo_database'])
 
         # Initialize RabbitMQ exchanges and queues
         direct_exchange_config = self.rabbitmq_config.get_exchange_details_by_type("direct")
@@ -36,14 +29,11 @@ class Startup:
 
         # Generic msrv configuration
         self.environment = config['environment']
-        self.service_name = config['serviceName']
-        self.service_version = config['serviceVersion']
-        self.api_name = config['apiName']
-        self.api_version = config['apiVersion']
-        self.base_url = config['baseUrl']
-
-    def create_sql_session(self):
-        return sessionmaker(bind=self.engine)
+        self.service_name = config['service_name']
+        self.service_version = config['service_version']
+        self.api_name = config['api_name']
+        self.api_version = config['api_version']
+        self.base_url = config['base_url']
 
 
 #  Initialize startup object

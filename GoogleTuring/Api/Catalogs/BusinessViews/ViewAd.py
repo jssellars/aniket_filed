@@ -1,13 +1,15 @@
-from Core.Web.GoogleAdWordsAPI.Enums.AdWordsPerformanceReportType import AdWordsPerformanceReportType
+from GoogleTuring.Api.Catalogs.Views.ViewTypeEnum import ViewTypeEnum
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
+from GoogleTuring.Api.Catalogs.BusinessViews.TableEnum import TableEnum
 from GoogleTuring.Api.Catalogs.Views.GoogleView import GoogleView
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.AdColumnsMaster import AdColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.AdColumnsMaster import AdColumnsMaster
 
 
 class ViewAd(GoogleView):
-    table_name = "Ad Performances"
+    table_name = TableEnum.AD_PERFORMANCES.value
     view_name = "Ads"
-    data_source_name = AdWordsPerformanceReportType.AD.value
-    type = 1  # Fallback
+    data_source_name = FiledGoogleInsightsTableEnum.AD.value
+    type = ViewTypeEnum.BUSINESS.value
     columns = [
         AdColumnsMaster.enable_pause_ad.id,
         AdColumnsMaster.headline.id,

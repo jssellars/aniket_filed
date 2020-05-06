@@ -1,7 +1,6 @@
 from collections.abc import Mapping
 
 from Core.Tools.Misc.ClassGenerator import ClassGenerator
-from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from Core.Tools.Misc.ObjectManipulators import extract_class_attributes
 
 
@@ -27,29 +26,26 @@ class Condition(ClassGenerator):
         return list(other.keys()) == extract_class_attributes(cls)
 
 
-class FiledFacebookInsightsTableName(EnumerationBase):
-    ACCOUNT = 'vAdAccountInsights'
-    CAMPAIGN = 'vCampaignInsights'
-    ADSET = 'vAdSetInsights'
-    AD = 'vAdInsights'
-
-
 class QueryBuilderRequestMapper:
     TableName = None
     Columns = None
     Dimensions = None
     Where = None
 
-    table_name = FiledFacebookInsightsTableName
+    table_name = None
 
-    def __init__(self, query_builder_request):
+    def __init__(self, query_builder_request, table_name):
         self.TableName = query_builder_request['TableName']
         self.Columns = [QueryBuilderColumn(column) for column in query_builder_request['Columns']]
         self.Dimensions = [QueryBuilderDimension(dimension) for dimension in query_builder_request['Dimensions']]
         self.Conditions = self.find_all_where_conditions(query_builder_request['Where'])
+        self.table_name = table_name
 
     def get_level(self):
         return self.table_name.get_by_value(self.TableName).lower()
+
+    def get_report(self):
+        return self.table_name.get_enum_by_value(self.TableName)
 
     @staticmethod
     def find_all_where_conditions(entry):

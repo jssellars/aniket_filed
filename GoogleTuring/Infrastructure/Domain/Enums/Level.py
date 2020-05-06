@@ -1,7 +1,7 @@
 from enum import Enum
 
 from GoogleTuring.Infrastructure.Domain.GoogleBaseFields import BASE_FIELDS
-from GoogleTuring.Infrastructure.Domain.GoogleFieldMetadata import GoogleFieldMetadata
+from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.SpecificFields import AD_GROUP_FIELDS
 
 
@@ -17,7 +17,7 @@ LEVEL_TO_FIELDS = {
 }
 
 LEVEL_TO_IDENTIFIER = {
-    Level.CAMPAIGN: GoogleFieldMetadata.campaign_id,
-    Level.AD_GROUP: GoogleFieldMetadata.ad_group_id,
-    Level.AD: GoogleFieldMetadata.ad_id
+    Level.CAMPAIGN: GoogleFieldsMetadata.campaign_id,
+    Level.AD_GROUP: GoogleFieldsMetadata.ad_group_id,
+    Level.AD: GoogleFieldsMetadata.ad_id
 }

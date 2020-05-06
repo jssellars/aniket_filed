@@ -1,6 +1,6 @@
 from enum import Enum
 
-from GoogleTuring.Infrastructure.Domain.GoogleFieldMetadata import GoogleFieldMetadata
+from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
 
 class ActionBreakdown(Enum):
@@ -10,6 +10,6 @@ class ActionBreakdown(Enum):
 
 
 ACTION_BREAKDOWN_TO_FIELD = {
-    ActionBreakdown.DEVICE: GoogleFieldMetadata.device,
+    ActionBreakdown.DEVICE: GoogleFieldsMetadata.device,
     ActionBreakdown.DEFAULT: None
 }
