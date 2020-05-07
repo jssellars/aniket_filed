@@ -8,26 +8,28 @@ NC='\033[0m'
 
 command -v docker-compose >/dev/null 2>&1 || { echo -e >&2 "=>${RED}I require docker-compose but it's not installed.  Aborting.${NC}"; exit 1; }
 
-services=( filed-potter-facebook-accounts-api
-           filed-potter-facebook-accounts-background-tasks
-           filed-potter-facebook-audiences-background-tasks
-           filed-potter-facebook-pixels-api
-           filed-potter-facebook-pixels-background-tasks
-           filed-dexter-api
-           filed-turing-api
-           filed-ad-preview
-           filed-targeting-search )
+declare -a services=(filed-ad-preview
+                    filed-dexter-api
+                    filed-potter-facebook-accounts-api
+                    filed-potter-facebook-accounts-background-tasks
+                    filed-potter-facebook-audiences-background-tasks
+                    filed-potter-facebook-pixels-api
+                    filed-potter-facebook-pixels-background-tasks
+                    filed-targeting-search
+                    filed-turing-api)
+
 
 HEIGHT=20
 WIDTH=80
-CHOICE_HEIGHT=4
+CHOICE_HEIGHT=40
 BACKTITLE="Docker images build script v0.1"
 TITLE="Builder of docker containers"
 MENU="Choose one of the following options:"
 
 OPTIONS=(1 "=> Build DEV2 environment"
          2 "=> Build PROD environment"
-         3 "=> Pull GIT sources")
+         3 "=> Pull GIT sources"
+         4 "=> Build specific applications")
 
 while true; do
 
@@ -79,8 +81,31 @@ case $CHOICE in
             )
             git pull origin "$stage"
             ;;
+        4)
+            pkglist=""
+            n=1
+            for pkg in ${services[@]}
+            do
+                    pkglist="$pkglist $pkg $n off"
+                    n=$[n+1]
+            done
+
+            choices=`dialog --stdout --cancel-label "Exit" --checklist 'Choose item:' 40 80 60 $pkglist`
+
+            if [ $? -eq 0 ]
+            then
+                    for choice in $choices
+                    do
+                    echo -e "=> ${YELLOW}Begin building of : ${choice}${NC}"
+                    docker-compose build --force-rm ${choice}
+                    done
+            else
+                    echo -e "=>${RED} Cancel selected ${NC}"
+            fi
+            break
+            ;;            
         "") 
-            echo -e "Execution done"
+            echo -e "=> ${GREEN}Execution done${NC}"
             break
             ;;                          
  esac
