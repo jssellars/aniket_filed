@@ -10,6 +10,7 @@ ENV PYTHON_SOLUTION_PATH=''
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookAccounts/Api/uwsgi.ini
 
+
 COPY ./Potter /app/Potter
 COPY ./Core /app/Core
 COPY ./requirements.txt /app/Potter/FacebookAccounts/Api

@@ -17,6 +17,10 @@ spec:
       labels:
         run: dev2-filed-ad-preview
     spec:
+      hostAliases:
+        - ip: "192.168.1.211"
+          hostnames:
+          - "dev2.filed.com"             
       imagePullSecrets:
       - name: regcred         
       containers:

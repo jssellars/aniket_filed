@@ -17,6 +17,10 @@ spec:
       labels:
         run: dev2-filed-targeting-search
     spec:
+      hostAliases:
+        - ip: "192.168.1.211"
+          hostnames:
+          - "dev2.filed.com"             
       containers:
       - name: dev2-filed-targeting-search
         image: ct.filed.com/dev2-filed-targeting-search:v0.1
