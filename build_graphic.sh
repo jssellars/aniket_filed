@@ -29,7 +29,8 @@ MENU="Choose one of the following options:"
 OPTIONS=(1 "=> Build DEV2 environment"
          2 "=> Build PROD environment"
          3 "=> Pull GIT sources"
-         4 "=> Build specific applications")
+         4 "=> Build specific DEV2 applications"
+         4 "=> Build specific PROD applications")
 
 while true; do
 
@@ -82,6 +83,7 @@ case $CHOICE in
             git pull origin "$stage"
             ;;
         4)
+            sed -i -e 's/STAGE=prod/STAGE=dev2/g' .env
             pkglist=""
             n=1
             for pkg in ${services[@]}
@@ -98,12 +100,40 @@ case $CHOICE in
                     do
                     echo -e "=> ${YELLOW}Begin building of : ${choice}${NC}"
                     docker-compose build --force-rm ${choice}
+                    echo -e "=> ${GREEN}Pushing images to private repo...${NC}"
+                    docker-compose push ${choice}
                     done
             else
                     echo -e "=>${RED} Cancel selected ${NC}"
             fi
             break
             ;;            
+        5)
+            sed -i -e 's/STAGE=dev2/STAGE=prod/g' .env
+            pkglist=""
+            n=1
+            for pkg in ${services[@]}
+            do
+                    pkglist="$pkglist $pkg $n off"
+                    n=$[n+1]
+            done
+
+            choices=`dialog --stdout --cancel-label "Exit" --checklist 'Choose item:' 40 80 60 $pkglist`
+
+            if [ $? -eq 0 ]
+            then
+                    for choice in $choices
+                    do
+                    echo -e "=> ${YELLOW}Begin building of : ${choice}${NC}"
+                    docker-compose build --force-rm ${choice}
+                    echo -e "=> ${GREEN}Pushing images to private repo...${NC}"
+                    docker-compose push ${choice}
+                    done
+            else
+                    echo -e "=>${RED} Cancel selected ${NC}"
+            fi
+            break
+            ;; 
         "") 
             echo -e "=> ${GREEN}Execution done${NC}"
             break
