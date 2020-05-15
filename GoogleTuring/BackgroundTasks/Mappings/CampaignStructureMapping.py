@@ -10,8 +10,8 @@ from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import GOOGLE
 class CampaignStructureMapping(StructureMapping):
     _PAGE_SIZE = 200
 
-    def __init__(self, business_owner_id, account_id, service, structure_fields):
-        super().__init__(business_owner_id, account_id, service, structure_fields)
+    def __init__(self, business_owner_id, account_id, service, structure_fields, entries=None):
+        super().__init__(business_owner_id, account_id, service, structure_fields, entries)
 
     def _set_structure_id(self):
         self._structure_id = 'campaign_id'

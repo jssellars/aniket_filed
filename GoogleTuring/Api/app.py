@@ -3,6 +3,7 @@ import os
 import sys
 
 from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, AdsManagerCatalogsViewsByLevelEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, AdsManagerInsightsWithTotalsEndpoint
 
 path = os.environ.get("PYTHON_SOLUTION_PATH")
@@ -42,6 +43,9 @@ api.add_resource(AdsManagerInsightsEndpoint, insights_controller)
 insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
 
+# Structure updates
+structure_details_controller = "{base_url}/<int:account_id>/<string:level>/<int:structure_id>".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerEndpoint, structure_details_controller)
+
 if __name__ == "__main__":
-    # app.run(debug=True, host="localhost", port="41000")
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

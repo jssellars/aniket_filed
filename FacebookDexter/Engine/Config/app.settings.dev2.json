@@ -38,7 +38,7 @@
     "password": "F2!irf0q",
     "name": "filed-facebook-tokens"
   },
-  "mongoDatabase" : {
+  "mongoDatabase": {
     "sshTunnel": true,
     "connectionString": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
     "mongoUser": "mongo-admin",
@@ -55,7 +55,6 @@
     "dexterJournalDatabaseName": "Dexter_Engine_Run_Journal",
     "dexterJournalCollectionName": "Dexter_Engine_Run_Journal"
   },
-
   "runVerbose": false,
   "logErrors": true,
   "environment": "dev",

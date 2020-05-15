@@ -10,10 +10,10 @@ from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import GOOGLE
 class AdGroupAdStructureMapping(StructureMapping):
     _PAGE_SIZE = 3000
 
-    def __init__(self, business_owner_id, account_id, ad_group_details, service, structure_fields):
-        super().__init__(business_owner_id, account_id, service, structure_fields)
+    def __init__(self, business_owner_id, account_id, ad_group_details, service, structure_fields, entries=None):
+        super().__init__(business_owner_id, account_id, service, structure_fields, entries)
         self.__ad_group_details = ad_group_details
-    
+
     def _set_structure_id(self):
         self._structure_id = 'ad_id'
 

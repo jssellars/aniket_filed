@@ -1,7 +1,7 @@
-from enum import Enum
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
 
 
-class StructureType(Enum):
+class StructureType(EnumerationBase):
     AD = 'ad'
     AD_GROUP = 'ad_group'
     CAMPAIGN = 'campaign'
@@ -14,3 +14,10 @@ LEVELS = [
     StructureType.AD,
     StructureType.AD_GROUP_KEYWORDS
 ]
+
+LEVEL_TO_ID = {
+    StructureType.AD: 'ad_id',
+    StructureType.AD_GROUP: 'ad_group_id',
+    StructureType.CAMPAIGN: 'campaign_id',
+    StructureType.AD_GROUP_KEYWORDS: 'keywords_id'
+}

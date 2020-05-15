@@ -12,6 +12,7 @@
     "remote_port": 27017,
     "google_insights_database_name": "dev2_Filed_Turing_Google_Insights",
     "google_accounts_database_name": "dev2_Filed_Turing_Google_Accounts",
+    "google_structures_database_name": "dev2_Filed_Turing_Google_Structures",
     "accounts_collection_name": "google_accounts"
   },
   "google": {

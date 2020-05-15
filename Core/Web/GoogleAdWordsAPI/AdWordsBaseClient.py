@@ -38,6 +38,9 @@ class AdWordsBaseClient:
     def get_location_criterion_service(self):
         return self._client.GetService(AdWordsServiceType.LOCATION_CRITERION_SERVICE.value)
 
+    def get_budget_service(self):
+        return self._client.GetService(AdWordsServiceType.BUDGET_SERVICE.value)
+
     def get_campaign_service(self):
         return self._client.GetService(AdWordsServiceType.CAMPAIGN_SERVICE.value)
 
@@ -47,8 +50,14 @@ class AdWordsBaseClient:
     def get_ad_group_ad_service(self):
         return self._client.GetService(AdWordsServiceType.AD_GROUP_AD_SERVICE.value)
 
+    def get_ad_service(self):
+        return self._client.GetService(AdWordsServiceType.AD_SERVICE.value)
+
     def get_ad_group_criterion_service(self):
         return self._client.GetService(AdWordsServiceType.AD_GROUP_CRITERION_SERVICE.value)
+
+    def get_campaign_criterion_service(self):
+        return self._client.GetService(AdWordsServiceType.CAMPAIGN_CRITERION_SERVICE.value)
 
     def set_client_customer_id(self, client_customer_id):
         self._client.SetClientCustomerId(client_customer_id)

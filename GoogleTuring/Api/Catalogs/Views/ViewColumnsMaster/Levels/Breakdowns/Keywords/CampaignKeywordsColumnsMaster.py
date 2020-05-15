@@ -16,7 +16,7 @@ class CampaignKeywordsColumnsMaster:
     campaign_name = ViewColumnsMaster.campaign_name
     campaign_status = ViewColumnsMaster.campaign_status
     conversion_adjustment = ViewColumnsMaster.conversion_adjustment
-    cpc_bid = ViewColumnsMaster.cpc_bid
+    max_cpc = ViewColumnsMaster.max_cpc
     cpc_bid_source = ViewColumnsMaster.cpc_bid_source
     cpm_bid = ViewColumnsMaster.cpm_bid
     creative_quality_score = ViewColumnsMaster.creative_quality_score

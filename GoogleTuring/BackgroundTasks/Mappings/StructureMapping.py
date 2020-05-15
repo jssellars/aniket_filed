@@ -4,12 +4,16 @@ from googleads import adwords
 class StructureMapping:
     _PAGE_SIZE = 100
 
-    def __init__(self, business_owner_id, account_id, service, structure_fields):
+    def __init__(self, business_owner_id, account_id, service, structure_fields, entries):
         self._business_owner_id = business_owner_id
         self._account_id = account_id
         self._service = service
         self._structure_fields = structure_fields
-        self._entries = self._get_structure_entries()
+        if not entries:
+            self._entries = self._get_structure_entries()
+        else:
+            self._entries = entries
+
         self._structure_id = None
         self._set_structure_id()
 

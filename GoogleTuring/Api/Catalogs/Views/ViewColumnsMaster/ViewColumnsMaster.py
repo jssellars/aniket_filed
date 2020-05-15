@@ -329,7 +329,7 @@ class ViewColumnsMaster:
     short_headline = ViewColumn(__id.increment_as_string(), display_name='short_headline', primary_value=GoogleMetadataColumnsPool.short_headline, type_id=ViewColumnType.text.id,
                                 category_id=ViewColumnCategory.common.id, actions=[])
 
-    status = ViewColumn(__id.increment_as_string(), display_name='status', primary_value=GoogleMetadataColumnsPool.status, type_id=ViewColumnType.text.id,
+    status = ViewColumn(__id.increment_as_string(), display_name='Status', primary_value=GoogleMetadataColumnsPool.status, type_id=ViewColumnType.text.id,
                         category_id=ViewColumnCategory.common.id, actions=[])
 
     enable_pause_keyword = ViewColumn(__id.increment_as_string(), display_name='Enable/Pause', primary_value=GoogleMetadataColumnsPool.status, type_id=ViewColumnType.text.id,
@@ -408,6 +408,9 @@ class ViewColumnsMaster:
                                                   type_id=ViewColumnType.text.id, category_id=ViewColumnCategory.common.id, actions=[])
 
     cpc_bid = ViewColumn(__id.increment_as_string(), display_name='Default max. CPC', primary_value=GoogleMetadataColumnsPool.cpc_bid, type_id=ViewColumnType.text.id,
+                         category_id=ViewColumnCategory.common.id, actions=[])
+
+    max_cpc = ViewColumn(__id.increment_as_string(), display_name='Max. CPC', primary_value=GoogleMetadataColumnsPool.cpc_bid, type_id=ViewColumnType.text.id,
                          category_id=ViewColumnCategory.common.id, actions=[])
 
     cpm_bid = ViewColumn(__id.increment_as_string(), display_name='cpm_bid', primary_value=GoogleMetadataColumnsPool.cpm_bid, type_id=ViewColumnType.text.id,
@@ -597,7 +600,7 @@ class ViewColumnsMaster:
     base_campaign_id = ViewColumn(__id.increment_as_string(), display_name='base_campaign_id', primary_value=GoogleMetadataColumnsPool.base_campaign_id, type_id=ViewColumnType.text.id,
                                   category_id=ViewColumnCategory.common.id, actions=[])
 
-    bid_modifier = ViewColumn(__id.increment_as_string(), display_name='bid_modifier', primary_value=GoogleMetadataColumnsPool.bid_modifier, type_id=ViewColumnType.text.id,
+    bid_modifier = ViewColumn(__id.increment_as_string(), display_name='Bid Adjust', primary_value=GoogleMetadataColumnsPool.bid_modifier, type_id=ViewColumnType.text.id,
                               category_id=ViewColumnCategory.common.id, actions=[])
 
     cpm_bid_source = ViewColumn(__id.increment_as_string(), display_name='cpm_bid_source', primary_value=GoogleMetadataColumnsPool.cpm_bid_source, type_id=ViewColumnType.text.id,

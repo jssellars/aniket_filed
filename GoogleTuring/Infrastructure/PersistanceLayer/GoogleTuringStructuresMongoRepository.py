@@ -1,7 +1,7 @@
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from Core.Tools.MongoRepository.graceful_auto_reconnect import graceful_auto_reconnect
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
+from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
 
 
 class GoogleTuringStructuresMongoRepository(MongoRepositoryBase):
@@ -45,3 +45,25 @@ class GoogleTuringStructuresMongoRepository(MongoRepositoryBase):
         if common_structures_ids:
             self.change_status_many(ids=common_structures_ids, new_status=StructureStatus.DEPRECATED.value, id_key=id_key)
             self.add_many(common_structures)
+
+    def update_structure(self, structure_mapping):
+        processed_entry = structure_mapping.process()[0]
+        id_key = structure_mapping.get_structure_id()
+        structure_id = processed_entry[id_key]
+
+        self.change_status_many(ids=[structure_id], new_status=StructureStatus.DEPRECATED.value, id_key=id_key)
+        self.add_one(processed_entry)
+
+    def get_additional_info(self, level, structure_id):
+        id_key = LEVEL_TO_ID[level]
+        query = {
+            MongoOperator.AND.value: [{
+                id_key: {
+                    MongoOperator.EQUALS.value: structure_id
+                },
+                "status": {MongoOperator.IN.value: [StructureStatus.ENABLED.value, StructureStatus.PAUSED.value]}
+            }]
+        }
+
+        additional_info = self.get(query)[-1]
+        return additional_info

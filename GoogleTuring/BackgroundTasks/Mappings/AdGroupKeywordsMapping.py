@@ -11,8 +11,8 @@ from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import GOOGLE
 class AdGroupKeywordsMapping(StructureMapping):
     _PAGE_SIZE = 2000
 
-    def __init__(self, business_owner_id, account_id, service, structure_fields, ad_group_details):
-        super().__init__(business_owner_id, account_id, service, structure_fields)
+    def __init__(self, business_owner_id, account_id, service, structure_fields, ad_group_details, entries=None):
+        super().__init__(business_owner_id, account_id, service, structure_fields, entries)
         self.__ad_group_details = ad_group_details
 
     def _set_structure_id(self):

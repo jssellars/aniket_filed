@@ -69,7 +69,7 @@ class ViewAdGroupKeywords(GoogleView):
         AdGroupKeywordsColumnsMaster.campaign_name.id,
         AdGroupKeywordsColumnsMaster.ad_group_name.id,
         AdGroupKeywordsColumnsMaster.status.id,
-        AdGroupKeywordsColumnsMaster.cpc_bid.id,
+        AdGroupKeywordsColumnsMaster.max_cpc.id,
         AdGroupKeywordsColumnsMaster.approval_status.id,
         AdGroupKeywordsColumnsMaster.final_urls.id,
         AdGroupKeywordsColumnsMaster.impressions.id,

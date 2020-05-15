@@ -65,7 +65,7 @@ class ViewCampaignKeywords(ViewCampaignBase):
         CampaignKeywordsColumnsMaster.keyword.id,
         CampaignKeywordsColumnsMaster.campaign_name.id,
         CampaignKeywordsColumnsMaster.status.id,
-        CampaignKeywordsColumnsMaster.cpc_bid.id,
+        CampaignKeywordsColumnsMaster.max_cpc.id,
         CampaignKeywordsColumnsMaster.approval_status.id,
         CampaignKeywordsColumnsMaster.final_urls.id,
         CampaignKeywordsColumnsMaster.impressions.id,
