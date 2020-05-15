@@ -28,8 +28,10 @@ def hello():
 @app.route('/GetRecommendationsPage', methods = ['POST'])
 def GetRecommendationsPage():
 
-    permittedFilters = ['campaign_id', 'channel', 'category', 'optimization_type', 'level', 'importance', 'confidence', 'recommendation_type', 'source', 'structure_id', 'ad_account_id', 'search_term', 'parent_id']
+    permittedFilters = ['campaign_id', 'channel', 'category', 'optimization_type', 'level', 'importance', 'confidence',
+                       'recommendation_type', 'source', 'structure_id', 'ad_account_id', 'search_term', 'parent_id']
 
+    permitted_sort_criteria = ['recommendation_type', 'optimization_type', 'created_at', 'importance', 'confidence']
     data = request.get_json()        
 
     pageNumber = data['PageNumber'] if 'PageNumber' in data else 1
@@ -79,7 +81,7 @@ def GetRecommendationsPage():
         if (isinstance(sort, dict) == False):
             return 'invalid sort', 400
         for key in sort:
-            if key not in ['recommendationType', 'optimizationType', 'createdAt', 'importance', 'confidence']:
+            if key not in permitted_sort_criteria:
                 return f'invalid sort criterion {key}', 400
             if sort[key] not in ['Ascending', 'Descending']:
                 return f'invalid sort order, {sort[key]}', 400
