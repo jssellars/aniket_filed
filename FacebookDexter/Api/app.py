@@ -21,13 +21,15 @@ recommendationRepository = None
 # Make the WSGI interface available at the top level so wfastcgi can get it.
 wsgi_app = app.wsgi_app
 
-
 @app.route('/')
 def hello():   
     return "Hello World!!!"
 
 @app.route('/GetRecommendationsPage', methods = ['POST'])
 def GetRecommendationsPage():
+
+    permittedFilters = ['campaign_id', 'channel', 'category', 'optimization_type', 'level', 'importance', 'confidence', 'recommendation_type', 'source', 'structure_id', 'ad_account_id', 'search_term', 'parent_id']
+
     data = request.get_json()        
 
     pageNumber = data['PageNumber'] if 'PageNumber' in data else 1
@@ -43,14 +45,15 @@ def GetRecommendationsPage():
 
     if filter is not None:
         channel = data['Filter']['channel'] if 'channel' in data['Filter'] else 'facebook'
+    else:
+        channel='facebook'
 
     bad_filters = []
     if (filter is not None):
         if (isinstance(filter, dict) == False):
              return 'invalid filter', 400
         for key in filter:
-            if key not in ['source', 'level', 'confidence', 'importance', 'recommendationType', 'optimizationType', 'structureId', 'metric', 'channel',
-                          'searchTerm', 'adAccountId', 'campaignId', 'parentId']:
+            if key not in permittedFilters:
                 return f"invalid filter criterion {key}", 400            
             if filter[key] == []:
                 bad_filters.append(key)
@@ -174,18 +177,18 @@ def GetActionHistory():
         print (e)
         return 500, 'An error occcured'
 
-@app.route('/GetCountByMetricAndType', methods=['POST'])
-def getCountsByMetrics():
-    try:
+@app.route('/GetCountByCategory', methods=['POST'])
+def getCountsByCategory():
+    try:        
         data = request.get_json()
         campaign_ids = data['campaignIds']
         channel = data['channel']
         count_filter = {}
 
         if (isinstance(campaign_ids, list)):
-            count_filter['campaignId'] = {'$in': campaign_ids}
+            count_filter['campaign_id'] = {'$in': campaign_ids}
         else:
-            count_filter['campaignId'] = campaign_ids
+            count_filter['campaign_id'] = campaign_ids
 
         if (isinstance(channel, list)):
             count_filter['channel'] = {'$in': channel}
