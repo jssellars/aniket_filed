@@ -9,7 +9,8 @@ NC='\033[0m'
 command -v docker-compose >/dev/null 2>&1 || { echo -e >&2 "=>${RED}I require docker-compose but it's not installed.  Aborting.${NC}"; exit 1; }
 
 declare -a services=(filed-ad-preview
-                    filed-dexter-api
+                    filed-facebook-dexter-api
+                    filed-facebook-dexter-background-tasks
                     filed-potter-facebook-accounts-api
                     filed-potter-facebook-accounts-background-tasks
                     filed-potter-facebook-audiences-background-tasks

@@ -1,0 +1,19 @@
+FROM tiangolo/uwsgi-nginx-flask:python3.7 AS build
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils && apt-get install -y unixodbc-dev
+
+FROM build
+
+ARG STAGE
+ENV LISTEN_PORT 47351
+EXPOSE 47351
+ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_ENV=${STAGE}
+ENV UWSGI_INI /app/FacebookTuring/BackgroundTasks/uwsgi.ini
+
+COPY ./FacebookTuring /app/FacebookTuring
+COPY ./Core /app/Core
+COPY ./requirements.txt /app/FacebookTuring/BackgroundTasks
+COPY ./FacebookTuring/uwsgi.ini /app/FacebookTuring/BackgroundTasks
+
+WORKDIR /app/FacebookTuring/BackgroundTasks
+RUN pip install --upgrade pip && pip3 install -r requirements.txt

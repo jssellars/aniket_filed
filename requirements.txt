@@ -28,5 +28,6 @@ flask-cors
 Flask-JWT
 flask-jwt-simple
 flask_restful
+humps
 facebook_business
 pyhumps

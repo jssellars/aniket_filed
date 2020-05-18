@@ -1,9 +1,9 @@
 apiVersion: v1
 metadata:
-  name: dev2-filed-turing-api
+  name: dev2-filed-facebook-turing-api
 kind: Service
 metadata:
-  name: dev2-filed-turing-api
+  name: dev2-filed-facebook-turing-api
   annotations:
     # Note that the backend talks over HTTP.
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
@@ -14,7 +14,7 @@ metadata:
     # Redirect to HTTPS - not working !!! to be investigated
     service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
   labels:
-    run: dev2-filed-turing-api
+    run: dev2-filed-facebook-turing-api
 spec:
   ports:
   # - name: http
@@ -24,5 +24,5 @@ spec:
     port: 443
     targetPort: 47350
   selector:
-    run: dev2-filed-turing-api
+    run: dev2-filed-facebook-turing-api
   type: LoadBalancer  

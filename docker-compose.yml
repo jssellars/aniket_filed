@@ -73,26 +73,25 @@ services:
 
 ########################### Dexter ################################
 
-  # Facebook-Dexter-Api
+  # Potter-Dexter-Api
   filed-facebook-dexter-api:
     image: ct.filed.com/${STAGE}-filed-facebook-dexter-api:v0.1
     ports:
-     - "43700:43700"
+     - "47300:47300"
     build:
       context: .
       dockerfile: filed-facebook-dexter-api
-      args:
+      args: 
         STAGE: ${STAGE}
 
-  # Facebook-Dexter-Background-Tasks
   filed-facebook-dexter-background-tasks:
     image: ct.filed.com/${STAGE}-filed-facebook-dexter-background-tasks:v0.1
     ports:
-     - "47301:447301"
+     - "43701:43701" 
     build:
       context: .
       dockerfile: filed-facebook-dexter-background-tasks
-      args:
+      args: 
         STAGE: ${STAGE}
 
 ###################################################################
@@ -100,13 +99,23 @@ services:
 ########################### Turing ################################
 
   # Potter-Facebook-Accounts-Api
-  filed-turing-api:
-    image: ct.filed.com/${STAGE}-filed-turing-api:v0.1
+  filed-facebook-turing-api:
+    image: ct.filed.com/${STAGE}-filed-facebook-turing-api:v0.1
     ports:
      - "47350:47350"
     build:
       context: .
-      dockerfile: filed-turing-api
+      dockerfile: filed-facebook-turing-api
+      args:
+        STAGE: ${STAGE}
+
+  filed-facebook-turing-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-facebook-turing-background-tasks:v0.1
+    ports:
+     - "47351:47351"
+    build:
+      context: .
+      dockerfile: filed-facebook-turing-background-tasks
       args:
         STAGE: ${STAGE}
 

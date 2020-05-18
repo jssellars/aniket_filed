@@ -1,0 +1,18 @@
+FROM tiangolo/uwsgi-nginx-flask:python3.7 AS build
+RUN apt-get update && apt-get install -y unixodbc-dev
+
+FROM build
+ARG STAGE
+ENV LISTEN_PORT 47301
+EXPOSE 43700
+ENV PYTHON_SOLUTION_PATH='/app'
+ENV PYTHON_ENV=${STAGE}
+COPY ./FacebookDexter/uwsgi.ini /app/FacebookDexter/BackgroundTasks/
+COPY ./FacebookDexter/BackgroundTasks /app/FacebookDexter/BackgroundTasks/
+COPY ./FacebookDexter/Engine /app/FacebookDexter/Engine/
+COPY ./FacebookDexter/Infrastructure /app/FacebookDexter/Infrastructure/
+COPY ./Core /app/Core
+COPY ./requirements.txt /app/FacebookDexter/BackgroundTasks/
+WORKDIR /app/FacebookDexter/BackgroundTasks
+RUN pip install --upgrade pip && pip3 install -r requirements.txt
+ENTRYPOINT ["python3", "app.py"]
