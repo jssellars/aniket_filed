@@ -2,9 +2,11 @@
 import os
 import sys
 
-from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, AdsManagerCatalogsViewsByLevelEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, \
+    AdsManagerCatalogsViewsByLevelEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, AdsManagerInsightsWithTotalsEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, \
+    AdsManagerInsightsWithTotalsEndpoint
 
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
@@ -20,7 +22,8 @@ from flask_jwt_simple import JWTManager
 from GoogleTuring.Api.Startup import startup
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
+app.config["JWT_SECRET_KEY"] = os.environ[
+    "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
 app.config["JWT_TOKEN_LOCATION"] = "headers"
 app.config["JWT_HEADER_NAME"] = "Authorization"
 app.config["JWT_HEADER_TYPE"] = "Bearer"
@@ -44,7 +47,8 @@ insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_
 api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
 
 # Structure updates
-structure_details_controller = "{base_url}/<int:account_id>/<string:level>/<int:structure_id>".format(base_url=startup.base_url.lower())
+structure_details_controller = "{base_url}/<int:account_id>/<string:level>/<int:structure_id>".format(
+    base_url=startup.base_url.lower())
 api.add_resource(AdsManagerEndpoint, structure_details_controller)
 
 if __name__ == "__main__":

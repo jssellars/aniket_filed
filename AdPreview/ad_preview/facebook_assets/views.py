@@ -1,7 +1,6 @@
 import json
 
 from django.http import HttpResponse
-
 from facebook_assets.FacebookAssets import FacebookAssets
 
 

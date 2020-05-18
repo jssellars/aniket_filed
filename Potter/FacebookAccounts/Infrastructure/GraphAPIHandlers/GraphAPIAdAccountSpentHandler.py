@@ -2,12 +2,14 @@ import typing
 from datetime import datetime
 
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Potter.FacebookAccounts.BackgroundTasks.Startup import startup
 from Potter.FacebookAccounts.Infrastructure.Domain.AdAccountAmountSpentModel import AdAccountAmountSpentModel
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountSpentMapping import GraphAPIAdAccountSpentMapping
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestAdAccountSpent import GraphAPIRequestAdAccountSpent
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountSpentMapping import \
+    GraphAPIAdAccountSpentMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestAdAccountSpent import \
+    GraphAPIRequestAdAccountSpent
 
 
 class GraphAPIAdAccountSpentHandler:

@@ -8,7 +8,6 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 
 
 class GraphAPIGetHelper(HTTPRequestBase):
-
     _sleep_before_getting_data = 1
     _async_job_completed_percentage = 100
     _async_job_failed_status = 'Job Failed'
@@ -21,8 +20,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
         try:
             response, summary = self.get(config.request.url)
         except Exception as e:
-            # TODO: Log error
-            raise Exception(e)
+            raise e
 
         return response, summary
 
@@ -30,26 +28,24 @@ class GraphAPIGetHelper(HTTPRequestBase):
         try:
             ad_report = self.post(url=config.request.url)
         except Exception as e:
-            # TODO: Log errors
-            raise Exception(e)
+            raise e
 
         try:
             if self.__report_run_id_key in ad_report.keys():
                 ad_report_response = AdReportRun(fbid=ad_report[self.__report_run_id_key])
                 event_loop = asyncio.new_event_loop()
-                task = event_loop.create_task(self._loop_graph_api_for_async_response(ad_report_response, config.async_trials))
+                task = event_loop.create_task(
+                    self._loop_graph_api_for_async_response(ad_report_response, config.async_trials))
                 response = event_loop.run_until_complete(task)
             else:
                 response = []
         except Exception as e:
-            # TODO: Log errors
-            raise Exception(e)
+            raise e
 
         return response
 
     def _get_partial_graph_api_base(self, config):
         if config.request is None:
-            # TODO: Log error
             raise Exception('Missing Fields API request. Please provide an appropriate FB API request and try again.')
 
         try:
@@ -66,8 +62,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
             # Combine partial responses for different groups of fields into one response
             response = self._combine_partial_responses(partial_responses, config.required_field)
         except Exception as e:
-            # TODO: Log error
-            raise Exception(e)
+            raise e
 
         return response, summary
 
@@ -78,7 +73,9 @@ class GraphAPIGetHelper(HTTPRequestBase):
 
         response.api_get()  # Probe FB ad report
 
-        while (response[AdReportRun.Field.async_percent_completion] < self._async_job_completed_percentage and response[AdReportRun.Field.async_status] != self._async_job_failed_status) and retry_num <= async_trials:
+        while (response[AdReportRun.Field.async_percent_completion] < self._async_job_completed_percentage and
+               response[
+                   AdReportRun.Field.async_status] != self._async_job_failed_status) and retry_num <= async_trials:
             await asyncio.sleep(1 ** retry_num)
             response.api_get()
             retry_num += 1
@@ -131,7 +128,9 @@ class GraphAPIGetHelper(HTTPRequestBase):
             partial_responses_num = len(partial_responses)
 
             for index in range(1, partial_responses_num):
-                response = [{**u, **v} for u, v in GraphAPIGetHelper.sorted_zip_longest(response, partial_responses[index], key=required_field, fillvalue={})]
+                response = [{**u, **v} for u, v in
+                            GraphAPIGetHelper.sorted_zip_longest(response, partial_responses[index],
+                                                                 key=required_field, fillvalue={})]
 
         else:
             response = partial_responses
@@ -147,4 +146,3 @@ class GraphAPIGetHelper(HTTPRequestBase):
                 yield list(set(fields[index:index + GraphAPIGetHelper.__fields_num] + [required_field]))
             else:
                 yield list(set(fields[index:index + GraphAPIGetHelper.__fields_num]))
-

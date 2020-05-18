@@ -1,10 +1,9 @@
+import json
+
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
 from location.handlers.location_handlers import *
-
-import json
 
 
 def get_all(request):
@@ -59,6 +58,7 @@ def get_electoral_districts(request):
         return HttpResponse(status=400)
 
     return HttpResponse(JsonResponse({'results': results}, safe=False), status=200, content_type='application/json')
+
 
 @csrf_exempt
 def search_location(request, query_string):

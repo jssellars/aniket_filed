@@ -1,5 +1,6 @@
 {
   "rabbitmq": {
+    "consumer_name": "dev.bt.facebook.turing.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -7,32 +8,26 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "dev2.filed.direct",
+        "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev2.filed.turing.inbound",
-          "inbound_routing_key": "dev2.filed.turing.inbound.inbound.key",
-          "outbound": "dev2.filed.turing.outbound",
-          "outbound_routing_key": "dev2.filed.turing.outbound.key"
+          "inbound": "dev.facebook.turing.outbound",
+          "inbound_routing_key": "dev.facebook.turing.outbound.key",
+          "outbound": "dev.facebook.dexter.inbound",
+          "outbound_routing_key": "dev.facebook.dexter.inbound.key"
         }
-      },
-      {
-        "name": "dev2.filed.facebook.turing.fanout",
-        "type": "fanout"
       }
     ],
     "publish_interval": 1,
     "heartbeat": 0,
     "connection_timeout": 300
   },
-
   "facebook": {
     "description": "Filed Live",
     "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
-
   "sql_server_database": {
     "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
     "port": 1433,
@@ -40,8 +35,7 @@
     "password": "F2!irf0q",
     "name": "filed-facebook-tokens"
   },
-
-  "mongo_database" : {
+  "mongo_database": {
     "ssh_tunnel": true,
     "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
     "mongo_user": "mongo-admin",
@@ -52,14 +46,22 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "insights_database_name": "Filed_Turing_Facebook_Insights",
-    "structures_database_name": "Filed_Turing_Facebook_Structures_Test"
+    "insights_database_name": "dev_facebook_turing_insights",
+    "structures_database_name": "dev_facebook_turing_structures",
+    "accounts_journal_database_name": "dev_facebook_turing_accounts_journal",
+    "accounts_journal_collection_name": "journal"
   },
-
   "environment": "dev",
-  "api_name": "Turing",
+  "api_name": "FacebookTuringBackgroundTasks",
   "api_version": "1.0.0",
-  "service_name": "Turing",
+  "service_name": "FacebookTuringBackgroundTasks",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-facebook-turing-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
 }
+

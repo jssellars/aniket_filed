@@ -1,7 +1,9 @@
 from Core.Tools.Misc.ObjectSerializers import object_to_json, object_to_attribute_values_list
 from GoogleTuring.Api.Catalogs.BusinessViews.ViewAd import ViewAd
-from GoogleTuring.Api.Catalogs.BusinessViews.ViewAdGroup import ViewAdGroup, ViewAdGroupKeywords, ViewAdGroupGender, ViewAdGroupAge
-from GoogleTuring.Api.Catalogs.BusinessViews.ViewCampaign import ViewCampaign, ViewCampaignGender, ViewCampaignKeywords, ViewCampaignAge
+from GoogleTuring.Api.Catalogs.BusinessViews.ViewAdGroup import ViewAdGroup, ViewAdGroupKeywords, ViewAdGroupGender, \
+    ViewAdGroupAge
+from GoogleTuring.Api.Catalogs.BusinessViews.ViewCampaign import ViewCampaign, ViewCampaignGender, \
+    ViewCampaignKeywords, ViewCampaignAge
 
 
 class AdsManagerCatalogsViewsByLevelDto:

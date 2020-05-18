@@ -39,25 +39,32 @@ class GoogleMetadataColumnsPool:
 
     campaign_status = ColumnMetadata(GoogleFieldsMetadata.campaign_status.field_name, ColumnType.text)
 
-    combined_approval_status = ColumnMetadata(GoogleFieldsMetadata.combined_approval_status.field_name, ColumnType.text)
+    combined_approval_status = ColumnMetadata(GoogleFieldsMetadata.combined_approval_status.field_name,
+                                              ColumnType.text)
 
     conversion_adjustment = ColumnMetadata(GoogleFieldsMetadata.conversion_adjustment.field_name, ColumnType.text)
 
-    creative_destination_url = ColumnMetadata(GoogleFieldsMetadata.creative_destination_url.field_name, ColumnType.text)
+    creative_destination_url = ColumnMetadata(GoogleFieldsMetadata.creative_destination_url.field_name,
+                                              ColumnType.text)
 
     creative_final_app_urls = ColumnMetadata(GoogleFieldsMetadata.creative_final_app_urls.field_name, ColumnType.text)
 
-    creative_final_mobile_urls = ColumnMetadata(GoogleFieldsMetadata.creative_final_mobile_urls.field_name, ColumnType.text)
+    creative_final_mobile_urls = ColumnMetadata(GoogleFieldsMetadata.creative_final_mobile_urls.field_name,
+                                                ColumnType.text)
 
     creative_final_urls = ColumnMetadata(GoogleFieldsMetadata.creative_final_urls.field_name, ColumnType.text)
 
-    creative_final_url_suffix = ColumnMetadata(GoogleFieldsMetadata.creative_final_url_suffix.field_name, ColumnType.text)
+    creative_final_url_suffix = ColumnMetadata(GoogleFieldsMetadata.creative_final_url_suffix.field_name,
+                                               ColumnType.text)
 
-    creative_tracking_url_template = ColumnMetadata(GoogleFieldsMetadata.creative_tracking_url_template.field_name, ColumnType.text)
+    creative_tracking_url_template = ColumnMetadata(GoogleFieldsMetadata.creative_tracking_url_template.field_name,
+                                                    ColumnType.text)
 
-    creative_url_custom_parameters = ColumnMetadata(GoogleFieldsMetadata.creative_url_custom_parameters.field_name, ColumnType.text)
+    creative_url_custom_parameters = ColumnMetadata(GoogleFieldsMetadata.creative_url_custom_parameters.field_name,
+                                                    ColumnType.text)
 
-    customer_descriptive_name = ColumnMetadata(GoogleFieldsMetadata.customer_descriptive_name.field_name, ColumnType.text)
+    customer_descriptive_name = ColumnMetadata(GoogleFieldsMetadata.customer_descriptive_name.field_name,
+                                               ColumnType.text)
 
     description = ColumnMetadata(GoogleFieldsMetadata.description.field_name, ColumnType.text)
 
@@ -69,33 +76,48 @@ class GoogleMetadataColumnsPool:
 
     display_url = ColumnMetadata(GoogleFieldsMetadata.display_url.field_name, ColumnType.text)
 
-    enhanced_display_creative_landscape_logo_image_media_id = ColumnMetadata(GoogleFieldsMetadata.enhanced_display_creative_landscape_logo_image_media_id.field_name, ColumnType.text)
+    enhanced_display_creative_landscape_logo_image_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.enhanced_display_creative_landscape_logo_image_media_id.field_name, ColumnType.text)
 
-    enhanced_display_creative_logo_image_media_id = ColumnMetadata(GoogleFieldsMetadata.enhanced_display_creative_logo_image_media_id.field_name, ColumnType.text)
+    enhanced_display_creative_logo_image_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.enhanced_display_creative_logo_image_media_id.field_name,
+        ColumnType.text)
 
-    enhanced_display_creative_marketing_image_media_id = ColumnMetadata(GoogleFieldsMetadata.enhanced_display_creative_marketing_image_media_id.field_name, ColumnType.text)
+    enhanced_display_creative_marketing_image_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.enhanced_display_creative_marketing_image_media_id.field_name,
+        ColumnType.text)
 
-    enhanced_display_creative_marketing_image_square_media_id = ColumnMetadata(GoogleFieldsMetadata.enhanced_display_creative_marketing_image_square_media_id.field_name, ColumnType.text)
+    enhanced_display_creative_marketing_image_square_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.enhanced_display_creative_marketing_image_square_media_id.field_name, ColumnType.text)
 
-    expanded_dynamic_search_creative_description_2 = ColumnMetadata(GoogleFieldsMetadata.expanded_dynamic_search_creative_description_2.field_name, ColumnType.text)
+    expanded_dynamic_search_creative_description_2 = ColumnMetadata(
+        GoogleFieldsMetadata.expanded_dynamic_search_creative_description_2.field_name,
+        ColumnType.text)
 
-    expanded_text_ad_description_2 = ColumnMetadata(GoogleFieldsMetadata.expanded_text_ad_description_2.field_name, ColumnType.text)
+    expanded_text_ad_description_2 = ColumnMetadata(GoogleFieldsMetadata.expanded_text_ad_description_2.field_name,
+                                                    ColumnType.text)
 
-    expanded_text_ad_headline_part_3 = ColumnMetadata(GoogleFieldsMetadata.expanded_text_ad_headline_part_3.field_name, ColumnType.text)
+    expanded_text_ad_headline_part_3 = ColumnMetadata(GoogleFieldsMetadata.expanded_text_ad_headline_part_3.field_name,
+                                                      ColumnType.text)
 
     external_customer_id = ColumnMetadata(GoogleFieldsMetadata.external_customer_id.field_name, ColumnType.text)
 
     format_setting = ColumnMetadata(GoogleFieldsMetadata.format_setting.field_name, ColumnType.text)
 
-    gmail_creative_header_image_media_id = ColumnMetadata(GoogleFieldsMetadata.gmail_creative_header_image_media_id.field_name, ColumnType.text)
+    gmail_creative_header_image_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.gmail_creative_header_image_media_id.field_name, ColumnType.text)
 
-    gmail_creative_logo_image_media_id = ColumnMetadata(GoogleFieldsMetadata.gmail_creative_logo_image_media_id.field_name, ColumnType.text)
+    gmail_creative_logo_image_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.gmail_creative_logo_image_media_id.field_name, ColumnType.text)
 
-    gmail_creative_marketing_image_media_id = ColumnMetadata(GoogleFieldsMetadata.gmail_creative_marketing_image_media_id.field_name, ColumnType.text)
+    gmail_creative_marketing_image_media_id = ColumnMetadata(
+        GoogleFieldsMetadata.gmail_creative_marketing_image_media_id.field_name, ColumnType.text)
 
-    gmail_teaser_business_name = ColumnMetadata(GoogleFieldsMetadata.gmail_teaser_business_name.field_name, ColumnType.text)
+    gmail_teaser_business_name = ColumnMetadata(GoogleFieldsMetadata.gmail_teaser_business_name.field_name,
+                                                ColumnType.text)
 
-    gmail_teaser_description = ColumnMetadata(GoogleFieldsMetadata.gmail_teaser_description.field_name, ColumnType.text)
+    gmail_teaser_description = ColumnMetadata(GoogleFieldsMetadata.gmail_teaser_description.field_name,
+                                              ColumnType.text)
 
     gmail_teaser_headline = ColumnMetadata(GoogleFieldsMetadata.gmail_teaser_headline.field_name, ColumnType.text)
 
@@ -113,11 +135,14 @@ class GoogleMetadataColumnsPool:
 
     image_ad_url = ColumnMetadata(GoogleFieldsMetadata.image_ad_url.field_name, ColumnType.text)
 
-    image_creative_image_height = ColumnMetadata(GoogleFieldsMetadata.image_creative_image_height.field_name, ColumnType.text)
+    image_creative_image_height = ColumnMetadata(GoogleFieldsMetadata.image_creative_image_height.field_name,
+                                                 ColumnType.text)
 
-    image_creative_image_width = ColumnMetadata(GoogleFieldsMetadata.image_creative_image_width.field_name, ColumnType.text)
+    image_creative_image_width = ColumnMetadata(GoogleFieldsMetadata.image_creative_image_width.field_name,
+                                                ColumnType.text)
 
-    image_creative_mime_type = ColumnMetadata(GoogleFieldsMetadata.image_creative_mime_type.field_name, ColumnType.text)
+    image_creative_mime_type = ColumnMetadata(GoogleFieldsMetadata.image_creative_mime_type.field_name,
+                                              ColumnType.text)
 
     image_creative_name = ColumnMetadata(GoogleFieldsMetadata.image_creative_name.field_name, ColumnType.text)
 
@@ -131,46 +156,74 @@ class GoogleMetadataColumnsPool:
 
     main_color = ColumnMetadata(GoogleFieldsMetadata.main_color.field_name, ColumnType.text)
 
-    marketing_image_call_to_action_text = ColumnMetadata(GoogleFieldsMetadata.marketing_image_call_to_action_text.field_name, ColumnType.text)
+    marketing_image_call_to_action_text = ColumnMetadata(
+        GoogleFieldsMetadata.marketing_image_call_to_action_text.field_name, ColumnType.text)
 
-    marketing_image_call_to_action_text_color = ColumnMetadata(GoogleFieldsMetadata.marketing_image_call_to_action_text_color.field_name, ColumnType.text)
+    marketing_image_call_to_action_text_color = ColumnMetadata(
+        GoogleFieldsMetadata.marketing_image_call_to_action_text_color.field_name, ColumnType.text)
 
-    marketing_image_description = ColumnMetadata(GoogleFieldsMetadata.marketing_image_description.field_name, ColumnType.text)
+    marketing_image_description = ColumnMetadata(GoogleFieldsMetadata.marketing_image_description.field_name,
+                                                 ColumnType.text)
 
-    marketing_image_headline = ColumnMetadata(GoogleFieldsMetadata.marketing_image_headline.field_name, ColumnType.text)
+    marketing_image_headline = ColumnMetadata(GoogleFieldsMetadata.marketing_image_headline.field_name,
+                                              ColumnType.text)
 
-    multi_asset_responsive_display_ad_accent_color = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_accent_color.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_accent_color = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_accent_color.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_allow_flexible_color = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_allow_flexible_color.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_allow_flexible_color = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_allow_flexible_color.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_business_name = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_business_name.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_business_name = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_business_name.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_call_to_action_text = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_call_to_action_text.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_call_to_action_text = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_call_to_action_text.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_descriptions = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_descriptions.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_descriptions = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_descriptions.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_dynamic_settings_price_prefix = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_dynamic_settings_price_prefix.field_name,
-                                                                                     ColumnType.text)
+    multi_asset_responsive_display_ad_dynamic_settings_price_prefix = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_dynamic_settings_price_prefix.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_dynamic_settings_promo_text = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_dynamic_settings_promo_text.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_dynamic_settings_promo_text = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_dynamic_settings_promo_text.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_format_setting = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_format_setting.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_format_setting = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_format_setting.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_headlines = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_headlines.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_headlines = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_headlines.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_landscape_logo_images = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_landscape_logo_images.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_landscape_logo_images = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_landscape_logo_images.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_logo_images = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_logo_images.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_logo_images = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_logo_images.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_long_headline = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_long_headline.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_long_headline = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_long_headline.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_main_color = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_main_color.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_main_color = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_main_color.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_marketing_images = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_marketing_images.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_marketing_images = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_marketing_images.field_name,
+        ColumnType.text)
 
-    multi_asset_responsive_display_ad_square_marketing_images = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_square_marketing_images.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_square_marketing_images = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_square_marketing_images.field_name, ColumnType.text)
 
-    multi_asset_responsive_display_ad_you_tube_videos = ColumnMetadata(GoogleFieldsMetadata.multi_asset_responsive_display_ad_you_tube_videos.field_name, ColumnType.text)
+    multi_asset_responsive_display_ad_you_tube_videos = ColumnMetadata(
+        GoogleFieldsMetadata.multi_asset_responsive_display_ad_you_tube_videos.field_name,
+        ColumnType.text)
 
     path_1 = ColumnMetadata(GoogleFieldsMetadata.path_1.field_name, ColumnType.text)
 
@@ -182,43 +235,57 @@ class GoogleMetadataColumnsPool:
 
     promo_text = ColumnMetadata(GoogleFieldsMetadata.promo_text.field_name, ColumnType.text)
 
-    responsive_search_ad_descriptions = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_descriptions.field_name, ColumnType.text)
+    responsive_search_ad_descriptions = ColumnMetadata(
+        GoogleFieldsMetadata.responsive_search_ad_descriptions.field_name, ColumnType.text)
 
-    responsive_search_ad_headlines = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_headlines.field_name, ColumnType.text)
+    responsive_search_ad_headlines = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_headlines.field_name,
+                                                    ColumnType.text)
 
-    responsive_search_ad_path_1 = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_path_1.field_name, ColumnType.text)
+    responsive_search_ad_path_1 = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_path_1.field_name,
+                                                 ColumnType.text)
 
-    responsive_search_ad_path_2 = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_path_2.field_name, ColumnType.text)
+    responsive_search_ad_path_2 = ColumnMetadata(GoogleFieldsMetadata.responsive_search_ad_path_2.field_name,
+                                                 ColumnType.text)
 
     short_headline = ColumnMetadata(GoogleFieldsMetadata.short_headline.field_name, ColumnType.text)
 
     status = ColumnMetadata(GoogleFieldsMetadata.status.field_name, ColumnType.text)
 
-    system_managed_entity_source = ColumnMetadata(GoogleFieldsMetadata.system_managed_entity_source.field_name, ColumnType.text)
+    system_managed_entity_source = ColumnMetadata(GoogleFieldsMetadata.system_managed_entity_source.field_name,
+                                                  ColumnType.text)
 
-    universal_app_ad_descriptions = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_descriptions.field_name, ColumnType.text)
+    universal_app_ad_descriptions = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_descriptions.field_name,
+                                                   ColumnType.text)
 
-    universal_app_ad_headlines = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_headlines.field_name, ColumnType.text)
+    universal_app_ad_headlines = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_headlines.field_name,
+                                                ColumnType.text)
 
-    universal_app_ad_html_5_media_bundles = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_html_5_media_bundles.field_name, ColumnType.text)
+    universal_app_ad_html_5_media_bundles = ColumnMetadata(
+        GoogleFieldsMetadata.universal_app_ad_html_5_media_bundles.field_name, ColumnType.text)
 
     universal_app_ad_images = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_images.field_name, ColumnType.text)
 
-    universal_app_ad_mandatory_ad_text = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_mandatory_ad_text.field_name, ColumnType.text)
+    universal_app_ad_mandatory_ad_text = ColumnMetadata(
+        GoogleFieldsMetadata.universal_app_ad_mandatory_ad_text.field_name, ColumnType.text)
 
-    universal_app_ad_you_tube_videos = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_you_tube_videos.field_name, ColumnType.text)
+    universal_app_ad_you_tube_videos = ColumnMetadata(GoogleFieldsMetadata.universal_app_ad_you_tube_videos.field_name,
+                                                      ColumnType.text)
 
-    account_descriptive_name = ColumnMetadata(GoogleFieldsMetadata.account_descriptive_name.field_name, ColumnType.text)
+    account_descriptive_name = ColumnMetadata(GoogleFieldsMetadata.account_descriptive_name.field_name,
+                                              ColumnType.text)
 
-    ad_group_desktop_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.ad_group_desktop_bid_modifier.field_name, ColumnType.text)
+    ad_group_desktop_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.ad_group_desktop_bid_modifier.field_name,
+                                                   ColumnType.text)
 
     ad_group_id = ColumnMetadata(GoogleFieldsMetadata.ad_group_id.field_name, ColumnType.text)
 
-    ad_group_mobile_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.ad_group_mobile_bid_modifier.field_name, ColumnType.text)
+    ad_group_mobile_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.ad_group_mobile_bid_modifier.field_name,
+                                                  ColumnType.text)
 
     ad_group_name = ColumnMetadata(GoogleFieldsMetadata.ad_group_name.field_name, ColumnType.text)
 
-    ad_group_tablet_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.ad_group_tablet_bid_modifier.field_name, ColumnType.text)
+    ad_group_tablet_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.ad_group_tablet_bid_modifier.field_name,
+                                                  ColumnType.text)
 
     ad_group_type = ColumnMetadata(GoogleFieldsMetadata.ad_group_type.field_name, ColumnType.text)
 
@@ -232,7 +299,8 @@ class GoogleMetadataColumnsPool:
 
     bidding_strategy_type = ColumnMetadata(GoogleFieldsMetadata.bidding_strategy_type.field_name, ColumnType.text)
 
-    content_bid_criterion_type_group = ColumnMetadata(GoogleFieldsMetadata.content_bid_criterion_type_group.field_name, ColumnType.text)
+    content_bid_criterion_type_group = ColumnMetadata(GoogleFieldsMetadata.content_bid_criterion_type_group.field_name,
+                                                      ColumnType.text)
 
     cpc_bid = ColumnMetadata(GoogleFieldsMetadata.cpc_bid.field_name, ColumnType.text)
 
@@ -242,7 +310,8 @@ class GoogleMetadataColumnsPool:
 
     effective_target_roas = ColumnMetadata(GoogleFieldsMetadata.effective_target_roas.field_name, ColumnType.text)
 
-    effective_target_roas_source = ColumnMetadata(GoogleFieldsMetadata.effective_target_roas_source.field_name, ColumnType.text)
+    effective_target_roas_source = ColumnMetadata(GoogleFieldsMetadata.effective_target_roas_source.field_name,
+                                                  ColumnType.text)
 
     enhanced_cpc_enabled = ColumnMetadata(GoogleFieldsMetadata.enhanced_cpc_enabled.field_name, ColumnType.text)
 
@@ -256,21 +325,26 @@ class GoogleMetadataColumnsPool:
 
     url_custom_parameters = ColumnMetadata(GoogleFieldsMetadata.url_custom_parameters.field_name, ColumnType.text)
 
-    advertising_channel_sub_type = ColumnMetadata(GoogleFieldsMetadata.advertising_channel_sub_type.field_name, ColumnType.text)
+    advertising_channel_sub_type = ColumnMetadata(GoogleFieldsMetadata.advertising_channel_sub_type.field_name,
+                                                  ColumnType.text)
 
-    advertising_channel_type = ColumnMetadata(GoogleFieldsMetadata.advertising_channel_type.field_name, ColumnType.text)
+    advertising_channel_type = ColumnMetadata(GoogleFieldsMetadata.advertising_channel_type.field_name,
+                                              ColumnType.text)
 
     amount = ColumnMetadata(GoogleFieldsMetadata.amount.field_name, ColumnType.text)
 
     budget_id = ColumnMetadata(GoogleFieldsMetadata.budget_id.field_name, ColumnType.text)
 
-    campaign_desktop_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.campaign_desktop_bid_modifier.field_name, ColumnType.text)
+    campaign_desktop_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.campaign_desktop_bid_modifier.field_name,
+                                                   ColumnType.text)
 
     campaign_group_id = ColumnMetadata(GoogleFieldsMetadata.campaign_group_id.field_name, ColumnType.text)
 
-    campaign_mobile_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.campaign_mobile_bid_modifier.field_name, ColumnType.text)
+    campaign_mobile_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.campaign_mobile_bid_modifier.field_name,
+                                                  ColumnType.text)
 
-    campaign_tablet_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.campaign_tablet_bid_modifier.field_name, ColumnType.text)
+    campaign_tablet_bid_modifier = ColumnMetadata(GoogleFieldsMetadata.campaign_tablet_bid_modifier.field_name,
+                                                  ColumnType.text)
 
     campaign_trial_type = ColumnMetadata(GoogleFieldsMetadata.campaign_trial_type.field_name, ColumnType.text)
 
@@ -278,13 +352,16 @@ class GoogleMetadataColumnsPool:
 
     has_recommended_budget = ColumnMetadata(GoogleFieldsMetadata.has_recommended_budget.field_name, ColumnType.text)
 
-    is_budget_explicitly_shared = ColumnMetadata(GoogleFieldsMetadata.is_budget_explicitly_shared.field_name, ColumnType.text)
+    is_budget_explicitly_shared = ColumnMetadata(GoogleFieldsMetadata.is_budget_explicitly_shared.field_name,
+                                                 ColumnType.text)
 
-    maximize_conversion_value_target_roas = ColumnMetadata(GoogleFieldsMetadata.maximize_conversion_value_target_roas.field_name, ColumnType.text)
+    maximize_conversion_value_target_roas = ColumnMetadata(
+        GoogleFieldsMetadata.maximize_conversion_value_target_roas.field_name, ColumnType.text)
 
     period = ColumnMetadata(GoogleFieldsMetadata.period.field_name, ColumnType.text)
 
-    recommended_budget_amount = ColumnMetadata(GoogleFieldsMetadata.recommended_budget_amount.field_name, ColumnType.text)
+    recommended_budget_amount = ColumnMetadata(GoogleFieldsMetadata.recommended_budget_amount.field_name,
+                                               ColumnType.text)
 
     serving_status = ColumnMetadata(GoogleFieldsMetadata.serving_status.field_name, ColumnType.text)
 
@@ -306,11 +383,14 @@ class GoogleMetadataColumnsPool:
 
     keywords = ColumnMetadata(GoogleFieldsMetadata.keywords.field_name, ColumnType.text)
 
-    criteria_destination_url = ColumnMetadata(GoogleFieldsMetadata.criteria_destination_url.field_name, ColumnType.text)
+    criteria_destination_url = ColumnMetadata(GoogleFieldsMetadata.criteria_destination_url.field_name,
+                                              ColumnType.text)
 
-    estimated_add_clicks_at_first_position_cpc = ColumnMetadata(GoogleFieldsMetadata.estimated_add_clicks_at_first_position_cpc.field_name, ColumnType.text)
+    estimated_add_clicks_at_first_position_cpc = ColumnMetadata(
+        GoogleFieldsMetadata.estimated_add_clicks_at_first_position_cpc.field_name, ColumnType.text)
 
-    estimated_add_cost_at_first_position_cpc = ColumnMetadata(GoogleFieldsMetadata.estimated_add_cost_at_first_position_cpc.field_name, ColumnType.text)
+    estimated_add_cost_at_first_position_cpc = ColumnMetadata(
+        GoogleFieldsMetadata.estimated_add_cost_at_first_position_cpc.field_name, ColumnType.text)
 
     final_app_urls = ColumnMetadata(GoogleFieldsMetadata.final_app_urls.field_name, ColumnType.text)
 
@@ -326,7 +406,8 @@ class GoogleMetadataColumnsPool:
 
     keyword_match_type = ColumnMetadata(GoogleFieldsMetadata.keyword_match_type.field_name, ColumnType.text)
 
-    post_click_quality_score = ColumnMetadata(GoogleFieldsMetadata.post_click_quality_score.field_name, ColumnType.text)
+    post_click_quality_score = ColumnMetadata(GoogleFieldsMetadata.post_click_quality_score.field_name,
+                                              ColumnType.text)
 
     quality_score = ColumnMetadata(GoogleFieldsMetadata.quality_score.field_name, ColumnType.text)
 
@@ -346,7 +427,8 @@ class GoogleMetadataColumnsPool:
 
     metro_criteria_id = ColumnMetadata(GoogleFieldsMetadata.metro_criteria_id.field_name, ColumnType.text)
 
-    most_specific_criteria_id = ColumnMetadata(GoogleFieldsMetadata.most_specific_criteria_id.field_name, ColumnType.text)
+    most_specific_criteria_id = ColumnMetadata(GoogleFieldsMetadata.most_specific_criteria_id.field_name,
+                                               ColumnType.text)
 
     region_name = ColumnMetadata(GoogleFieldsMetadata.region_name.field_name, ColumnType.text)
 
@@ -364,7 +446,8 @@ class GoogleMetadataColumnsPool:
 
     click_type = ColumnMetadata(GoogleFieldsMetadata.click_type.field_name, ColumnType.text)
 
-    conversion_adjustment_lag_bucket = ColumnMetadata(GoogleFieldsMetadata.conversion_adjustment_lag_bucket.field_name, ColumnType.text)
+    conversion_adjustment_lag_bucket = ColumnMetadata(GoogleFieldsMetadata.conversion_adjustment_lag_bucket.field_name,
+                                                      ColumnType.text)
 
     conversion_lag_bucket = ColumnMetadata(GoogleFieldsMetadata.conversion_lag_bucket.field_name, ColumnType.text)
 
@@ -382,7 +465,8 @@ class GoogleMetadataColumnsPool:
 
     device = ColumnMetadata(GoogleFieldsMetadata.device.field_name, ColumnType.text)
 
-    external_conversion_source = ColumnMetadata(GoogleFieldsMetadata.external_conversion_source.field_name, ColumnType.text)
+    external_conversion_source = ColumnMetadata(GoogleFieldsMetadata.external_conversion_source.field_name,
+                                                ColumnType.text)
 
     month = ColumnMetadata(GoogleFieldsMetadata.month.field_name, ColumnType.text)
 
@@ -398,13 +482,15 @@ class GoogleMetadataColumnsPool:
 
     hour_of_day = ColumnMetadata(GoogleFieldsMetadata.hour_of_day.field_name, ColumnType.text)
 
-    conversion_attribution_event_type = ColumnMetadata(GoogleFieldsMetadata.conversion_attribution_event_type.field_name, ColumnType.text)
+    conversion_attribution_event_type = ColumnMetadata(
+        GoogleFieldsMetadata.conversion_attribution_event_type.field_name, ColumnType.text)
 
     ad_format = ColumnMetadata(GoogleFieldsMetadata.ad_format.field_name, ColumnType.text)
 
     location_type = ColumnMetadata(GoogleFieldsMetadata.location_type.field_name, ColumnType.text)
 
-    conversion_category_name = ColumnMetadata(GoogleFieldsMetadata.conversion_category_name.field_name, ColumnType.text)
+    conversion_category_name = ColumnMetadata(GoogleFieldsMetadata.conversion_category_name.field_name,
+                                              ColumnType.text)
 
     ad_group_id_segment = ColumnMetadata(GoogleFieldsMetadata.ad_group_id_segment.field_name, ColumnType.text)
 
@@ -412,7 +498,8 @@ class GoogleMetadataColumnsPool:
 
     ad_group_status_segment = ColumnMetadata(GoogleFieldsMetadata.ad_group_status_segment.field_name, ColumnType.text)
 
-    absolute_top_impression_percentage = ColumnMetadata(GoogleFieldsMetadata.absolute_top_impression_percentage.field_name, ColumnType.text)
+    absolute_top_impression_percentage = ColumnMetadata(
+        GoogleFieldsMetadata.absolute_top_impression_percentage.field_name, ColumnType.text)
 
     active_view_cpm = ColumnMetadata(GoogleFieldsMetadata.active_view_cpm.field_name, ColumnType.text)
 
@@ -420,11 +507,14 @@ class GoogleMetadataColumnsPool:
 
     active_view_impressions = ColumnMetadata(GoogleFieldsMetadata.active_view_impressions.field_name, ColumnType.text)
 
-    active_view_measurability = ColumnMetadata(GoogleFieldsMetadata.active_view_measurability.field_name, ColumnType.text)
+    active_view_measurability = ColumnMetadata(GoogleFieldsMetadata.active_view_measurability.field_name,
+                                               ColumnType.text)
 
-    active_view_measurable_cost = ColumnMetadata(GoogleFieldsMetadata.active_view_measurable_cost.field_name, ColumnType.text)
+    active_view_measurable_cost = ColumnMetadata(GoogleFieldsMetadata.active_view_measurable_cost.field_name,
+                                                 ColumnType.text)
 
-    active_view_measurable_impressions = ColumnMetadata(GoogleFieldsMetadata.active_view_measurable_impressions.field_name, ColumnType.text)
+    active_view_measurable_impressions = ColumnMetadata(
+        GoogleFieldsMetadata.active_view_measurable_impressions.field_name, ColumnType.text)
 
     active_view_viewability = ColumnMetadata(GoogleFieldsMetadata.active_view_viewability.field_name, ColumnType.text)
 
@@ -452,11 +542,14 @@ class GoogleMetadataColumnsPool:
 
     bounce_rate = ColumnMetadata(GoogleFieldsMetadata.bounce_rate.field_name, ColumnType.text)
 
-    click_assisted_conversions = ColumnMetadata(GoogleFieldsMetadata.click_assisted_conversions.field_name, ColumnType.text)
+    click_assisted_conversions = ColumnMetadata(GoogleFieldsMetadata.click_assisted_conversions.field_name,
+                                                ColumnType.text)
 
-    click_assisted_conversions_over_last_click_conversions = ColumnMetadata(GoogleFieldsMetadata.click_assisted_conversions_over_last_click_conversions.field_name, ColumnType.text)
+    click_assisted_conversions_over_last_click_conversions = ColumnMetadata(
+        GoogleFieldsMetadata.click_assisted_conversions_over_last_click_conversions.field_name, ColumnType.text)
 
-    click_assisted_conversion_value = ColumnMetadata(GoogleFieldsMetadata.click_assisted_conversion_value.field_name, ColumnType.text)
+    click_assisted_conversion_value = ColumnMetadata(GoogleFieldsMetadata.click_assisted_conversion_value.field_name,
+                                                     ColumnType.text)
 
     clicks = ColumnMetadata(GoogleFieldsMetadata.clicks.field_name, ColumnType.text)
 
@@ -472,15 +565,19 @@ class GoogleMetadataColumnsPool:
 
     cost_per_conversion = ColumnMetadata(GoogleFieldsMetadata.cost_per_conversion.field_name, ColumnType.text)
 
-    cost_per_current_model_attributed_conversion = ColumnMetadata(GoogleFieldsMetadata.cost_per_current_model_attributed_conversion.field_name, ColumnType.text)
+    cost_per_current_model_attributed_conversion = ColumnMetadata(
+        GoogleFieldsMetadata.cost_per_current_model_attributed_conversion.field_name, ColumnType.text)
 
-    cross_device_conversions = ColumnMetadata(GoogleFieldsMetadata.cross_device_conversions.field_name, ColumnType.text)
+    cross_device_conversions = ColumnMetadata(GoogleFieldsMetadata.cross_device_conversions.field_name,
+                                              ColumnType.text)
 
     ctr = ColumnMetadata(GoogleFieldsMetadata.ctr.field_name, ColumnType.text)
 
-    current_model_attributed_conversions = ColumnMetadata(GoogleFieldsMetadata.current_model_attributed_conversions.field_name, ColumnType.text)
+    current_model_attributed_conversions = ColumnMetadata(
+        GoogleFieldsMetadata.current_model_attributed_conversions.field_name, ColumnType.text)
 
-    current_model_attributed_conversion_value = ColumnMetadata(GoogleFieldsMetadata.current_model_attributed_conversion_value.field_name, ColumnType.text)
+    current_model_attributed_conversion_value = ColumnMetadata(
+        GoogleFieldsMetadata.current_model_attributed_conversion_value.field_name, ColumnType.text)
 
     engagement_rate = ColumnMetadata(GoogleFieldsMetadata.engagement_rate.field_name, ColumnType.text)
 
@@ -492,11 +589,14 @@ class GoogleMetadataColumnsPool:
 
     gmail_secondary_clicks = ColumnMetadata(GoogleFieldsMetadata.gmail_secondary_clicks.field_name, ColumnType.text)
 
-    impression_assisted_conversions = ColumnMetadata(GoogleFieldsMetadata.impression_assisted_conversions.field_name, ColumnType.text)
+    impression_assisted_conversions = ColumnMetadata(GoogleFieldsMetadata.impression_assisted_conversions.field_name,
+                                                     ColumnType.text)
 
-    impression_assisted_conversions_over_last_click_conversions = ColumnMetadata(GoogleFieldsMetadata.impression_assisted_conversions_over_last_click_conversions.field_name, ColumnType.text)
+    impression_assisted_conversions_over_last_click_conversions = ColumnMetadata(
+        GoogleFieldsMetadata.impression_assisted_conversions_over_last_click_conversions.field_name, ColumnType.text)
 
-    impression_assisted_conversion_value = ColumnMetadata(GoogleFieldsMetadata.impression_assisted_conversion_value.field_name, ColumnType.text)
+    impression_assisted_conversion_value = ColumnMetadata(
+        GoogleFieldsMetadata.impression_assisted_conversion_value.field_name, ColumnType.text)
 
     impressions = ColumnMetadata(GoogleFieldsMetadata.impressions.field_name, ColumnType.text)
 
@@ -508,13 +608,17 @@ class GoogleMetadataColumnsPool:
 
     percent_new_visitors = ColumnMetadata(GoogleFieldsMetadata.percent_new_visitors.field_name, ColumnType.text)
 
-    top_impression_percentage = ColumnMetadata(GoogleFieldsMetadata.top_impression_percentage.field_name, ColumnType.text)
+    top_impression_percentage = ColumnMetadata(GoogleFieldsMetadata.top_impression_percentage.field_name,
+                                               ColumnType.text)
 
-    value_per_all_conversion = ColumnMetadata(GoogleFieldsMetadata.value_per_all_conversion.field_name, ColumnType.text)
+    value_per_all_conversion = ColumnMetadata(GoogleFieldsMetadata.value_per_all_conversion.field_name,
+                                              ColumnType.text)
 
     value_per_conversion = ColumnMetadata(GoogleFieldsMetadata.value_per_conversion.field_name, ColumnType.text)
 
-    value_per_current_model_attributed_conversion = ColumnMetadata(GoogleFieldsMetadata.value_per_current_model_attributed_conversion.field_name, ColumnType.text)
+    value_per_current_model_attributed_conversion = ColumnMetadata(
+        GoogleFieldsMetadata.value_per_current_model_attributed_conversion.field_name,
+        ColumnType.text)
 
     video_quartile_100_rate = ColumnMetadata(GoogleFieldsMetadata.video_quartile_100_rate.field_name, ColumnType.text)
 
@@ -528,41 +632,57 @@ class GoogleMetadataColumnsPool:
 
     video_views = ColumnMetadata(GoogleFieldsMetadata.video_views.field_name, ColumnType.text)
 
-    view_through_conversions = ColumnMetadata(GoogleFieldsMetadata.view_through_conversions.field_name, ColumnType.text)
+    view_through_conversions = ColumnMetadata(GoogleFieldsMetadata.view_through_conversions.field_name,
+                                              ColumnType.text)
 
-    content_impression_share = ColumnMetadata(GoogleFieldsMetadata.content_impression_share.field_name, ColumnType.text)
+    content_impression_share = ColumnMetadata(GoogleFieldsMetadata.content_impression_share.field_name,
+                                              ColumnType.text)
 
-    content_rank_lost_impression_share = ColumnMetadata(GoogleFieldsMetadata.content_rank_lost_impression_share.field_name, ColumnType.text)
+    content_rank_lost_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.content_rank_lost_impression_share.field_name, ColumnType.text)
 
     num_offline_impressions = ColumnMetadata(GoogleFieldsMetadata.num_offline_impressions.field_name, ColumnType.text)
 
-    num_offline_interactions = ColumnMetadata(GoogleFieldsMetadata.num_offline_interactions.field_name, ColumnType.text)
+    num_offline_interactions = ColumnMetadata(GoogleFieldsMetadata.num_offline_interactions.field_name,
+                                              ColumnType.text)
 
-    offline_interaction_rate = ColumnMetadata(GoogleFieldsMetadata.offline_interaction_rate.field_name, ColumnType.text)
+    offline_interaction_rate = ColumnMetadata(GoogleFieldsMetadata.offline_interaction_rate.field_name,
+                                              ColumnType.text)
 
     relative_ctr = ColumnMetadata(GoogleFieldsMetadata.relative_ctr.field_name, ColumnType.text)
 
-    search_absolute_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_absolute_top_impression_share.field_name, ColumnType.text)
+    search_absolute_top_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_absolute_top_impression_share.field_name, ColumnType.text)
 
-    search_budget_lost_absolute_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_budget_lost_absolute_top_impression_share.field_name, ColumnType.text)
+    search_budget_lost_absolute_top_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_budget_lost_absolute_top_impression_share.field_name,
+        ColumnType.text)
 
-    search_budget_lost_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_budget_lost_top_impression_share.field_name, ColumnType.text)
+    search_budget_lost_top_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_budget_lost_top_impression_share.field_name, ColumnType.text)
 
-    search_exact_match_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_exact_match_impression_share.field_name, ColumnType.text)
+    search_exact_match_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_exact_match_impression_share.field_name, ColumnType.text)
 
     search_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_impression_share.field_name, ColumnType.text)
 
-    search_rank_lost_absolute_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_rank_lost_absolute_top_impression_share.field_name, ColumnType.text)
+    search_rank_lost_absolute_top_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_rank_lost_absolute_top_impression_share.field_name,
+        ColumnType.text)
 
-    search_rank_lost_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_rank_lost_impression_share.field_name, ColumnType.text)
+    search_rank_lost_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_rank_lost_impression_share.field_name, ColumnType.text)
 
-    search_rank_lost_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_rank_lost_top_impression_share.field_name, ColumnType.text)
+    search_rank_lost_top_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_rank_lost_top_impression_share.field_name, ColumnType.text)
 
-    search_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_top_impression_share.field_name, ColumnType.text)
+    search_top_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_top_impression_share.field_name,
+                                                 ColumnType.text)
 
     average_frequency = ColumnMetadata(GoogleFieldsMetadata.average_frequency.field_name, ColumnType.text)
 
-    content_budget_lost_impression_share = ColumnMetadata(GoogleFieldsMetadata.content_budget_lost_impression_share.field_name, ColumnType.text)
+    content_budget_lost_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.content_budget_lost_impression_share.field_name, ColumnType.text)
 
     impression_reach = ColumnMetadata(GoogleFieldsMetadata.impression_reach.field_name, ColumnType.text)
 
@@ -570,14 +690,19 @@ class GoogleMetadataColumnsPool:
 
     invalid_clicks = ColumnMetadata(GoogleFieldsMetadata.invalid_clicks.field_name, ColumnType.text)
 
-    search_budget_lost_impression_share = ColumnMetadata(GoogleFieldsMetadata.search_budget_lost_impression_share.field_name, ColumnType.text)
+    search_budget_lost_impression_share = ColumnMetadata(
+        GoogleFieldsMetadata.search_budget_lost_impression_share.field_name, ColumnType.text)
 
     search_click_share = ColumnMetadata(GoogleFieldsMetadata.search_click_share.field_name, ColumnType.text)
 
-    historical_creative_quality_score = ColumnMetadata(GoogleFieldsMetadata.historical_creative_quality_score.field_name, ColumnType.text)
+    historical_creative_quality_score = ColumnMetadata(
+        GoogleFieldsMetadata.historical_creative_quality_score.field_name, ColumnType.text)
 
-    historical_landing_page_quality_score = ColumnMetadata(GoogleFieldsMetadata.historical_landing_page_quality_score.field_name, ColumnType.text)
+    historical_landing_page_quality_score = ColumnMetadata(
+        GoogleFieldsMetadata.historical_landing_page_quality_score.field_name, ColumnType.text)
 
-    historical_quality_score = ColumnMetadata(GoogleFieldsMetadata.historical_quality_score.field_name, ColumnType.text)
+    historical_quality_score = ColumnMetadata(GoogleFieldsMetadata.historical_quality_score.field_name,
+                                              ColumnType.text)
 
-    historical_search_predicted_ctr = ColumnMetadata(GoogleFieldsMetadata.historical_search_predicted_ctr.field_name, ColumnType.text)
+    historical_search_predicted_ctr = ColumnMetadata(GoogleFieldsMetadata.historical_search_predicted_ctr.field_name,
+                                                     ColumnType.text)

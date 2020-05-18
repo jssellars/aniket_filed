@@ -1,11 +1,12 @@
-from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import RunStatusDexterEngineJournal
 from datetime import datetime
+
+from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import RunStatusDexterEngineJournal
+
 
 class DexterJournalMongoRepositoryHelper:
 
     @staticmethod
     def get_search_in_progress_query(ad_account_id, algorithm_type, business_owner_id):
-
         return {
             'ad_account_id': ad_account_id,
             'algorithm_type': algorithm_type.value,
@@ -15,7 +16,6 @@ class DexterJournalMongoRepositoryHelper:
 
     @staticmethod
     def get_search_pending_query(ad_account_id, algorithm_type, business_owner_id):
-
         return {
             'ad_account_id': ad_account_id,
             'algorithm_type': algorithm_type.value,
@@ -45,7 +45,7 @@ class DexterJournalMongoRepositoryHelper:
         return {
             '$set': {
                 'end_timestamp': datetime.now(),
-                'run_status' : RunStatusDexterEngineJournal.COMPLETED.value
+                'run_status': RunStatusDexterEngineJournal.COMPLETED.value
             }
         }
 
@@ -73,12 +73,11 @@ class DexterJournalMongoRepositoryHelper:
             "business_owner_id": business_owner_id,
             "algorithm_type": algorithm_type.value,
             "ad_account_id": ad_account_id,
-            "level" : level.value
+            "level": level.value
         }
 
     @staticmethod
     def get_sort_descending_by_start_date_query():
-
         return [('start_date', -1)]
 
     @staticmethod
@@ -87,4 +86,3 @@ class DexterJournalMongoRepositoryHelper:
             "business_owner_id": business_owner_id,
             "ad_account_id": ad_account_id
         }
-

@@ -1,17 +1,19 @@
+# todo: update GoogleTuring repo to latest MongoRepositoryBase
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
+from GoogleTuring.Infrastructure.PersistanceLayer.StatusChangerMongoRepository import StatusChangerMongoRepository
 
 
-class GoogleTuringStructuresMongoRepository(MongoRepositoryBase):
+class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
 
     def update_removed_structures(self, deleted_customer_ids):
         if deleted_customer_ids:
             collection_names = self.database.list_collection_names()
             for collection_name in collection_names:
                 self.collection = collection_name
-                self.change_status_many(ids=deleted_customer_ids, new_status=StructureStatus.REMOVED.value, id_key="account_id")
+                self.change_status_many(ids=deleted_customer_ids, new_status=StructureStatus.REMOVED.value,
+                                        id_key="account_id")
 
     def add_structures(self, structure_mapping):
         processed_entries = structure_mapping.process()
@@ -32,7 +34,8 @@ class GoogleTuringStructuresMongoRepository(MongoRepositoryBase):
 
         removed_structures_ids = list(set(existing_ids) - set(structure_ids))
         if removed_structures_ids:
-            self.change_status_many(ids=removed_structures_ids, new_status=StructureStatus.REMOVED.value, id_key=id_key)
+            self.change_status_many(ids=removed_structures_ids, new_status=StructureStatus.REMOVED.value,
+                                    id_key=id_key)
 
         new_structures_ids = list(set(structure_ids) - set(existing_ids))
         if new_structures_ids:
@@ -43,7 +46,8 @@ class GoogleTuringStructuresMongoRepository(MongoRepositoryBase):
         common_structures = list(filter(lambda x: x[id_key] in common_structures_ids, processed_entries))
 
         if common_structures_ids:
-            self.change_status_many(ids=common_structures_ids, new_status=StructureStatus.DEPRECATED.value, id_key=id_key)
+            self.change_status_many(ids=common_structures_ids, new_status=StructureStatus.DEPRECATED.value,
+                                    id_key=id_key)
             self.add_many(common_structures)
 
     def update_structure(self, structure_mapping):

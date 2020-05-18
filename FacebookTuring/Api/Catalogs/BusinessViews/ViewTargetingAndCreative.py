@@ -10,28 +10,28 @@ class ViewTargetingAndCreativeBase(View):
 class ViewCampaignTargetingAndCreative(ViewTargetingAndCreativeBase):
     table_name = "vCampaignInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
-        ViewColumnsMaster.spend,
+        ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.end_date,
         ViewColumnsMaster.reach,
         ViewColumnsMaster.cost_per_1000_people_reached,
-        ViewColumnsMaster.link_click,
-        # TODO: get COST per link click column
-        # TODO: get ctr per link click
-        ViewColumnsMaster.cpc,
-        ViewColumnsMaster.ctr,
-        ViewColumnsMaster.clicks
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.cost_per_link_click,
+        ViewColumnsMaster.link_click_through_rate,
+        ViewColumnsMaster.cpc_all,
+        ViewColumnsMaster.ctr_all,
+        ViewColumnsMaster.clicks_all
     ]
 
 
 class ViewAdSetTargetingAndCreative(ViewTargetingAndCreativeBase):
     table_name = "vAdSetInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
@@ -39,27 +39,27 @@ class ViewAdSetTargetingAndCreative(ViewTargetingAndCreativeBase):
         ViewColumnsMaster.frequency,
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
-        ViewColumnsMaster.spend,
+        ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.end_date,
-        # TODO: get ad set schedule
+        ViewColumnsMaster.adset_schedule,
         ViewColumnsMaster.location,
         ViewColumnsMaster.age,
         ViewColumnsMaster.gender,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.link_click,
-        # TODO: get COST per link click column
-        # TODO: get ctr per link click
-        ViewColumnsMaster.clicks,
-        ViewColumnsMaster.ctr,
-        ViewColumnsMaster.cpc
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.cost_per_link_click,
+        ViewColumnsMaster.link_click_through_rate,
+        ViewColumnsMaster.clicks_all,
+        ViewColumnsMaster.ctr_all,
+        ViewColumnsMaster.cpc_all
     ]
 
 
 class ViewAdTargetingAndCreative(ViewTargetingAndCreativeBase):
     table_name = "vAdInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
@@ -67,7 +67,7 @@ class ViewAdTargetingAndCreative(ViewTargetingAndCreativeBase):
         ViewColumnsMaster.frequency,
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
-        ViewColumnsMaster.spend,
+        ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.end_date,
         # TODO: get ad schedule
         ViewColumnsMaster.quality_ranking,
@@ -81,10 +81,10 @@ class ViewAdTargetingAndCreative(ViewTargetingAndCreativeBase):
         # TODO: get preview link
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.link_click,
-        # TODO: get COST per link click column
-        # TODO: get ctr per link click
-        ViewColumnsMaster.clicks,
-        ViewColumnsMaster.ctr,
-        ViewColumnsMaster.cpc
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.cost_per_link_click,
+        ViewColumnsMaster.link_click_through_rate,
+        ViewColumnsMaster.clicks_all,
+        ViewColumnsMaster.ctr_all,
+        ViewColumnsMaster.cpc_all
     ]

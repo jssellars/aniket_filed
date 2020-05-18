@@ -1,5 +1,5 @@
-from django.db import models
 import jsonfield
+from django.db import models
 
 
 class Country(models.Model):

@@ -20,17 +20,17 @@ spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-          - "dev2.filed.com"             
+            - "dev2.filed.com"
       imagePullSecrets:
-      - name: regcred          
+        - name: regcred
       containers:
-      - name: dev2-filed-dexter-api
-        image: ct.filed.com/dev2-filed-dexter-api:v0.1
-        imagePullPolicy: Always
-        # livenessProbe:
-        #   httpGet:
-        #     path: /
-        #     port: 80
+        - name: dev2-filed-dexter-api
+          image: ct.filed.com/dev2-filed-dexter-api:v0.1
+          imagePullPolicy: Always
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 80
         #   initialDelaySeconds: 5
         #   periodSeconds: 5  
         ports: 

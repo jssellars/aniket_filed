@@ -1,0 +1,18 @@
+FROM tiangolo/uwsgi-nginx-flask:python3.7 AS build
+RUN apt-get update && apt-get install -y unixodbc-dev
+
+FROM build
+
+ARG STAGE
+ENV LISTEN_PORT 47220
+EXPOSE 47220
+ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_ENV=${STAGE}
+ENV UWSGI_INI /app/Potter/FacebookCampaignsBuilder/Api/uwsgi.ini
+
+COPY ./Potter /app/Potter
+COPY ./Core /app/Core
+COPY ./requirements.txt /app/Potter/FacebookCampaignsBuilder/Api
+
+WORKDIR /app/Potter/FacebookCampaignsBuilder/Api
+RUN pip install --upgrade pip && pip3 install -r requirements.txt

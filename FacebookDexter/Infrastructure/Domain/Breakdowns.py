@@ -32,6 +32,7 @@ class BreakdownEnum(Enum):
     GENDER = BreakdownBase(name="gender_breakdown", display_name="Gender")
     PLACEMENT = BreakdownBase(name="placement", display_name="Placement")
     DEVICE = BreakdownBase(name="impression_device", display_name="Device")
+    PLATFORM = BreakdownBase(name="platform_position", display_name="Publisher platform")
 
 
 class ActionBreakdownEnum(Enum):
@@ -45,4 +46,9 @@ class BreakdownMetadata:
     action_breakdown: ActionBreakdownEnum = None
     action_breakdown_value: typing.Any = None
 
-
+    def equals(self, other):
+        is_equal = (self.breakdown == other.breakdown and
+                    self.breakdown_value == other.breakdown_value and
+                    self.action_breakdown == other.action_breakdown and
+                    self.action_breakdown_value == other.action_breakdown_value)
+        return is_equal

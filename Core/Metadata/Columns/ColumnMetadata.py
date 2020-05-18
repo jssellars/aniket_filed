@@ -1,7 +1,7 @@
 from typing import List
 
-from Core.Tools.Misc.Enumeration import Enumeration
 from Core.Metadata.Columns.ColumnType import ColumnType
+from Core.Tools.Misc.Enumeration import Enumeration
 
 
 class ColumnMetadata:
@@ -10,6 +10,5 @@ class ColumnMetadata:
         self.type_id = column_type.id
 
         # Optional parameter
-        self.categorical_values = [enumeration.name for enumeration in categorical_values_list] if self.type_id == ColumnType.categorical.id else None
-
-
+        self.categorical_values = [enumeration.name for enumeration in
+                                   categorical_values_list] if self.type_id == ColumnType.categorical.id else None

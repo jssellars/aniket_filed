@@ -4,9 +4,12 @@ from marshmallow import INCLUDE, pre_load
 
 from Core.Tools.Mapper.MapperBase import MapperBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesLookalikeSpecDto import GraphAPIAudiencesLookalikeSpecDto
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import GraphAPIAudiencesPermissionsForActionsDto
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import OperationStatus, DataSource, SharingStatus
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesLookalikeSpecDto import \
+    GraphAPIAudiencesLookalikeSpecDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import \
+    GraphAPIAudiencesPermissionsForActionsDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import OperationStatus, DataSource, \
+    SharingStatus
 
 
 class GraphAPICustomAudienceMapping(MapperBase):
@@ -19,7 +22,8 @@ class GraphAPICustomAudienceMapping(MapperBase):
             data = Tools.convert_to_json(data)
 
         if "permissions_for_actions" in data.keys():
-            data["permissions_for_actions"] = GraphAPIAudiencesPermissionsForActionsDto(**data["permissions_for_actions"])
+            data["permissions_for_actions"] = GraphAPIAudiencesPermissionsForActionsDto(
+                **data["permissions_for_actions"])
 
         if "external_event_source" in data.keys():
             data["external_event_source"] = data["external_event_source"]["id"]

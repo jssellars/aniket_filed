@@ -9,7 +9,7 @@ class AdSetModelFields(StructureModelFieldBase):
 
     structure_fields = [
         FieldsMetadata.ad_account_structure_id,
-        FieldsMetadata.campaign_name,
+        FieldsMetadata.campaign_structure_name,
         FieldsMetadata.campaign_id,
         FieldsMetadata.name,
         FieldsMetadata.id,
@@ -24,7 +24,7 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.bid_strategy,
         FieldsMetadata.billing_event,
         FieldsMetadata.budget_remaining,
-        FieldsMetadata.campaign,
+        # FieldsMetadata.campaign,
         FieldsMetadata.configured_status,
         FieldsMetadata.created_at,
         FieldsMetadata.daily_budget,
@@ -41,7 +41,6 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.lifetime_imps,
         FieldsMetadata.lifetime_spend_cap,
         FieldsMetadata.lifetime_min_spend_target,
-        FieldsMetadata.name,
         FieldsMetadata.optimization_goal,
         FieldsMetadata.optimization_sub_event,
         FieldsMetadata.pacing_type,
@@ -57,11 +56,11 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.lifetime_min_spend_target,
         FieldsMetadata.ad_rules_governed,
         FieldsMetadata.targetingsentencelines,
-        FieldsMetadata.amount_spent,
+        FieldsMetadata.amount_spent
     ]
 
     insights_fields = [
-        FieldsMetadata.ad_account_id,
+        FieldsMetadata.account_id,
         FieldsMetadata.account_name,
         FieldsMetadata.adset_id
     ]

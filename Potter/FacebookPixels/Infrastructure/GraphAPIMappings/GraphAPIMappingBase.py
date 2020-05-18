@@ -1,4 +1,5 @@
 import typing
+
 from marshmallow import INCLUDE, pre_load
 
 from Core.Tools.Mapper.MapperBase import MapperBase
@@ -23,4 +24,3 @@ class GraphAPIPixelCustomAudienceMapping(GraphAPIMappingBase):
 
 class GraphAPIPixelDAChecksMapping(GraphAPIMappingBase):
     pass
-

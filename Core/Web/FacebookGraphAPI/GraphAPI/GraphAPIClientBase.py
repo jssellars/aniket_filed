@@ -1,5 +1,5 @@
-from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestTypeEnum import HTTPRequestTypeEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientHelper import GraphAPIGetHelper
+from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestTypeEnum import HTTPRequestTypeEnum
 
 
 class GraphAPIClientBase(GraphAPIGetHelper):

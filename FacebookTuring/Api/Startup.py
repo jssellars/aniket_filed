@@ -1,10 +1,12 @@
 import json
 import os
 
-from kombu import Exchange, Queue
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
+from Core.Tools.Logger.LoggerFactory import LoggerFactory
+from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
 from FacebookTuring.Api.Config.Config import FacebookConfig
 from FacebookTuring.Api.Config.Config import MongoConfig
 from FacebookTuring.Api.Config.Config import RabbitMqConfig
@@ -26,23 +28,17 @@ class Startup(object):
 
         # Initialize connections to DB
         self.engine = create_engine(self.database_config.connection_string)
-        self.Session = sessionmaker(bind=self.engine)
+        self.session = sessionmaker(bind=self.engine)
 
         # Initialize RabbitMQ exchanges and queues
+        # Initialize RabbitMQ exchanges and queues
         direct_exchange_config = self.rabbitmq_config.get_exchange_details_by_type("direct")
-
-        self.direct_exchange = Exchange(direct_exchange_config['name'],
-                                        type=direct_exchange_config['type'])
-        queue_details = direct_exchange_config['queues']
-        self.directInboundQueue = Queue(queue_details['inbound'],
-                                        self.direct_exchange,
-                                        routing_key=queue_details['inbound_routing_key'])
-        self.directOutboundQueue = {'name': queue_details['outbound'],
-                                    'key': queue_details['outbound_routing_key']}
-
-        fanout_exchange_config = self.rabbitmq_config.get_exchange_details_by_type("fanout")
-        self.fanout_exchange = Exchange(fanout_exchange_config['name'],
-                                        type=fanout_exchange_config['type'])
+        self.exchange_details = ExchangeDetails(name=direct_exchange_config["name"],
+                                                type=direct_exchange_config["type"])
+        self.exchange_details.inbound_queue = QueueDetails(direct_exchange_config["queues"]["inbound"],
+                                                           direct_exchange_config["queues"]["inbound_routing_key"])
+        self.exchange_details.outbound_queue = QueueDetails(direct_exchange_config["queues"]["outbound"],
+                                                            direct_exchange_config["queues"]["outbound_routing_key"])
 
         # Generic msrv configuration
         self.environment = app_config['environment']
@@ -54,6 +50,12 @@ class Startup(object):
         self.port = app_config["port"]
         self.jwt_secret_key = app_config["jwt_secret_key"]
         self.debug_mode = app_config["debug_mode"]
+        self.docker_filename = app_config["docker_filename"]
+        self.logger_type = app_config["logger_type"]
+        self.rabbit_logger_type = app_config["rabbit_logger_type"]
+        self.logger_level = app_config["logger_level"]
+        self.es_host = app_config.get("es_host", None)
+        self.es_port = app_config.get("es_port", None)
 
     def create_sql_session(self):
         return sessionmaker(bind=self.engine)
@@ -62,10 +64,27 @@ class Startup(object):
 #  Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
-    env = "local"
-config_file = f"Config/Settings/app.settings.{env}.json"
+    env = "dev"
+config_file = os.path.join(os.getcwd(), f"Config/Settings/app.settings.{env}.json")
 
 with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)
+
+# Initialize logger
+logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
+                                                port=startup.es_port,
+                                                name=startup.api_name,
+                                                level=startup.logger_level,
+                                                index_name=startup.docker_filename)
+rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
+                                                              port=startup.es_port,
+                                                              name=startup.api_name,
+                                                              level=startup.logger_level,
+                                                              index_name=startup.docker_filename)
+
+# Log startup details
+startup_log = LoggerMessageStartup(app_config=app_config,
+                                   description="Facebook Turing API - data interface between Filed and Facebook")
+logger.logger.info(startup_log.to_dict())

@@ -2,7 +2,8 @@ from Core.Metadata.Insights.InsightsReportModel import InsightsReportModel
 from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list
 from GoogleTuring.Api.Catalogs.Breakdowns.SegmentIds import SegmentIds
 from GoogleTuring.Api.Catalogs.BusinessViews.TableEnum import TableEnum
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.CampaignAgeRangeColumnsMaster import CampaignAgeRangeColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.CampaignAgeRangeColumnsMaster import \
+    CampaignAgeRangeColumnsMaster
 
 
 class CampaignAgeRangePerformanceReport(InsightsReportModel):

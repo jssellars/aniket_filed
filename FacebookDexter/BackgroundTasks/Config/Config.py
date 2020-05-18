@@ -3,8 +3,19 @@ from string import Template
 from Core.Tools.Config.BaseConfig import BaseConfig
 
 
+class MongoConfig(BaseConfig):
+    pass
+
+
 class FacebookConfig(BaseConfig):
-    """Configuration for Facebook Graph API SDK"""
+    pass
+
+
+class ExternalServicesConfig(BaseConfig):
+    pass
+
+
+class DexterConfig(BaseConfig):
     pass
 
 
@@ -44,11 +55,3 @@ class SQLAlchemyConfig(BaseConfig):
                                                                        port=self.port,
                                                                        database=self.name)
         return connection_string
-
-
-class ExternalServicesConfig(BaseConfig):
-    """Configuration for external services"""
-
-
-class AdminUserConfig(BaseConfig):
-    """Configuration for Admin user credentials"""

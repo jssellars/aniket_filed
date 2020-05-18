@@ -1,63 +1,111 @@
+import copy
+import copy
 import typing
-from operator import getitem, setitem
+from collections import defaultdict
+from threading import Thread
 
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.BackgroundTasks.Orchestrators.OrchestratorRunConfig import OrchestratorRunConfig
-from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
+from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
+from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import \
+    UpdatedBusinessOwnersDetails, \
+    FacebookTuringDataSyncCompletedEvent
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
+    TuringAdAccountJournalRepository
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 class Orchestrator:
+    ACCOUNTS_PER_THREAD = 0.1
 
-    def __init__(self, mongo_repository: MongoRepositoryBase = None, mapper: typing.Any = None):
-        self.mongo_repository = mongo_repository
-        self.mapper = mapper
+    def __init__(self,
+                 insights_repository: TuringMongoRepository = None,
+                 structures_repository: TuringMongoRepository = None,
+                 account_journal_repository: TuringAdAccountJournalRepository = None):
 
-    def run_sync_job(self, run_config: OrchestratorRunConfig = None) -> typing.NoReturn:
-        if run_config.check_has_data:
-            has_data = self.check_data(run_config)
-            if not has_data:
-                return False
+        self.__insights_repository = insights_repository
+        self.__structures_repository = structures_repository
+        self.__account_journal_repository = account_journal_repository
+        self.__structures_syncronizer = None
+        self.__insights_syncronizer = None
+        self.__logger = None
+        self.__rabbit_logger = None
 
-        try:
-            response = GraphAPIInsightsHandler.get_insights(permanent_token=run_config.permanent_token,
-                                                            level=run_config.level,
-                                                            ad_account_id=run_config.account_id,
-                                                            fields=run_config.fields,
-                                                            parameters=run_config.params,
-                                                            structure_fields=run_config.structure_fields,
-                                                            requested_fields=run_config.requested_fields)
+    def set_insights_repository(self, insights_repository: TuringMongoRepository = None):
+        self.__insights_repository = insights_repository
+        return self
 
-            account_id = run_config.account_id.split("_")[1]
-            response = self.__add_account_id_if_missing(response, account_id)
+    def set_structures_reposiotry(self, structures_repository: TuringMongoRepository = None):
+        self.__structures_repository = structures_repository
+        return self
 
-            if run_config.structures_sync:
-                response = self.mapper.load(response, many=True)
-            self.mongo_repository.collection = run_config.collection_name
-            self.mongo_repository.add_many(response)
-        except Exception as e:
-            # TODO: log exception
-            print(e)
+    def set_account_journal_repository(self, account_journal_repository: TuringAdAccountJournalRepository = None):
+        self.__account_journal_repository = account_journal_repository
+        return self
+
+    def set_logger(self, logger: typing.Any):
+        self.__logger = logger
+        return self
+
+    def set_rabbit_logger(self, logger: typing.Any):
+        self.__rabbit_logger = logger
+        return self
+
+    def run(self):
+        # get latest ad account state for all BO
+        ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active()
+        business_owners = self.__group_by_business_owner_id(ad_accounts_details)
+
+        # for each BO for each ad account, start a structures sync thread and an insights sync thread
+        for business_owner_id, business_owner_details in business_owners.items():
+            tasks = list()
+            step = round(self.ACCOUNTS_PER_THREAD * len(business_owner_details))
+            for index in range(0, len(business_owner_details), step):
+                entry = business_owner_details[index:index + step]
+                tasks.append(Thread(target=sync,
+                                    args=(self.__structures_repository.new_structures_repository(),
+                                          self.__insights_repository.new_insights_repository(),
+                                          self.__account_journal_repository.new_ad_account_journal_repository(),
+                                          entry)))
+            for task in tasks:
+                task.start()
+            #  publish event with updated ad accounts to Facebook Dexter
+            # this publish event can be modified to publish one update for all BOs available. It makes more sense to
+            # publish as they come to minimise the
+            # waiting time for Dexter to run and the computation volume.
+            for task in tasks:
+                task.join()
+            self.__publish_business_owner_synced_event(business_owner_id)
 
     @staticmethod
-    def __add_account_id_if_missing(response: typing.List[typing.Dict], account_id: typing.AnyStr) -> typing.List[typing.Dict]:
-        if response and not getitem(response[0], FieldsMetadata.ad_account_id.name):
-            [setitem(response[index], FieldsMetadata.ad_account_id.name, account_id) for index in range(len(response))]
+    def __group_by_business_owner_id(ad_accounts_details: typing.List[typing.Dict] = None) -> typing.Dict:
+        business_owner_details = defaultdict(list)
+        for entry in ad_accounts_details:
+            business_owner_details[entry[MiscFieldsEnum.business_owner_id]].append(copy.deepcopy(entry))
+        return business_owner_details
 
-        return response
-
-    @staticmethod
-    def check_data(run_config: OrchestratorRunConfig) -> bool:
+    def __publish_business_owner_synced_event(self,
+                                              business_owner_id: typing.AnyStr = None) -> typing.NoReturn:
+        account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id)
+        business_owner_updated_details = UpdatedBusinessOwnersDetails(business_owner_facebook_id=business_owner_id,
+                                                                      ad_account_ids=account_ids)
+        business_owner_synced_event = FacebookTuringDataSyncCompletedEvent(
+            business_owners=[business_owner_updated_details])
         try:
-            response = GraphAPIInsightsHandler.get_insights(permanent_token=run_config.permanent_token,
-                                                            level=run_config.level,
-                                                            ad_account_id=run_config.account_id,
-                                                            fields=run_config.fields,
-                                                            parameters=run_config.params,
-                                                            structure_fields=run_config.structure_fields,
-                                                            requested_fields=run_config.requested_fields)
-            return True if response else False
+            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
+                                             startup.exchange_details.name,
+                                             startup.exchange_details.outbound_queue.key)
+            rabbitmq_client.publish(business_owner_synced_event)
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+                                    name=business_owner_synced_event.message_type,
+                                    extra_data={
+                                        "event_body": rabbitmq_client.serialize_message(business_owner_synced_event)
+                                    })
+            self.__rabbit_logger.logger.info(log.to_dict())
         except Exception as e:
-            # TODO: log exception
-            print(e)
-
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name=business_owner_synced_event.message_type,
+                                    description=str(e))
+            self.__logger.logger.exception(log.to_dict())

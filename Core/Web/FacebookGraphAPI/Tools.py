@@ -46,7 +46,7 @@ class Tools(object):
                 'type': source,
                 'fbtrace_id': None
             }
-            
+
         return error_message
 
 

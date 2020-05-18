@@ -4,7 +4,6 @@ from datetime import datetime
 
 @dataclass
 class DexterJournalEntryModel:
-
     business_owner_id: str = None
     ad_account_id: str = None
     algorithm_type: str = None

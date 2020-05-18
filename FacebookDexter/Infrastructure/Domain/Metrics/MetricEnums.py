@@ -8,6 +8,11 @@ class MetricTypeEnum(Enum):
     INSIGHT = 1
     STRUCTURE = 2
     AUDIENCE = 3
+    INTERESTS = 4
+    PIXEL = 5
+    CREATIVE = 6
+    INSIGHT_CATEGORICAL = 7
+    PROSPECTING = 8
 
 
 class MetricTrendTimeBucketEnum(Enum):

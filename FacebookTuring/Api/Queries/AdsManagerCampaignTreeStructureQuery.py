@@ -6,7 +6,6 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 class AdsManagerCampaignTreeStructureQuery:
-
     class CampaignKeyMap:
         id = "campaign_id"
         name = "campaign_name"
@@ -17,7 +16,7 @@ class AdsManagerCampaignTreeStructureQuery:
 
     class AdKeyMap:
         id = "ad_id"
-        name = "name"
+        name = "ad_name"
 
     keymap = {
         Level.CAMPAIGN.value: CampaignKeyMap,
@@ -27,35 +26,45 @@ class AdsManagerCampaignTreeStructureQuery:
 
     @classmethod
     def get(cls, level, facebook_id):
-        # todo: check why ads are not returned in "children" per adset
-        mongo_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                 database_name=startup.mongo_config['structures_database_name'],
-                                                 collection_name=level)
+        repository = TuringMongoRepository(config=startup.mongo_config,
+                                           database_name=startup.mongo_config['structures_database_name'],
+                                           collection_name=level)
+        try:
+            structure = repository.get_all_by_key(cls.keymap[level].id, facebook_id)
+            campaign_id = list(map(itemgetter(cls.keymap[Level.CAMPAIGN.value].id), structure))
+            campaign_id = campaign_id[0]
+        except Exception as e:
+            raise e
 
-        structure = mongo_repository.get_all_by_key(cls.keymap[level].id, [facebook_id])
+        try:
+            structures = {}
+            for structure_level in Level:
+                if structure_level != Level.ACCOUNT:
+                    repository.collection = structure_level.value
+                    structures[structure_level.value] = repository.get_all_by_key(cls.keymap[Level.CAMPAIGN.value].id,
+                                                                                  campaign_id)
+        except Exception as e:
+            raise e
 
-        campaign_id = list(map(itemgetter(cls.keymap[Level.CAMPAIGN.value].id), structure))
-
-        structures = {}
-        for structure_level in Level:
-            if structure_level != Level.ACCOUNT:
-                mongo_repository.collection = structure_level.value
-                structures[structure_level.value] = mongo_repository.get_all_by_key(cls.keymap[Level.CAMPAIGN.value].id, campaign_id)
-
-        tree = {
-            "id": structures[Level.CAMPAIGN.value][0][cls.keymap[Level.CAMPAIGN.value].id],
-            "name": structures[Level.CAMPAIGN.value][0][cls.keymap[Level.CAMPAIGN.value].name],
-            "children": [{
-                "id": structure[cls.keymap[Level.ADSET.value].id],
-                "name": structure[cls.keymap[Level.ADSET.value].name],
-                "children": list(map(cls.build_ad_leaf,
-                                     filter(lambda x: x[cls.keymap[Level.ADSET.value].id] == structure[cls.keymap[Level.ADSET.value].id],
-                                            structures[Level.AD.value]
-                                            )
+        try:
+            tree = {
+                "id": structures[Level.CAMPAIGN.value][0][cls.keymap[Level.CAMPAIGN.value].id],
+                "name": structures[Level.CAMPAIGN.value][0][cls.keymap[Level.CAMPAIGN.value].name],
+                "children": [{
+                    "id": structure[cls.keymap[Level.ADSET.value].id],
+                    "name": structure[cls.keymap[Level.ADSET.value].name],
+                    "children": list(map(cls.build_ad_leaf,
+                                         filter(lambda x: x[cls.keymap[Level.ADSET.value].id] == structure[
+                                             cls.keymap[Level.ADSET.value].id],
+                                                structures[Level.AD.value]
+                                                )
+                                         )
                                      )
-                                 )
-            } for structure in structures[Level.ADSET.value]]}
+                } for structure in structures[Level.ADSET.value]]}
+        except Exception as e:
+            raise e
 
+        repository.close()
         return tree
 
     @classmethod

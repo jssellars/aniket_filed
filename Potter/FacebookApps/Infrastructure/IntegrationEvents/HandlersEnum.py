@@ -1,5 +1,6 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from Potter.FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequestHandler import GetAllAppsMessageRequestHandler
+from Potter.FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequestHandler import \
+    GetAllAppsMessageRequestHandler
 
 
 class HandlersEnum(EnumerationBase):

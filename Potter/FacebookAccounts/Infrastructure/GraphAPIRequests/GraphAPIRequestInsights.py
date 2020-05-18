@@ -3,7 +3,6 @@ from string import Template
 
 
 class GraphAPIRequestInsights:
-
     __default_api_version = "v5.0"
 
     def __init__(self,
@@ -12,7 +11,6 @@ class GraphAPIRequestInsights:
                  since: typing.AnyStr = None,
                  until: typing.AnyStr = None,
                  api_version: typing.AnyStr = None):
-
         self.__url = Template("https://graph.facebook.com/$api_version/$business_owner_facebook_id/adaccounts?fields="
                               # "name,id,account_status,currency,amount_spent,business,campaigns{effective_status}," # required if we want no. active campaigns
                               "name,id,account_status,currency,amount_spent,business,"

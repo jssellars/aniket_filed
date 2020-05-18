@@ -19,6 +19,7 @@ class GraphAPIAppMapping(MapperBase):
 
         if GraphAPIAppFields.APP_EVENT_TYPES.value in data.keys():
             data[GraphAPIAppFields.APP_EVENT_TYPES.value] = [GraphAPIAppEventTypeDto(**entry)
-                                                             for entry in data[GraphAPIAppFields.APP_EVENT_TYPES.value]]
+                                                             for entry in
+                                                             data[GraphAPIAppFields.APP_EVENT_TYPES.value]]
 
         return data

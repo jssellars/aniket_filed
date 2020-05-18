@@ -28,7 +28,7 @@ class Startup(object):
 #  Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
-    env = "local"
+    env = "dev"
 config_file = f"Config/Settings/app.settings.{env}.json"
 
 with open(config_file, 'r') as app_settings_json_file:

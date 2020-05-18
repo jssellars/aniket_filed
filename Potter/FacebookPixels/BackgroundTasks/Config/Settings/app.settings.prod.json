@@ -22,14 +22,12 @@
     "heartbeat": 0,
     "connection_timeout": 300
   },
-
   "facebook": {
     "description": "Filed Live",
     "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
-
   "sql_server_database": {
     "host": "prod.filed.com",
     "port": 1433,
@@ -37,11 +35,16 @@
     "password": "Parola@20",
     "name": "Facebook.Potter.FacebookAccounts"
   },
-
   "environment": "prod",
   "api_name": "FacebookPixels",
   "api_version": "1.0.0",
   "service_name": "FacebookPixels",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-potter-pixels-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "prod-elasticsearch",
+  "es_port": 9200
 }

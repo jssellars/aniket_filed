@@ -1,5 +1,6 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEventHandler import GoogleUserPreferencesUpdatedEventHandler
+from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEventHandler import \
+    GoogleUserPreferencesUpdatedEventHandler
 
 
 class HandlersEnum(EnumerationBase):

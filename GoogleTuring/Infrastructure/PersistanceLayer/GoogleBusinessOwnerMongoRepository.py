@@ -1,9 +1,10 @@
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
+from Core.Tools.MongoRepository.MongoRepositoryBase import MongoProjectionState
 from GoogleTuring.Infrastructure.Domain.Enums.GoogleAccountStatus import GoogleAccountStatus
+from GoogleTuring.Infrastructure.PersistanceLayer.StatusChangerMongoRepository import StatusChangerMongoRepository
 
 
-class GoogleBusinessOwnerMongoRepository(MongoRepositoryBase):
+class GoogleBusinessOwnerMongoRepository(StatusChangerMongoRepository):
     def __init__(self, client=None, database_name=None, collection_name=None, config=None):
         super().__init__(client=client, database_name=database_name, collection_name=collection_name, config=config)
 

@@ -9,4 +9,3 @@ class GraphAPIPixelDAChecksDto:
     result: str = None
     title: str = None
     user_message: str = None
-    

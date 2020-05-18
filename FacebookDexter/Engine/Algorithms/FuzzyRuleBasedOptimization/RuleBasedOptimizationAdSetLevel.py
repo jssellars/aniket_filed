@@ -1,17 +1,22 @@
 import typing
 
-from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Fuzzifiers.RuleBasedOptimizationAdSetFuzzyfierFactory import \
-    RuleBasedOptimizationAdSetFuzzyfierFactory
-from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.RuleBasedOptimizationBase import RuleBasedOptimizationBase
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.RuleBasedOptimizationBase import \
+    RuleBasedOptimizationBase
+from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 
 
 class RuleBasedOptimizationAdSetLevel(RuleBasedOptimizationBase):
 
-    def __init__(self, **kwargs):
-        self.__fuzzyfier_factory = RuleBasedOptimizationAdSetFuzzyfierFactory
-
-        super().__init__(**kwargs)
+    def __init__(self):
+        super().__init__()
+        self.set_level(LevelEnum.ADSET)
 
     def run(self, adset_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        recommendations = self.evaluate_general_rules(facebook_id=adset_id, fuzzyfier_factory=self.__fuzzyfier_factory)
+        recommendations = []
+        recommendations += self.evaluate_general_rules(facebook_id=adset_id, fuzzyfier_factory=self._fuzzyfier_factory)
+        recommendations += self.evaluate_remove_rules(facebook_id=adset_id, fuzzyfier_factory=self._fuzzyfier_factory)
+        recommendations += self.evaluate_decrease_budget_rules(facebook_id=adset_id,
+                                                               fuzzyfier_factory=self._fuzzyfier_factory)
+        recommendations += self.evaluate_increase_budget_rules(facebook_id=adset_id,
+                                                               fuzzyfier_factory=self._fuzzyfier_factory)
         return recommendations

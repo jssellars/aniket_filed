@@ -1,5 +1,5 @@
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Catalogs.Breakdowns.BreakdownsEnumeration import BreakdownsEnumeration
-from FacebookTuring.Infrastructure.Models.FacebookFieldsMetadata import FieldsMetadata
 
 
 class TimeBreakdowns:

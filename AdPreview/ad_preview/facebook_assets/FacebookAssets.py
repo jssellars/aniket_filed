@@ -1,11 +1,10 @@
 from copy import deepcopy
 
+from adpreview.config import FacebookConfig
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.page import Page
 from facebook_business.adobjects.pagepost import PagePost
 from facebook_business.api import FacebookAdsApi
-
-from adpreview.config import FacebookConfig
 from tools.Tools import Tools
 from tools.business_owner_facebook_token import get_user_token
 
@@ -17,7 +16,6 @@ def _GetClassProperties(targetObject):
 
 
 class FacebookAssets(object):
-
     _adImagesMinimalFields = ['id', 'name', 'permalink_url']
     _pagePostsDetailsFields = [PagePost.Field.__dict__[v] for v in _GetClassProperties(PagePost.Field())]
     _pagePostsMinimalFields = ['id', 'picture', 'message']
@@ -46,8 +44,8 @@ class FacebookAssets(object):
         return adAccountImages
 
     def GetAdVideosMinimal(self, adAccountFacebookId=None):
-        assert adAccountFacebookId is not None 
-        
+        assert adAccountFacebookId is not None
+
         try:
             adAccount = AdAccount(fbid=adAccountFacebookId)
             adVideosRaw = adAccount.get_ad_videos(fields=self._adVideosMinimalFields)

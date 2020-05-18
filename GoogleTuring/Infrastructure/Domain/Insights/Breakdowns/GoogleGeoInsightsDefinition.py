@@ -1,6 +1,6 @@
-from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Infrastructure.Domain.Enums.ActionBreakdown import ActionBreakdown, ACTION_BREAKDOWN_TO_FIELD
 from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import Breakdown, BreakdownType, BREAKDOWN_TO_FIELD
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Infrastructure.Domain.Enums.Level import Level, LEVEL_TO_FIELDS
 
 
@@ -13,7 +13,8 @@ class GoogleGeoInsightsDefinition:
         self.action_breakdowns = [ActionBreakdown.DEVICE, ActionBreakdown.DEFAULT]
 
         self.fields = {
-            level: {breakdown: {action_breakdown: [*LEVEL_TO_FIELDS[level], BREAKDOWN_TO_FIELD[Breakdown.COUNTRY], BREAKDOWN_TO_FIELD[breakdown],
+            level: {breakdown: {action_breakdown: [*LEVEL_TO_FIELDS[level], BREAKDOWN_TO_FIELD[Breakdown.COUNTRY],
+                                                   BREAKDOWN_TO_FIELD[breakdown],
                                                    ACTION_BREAKDOWN_TO_FIELD[action_breakdown]]
                                 for action_breakdown in self.action_breakdowns}
                     for breakdown in self.breakdowns}

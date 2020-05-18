@@ -20,19 +20,19 @@ adwords:
   # flow.
   client_id: 17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com
   client_secret: bk0Gae3BgAkbbf63GD5kU4jq
-  # The following values configure the client for the service account flow.
-  # path_to_private_key_file: INSERT_PATH_TO_JSON_KEY_FILE_HERE
-  # delegated_account: INSERT_DOMAIN_WIDE_DELEGATION_ACCOUNT
-  #############################################################################
-  # ReportDownloader Headers                                                  #
-  # Below you may specify boolean values for optional headers that will be    #
-  # applied to all requests made by the ReportDownloader utility by default.  #
-  #############################################################################
-  # report_downloader_headers:
+    # The following values configure the client for the service account flow.
+    # path_to_private_key_file: INSERT_PATH_TO_JSON_KEY_FILE_HERE
+    # delegated_account: INSERT_DOMAIN_WIDE_DELEGATION_ACCOUNT
+    #############################################################################
+    # ReportDownloader Headers                                                  #
+    # Below you may specify boolean values for optional headers that will be    #
+    # applied to all requests made by the ReportDownloader utility by default.  #
+    #############################################################################
+    # report_downloader_headers:
     # skip_report_header: False
     # skip_column_header: False
     # skip_report_summary: False
-    # use_raw_enum_values: False
+  # use_raw_enum_values: False
 
 
 # AdManagerClient configurations
@@ -55,51 +55,51 @@ ad_manager:
   #############################################################################
   # The following values configure the client for the service account flow.
   path_to_private_key_file: INSERT_PATH_TO_JSON_KEY_FILE_HERE
-  # delegated_account: INSERT_DOMAIN_WIDE_DELEGATION_ACCOUNT
-  # The following values configure the client for the installed application
-  # flow.
-  # client_id: INSERT_OAUTH_2_CLIENT_ID_HERE
-  # client_secret: INSERT_CLIENT_SECRET_HERE
-  # refresh_token: INSERT_REFRESH_TOKEN_HERE
+    # delegated_account: INSERT_DOMAIN_WIDE_DELEGATION_ACCOUNT
+    # The following values configure the client for the installed application
+    # flow.
+    # client_id: INSERT_OAUTH_2_CLIENT_ID_HERE
+    # client_secret: INSERT_CLIENT_SECRET_HERE
+    # refresh_token: INSERT_REFRESH_TOKEN_HERE
 
 
-# Common configurations:
-###############################################################################
-# Compression (optional)                                                      #
-# Below you may specify whether to accept and automatically decompress gzip   #
-# encoded SOAP requests. By default, gzip compression is not enabled.         #
-###############################################################################
-# enable_compression: False
-###############################################################################
-# Logging configuration (optional)                                            #
-# Below you may specify the logging configuration. This will be provided as   #
-# an input to logging.config.dictConfig.                                      #
-###############################################################################
-# logging:
-  # version: 1
-  # disable_existing_loggers: False
-  # formatters:
+    # Common configurations:
+    ###############################################################################
+    # Compression (optional)                                                      #
+    # Below you may specify whether to accept and automatically decompress gzip   #
+    # encoded SOAP requests. By default, gzip compression is not enabled.         #
+    ###############################################################################
+    # enable_compression: False
+    ###############################################################################
+    # Logging configuration (optional)                                            #
+    # Below you may specify the logging configuration. This will be provided as   #
+    # an input to logging.config.dictConfig.                                      #
+    ###############################################################################
+    # logging:
+    # version: 1
+    # disable_existing_loggers: False
+    # formatters:
     # default_fmt:
-      # format: ext://googleads.util.LOGGER_FORMAT
-  # handlers:
+    # format: ext://googleads.util.LOGGER_FORMAT
+    # handlers:
     # default_handler:
-      # class: logging.StreamHandler
-      # formatter: default_fmt
-      # level: INFO
-  # loggers:
+    # class: logging.StreamHandler
+    # formatter: default_fmt
+    # level: INFO
+    # loggers:
     # Configure root logger
     # "":
-      # handlers: [default_handler]
-      # level: INFO
-###############################################################################
-# Proxy configurations (optional)                                             #
-# Below you may specify an HTTP or HTTPS Proxy to be used when making API     #
-# requests. Note: You must specify the scheme used for the proxy endpoint.    #
-#                                                                             #
-# For additional information on configuring these values, see:                #
-# http://docs.python-requests.org/en/master/user/advanced/#proxies            #
-###############################################################################
-# proxy_config:
+    # handlers: [default_handler]
+  # level: INFO
+  ###############################################################################
+  # Proxy configurations (optional)                                             #
+  # Below you may specify an HTTP or HTTPS Proxy to be used when making API     #
+  # requests. Note: You must specify the scheme used for the proxy endpoint.    #
+  #                                                                             #
+  # For additional information on configuring these values, see:                #
+  # http://docs.python-requests.org/en/master/user/advanced/#proxies            #
+  ###############################################################################
+  # proxy_config:
   # http: INSERT_HTTP_PROXY_URI_HERE
   # https: INSERT_HTTPS_PROXY_URI_HERE
   # If specified, the given cafile will only be used if certificate validation

@@ -1,9 +1,10 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequestHandler import GetAdAccountsAmountSpentInsightMessageRequestHandler
-from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.GetBusinessOwnersTreesMessageRequestHandler import GetBusinessOwnersTreesMessageRequestHandler
+from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequestHandler import \
+    GetAdAccountsAmountSpentInsightMessageRequestHandler
+from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.GetBusinessOwnersTreesMessageRequestHandler import \
+    GetBusinessOwnersTreesMessageRequestHandler
 
 
 class HandlersEnum(EnumerationBase):
     BUSINESS_OWNER_UPDATE_REQUEST = GetBusinessOwnersTreesMessageRequestHandler
     BUSINESS_OWNER_ACCOUNT_SPEND_REQUEST = GetAdAccountsAmountSpentInsightMessageRequestHandler
-

@@ -1,5 +1,6 @@
 import json
 
+
 class BaseConfig(object):
 
     def __init__(self, aDict):
@@ -35,4 +36,3 @@ class BaseConfig(object):
         if property_name not in self.__dict__.keys():
             return None
         return self.__dict__[property_name]
-

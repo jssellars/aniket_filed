@@ -1,5 +1,6 @@
 {
   "rabbitmq": {
+    "consumer_name": "dev.bt.facebook.dexter.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -7,13 +8,13 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "dev2.filed.direct",
+        "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev2.filed.facebook.accounts.worker.inbound",
-          "inbound_routing_key": "dev2.filed.facebook.accounts.worker.inbound.key",
-          "outbound": "dev2.filed.facebook.accounts.worker.outbound",
-          "outbound_routing_key": "dev2.filed.facebook.accounts.worker.outbound.key"
+          "inbound": "dev.facebook.dexter.inbound",
+          "inbound_routing_key": "dev.facebook.dexter.inbound.key",
+          "outbound": "dev.facebook.dexter.outbound",
+          "outbound_routing_key": "dev.facebook.dexter.outbound.key"
         }
       }
     ],
@@ -21,14 +22,12 @@
     "heartbeat": 0,
     "connection_timeout": 300
   },
-
   "facebook": {
     "description": "Filed Live",
-    "api_version": "v4.0",
+    "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
-
   "sql_server_database": {
     "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
     "port": 1433,
@@ -36,11 +35,43 @@
     "password": "F2!irf0q",
     "name": "filed-facebook-tokens"
   },
-
+  "mongo": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "recommendations_database_name": "dev_dexter_fuzzy_inference_recommendations",
+    "recommendations_collection_name": "recommendations",
+    "journal_database_name": "dev_dexter_engine_run_journal",
+    "journal_collection_name": "dexter_journal",
+    "structures_database": "dev_facebook_turing_structures",
+    "insights_database": "dev_facebook_turing_insights_mock",
+    "logs_database": "dev_facebook_dexter_logs"
+  },
+  "external_services": {
+    "targeting_search": "https://targetingsearch.filed.com/interests/suggestions/"
+  },
+  "dexter_config": {
+    "min_results": 1,
+    "days_since_last_change": 3,
+    "recommendation_days_last_updated" : 3
+  },
   "environment": "dev",
-  "api_name": "FacebookAccountsBackgroundTasks",
+  "api_name": "FacebookDexterBackgroundTasks",
   "api_version": "1.0.0",
-  "service_name": "FacebookAccountsBackgroundTasks",
+  "service_name": "FacebookDexterBackgroundTasks",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-facebook-dexter-background-tasks",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
 }

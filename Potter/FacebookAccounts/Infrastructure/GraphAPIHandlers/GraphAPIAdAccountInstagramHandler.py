@@ -5,8 +5,10 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClie
 from Potter.FacebookAccounts.Api.Startup import startup
 from Potter.FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import GraphAPIBusinessDto
 from Potter.FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIInstagramDto import GraphAPIInstagramDto
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import GraphAPIAdAccountBusinessMapping
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountInstagramMapping import GraphAPIAdAccountInstagramMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import \
+    GraphAPIAdAccountBusinessMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountInstagramMapping import \
+    GraphAPIAdAccountInstagramMapping
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestBusiness import GraphAPIRequestBusiness
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInstagram import GraphAPIRequestInstagram
 
@@ -17,7 +19,6 @@ class GraphAPIAdAccountInstagramHandler:
     def handle(cls,
                permanent_token: typing.AnyStr,
                account_id: typing.AnyStr) -> typing.List[typing.Dict]:
-
         #  get business_id for ad account
         business_mapping = GraphAPIAdAccountBusinessMapping(GraphAPIBusinessDto)
         config = GraphAPIClientBaseConfig()

@@ -1,18 +1,21 @@
-from dataclasses import asdict
-
 import requests
 
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import ExchangeTemporaryTokenGraphAPIRequest
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import GeneratePermanentTokenGraphAPIRequest
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import DeletePermissionsGraphAPIRequest
 from Core.Web.Security.Authorization import add_bearer_token, generate_technical_token
 from Potter.FacebookAccounts.Api.Dtos.BusinessOwnerCreatedDto import BusinessOwnerCreatedDto
+from Potter.FacebookAccounts.Api.Startup import startup, rabbit_logger
 from Potter.FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountHandler import GraphAPIAdAccountHandler
-from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.BusinessOwnerCreatedEvent import BusinessOwnerCreatedEvent
-from Potter.FacebookAccounts.Api.Startup import startup
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
+    DeletePermissionsGraphAPIRequest
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
+    ExchangeTemporaryTokenGraphAPIRequest
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
+    GeneratePermanentTokenGraphAPIRequest
+from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.BusinessOwnerCreatedEvent import \
+    BusinessOwnerCreatedEvent
 
 
 class BusinessOwnerCreateCommandHandler:
@@ -49,16 +52,24 @@ class BusinessOwnerCreateCommandHandler:
                 "BusinessOwnerFacebookId": command.facebook_id
             }
 
-            response = requests.put(startup.external_services.subscription_update_business_owner_endpoint, json=body, headers=headers)
+            _ = requests.put(startup.external_services.subscription_update_business_owner_endpoint, json=body,
+                             headers=headers)
         except Exception as e:
             raise e
 
     @classmethod
     def publish_response(cls, response):
         try:
-            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key)
+            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name,
+                                             startup.exchange_details.outbound_queue.key)
             response.requested_permissions = ",".join(response.requested_permissions)
             rabbitmq_client.publish(response)
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+                                    name=response.message_type,
+                                    extra_data={
+                                        "event_body": rabbitmq_client.serialize_message(response)
+                                    })
+            rabbit_logger.logger.info(log.to_dict())
         except Exception as e:
             raise e
 
@@ -72,18 +83,20 @@ class BusinessOwnerCreateCommandHandler:
             raise e
 
         try:
-            generate_permanent_token_url = GeneratePermanentTokenGraphAPIRequest.generate_url(command.facebook_id, temporary_token)
+            generate_permanent_token_url = GeneratePermanentTokenGraphAPIRequest.generate_url(command.facebook_id,
+                                                                                              temporary_token)
             permanent_token_response, _ = HTTPRequestBase.get(generate_permanent_token_url)
         except Exception as e:
             raise e
 
         try:
             for entry in permanent_token_response:
-                BusinessOwnerRepository(startup.session).create_or_update_user(business_owner_facebook_id=command.facebook_id,
-                                                                               name=command.name,
-                                                                               email=command.email,
-                                                                               token=entry["access_token"],
-                                                                               page_id=entry["id"])
+                BusinessOwnerRepository(startup.session).create_or_update_user(
+                    business_owner_facebook_id=command.facebook_id,
+                    name=command.name,
+                    email=command.email,
+                    token=entry["access_token"],
+                    page_id=entry["id"])
         except Exception as e:
             raise e
 
@@ -92,7 +105,8 @@ class BusinessOwnerCreateCommandHandler:
         try:
             permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(command.facebook_id)
 
-            businesses = GraphAPIAdAccountHandler(permanent_token, startup.facebook_config).get_business_owner_details(command.facebook_id)
+            businesses = GraphAPIAdAccountHandler(permanent_token, startup.facebook_config).get_business_owner_details(
+                command.facebook_id)
 
             businesses = BusinessOwnerCreatedDto(facebook_id=command.facebook_id,
                                                  name=command.name,
@@ -109,11 +123,14 @@ class BusinessOwnerCreateCommandHandler:
 
 class BusinessOwnerUpdateCommandHandler:
     """TODO: Finish implementation after discussion with Sebastian + Vlad on how it is best to do this"""
+
     @classmethod
     def handle(cls, command):
         try:
-            business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(command.facebook_id)
-            delete_permissions_url = DeletePermissionsGraphAPIRequest.generate_url(command.facebook_id, business_owner_permanent_token)
+            business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+                command.facebook_id)
+            delete_permissions_url = DeletePermissionsGraphAPIRequest.generate_url(command.facebook_id,
+                                                                                   business_owner_permanent_token)
 
             HTTPRequestBase.delete(delete_permissions_url)
         except Exception as e:

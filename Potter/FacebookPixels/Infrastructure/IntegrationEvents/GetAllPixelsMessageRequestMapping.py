@@ -9,4 +9,3 @@ class GetAllPixelsMessageRequestMapping(MapperBase):
 
     class Meta:
         unknown = EXCLUDE
-

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RecommendationCategory(Enum):
     IMPROVE_CPR = "cpr"
     IMPROVE_CPC = "cpc"

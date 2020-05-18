@@ -10,7 +10,7 @@ class ViewDeliveryBase(View):
 class ViewCampaignDelivery(ViewDeliveryBase):
     table_name = "vCampaignInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.reach,
@@ -24,7 +24,7 @@ class ViewCampaignDelivery(ViewDeliveryBase):
 class ViewAdSetDelivery(ViewDeliveryBase):
     table_name = "vAdSetInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.reach,
@@ -38,7 +38,7 @@ class ViewAdSetDelivery(ViewDeliveryBase):
 class ViewAdDelivery(ViewDeliveryBase):
     table_name = "vAdInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.reach,

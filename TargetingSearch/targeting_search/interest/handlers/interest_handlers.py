@@ -1,10 +1,9 @@
 import json
 from copy import deepcopy
 
-from django.core import serializers
-
 from algorithms.string_matching import match_strings
 from app_config.app_config import FACEBOOK_CONFIG
+from django.core import serializers
 from interest.handlers.interests_search import search_interests, suggest_interests
 from interest.models import *
 from tools.facebook_worker import FacebookInterestsWorker

@@ -20,21 +20,21 @@ spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-          - "dev2.filed.com"         
+            - "dev2.filed.com"
       imagePullSecrets:
-      - name: regcred        
+        - name: regcred
       containers:
-      - name: dev2-filed-potter-facebook-accounts-api
-        image: ct.filed.com/dev2-filed-potter-facebook-accounts-api:v0.1
-        imagePullPolicy: Always
-      #  livenessProbe:
-      #    httpGet:
-      #      path: /api/v1/facebook-accounts/version
-      #      port: 47200
-      #    initialDelaySeconds: 5
-      #    periodSeconds: 5  
-        ports: 
-        - containerPort : 47200
+        - name: dev2-filed-potter-facebook-accounts-api
+          image: ct.filed.com/dev2-filed-potter-facebook-accounts-api:v0.1
+          imagePullPolicy: Always
+          #  livenessProbe:
+          #    httpGet:
+          #      path: /api/v1/facebook-accounts/version
+          #      port: 47200
+          #    initialDelaySeconds: 5
+          #    periodSeconds: 5
+          ports:
+            - containerPort: 47200
       #   volumeMounts:
       #   - name: persistent-storage
       #     mountPath: /app/Filed.Users.API/logs

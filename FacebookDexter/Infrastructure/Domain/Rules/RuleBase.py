@@ -7,7 +7,9 @@ from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
-from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeEnum, RuleImportanceEnum, RuleSourceEnum, RuleCategoryEnum
+from FacebookDexter.Infrastructure.Domain.Rules.Connective import Connective
+from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeEnum, RuleImportanceEnum, RuleSourceEnum, \
+    RuleCategoryEnum, RuleRedirectEnum
 
 
 class RuleBase:
@@ -15,7 +17,7 @@ class RuleBase:
                  action: ActionEnum = None,
                  rtype: RuleTypeEnum = RuleTypeEnum.PERFORMANCE,
                  antecedents: typing.List[Antecedent] = None,
-                 connective: LogicOperatorEnum = None,
+                 connective: Connective = None,
                  template: typing.AnyStr = None,
                  importance: RuleImportanceEnum = RuleImportanceEnum.HIGH,
                  source: RuleSourceEnum = RuleSourceEnum.DEXTER,
@@ -23,11 +25,12 @@ class RuleBase:
                  breakdown_metadata: BreakdownMetadata = None,
                  time_interval: DaysEnum = None,
                  channel: ChannelEnum = None,
-                 category: RuleCategoryEnum = None):
+                 category: RuleCategoryEnum = None,
+                 redirect: RuleRedirectEnum = None):
         self.action = action
         self.type = rtype
         self.antecedents = antecedents
-        self.connective = connective if connective else LogicOperatorEnum.AND
+        self.connective = connective if connective else Connective(LogicOperatorEnum.AND)
         self.template = template
         self.importance = importance
         self.source = source
@@ -36,6 +39,7 @@ class RuleBase:
         self.time_interval = time_interval
         self.channel = channel
         self.category = category
+        self.redirect = redirect
 
     def get_antecedents_by_metric(self, metric_name: typing.AnyStr = None):
         return [antecedent for antecedent in self.antecedents if antecedent.metric_name == metric_name]

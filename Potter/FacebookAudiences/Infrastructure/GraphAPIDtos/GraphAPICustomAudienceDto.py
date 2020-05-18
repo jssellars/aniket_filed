@@ -2,7 +2,8 @@ import typing
 from dataclasses import dataclass
 
 from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos import GraphAPIAudiencesPermissionsForActionsDto
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesLookalikeSpecDto import GraphAPIAudiencesLookalikeSpecDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesLookalikeSpecDto import \
+    GraphAPIAudiencesLookalikeSpecDto
 
 
 @dataclass

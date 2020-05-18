@@ -5,7 +5,8 @@ from Core.Tools.Misc.ObjectSerializers import object_to_json
 class AdsManagerCatalogsBreakdownsCombinationsDto:
     json_encoder = object_to_json
 
-    __shared_state = json_encoder(FacebookTuring.Api.Catalogs.Breakdowns.BreakdownsCombinations.BreakdownsCombinations())
+    __shared_state = json_encoder(
+        FacebookTuring.Api.Catalogs.Breakdowns.BreakdownsCombinations.BreakdownsCombinations())
 
     def __init__(self):
         self.__dict__ = self.__shared_state

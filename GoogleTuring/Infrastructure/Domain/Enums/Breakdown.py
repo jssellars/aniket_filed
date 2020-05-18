@@ -1,4 +1,5 @@
 from enum import Enum
+
 from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
 

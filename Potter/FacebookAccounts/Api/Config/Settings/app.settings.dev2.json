@@ -22,14 +22,12 @@
     "heartbeat": 0,
     "connection_timeout": 300
   },
-
   "facebook": {
     "description": "Filed Live",
     "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
-
   "sql_server_database": {
     "host": "dev2.filed.com",
     "port": 1433,
@@ -37,7 +35,15 @@
     "password": "Parola@20",
     "name": "Dev2.Facebook.Potter.FacebookAccounts"
   },
-
+  "external_services": {
+    "users_signin_endpoint": "https://dev2-api-users.filed.com/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://dev2-api-users.filed.com/api/v1/users/get-technical-jwt",
+    "subscription_update_business_owner_endpoint": "https://dev2-api-subscriptions.filed.com/api/v1/contacts/set-businessowner-facebook-id"
+  },
+  "admin_user": {
+    "email": "admin@filed.com",
+    "password": "Adm1n@Fil3ed"
+  },
   "environment": "dev2",
   "api_name": "FacebookAccounts",
   "api_version": "1.0.0",
@@ -47,15 +53,10 @@
   "port": 47200,
   "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
   "debug_mode": true,
-
-  "external_services": {
-    "users_signin_endpoint": "https://dev2-api-users.filed.com/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://dev2-api-users.filed.com/api/v1/users/get-technical-jwt",
-    "subscription_update_business_owner_endpoint": "https://dev2-api-subscriptions.filed.com/api/v1/contacts/set-businessowner-facebook-id"
-  },
-
-  "admin_user": {
-    "email": "admin@filed.com",
-    "password": "Adm1n@Fil3ed"
-  }
+  "docker_filename": "filed-potter-accounts-api",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "dev2-elasticsearch",
+  "es_port": 9200
 }

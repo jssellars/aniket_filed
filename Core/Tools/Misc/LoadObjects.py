@@ -2,7 +2,6 @@ import os
 
 
 class LoadObjects:
-
     objects = []
 
     __python_init_filename = "__init__.py"

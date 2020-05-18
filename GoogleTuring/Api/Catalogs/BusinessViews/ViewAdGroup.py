@@ -1,9 +1,12 @@
 from GoogleTuring.Api.Catalogs.BusinessViews.TableEnum import TableEnum
 from GoogleTuring.Api.Catalogs.Views.GoogleView import GoogleView
 from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.AdGroupColumnsMaster import AdGroupColumnsMaster
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.AdGroupAgeRangeColumnsMaster import AdGroupAgeRangeColumnsMaster
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Gender.AdGroupGenderColumnsMaster import AdGroupGenderColumnsMaster
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Keywords.AdGroupKeywordsColumnsMaster import AdGroupKeywordsColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.AdGroupAgeRangeColumnsMaster import \
+    AdGroupAgeRangeColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Gender.AdGroupGenderColumnsMaster import \
+    AdGroupGenderColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Keywords.AdGroupKeywordsColumnsMaster import \
+    AdGroupKeywordsColumnsMaster
 from GoogleTuring.Api.Catalogs.Views.ViewTypeEnum import ViewTypeEnum
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 

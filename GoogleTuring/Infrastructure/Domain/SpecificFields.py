@@ -25,6 +25,3 @@ ENGAGEMENT_FIELDS = [
     # GoogleFieldMetadata.engagement_rate,
     GoogleFieldsMetadata.engagements
 ]
-
-
-

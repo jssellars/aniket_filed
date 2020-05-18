@@ -8,42 +8,47 @@ from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwn
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookTuring.Api.Startup import startup
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGraphAPIStructure
+from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGraphAPIStructure, \
+    LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureMapping, StructureFields
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 class AdsManagerDuplicateStructureCommandHandler:
-
     graph_api_client = None
 
     def handle(self, command, level, facebook_id, business_owner_facebook_id):
         # get business owner permanent Facebook token
-        business_owner_permanent_token = BusinessOwnerRepository(startup.Session).get_permanent_token(business_owner_facebook_id)
+        business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+            business_owner_facebook_id)
 
         # Create a Facebook API client
-        facebook_api_sdk_client = GraphAPISdkBase(startup.facebook_config, business_owner_permanent_token)
+        _ = GraphAPISdkBase(startup.facebook_config, business_owner_permanent_token)
         self.graph_api_client = GraphAPIClientBase(business_owner_permanent_token)
 
         if command.parent_ids:
-            for parent_id in command.parent_ids:
+            try:
+                for parent_id in command.parent_ids:
+                    self.duplicate_structure(command,
+                                             business_owner_facebook_id,
+                                             business_owner_permanent_token,
+                                             level,
+                                             facebook_id,
+                                             parent_id)
+            except Exception as e:
+                raise e
+        else:
+            try:
                 self.duplicate_structure(command,
                                          business_owner_facebook_id,
                                          business_owner_permanent_token,
                                          level,
-                                         facebook_id,
-                                         parent_id)
-        else:
-            self.duplicate_structure(command,
-                                     business_owner_facebook_id,
-                                     business_owner_permanent_token,
-                                     level,
-                                     facebook_id)
-
-        return 204
+                                         facebook_id)
+            except Exception as e:
+                raise e
 
     def duplicate_structure(self,
                             command,
@@ -56,7 +61,8 @@ class AdsManagerDuplicateStructureCommandHandler:
             new_structure_facebook_id = self.duplicate_structure_on_facebook(level, facebook_id, parent_id)
 
             # get full STRUCTURE for newly created entity
-            new_structure_details = self.get_new_structure_details(business_owner_permanent_token, new_structure_facebook_id, level)
+            new_structure_details = self.get_new_structure_details(business_owner_permanent_token,
+                                                                   new_structure_facebook_id, level)
 
             # Add new STRUCTURE
             self.save_structure_details(business_owner_facebook_id, new_structure_details, level)
@@ -72,9 +78,9 @@ class AdsManagerDuplicateStructureCommandHandler:
     def get_new_structure_details(self, business_owner_permanent_token, facebook_id, level):
         structure_fields = StructureFields.get(level)
         self.graph_api_client.config = self.build_facebook_api_client_get_details_config(facebook_id,
-                                                                                           business_owner_permanent_token,
-                                                                                           structure_fields.level,
-                                                                                           structure_fields.to_fields_list())
+                                                                                         business_owner_permanent_token,
+                                                                                         structure_fields.level,
+                                                                                         structure_fields.get_structure_fields())
         new_structure_details = self.graph_api_client.call_facebook()
 
         mapping = StructureMapping.get(level)
@@ -85,10 +91,12 @@ class AdsManagerDuplicateStructureCommandHandler:
         structure.business_owner_facebook_id = business_owner_facebook_id
         structure.last_updated_at = datetime.now()
 
-        mongo_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                 databaseName=startup.mongo_config['structures_database_name'],
-                                                 collection_name=level)
-        mongo_repository.AddOne(structure)
+        repository = TuringMongoRepository(config=startup.mongo_config,
+                                           databaseName=startup.mongo_config['structures_database_name'],
+                                           collection_name=level)
+        structure_id = getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
+        repository.add_structure(level=Level(level), key_value=structure_id, document=structure)
+        repository.close()
 
     @staticmethod
     def build_facebook_api_client_get_details_config(business_owner_permanent_token, facebook_id, level, fields):

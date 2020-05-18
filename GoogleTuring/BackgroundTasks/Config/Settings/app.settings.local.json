@@ -30,13 +30,13 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "google_insights_database_name": "local_Filed_Turing_Google_Insights",
-    "google_structures_database_name": "local_Filed_Turing_Google_Structures",
-    "google_accounts_database_name": "local_Filed_Turing_Google_Accounts",
+    "google_insights_database_name": "local_google_turing_insights",
+    "google_accounts_database_name": "local_google_turing_accounts",
+    "google_structures_database_name": "local_google_turing_structures",
     "location_data_collection_name": "location_data",
     "accounts_collection_name": "google_accounts"
   },
-    "google": {
+  "google": {
     "client_config_path": "Config/Settings/googleads.yaml",
     "developer_token": "JcuH_-cVSK9CBVpRz3ZIIg",
     "client_id": "17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",

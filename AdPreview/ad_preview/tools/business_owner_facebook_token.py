@@ -1,8 +1,6 @@
 import pyodbc
-
-from adpreview.config import USER_TOKEN_CONNECTION_STRING
 from adpreview.config import DATABASE_CONFIG
-
+from adpreview.config import USER_TOKEN_CONNECTION_STRING
 
 __GET_USER_TOKEN__ = """SELECT TOP(1) token FROM FacebookUserTokens WHERE FacebookUserTokens.user_id = '{user_id}'"""
 

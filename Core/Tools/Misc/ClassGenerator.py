@@ -2,7 +2,7 @@ import json
 
 
 class ClassGenerator:
-    
+
     def __init__(self, dict_input=None):
         if dict_input:
             if isinstance(dict_input, str):

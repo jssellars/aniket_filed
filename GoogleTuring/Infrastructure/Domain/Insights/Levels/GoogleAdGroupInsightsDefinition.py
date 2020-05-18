@@ -1,5 +1,5 @@
-from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Infrastructure.Domain.Enums.ActionBreakdown import ActionBreakdown, ACTION_BREAKDOWN_TO_FIELD
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Infrastructure.Domain.Enums.Level import Level
 from GoogleTuring.Infrastructure.Domain.GoogleBaseFields import BASE_FIELDS
 from GoogleTuring.Infrastructure.Domain.SpecificFields import ENGAGEMENT_FIELDS, AD_GROUP_FIELDS

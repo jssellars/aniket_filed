@@ -85,7 +85,8 @@ class AdWordsStructuresClient(AdWordsBaseClient):
             budget_id = self.__get_budget_id_for_campaign(service, structure_id)
             additional_info = {'budget_id': budget_id}
 
-        operand, extra_operand = UpdateStructureOperandMapper.map(details=details, structure_id=structure_id, additional_info=additional_info, level=level)
+        operand, extra_operand = UpdateStructureOperandMapper.map(details=details, structure_id=structure_id,
+                                                                  additional_info=additional_info, level=level)
 
         operations = [{
             'operator': 'SET',

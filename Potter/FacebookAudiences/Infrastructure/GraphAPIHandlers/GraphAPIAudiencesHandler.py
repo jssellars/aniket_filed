@@ -10,11 +10,15 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from Potter.FacebookAudiences.Infrastructure.Domain.Audience import Audience
 from Potter.FacebookAudiences.Infrastructure.Domain.AudienceStateEnum import AudienceStateEnum
 from Potter.FacebookAudiences.Infrastructure.Domain.AudienceTypeEnum import AudienceTypeEnum
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import GraphAPICustomAudienceDto, OperationStatus
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPICustomAudienceFields, GraphAPISavedAudienceFields
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import GraphAPICustomAudienceDto, \
+    OperationStatus
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPICustomAudienceFields, \
+    GraphAPISavedAudienceFields
 from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPISavedAudienceDto import GraphAPISavedAudienceDto
-from Potter.FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPICustomAudienceMapping import GraphAPICustomAudienceMapping
-from Potter.FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPISavedAudienceMapping import GraphAPISavedAudienceMapping
+from Potter.FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPICustomAudienceMapping import \
+    GraphAPICustomAudienceMapping
+from Potter.FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPISavedAudienceMapping import \
+    GraphAPISavedAudienceMapping
 
 
 class GraphAPIAudiencesHandler:

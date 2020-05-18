@@ -8,7 +8,8 @@ from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.AdGroupColumnsMast
 class AdGroupPerformanceReport(InsightsReportModel):
     table_name = TableEnum.AD_GROUP_PERFORMANCES.value
     report_breakdowns = [TableEnum.AD_GROUP_GENDER_PERFORMANCES, TableEnum.AD_GROUP_GEO_PERFORMANCES.value,
-                         TableEnum.AD_GROUP_AGE_RANGE_PERFORMANCES.value, TableEnum.AD_GROUP_KEYWORDS_PERFORMANCES.value]
+                         TableEnum.AD_GROUP_AGE_RANGE_PERFORMANCES.value,
+                         TableEnum.AD_GROUP_KEYWORDS_PERFORMANCES.value]
     display_name = "Ad Group Report"
 
     json_list_encoder = object_to_attribute_values_list

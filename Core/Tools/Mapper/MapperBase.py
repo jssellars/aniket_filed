@@ -1,7 +1,7 @@
 import typing
 from inspect import isfunction
 
-from marshmallow import Schema, post_load, fields, pre_load, EXCLUDE, INCLUDE
+from marshmallow import Schema, post_load, fields, pre_load, INCLUDE
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 
@@ -60,11 +60,12 @@ class MapperBase(Schema):
 
 
 class MappingBase(MapperBase):
-    # todo: needs testing. Not sure about initializing Meta properties from self
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if self._target:
-            input_fields = [attribute for attribute in dir(self._target) if not callable(getattr(self._target, attribute)) and not isfunction(getattr(self._target, attribute)) and not attribute.startswith('__')]
+            input_fields = [attribute for attribute in dir(self._target) if
+                            not callable(getattr(self._target, attribute)) and not isfunction(
+                                getattr(self._target, attribute)) and not attribute.startswith('__')]
             self.Meta.fields = input_fields
 
     class Meta:

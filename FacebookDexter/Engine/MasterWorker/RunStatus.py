@@ -1,4 +1,5 @@
-from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import RunStatusDexterEngineJournal, DexterEngineRunJournalEnum
+from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import RunStatusDexterEngineJournal, \
+    DexterEngineRunJournalEnum
 
 
 class RunStatus:

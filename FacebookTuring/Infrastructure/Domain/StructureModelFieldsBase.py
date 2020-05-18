@@ -1,15 +1,22 @@
-class StructureModelFieldBase:
+import functools
+import operator
 
+
+class StructureModelFieldBase:
     structure_fields = []
     insights_fields = []
 
     @classmethod
     def get_structure_fields(cls):
-        return [field.field_name for field in cls.structure_fields]
+        fields = [field.facebook_fields for field in cls.structure_fields]
+        fields = functools.reduce(operator.iconcat, fields, [])
+        return fields
 
     @classmethod
     def get_insights_fields(cls):
-        return [field.field_name for field in cls.insights_fields]
+        fields = [field.facebook_fields for field in cls.insights_fields]
+        fields = functools.reduce(operator.iconcat, fields, [])
+        return fields
 
     @classmethod
     def get_fields(cls):

@@ -8,13 +8,13 @@ from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto impor
 class CreatorDto:
     id: typing.AnyStr = None
     name: typing.AnyStr = None
-    
+
 
 @dataclass
 class AdAccountDto:
     id: typing.AnyStr = None
     account_id: typing.AnyStr = None
-    
+
 
 @dataclass
 class GraphAPIPixelDto:

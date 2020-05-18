@@ -6,7 +6,7 @@ from FacebookDexter.Infrastructure.FuzzyEngine.FuzzySets.FuzzyMembershipFunction
 
 class LinguisticVariableEnum(Enum):
     LOW = 1
-    AVERAGE = 2
+    MEDIUM = 2
     HIGH = 3
     INCREASING = 4
     DECREASING = 5
@@ -21,7 +21,8 @@ class LinguisticVariable:
 
 
 class Fuzzyfier:
-    def __init__(self, linguistic_levels: typing.List[LinguisticVariable] = None):
+    def __init__(self, metric_name: typing.AnyStr = None, linguistic_levels: typing.List[LinguisticVariable] = None):
+        self.metric_name = metric_name
         self.linguistic_levels = linguistic_levels
         self.__levels = None
 
@@ -34,14 +35,13 @@ class Fuzzyfier:
         if membership_function:
             fuzzy_value = membership_function.evaluate(value)
             fuzzy_class = linguistic_level
-
         return fuzzy_class, fuzzy_value
 
-    def __get_membership_function_by_linguistic_level(self, linguistic_level: LinguisticVariableEnum = None) -> FuzzyMembershipFunctionBase:
+    def __get_membership_function_by_linguistic_level(self,
+                                                      linguistic_level: LinguisticVariableEnum = None) -> FuzzyMembershipFunctionBase:
         linguistic_level_value = next(filter(lambda x: x.level == linguistic_level, self.linguistic_levels), None)
         if not linguistic_level_value:
             raise ValueError(f"Invalid linguistic variable level {linguistic_level.value}")
-
         return linguistic_level_value.membership_function
 
     @property

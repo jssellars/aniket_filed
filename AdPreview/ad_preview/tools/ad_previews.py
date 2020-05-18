@@ -1,10 +1,9 @@
+from adpreview.config import FacebookConfig
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.adobjects.adcreativelinkdata import AdCreativeLinkData
 from facebook_business.adobjects.adcreativeobjectstoryspec import AdCreativeObjectStorySpec
 from facebook_business.api import FacebookAdsApi
-
-from adpreview.config import FacebookConfig
 from tools.business_owner_facebook_token import get_user_token
 
 

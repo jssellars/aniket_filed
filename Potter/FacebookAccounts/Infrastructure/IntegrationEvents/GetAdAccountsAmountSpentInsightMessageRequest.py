@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-
 import typing
+from dataclasses import dataclass
 
 
 @dataclass
@@ -16,7 +15,7 @@ class GetAdAccountsAmountSpentInsightMessageRequest:
     user_id: str = None
     from_date: str = None
     to_date: str = None
-    ad_accounts_details: typing.List[typing.Any] = None # typing.List[AdAccountDetails]
+    ad_accounts_details: typing.List[typing.Any] = None  # typing.List[AdAccountDetails]
 
 
 """

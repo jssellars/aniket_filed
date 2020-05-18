@@ -4,8 +4,10 @@ from flask_restful import Resource, abort
 
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
 from GoogleTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
-from GoogleTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import AdsManagerDeleteStructureCommandHandler
-from GoogleTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import AdsManagerUpdateStructureCommandHandler
+from GoogleTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import \
+    AdsManagerDeleteStructureCommandHandler
+from GoogleTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import \
+    AdsManagerUpdateStructureCommandHandler
 from GoogleTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
 

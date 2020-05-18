@@ -1,1 +1,2 @@
 DEFAULT_DATETIME = "%Y-%m-%d"
+DEFAULT_DATETIME_ISO = "%Y-%m-%dT%H:%M:%S"

@@ -23,5 +23,5 @@ DATABASE_CONFIG = {
 FACEBOOK_SEARCH_URL = "https://graph.facebook.com/{api_version}/{ad_account_id}/targetingsearch?q={search_input}&access_token={token}&limit=5000"
 SUGGEST_INTEREST_URL = "https://graph.facebook.com/{api_version}/search?interest_list={interests}&type=adinterestsuggestion&access_token={token}&limit=5000"
 
-AUDIENCE_DETAILS_URL = "https://graph.facebook.com/{api_version}/{ad_account_id}/delivery_estimate?access_token={token}"+\
-    "&targeting_spec={targeting_spec}&optimization_goal={optimization_goal}&attribution_spec={attribution_spec}&bid_strategy={bid_strategy}"
+AUDIENCE_DETAILS_URL = "https://graph.facebook.com/{api_version}/{ad_account_id}/delivery_estimate?access_token={token}" + \
+                       "&targeting_spec={targeting_spec}&optimization_goal={optimization_goal}&attribution_spec={attribution_spec}&bid_strategy={bid_strategy}"

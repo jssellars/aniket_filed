@@ -1,0 +1,66 @@
+{
+  "rabbitmq": {
+    "consumer_name": "staging.bt.facebook.turing.consumer",
+    "username": "ecsubdgh",
+    "password": "ieNetipc0tqrtZvzRkSrqaW6ADyASym0",
+    "hostname": "spotted-starfish.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ecsubdgh",
+    "exchanges": [
+      {
+        "name": "staging.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "staging.facebook.turing.outbound",
+          "inbound_routing_key": "staging.facebook.turing.outbound.key",
+          "outbound": "staging.facebook.dexter.inbound",
+          "outbound_routing_key": "staging.facebook.dexter.inbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "dev2.filed.com",
+    "port": 1433,
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Staging.Facebook.Potter.FacebookAccounts"
+  },
+  "mongo_database": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "insights_database_name": "staging_facebook_turing_insights",
+    "structures_database_name": "staging_facebook_turing_structures",
+    "accounts_journal_database_name": "staging_facebook_turing_accounts_journal",
+    "accounts_journal_collection_name": "journal"
+  },
+  "environment": "staging",
+  "api_name": "FacebookTuringBackgroundTasks",
+  "api_version": "1.0.0",
+  "service_name": "FacebookTuringBackgroundTasks",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "docker_filename": "filed-facebook-turing-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "staging-elasticsearch",
+  "es_port": 9200
+}

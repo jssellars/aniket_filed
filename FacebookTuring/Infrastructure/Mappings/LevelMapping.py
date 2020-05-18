@@ -1,8 +1,9 @@
-from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.campaign import Campaign
-from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.campaign import Campaign
+
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
 
 
 class Level(EnumerationBase):

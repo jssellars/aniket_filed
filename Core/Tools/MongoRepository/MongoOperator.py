@@ -20,3 +20,5 @@ class MongoOperator(Enum):
     MATCH = "$match"
     SUM = "$sum"
     AVERAGE = "$avg"
+    MIN = "$min"
+    MAX = "$max"

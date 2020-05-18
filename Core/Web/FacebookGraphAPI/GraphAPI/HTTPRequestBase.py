@@ -2,7 +2,6 @@ import requests
 
 
 class HTTPRequestBase(object):
-
     _timeout = 10000
 
     @classmethod

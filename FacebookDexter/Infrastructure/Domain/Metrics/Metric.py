@@ -24,12 +24,23 @@ class Metric(MetricBase):
 
         super().__init__(name=name, display_name=display_name)
 
-        self.numerator = numerator if isinstance(numerator, list) else [numerator]
+        if numerator is None:
+            self.numerator = []
+        elif isinstance(numerator, list):
+            self.numerator = numerator
+        else:
+            self.numerator = [numerator]
+
         self.numerator_aggregator = numerator_aggregator if numerator_aggregator else AggregatorEnum.SUM
-        self.denominator = denominator if isinstance(denominator, list) else [denominator]
+
+        if denominator is None:
+            self.denominator = []
+        elif isinstance(denominator, list):
+            self.denominator = denominator
+        else:
+            self.denominator = [denominator]
+
         self.denominator_aggregator = denominator_aggregator if denominator_aggregator else AggregatorEnum.SUM
+
         self.multiplier = multiplier if multiplier else self.DEFAULT_MULTIPLIER
         self.type = mtype
-
-
-

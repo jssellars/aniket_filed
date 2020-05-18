@@ -20,12 +20,15 @@ from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIFields import Gra
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPIPixelDAChecksFields
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPIPixelFields
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPIPixelStatsFields
-from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelCustomAudienceDto import GraphAPIPixelCustomAudienceDto
+from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelCustomAudienceDto import \
+    GraphAPIPixelCustomAudienceDto
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelDAChecksDto import GraphAPIPixelDAChecksDto
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelDto import GraphAPIPixelDto
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelStatsDto import GraphAPIPixelStatsDto
-from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPICustomConversionMapping import GraphAPICustomConversionMapping
-from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPIMappingBase import GraphAPIPixelCustomAudienceMapping, GraphAPIPixelDAChecksMapping
+from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPICustomConversionMapping import \
+    GraphAPICustomConversionMapping
+from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPIMappingBase import \
+    GraphAPIPixelCustomAudienceMapping, GraphAPIPixelDAChecksMapping
 from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPIPixelMapping import GraphAPIPixelMapping
 from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPIPixelStatsMapping import GraphAPIPixelStatsMapping
 from Potter.FacebookPixels.Infrastructure.Tools.Misc import group_pixel_stats_by_value
@@ -114,9 +117,11 @@ class GraphAPIPixelHandler:
             errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__build_pixel()")))
 
         try:
-            pixel_dto.events = [cls.__map_custom_conversion_to_event_model(custom_conversion, pixel.id) for custom_conversion in custom_conversions]
+            pixel_dto.events = [cls.__map_custom_conversion_to_event_model(custom_conversion, pixel.id) for
+                                custom_conversion in custom_conversions]
         except Exception as e:
-            errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__map_custom_conversion_to_event_model()")))
+            errors.append(
+                copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__map_custom_conversion_to_event_model()")))
 
         try:
             if pixel_dto.events and pixel_stats:
@@ -124,7 +129,8 @@ class GraphAPIPixelHandler:
             elif pixel_stats:
                 pixel_dto.events = cls.__map_pixel_stats_to_event_model(pixel_stats, pixel.id)
         except Exception as e:
-            errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__map_pixel_stats_to_event_model()")))
+            errors.append(
+                copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__map_pixel_stats_to_event_model()")))
 
         pixel_dto.state = cls.__is_pixel_active(pixel_dto)
 
@@ -147,9 +153,12 @@ class GraphAPIPixelHandler:
         return hashlib.sha1(name_string.encode('utf-8')).hexdigest()
 
     @classmethod
-    def __map_custom_conversion_to_event_model(cls, custom_conversion: GraphAPICustomConversionDto = None, pixel_id: typing.AnyStr = None) -> Event:
+    def __map_custom_conversion_to_event_model(cls, custom_conversion: GraphAPICustomConversionDto = None,
+                                               pixel_id: typing.AnyStr = None) -> Event:
         event = Event()
-        event.id = custom_conversion.id if custom_conversion.id else cls.__create_hash_id(pixel_id, custom_conversion.name, EventType.CUSTOM.value)
+        event.id = custom_conversion.id if custom_conversion.id else cls.__create_hash_id(pixel_id,
+                                                                                          custom_conversion.name,
+                                                                                          EventType.CUSTOM.value)
         event.name = custom_conversion.name
         event.date_created = custom_conversion.creation_time
         event.last_updated = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
@@ -161,7 +170,8 @@ class GraphAPIPixelHandler:
         return event
 
     @classmethod
-    def __map_pixel_stats_to_event_model(cls, pixel_stats: typing.List[GraphAPIPixelStatsDto], pixel_id: typing.AnyStr = None) -> typing.List[Event]:
+    def __map_pixel_stats_to_event_model(cls, pixel_stats: typing.List[GraphAPIPixelStatsDto],
+                                         pixel_id: typing.AnyStr = None) -> typing.List[Event]:
         grouped_pixel_stats = group_pixel_stats_by_value(pixel_stats)
         events = []
         for event_type, event_stats in grouped_pixel_stats.items():
@@ -177,7 +187,9 @@ class GraphAPIPixelHandler:
                 event.last_updated = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
                 last_week = datetime.now() - timedelta(days=7)
-                event_last_fired_time = datetime.strptime(event.event_activity.split(cls.__facebook_datetime_tz_separator)[0], cls.__facebook_datetime_format)
+                event_last_fired_time = datetime.strptime(
+                    event.event_activity.split(cls.__facebook_datetime_tz_separator)[0],
+                    cls.__facebook_datetime_format)
                 if event_last_fired_time >= last_week:
                     event.state = State.ACTIVE.value
                 else:
@@ -210,7 +222,8 @@ class GraphAPIPixelHandler:
 
     @staticmethod
     def __filter_custom_conversion_by_pixel_id(custom_conversions: typing.List[GraphAPICustomConversionDto] = None,
-                                               pixel_id: typing.AnyStr = None) -> typing.List[GraphAPICustomConversionDto]:
+                                               pixel_id: typing.AnyStr = None) -> typing.List[
+        GraphAPICustomConversionDto]:
         filtered_custom_conversions = [custom_conversion for custom_conversion in custom_conversions
                                        if custom_conversion.pixel_id == pixel_id]
         return filtered_custom_conversions
@@ -240,4 +253,3 @@ class GraphAPIPixelHandler:
                                                         params=cls.__build_pixel_stats_params())
         pixel_stats = pixel_stats_mapper.load(pixel_stats, many=True)
         return pixel_stats
-

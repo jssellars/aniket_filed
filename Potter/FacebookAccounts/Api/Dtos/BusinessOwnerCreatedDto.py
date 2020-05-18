@@ -9,5 +9,4 @@ class BusinessOwnerCreatedDto:
     email: str = None
     requested_permissions: str = None
     filed_user_id: int = None
-    businesses: typing.List[typing.Any] = None # List[BusinessModel]
-
+    businesses: typing.List[typing.Any] = None  # List[BusinessModel]

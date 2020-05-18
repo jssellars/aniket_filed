@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from facebook_business.exceptions import FacebookRequestError
 from facebook_business.api import Cursor
+from facebook_business.exceptions import FacebookRequestError
 
 
 class Tools(object):

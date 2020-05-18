@@ -8,15 +8,15 @@ class AdModelFields(StructureModelFieldBase):
     level = "ads"
 
     structure_fields = [
-        FieldsMetadata.ad_account_id,
-        FieldsMetadata.campaign_name,
+        FieldsMetadata.account_id,
+        FieldsMetadata.campaign_structure_name,
         FieldsMetadata.campaign_id,
-        FieldsMetadata.adset_name,
+        FieldsMetadata.adset_structure_name,
         FieldsMetadata.adset_id,
         FieldsMetadata.name,
         FieldsMetadata.id,
         FieldsMetadata.bid_amount,
-        FieldsMetadata.campaign,
+        # FieldsMetadata.campaign,
         FieldsMetadata.configured_status,
         FieldsMetadata.created_at,
         FieldsMetadata.creative,

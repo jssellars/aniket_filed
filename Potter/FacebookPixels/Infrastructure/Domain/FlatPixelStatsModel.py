@@ -1,5 +1,5 @@
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -15,4 +15,4 @@ class PixelStatsRow:
 
 @dataclass
 class FlatPixelStatsModel:
-    stats: typing.List[PixelStatsRow] = None
+    stats: typing.List[PixelStatsRow] = field(default_factory=list)

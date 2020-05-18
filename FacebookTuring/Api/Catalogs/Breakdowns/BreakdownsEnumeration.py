@@ -7,4 +7,3 @@ class BreakdownsEnumeration:
 
     def to_string(self):
         return self.column_name
-

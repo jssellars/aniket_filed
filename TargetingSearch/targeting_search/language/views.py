@@ -33,4 +33,4 @@ def match_languages(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(json.dumps({'results': results}), status=200,  content_type='application/json')
+    return HttpResponse(json.dumps({'results': results}), status=200, content_type='application/json')

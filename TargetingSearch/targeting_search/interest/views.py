@@ -1,9 +1,8 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
+from interest.handlers.audience_details_handler import estimate_audiece_size
 from interest.handlers.interest_handlers import *
 from interest.handlers.interests_tree_handler import get_interests_tree_handler
-from interest.handlers.audience_details_handler import estimate_audiece_size
 
 
 def get_all(request):
@@ -77,8 +76,8 @@ def match_interests(request):
 @csrf_exempt
 def get_estimated_audience_size(request):
     if request.method == "POST":
-        results =  estimate_audiece_size(json.loads(request.body.decode('utf-8')))
+        results = estimate_audiece_size(json.loads(request.body.decode('utf-8')))
     else:
         return HttpResponse(status=400)
-    
+
     return HttpResponse(json.dumps({'results': results}), status=200, content_type='application/json')

@@ -1,7 +1,8 @@
 from marshmallow import fields
 
 from Core.Tools.Mapper.MapperBase import MapperBase, MapperNestedField
-from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequest import AdAccountDetails
+from Potter.FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequest import \
+    AdAccountDetails
 
 
 class GetAdAccountsAmountSpentInsightMessageRequestMapping(MapperBase):

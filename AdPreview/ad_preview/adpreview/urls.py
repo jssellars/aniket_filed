@@ -15,9 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
-from staticpreview import views as static_preview_views
 from facebook_assets import views as facebook_assets_views
+from staticpreview import views as static_preview_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,5 +26,6 @@ urlpatterns = [
     path('generate-preview/', static_preview_views.generate_preview_by_type),
     path('<str:business_owner_facebook_id>/ad-images/<str:ad_account_id>', facebook_assets_views.GetAdImages),
     path('<str:business_owner_facebook_id>/ad-videos/<str:ad_account_id>', facebook_assets_views.GetAdVideos),
-    path('<str:business_owner_facebook_id>/page-posts/<str:page_facebook_id>', facebook_assets_views.GetPagePostsMinimal)
+    path('<str:business_owner_facebook_id>/page-posts/<str:page_facebook_id>',
+         facebook_assets_views.GetPagePostsMinimal)
 ]

@@ -1,4 +1,5 @@
 import typing
+
 from marshmallow import fields, pre_load
 
 from Core.Tools.Mapper.MapperBase import MapperBase

@@ -1,4 +1,5 @@
 import typing
+
 from marshmallow import fields, pre_load, EXCLUDE
 
 from Core.Tools.Mapper.MapperBase import MapperBase
@@ -26,4 +27,3 @@ class PixelsInsightsResponseDtoMapping(MapperBase):
             data["timestamp"] = data.pop("start_time")
 
         return data
-

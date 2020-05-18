@@ -25,6 +25,7 @@ def flatten_pixel_stats(pixel_stats: typing.List[GraphAPIPixelStatsDto]) -> Flat
 def group_pixel_stats_by_value(pixel_stats: typing.List[GraphAPIPixelStatsDto]) -> typing.Dict:
     flat_pixel_stats = flatten_pixel_stats(pixel_stats)
     get_attr_func = operator.attrgetter('value')
-    grouped_pixel_stats = {k: list(g) for k, g in itertools.groupby(sorted(flat_pixel_stats.stats, key=get_attr_func), get_attr_func)}
+    grouped_pixel_stats = {k: list(g) for k, g in
+                           itertools.groupby(sorted(flat_pixel_stats.stats, key=get_attr_func), get_attr_func)}
 
     return grouped_pixel_stats

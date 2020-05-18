@@ -1,8 +1,10 @@
 import typing
 from dataclasses import dataclass
 
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import GraphAPIAudiencesPermissionsForActionsDto
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesSentenceLineDto import GraphAPIAudiencesSentenceLineDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import \
+    GraphAPIAudiencesPermissionsForActionsDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesSentenceLineDto import \
+    GraphAPIAudiencesSentenceLineDto
 
 
 @dataclass

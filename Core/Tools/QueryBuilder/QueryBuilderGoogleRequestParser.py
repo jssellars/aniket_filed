@@ -79,4 +79,5 @@ class QueryBuilderGoogleRequestParser:
 
     @staticmethod
     def map(name):
-        return next(filter(lambda x: x.field_name == name if isinstance(x, GoogleField) else None, GoogleFieldsMetadata.__dict__.values()), None)
+        return next(filter(lambda x: x.field_name == name if isinstance(x, GoogleField) else None,
+                           GoogleFieldsMetadata.__dict__.values()), None)

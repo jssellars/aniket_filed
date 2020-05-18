@@ -9,7 +9,8 @@ class GraphAPIRequestPageInstagram:
                  access_token: typing.AnyStr = None,
                  page_id: typing.AnyStr = None,
                  api_version: typing.AnyStr = None):
-        self.__url = Template("https://graph.facebook.com/$api_version/$page_id?fields=instagram_business_account{id,username}&access_token=$access_token")
+        self.__url = Template(
+            "https://graph.facebook.com/$api_version/$page_id?fields=instagram_business_account{id,username}&access_token=$access_token")
 
         self.__access_token = access_token
         self.__page_id = page_id

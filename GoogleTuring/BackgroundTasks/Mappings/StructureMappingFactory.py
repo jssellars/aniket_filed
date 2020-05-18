@@ -17,15 +17,22 @@ class StructureMappingFactory:
             structure_fields = None
 
         if level == StructureType.CAMPAIGN:
-            return CampaignStructureMapping(business_owner_id=business_owner_id, account_id=account_id, service=service, structure_fields=structure_fields, entries=entries)
+            return CampaignStructureMapping(business_owner_id=business_owner_id, account_id=account_id,
+                                            service=service, structure_fields=structure_fields,
+                                            entries=entries)
         elif level == StructureType.AD_GROUP:
             ad_group_service, criterion_service = service
             ad_group_structure_fields, criterion_fields = structure_fields
-            return AdGroupStructureMapping(business_owner_id=business_owner_id, account_id=account_id, service=ad_group_service, structure_fields=ad_group_structure_fields,
-                                           criterion_service=criterion_service, criterion_fields=criterion_fields, entries=entries)
+            return AdGroupStructureMapping(business_owner_id=business_owner_id, account_id=account_id,
+                                           service=ad_group_service,
+                                           structure_fields=ad_group_structure_fields,
+                                           criterion_service=criterion_service, criterion_fields=criterion_fields,
+                                           entries=entries)
         elif level == StructureType.AD:
-            return AdGroupAdStructureMapping(business_owner_id=business_owner_id, account_id=account_id, ad_group_details=additional_info,
+            return AdGroupAdStructureMapping(business_owner_id=business_owner_id, account_id=account_id,
+                                             ad_group_details=additional_info,
                                              service=service, structure_fields=structure_fields, entries=entries)
         elif level == StructureType.AD_GROUP_KEYWORDS:
-            return AdGroupKeywordsMapping(business_owner_id=business_owner_id, account_id=account_id, service=service, structure_fields=structure_fields,
+            return AdGroupKeywordsMapping(business_owner_id=business_owner_id, account_id=account_id, service=service,
+                                          structure_fields=structure_fields,
                                           ad_group_details=additional_info, entries=entries)

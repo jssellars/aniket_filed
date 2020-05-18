@@ -10,33 +10,33 @@ class ViewEngagementBase(View):
 class ViewCampaignEngagement(ViewEngagementBase):
     table_name = "vCampaignInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.delivery,
-        ViewColumnsMaster.post_reaction,
-        ViewColumnsMaster.comment,
-        # TODO: Add post save column
-        ViewColumnsMaster.post_share,
-        ViewColumnsMaster.link_click,
-        ViewColumnsMaster.like,
-        # ViewColumnsMaster.costPerUniqueInlineLinkClick,
-        # ViewColumnsMaster.effectShare
+        ViewColumnsMaster.post_reactions,
+        ViewColumnsMaster.post_comments,
+        ViewColumnsMaster.post_saves,
+        ViewColumnsMaster.post_shares,
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.page_likes,
+        ViewColumnsMaster.cost_per_unique_link_click
+        # todo: effects share
     ]
 
 
 class ViewAdSetEngagement(ViewEngagementBase):
     table_name = "vAdSetInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
-        ViewColumnsMaster.post_reaction,
-        ViewColumnsMaster.comment,
-        # TODO: Add post save column
-        ViewColumnsMaster.post_share,
-        ViewColumnsMaster.link_click,
-        ViewColumnsMaster.like,
-        # ViewColumnsMaster.costPerUniqueInlineLinkClick,
+        ViewColumnsMaster.post_reactions,
+        ViewColumnsMaster.post_comments,
+        ViewColumnsMaster.post_saves,
+        ViewColumnsMaster.post_shares,
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.page_likes,
+        ViewColumnsMaster.cost_per_unique_link_click
         # ViewColumnsMaster.effectShare
     ]
 
@@ -44,15 +44,15 @@ class ViewAdSetEngagement(ViewEngagementBase):
 class ViewAdEngagement(ViewEngagementBase):
     table_name = "vAdInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
-        ViewColumnsMaster.post_reaction,
-        ViewColumnsMaster.comment,
-        # TODO: Add post save column
-        ViewColumnsMaster.post_share,
-        ViewColumnsMaster.link_click,
-        ViewColumnsMaster.like,
-        # ViewColumnsMaster.costPerUniqueInlineLinkClick,
+        ViewColumnsMaster.post_reactions,
+        ViewColumnsMaster.post_comments,
+        ViewColumnsMaster.post_saves,
+        ViewColumnsMaster.post_shares,
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.page_likes,
+        ViewColumnsMaster.cost_per_unique_link_click
         # ViewColumnsMaster.effectShare
     ]

@@ -20,6 +20,8 @@ lib64/
 parts/
 sdist/
 var/
+logs/
+rabbit/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -59,6 +61,7 @@ target/
 
 # Pycharm project
 *.DS_Store
+.DS_Store
 .idea
 
 # VS code

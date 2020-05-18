@@ -3,11 +3,11 @@ from string import Template
 
 
 class GraphAPIRequestBase:
-
     _limit = 25
     _api_version = "v5.0"
 
-    def __init__(self, facebook_id=None, business_owner_permanent_token=None, fields=None, params=None, api_version=None, limit=None):
+    def __init__(self, facebook_id=None, business_owner_permanent_token=None, fields=None, params=None,
+                 api_version=None, limit=None):
         self._facebook_id = facebook_id
         self.business_owner_permanent_token = business_owner_permanent_token
         self._fields = fields
@@ -51,8 +51,9 @@ class GraphAPIRequestBase:
                     graph_api_request += "&{key}={value}".format(key=key, value=value)
 
         #  Combine request components
-        graph_api_request_other_params = Template("&access_token=$business_owner_permanent_facebook_token&limit=$limit").safe_substitute(limit=self._limit,
-                                                                                                                                         business_owner_permanent_facebook_token=self.business_owner_permanent_token)
+        graph_api_request_other_params = Template(
+            "&access_token=$business_owner_permanent_facebook_token&limit=$limit").safe_substitute(limit=self._limit,
+                                                                                                   business_owner_permanent_facebook_token=self.business_owner_permanent_token)
         graph_api_request += graph_api_request_other_params
 
         # Try to replace facebook_id ( if required in the Fields Graph API URL )
@@ -65,4 +66,3 @@ class GraphAPIRequestBase:
         self._fields = fields
         self._params = params
         self._url = self._build_graph_api_request_url()
-

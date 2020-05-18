@@ -1,8 +1,11 @@
 import typing
 
-from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPISyncStructuresHandler import AdWordsAPISyncStructuresHandler
-from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import GoogleUserPreferencesUpdatedEvent
-from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEventMapping import GoogleUserPreferencesUpdatedEventMapping
+from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPISyncStructuresHandler import \
+    AdWordsAPISyncStructuresHandler
+from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import \
+    GoogleUserPreferencesUpdatedEvent
+from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEventMapping import \
+    GoogleUserPreferencesUpdatedEventMapping
 
 
 class GoogleUserPreferencesUpdatedEventHandler:

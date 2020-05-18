@@ -1,8 +1,0 @@
-pandas
-numpy
-scipy
-sklearn
-statistics
-sqlalchemy
-pyodbc
-requests

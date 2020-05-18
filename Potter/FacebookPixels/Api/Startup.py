@@ -5,6 +5,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
+from Core.Tools.Logger.LoggerFactory import LoggerFactory
+from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
 from Potter.FacebookPixels.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig
 
 
@@ -42,6 +44,12 @@ class Startup(object):
         self.port = app_config["port"]
         self.jwt_secret_key = app_config["jwt_secret_key"]
         self.debug_mode = app_config["debug_mode"]
+        self.docker_filename = app_config["docker_filename"]
+        self.logger_type = app_config["logger_type"]
+        self.rabbit_logger_type = app_config["rabbit_logger_type"]
+        self.logger_level = app_config["logger_level"]
+        self.es_host = app_config.get("es_host", None)
+        self.es_port = app_config.get("es_port", None)
 
     def create_sql_connection(self):
         return sessionmaker(bind=self.engine)
@@ -57,3 +65,19 @@ with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)
+
+# Initialize logger
+logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
+                                                port=startup.es_port,
+                                                name=startup.api_name,
+                                                level=startup.logger_level,
+                                                index_name=startup.docker_filename)
+rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
+                                                              port=startup.es_port,
+                                                              name=startup.api_name,
+                                                              level=startup.logger_level,
+                                                              index_name=startup.docker_filename)
+
+# Log startup details
+startup_log = LoggerMessageStartup(app_config=app_config, description="Potter Facebook Pixels API")
+logger.logger.info(startup_log.to_dict())

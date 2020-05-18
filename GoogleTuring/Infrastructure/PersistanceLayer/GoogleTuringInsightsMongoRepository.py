@@ -9,7 +9,8 @@ from GoogleTuring.Infrastructure.PersistanceLayer.MongoIdToNameCache import Mong
 
 
 class GoogleTuringInsightsMongoRepository(MongoRepositoryBase):
-    def __init__(self, client=None, database_name=None, collection_name=None, config=None, location_collection_name=None):
+    def __init__(self, client=None, database_name=None, collection_name=None, config=None,
+                 location_collection_name=None):
         super().__init__(client=client, database_name=database_name, collection_name=collection_name, config=config)
         self.__location_collection_name = location_collection_name
         self.collection = self.__location_collection_name

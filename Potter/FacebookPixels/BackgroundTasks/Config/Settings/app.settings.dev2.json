@@ -37,11 +37,16 @@
     "password": "Parola@20",
     "name": "Dev2.Facebook.Potter.FacebookAccounts"
   },
-
   "environment": "dev2",
   "api_name": "FacebookPixels",
   "api_version": "1.0.0",
   "service_name": "FacebookPixels",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-potter-pixels-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "dev2-elasticsearch",
+  "es_port": 9200
 }

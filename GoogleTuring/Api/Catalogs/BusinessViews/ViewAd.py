@@ -1,8 +1,8 @@
-from GoogleTuring.Api.Catalogs.Views.ViewTypeEnum import ViewTypeEnum
-from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Api.Catalogs.BusinessViews.TableEnum import TableEnum
 from GoogleTuring.Api.Catalogs.Views.GoogleView import GoogleView
 from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.AdColumnsMaster import AdColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewTypeEnum import ViewTypeEnum
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 
 
 class ViewAd(GoogleView):

@@ -12,8 +12,11 @@ from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 
 class StructureMapping:
     """Convert a FB Structure to Domain structure model"""
+
     @classmethod
     def get(cls, level):
+        if level == Level.ACCOUNT.value:
+            return None
         if level == Level.CAMPAIGN.value:
             return CampaignMapping(target=CampaignModel)
         elif level == Level.ADSET.value:
@@ -26,9 +29,12 @@ class StructureMapping:
 
 class StructureFields:
     """Get a list of fields to get for each structure"""
+
     @classmethod
     def get(cls, level):
-        if level == Level.CAMPAIGN.value:
+        if level == Level.ACCOUNT.value:
+            return None
+        elif level == Level.CAMPAIGN.value:
             return CampaignModelFields
         elif level == Level.ADSET.value:
             return AdSetModelFields

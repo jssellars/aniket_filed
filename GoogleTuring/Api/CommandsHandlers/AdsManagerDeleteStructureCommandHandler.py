@@ -3,7 +3,8 @@ from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleTuringStructuresMongoRepository import GoogleTuringStructuresMongoRepository
+from GoogleTuring.Infrastructure.PersistanceLayer.GoogleTuringStructuresMongoRepository import \
+    GoogleTuringStructuresMongoRepository
 
 
 class AdsManagerDeleteStructureCommandHandler(AdsManagerBaseCommandHandler):
@@ -26,9 +27,11 @@ class AdsManagerDeleteStructureCommandHandler(AdsManagerBaseCommandHandler):
         # Update structure to REMOVED in our DB
         try:
             mongo_repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
-                                                                     database_name=startup.mongo_config['google_structures_database_name'],
+                                                                     database_name=startup.mongo_config[
+                                                                         'google_structures_database_name'],
                                                                      collection_name=level)
             id_key = LEVEL_TO_ID[level]
-            mongo_repository.change_status_many(ids=[structure_id], new_status=StructureStatus.REMOVED.value, id_key=id_key)
+            mongo_repository.change_status_many(ids=[structure_id], new_status=StructureStatus.REMOVED.value,
+                                                id_key=id_key)
         except Exception as e:
             raise e

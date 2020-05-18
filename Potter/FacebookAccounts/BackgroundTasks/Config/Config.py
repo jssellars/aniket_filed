@@ -18,9 +18,9 @@ class RabbitMqConfig(BaseConfig):
     @property
     def connection_string(self):
         url = Template('amqp://$user:$password@$host:$port/$vhost')
-        return url.substitute(user=self.username, 
-                              password=self.password, 
-                              host=self.hostname, 
+        return url.substitute(user=self.username,
+                              password=self.password,
+                              host=self.hostname,
                               port=self.port,
                               vhost=self.virtual_host)
 
@@ -39,10 +39,10 @@ class SQLAlchemyConfig(BaseConfig):
     @property
     def connection_string(self):
         connection_string = self.connection_string_template.substitute(username=self.username,
-                                                                    password=self.password,
-                                                                    host=self.host,
-                                                                    port=self.port,
-                                                                    database=self.name)
+                                                                       password=self.password,
+                                                                       host=self.host,
+                                                                       port=self.port,
+                                                                       database=self.name)
         return connection_string
 
 
@@ -52,4 +52,3 @@ class ExternalServicesConfig(BaseConfig):
 
 class AdminUserConfig(BaseConfig):
     """Configuration for Admin user credentials"""
-

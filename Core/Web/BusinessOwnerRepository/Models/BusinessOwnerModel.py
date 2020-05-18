@@ -1,6 +1,5 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
-
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
@@ -17,4 +16,3 @@ class BusinessOwnerModel(Base):
     page_id = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
-

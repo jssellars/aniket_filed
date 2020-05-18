@@ -9,7 +9,7 @@ def _preview_generator(request):
     params = request['params']
 
     preview_generator = GenerateAdPreview()
-    
+
     try:
         ad_preview = preview_generator.generate_preview(ad_account_id, page_id, params)
     except Exception as e:

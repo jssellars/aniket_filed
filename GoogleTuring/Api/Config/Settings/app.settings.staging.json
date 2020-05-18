@@ -10,9 +10,9 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "google_insights_database_name": "staging_Filed_Turing_Google_Insights",
-    "google_accounts_database_name": "staging_Filed_Turing_Google_Accounts",
-    "google_structures_database_name": "staging_Filed_Turing_Google_Structures",
+    "google_insights_database_name": "staging_google_turing_insights",
+    "google_accounts_database_name": "staging_google_turing_accounts",
+    "google_structures_database_name": "staging_google_turing_structures",
     "accounts_collection_name": "google_accounts"
   },
   "google": {

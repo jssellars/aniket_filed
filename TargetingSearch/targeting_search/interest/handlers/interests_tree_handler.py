@@ -54,7 +54,7 @@ class Leaf(Node):
 
 def flattenData(data):
     # 'Adds type to path and adds the leaf as an external property for simplified processing'
-    extraNodes = { 
+    extraNodes = {
         "Family Statuses": "Demographics",
         "Life Events": "Demographics",
         "Industries": "Demographics",
@@ -75,8 +75,7 @@ def flattenData(data):
             print(extraNodes[node_type])
             node_type = extraNodes[node_type]
             nodeData['path'].insert(0, node_type)
-        
-        
+
         if nodeData['name'] not in nodeData['path']:
             nodeData['path'].append(nodeData['name'])
         leafNode = nodeData['path'].pop()

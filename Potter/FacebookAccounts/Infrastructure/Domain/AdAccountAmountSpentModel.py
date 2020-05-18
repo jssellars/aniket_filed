@@ -8,4 +8,3 @@ class AdAccountAmountSpentModel:
     business_name: str = None
     amount_spent: float = None
     currency: str = None
-

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RecommendationType(Enum):
     AUDIENCE = 'Audience'
     BUDGET_AND_BID = 'Budget & Bid'

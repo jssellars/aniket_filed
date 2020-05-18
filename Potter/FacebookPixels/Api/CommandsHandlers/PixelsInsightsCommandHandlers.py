@@ -3,9 +3,10 @@ import typing
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Potter.FacebookPixels.Api.Commands.PixelsInsightsCommand import PixelsInsightsCommand
 from Potter.FacebookPixels.Api.Dtos.PixelsInsightsResponseDto import PixelsInsightsResponseDto
-from Potter.FacebookPixels.Api.Mappings.PixelsInsightsResponseDtoMapping import PixelsInsightsResponseDtoMapping
+from Potter.FacebookPixels.Api.Mappings.LevelToGraphAPIPixelsInsightsHandler import \
+    LevelToGraphAPIPixelsInsightsHandler
 from Potter.FacebookPixels.Api.Mappings.PixelsInsightsLevel import PixelsInsightsLevel
-from Potter.FacebookPixels.Api.Mappings.LevelToGraphAPIPixelsInsightsHandler import LevelToGraphAPIPixelsInsightsHandler
+from Potter.FacebookPixels.Api.Mappings.PixelsInsightsResponseDtoMapping import PixelsInsightsResponseDtoMapping
 from Potter.FacebookPixels.Api.Startup import startup
 from Potter.FacebookPixels.Infrastructure.Tools.Misc import flatten_pixel_stats
 
@@ -25,5 +26,3 @@ class PixelsInsightsCommandHandler:
         response = response_mapper.load(insights.stats, many=True)
 
         return response
-
-

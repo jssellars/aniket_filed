@@ -5,9 +5,11 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Potter.FacebookAccounts.Infrastructure.Domain.AdAccountModel import AdAccountModel
 from Potter.FacebookAccounts.Infrastructure.Domain.BusinessModel import BusinessModel
 from Potter.FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import GraphAPIBusinessDto
-from Potter.FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountFields import GraphAPIBusinessRequestField, GraphAPIAdAccountField
+from Potter.FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountFields import \
+    GraphAPIBusinessRequestField, GraphAPIAdAccountField
 from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIBusinessMapping import GraphAPIBusinessMapping
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIToAdAccountMapping import GraphAPIToAdAccountMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIToAdAccountMapping import \
+    GraphAPIToAdAccountMapping
 
 
 class GraphAPIAdAccountHandler(GraphAPISdkBase):
@@ -16,7 +18,8 @@ class GraphAPIAdAccountHandler(GraphAPISdkBase):
         super(GraphAPIAdAccountHandler, self).__init__(facebook_config, business_owner_permanent_token)
 
     def get_business_owner_details(self, business_owner_facebook_id):
-        businesses = User(fbid=business_owner_facebook_id).get_businesses(fields=GraphAPIBusinessRequestField.get_values())
+        businesses = User(fbid=business_owner_facebook_id).get_businesses(
+            fields=GraphAPIBusinessRequestField.get_values())
         mapping = GraphAPIBusinessMapping(target=GraphAPIBusinessDto)
         businesses = mapping.load(businesses, many=True)
 

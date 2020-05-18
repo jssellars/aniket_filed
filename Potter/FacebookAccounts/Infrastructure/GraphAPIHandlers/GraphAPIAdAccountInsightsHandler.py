@@ -1,5 +1,4 @@
 # todo: this handler needs refactoring after we introduce the generic table on the accounts page
-# todo: amount_spent might need to be divided by 100. check with FB
 import copy
 import typing
 from datetime import datetime
@@ -16,7 +15,8 @@ class GraphAPIAdAccountInsightsHandler:
     @classmethod
     def handle(cls, request: typing.Any, startup: typing.Any) -> typing.List[typing.Dict]:
         # get permanent token
-        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(request.business_owner_facebook_id)
+        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+            request.business_owner_facebook_id)
 
         from_date = cls.__convert_datetime(request.from_date)
         to_date = cls.__convert_datetime(request.to_date)
@@ -57,7 +57,7 @@ class GraphAPIAdAccountInsightsHandler:
             if not isinstance(entry, dict):
                 entry = Tools.convert_to_json(entry)
 
-            # map number of campaigns
+            #  map number of campaigns
             # entry = cls.__map_number_of_campaigns(entry, business_owner_facebook_id, permanent_token)
 
             # map business
@@ -77,7 +77,7 @@ class GraphAPIAdAccountInsightsHandler:
 
             entry["account_name"] = entry.pop("name")
             entry["ad_account_id"] = entry.pop("id")
-            entry["amount_spent"] = float(entry.pop("amount_spent"))
+            entry["amount_spent"] = float(entry.pop("amount_spent")) / 100
 
             if "insights" in entry.keys():
                 del entry["insights"]
@@ -137,7 +137,9 @@ class GraphAPIAdAccountInsightsHandler:
             actions = insights["actions"]
 
         # todo: discuss with Chase how to define these metrics better
-        response["conversions"] = sum([float(entry["value"]) for entry in list(filter(lambda x: x["action_type"].find("omni") > -1, actions)) if entry["value"]])
+        response["conversions"] = sum(
+            [float(entry["value"]) for entry in list(filter(lambda x: x["action_type"].find("omni") > -1, actions)) if
+             entry["value"]])
 
         return response
 

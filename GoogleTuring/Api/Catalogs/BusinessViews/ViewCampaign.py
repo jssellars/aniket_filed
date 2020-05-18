@@ -1,8 +1,11 @@
 from GoogleTuring.Api.Catalogs.BusinessViews.TableEnum import TableEnum
 from GoogleTuring.Api.Catalogs.Views.GoogleView import GoogleView
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.CampaignAgeRangeColumnsMaster import CampaignAgeRangeColumnsMaster
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Gender.CampaignGenderColumnsMaster import CampaignGenderColumnsMaster
-from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Keywords.CampaignKeywordsColumnsMaster import CampaignKeywordsColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.AgeRange.CampaignAgeRangeColumnsMaster import \
+    CampaignAgeRangeColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Gender.CampaignGenderColumnsMaster import \
+    CampaignGenderColumnsMaster
+from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.Breakdowns.Keywords.CampaignKeywordsColumnsMaster import \
+    CampaignKeywordsColumnsMaster
 from GoogleTuring.Api.Catalogs.Views.ViewColumnsMaster.Levels.CampaignColumnsMaster import CampaignColumnsMaster
 from GoogleTuring.Api.Catalogs.Views.ViewTypeEnum import ViewTypeEnum
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum

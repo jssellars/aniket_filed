@@ -5,7 +5,8 @@ from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwn
 from Potter.FacebookApps.BackgroundTasks.Startup import startup
 from Potter.FacebookApps.Infrastructure.GraphAPIHandlers.GraphAPIAppsHandler import GraphAPIAppsHandler
 from Potter.FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequest import GetAllAppsMessageRequest
-from Potter.FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequestMapping import GetAllAppsMessageRequestMapping
+from Potter.FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequestMapping import \
+    GetAllAppsMessageRequestMapping
 from Potter.FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageResponse import GetAllAppsMessageResponse
 
 
@@ -18,10 +19,12 @@ class GetAllAppsMessageRequestHandler:
         message = message_mapper.load(message_body)
 
         # get permanent token
-        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(message.business_owner_facebook_id)
+        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+            message.business_owner_facebook_id)
 
         # get audiences
-        apps, errors = GraphAPIAppsHandler.get_apps(permanent_token=permanent_token, account_id=message.ad_account_id, startup=startup)
+        apps, errors = GraphAPIAppsHandler.get_apps(permanent_token=permanent_token, account_id=message.ad_account_id,
+                                                    startup=startup)
 
         #  Publish response details to audiences outbound queue
         # todo: use below after c# changes ErrorMessage

@@ -3,7 +3,6 @@ from string import Template
 
 
 class GraphAPIRequestAdAccountSpent:
-
     __default_api_version = "v5.0"
 
     def __init__(self,
@@ -13,8 +12,8 @@ class GraphAPIRequestAdAccountSpent:
                  since: typing.AnyStr = None,
                  until: typing.AnyStr = None,
                  api_version: typing.AnyStr = None):
-
-        self.__url = Template("https://graph.facebook.com/$api_version/$business_owner_facebook_id/adaccounts?fields=account_id,currency,business,insights.time_range({'since':'$since','until':'$until'})&access_token=$access_token&filtering=[{field: 'account_id',operator:'EQUAL', value: '$account_id'}]")
+        self.__url = Template(
+            "https://graph.facebook.com/$api_version/$business_owner_facebook_id/adaccounts?fields=account_id,currency,business,insights.time_range({'since':'$since','until':'$until'})&access_token=$access_token&filtering=[{field: 'account_id',operator:'EQUAL', value: '$account_id'}]")
         self.__access_token = access_token
         self.__business_owner_facebook_id = business_owner_facebook_id
         self.__account_id = account_id

@@ -11,7 +11,7 @@ class BusinessOwner:
 
 @dataclass
 class GetBusinessOwnersTreesMessageResponse:
-    message_type: str = "GetBusinessOwnersTreesMessageResponse" # todo: might need to remove this from here
+    message_type: str = "GetBusinessOwnersTreesMessageResponse"
     facebook_id: str = None
     businesses: typing.List[BusinessModel] = None
     errors: typing.List[typing.Dict] = None

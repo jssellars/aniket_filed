@@ -9,7 +9,8 @@ class GraphAPIRequestOwnedPages:
                  access_token: typing.AnyStr = None,
                  business_id: typing.AnyStr = None,
                  api_version: typing.AnyStr = None):
-        self.__url = Template("https://graph.facebook.com/$api_version/$business_id?fields=owned_pages{id,name}&access_token=$access_token")
+        self.__url = Template(
+            "https://graph.facebook.com/$api_version/$business_id?fields=owned_pages{id,name}&access_token=$access_token")
 
         self.__access_token = access_token
         self.__business_id = business_id

@@ -10,61 +10,61 @@ class ViewPerformanceAndClicksBase(View):
 class ViewCampaignPerformanceAndClicks(ViewPerformanceAndClicksBase):
     table_name = "vCampaignInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
-        ViewColumnsMaster.spend,
+        ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.link_click,
-        # ViewColumnsMaster.costPerUniqueInlineLinkClick,
-        ViewColumnsMaster.link_click_website_ctr,
-        ViewColumnsMaster.clicks,
-        ViewColumnsMaster.ctr,
-        ViewColumnsMaster.cpc,
-        ViewColumnsMaster.unique_clicks
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.cost_per_unique_link_click,
+        ViewColumnsMaster.link_click_through_rate,
+        ViewColumnsMaster.clicks_all,
+        ViewColumnsMaster.ctr_all,
+        ViewColumnsMaster.cpc_all,
+        ViewColumnsMaster.unique_clicks_all
     ]
 
 
 class ViewAdSetPerformanceAndClicks(ViewPerformanceAndClicksBase):
     table_name = "vAdSetInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
-        ViewColumnsMaster.spend,
+        ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.link_click,
-        # ViewColumnsMaster.costPerUniqueInlineLinkClick,
-        ViewColumnsMaster.link_click_website_ctr,
-        ViewColumnsMaster.clicks,
-        ViewColumnsMaster.ctr,
-        ViewColumnsMaster.cpc,
-        ViewColumnsMaster.unique_clicks
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.cost_per_unique_link_click,
+        ViewColumnsMaster.link_click_through_rate,
+        ViewColumnsMaster.clicks_all,
+        ViewColumnsMaster.ctr_all,
+        ViewColumnsMaster.cpc_all,
+        ViewColumnsMaster.unique_clicks_all
     ]
 
 
 class ViewAdPerformanceAndClicks(ViewPerformanceAndClicksBase):
     table_name = "vAdInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
-        ViewColumnsMaster.spend,
+        ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.link_click,
-        # ViewColumnsMaster.costPerUniqueInlineLinkClick,
-        ViewColumnsMaster.link_click_website_ctr,
-        ViewColumnsMaster.clicks,
-        ViewColumnsMaster.ctr,
-        ViewColumnsMaster.cpc,
-        ViewColumnsMaster.unique_clicks
+        ViewColumnsMaster.link_clicks,
+        ViewColumnsMaster.cost_per_unique_link_click,
+        ViewColumnsMaster.link_click_through_rate,
+        ViewColumnsMaster.clicks_all,
+        ViewColumnsMaster.ctr_all,
+        ViewColumnsMaster.cpc_all,
+        ViewColumnsMaster.unique_clicks_all
     ]

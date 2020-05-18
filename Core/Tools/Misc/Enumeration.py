@@ -6,4 +6,3 @@ class Enumeration:
 
     def ToString(self):
         return self.name
-

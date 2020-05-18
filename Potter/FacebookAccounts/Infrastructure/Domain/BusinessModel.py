@@ -6,4 +6,4 @@ from dataclasses import dataclass, field
 class BusinessModel:
     id: str = None
     name: str = None
-    ad_accounts: typing.List[typing.Any] = field(default_factory=list) # List[AdAccountModel]
+    ad_accounts: typing.List[typing.Any] = field(default_factory=list)  # List[AdAccountModel]

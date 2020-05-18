@@ -1,9 +1,11 @@
 import typing
+
 from marshmallow import fields, pre_load, EXCLUDE
 
 from Core.Tools.Mapper.MapperBase import MapperBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookIdKeyMapping, LevelToFacebookNameKeyMapping
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookIdKeyMapping, \
+    LevelToFacebookNameKeyMapping
 
 
 class AdsManagerStructureMapping(MapperBase):

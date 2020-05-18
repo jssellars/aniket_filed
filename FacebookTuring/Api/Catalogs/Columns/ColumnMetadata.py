@@ -1,7 +1,7 @@
 from typing import List
 
 from Core.Tools.Misc.Enumeration import Enumeration
-from FacebookTuring.Api.Catalogs.Columns.ColumnType import ColumnType
+from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
 
 
 class ColumnMetadata:
@@ -11,6 +11,5 @@ class ColumnMetadata:
         self.type_id = column_type.id
 
         # Optional parameter
-        self.categorical_values = [enumeration.name for enumeration in categorical_values_list] if self.type_id == ColumnType.categorical.id else None
-
-
+        self.categorical_values = [enumeration.name for enumeration in
+                                   categorical_values_list] if self.type_id == FieldDataTypeEnum.categorical.id else None

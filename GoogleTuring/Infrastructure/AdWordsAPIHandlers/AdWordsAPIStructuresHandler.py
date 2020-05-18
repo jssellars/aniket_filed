@@ -16,6 +16,9 @@ class AdWordsAPIStructuresHandler(AdWordsAPIBaseHandler):
         adwords_client.delete_structure(structure_id=structure_id, level=level)
 
     @classmethod
-    def update_structure(cls, permanent_token, client_customer_id, level, structure_id, details, data_source_name, additional_info):
+    def update_structure(cls, permanent_token, client_customer_id, level, structure_id, details, data_source_name,
+                         additional_info):
         adwords_client = cls._build_client(client_customer_id, permanent_token)
-        return adwords_client.update_structure(structure_id=structure_id, level=level, details=details, data_source_name=data_source_name, additional_info=additional_info)
+        return adwords_client.update_structure(structure_id=structure_id, level=level, details=details,
+                                               data_source_name=data_source_name,
+                                               additional_info=additional_info)

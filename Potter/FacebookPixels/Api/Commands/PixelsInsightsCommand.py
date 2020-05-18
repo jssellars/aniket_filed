@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-
 import typing
+from dataclasses import dataclass
 
 
 @dataclass
@@ -12,4 +11,3 @@ class PixelsInsightsCommand:
     breakdown: typing.AnyStr = None  # aggregation value from Facebook
     start_time: typing.AnyStr = None  # "YYYY-MM-DD"
     end_time: typing.AnyStr = None  # "YYYY-MM-DD"
-

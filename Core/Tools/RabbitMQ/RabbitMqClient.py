@@ -1,9 +1,8 @@
 import json
+import typing
 import uuid
 
 import pika
-import typing
-
 from pika import BasicProperties
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
@@ -12,7 +11,7 @@ from Core.Tools.Misc.ObjectSerializers import object_to_json
 class RabbitMqClient:
 
     @classmethod
-    def __serialize(cls, data: typing.Any) -> typing.Dict:
+    def serialize_message(cls, data: typing.Any) -> typing.Dict:
         return object_to_json(data)
 
     def __init__(self,
@@ -28,7 +27,8 @@ class RabbitMqClient:
 
         self.consumer_started = False
 
-        credentials = pika.credentials.PlainCredentials(username=self.__config.username, password=self.__config.password, erase_on_connect=False)
+        credentials = pika.credentials.PlainCredentials(username=self.__config.username,
+                                                        password=self.__config.password, erase_on_connect=False)
         self.__connection_parameters = pika.ConnectionParameters(host=self.__config.hostname,
                                                                  port=self.__config.port,
                                                                  virtual_host=self.__config.virtual_host,
@@ -42,7 +42,7 @@ class RabbitMqClient:
         channel = connection.channel()
 
         message_properties = self.__generate_message_properties(message_body)
-        message_body = json.dumps(RabbitMqClient.__serialize(message_body))
+        message_body = json.dumps(RabbitMqClient.serialize_message(message_body))
 
         channel.basic_publish(self.__exchange_name,
                               self.__outbound_routing_key,
@@ -81,7 +81,8 @@ class RabbitMqClient:
 
     def start_consuming(self):
         if not self.__channel:
-            raise ValueError("No channel was created. Try again by creating a channel and registering a consumer first.")
+            raise ValueError(
+                "No channel was created. Try again by creating a channel and registering a consumer first.")
 
         self.consumer_started = True
         self.__channel.start_consuming()

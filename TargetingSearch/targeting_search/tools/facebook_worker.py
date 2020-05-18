@@ -31,7 +31,6 @@ class BaseFacebookWorker(object):
 
 
 class FacebookLanguagesWorker(BaseFacebookWorker):
-
     __MAXIMUM_RESULTS_NUMBER__ = int(1e6)
     __GET_ALL_LANGUAGES_PARAMETERS__ = {
         'q': '',
@@ -49,7 +48,6 @@ class FacebookLanguagesWorker(BaseFacebookWorker):
 
 
 class FacebookLocationsWorker(BaseFacebookWorker):
-    
     __MAXIMUM_RESULTS_NUMBER__ = int(1e6)
     __DEFAULT_GET_ALL_TYPE__ = ['country_group']
     __ALL_DATA_TYPES__ = ['country', 'country_group', 'region', 'geo_market', 'electoral_district']
@@ -93,7 +91,6 @@ class FacebookLocationsWorker(BaseFacebookWorker):
 
 
 class FacebookInterestsWorker(BaseFacebookWorker):
-
     __MAXIMUM_RESULTS_NUMBER__ = int(1e6)
 
     __INTEREST_SEARCH_TYPES__ = ['adeducationschool', 'adeducationmajor', 'adinterest', 'adworkemployer',
@@ -137,5 +134,3 @@ class FacebookInterestsWorker(BaseFacebookWorker):
         results = TargetingSearch.search(api=self._facebook_ads_api, params=params)
 
         return self._facebook_results_to_json(results)
-
-

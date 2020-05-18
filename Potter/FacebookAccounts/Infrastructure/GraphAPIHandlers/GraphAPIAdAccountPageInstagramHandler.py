@@ -5,8 +5,10 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Potter.FacebookAccounts.Api.Startup import startup
 from Potter.FacebookAccounts.Infrastructure.GraphAPIDtos import GraphAPIPageInstagramDto
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountPageInstagramMapping import GraphAPIAdAccountPageInstagramMapping
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestPageInstagram import GraphAPIRequestPageInstagram
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountPageInstagramMapping import \
+    GraphAPIAdAccountPageInstagramMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestPageInstagram import \
+    GraphAPIRequestPageInstagram
 
 
 class GraphAPIAdAccountPageInstagramHandler:

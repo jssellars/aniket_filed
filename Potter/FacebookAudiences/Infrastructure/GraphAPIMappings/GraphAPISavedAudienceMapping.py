@@ -5,8 +5,10 @@ from marshmallow import INCLUDE, pre_load
 
 from Core.Tools.Mapper.MapperBase import MapperBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import GraphAPIAudiencesPermissionsForActionsDto
-from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesSentenceLineDto import GraphAPIAudiencesSentenceLineDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import \
+    GraphAPIAudiencesPermissionsForActionsDto
+from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesSentenceLineDto import \
+    GraphAPIAudiencesSentenceLineDto
 from Potter.FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPISavedAudienceDto import AdAccount
 
 
@@ -23,10 +25,12 @@ class GraphAPISavedAudienceMapping(MapperBase):
             data["account"] = AdAccount(**data["account"])
 
         if "permission_for_actions" in data.keys():
-            data["permission_for_actions"] = GraphAPIAudiencesPermissionsForActionsDto(**data["permission_for_actions"])
+            data["permission_for_actions"] = GraphAPIAudiencesPermissionsForActionsDto(
+                **data["permission_for_actions"])
 
         if "sentence_lines" in data.keys():
-            data["sentence_lines"] = [GraphAPIAudiencesSentenceLineDto(**sentence_line) for sentence_line in data["sentence_lines"]]
+            data["sentence_lines"] = [GraphAPIAudiencesSentenceLineDto(**sentence_line) for sentence_line in
+                                      data["sentence_lines"]]
 
         if "targeting" in data.keys() and not isinstance(data["targeting"], typing.Dict):
             targeting = data.pop("targeting")

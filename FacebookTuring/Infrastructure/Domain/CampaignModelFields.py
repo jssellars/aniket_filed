@@ -40,13 +40,12 @@ class CampaignModelFields(StructureModelFieldBase):
         FieldsMetadata.top_line_id,
         FieldsMetadata.updated_time,
         FieldsMetadata.ad_rules_governed,
-        FieldsMetadata.copies,
-
+        FieldsMetadata.copies
     ]
 
     insights_fields = [
         FieldsMetadata.account_name,
-        FieldsMetadata.ad_account_id,
+        FieldsMetadata.account_id,
         FieldsMetadata.campaign_id,
         FieldsMetadata.campaign_name
     ]

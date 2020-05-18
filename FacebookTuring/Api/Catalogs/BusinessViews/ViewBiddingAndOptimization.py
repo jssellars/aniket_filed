@@ -10,20 +10,20 @@ class ViewBiddingAndOptimizationBase(View):
 class ViewCampaignBiddingAndOptimization(ViewBiddingAndOptimizationBase):
     tableName = "vCampaignInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
-        ViewColumnsMaster.spend
+        ViewColumnsMaster.amount_spent
     ]
 
 
 class ViewAdSetBiddingAndOptimization(ViewBiddingAndOptimizationBase):
     tableName = "vAdSetInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
@@ -33,15 +33,15 @@ class ViewAdSetBiddingAndOptimization(ViewBiddingAndOptimizationBase):
         ViewColumnsMaster.bid_strategy,
         ViewColumnsMaster.last_significant_edit,
         ViewColumnsMaster.budget,
-        ViewColumnsMaster.spend,
-        # TODO: add adset schedule column
+        ViewColumnsMaster.amount_spent,
+        ViewColumnsMaster.adset_schedule
     ]
 
 
 class ViewAdBiddingAndOptimization(ViewBiddingAndOptimizationBase):
     tableName = "vAdInsights"
     columns = [
-        ViewColumnsMaster.effective_status,
+        ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
@@ -49,6 +49,5 @@ class ViewAdBiddingAndOptimization(ViewBiddingAndOptimizationBase):
         ViewColumnsMaster.bid_strategy,
         ViewColumnsMaster.last_significant_edit,
         ViewColumnsMaster.budget,
-        ViewColumnsMaster.spend
+        ViewColumnsMaster.amount_spent
     ]
-

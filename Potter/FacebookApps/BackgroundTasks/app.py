@@ -1,6 +1,7 @@
 # ====== CONFIGURE PATH TO SOLUTION - DO NOT DELETE ====== #
 import os
 import sys
+
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -37,4 +38,5 @@ rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
 
 while True:
     if not rabbitmq_client.consumer_started:
-        rabbitmq_client.register_callback(callback).register_consumer(consumer_tag=startup.rabbitmq_config.consumer_name).start_consuming()
+        rabbitmq_client.register_callback(callback).register_consumer(
+            consumer_tag=startup.rabbitmq_config.consumer_name).start_consuming()

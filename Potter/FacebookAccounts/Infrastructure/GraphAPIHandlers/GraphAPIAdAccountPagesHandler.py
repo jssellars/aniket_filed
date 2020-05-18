@@ -5,10 +5,13 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClie
 from Potter.FacebookAccounts.Api.Startup import startup
 from Potter.FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import GraphAPIBusinessDto
 from Potter.FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIPagesDto import GraphAPIPagesDto
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import GraphAPIAdAccountBusinessMapping
-from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountPagesMapping import GraphAPIAdAccountPagesMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import \
+    GraphAPIAdAccountBusinessMapping
+from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountPagesMapping import \
+    GraphAPIAdAccountPagesMapping
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestBusiness import GraphAPIRequestBusiness
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestClientPages import GraphAPIRequestClientPages
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestClientPages import \
+    GraphAPIRequestClientPages
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestOwnedPages import GraphAPIRequestOwnedPages
 
 
@@ -18,7 +21,6 @@ class GraphAPIAdAccountPagesHandler:
     def handle(cls,
                permanent_token: typing.AnyStr,
                account_id: typing.AnyStr) -> typing.List[typing.Dict]:
-
         #  get business_id for ad account
         business_mapping = GraphAPIAdAccountBusinessMapping(GraphAPIBusinessDto)
         config = GraphAPIClientBaseConfig()
@@ -38,7 +40,7 @@ class GraphAPIAdAccountPagesHandler:
         response, _ = graph_api_client.call_facebook()
         owned_pages = pages_mapping.load(response)
 
-        # get client pages
+        #  get client pages
         config.request = GraphAPIRequestClientPages(api_version=startup.facebook_config.api_version,
                                                     access_token=permanent_token,
                                                     business_id=business.id)

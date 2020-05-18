@@ -21,7 +21,7 @@ def search_interests(search_input=None):
     results = requests.get(url).json()['data']
     for index, _ in enumerate(results):
         results[index]['key'] = results[index]['id']
-    
+
     return results
 
 

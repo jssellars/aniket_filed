@@ -5,5 +5,3 @@ from dataclasses import dataclass
 class GraphAPIBusinessDto:
     id: str = None
     name: str = None
-
-

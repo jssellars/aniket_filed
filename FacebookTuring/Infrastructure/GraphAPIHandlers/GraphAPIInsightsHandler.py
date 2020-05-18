@@ -5,56 +5,55 @@ from operator import getitem
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 
 class GraphAPIInsightsHandler:
-
     __ids_keymap = {
         Level.ACCOUNT.value: {
-            "structure": FieldsMetadata.id.field_name,
-            "insight": FieldsMetadata.ad_account_id.field_name
+            "structure": FieldsMetadata.id.name,
+            "insight": FieldsMetadata.account_name.name
         },
 
         Level.CAMPAIGN.value: {
-            "structure": FieldsMetadata.id.field_name,
-            "insight": FieldsMetadata.campaign_id.field_name
+            "structure": FieldsMetadata.id.name,
+            "insight": FieldsMetadata.campaign_id.name
         },
 
         Level.ADSET.value: {
-            "structure": FieldsMetadata.id.field_name,
-            "insight": FieldsMetadata.adset_id.field_name
+            "structure": FieldsMetadata.id.name,
+            "insight": FieldsMetadata.adset_id.name
         },
 
         Level.AD.value: {
-            "structure": FieldsMetadata.id.field_name,
-            "insight": FieldsMetadata.ad_id.field_name
+            "structure": FieldsMetadata.id.name,
+            "insight": FieldsMetadata.ad_id.name
         }
     }
 
     __structure_insights_keymap = {
         Level.ACCOUNT.value: {
-            FieldsMetadata.name.field_name: FieldsMetadata.account_name.field_name,
-            FieldsMetadata.id.field_name: FieldsMetadata.ad_account_id.field_name
+            FieldsMetadata.name.name: FieldsMetadata.account_name.name,
+            FieldsMetadata.id.name: FieldsMetadata.account_name.name
         },
 
         Level.CAMPAIGN.value: {
-            FieldsMetadata.name.field_name: FieldsMetadata.campaign_name.field_name,
-            FieldsMetadata.id.field_name: FieldsMetadata.campaign_id.field_name
+            FieldsMetadata.name.name: FieldsMetadata.campaign_name.name,
+            FieldsMetadata.id.name: FieldsMetadata.campaign_id.name
         },
 
         Level.ADSET.value: {
-            FieldsMetadata.name.field_name: FieldsMetadata.adset_name.field_name,
-            FieldsMetadata.id.field_name: FieldsMetadata.adset_id.field_name
+            FieldsMetadata.name.name: FieldsMetadata.adset_name.name,
+            FieldsMetadata.id.name: FieldsMetadata.adset_id.name
         },
 
         Level.AD.value: {
-            FieldsMetadata.name.field_name: FieldsMetadata.ad_name.field_name,
-            FieldsMetadata.id.field_name: FieldsMetadata.ad_id.field_name
+            FieldsMetadata.name.name: FieldsMetadata.ad_name.name,
+            FieldsMetadata.id.name: FieldsMetadata.ad_id.name
         }
     }
 
@@ -72,7 +71,8 @@ class GraphAPIInsightsHandler:
                           fields: typing.List[typing.AnyStr] = None,
                           parameters: typing.Dict = None,
                           requested_fields: typing.List[FieldsMetadata] = None,
-                          add_totals: bool = False) -> typing.Tuple[typing.List[typing.Dict], typing.List[typing.Dict]]:
+                          add_totals: bool = False) -> typing.Tuple[
+        typing.List[typing.Dict], typing.List[typing.Dict]]:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_insights_config(permanent_token=permanent_token,
                                                                 ad_account_id=ad_account_id,
@@ -83,6 +83,7 @@ class GraphAPIInsightsHandler:
         try:
             response, summary = graph_api_client.call_facebook()
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response)
+            insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
             return insights_response, summary
         except Exception as e:
             raise e
@@ -92,7 +93,8 @@ class GraphAPIInsightsHandler:
                             permanent_token: typing.AnyStr = None,
                             ad_account_id: typing.AnyStr = None,
                             level: typing.AnyStr = None,
-                            fields: typing.List[typing.AnyStr] = None) -> typing.Tuple[typing.List[typing.Dict], typing.List[typing.Dict]]:
+                            fields: typing.List[typing.AnyStr] = None) -> typing.Tuple[
+        typing.List[typing.Dict], typing.List[typing.Dict]]:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_structure_config(permanent_token=permanent_token,
                                                                  ad_account_id=ad_account_id,
@@ -120,7 +122,8 @@ class GraphAPIInsightsHandler:
                                                      requested_fields=requested_fields)
 
         if not structure_fields:
-            return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=insights_response)
+            return cls.map_to_requested_fields(level=level, requested_fields=requested_fields,
+                                               response=insights_response)
         else:
             structures_response, _ = cls.get_structures_base(permanent_token=permanent_token,
                                                              ad_account_id=ad_account_id,
@@ -163,7 +166,8 @@ class GraphAPIInsightsHandler:
             insights_without_breakdowns = []
 
         # Combine insights without breakdowns with insights with breakdowns
-        combined_insights = cls.join_insights(insights=insights, insights_without_breakdowns=insights_without_breakdowns)
+        combined_insights = cls.join_insights(insights=insights,
+                                              insights_without_breakdowns=insights_without_breakdowns)
 
         # Get structure information
         if not structure_fields:
@@ -181,6 +185,20 @@ class GraphAPIInsightsHandler:
                                                         insights=combined_insights,
                                                         structures=structures_response)
             return {"data": response, "summary": summary}
+
+    @classmethod
+    def get_reports_insights(cls,
+                             permanent_token: str = None,
+                             ad_account_id: str = None,
+                             fields: typing.List[typing.AnyStr] = None,
+                             parameters: typing.Dict = None,
+                             requested_fields: typing.List[FieldsMetadata] = None) -> typing.List[typing.Dict]:
+        insights_response, _ = cls.get_insights_base(permanent_token=permanent_token,
+                                                     ad_account_id=ad_account_id,
+                                                     fields=fields,
+                                                     parameters=parameters,
+                                                     requested_fields=requested_fields)
+        return insights_response
 
     @classmethod
     def join_insights(cls,
@@ -207,10 +225,13 @@ class GraphAPIInsightsHandler:
             requested_fields_names = [field.name for field in requested_fields]
             response = [{**insight, **structure}
                         for structure in structures
-                        for insight in list(filter(lambda x: getitem(x, insight_id_key) == getitem(structure, structure_id_key), insights))] + \
+                        for insight in list(
+                    filter(lambda x: getitem(x, insight_id_key) == getitem(structure, structure_id_key), insights))] + \
                        [{**dict.fromkeys(requested_fields_names), **structure}
                         for structure in structures
-                        if not list(filter(lambda x: getitem(x, insight_id_key) == getitem(structure, structure_id_key), insights))]
+                        if not list(
+                           filter(lambda x: getitem(x, insight_id_key) == getitem(structure, structure_id_key),
+                                  insights))]
 
         return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=response)
 

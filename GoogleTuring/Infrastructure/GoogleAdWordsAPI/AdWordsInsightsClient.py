@@ -34,13 +34,15 @@ class AdWordsInsightsClient(AdWordsBaseClient):
         report_data.write(header + '\n')
 
         stream_data = self.get_report_downloader().DownloadReportAsStreamWithAwql(
-            report_query, 'CSV', skip_report_header=True, skip_column_header=True, skip_report_summary=skip_summary, include_zero_impressions=False)
+            report_query, 'CSV', skip_report_header=True, skip_column_header=True, skip_report_summary=skip_summary,
+            include_zero_impressions=False)
         try:
             while True:
                 chunk = stream_data.read(self._CHUNK_SIZE)
                 if not chunk:
                     break
-                report_data.write(chunk.decode() if sys.version_info[0] == 3 and getattr(report_data, 'mode', 'w') == 'w' else chunk)
+                report_data.write(
+                    chunk.decode() if sys.version_info[0] == 3 and getattr(report_data, 'mode', 'w') == 'w' else chunk)
         finally:
             report_data.seek(0)
             df = pd.read_csv(report_data)

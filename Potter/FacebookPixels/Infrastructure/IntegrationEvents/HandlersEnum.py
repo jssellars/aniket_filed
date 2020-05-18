@@ -1,5 +1,6 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from Potter.FacebookPixels.Infrastructure.IntegrationEvents.GetAllPixelsMessageRequestHandler import GetAllPixelsMessageRequestHandler
+from Potter.FacebookPixels.Infrastructure.IntegrationEvents.GetAllPixelsMessageRequestHandler import \
+    GetAllPixelsMessageRequestHandler
 
 
 class HandlersEnum(EnumerationBase):

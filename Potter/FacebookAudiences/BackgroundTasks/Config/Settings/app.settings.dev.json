@@ -22,32 +22,29 @@
     "heartbeat": 0,
     "connection_timeout": 300
   },
-
   "facebook": {
     "description": "Filed Live",
     "api_version": "v5.0",
     "app_id": "174014546372191",
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
-
   "sql_server_database": {
     "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
     "port": 1433,
-<<<<<<< HEAD
     "username": "admin",
     "password": "F2!irf0q",
     "name": "filed-facebook-tokens"
-=======
-    "username": "sa",
-    "password": "Parola@20",
-    "name": "Dev.Facebook.Potter.FacebookAccounts"
->>>>>>> origin/dev
   },
-
   "environment": "dev",
   "api_name": "FacebookAudiences",
   "api_version": "1.0.0",
   "service_name": "FacebookAudiences",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-potter-audiences-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
 }

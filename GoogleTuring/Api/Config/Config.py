@@ -8,7 +8,6 @@ class GoogleConfig(BaseConfig):
 
 
 class RabbitMqConfig(BaseConfig):
-
     _MINIMUM_PUBLISH_INTERVAL = 5
     _MINIMUM_HEARTBEAT_ = 4
     _DEFAULT_SERIALIZER_ = 'json'

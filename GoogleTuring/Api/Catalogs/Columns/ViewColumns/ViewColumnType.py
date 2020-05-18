@@ -2,7 +2,7 @@ from Core.Tools.Misc.Enumeration import Enumeration
 
 
 class ViewColumnType:
-    masterCheckbox = Enumeration(0, "masterCheckbox", "masterCheckbox")
+    masterCheckbox = Enumeration(0, "master_checkbox", "master_checkbox")
     text = Enumeration(1, "text", "text")
     number = Enumeration(2, "number", "number")
     currency = Enumeration(3, "currency", "currency")

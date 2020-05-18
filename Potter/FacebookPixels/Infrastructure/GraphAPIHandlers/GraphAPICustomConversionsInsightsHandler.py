@@ -4,9 +4,11 @@ from facebook_business.adobjects.customconversion import CustomConversion
 
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPICustomConversionStatsFields
 from Potter.FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelStatsDto import GraphAPIPixelStatsDto
-from Potter.FacebookPixels.Infrastructure.GraphAPIHandlers.GraphAPIPixelsInsightsHandler import GraphAPIPixelsInsightsHandler
+from Potter.FacebookPixels.Infrastructure.GraphAPIHandlers.GraphAPIPixelsInsightsHandler import \
+    GraphAPIPixelsInsightsHandler
 from Potter.FacebookPixels.Infrastructure.GraphAPIHandlers.Helpers import connect_to_graph_api_sdk
-from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPICustomConversionStatsMapping import GraphAPICustomConversionStatsMapping
+from Potter.FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPICustomConversionStatsMapping import \
+    GraphAPICustomConversionStatsMapping
 
 
 class GraphAPICustomConversionsInsightsHandler(GraphAPIPixelsInsightsHandler):
@@ -34,4 +36,3 @@ class GraphAPICustomConversionsInsightsHandler(GraphAPIPixelsInsightsHandler):
         insights = insights_mapper.load(insights, many=True)
 
         return insights
-

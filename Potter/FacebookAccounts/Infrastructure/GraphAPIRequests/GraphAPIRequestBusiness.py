@@ -9,7 +9,8 @@ class GraphAPIRequestBusiness:
                  access_token: typing.AnyStr = None,
                  account_id: typing.AnyStr = None,
                  api_version: typing.AnyStr = None):
-        self.__url = Template("https://graph.facebook.com/$api_version/$account_id?fields=business&access_token=$access_token")
+        self.__url = Template(
+            "https://graph.facebook.com/$api_version/$account_id?fields=business&access_token=$access_token")
 
         self.__access_token = access_token
         self.__account_id = account_id

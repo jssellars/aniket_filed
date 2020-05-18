@@ -1,6 +1,5 @@
-from dataclasses import dataclass, field
-
 import typing
+from dataclasses import dataclass, field
 
 
 @dataclass
