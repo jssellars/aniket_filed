@@ -7,6 +7,7 @@ from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManager
 from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, \
     AdsManagerInsightsWithTotalsEndpoint
+from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
@@ -33,6 +34,14 @@ jwt = JWTManager(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 api = Api(app)
+
+# Version / Healthcheck
+healthcheck_controller = "{base_url}/turing/healthcheck".format(base_url=startup.base_url.lower())
+api.add_resource(HealthCheckEndpoint, healthcheck_controller)
+
+version_controller = "{base_url}/turing/version".format(base_url=startup.base_url.lower())
+api.add_resource(VersionEndpoint, version_controller)
+
 views_controller = "{base_url}/views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsMetaColumnsEndpoint, views_controller)
 
