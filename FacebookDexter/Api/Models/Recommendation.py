@@ -33,27 +33,26 @@ class Recommendation(object):
     def __init__(self, originDict):
         self.__dict__ = self.convert_recommendation_to_camel_case(originDict)
 
-    def convert_recommendation_to_camel_case(self, originDict):
+    def convert_recommendation_to_camel_case(self, initialDict):
         camel_case_recommendation = {}
-        for key in originDict:
-            if (isinstance(originDict[key], ObjectId)):
-                camel_case_recommendation['id'] = str((originDict[key]))
+        for key in initialDict:
+            if (isinstance(initialDict[key], ObjectId)):
+                camel_case_recommendation['id'] = str((initialDict[key]))
                 continue
-            if (isinstance(originDict[key], datetime)):
-                camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = originDict[key].isoformat()
+            if (isinstance(initialDict[key], datetime)):
+                camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = initialDict[key].isoformat()
                 continue
-            if (isinstance(originDict[key], dict)):
-                camel_case_recommendation[
-                    CaseConverter.snake_to_camel_case(key)] = self.convert_recommendation_to_camel_case(
-                    originDict[key])
+            if (isinstance(initialDict[key], dict)):
+                if (key=='application_details'):
+                    camel_case_recommendation['applicationDetails'] = initialDict[key]
+                    continue
+                camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = self.convert_recommendation_to_camel_case(initialDict[key])
                 continue
-            if (isinstance(originDict[key], list)):
-                camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = [
-                    self.convert_recommendation_to_camel_case(item) for item in
-                    originDict[key]]
+            if (isinstance(initialDict[key], list)):
+                camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = [self.convert_recommendation_to_camel_case(item) for item in initialDict[key]]
                 continue
             if (key == 'importance'):
-                camel_case_recommendation[key] = ImportanceMapper.get_importance_string(originDict[key])
+                camel_case_recommendation[key] = ImportanceMapper.get_importance_string(initialDict[key])
                 continue
-            camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = originDict[key]
+            camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = initialDict[key]
         return camel_case_recommendation

@@ -84,9 +84,8 @@ def GetRecommendationsPage():
                 mongoSort.append((key, 1))
             else:
                 mongoSort.append((key, -1))
-    try:
-        recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, channel, filter,
-                                                                                 mongoSort, excludedIds)
+    try :
+        recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, filter, mongoSort, excludedIds)
         response = make_response((json.dumps(recommendationsList)))
         response.headers['Content-Type'] = "application/json"
         return response

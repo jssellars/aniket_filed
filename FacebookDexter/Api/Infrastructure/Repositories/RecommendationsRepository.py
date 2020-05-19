@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pymongo
 from Models.Recommendation import Recommendation
-from Models.RecommendationMetric import RecommendationMetric
+from Models.RecommendationCategory import RecommendationCategory
 from Models.RecommendationStatus import RecommendationStatus
 from Models.RecommendationType import RecommendationType
 from Settings.MongoConfig import MongoConfig
@@ -40,16 +40,16 @@ class RecommendationsRepository(object):
     def get_campaigns(self, adAccountId, channel):
         aggreagation = [
             {'$match': {
-                'adAccountId': adAccountId,
+                'ad_account_id': adAccountId,
                 'channel': channel
             }
             },
             {'$group': {
                 '_id': {
-                    'campaignId': "$campaignId",
-                    'campaignName': "$campaignName",
+                    'campaignId': "$campaign_id",
+                    'campaignName': "$campaign_name",
                     'channel': '$channel',
-                    'adAccountId': '$adAccountId'
+                    'adAccountId': '$ad_account_id'
                 }
             }
             }
@@ -58,6 +58,7 @@ class RecommendationsRepository(object):
         campaigns = list(cursor)
         distinct_campaigns = [{'Id': campaign['_id']['campaignId'], 'name': campaign['_id']['campaignName']} for
                               campaign in campaigns]
+        print (self.collection.distinct('ad_account_id'))
         return distinct_campaigns
 
     def get_recommendation_by_id(self, id: str):
@@ -65,7 +66,7 @@ class RecommendationsRepository(object):
         recommendation_dict = Recommendation(recommendation).__dict__
         return recommendation_dict
 
-    def get_recommendations_page(self, page_number, page_size, channel, filter=None, sort=None, excluded_ids=None):
+    def get_recommendations_page(self, page_number, page_size, filter=None, sort=None, excluded_ids=None):
         skipped = (page_number - 1) * page_size
         query_sort = [("createdAt", pymongo.DESCENDING)]
         if (sort is not None):
@@ -73,10 +74,15 @@ class RecommendationsRepository(object):
         if (excluded_ids is None):
             excluded_ids = []
 
+        print(self.collection.find_one({"_id": ObjectId('5ebfcd0c4e4db90ee8d4e854')}))
+
         cursor, count = self.get_recommendations_by_campaign_ids(filter, excluded_ids)
         recommendations = list(cursor.sort(query_sort).skip(skipped).limit(page_size))
+
         recommendations_as_dict_list = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in
                                         recommendations]
+
+
         response_dict = {}
         response_dict['count'] = count
         response_dict['recommendations'] = recommendations_as_dict_list
@@ -123,7 +129,7 @@ class RecommendationsRepository(object):
                     search_filter = {}
                     search_filter['$regex'] = filter[key]
                     search_filter['$options'] = 'i'  # ignore case
-                    query_filter['structureName'] = search_filter
+                    query_filter['structure_name'] = search_filter
                     continue
                 if (isinstance(filter[key], list)):
                     query_filter[key] = {"$in": filter[key]}
@@ -142,13 +148,13 @@ class RecommendationsRepository(object):
     def get_counts_by_type(self, filter):
         counts_by_type = {}
         match_filter = copy.deepcopy(filter)
-        match_filter['status'] = {'$nin': [RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value]}
-        match_aggregation = {'$match': match_filter}
-        count_aggregation = {'$group': {
-            '_id': '$recommendationType',
-            'count': {'$sum': 1}
-        }}
-
+        match_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
+        match_aggregation = { '$match' : match_filter}
+        count_aggregation = { '$group' : {
+            '_id' : '$recommendation_type',
+            'count': { '$sum': 1 }
+            }}
+        
         aggregation = [match_aggregation, count_aggregation]
         cursor = self.collection.aggregate(aggregation)
         counts = list(cursor)
@@ -169,7 +175,7 @@ class RecommendationsRepository(object):
         match_filter['status'] = {'$nin': [RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value]}
         match_aggregation = {'$match': match_filter}
         count_aggregation = {'$group': {
-            '_id': '$metric',
+            '_id': '$category',
             'count': {'$sum': 1}
         }}
 
@@ -177,7 +183,7 @@ class RecommendationsRepository(object):
         cursor = self.collection.aggregate(aggregation)
         counts = list(cursor)
 
-        for metric in RecommendationMetric:
+        for metric in RecommendationCategory:
             metric_count = 0
             for count in counts:
                 if (count['_id'] == metric.value):
