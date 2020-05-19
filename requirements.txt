@@ -31,3 +31,5 @@ flask_restful
 humps
 facebook_business
 pyhumps
+googleads
+Cython

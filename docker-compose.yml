@@ -96,9 +96,9 @@ services:
 
 ###################################################################
 
-########################### Turing ################################
+########################### Facebook-Turing ################################
 
-  # Potter-Facebook-Accounts-Api
+  # Facebook-Turing
   filed-facebook-turing-api:
     image: ct.filed.com/${STAGE}-filed-facebook-turing-api:v0.1
     ports:
@@ -116,6 +116,31 @@ services:
     build:
       context: .
       dockerfile: filed-facebook-turing-background-tasks
+      args:
+        STAGE: ${STAGE}
+
+###################################################################
+
+########################### Google-Turing ################################
+
+  # Google-Turing
+  filed-google-turing-api:
+    image: ct.filed.com/${STAGE}-filed-google-turing-api:v0.1
+    ports:
+     - "47550:47550"
+    build:
+      context: .
+      dockerfile: filed-google-turing-api
+      args:
+        STAGE: ${STAGE}
+
+  filed-google-turing-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-google-turing-background-tasks:v0.1
+    ports:
+     - "47551:47551"
+    build:
+      context: .
+      dockerfile: filed-google-turing-background-taskss
       args:
         STAGE: ${STAGE}
 
