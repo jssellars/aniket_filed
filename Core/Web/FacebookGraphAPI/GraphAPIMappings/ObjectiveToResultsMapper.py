@@ -24,6 +24,4 @@ def map_objective_to_results_field_value(data: typing.Dict = None):
     try:
         return ObjectiveToResultsFieldValueEnum.get_enum_by_name(objective).value
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        pass
+        raise e

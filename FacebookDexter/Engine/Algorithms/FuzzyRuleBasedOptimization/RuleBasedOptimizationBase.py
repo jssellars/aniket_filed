@@ -60,38 +60,44 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
                                                business_owner_id=self._business_owner_id)
         return recommendation.create(facebook_id, rule, rule_data, external_services=self._external_services).to_dict()
 
-    def evaluate_remove_rules(self, facebook_id: typing.AnyStr = None, fuzzyfier_factory: typing.Any = None) -> \
-            typing.List[typing.Dict]:
+    def evaluate_remove_rules(self,
+                              facebook_id: typing.AnyStr = None,
+                              fuzzyfier_factory: typing.Any = None) -> typing.List[typing.Dict]:
         recommendations = self.__evaluate_rules_base(facebook_id=facebook_id, action=ActionEnum.REMOVE,
                                                      fuzzyfier_factory=fuzzyfier_factory)
         return recommendations
 
-    def evaluate_create_rules(self, facebook_id: typing.AnyStr = None, fuzzyfier_factory: typing.Any = None) -> \
-            typing.List[typing.Dict]:
+    def evaluate_create_rules(self,
+                              facebook_id: typing.AnyStr = None,
+                              fuzzyfier_factory: typing.Any = None) -> typing.List[typing.Dict]:
         recommendations = self.__evaluate_rules_base(facebook_id=facebook_id, action=ActionEnum.CREATE,
                                                      fuzzyfier_factory=fuzzyfier_factory)
         return recommendations
 
-    def evaluate_pause_rules(self, facebook_id: typing.AnyStr = None, fuzzyfier_factory: typing.Any = None) -> \
-            typing.List[typing.Dict]:
+    def evaluate_pause_rules(self,
+                             facebook_id: typing.AnyStr = None,
+                             fuzzyfier_factory: typing.Any = None) -> typing.List[typing.Dict]:
         recommendations = self.__evaluate_rules_base(facebook_id=facebook_id, action=ActionEnum.PAUSE,
                                                      fuzzyfier_factory=fuzzyfier_factory)
         return recommendations
 
-    def evaluate_decrease_budget_rules(self, facebook_id: typing.AnyStr = None,
+    def evaluate_decrease_budget_rules(self,
+                                       facebook_id: typing.AnyStr = None,
                                        fuzzyfier_factory: typing.Any = None) -> typing.List[typing.Dict]:
         recommendations = self.__evaluate_rules_base(facebook_id=facebook_id, action=ActionEnum.DECREASE_BUDGET,
                                                      fuzzyfier_factory=fuzzyfier_factory)
         return recommendations
 
-    def evaluate_increase_budget_rules(self, facebook_id: typing.AnyStr = None,
+    def evaluate_increase_budget_rules(self,
+                                       facebook_id: typing.AnyStr = None,
                                        fuzzyfier_factory: typing.Any = None) -> typing.List[typing.Dict]:
         recommendations = self.__evaluate_rules_base(facebook_id=facebook_id, action=ActionEnum.INCREASE_BUDGET,
                                                      fuzzyfier_factory=fuzzyfier_factory)
         return recommendations
 
-    def evaluate_general_rules(self, facebook_id: typing.AnyStr = None, fuzzyfier_factory: typing.Any = None) -> \
-            typing.List[typing.Dict]:
+    def evaluate_general_rules(self,
+                               facebook_id: typing.AnyStr = None,
+                               fuzzyfier_factory: typing.Any = None) -> typing.List[typing.Dict]:
         recommendations = self.__evaluate_rules_base(facebook_id=facebook_id, action=ActionEnum.GENERAL,
                                                      fuzzyfier_factory=fuzzyfier_factory)
         return recommendations

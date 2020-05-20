@@ -1,3 +1,4 @@
+import threading
 import typing
 
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import AlgorithmsEnum
@@ -48,30 +49,36 @@ def start_dexter_for_business_owner(business_owner: typing.AnyStr = None,
 
     for start in range(0, number_of_account_ids, batch_size):
         if start + batch_size < number_of_account_ids:
-            # child_thread = threading.Thread(target=start_algorithm_for_accounts_set, args=(business_owner.ad_account_ids[start:start + batch_size],
-            #                                                                                business_owner.business_owner_facebook_id,
-            #                                                                                startup,
-            #                                                                                data_repository,
-            #                                                                                recommendations_repository,
-            #                                                                                journal_repository))
-            # child_thread.start()
-            start_algorithm_for_accounts_set(business_owner.ad_account_ids[start:start + batch_size],
-                                             business_owner.business_owner_facebook_id,
-                                             startup,
-                                             data_repository,
-                                             recommendations_repository,
-                                             journal_repository)
+            child_thread = threading.Thread(target=start_algorithm_for_accounts_set,
+                                            args=(business_owner.ad_account_ids[start:start + batch_size],
+                                                  business_owner.business_owner_facebook_id,
+                                                  startup,
+                                                  data_repository,
+                                                  recommendations_repository,
+                                                  journal_repository))
+            child_thread.start()
+
+            #  Uncomment if you want to run in single thread
+            # start_algorithm_for_accounts_set(business_owner.ad_account_ids[start:start + batch_size],
+            #                                  business_owner.business_owner_facebook_id,
+            #                                  startup,
+            #                                  data_repository,
+            #                                  recommendations_repository,
+            #                                  journal_repository)
         else:
-            # child_thread = threading.Thread(target=start_algorithm_for_accounts_set, args=(business_owner.ad_account_ids[start:],
-            #                                                                                business_owner.business_owner_facebook_id,
-            #                                                                                startup,
-            #                                                                                data_repository,
-            #                                                                                recommendations_repository,
-            #                                                                                journal_repository))
-            # child_thread.start()
-            start_algorithm_for_accounts_set(business_owner.ad_account_ids[start:],
-                                             business_owner.business_owner_facebook_id,
-                                             startup,
-                                             data_repository,
-                                             recommendations_repository,
-                                             journal_repository)
+            child_thread = threading.Thread(target=start_algorithm_for_accounts_set,
+                                            args=(business_owner.ad_account_ids[start:],
+                                                  business_owner.business_owner_facebook_id,
+                                                  startup,
+                                                  data_repository,
+                                                  recommendations_repository,
+                                                  journal_repository))
+            child_thread.start()
+
+            #  Uncomment if you want to run in single thread
+            # start_algorithm_for_accounts_set(business_owner.ad_account_ids[start:],
+            #                                  business_owner.business_owner_facebook_id,
+            #                                  startup,
+            #                                  data_repository,
+            #                                  recommendations_repository,
+            #                                  journal_repository)

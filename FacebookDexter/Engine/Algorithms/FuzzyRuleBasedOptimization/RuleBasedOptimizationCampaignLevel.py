@@ -1,11 +1,12 @@
 import typing
 from datetime import datetime, timedelta
 
+from dateutil.parser import parse
+
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.RuleBasedOptimizationBase import \
     RuleBasedOptimizationBase
-from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME_ISO
 from FacebookDexter.Infrastructure.Domain.Breakdowns import BreakdownMetadata, BreakdownEnum, ActionBreakdownEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.MetricCalculator import MetricCalculator
@@ -45,10 +46,13 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
                       set_level(self._level).
                       compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval))
 
-        if results < self._dexter_config.min_results:
+        if results >= self._dexter_config.min_results:
+            return True
+        else:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                     name="RuleBasedOptimizationCampaignLevel",
-                                    description=f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
+                                    description=f"Campaign {campaign_id} has less than "
+                                                f"{self._dexter_config.min_results} results",
                                     extra_data={
                                         "values": results,
                                         "facebook_id": campaign_id,
@@ -56,15 +60,12 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
                                     })
             self.get_logger().logger.info(log)
             return False
-        else:
-            return True
 
     def __check_last_x_days_since_update(self, campaign_id):
         structure_details = self._mongo_repository.get_structure_details(key_value=campaign_id,
                                                                          level=LevelEnum.CAMPAIGN)
-        updated_time = structure_details.get('updated_time').split("+")[0]
-        updated_time = datetime.strptime(updated_time, DEFAULT_DATETIME_ISO)
-        date_stop = datetime.now()
+        updated_time = parse(structure_details.get('updated_time')).date()
+        date_stop = datetime.now().date()
 
         if (date_stop - updated_time).days >= self._dexter_config.recommendation_days_last_updated:
             breakdown_metadata = BreakdownMetadata(breakdown=BreakdownEnum.NONE,
@@ -78,12 +79,13 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
                           set_level(self._level).
                           compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval_days))
 
-            if results > self._dexter_config.min_results:
+            if results >= self._dexter_config.min_results:
                 return True
             else:
                 log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                         name="RuleBasedOptimizationCampaignLevel",
-                                        description=f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
+                                        description=f"Campaign {campaign_id} has less "
+                                                    f"than {self._dexter_config.min_results} results",
                                         extra_data={
                                             "values": results,
                                             "facebook_id": campaign_id,

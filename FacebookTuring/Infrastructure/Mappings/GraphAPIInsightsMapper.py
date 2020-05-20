@@ -24,9 +24,14 @@ class GraphAPIInsightsMapper:
     def map_response(cls, requested_fields: typing.List[Field] = None, response: typing.List[typing.Dict] = None):
         mapped_response = []
         for data in response:
-            mapped_fields = cls.map_field_all(requested_fields, data)
-            mapped_data = [dict(ChainMap(*entry)) for entry in itertools.product(*mapped_fields)]
-            mapped_response.extend(mapped_data)
+            try:
+                mapped_fields = cls.map_field_all(requested_fields, data)
+            except:
+                mapped_fields = []
+
+            if mapped_fields:
+                mapped_data = [dict(ChainMap(*entry)) for entry in itertools.product(*mapped_fields)]
+                mapped_response.extend(mapped_data)
         return mapped_response
 
     @classmethod
@@ -37,8 +42,8 @@ class GraphAPIInsightsMapper:
         mapped_fields = []
         for index in range(len(requested_fields)):
             if requested_fields[index].field_type != FieldType.ACTION_BREAKDOWN:
-                if requested_fields[index].name == FieldsMetadata.results.name or requested_fields[
-                    index].name == FieldsMetadata.cost_per_result.name:
+                if requested_fields[index].name == FieldsMetadata.results.name or \
+                        requested_fields[index].name == FieldsMetadata.cost_per_result.name:
                     facebook_results_field_value = map_objective_to_results_field_value(data)
                     field_filter = [ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                          operator=ActionFieldConditionOperatorEnum.LIKE,

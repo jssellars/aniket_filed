@@ -11,7 +11,7 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.video_plays,
     FieldsMetadata.leads_total,
     FieldsMetadata.event_responses,
-    FieldsMetadata.website_app_installs_total,
+    FieldsMetadata.app_installs_total,
     FieldsMetadata.conversions,
     FieldsMetadata.thru_plays,
     FieldsMetadata.unique_link_clicks,

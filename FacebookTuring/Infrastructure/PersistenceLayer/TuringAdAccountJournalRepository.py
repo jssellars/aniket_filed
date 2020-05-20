@@ -115,8 +115,10 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             entry[MiscFieldsEnum.account_id] = entry.pop(MiscFieldsEnum.id).split("_")[1]
             entry[MiscFieldsEnum.business_owner_id] = business_owner_id
             entry[MiscFieldsEnum.status] = StructureStatusEnum.ACTIVE.value
-            #  todo: replace to last 3 months after we are sure everything works. It takes too long for 3months. Makes testing hard.
-            entry[MiscFieldsEnum.last_synced_on] = datetime.now() - timedelta(days=MiscFieldsEnum.last_two_weeks)
+            #  todo: replace to last 3 months after we are sure everything works.
+            #  It takes too long for 3months. Makes testing hard.
+            entry[MiscFieldsEnum.last_synced_on] = (datetime.now() -
+                                                    timedelta(days=MiscFieldsEnum.last_one_months))
             new_accounts.append(copy.deepcopy(entry))
 
         self.add_many(new_accounts)

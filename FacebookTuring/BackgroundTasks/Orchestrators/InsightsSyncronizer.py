@@ -36,7 +36,7 @@ class InsightsSyncronizer:
         self.action_breakdown = action_breakdown
         self.date_start = date_start
         self.date_stop = date_stop
-        self.__requested_fields = INSIGHTS_SYNCRONIZER_FIELDS
+        self.__requested_fields = None
         self.__ad_account_id = "act_" + self.account_id
         self.__permanent_token = None
         self.__mongo_repository = None
@@ -44,7 +44,9 @@ class InsightsSyncronizer:
     def run(self) -> typing.NoReturn:
         try:
             if self.breakdown is not None and self.breakdown != InsightsSyncronizerBreakdownEnum.NONE.value:
-                self.__requested_fields.append(self.breakdown)
+                self.__requested_fields = INSIGHTS_SYNCRONIZER_FIELDS + [self.breakdown]
+            else:
+                self.__requested_fields = INSIGHTS_SYNCRONIZER_FIELDS
             response = GraphAPIInsightsHandler.get_reports_insights(permanent_token=self.permanent_token,
                                                                     ad_account_id=self.__ad_account_id,
                                                                     fields=self.__get_fields(),

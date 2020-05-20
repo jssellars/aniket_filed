@@ -8,7 +8,7 @@ class MongoLogger:
         COLLECTION_NAME = 'logs'
 
         def __init__(self, repository: MongoRepositoryBase = None, database_name: typing.AnyStr = None):
-            self.__repository = repository
+            self.__repository = repository.new_repository()
             self.__repository.set_database(database_name)
             self.__repository.set_collection(self.COLLECTION_NAME)
 

@@ -24,7 +24,8 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your reach has decreased, but why? Your ads quality is also low,  at this point your ads are being penalized and delivery "
+             template="Your reach has decreased, but why? Your ads quality is also low,  at this point your "
+                      "ads are being penalized and delivery "
                       "is being affected. Dexter suggests creating new ads with new targeting.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

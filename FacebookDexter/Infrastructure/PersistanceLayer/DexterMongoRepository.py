@@ -20,8 +20,8 @@ class DexterMongoRepository(MongoRepositoryBase):
                              date_start: typing.AnyStr = None,
                              date_stop: typing.AnyStr = None,
                              breakdown: BreakdownEnum = BreakdownEnum.NONE,
-                             action_breakdown: ActionBreakdownEnum = ActionBreakdownEnum.NONE) -> typing.List[
-        typing.Tuple[typing.AnyStr, typing.AnyStr]]:
+                             action_breakdown: ActionBreakdownEnum = ActionBreakdownEnum.NONE) -> \
+            typing.List[typing.Tuple[typing.AnyStr, typing.AnyStr]]:
         self._database = self._client[self._config.insights_database]
         collection_name = level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
         self.set_collection(collection_name)
@@ -74,7 +74,9 @@ class DexterMongoRepository(MongoRepositoryBase):
                            level: LevelEnum = None,
                            breakdown_metadata: BreakdownMetadata = None) -> typing.List[typing.Dict]:
         self._database = self._client[self._config.insights_database]
-        collection_name = level.value + "_" + breakdown_metadata.breakdown.value.name + "_" + breakdown_metadata.action_breakdown.value.name
+        collection_name = (level.value + "_" +
+                           breakdown_metadata.breakdown.value.name + "_" +
+                           breakdown_metadata.action_breakdown.value.name)
         self.set_collection(collection_name)
 
         # build mongo query
@@ -139,8 +141,8 @@ class DexterMongoRepository(MongoRepositoryBase):
             query[1][MongoOperator.MATCH.value][MongoOperator.AND.value].append(breakdown_value_filter)
 
         # add desired metrics to query
-        metrics_dict = {metric: {MongoOperator.SUM.value: f"{MongoOperator.DOLLAR_SIGN.value}{metric}"} for metric in
-                        metrics}
+        metrics_dict = {metric: {MongoOperator.SUM.value: f"{MongoOperator.DOLLAR_SIGN.value}{metric}"}
+                        for metric in metrics}
         query[0][MongoOperator.GROUP.value].update(metrics_dict)
 
         try:
@@ -156,7 +158,9 @@ class DexterMongoRepository(MongoRepositoryBase):
                       level: LevelEnum = None,
                       breakdown_metadata: BreakdownMetadata = None) -> typing.List[typing.Dict]:
         self._database = self._client[self._config.insights_database]
-        collection_name = level.value + "_" + breakdown_metadata.breakdown.value.name + "_" + breakdown_metadata.action_breakdown.value.name
+        collection_name = (level.value + "_" +
+                           breakdown_metadata.breakdown.value.name + "_" +
+                           breakdown_metadata.action_breakdown.value.name)
         self.set_collection(collection_name)
 
         # build mongo query
@@ -212,8 +216,8 @@ class DexterMongoRepository(MongoRepositoryBase):
             query[1][MongoOperator.MATCH.value][MongoOperator.AND.value].append(breakdown_value_filter)
 
         # add desired metrics to query
-        metrics_dict = {metric: {MongoOperator.MIN.value: f"{MongoOperator.DOLLAR_SIGN.value}{metric}"} for metric in
-                        metrics}
+        metrics_dict = {metric: {MongoOperator.MIN.value: f"{MongoOperator.DOLLAR_SIGN.value}{metric}"} for
+                        metric in metrics}
         query[0][MongoOperator.GROUP.value].update(metrics_dict)
 
         try:
@@ -229,7 +233,9 @@ class DexterMongoRepository(MongoRepositoryBase):
                       level: LevelEnum = None,
                       breakdown_metadata: BreakdownMetadata = None) -> typing.List[typing.Dict]:
         self._database = self._client[self._config.insights_database]
-        collection_name = level.value + "_" + breakdown_metadata.breakdown.value.name + "_" + breakdown_metadata.action_breakdown.value.name
+        collection_name = (level.value + "_" +
+                           breakdown_metadata.breakdown.value.name + "_" +
+                           breakdown_metadata.action_breakdown.value.name)
         self.set_collection(collection_name)
 
         # build mongo query
@@ -286,8 +292,8 @@ class DexterMongoRepository(MongoRepositoryBase):
             query[1][MongoOperator.MATCH.value][MongoOperator.AND.value].append(breakdown_value_filter)
 
         # add desired metrics to query
-        metrics_dict = {metric: {MongoOperator.MAX.value: f"{MongoOperator.DOLLAR_SIGN.value}{metric}"} for metric in
-                        metrics}
+        metrics_dict = {metric: {MongoOperator.MAX.value: f"{MongoOperator.DOLLAR_SIGN.value}{metric}"}
+                        for metric in metrics}
         query[0][MongoOperator.GROUP.value].update(metrics_dict)
 
         try:
@@ -297,8 +303,9 @@ class DexterMongoRepository(MongoRepositoryBase):
 
         return results
 
-    def get_recommendation_meta_information(self, key_value: typing.AnyStr = None, level: LevelEnum = None) -> \
-            typing.Union[typing.Dict, typing.NoReturn]:
+    def get_recommendation_meta_information(self,
+                                            key_value: typing.AnyStr = None,
+                                            level: LevelEnum = None) -> typing.Union[typing.Dict, typing.NoReturn]:
         self._database = self._client[self._config.structures_database]
         self.set_collection(level.value)
 

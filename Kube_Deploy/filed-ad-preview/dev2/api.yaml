@@ -20,28 +20,25 @@ spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-<<<<<<< HEAD
-          - "dev2.filed.com"
+          - "dev2.filed.com"             
       imagePullSecrets:
-      - name: regcred
+      - name: regcred         
       containers:
       - name: dev2-filed-ad-preview
         image: ct.filed.com/dev2-filed-ad-preview:v0.1
         imagePullPolicy: Always
-=======
-            - "dev2.filed.com"
-      imagePullSecrets:
-        - name: regcred
-      containers:
-        - name: dev2-filed-ad-preview
-          image: ct.filed.com/dev2-filed-ad-preview:v0.1
-          imagePullPolicy: Always
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 80
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 80
         #   initialDelaySeconds: 5
         #   periodSeconds: 5  
->>>>>>> 087b93cdef5118aa159cdc46b4eb9139055abcd9
         ports: 
         - containerPort : 47221
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /app/logs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: dev2-mss-logs-claim

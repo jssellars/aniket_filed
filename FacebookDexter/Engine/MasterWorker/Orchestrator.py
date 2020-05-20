@@ -70,6 +70,7 @@ class Orchestrator(OrchestratorBuilder):
         rules = RulesFactory.get(algorithm_type=alg_type, level=level)
         fuzzyfier_factory = FuzzyfierFactory.get(algorithm_type=alg_type, level=level)
         rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=alg_type, level=level)
+
         try:
             rule_algorithm = rule_algorithm. \
                 set_business_owner_id(self.business_owner_id). \
@@ -87,47 +88,39 @@ class Orchestrator(OrchestratorBuilder):
         return rule_algorithm
 
     def __run_first_time(self):
-        rule_algorithm = self.__init_algorithm(self.algorithm_type, self.level)
-        if rule_algorithm is not None:
-            journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
+        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
 
-            search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                           self.algorithm_type,
-                                                                                           self.business_owner_id)
-            self._journal_repository.add_one(journal_object_saving)
-
-            self.__run_algorithm(search_query=search_query)
-
-    def __run_from_pending(self):
-        rule_algorithm = self.__init_algorithm(self.algorithm_type, self.level)
-        if rule_algorithm is not None:
-            search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(self.ad_account_id,
+        search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
                                                                                        self.algorithm_type,
                                                                                        self.business_owner_id)
-            update_query = DexterJournalMongoRepositoryHelper.get_update_query_in_progress()
-            self._journal_repository.update_one(search_query, update_query)
+        self._journal_repository.add_one(journal_object_saving)
 
-            search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                           self.algorithm_type,
-                                                                                           self.business_owner_id)
+        self.__run_algorithm(search_query=search_query)
 
-            self.__run_algorithm(search_query=search_query)
+    def __run_from_pending(self):
+        search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(self.ad_account_id,
+                                                                                   self.algorithm_type,
+                                                                                   self.business_owner_id)
+        update_query = DexterJournalMongoRepositoryHelper.get_update_query_in_progress()
+        self._journal_repository.update_one(search_query, update_query)
+
+        search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
+                                                                                       self.algorithm_type,
+                                                                                       self.business_owner_id)
+
+        self.__run_algorithm(search_query=search_query)
 
     def __save_pending_entry_to_journal(self):
-        rule_algorithm = self.__init_algorithm(self.algorithm_type, self.level)
-        if rule_algorithm is not None:
-            journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.PENDING)
-            self._journal_repository.add_one(journal_object_saving)
+        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.PENDING)
+        self._journal_repository.add_one(journal_object_saving)
 
     def __run_from_completed_or_failed(self):
-        rule_algorithm = self.__init_algorithm(self.algorithm_type, self.level)
-        if rule_algorithm is not None:
-            journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
-            search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                           self.algorithm_type,
-                                                                                           self.business_owner_id)
-            self._journal_repository.add_one(journal_object_saving)
-            self.__run_algorithm(search_query=search_query)
+        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
+        search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
+                                                                                       self.algorithm_type,
+                                                                                       self.business_owner_id)
+        self._journal_repository.add_one(journal_object_saving)
+        self.__run_algorithm(search_query=search_query)
 
     def update_remaining_null_dates(self):
         search_null_end_date_query = DexterJournalMongoRepositoryHelper.get_search_for_null_end_date(

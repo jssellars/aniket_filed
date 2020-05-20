@@ -34,14 +34,6 @@ jwt = JWTManager(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 api = Api(app)
-
-# Version / Healthcheck
-healthcheck_controller = "{base_url}/turing/healthcheck".format(base_url=startup.base_url.lower())
-api.add_resource(HealthCheckEndpoint, healthcheck_controller)
-
-version_controller = "{base_url}/turing/version".format(base_url=startup.base_url.lower())
-api.add_resource(VersionEndpoint, version_controller)
-
 views_controller = "{base_url}/views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsMetaColumnsEndpoint, views_controller)
 
@@ -59,6 +51,13 @@ api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_cont
 structure_details_controller = "{base_url}/<int:account_id>/<string:level>/<int:structure_id>".format(
     base_url=startup.base_url.lower())
 api.add_resource(AdsManagerEndpoint, structure_details_controller)
+
+# Version / Healthcheck
+healthcheck_controller = "{base_url}/turing/healthcheck".format(base_url=startup.base_url.lower())
+api.add_resource(HealthCheckEndpoint, healthcheck_controller)
+
+version_controller = "{base_url/turing/version".format(base_url=startup.base_url.lower())
+api.add_resource(VersionEndpoint, version_controller)
 
 if __name__ == "__main__":
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

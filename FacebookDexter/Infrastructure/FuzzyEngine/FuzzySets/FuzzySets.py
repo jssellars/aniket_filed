@@ -38,7 +38,8 @@ class Fuzzyfier:
         return fuzzy_class, fuzzy_value
 
     def __get_membership_function_by_linguistic_level(self,
-                                                      linguistic_level: LinguisticVariableEnum = None) -> FuzzyMembershipFunctionBase:
+                                                      linguistic_level: LinguisticVariableEnum = None) -> \
+            FuzzyMembershipFunctionBase:
         linguistic_level_value = next(filter(lambda x: x.level == linguistic_level, self.linguistic_levels), None)
         if not linguistic_level_value:
             raise ValueError(f"Invalid linguistic variable level {linguistic_level.value}")

@@ -4,6 +4,7 @@ from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderRequestMapper
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import FiledFacebookInsightsTableEnum
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 
 
@@ -11,7 +12,7 @@ class AdsManagerInsightsCommandHandler:
 
     @classmethod
     def map_query(cls, query: typing.Dict = None, has_breakdowns: bool = True):
-        query_builder_request = QueryBuilderRequestMapper(query)
+        query_builder_request = QueryBuilderRequestMapper(query, FiledFacebookInsightsTableEnum)
         query = QueryBuilderFacebookRequestParser()
         query.parse(query_builder_request, parse_breakdowns=has_breakdowns)
         return query

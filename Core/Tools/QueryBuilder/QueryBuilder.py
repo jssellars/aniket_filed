@@ -1,6 +1,8 @@
+import typing
 from collections.abc import Mapping
 
 from Core.Tools.Misc.ClassGenerator import ClassGenerator
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from Core.Tools.Misc.ObjectManipulators import extract_class_attributes
 
 
@@ -34,11 +36,12 @@ class QueryBuilderRequestMapper:
 
     table_name = None
 
-    def __init__(self, query_builder_request, table_name):
+    def __init__(self, query_builder_request: typing.Dict = None, table_name: EnumerationBase = None):
         self.TableName = query_builder_request['TableName']
         self.Columns = [QueryBuilderColumn(column) for column in query_builder_request['Columns']]
         self.Dimensions = [QueryBuilderDimension(dimension) for dimension in query_builder_request['Dimensions']]
         self.Conditions = self.find_all_where_conditions(query_builder_request['Where'])
+
         self.table_name = table_name
 
     def get_level(self):

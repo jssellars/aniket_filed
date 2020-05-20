@@ -58,7 +58,7 @@ def callback(ch, method, properties, body):
         orchestrator = (Orchestrator().
                         set_account_journal_repository(account_journal_repository).
                         set_insights_repository(insights_repository).
-                        set_structures_reposiotry(structures_repository).
+                        set_structures_repository(structures_repository).
                         set_logger(logger).
                         set_rabbit_logger(rabbit_logger))
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     schedule.every().day.at("00:05").do(run_daily_sync)
 
     rabbit_thread = Thread(target=rabbitmq_client.register_callback(callback)
-                           .register_consumer(consumer_tag="google.turing")
+                           .register_consumer(consumer_tag=startup.rabbitmq_config.consumer_name)
                            .start_consuming)
     rabbit_thread.start()
 

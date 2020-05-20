@@ -51,16 +51,16 @@
     "journal_database_name": "dev_dexter_engine_run_journal",
     "journal_collection_name": "dexter_journal",
     "structures_database": "dev_facebook_turing_structures",
-    "insights_database": "dev_facebook_turing_insights_mock",
+    "insights_database": "dev_facebook_turing_insights",
     "logs_database": "dev_facebook_dexter_logs"
   },
   "external_services": {
     "targeting_search": "https://targetingsearch.filed.com/interests/suggestions/"
   },
   "dexter_config": {
-    "min_results": 1,
+    "min_results": 0,
     "days_since_last_change": 3,
-    "recommendation_days_last_updated" : 3
+    "recommendation_days_last_updated": 3
   },
   "environment": "dev",
   "api_name": "FacebookDexterBackgroundTasks",

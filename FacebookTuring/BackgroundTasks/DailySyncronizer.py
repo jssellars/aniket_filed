@@ -20,7 +20,7 @@ def run_daily_sync():
         orchestrator = Orchestrator(). \
             set_account_journal_repository(account_journal_repository). \
             set_insights_repository(insights_repository). \
-            set_structures_reposiotry(structures_repository)
+            set_structures_repository(structures_repository)
         orchestrator.run()
     except:
         log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,

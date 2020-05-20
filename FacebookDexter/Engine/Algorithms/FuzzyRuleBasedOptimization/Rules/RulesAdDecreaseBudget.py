@@ -23,7 +23,8 @@ RULES_AD_DECREASE_BUDGET = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your quality ranking and results are low. You should decrease the budget by maximum 25%.",
+             template="Dexter noticed your quality ranking and results are low. You should decrease "
+                      "the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -48,7 +49,8 @@ RULES_AD_DECREASE_BUDGET = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your quality ranking is low while your CPC remains high. You should decrease the budget by maximum 25%.",
+             template="Dexter noticed your quality ranking is low while your CPC remains high. You should decrease "
+                      "the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -73,7 +75,8 @@ RULES_AD_DECREASE_BUDGET = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your ad has more that 20% text overlay and a high CPC. You should decrease the budget by maximum 25%.",
+             template="Dexter noticed your ad has more that 20% text overlay and a high CPC. You should decrease "
+                      "the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,

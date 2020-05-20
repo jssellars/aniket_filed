@@ -45,13 +45,8 @@
   "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
   "debug_mode": true,
   "docker_filename": "filed-potter-pixels-api",
-<<<<<<< HEAD
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
-=======
   "logger_type": "file_logger",
   "rabbit_logger_type": "rabbit_file_logger",
->>>>>>> 087b93cdef5118aa159cdc46b4eb9139055abcd9
   "logger_level": "DEBUG",
   "es_host": "localhost",
   "es_port": 9200

@@ -15,7 +15,7 @@ class AvailableMetricBaseEnum(Enum):
     VIDEO_PLAYS = MetricBase(FieldsMetadata.video_plays.name, "Video plays")
     LEADS = MetricBase(FieldsMetadata.leads_total.name, "Leads")
     RSVPS = MetricBase(FieldsMetadata.event_responses.name, "RSVPs")
-    APP_INSTALLS = MetricBase(FieldsMetadata.website_app_installs_total.name, "App installs")
+    APP_INSTALLS = MetricBase(FieldsMetadata.app_installs_total.name, "App installs")
     CONVERSIONS = MetricBase(FieldsMetadata.conversions.name, "Conversions")
     THRUPLAYS = MetricBase(FieldsMetadata.thru_plays.name, "Thru plays")
     UNIQUE_CLICKS = MetricBase(FieldsMetadata.unique_link_clicks.name, "Unique clicks")

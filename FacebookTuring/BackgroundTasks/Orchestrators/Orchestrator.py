@@ -37,7 +37,7 @@ class Orchestrator:
         self.__insights_repository = insights_repository
         return self
 
-    def set_structures_reposiotry(self, structures_repository: TuringMongoRepository = None):
+    def set_structures_repository(self, structures_repository: TuringMongoRepository = None):
         self.__structures_repository = structures_repository
         return self
 
@@ -77,6 +77,13 @@ class Orchestrator:
             # waiting time for Dexter to run and the computation volume.
             for task in tasks:
                 task.join()
+
+            # # uncomment to test in sync
+            # sync(self.__structures_repository.new_structures_repository(),
+            #      self.__insights_repository.new_insights_repository(),
+            #      self.__account_journal_repository.new_ad_account_journal_repository(),
+            #      entry)
+
             self.__publish_business_owner_synced_event(business_owner_id)
 
     @staticmethod

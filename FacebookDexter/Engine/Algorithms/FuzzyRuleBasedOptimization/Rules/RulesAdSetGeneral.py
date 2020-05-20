@@ -24,9 +24,11 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your <id=1&metric_name=CPM&metric_type=1&antecedent_type=1> has increased too much for Dexter in the last <id=1&time_interval=7> days."
+             template="Your <id=1&metric_name=CPM&metric_type=1&antecedent_type=1> has increased too much "
+                      "for Dexter in the last <id=1&time_interval=7> days."
                       " This could mean several things. However, Dexter suggests that you launch "
-                      "your best performing ads with <id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null>. ",
+                      "your best performing ads with "
+                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -53,9 +55,12 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Dexter has been monitoring your campaigns very closely, and your <id=1&metric_name=CPM&metric_type=1&antecedent_type=1> "
-                      "has increased by <id=1&value=null>% in the last <id=1&time_interval=7> days. He recommends you try these new interests "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3>: <id=2&value=null>, to find the cheapest cost",
+             template="Dexter has been monitoring your campaigns very closely, and "
+                      "your <id=1&metric_name=CPM&metric_type=1&antecedent_type=1> "
+                      "has increased by <id=1&value=null>% in the last <id=1&time_interval=7> days. "
+                      "He recommends you try these new interests "
+                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3>: "
+                      "<id=2&value=null>, to find the cheapest cost",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -82,8 +87,10 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=1> have decreased over the last <id=1&time_interval=7> days. Dexter "
-                      "suggests testing <id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5>: <id=2&value=null> to "
+             template="Your <id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=1> have decreased over "
+                      "the last <id=1&time_interval=7> days. Dexter "
+                      "suggests testing <id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5>: "
+                      "<id=2&value=null> to "
                       "help broaden your reach and get more results.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

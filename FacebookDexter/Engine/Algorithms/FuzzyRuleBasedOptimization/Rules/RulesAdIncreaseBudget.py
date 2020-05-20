@@ -24,7 +24,8 @@ RULES_AD_INCREASE_BUDGET = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Amazing job!! Dexter noticed your ads quality and results are high. You should increase your budget by a maximum 25% "
+             template="Amazing job!! Dexter noticed your ads quality and results are high. You should increase "
+                      "your budget by a maximum 25% "
                       "to reach as many people as possible.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -50,7 +51,8 @@ RULES_AD_INCREASE_BUDGET = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your ads quality and CTR are high, and you have a large audience. You should increase your budget by a maximum 25% to "
+             template="Dexter noticed your ads quality and CTR are high, and you have a large audience. "
+                      "You should increase your budget by a maximum 25% to "
                       "reach as many people as possible.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

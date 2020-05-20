@@ -135,7 +135,8 @@ class RecommendationBuilder:
         self.template = rule.template
         self.importance = rule.importance.value
         self.source = rule.source.value
-        self.level = rule.level.value
+        # required by FE. will change after FE refactor
+        self.level = rule.level.value if rule.level != LevelEnum.ADSET else 'adSet'
         self.created_at = datetime.now().strftime(DEFAULT_DATETIME_ISO)
         self.recommendation_type = rule.type.value
         self.redirect_for_edit = rule.redirect.value
@@ -206,8 +207,8 @@ class RecommendationBuilder:
         return self
 
     def __set_id(self):
-        hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + self.action_breakdown[
-            'name']
+        hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + \
+                     self.action_breakdown['name']
         self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
 
     def to_dict(self):

@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prod-filed-facebook-dexter-background-tasks
+  name: dev2-filed-dexter-api
 spec:
   selector:
     matchLabels:
-      run: prod-filed-facebook-dexter-background-tasks
+      run: dev2-filed-dexter-api
   replicas: 1
   strategy:
     type: RollingUpdate
@@ -15,17 +15,17 @@ spec:
   template:
     metadata:
       labels:
-        run: prod-filed-facebook-dexter-background-tasks
+        run: dev2-filed-dexter-api
     spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-          - "prod.filed.com"             
+          - "dev2.filed.com"             
       imagePullSecrets:
       - name: regcred          
       containers:
-      - name: prod-filed-facebook-dexter-background-tasks
-        image: ct.filed.com/prod-filed-facebook-dexter-background-tasks:v0.1
+      - name: dev2-filed-dexter-api
+        image: ct.filed.com/dev2-filed-dexter-api:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:
@@ -34,11 +34,11 @@ spec:
         #   initialDelaySeconds: 5
         #   periodSeconds: 5  
         ports: 
-        - containerPort : 43701
-      #   volumeMounts:
-      #   - name: persistent-storage
-      #     mountPath: /app/logs
-      # volumes:
-      # - name: persistent-storage
-      #   persistentVolumeClaim:
-      #     claimName: prod-mss-logs-claim
+        - containerPort : 43700
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /app/logs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: dev2-mss-logs-claim

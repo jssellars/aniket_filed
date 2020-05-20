@@ -1,6 +1,8 @@
-# todo: make this more efficient
 import typing
 from datetime import datetime, timedelta
+from threading import Thread
+
+from dateutil.parser import parse
 
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizer import InsightsSyncronizer
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import \
@@ -26,18 +28,32 @@ def sync(structures_repository: TuringMongoRepository = None,
         last_synced_on = entry[MiscFieldsEnum.last_synced_on]
         if isinstance(last_synced_on, str):
             try:
-                last_synced_on = datetime.fromisoformat(last_synced_on)
+                last_synced_on = parse(last_synced_on)
             except Exception as e:
                 raise e
 
-        now = datetime.now()
+        now = datetime.now().date()
 
-        if last_synced_on < now:
+        if last_synced_on.date() < now:
             try:
-                sync_structures(structures_repository, entry[MiscFieldsEnum.business_owner_id],
-                                entry[MiscFieldsEnum.account_id])
-                sync_insights(insights_repository, entry[MiscFieldsEnum.business_owner_id],
-                              entry[MiscFieldsEnum.account_id], last_synced_on)
+                #  start a new thread for synchronizing structures
+                structure_thread = Thread(target=sync_structures,
+                                          args=(structures_repository,
+                                                entry[MiscFieldsEnum.business_owner_id],
+                                                entry[MiscFieldsEnum.account_id]))
+
+                # start a new thread for synchronizing all insights
+                insights_thread = Thread(target=sync_insights,
+                                         args=(insights_repository,
+                                               entry[MiscFieldsEnum.business_owner_id],
+                                               entry[MiscFieldsEnum.account_id], last_synced_on))
+                # run synchronizer threads
+                structure_thread.start()
+                insights_thread.start()
+
+                # wait for threads to finish syncing before moving on to the next ad account
+                structure_thread.join()
+                insights_thread.join()
             except Exception as e:
                 raise NotImplementedError(str(e))
 
@@ -65,8 +81,6 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
 
     levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
 
-    data_available = True
-
     for level in levels:
         if level == Level.ADSET:
             for breakdown in InsightsSyncronizerBreakdownEnum:
@@ -77,22 +91,7 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
                                                       breakdown=breakdown.value,
                                                       action_breakdown=action_breakdown.value)
                     syncronizer.set_mongo_repository(insights_repository)
-                    data_available = syncronizer.check_data(date_start.strftime(DEFAULT_DATETIME_FORMAT),
-                                                            date_stop.strftime(DEFAULT_DATETIME_FORMAT))
-
-                    if data_available:
-                        while date_stop >= date_start:
-                            current_date_stop = date_start + timedelta(SYNC_DAYS_INTERVAL)
-                            date_start_sync = date_start.strftime(DEFAULT_DATETIME_FORMAT)
-                            date_stop_sync = current_date_stop.strftime(DEFAULT_DATETIME_FORMAT)
-
-                            syncronizer.date_start = date_start_sync
-                            syncronizer.date_stop = date_stop_sync
-                            syncronizer.run()
-
-                            date_start = current_date_stop + NEXT_DAY
-
-                    syncronizer.close_database_connection()
+                    sync_insights_base(syncronizer, date_start, date_stop)
         else:
             syncronizer = InsightsSyncronizer(business_owner_id=business_owner_id,
                                               account_id=account_id,
@@ -100,42 +99,25 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
                                               breakdown=InsightsSyncronizerBreakdownEnum.NONE.value,
                                               action_breakdown=InsightsSyncronizerActionBreakdownEnum.NONE.value)
             syncronizer.set_mongo_repository(insights_repository)
-            data_available = syncronizer.check_data(date_start.strftime(DEFAULT_DATETIME_FORMAT),
-                                                    date_stop.strftime(DEFAULT_DATETIME_FORMAT))
+            sync_insights_base(syncronizer, date_start, date_stop)
 
-            if data_available:
-                while date_stop >= date_start:
-                    current_date_stop = date_start + timedelta(SYNC_DAYS_INTERVAL)
-                    date_start_sync = date_start.strftime(DEFAULT_DATETIME_FORMAT)
-                    date_stop_sync = current_date_stop.strftime(DEFAULT_DATETIME_FORMAT)
 
-                    syncronizer.date_start = date_start_sync
-                    syncronizer.date_stop = date_stop_sync
-                    syncronizer.run()
+def sync_insights_base(syncronizer: InsightsSyncronizer = None,
+                       date_start: datetime = None,
+                       date_stop: datetime = None):
+    data_available = syncronizer.check_data(date_start.strftime(DEFAULT_DATETIME_FORMAT),
+                                            date_stop.strftime(DEFAULT_DATETIME_FORMAT))
 
-                    date_start = current_date_stop + NEXT_DAY
+    if data_available:
+        while date_stop >= date_start:
+            current_date_stop = date_start + timedelta(SYNC_DAYS_INTERVAL)
+            date_start_sync = date_start.strftime(DEFAULT_DATETIME_FORMAT)
+            date_stop_sync = current_date_stop.strftime(DEFAULT_DATETIME_FORMAT)
 
-            syncronizer.close_database_connection()
+            syncronizer.date_start = date_start_sync
+            syncronizer.date_stop = date_stop_sync
+            syncronizer.run()
 
-        if not data_available:
-            break
+            date_start = current_date_stop + NEXT_DAY
 
-# def sync_insights_base(syncronizer: InsightsSyncronizer = None,
-#                        date_start: datetime = None,
-#                        date_stop: datetime = None):
-#     data_available = syncronizer.check_data(date_start.strftime(DEFAULT_DATETIME_FORMAT),
-#                                             date_stop.strftime(DEFAULT_DATETIME_FORMAT))
-#
-#     if data_available:
-#         while date_stop >= date_start:
-#             current_date_stop = date_start + timedelta(SYNC_DAYS_INTERVAL)
-#             date_start_sync = date_start.strftime(DEFAULT_DATETIME_FORMAT)
-#             date_stop_sync = current_date_stop.strftime(DEFAULT_DATETIME_FORMAT)
-#
-#             syncronizer.date_start = date_start_sync
-#             syncronizer.date_stop = date_stop_sync
-#             syncronizer.run()
-#
-#             date_start = current_date_stop + NEXT_DAY
-#
-#     syncronizer.close_database_connection()
+    syncronizer.close_database_connection()

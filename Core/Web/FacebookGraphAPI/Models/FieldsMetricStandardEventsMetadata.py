@@ -455,6 +455,14 @@ class FieldsMetricStandardEventsMetadata:
                                         action_breakdowns=[GraphAPIInsightsFields.action_type],
                                         field_type=FieldType.ACTION_INSIGHT)
     # app installs
+    app_installs_total = Field(name='app_installs_total',
+                               facebook_fields=[GraphAPIInsightsFields.actions],
+                               mapper=ActionFieldMapper(field_filter=[
+                                   ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                        operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                        field_value=GraphAPIInsightsFields.app_installs)]),
+                               action_breakdowns=[GraphAPIInsightsFields.action_type],
+                               field_type=FieldType.ACTION_INSIGHT)
     mobile_app_installs_total = Field(name='mobile_app_installs_total',
                                       facebook_fields=[GraphAPIInsightsFields.actions],
                                       mapper=ActionFieldMapper(field_filter=[

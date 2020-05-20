@@ -31,7 +31,6 @@ from FacebookDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
 
 
 class Rules:
-    # todo: add remove rules
     remove = [*RULES_ADSET_REMOVE_AGE_GROUPS,
               *RULES_ADSET_REMOVE_GENDER,
               *RULES_ADSET_REMOVE_PLACEMENT,

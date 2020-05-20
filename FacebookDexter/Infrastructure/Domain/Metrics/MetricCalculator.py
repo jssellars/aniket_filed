@@ -56,7 +56,7 @@ class MetricCalculator(MetricCalculatorBuilder):
     def _logger(self):
         if self.__logger is None and self._repository is not None:
             self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
+                                        database_name=self._repository.config.logs_database, )
         return self.__logger
 
     @property
@@ -83,8 +83,8 @@ class MetricCalculator(MetricCalculatorBuilder):
         return self.__calculator
 
     def compute_value(self, atype: AntecedentTypeEnum = None,
-                      time_interval: typing.Union[DaysEnum, int] = DaysEnum.ONE) -> typing.Tuple[
-        typing.Any, typing.Any]:
+                      time_interval: typing.Union[DaysEnum, int] = DaysEnum.ONE) -> \
+            typing.Tuple[typing.Any, typing.Any]:
         date_stop = datetime.now()
         try:
             date_start = date_stop - timedelta(days=time_interval)
@@ -93,7 +93,8 @@ class MetricCalculator(MetricCalculatorBuilder):
         except Exception:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="MetricCalculator",
-                                    description=f"Failed to process date start and date stop for time interval {time_interval}.",
+                                    description=f"Failed to process date start and date stop for "
+                                                f"time interval {time_interval}.",
                                     extra_data={
                                         "state": self.__current_state(),
                                         "error": traceback.format_exc()
@@ -314,7 +315,8 @@ class MetricCalculator(MetricCalculatorBuilder):
             aggregated_numerator = numerator_aggregator_function(self.__compute_numerator_value(data))
             if isinstance(self._metric.denominator, list) and self._metric.denominator:
                 aggregated_denominator = denominator_aggregator_function(self.__compute_denominator_values(data))
-                return self._metric.multiplier * aggregated_numerator / aggregated_denominator if aggregated_denominator else None
+                return self._metric.multiplier * aggregated_numerator / aggregated_denominator \
+                    if aggregated_denominator else None
             else:
                 return self._metric.multiplier * aggregated_numerator
         except Exception:
@@ -467,8 +469,9 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         return resultant_slope
 
-    def __min_max_normalized_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> \
-            typing.Union[int, float]:
+    def __min_max_normalized_value(self,
+                                   date_start: typing.AnyStr = None,
+                                   date_stop: typing.AnyStr = None) -> typing.Union[int, float]:
         value = self.aggregated_value(date_start, date_stop)
         min_value, max_value = self.min_max_value()
         if min_value is None:
@@ -479,7 +482,8 @@ class MetricCalculator(MetricCalculatorBuilder):
             scaled_value = None
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                     name="MetricCalculator",
-                                    description=f"Couldn't compute the min-max normalized value for {value}, {min_value}, {max_value}.",
+                                    description=f"Couldn't compute the min-max normalized value "
+                                                f"for {value}, {min_value}, {max_value}.",
                                     extra_data={
                                         "state": self.__current_state()
                                     })
@@ -487,36 +491,42 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         return scaled_value
 
-    def fuzzy_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Tuple[
-        LinguisticVariableEnum, float]:
+    def fuzzy_value(self,
+                    date_start: typing.AnyStr = None,
+                    date_stop: typing.AnyStr = None) -> typing.Tuple[LinguisticVariableEnum, float]:
         value = self.__min_max_normalized_value(date_start, date_stop)
         return self.__fuzzy_value_base(value, AntecedentTypeEnum.FUZZY_VALUE)
 
-    def fuzzy_trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Tuple[
-        LinguisticVariableEnum, float]:
+    def fuzzy_trend(self,
+                    date_start: typing.AnyStr = None,
+                    date_stop: typing.AnyStr = None) -> typing.Tuple[LinguisticVariableEnum, float]:
         value = self.trend(date_start, date_stop)
         return self.__fuzzy_value_base(value, AntecedentTypeEnum.FUZZY_TREND)
 
-    def weighted_fuzzy_trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Tuple[
-        LinguisticVariableEnum, float]:
+    def weighted_fuzzy_trend(self,
+                             date_start: typing.AnyStr = None,
+                             date_stop: typing.AnyStr = None) -> typing.Tuple[LinguisticVariableEnum, float]:
         value = self.weighted_trend(date_start, date_stop)
         return self.__fuzzy_value_base(value, AntecedentTypeEnum.WEIGHTED_FUZZY_TREND)
 
-    def __fuzzy_value_base(self, value: float = None, fuzzyfier_type: AntecedentTypeEnum = None) -> typing.Tuple[
-        LinguisticVariableEnum, float]:
+    def __fuzzy_value_base(self,
+                           value: float = None,
+                           fuzzyfier_type: AntecedentTypeEnum = None) -> typing.Tuple[LinguisticVariableEnum, float]:
         fuzzyfier = self._fuzzyfier_factory.get_fuzzyfier(fuzzyfier_type, self._metric.name)
         fuzzy_class = None
         fuzzy_membership_value = 0.0
         try:
             for linguistic_level in fuzzyfier.levels:
                 current_fuzzy_class, current_fuzzy_membership_value = fuzzyfier.fuzzyfy(value, linguistic_level)
-                if current_fuzzy_membership_value is not None and current_fuzzy_membership_value > fuzzy_membership_value:
+                if current_fuzzy_membership_value is not None and \
+                        current_fuzzy_membership_value > fuzzy_membership_value:
                     fuzzy_class = current_fuzzy_class
                     fuzzy_membership_value = current_fuzzy_membership_value
         except Exception:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="MetricCalculator",
-                                    description=f"Couldn't compute fuzzy value for {value} and fuzzyfier {fuzzyfier_type.value}.",
+                                    description=f"Couldn't compute fuzzy value for {value} and "
+                                                f"fuzzyfier {fuzzyfier_type.value}.",
                                     extra_data={
                                         "state": self.__current_state(),
                                         "fuzzyfier": fuzzyfier,
@@ -526,8 +536,9 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         return fuzzy_class, fuzzy_membership_value
 
-    def difference(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Union[
-        int, float]:
+    def difference(self,
+                   date_start: typing.AnyStr = None,
+                   date_stop: typing.AnyStr = None) -> typing.Union[int, float]:
         initial_metric_value = self.aggregated_value(date_start=date_start, date_stop=date_start)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if initial_metric_value is not None and current_metric_value is not None:
@@ -564,8 +575,9 @@ class MetricCalculator(MetricCalculatorBuilder):
             self._logger.logger.info(log)
         return difference
 
-    def percentage_difference(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Union[
-        int, float]:
+    def percentage_difference(self,
+                              date_start: typing.AnyStr = None,
+                              date_stop: typing.AnyStr = None) -> typing.Union[int, float]:
         initial_metric_value = self.aggregated_value(date_start=date_start, date_stop=date_start)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if initial_metric_value is not None and current_metric_value is not None:
@@ -595,7 +607,8 @@ class MetricCalculator(MetricCalculatorBuilder):
 
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                     name="MetricCalculator",
-                                    description="Ill-defined percentage difference. Both initial and current metrics are none",
+                                    description="Ill-defined percentage difference. Both initial and "
+                                                "current metrics are none",
                                     extra_data={
                                         "state": self.__current_state()
                                     })
@@ -622,8 +635,9 @@ class MetricCalculator(MetricCalculatorBuilder):
             metrics += [value.name for value in self._metric.denominator if value]
         return metrics
 
-    def __get_metrics_values(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.List[
-        typing.Dict]:
+    def __get_metrics_values(self,
+                             date_start: typing.AnyStr = None,
+                             date_stop: typing.AnyStr = None) -> typing.List[typing.Dict]:
         try:
             metrics_values = self._repository.get_metrics_values(key_value=self._facebook_id,
                                                                  date_start=date_start,

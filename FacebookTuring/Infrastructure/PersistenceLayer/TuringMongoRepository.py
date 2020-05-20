@@ -104,8 +104,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         return list(results)
 
     @staticmethod
-    def __get_structure_details_query(level: Level = None, key_value: typing.AnyStr = None) -> typing.Tuple[
-        typing.Dict, typing.Dict]:
+    def __get_structure_details_query(level: Level = None,
+                                      key_value: typing.AnyStr = None) -> typing.Tuple[typing.Dict, typing.Dict]:
         query = {
             MongoOperator.AND.value: [
                 {
@@ -133,8 +133,9 @@ class TuringMongoRepository(MongoRepositoryBase):
             structure[MiscFieldsEnum.details] = BSON.decode(structure[MiscFieldsEnum.details])
         return structure
 
-    def get_structure_details_many(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.List[
-        typing.Dict]:
+    def get_structure_details_many(self,
+                                   level: Level = None,
+                                   key_value: typing.AnyStr = None) -> typing.List[typing.Dict]:
         self.set_collection(collection_name=level.value)
         query, projection = self.__get_structure_details_query(level, key_value)
         structures = self.get(query, projection)
@@ -230,18 +231,18 @@ class TuringMongoRepository(MongoRepositoryBase):
         # add new structures
         new_structures_ids = list(structure_ids - existing_structures_ids)
         new_structures = [structure for structure in structures
-                          if getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(
-                level.name).value) in new_structures_ids]
-        # new_structures = self.__encode_structure_details_to_bson(new_structures)
+                          if getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value) in
+                          new_structures_ids]
+
         if new_structures:
             self.add_many(new_structures)
 
         # update common structures
         common_structures_ids = list(existing_structures_ids.intersection(structure_ids))
         common_structures = [structure for structure in structures
-                             if getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(
-                level.name).value) in common_structures_ids]
-        # common_structures = self.__encode_structure_details_to_bson(common_structures)
+                             if getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
+                             in common_structures_ids]
+
         if common_structures:
             self.change_status_many(level=level,
                                     key_value=common_structures_ids,
@@ -265,7 +266,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                 },
                 {
                     MiscFieldsEnum.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE
+                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
             ]
@@ -293,7 +294,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                 },
                 {
                     MiscFieldsEnum.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE
+                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
             ]
@@ -320,7 +321,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                 },
                 {
                     MiscFieldsEnum.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE
+                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
             ]
