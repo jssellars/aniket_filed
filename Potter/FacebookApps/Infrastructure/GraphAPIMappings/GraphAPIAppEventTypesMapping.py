@@ -6,7 +6,7 @@ from Core.Tools.Mapper.MapperBase import MapperBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 
 
-class GraphAPIAppMapping(MapperBase):
+class GraphAPIAppEventTypesMapping(MapperBase):
     class Meta:
         unknown = INCLUDE
 

@@ -278,7 +278,7 @@ class MetricCalculator(MetricCalculatorBuilder):
                                         "error": traceback.format_exc()
                                     })
             self._logger.logger.info(log)
-            raise e
+            return False
 
     def values(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.List[float]:
         data = self.__get_metrics_values(date_start=date_start, date_stop=date_stop)
@@ -297,7 +297,7 @@ class MetricCalculator(MetricCalculatorBuilder):
 
             raise ValueError("Numerator and denominator data mismatch.")
 
-        values = [numerator[index] / denominator[index] for index in range(len(numerator))]
+        values = [numerator[index] / denominator[index] for index in range(len(numerator)) if denominator[index]]
         return values
 
     def __compute_aggregated_value(self, data: typing.List[typing.Dict]) -> float:
@@ -357,24 +357,29 @@ class MetricCalculator(MetricCalculatorBuilder):
         date_stop = datetime.now()
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
-        return min(data), max(data)
+        min_data = min(data) if data else None
+        max_data = max(data) if data else None
+        return min_data, max_data
 
     def min_value(self):
         date_stop = datetime.now()
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
-        return min(data)
+        return min(data) if data else None
 
     def max_value(self):
         date_stop = datetime.now()
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
-        return max(data)
+        return max(data) if data else None
 
-    def trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> float:
+    def trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Union[typing.NoReturn, float]:
         _date_start = datetime.strptime(date_start, DEFAULT_DATETIME)
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
         current_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
+
+        if current_value is None:
+            return None
 
         slopes = []
         for time_bucket in MetricTrendTimeBucketEnum:
@@ -384,7 +389,7 @@ class MetricCalculator(MetricCalculatorBuilder):
                 date_start = date_start.strftime(DEFAULT_DATETIME)
                 bucket_value = self.aggregated_value(date_start=date_start, date_stop=date_stop)
 
-                if bucket_value:
+                if bucket_value is not None:
                     dy = current_value - bucket_value
                     dt = time_bucket.value
                     slopes.append(np.arctan2(dy, dt))
@@ -581,7 +586,10 @@ class MetricCalculator(MetricCalculatorBuilder):
         initial_metric_value = self.aggregated_value(date_start=date_start, date_stop=date_start)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if initial_metric_value is not None and current_metric_value is not None:
-            difference = 100 * (current_metric_value - initial_metric_value) / initial_metric_value
+            try:
+                difference = 100 * (current_metric_value - initial_metric_value) / initial_metric_value
+            except ZeroDivisionError:
+                difference = 100 * current_metric_value
         elif initial_metric_value is None and current_metric_value is not None:
             difference = 100
 

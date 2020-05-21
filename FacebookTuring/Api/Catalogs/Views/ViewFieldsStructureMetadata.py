@@ -12,7 +12,7 @@ class ViewFieldsStructureMetadata:
                              is_fixed=False)
     status = ViewColumn(Autoincrement.hex_string('status'), display_name="Status", primary_value=FieldsMetadata.status,
                         type_id=ViewColumnTypeEnum.BUTTON.value, category_id=ViewColumnCategoryEnum.SETTINGS.value,
-                        is_fixed=False)
+                        is_fixed=True)
     effective_status = ViewColumn(Autoincrement.hex_string('effective_status'), display_name="Effective status",
                                   primary_value=FieldsMetadata.effective_status,
                                   type_id=ViewColumnTypeEnum.TEXT.value,

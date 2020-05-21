@@ -28,7 +28,6 @@ def callback(ch, method, properties, body):
         message_type = getattr(properties, "type", None)
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
-        rabbit_logger.log(message_type, body)
         request_handler.set_rabbit_logger(rabbit_logger).handle(body)
     except Exception as e:
         log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,

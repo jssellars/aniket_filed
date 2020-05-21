@@ -28,7 +28,7 @@ class AdAccountPagesEndpoint(Resource):
         try:
             business_owner_id = extract_business_owner_facebook_id(get_jwt())
             pages = AdAccountPagesQuery.handle(business_owner_id, account_id)
-            response = json.dumps(humps.camelize(pages))
+            response = humps.camelize(pages)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:

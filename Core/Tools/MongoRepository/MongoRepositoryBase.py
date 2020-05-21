@@ -183,5 +183,5 @@ class MongoRepositoryBase:
         return object_to_json(data)
 
     def new_repository(self):
-        repository = MongoRepositoryBase(config=self.config, database_name=self.config.structures_database_name)
+        repository = MongoRepositoryBase(config=self.config, database_name=self.config.logs_database)
         return repository

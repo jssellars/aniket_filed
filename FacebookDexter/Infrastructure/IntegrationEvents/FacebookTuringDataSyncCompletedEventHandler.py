@@ -1,5 +1,4 @@
 import json
-import threading
 
 from FacebookDexter.Engine.MasterWorker import MasterWorker
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import \
@@ -47,17 +46,17 @@ class FacebookTuringDataSyncCompletedEventHandler:
         business_owners = mapper.load(body.get("business_owners", []), many=True)
 
         for business_owner in business_owners:
-            business_owner_thread = threading.Thread(target=MasterWorker.start_dexter_for_business_owner,
-                                                     args=(business_owner,
-                                                           cls.__startup,
-                                                           cls.__data_repository,
-                                                           cls.__recommendations_repository,
-                                                           cls.__journal_repository))
-            business_owner_thread.start()
+            # business_owner_thread = threading.Thread(target=MasterWorker.start_dexter_for_business_owner,
+            #                                          args=(business_owner,
+            #                                                cls.__startup,
+            #                                                cls.__data_repository,
+            #                                                cls.__recommendations_repository,
+            #                                                cls.__journal_repository))
+            # business_owner_thread.start()
 
             #  Uncomment if you want to run in single thread
-            # MasterWorker.start_dexter_for_business_owner(business_owner,
-            #                                              cls.__startup,
-            #                                              cls.__data_repository,
-            #                                              cls.__recommendations_repository,
-            #                                              cls.__journal_repository)
+            MasterWorker.start_dexter_for_business_owner(business_owner,
+                                                         cls.__startup,
+                                                         cls.__data_repository,
+                                                         cls.__recommendations_repository,
+                                                         cls.__journal_repository)

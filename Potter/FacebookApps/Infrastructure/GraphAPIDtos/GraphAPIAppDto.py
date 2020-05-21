@@ -6,7 +6,11 @@ from Potter.FacebookApps.Infrastructure.GraphAPIDtos.GraphAPIAppEventTypeDto imp
 
 @dataclass
 class GraphAPIAppDto:
-    id: typing.AnyStr = None,
-    name: typing.AnyStr = None,
     app_event_types: typing.List[GraphAPIAppEventTypeDto] = field(default_factory=list)
+    app_name: typing.AnyStr = None
+    app_type: typing.AnyStr = None
+    category: typing.AnyStr = None
+    created_time: typing.AnyStr = None
     description: typing.AnyStr = None
+    id: typing.AnyStr = None
+    name: typing.AnyStr = None

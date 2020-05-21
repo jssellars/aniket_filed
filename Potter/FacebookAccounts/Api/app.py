@@ -16,7 +16,8 @@ from flask_restful import Api
 
 from Potter.FacebookAccounts.Api.Controllers.AdAccountController import AdAccountInsightsEndpoint, \
     AdAccountPagesEndpoint, AdAccountInstagramEndpoint, AdAccountPageInstagramEndpoint
-from Potter.FacebookAccounts.Api.Controllers.BusinessOwnerController import BusinessOwnerEndpoint
+from Potter.FacebookAccounts.Api.Controllers.BusinessOwnerController import BusinessOwnerEndpoint, \
+    BusinessOwnerDeletePermissionsEndpoint
 from Potter.FacebookAccounts.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 from Potter.FacebookAccounts.Api.Startup import startup
 
@@ -44,6 +45,10 @@ api.add_resource(VersionEndpoint, version_controller)
 # Business owner controller
 business_owner_controller = "{base_url}/business-owner".format(base_url=startup.base_url.lower())
 api.add_resource(BusinessOwnerEndpoint, business_owner_controller)
+
+business_owner_delete_permissions_controller = "{base_url}/business-owner/<string:permissions>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(BusinessOwnerDeletePermissionsEndpoint, business_owner_delete_permissions_controller)
 
 # Ad account controller
 ad_account_controller = "{base_url}/facebook-accounts".format(base_url=startup.base_url.lower())
