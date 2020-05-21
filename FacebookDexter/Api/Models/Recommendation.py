@@ -41,7 +41,10 @@ class Recommendation(object):
             if (isinstance(originDict[key], datetime)):
                 camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = originDict[key].isoformat()
                 continue
-            if (isinstance(originDict[key], dict)):                
+            if (isinstance(originDict[key], dict)):
+                if (key=='application_details'):
+                    camel_case_recommendation['applicationDetails'] = originDict[key]
+                    continue
                 camel_case_recommendation[CaseConverter.snake_to_camel_case(key)] = self.convert_recommendation_to_camel_case(originDict[key])
                 continue
             if (isinstance(originDict[key], list)):                

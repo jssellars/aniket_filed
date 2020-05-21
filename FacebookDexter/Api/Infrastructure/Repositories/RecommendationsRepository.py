@@ -78,7 +78,7 @@ class RecommendationsRepository(object):
         counts_filter = {}
         if (filter is not None):
             if ('campaign_id' in filter):
-                counts_filter['campaign_id'] = { '$in' : filter['campaign_id'] }
+                counts_filter['campaign_id'] = {'$in': filter['campaign_id']}
         counts_by_type = self.get_counts_by_type(counts_filter);
         response_dict['countsByType'] = counts_by_type
         return response_dict
