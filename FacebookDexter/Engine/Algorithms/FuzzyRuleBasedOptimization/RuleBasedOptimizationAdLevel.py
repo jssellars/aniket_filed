@@ -33,14 +33,15 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
 
         recommendations = []
         for ad_id in lowest_25p_performing_ads:
-            recommendations += self.evaluate_pause_rules(facebook_id=ad_id, fuzzyfier_factory=self._fuzzyfier_factory)
-            recommendations += self.evaluate_decrease_budget_rules(facebook_id=ad_id,
-                                                                   fuzzyfier_factory=self._fuzzyfier_factory)
-            recommendations += self.evaluate_increase_budget_rules(facebook_id=ad_id,
-                                                                   fuzzyfier_factory=self._fuzzyfier_factory)
-            recommendations += self.evaluate_general_rules(facebook_id=ad_id,
-                                                           fuzzyfier_factory=self._fuzzyfier_factory)
-
+            if self.is_available(ad_id):
+                recommendations += self.evaluate_pause_rules(facebook_id=ad_id,
+                                                             fuzzyfier_factory=self._fuzzyfier_factory)
+                recommendations += self.evaluate_decrease_budget_rules(facebook_id=ad_id,
+                                                                       fuzzyfier_factory=self._fuzzyfier_factory)
+                recommendations += self.evaluate_increase_budget_rules(facebook_id=ad_id,
+                                                                       fuzzyfier_factory=self._fuzzyfier_factory)
+                recommendations += self.evaluate_general_rules(facebook_id=ad_id,
+                                                               fuzzyfier_factory=self._fuzzyfier_factory)
         return recommendations
 
     def __load_ids(self):

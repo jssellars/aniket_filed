@@ -33,7 +33,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
     }
 
     __keyword_value_map = {
-        'metric_name': lambda x: x.metric_name.value.display_name.lower(),
+        'metric_name': lambda x: x.metric_name.value.display_name,
         'value': lambda x: x.value,
         'time_interval': lambda x: str(x.time_interval.value),
         'linguistic_variable': lambda x: LinguisticVariableEnum(x).name,
@@ -95,12 +95,14 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                 value = ''
                 log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                         name="RecommendationTemplateBuilder",
-                                        description=f"Failed to compute keyword value for metric {keyword.metric_name.value.name}")
+                                        description=f"Failed to compute keyword value for "
+                                                    f"metric {keyword.metric_name.value.name}")
                 self.logger.logger.info(log)
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="RecommendationTemplateBuilder",
-                                    description=f"Failed to compute keyword value for metric {keyword.metric_name.value.name}",
+                                    description=f"Failed to compute keyword value for "
+                                                f"metric {keyword.metric_name.value.name}",
                                     extra_data={
                                         "error": traceback.format_exc()
                                     })
@@ -141,7 +143,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         return rule_template_keyword
 
-    def __get_value_for_keyword(self, keyword, keywords_values):
+    def __get_value_for_keyword(self, keyword: typing.AnyStr = None, keywords_values: RuleTemplateKeyword = None):
         key, value = keyword.split('&')[1].split('=')
         return self.__keyword_value_map[key](keywords_values)
 
@@ -172,7 +174,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=keyword.time_interval)
 
         if value:
-            value = '{:.2f}'.format(abs(float(value)))
+            value = abs(int(value))
 
         return value
 
@@ -239,4 +241,4 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
         value, _ = mc.compute_value(atype=keyword.antecedent_type)
 
-        return value
+        return int(value)

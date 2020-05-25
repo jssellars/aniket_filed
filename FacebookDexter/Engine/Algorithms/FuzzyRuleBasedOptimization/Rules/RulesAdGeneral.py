@@ -6,7 +6,6 @@ from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
-from FacebookDexter.Infrastructure.Domain.ObjectiveEnum import ObjectiveEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Connective import Connective
@@ -32,17 +31,17 @@ RULES_AD_GENERAL = [
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.REACH),
                  Antecedent(aid=1,
-                            atype=AntecedentTypeEnum.VALUE,
-                            metric=AvailableMetricEnum.OBJECTIVE.value,
-                            operator=LogicOperatorEnum.EQUALS,
-                            expected_value=ObjectiveEnum.REACH),
-                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_VALUE,
                             metric=AvailableMetricEnum.REACH.value,
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=LinguisticVariableEnum.DECREASING),
-                 Antecedent(aid=3,
+                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.VALUE,
                             metric=AvailableMetricEnum.QUALITY_RANKING.value,
                             operator=LogicOperatorEnum.IN,

@@ -22,8 +22,9 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends "
+                      "you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -44,8 +45,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=COST_PER_APP_INSTALL&metric_type=1&antecedent_type=8> has increased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=COST_PER_APP_INSTALL&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -66,8 +67,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=CPM&metric_type=1&antecedent_type=8> has increased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=CPM&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -88,8 +89,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=REACH&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the following age ranges <id=1&breakdown_values=null>.",
+             template="Your <id=1&metric_name=REACH&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -109,8 +110,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=ENGAGEMENT_RATE&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=ENGAGEMENT_RATE&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -131,8 +132,9 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=ENGAGEMENT_RATE&metric_type=1&antecedent_type=8> has increased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=ENGAGEMENT_RATE&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you "
+                      "stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -153,8 +155,9 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=ROAS&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=ROAS&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends "
+                      "you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -175,8 +178,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=CR&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=CR&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -197,8 +200,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=RSVPS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=RSVPS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -219,8 +222,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=LEADS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=LEADS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -241,8 +244,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=CTR&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=CTR&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -263,8 +266,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=CPC&metric_type=1&antecedent_type=8> has increased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=CPC&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -285,8 +288,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=LINK_CLICKS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=LINK_CLICKS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -307,8 +310,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=PAGE_LIKES&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=PAGE_LIKES&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -329,8 +332,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -351,8 +354,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=PURCHASES&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=PURCHASES&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -373,8 +376,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=COST_PER_PURCHASE&metric_type=1&antecedent_type=8> has increased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=COST_PER_PURCHASE&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -395,8 +398,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=COST_PER_THRUPLAY&metric_type=1&antecedent_type=8> has increased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=COST_PER_THRUPLAY&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -417,8 +420,8 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=VIDEO_PLAYS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null> % in the last "
-                      "<id=1&time_interval=7> for some of the age groups you are targeting. Dexter recommends you stop targeting the "
+             template="Your <id=1&metric_name=VIDEO_PLAYS&metric_type=1&antecedent_type=8> have decreased by <id=1&value=null>% in the last "
+                      "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

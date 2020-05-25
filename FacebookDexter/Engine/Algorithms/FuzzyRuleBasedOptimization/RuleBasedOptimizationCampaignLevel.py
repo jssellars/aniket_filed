@@ -21,8 +21,9 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
 
     def run(self, campaign_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
         recommendations = []
-        recommendations += self.evaluate_general_rules(campaign_id, self._fuzzyfier_factory)
-        recommendations += self.evaluate_create_rules(campaign_id, self._fuzzyfier_factory)
+        if self.is_available(campaign_id):
+            recommendations += self.evaluate_general_rules(campaign_id, self._fuzzyfier_factory)
+            recommendations += self.evaluate_create_rules(campaign_id, self._fuzzyfier_factory)
         return recommendations
 
     def check_run_status(self, campaign_id):

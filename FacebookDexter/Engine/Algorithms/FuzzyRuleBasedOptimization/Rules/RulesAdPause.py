@@ -5,7 +5,6 @@ from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
-from FacebookDexter.Infrastructure.Domain.ObjectiveEnum import ObjectiveEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Connective import Connective
@@ -30,17 +29,17 @@ RULES_AD_PAUSE = [
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.NOT_EQUAL,
+                 #            expected_value=ObjectiveEnum.REACH.value),
                  Antecedent(aid=1,
-                            atype=AntecedentTypeEnum.VALUE,
-                            metric=AvailableMetricEnum.OBJECTIVE.value,
-                            operator=LogicOperatorEnum.NOT_EQUAL,
-                            expected_value=ObjectiveEnum.REACH.value),
-                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
                             metric=AvailableMetricEnum.CPC.value,
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=LinguisticVariableEnum.INCREASING),
-                 Antecedent(aid=3,
+                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_VALUE,
                             metric=AvailableMetricEnum.RESULTS.value,
                             operator=LogicOperatorEnum.EQUALS,
@@ -61,17 +60,17 @@ RULES_AD_PAUSE = [
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.NOT_EQUAL,
+                 #            expected_value=ObjectiveEnum.REACH.value),
                  Antecedent(aid=1,
-                            atype=AntecedentTypeEnum.VALUE,
-                            metric=AvailableMetricEnum.OBJECTIVE.value,
-                            operator=LogicOperatorEnum.NOT_EQUAL,
-                            expected_value=ObjectiveEnum.REACH.value),
-                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
                             metric=AvailableMetricEnum.IMPRESSIONS.value,
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=LinguisticVariableEnum.INCREASING),
-                 Antecedent(aid=3,
+                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_VALUE,
                             metric=AvailableMetricEnum.RESULTS.value,
                             operator=LogicOperatorEnum.EQUALS,
@@ -92,12 +91,12 @@ RULES_AD_PAUSE = [
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.NOT_EQUAL,
+                 #            expected_value=ObjectiveEnum.REACH.value),
                  Antecedent(aid=1,
-                            atype=AntecedentTypeEnum.VALUE,
-                            metric=AvailableMetricEnum.OBJECTIVE.value,
-                            operator=LogicOperatorEnum.NOT_EQUAL,
-                            expected_value=ObjectiveEnum.REACH.value),
-                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
                             metric=AvailableMetricEnum.COST_PER_RESULT.value,
                             operator=LogicOperatorEnum.EQUALS,

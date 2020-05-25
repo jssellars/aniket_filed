@@ -23,7 +23,8 @@ RULES_ADSET_INCREASE_BUDGET = [
              level=LevelEnum.ADSET,
              action=ActionEnum.INCREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per result is low while getting good conversions. You should increase the budget by maximum 25%.",
+             template="Dexter noticed your cost per result is low while getting good conversions. You should "
+                      "increase the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -48,7 +49,8 @@ RULES_ADSET_INCREASE_BUDGET = [
              level=LevelEnum.ADSET,
              action=ActionEnum.INCREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CTR is high and you are targeting a large audience. You should increase the budget by maximum 25%.",
+             template="Dexter noticed your CTR is high and you are targeting a large audience. You should increase "
+                      "the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -73,7 +75,8 @@ RULES_ADSET_INCREASE_BUDGET = [
              level=LevelEnum.ADSET,
              action=ActionEnum.INCREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CTR and conversion rate are both increasing. You should increase the budget by maximum 25%.",
+             template="Dexter noticed your CTR and conversion rate are both increasing. You should increase the "
+                      "budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -98,7 +101,8 @@ RULES_ADSET_INCREASE_BUDGET = [
              level=LevelEnum.ADSET,
              action=ActionEnum.INCREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your text overlay is above 20% while your CPC remains high. You should decrease the budget by maximum 25%.",
+             template="Dexter noticed your text overlay is above 20% while your CPC remains high. You should decrease "
+                      "the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -123,7 +127,8 @@ RULES_ADSET_INCREASE_BUDGET = [
              level=LevelEnum.ADSET,
              action=ActionEnum.INCREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per results is low while your conversions are increasing. Your audience is large, so you should increase the "
+             template="Dexter noticed your cost per results is low while your conversions are increasing. "
+                      "Your audience is large, so you should increase the "
                       "budget by maximum 25% to reach as many people as possible.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

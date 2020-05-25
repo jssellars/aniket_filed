@@ -2,8 +2,6 @@
 import os
 import sys
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -13,6 +11,7 @@ else:
 
 import json
 
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Potter.FacebookPixels.BackgroundTasks.Startup import startup, rabbit_logger, logger
 from Potter.FacebookPixels.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum

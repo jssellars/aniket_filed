@@ -86,6 +86,8 @@ class MetricCalculator(MetricCalculatorBuilder):
                       time_interval: typing.Union[DaysEnum, int] = DaysEnum.ONE) -> \
             typing.Tuple[typing.Any, typing.Any]:
         date_stop = datetime.now()
+        # todo: remove after testing
+        # date_stop = datetime(2020, 5, 20)
         try:
             date_start = date_stop - timedelta(days=time_interval)
         except TypeError:
@@ -252,22 +254,29 @@ class MetricCalculator(MetricCalculatorBuilder):
     def is_prospecting_campaign(self, *args, **kwargs) -> bool:
         if self._level == LevelEnum.CAMPAIGN:
             structure_id = self._repository.get_adset_id_by_campaign_id(key_value=self._facebook_id)
+            if structure_id is None:
+                return False
             structure_details = self._repository.get_structure_details(key_value=structure_id, level=LevelEnum.ADSET)
         elif self._level == LevelEnum.ADSET:
             structure_details = self._repository.get_structure_details(key_value=self._facebook_id, level=self._level)
         elif self._level == LevelEnum.AD:
-            structure_id = self._repository.get_adset_id_by_campaign_id(key_value=self._facebook_id)
+            structure_id = self._repository.get_adset_id_by_ad_id(key_value=self._facebook_id)
+            if structure_id is None:
+                return False
             structure_details = self._repository.get_structure_details(key_value=structure_id, level=LevelEnum.ADSET)
         else:
             raise ValueError(f"Cannot extract ad set targeting for level {self._level}")
 
         try:
-            interests = [interest_dict['name']
-                         for entry in structure_details['targeting']['flexible_spec']
-                         for interest_lists in entry.values()
-                         for interest_dict in interest_lists
-                         if self.__is_interest(entry)]
-            if not interests:
+            if 'flexible_spec' in structure_details['targeting']:
+                interests = [interest_dict['name']
+                             for entry in structure_details['targeting']['flexible_spec']
+                             for interest_lists in entry.values()
+                             for interest_dict in interest_lists
+                             if self.__is_interest(entry)]
+                if not interests:
+                    return False
+            else:
                 return False
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
@@ -339,7 +348,7 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         data = self.__get_metrics_values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
 
-        value = data[-1].get(self._metric.name, None)
+        value = data[-1].get(self._metric.name, None) if data else None
 
         if value is None:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
@@ -378,6 +387,7 @@ class MetricCalculator(MetricCalculatorBuilder):
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
         current_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
 
+        # todo: remember to uncomment this
         if current_value is None:
             return None
 
