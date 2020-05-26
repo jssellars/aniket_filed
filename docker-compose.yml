@@ -2,7 +2,6 @@ version: '3'
 services:
 
 ########################### Potter ################################
-
   # Potter-Facebook-Accounts-Api
   filed-potter-facebook-accounts-api:
     image: ct.filed.com/${STAGE}-filed-potter-facebook-accounts-api:v0.1
@@ -58,28 +57,87 @@ services:
       args: 
         STAGE: ${STAGE}
 
-###################################################################
-
-########################### Dexter ################################
-
-  # Potter-Dexter-Api
-  filed-dexter-api:
-    image: ct.filed.com/${STAGE}-filed-dexter-api:v0.1
+  # Potter-Facebook-Apps-Background-Tasks
+  filed-potter-facebook-apps-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-potter-facebook-apps-background-tasks:v0.1
     ports:
-     - "43700:43700" 
+     - "47231:47231" 
     build:
       context: .
-      dockerfile: filed-dexter-api
+      dockerfile: filed-potter-facebook-apps-background-tasks
+      args: 
+        STAGE: ${STAGE}        
+ # Potter-Facebook-Campaigns-Builder-Api
+  filed-potter-facebook-campaigns-builder-api:
+    image: ct.filed.com/${STAGE}-filed-potter-facebook-campaigns-builder-api:v0.1
+    ports:
+     - "47220:47220"
+    build:
+      context: .
+      dockerfile: filed-potter-facebook-campaigns-builder-api
+      args:
+        STAGE: ${STAGE}       
+
+###################################################################
+########################### Dexter ################################
+  # Facebook-Dexter-Api
+  filed-facebook-dexter-api:
+    image: ct.filed.com/${STAGE}-filed-facebook-dexter-api:v0.1
+    ports:
+     - "47300:47300"
+    build:
+      context: .
+      dockerfile: filed-facebook-dexter-api
       args: 
         STAGE: ${STAGE}
 
+  filed-facebook-dexter-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-facebook-dexter-background-tasks:v0.1
+    ports:
+     - "43701:43701" 
+    build:
+      context: .
+      dockerfile: filed-facebook-dexter-background-tasks
+      args: 
+        STAGE: ${STAGE}
 ###################################################################
+########################### Facebook-Turing ################################
+  # Facebook-Turing
+  filed-facebook-turing-api:
+    image: ct.filed.com/${STAGE}-filed-facebook-turing-api:v0.1
+    ports:
+     - "47350:47350"
+    build:
+      context: .
+      dockerfile: filed-facebook-turing-api
+      args:
+        STAGE: ${STAGE}
 
-########################### Turing ################################
+  filed-facebook-turing-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-facebook-turing-background-tasks:v0.1
+    ports:
+     - "47351:47351"
+    build:
+      context: .
+      dockerfile: filed-facebook-turing-background-tasks
+      args:
+        STAGE: ${STAGE}
 
-  # Potter-Facebook-Accounts-Api
-  filed-turing-api:
-    image: ct.filed.com/${STAGE}-filed-turing-api:v0.1
+###################################################################
+########################### Google-Turing ################################
+  # Google-Turing
+  filed-google-turing-api:
+    image: ct.filed.com/${STAGE}-filed-google-turing-api:v0.1
+    ports:
+     - "47550:47550"
+    build:
+      context: .
+      dockerfile: filed-google-turing-api
+      args:
+        STAGE: ${STAGE}
+
+  filed-google-turing-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-google-turing-background-tasks:v0.1
     ports:
      - "47350:47350" 
     build:
@@ -89,9 +147,7 @@ services:
         STAGE: ${STAGE}
 
 ###################################################################
-
 ########################### Ad-Preview ############################
-
   # Filed-Ad-Preview
   filed-ad-preview:
     image: ct.filed.com/${STAGE}-filed-ad-preview:v0.1
@@ -104,7 +160,6 @@ services:
         STAGE: ${STAGE}
 
 ###################################################################
-
 ########################### Targeting-Search ######################
 
   # Filed-Targeting-Search

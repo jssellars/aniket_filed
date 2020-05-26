@@ -9,16 +9,20 @@ NC='\033[0m'
 command -v kubectl >/dev/null 2>&1 || { echo -e >&2 "=>${RED}I require kubectl but it's not installed.  Aborting.${NC}"; exit 1; }
 
 declare -a services_api=(filed-ad-preview
-                filed-facebook-dexter-api
-                filed-potter-facebook-accounts-api
-                filed-potter-facebook-pixels-api
-                filed-targeting-search
-                filed-turing-api)
+                         filed-facebook-dexter-api
+                         filed-facebook-turing-api
+                         filed-potter-facebook-accounts-api
+                         filed-potter-facebook-campaigns-builder-api
+                         filed-potter-facebook-pixels-api
+                         filed-targeting-search
+                         filed-turing-api)
 
 declare -a services_tasks=(filed-potter-facebook-accounts-background-tasks
-                filed-potter-facebook-audiences-background-tasks
-                filed-potter-facebook-pixels-background-tasks
-                filed-facebook-dexter-background-tasks)
+                           filed-potter-facebook-audiences-background-tasks
+                           filed-potter-facebook-pixels-background-tasks
+                           filed-facebook-dexter-background-tasks
+                           filed-facebook-turing-background-tasks
+                           filed-potter-facebook-apps-background-tasks)
 
 HEIGHT=20
 WIDTH=100

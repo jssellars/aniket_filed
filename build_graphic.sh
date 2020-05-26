@@ -6,18 +6,39 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+echo -e "=> ${GREEN}Checking environment...${NC}"
+
+build='docker-compose build --force-rm'
+push='docker-compose push'
+
 command -v docker-compose >/dev/null 2>&1 || { echo -e >&2 "=>${RED}I require docker-compose but it's not installed.  Aborting.${NC}"; exit 1; }
 
+echo -e "=> ${YELLOW}Setting initial .env for build - The default is DEV2...${NC}"
+
+touch .env || exit
+echo -e STAGE=dev2 > .env
+
+function cleanup {
+  echo -e "=> ${RED}Removing .env files...${NC}"
+  rm  -rf .env .env-e
+}
+
+trap cleanup EXIT
+
 declare -a services=(filed-ad-preview
-                    filed-facebook-dexter-api
-                    filed-facebook-dexter-background-tasks
-                    filed-potter-facebook-accounts-api
-                    filed-potter-facebook-accounts-background-tasks
-                    filed-potter-facebook-audiences-background-tasks
-                    filed-potter-facebook-pixels-api
-                    filed-potter-facebook-pixels-background-tasks
-                    filed-targeting-search
-                    filed-turing-api)
+                     filed-facebook-dexter-api
+                     filed-facebook-turing-api
+                     filed-potter-facebook-accounts-api
+                     filed-potter-facebook-campaigns-builder-api
+                     filed-potter-facebook-pixels-api
+                     filed-targeting-search
+                     filed-turing-api
+                     filed-potter-facebook-accounts-background-tasks
+                     filed-potter-facebook-audiences-background-tasks
+                     filed-potter-facebook-pixels-background-tasks
+                     filed-facebook-dexter-background-tasks
+                     filed-facebook-turing-background-tasks
+                     filed-potter-facebook-apps-background-tasks)
 
 
 HEIGHT=20
@@ -54,10 +75,10 @@ case $CHOICE in
             for image in "${services[@]}"
             do
             echo -e "=> ${YELLOW}Begin building of : ${image}${NC}"
-            docker-compose build --force-rm ${image}
+            ${build} ${image}
             echo -e "=> ${GREEN} Done building ${image}${NC}"
             echo -e "=> ${GREEN} Pushing images to private repo...${NC}"
-            docker-compose push ${image}
+            ${push} ${image}
             echo -e "=> ${GREEN} Done pushing ${image}${NC}"
             done
             ;;
@@ -67,10 +88,10 @@ case $CHOICE in
             for image in "${services[@]}"
             do
             echo -e "=> ${YELLOW}Begin building of : ${image}${NC}"
-            docker-compose build --force-rm ${image}
+            ${build} ${image}
             echo -e "=> ${GREEN} Done building ${image}${NC}"
             echo -e "=> ${GREEN} Pushing images to private repo...${NC}"
-            docker-compose push ${image}
+            ${push} ${image}
             echo -e "=> ${GREEN} Done pushing ${image}${NC}"
             done
             ;;
@@ -100,9 +121,9 @@ case $CHOICE in
                     for choice in $choices
                     do
                     echo -e "=> ${YELLOW}Begin building of : ${choice}${NC}"
-                    docker-compose build --force-rm ${choice}
+                    ${build} ${choice}
                     echo -e "=> ${GREEN}Pushing images to private repo...${NC}"
-                    docker-compose push ${choice}
+                    ${push} ${choice}
                     done
             else
                     echo -e "=>${RED} Cancel selected ${NC}"
@@ -126,9 +147,9 @@ case $CHOICE in
                     for choice in $choices
                     do
                     echo -e "=> ${YELLOW}Begin building of : ${choice}${NC}"
-                    docker-compose build --force-rm ${choice}
+                    ${build} ${choice}
                     echo -e "=> ${GREEN}Pushing images to private repo...${NC}"
-                    docker-compose push ${choice}
+                    ${push} ${choice}
                     done
             else
                     echo -e "=>${RED} Cancel selected ${NC}"

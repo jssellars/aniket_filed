@@ -61,3 +61,5 @@ googleads==23.0.1
 zeep==3.4.0
 schedule==0.6.0
 PyYAML==5.3
+CMRESHandler
+python-json-logger
