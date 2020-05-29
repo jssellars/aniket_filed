@@ -11,6 +11,7 @@ from Infrastructure.Repositories.RecommendationsRepository import Recommendation
 from flask_cors import CORS
 from Models.RecommendationStatus import RecommendationStatus
 from Tools.ImportanceMapper import ImportanceMapper
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -101,14 +102,36 @@ def GetRecommendationsPage():
 @app.route('/ApplyRecommendation', methods=['PATCH'])
 def applyRecommendation():
     id = request.args.get('id')
+    headers = request.headers
+    
+    bearer = headers.get('HTTP_AUTHORIZATION')
+    print(bearer)
     try:
-        applieddRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
-        if (applieddRecommendation['status'] == RecommendationStatus.APPLIED.value):
-            response = make_response({})
-            response.headers['Content-Type'] = "application/json"
-            return response
+        recommendation = recommendation_repository.get_recommendation_by_id(id)
+    except Exception as e:
+        print (e)
+        return 500, 'An error occcured'
+
+    details = recommendation.get('applicationDetails', None)
+    if (details is None):
+        return 400, 'Unable to apply recommendation'
+    
+    request_payload = details
+    request_header = { 'HTTP_AUTHORIZATION' : bearer }
+    url = "https://dev.filed.com:42220/api/v1/"
+    url += recommendation['level'] + '/'
+    url += recommendation['structureId']    
+    try:
+        apply_request = requests.put(url, request_payload, headers=request_header);
+        if (apply_request.status_code == 200):
+            applieddRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
+            if (applieddRecommendation['status'] == RecommendationStatus.APPLIED.value):
+                response = make_response({})
+                response.headers['Content-Type'] = "application/json"
+                return response
         else:
-            return 'unable to apply recommendation', 500
+            return 'unable to apply recommendation', 500            
+
     except Exception as e:
         print (e)
         return 500, 'An error occcured'

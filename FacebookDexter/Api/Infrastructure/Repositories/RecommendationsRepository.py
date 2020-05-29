@@ -83,20 +83,9 @@ class RecommendationsRepository(object):
         response_dict['countsByType'] = counts_by_type
         return response_dict
 
-    #def get_recommendations_by_ad_account_and_level(self, adAccountId, level, channel):
-    #    mongo_filter = { }
-    #    mongo_filter['adAccountId'] = adAccountId
-    #    mongo_filter['level'] = level
-    #    mongo_filter['channel'] = channel
-    #    mongo_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
-    #    cursor = self.collection.find(mongo_filter)
-    #    recommendationsAsDictList = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in list(cursor)]
-    #    return recommendationsAsDictList
-
     def set_recommendation_status(self, id:str, status:str):
         recommendation_objectId = ObjectId(id)
-        now = datetime.now()
-
+        now = datetime.now()        
         self.collection.update_one({"_id" :recommendation_objectId},{'$set' : {"status": status, "application_date": now, 'applied_by': 'Dexter' }})
         return Recommendation(self.collection.find_one({"_id" : recommendation_objectId})).__dict__
 
