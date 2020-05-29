@@ -20,7 +20,10 @@ spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-            - "dev2.filed.com"
+          - "dev2.filed.com"
+        - ip: "192.168.2.91"
+          hostnames:
+          - "dev2.mongodb" 
       containers:
         - name: dev2-filed-potter-facebook-audiences-background-tasks
           image: ct.filed.com/dev2-filed-potter-facebook-audiences-background-tasks:v0.1

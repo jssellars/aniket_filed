@@ -21,6 +21,9 @@ spec:
         - ip: "192.168.1.211"
           hostnames:
           - "dev2.filed.com"
+        - ip: "192.168.2.91"
+          hostnames:
+          - "dev2.mongodb"           
       imagePullSecrets:
       - name: regcred            
       containers:

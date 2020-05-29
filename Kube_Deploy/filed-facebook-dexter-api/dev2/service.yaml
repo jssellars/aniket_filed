@@ -1,28 +1,11 @@
 apiVersion: v1
-metadata:
-  name: dev2-filed-dexter-api
 kind: Service
 metadata:
   name: dev2-filed-dexter-api
-  annotations:
-    # Note that the backend talks over HTTP.
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    # Fill in with the ARN of your certificate.
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-west-2:051552587355:certificate/a4536b79-8cf5-4c70-bc89-f2afec4269e2
-    # Only run SSL on the port named "https" below.
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
-    # Redirect to HTTPS - not working !!! to be investigated
-    service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
   labels:
     run: dev2-filed-dexter-api
 spec:
   ports:
-  # - name: http
-  #   port: 80
-  #   targetPort: 43700
-  - name: https
-    port: 443
-    targetPort: 43700
+  - port: 43700
   selector:
     run: dev2-filed-dexter-api
-  type: LoadBalancer  

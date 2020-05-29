@@ -1,28 +1,11 @@
 apiVersion: v1
-metadata:
-  name: prod-filed-turing-api
 kind: Service
 metadata:
-  name: prod-filed-turing-api
-  annotations:
-    # Note that the backend talks over HTTP.
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    # Fill in with the ARN of your certificate.
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-west-2:051552587355:certificate/a4536b79-8cf5-4c70-bc89-f2afec4269e2
-    # Only run SSL on the port named "https" below.
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
-    # Redirect to HTTPS - not working !!! to be investigated
-    service.beta.kubernetes.io/aws-load-balancer-redirect-http-to-https: "true"
+  name: prod-filed-facebook-turing-api
   labels:
-    run: prod-filed-turing-api
+    run: prod-filed-facebook-turing-api
 spec:
   ports:
-  # - name: http
-  #   port: 80
-  #   targetPort: 47350
-  - name: https
-    port: 443
-    targetPort: 47350
+  - port: 47350
   selector:
-    run: prod-filed-turing-api
-  type: LoadBalancer  
+    run: prod-filed-facebook-turing-api

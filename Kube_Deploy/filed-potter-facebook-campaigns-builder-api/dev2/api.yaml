@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dev2-filed-facebook-dexter-background-tasks
+  name: dev2-filed-potter-facebook-campaigns-builder-api
 spec:
   selector:
     matchLabels:
-      run: dev2-filed-facebook-dexter-background-tasks
+      run: dev2-filed-potter-facebook-campaigns-builder-api
   replicas: 1
   strategy:
     type: RollingUpdate
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        run: dev2-filed-facebook-dexter-background-tasks
+        run: dev2-filed-potter-facebook-campaigns-builder-api
     spec:
       hostAliases:
         - ip: "192.168.1.211"
@@ -23,13 +23,12 @@ spec:
           - "dev2.filed.com"
         - ip: "192.168.2.91"
           hostnames:
-          - "dev2.mongodb"             
+          - "dev2.mongodb" 
       imagePullSecrets:
         - name: regcred
       containers:
-      - name: dev2-filed-facebook-dexter-background-tasks
-        image: ct.filed.com/dev2-filed-facebook-dexter-background-tasks:v0.1
-        imagePullPolicy: Always
-        ports: 
-        - containerPort : 43701
-
+        - name: dev2-filed-potter-facebook-campaigns-builder-api
+          image: ct.filed.com/dev2-filed-potter-facebook-campaigns-builder-api:v0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 47220

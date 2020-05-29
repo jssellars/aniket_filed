@@ -20,35 +20,16 @@ spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-            - "dev2.filed.com"
+          - "dev2.filed.com"
+        - ip: "192.168.2.91"
+          hostnames:
+          - "dev2.mongodb"            
       imagePullSecrets:
-        - name: regcred
+      - name: regcred
       containers:
-<<<<<<< HEAD:Kube_Deploy/filed-facebook-dexter-api/dev2/api.yaml
       - name: dev2-filed-facebook-dexter-api
         image: ct.filed.com/dev2-filed-facebook-dexter-api:v0.1
         imagePullPolicy: Always
-        # livenessProbe:
-        #   httpGet:
-        #     path: /
-        #     port: 80
-=======
-        - name: dev2-filed-dexter-api
-          image: ct.filed.com/dev2-filed-dexter-api:v0.1
-          imagePullPolicy: Always
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 80
->>>>>>> origin/start_working_on_dexter:Kube_Deploy/filed-dexter-api/dev2/api.yaml
-        #   initialDelaySeconds: 5
-        #   periodSeconds: 5  
         ports: 
         - containerPort : 43700
-      #   volumeMounts:
-      #   - name: persistent-storage
-      #     mountPath: /app/logs
-      # volumes:
-      # - name: persistent-storage
-      #   persistentVolumeClaim:
-      #     claimName: dev2-mss-logs-claim
+
