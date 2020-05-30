@@ -15,8 +15,8 @@ class GraphAPICampaignBuilderHandler(object):
         self.campaigns = []
 
     def _BuildCampaignCore(self, campaignTemplate):
-        if 'campaign_budget_optimization' in campaignTemplate.keys() and campaignTemplate[
-            'campaign_budget_optimization']:
+        if 'campaign_budget_optimization' in campaignTemplate.keys() and \
+                campaignTemplate['campaign_budget_optimization']:
             self._BuildCampaignCoreWithBudgetOptimization(campaignTemplate)
         else:
             self._BuildCampaignCoreWithoutBudgetOptimization(campaignTemplate)

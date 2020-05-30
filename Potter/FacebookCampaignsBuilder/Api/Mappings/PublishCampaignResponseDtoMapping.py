@@ -1,6 +1,6 @@
 import typing
 
-from marshmallow import EXCLUDE, fields, pre_load
+from marshmallow import EXCLUDE, fields, pre_load, post_load
 
 from Core.Tools.Mapper.MapperBase import MapperBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
@@ -11,7 +11,7 @@ class PublishCampaignResponseDtoMapping(MapperBase):
     campaign_goal = fields.String()
     ad_account_id = fields.String()
     use_dexter_optimization = fields.Boolean()
-    campaign_template_filed_id = fields.String()
+    # campaign_template_filed_id = fields.String()
     user_filed_id = fields.Integer()
     average_conversion_value = fields.Float()
     campaigns = fields.List(fields.String)
@@ -31,3 +31,10 @@ class PublishCampaignResponseDtoMapping(MapperBase):
         data['average_conversion_value'] = data['campaign_optimization_details']['dexter_optimization'][
             'average_conversion_value']
         return data
+
+    @post_load
+    def build(self, data: typing.Any, **kwargs):
+        if self._target:
+            return self._target(**data)
+        else:
+            return data

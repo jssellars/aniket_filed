@@ -178,7 +178,7 @@ class ViewFieldsMetricStandardEventsMetadata:
                                        type_id=ViewColumnTypeEnum.NUMBER.value,
                                        category_id=ViewColumnCategoryEnum.CONVERSION.value, is_fixed=False)
     app_activations_unique = ViewColumn(Autoincrement.hex_string('app_activations_unique'),
-                                        display_name="Unique pp activations",
+                                        display_name="Unique app activations",
                                         primary_value=FieldsMetadata.app_activations_unique,
                                         type_id=ViewColumnTypeEnum.NUMBER.value,
                                         category_id=ViewColumnCategoryEnum.CONVERSION.value, is_fixed=False)
@@ -634,7 +634,7 @@ class ViewFieldsMetricStandardEventsMetadata:
                                primary_value=FieldsMetadata.searches_cost, type_id=ViewColumnTypeEnum.CURRENCY.value,
                                category_id=ViewColumnCategoryEnum.CONVERSION.value, is_fixed=False)
     searches_unique_cost = ViewColumn(Autoincrement.hex_string('searches_unique_cost'),
-                                      display_name="Cost per nique searche",
+                                      display_name="Cost per unique search",
                                       primary_value=FieldsMetadata.searches_unique_cost,
                                       type_id=ViewColumnTypeEnum.CURRENCY.value,
                                       category_id=ViewColumnCategoryEnum.CONVERSION.value, is_fixed=False)

@@ -4,6 +4,8 @@ from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
 
 
 class MongoLogger:
+    _instance = None
+
     class Logger:
         COLLECTION_NAME = 'logs'
 
@@ -15,5 +17,10 @@ class MongoLogger:
         def info(self, message: typing.Dict = None):
             self.__repository.add_one(message)
 
-    def __init__(self, repository: MongoRepositoryBase = None, database_name: typing.AnyStr = None):
-        self.logger = self.Logger(repository, database_name)
+    def __new__(self, repository: MongoRepositoryBase = None, database_name: typing.AnyStr = None):
+        if self._instance is None:
+            self._instance = super(MongoLogger, self).__new__(self)
+
+            self.logger = MongoLogger.Logger(repository, database_name)
+
+        return self._instance

@@ -67,7 +67,9 @@ class RuleEvaluator(RuleEvaluatorBuilder):
         return truth_value
 
     def __evaluate_antecedent_base(self, antecedent: Antecedent = None) -> typing.List[RuleEvaluatorData]:
-        value, _ = self._metric_calculator.set_metric(antecedent.metric).compute_value(atype=antecedent.type)
+        value, _ = (self._metric_calculator.set_metric(antecedent.metric). \
+                                            set_time_interval(self._time_interval).
+                                            compute_value(atype=antecedent.type))
         antecedent_truth_value = antecedent.evaluate(value)
         data = RuleEvaluatorData(antecedent_id=antecedent.id,
                                  antecedent_truth_value=antecedent_truth_value,
@@ -90,7 +92,7 @@ class RuleEvaluator(RuleEvaluatorBuilder):
         value, confidence = self._metric_calculator. \
             set_metric(antecedent.metric). \
             set_breakdown_metadata(breakdown_metadata). \
-            compute_value(atype=antecedent.type, time_interval=self._rule.time_interval)
+            compute_value(atype=antecedent.type, time_interval=self._time_interval)
         antecedent_truth_value = antecedent.evaluate(value)
         data = RuleEvaluatorData(antecedent_id=antecedent.id,
                                  antecedent_truth_value=antecedent_truth_value,
@@ -103,5 +105,5 @@ class RuleEvaluator(RuleEvaluatorBuilder):
         self._breakdown_metadata = self._metric_calculator.get_breakdown_metadata(
             self._rule.breakdown_metadata.breakdown,
             self._rule.breakdown_metadata.action_breakdown,
-            self._rule.time_interval)
+            self._time_interval)
         return self._breakdown_metadata

@@ -1,9 +1,12 @@
 import typing
+from datetime import datetime
 
 from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Fuzzifiers.RuleBasedOptimizationFuzzyfierFactory import \
     RuleBasedOptimizationFuzzyfierFactory
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules import Rules
+from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME
+from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Rules.RuleEvaluator import RuleEvaluator
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
@@ -23,6 +26,8 @@ class RuleBasedOptimizationBuilder:
         self._level = None
         self._dexter_config = None
         self.__logger = None
+        self._date_stop = None
+        self._time_interval = None
 
     def get_logger(self):
         if self._mongo_repository is not None:
@@ -68,4 +73,12 @@ class RuleBasedOptimizationBuilder:
 
     def set_dexter_config(self, dexter_config: typing.Any = None):
         self._dexter_config = dexter_config
+        return self
+
+    def set_date_stop(self, date_stop: typing.AnyStr = None):
+        self._date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
+        return self
+
+    def set_time_interval(self, time_interval: DaysEnum = None):
+        self._time_interval = time_interval
         return self

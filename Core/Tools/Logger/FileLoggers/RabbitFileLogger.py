@@ -10,6 +10,7 @@ RabbitMessageType = typing.Union[typing.AnyStr, typing.Dict]
 
 class RabbitFileLogger:
     LOGS_FOLDER = 'rabbit'
+    _instance = None
 
     class InternalLogger:
         def __init__(self, logs_folder: typing.AnyStr = None):
@@ -27,7 +28,12 @@ class RabbitFileLogger:
             except Exception as e:
                 pass
 
-    def __init__(self, **kwargs):
-        if not os.path.exists(self.LOGS_FOLDER):
-            os.makedirs(self.LOGS_FOLDER)
-        self.logger = self.InternalLogger(self.LOGS_FOLDER)
+    def __new__(self, **kwargs):
+        if self._instance is None:
+            self._instance = super(RabbitFileLogger, self).__new__(self)
+
+            if not os.path.exists(RabbitFileLogger.LOGS_FOLDER):
+                os.makedirs(RabbitFileLogger.LOGS_FOLDER)
+            self.logger = RabbitFileLogger.InternalLogger(RabbitFileLogger.LOGS_FOLDER)
+
+        return self._instance

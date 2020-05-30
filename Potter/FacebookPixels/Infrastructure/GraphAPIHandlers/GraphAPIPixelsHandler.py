@@ -61,28 +61,28 @@ class GraphAPIPixelHandler:
                 custom_audiences = cls.__get_custom_audiences(ad_account, pixel.id)
             except Exception as e:
                 custom_audiences = []
-                errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelHandler.__get_custom_audiences()")))
+                errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
             # Get DA Checks for current pixel
             try:
                 da_checks = cls.__get_da_checks(pixel.id)
             except Exception as e:
                 da_checks = []
-                errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelHandler.__get_da_checks()")))
+                errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
             # Get custom conversions for current pixel
             try:
                 custom_conversions = cls.__get_custom_conversions(ad_account, pixel.id)
             except Exception as e:
                 custom_conversions = []
-                errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelHandler.__get_custom_conversions()")))
+                errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
             # Get stats for current pixel
             try:
                 pixel_stats = cls.__get_pixel_stats(pixel.id)
             except Exception as e:
                 pixel_stats = []
-                errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelHandler.__get_pixel_stats()")))
+                errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
             #  Assemble final pixels response
             pixel_dto = cls.__build_pixel(pixel, custom_audiences, da_checks, custom_conversions, pixel_stats, errors)
@@ -114,14 +114,14 @@ class GraphAPIPixelHandler:
             pixel_dto.audiences = custom_audiences
             pixel_dto.da_checks = da_checks
         except Exception as e:
-            errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__build_pixel()")))
+            errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
         try:
             pixel_dto.events = [cls.__map_custom_conversion_to_event_model(custom_conversion, pixel.id) for
                                 custom_conversion in custom_conversions]
         except Exception as e:
             errors.append(
-                copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__map_custom_conversion_to_event_model()")))
+                copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
         try:
             if pixel_dto.events and pixel_stats:
@@ -130,7 +130,7 @@ class GraphAPIPixelHandler:
                 pixel_dto.events = cls.__map_pixel_stats_to_event_model(pixel_stats, pixel.id)
         except Exception as e:
             errors.append(
-                copy.deepcopy(Tools.create_error(e, "GraphAPIPixelsHandler.__map_pixel_stats_to_event_model()")))
+                copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
         pixel_dto.state = cls.__is_pixel_active(pixel_dto)
 

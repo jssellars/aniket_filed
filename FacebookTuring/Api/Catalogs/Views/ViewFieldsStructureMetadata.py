@@ -48,8 +48,20 @@ class ViewFieldsStructureMetadata:
                          type_id=ViewColumnTypeEnum.CURRENCY.value, category_id=ViewColumnCategoryEnum.SETTINGS.value,
                          is_fixed=False)
     budget = ViewColumn(Autoincrement.hex_string('budget'), display_name="Budget", primary_value=FieldsMetadata.budget,
-                        type_id=ViewColumnTypeEnum.TEXT.value, category_id=ViewColumnCategoryEnum.SETTINGS.value,
+                        type_id=ViewColumnTypeEnum.NUMBER.value, category_id=ViewColumnCategoryEnum.SETTINGS.value,
                         is_fixed=False)
+    daily_min_adset_budget = ViewColumn(Autoincrement.hex_string('daily_min_adset_budget'), display_name="Daily mininum adset budget",
+                                        primary_value=FieldsMetadata.daily_min_adset_budget, type_id=ViewColumnTypeEnum.NUMBER.value,
+                                        category_id=ViewColumnCategoryEnum.SETTINGS.value, is_fixed=False)
+    daily_max_adset_budget = ViewColumn(Autoincrement.hex_string('daily_max_adset_budget'), display_name="Daily maximum adset budget",
+                                        primary_value=FieldsMetadata.daily_max_adset_budget, type_id=ViewColumnTypeEnum.NUMBER.value,
+                                        category_id=ViewColumnCategoryEnum.SETTINGS.value, is_fixed=False)
+    lifetime_min_adset_budget = ViewColumn(Autoincrement.hex_string('lifetime_min_adset_budget'), display_name="Lifetime minimum adset budget",
+                                           primary_value=FieldsMetadata.lifetime_min_adset_budget, type_id=ViewColumnTypeEnum.NUMBER.value,
+                                           category_id=ViewColumnCategoryEnum.SETTINGS.value, is_fixed=False)
+    lifetime_max_adset_budget = ViewColumn(Autoincrement.hex_string('lifetime_max_adset_budget'), display_name="Lifetime maximum adset budget",
+                                           primary_value=FieldsMetadata.lifetime_max_adset_budget, type_id=ViewColumnTypeEnum.NUMBER.value,
+                                           category_id=ViewColumnCategoryEnum.SETTINGS.value, is_fixed=False)
     budget_remaining = ViewColumn(Autoincrement.hex_string('budget_remaining'), display_name="Budget remaining",
                                   primary_value=FieldsMetadata.budget_remaining,
                                   type_id=ViewColumnTypeEnum.CURRENCY.value,

@@ -33,7 +33,7 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
         return self.__check_in_last_x_days(campaign_id)
 
     def __check_in_last_x_days(self, campaign_id):
-        date_stop = datetime.now()
+        date_stop = self._date_stop
         date_start = date_stop - timedelta(days=self._dexter_config.days_since_last_change)
         breakdown_metadata = BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                action_breakdown=ActionBreakdownEnum.NONE)
@@ -45,6 +45,7 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
                       set_facebook_id(campaign_id).
                       set_repository(self._mongo_repository).
                       set_level(self._level).
+                      set_date_stop(self._date_stop).
                       compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval))
 
         if results >= self._dexter_config.min_results:
@@ -66,7 +67,7 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
         structure_details = self._mongo_repository.get_structure_details(key_value=campaign_id,
                                                                          level=LevelEnum.CAMPAIGN)
         updated_time = parse(structure_details.get('updated_time')).date()
-        date_stop = datetime.now().date()
+        date_stop = self._date_stop.date()
 
         if (date_stop - updated_time).days >= self._dexter_config.recommendation_days_last_updated:
             breakdown_metadata = BreakdownMetadata(breakdown=BreakdownEnum.NONE,
@@ -78,6 +79,7 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
                           set_facebook_id(campaign_id).
                           set_repository(self._mongo_repository).
                           set_level(self._level).
+                          set_date_stop(self._date_stop).
                           compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval_days))
 
             if results >= self._dexter_config.min_results:

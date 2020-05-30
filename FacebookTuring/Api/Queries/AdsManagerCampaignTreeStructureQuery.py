@@ -30,7 +30,7 @@ class AdsManagerCampaignTreeStructureQuery:
                                            database_name=startup.mongo_config['structures_database_name'],
                                            collection_name=level)
         try:
-            structure = repository.get_all_by_key(cls.keymap[level].id, facebook_id)
+            structure = repository.get_active_structure_ids(cls.keymap[level].id, facebook_id)
             campaign_id = list(map(itemgetter(cls.keymap[Level.CAMPAIGN.value].id), structure))
             campaign_id = campaign_id[0]
         except Exception as e:
@@ -41,8 +41,8 @@ class AdsManagerCampaignTreeStructureQuery:
             for structure_level in Level:
                 if structure_level != Level.ACCOUNT:
                     repository.collection = structure_level.value
-                    structures[structure_level.value] = repository.get_all_by_key(cls.keymap[Level.CAMPAIGN.value].id,
-                                                                                  campaign_id)
+                    structures[structure_level.value] = repository.get_active_structure_ids(cls.keymap[Level.CAMPAIGN.value].id,
+                                                                                            campaign_id)
         except Exception as e:
             raise e
 

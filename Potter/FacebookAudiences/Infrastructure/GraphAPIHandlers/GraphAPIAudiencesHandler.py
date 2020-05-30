@@ -41,14 +41,14 @@ class GraphAPIAudiencesHandler:
             mapped_audiences = [cls.__map_custom_audience(audience) for audience in custom_audiences]
             audiences.extend(mapped_audiences)
         except Exception as e:
-            errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIAudiencesHandler.get_custom_audiences()")))
+            errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
         try:
             saved_audiences = cls.get_saved_audiences(account_id=account_id)
             mapped_audiences = [cls.__map_saved_audience(audience) for audience in saved_audiences]
             audiences.extend(mapped_audiences)
         except Exception as e:
-            errors.append(copy.deepcopy(Tools.create_error(e, "GraphAPIAudiencesHandler.get_saved_audiences()")))
+            errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
         return audiences, errors
 

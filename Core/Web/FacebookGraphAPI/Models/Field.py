@@ -4,6 +4,7 @@ from enum import Enum
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldMapper import ActionFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.BreakdownValueFieldMapper import BreakdownValueFieldMapper
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.BudgetFieldMapper import BudgetFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.CostPerActionFieldMapper import CostPerActionFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.OneToOneFieldMapper import OneToOneFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureFieldMapper import StructureFieldMapper
@@ -16,7 +17,8 @@ MapperType = typing.Union[ActionFieldMapper,
                           OneToOneFieldMapper,
                           StructureFieldMapper,
                           BreakdownValueFieldMapper,
-                          TimeBreakdownValueFieldMapper]
+                          TimeBreakdownValueFieldMapper,
+                          BudgetFieldMapper]
 
 
 class FieldType(Enum):

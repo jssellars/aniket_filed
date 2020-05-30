@@ -1,6 +1,7 @@
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.BudgetFieldMapper import BudgetFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.OneToOneFieldMapper import OneToOneFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureFieldMapper import StructureFieldMapper, \
     StructureDetailsTypeEnum
@@ -87,9 +88,27 @@ class FieldsStructureMetadata:
                     mapper=OneToOneFieldMapper(),
                     field_type=FieldType.STRUCTURE)
     budget = Field(name="budget",
-                   facebook_fields=[GraphAPIInsightsFields.budget],
-                   mapper=OneToOneFieldMapper(),
+                   facebook_fields=[GraphAPIInsightsFields.daily_budget,
+                                    GraphAPIInsightsFields.lifetime_budget],
+                   mapper=BudgetFieldMapper(facebook_field_names=[GraphAPIInsightsFields.daily_budget,
+                                                                  GraphAPIInsightsFields.lifetime_budget]),
                    field_type=FieldType.STRUCTURE)
+    daily_min_adset_budget = Field(name="daily_min_adset_budget",
+                                   facebook_fields=[GraphAPIInsightsFields.daily_min_spend_target],
+                                   mapper=OneToOneFieldMapper(),
+                                   field_type=FieldType.STRUCTURE)
+    daily_max_adset_budget = Field(name="daily_max_adset_budget",
+                                   facebook_fields=[GraphAPIInsightsFields.daily_spend_cap],
+                                   mapper=OneToOneFieldMapper(),
+                                   field_type=FieldType.STRUCTURE)
+    lifetime_min_adset_budget = Field(name="lifetime_min_adset_budget",
+                                      facebook_fields=[GraphAPIInsightsFields.lifetime_min_spend_target],
+                                      mapper=OneToOneFieldMapper(),
+                                      field_type=FieldType.STRUCTURE)
+    lifetime_max_adset_budget = Field(name="lifetime_max_adset_budget",
+                                      facebook_fields=[GraphAPIInsightsFields.lifetime_spend_cap],
+                                      mapper=OneToOneFieldMapper(),
+                                      field_type=FieldType.STRUCTURE)
     budget_remaining = Field(name="budget_remaining",
                              facebook_fields=[GraphAPIInsightsFields.budget_remaining],
                              mapper=OneToOneFieldMapper(),

@@ -40,14 +40,11 @@ class GetAllAudiencesMessageRequestHandler:
                                                                        account_id=message.ad_account_id,
                                                                        startup=startup)
 
-            #  Publish response details to audiences outbound queue
-            # todo: use below after c# changes ErrorMessage
-            # response = GetAllAudiencesMessageResponse(ad_account_id=message.ad_account_id, business_id=message.business_id, audiences=audiences, errors=errors)
             response = GetAllAudiencesMessageResponse(business_owner_facebook_id=message.business_owner_facebook_id,
                                                       ad_account_id=message.ad_account_id,
                                                       business_id=message.business_id,
                                                       audiences=audiences,
-                                                      errors=[])
+                                                      errors=errors)
 
             cls.__publish(response)
         except Exception as e:

@@ -14,6 +14,7 @@ from flask_cors import CORS
 from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
+from Potter.FacebookCampaignsBuilder.Api.Controllers.AudienceSizeController import AudienceSizeEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.PublishCampaignController import PublishCampaignEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Startup import startup
@@ -42,6 +43,10 @@ api.add_resource(VersionEndpoint, version_controller)
 #  Publish campaign controller
 publish_campaign_controller = "{base_url}/campaign".format(base_url=startup.base_url.lower())
 api.add_resource(PublishCampaignEndpoint, publish_campaign_controller)
+
+#  Audience size controller
+audience_size_controller = "{base_url}/audience-size/<string:account_id>".format(base_url=startup.base_url.lower())
+api.add_resource(AudienceSizeEndpoint, audience_size_controller)
 
 if __name__ == "__main__":
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

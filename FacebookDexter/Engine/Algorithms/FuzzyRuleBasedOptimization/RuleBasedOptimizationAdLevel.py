@@ -49,13 +49,15 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
 
     def find_lowest_25p_performing_ads(self, ad_performance_time_range: int = None) -> typing.List[typing.AnyStr]:
         if not ad_performance_time_range:
-            ad_performance_time_range = self.DEFAULT_AD_PERFORMANCE_TIME_RANGE
+            ad_performance_time_range = self._time_interval
 
         calculator = MetricCalculator()
         calculator = calculator. \
             set_level(LevelEnum.AD). \
             set_metric(AvailableMetricEnum.CLICKS.value). \
             set_repository(self._mongo_repository). \
+            set_date_stop(self._date_stop). \
+            set_time_interval(self._time_interval). \
             set_breakdown_metadata(
             BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
 

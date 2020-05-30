@@ -49,8 +49,8 @@ class PublishCampaignCommandHandler(object):
 
         #  Build adsets
         adSetBuilder = GraphAPIAdSetBuilderHandler()
-        if 'campaign_budget_optimization' in campaignTemplate.keys() and campaignTemplate[
-            'campaign_budget_optimization']:
+        if 'campaign_budget_optimization' in campaignTemplate.keys() and \
+                campaignTemplate['campaign_budget_optimization']:
             isUsingCampaignBudgetOptimization = True
         else:
             isUsingCampaignBudgetOptimization = False
@@ -81,9 +81,9 @@ class PublishCampaignCommandHandler(object):
                 for adSetIndex, adSet in enumerate(adSetBuilder.adSets):
                     adSet['campaign_id'] = campaignFacebookId
                     # remove array of [None] from countries
-                    if 'geo_locations' in adSet['targeting'].keys() and 'countries' in adSet['targeting'][
-                        'geo_locations'] and not \
-                            adSet['targeting']['geo_locations']['countries']:
+                    if 'geo_locations' in adSet['targeting'].keys() and \
+                            'countries' in adSet['targeting']['geo_locations'] and \
+                            adSet['targeting']['geo_locations']['countries'] == [None]:
                         del adSet['targeting']['geo_locations']['countries']
                     facebookAdSet = adAccount.create_ad_set(params=adSet)
                     adSetFacebookId = facebookAdSet.get_id()
@@ -101,8 +101,8 @@ class PublishCampaignCommandHandler(object):
                         currentAdTemplate.update(adTemplateDetails)
                         currentAdTemplate['ad_format'] = adTemplate['ad_format']
                         adBuilder.buildAd(request['ad_account_id'], adSetFacebookId, currentAdTemplate,
-                                          adTemplate['details']['pageFacebookId'],
-                                          adTemplate['details']['instagramAccountFacebookId'])
+                                          adTemplate['details']['page_facebook_id'],
+                                          adTemplate['details']['instagram_account_facebook_id'])
                         adBuilder.ad[Ad.Field.name] = adSet['name'] + " - Ad - " + str(adIndex + 1)
                         ad = adAccount.create_ad(params=adBuilder.ad)
                         adFacebookId = ad.get_id()
@@ -123,9 +123,7 @@ class PublishCampaignCommandHandler(object):
             }
 
         if 'countries' not in adSetTemplate['targeting']['geo_locations'].keys():
-            adSetTemplate['targeting']['geo_locations'] = {
-                'countries': [None]
-            }
+            adSetTemplate['targeting']['geo_locations']["countries"] = [None]
 
         return adSetTemplate
 

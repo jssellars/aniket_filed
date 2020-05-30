@@ -60,7 +60,9 @@ class AvailableMetricEnum(EnumerationBase):
     AVERAGE_SPEND = Metric(name=FieldsMetadata.amount_spent.name, display_name="Average amount spent",
                            numerator=AvailableMetricBaseEnum.SPEND.value,
                            numerator_aggregator=AggregatorEnum.AVERAGE, mtype=MetricTypeEnum.INSIGHT)
-    REACH = Metric(name=FieldsMetadata.reach.name, display_name="Reach", numerator=AvailableMetricBaseEnum.REACH.value,
+    REACH = Metric(name=FieldsMetadata.reach.name, display_name="Reach",
+                   numerator=AvailableMetricBaseEnum.REACH.value,
+                   denominator=AvailableMetricBaseEnum.SPEND.value,
                    mtype=MetricTypeEnum.INSIGHT)
     LINK_CLICKS = Metric(name=FieldsMetadata.link_clicks.name, display_name="Link clicks",
                          numerator=AvailableMetricBaseEnum.LINK_CLICKS.value,
@@ -70,6 +72,7 @@ class AvailableMetricEnum(EnumerationBase):
                         mtype=MetricTypeEnum.INSIGHT)
     IMPRESSIONS = Metric(name=FieldsMetadata.impressions.name, display_name="Impressions",
                          numerator=AvailableMetricBaseEnum.IMPRESSIONS.value,
+                         denominator=AvailableMetricBaseEnum.SPEND.value,
                          mtype=MetricTypeEnum.INSIGHT)
     PURCHASES = Metric(name=FieldsMetadata.purchases_total.name, display_name="Purchases",
                        numerator=AvailableMetricBaseEnum.PURCHASES.value,

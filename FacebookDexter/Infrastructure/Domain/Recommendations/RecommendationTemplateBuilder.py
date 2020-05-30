@@ -32,17 +32,19 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         "breakdown_values": lambda x: None
     }
 
-    __keyword_value_map = {
-        'metric_name': lambda x: x.metric_name.value.display_name,
-        'value': lambda x: x.value,
-        'time_interval': lambda x: str(x.time_interval.value),
-        'linguistic_variable': lambda x: LinguisticVariableEnum(x).name,
-        'breakdown_values': lambda x: x.breakdown_values
-    }
-
     def __init__(self, breakdown_values: typing.List[typing.AnyStr] = None):
         super().__init__()
         self.__breakdown_values = breakdown_values
+
+    @property
+    def __keyword_value_map(self):
+        return {
+            'metric_name': lambda x: x.metric_name.value.display_name,
+            'value': lambda x: x.value,
+            'time_interval': lambda x: str(self._time_interval.value),
+            'linguistic_variable': lambda x: LinguisticVariableEnum(x).name,
+            'breakdown_values': lambda x: x.breakdown_values
+        }
 
     def build_template(self, template: typing.AnyStr = None) -> typing.Union[typing.AnyStr, typing.NoReturn]:
         try:
@@ -84,30 +86,32 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         return list(keyword_dict.values())
 
     def __find_keywords_values(self, keyword: RuleTemplateKeyword):
-        try:
-            if keyword.metric_type == MetricTypeEnum.INSIGHT:
-                value = self.__find_insight_value(keyword)
-            elif keyword.metric_type == MetricTypeEnum.INTERESTS:
-                value = self.__find_suggested_interests(keyword)
-            elif keyword.metric_type == MetricTypeEnum.AUDIENCE:
-                value = self.__find_audience_size(keyword)
-            else:
-                value = ''
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+        value = ''
+        if keyword.metric_name:
+            try:
+                if keyword.metric_type == MetricTypeEnum.INSIGHT:
+                    value = self.__find_insight_value(keyword)
+                elif keyword.metric_type == MetricTypeEnum.INTERESTS:
+                    value = self.__find_suggested_interests(keyword)
+                elif keyword.metric_type == MetricTypeEnum.AUDIENCE:
+                    value = self.__find_audience_size(keyword)
+                else:
+                    value = ''
+                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                            name="RecommendationTemplateBuilder",
+                                            description=f"Failed to compute keyword value for "
+                                                        f"metric {keyword.metric_name.value.name}")
+                    self.logger.logger.info(log)
+            except Exception as e:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                         name="RecommendationTemplateBuilder",
                                         description=f"Failed to compute keyword value for "
-                                                    f"metric {keyword.metric_name.value.name}")
+                                                    f"metric {keyword.metric_name.value.name}",
+                                        extra_data={
+                                            "error": traceback.format_exc()
+                                        })
                 self.logger.logger.info(log)
-        except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="RecommendationTemplateBuilder",
-                                    description=f"Failed to compute keyword value for "
-                                                f"metric {keyword.metric_name.value.name}",
-                                    extra_data={
-                                        "error": traceback.format_exc()
-                                    })
-            self.logger.logger.info(log)
-            raise e
+                raise e
 
         keyword.value = str(value) if value is not None else ''
 
@@ -169,6 +173,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             set_level(self._level). \
             set_metric(keyword.metric_name.value). \
             set_repository(self._repository). \
+            set_date_stop(self._date_stop). \
+            set_time_interval(keyword.time_interval). \
             set_breakdown_metadata(
             BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=keyword.time_interval)
@@ -182,12 +188,15 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         structure = self._repository.get_structure_details(self._structure_id, LevelEnum.ADSET)
 
         try:
-            interests = [interest_dict['name']
-                         for entry in structure['targeting']['flexible_spec']
-                         for interest_lists in entry.values()
-                         for interest_dict in interest_lists
-                         if self.__is_interest(entry)]
-            if not interests:
+            if 'flexible_spec' in structure['targeting'].keys():
+                interests = [interest_dict['name']
+                             for entry in structure['targeting']['flexible_spec']
+                             for interest_lists in entry.values()
+                             for interest_dict in interest_lists
+                             if self.__is_interest(entry)]
+                if not interests:
+                    return ''
+            else:
                 return ''
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
@@ -237,6 +246,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             set_business_owner_repo_session(self._business_owner_repo_session). \
             set_facebook_config(self._facebook_config). \
             set_business_owner_id(self._business_owner_id). \
+            set_date_stop(self._date_stop). \
             set_breakdown_metadata(
             BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
         value, _ = mc.compute_value(atype=keyword.antecedent_type)

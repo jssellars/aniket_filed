@@ -16,6 +16,32 @@ class TuringMongoRepository(MongoRepositoryBase):
     def __init__(self, *args, **kwargs):
         super(TuringMongoRepository, self).__init__(*args, **kwargs)
 
+    def get_active_structure_ids(self, key_name: typing.AnyStr = None, key_value: typing.AnyStr = None) -> typing.List[typing.Dict]:
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    key_name: {
+                        MongoOperator.EQUALS.value: key_value
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
+                    }
+                }
+            ]
+        }
+
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        try:
+            results = self.collection.find(query, projection)
+        except Exception as e:
+            raise e
+        return list(results)
+
     def get_structure_ids(self, level: Level = None, account_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         self.set_collection(collection_name=level.value)
         query = {

@@ -53,14 +53,11 @@ class GetAllAppsMessageRequestHandler:
         except Exception as e:
             raise e
 
-        #  Publish response details to audiences outbound queue
-        # todo: use below after c# changes ErrorMessage
-        # replace errors=[] with errors returned by get_apps()
         try:
             response = GetAllAppsMessageResponse(business_owner_facebook_id=message.business_owner_facebook_id,
                                                  ad_account_id=message.ad_account_id,
                                                  apps=apps,
-                                                 errors=[])
+                                                 errors=errors)
 
             cls.__publish(response)
         except Exception as e:

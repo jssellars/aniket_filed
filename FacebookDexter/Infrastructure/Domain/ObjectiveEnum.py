@@ -1,4 +1,3 @@
-# todo: check with FB values
 from enum import Enum
 
 

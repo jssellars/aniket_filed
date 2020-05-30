@@ -8,20 +8,26 @@ from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 
 
 class ElasticSearchLogger:
-    def __init__(self,
+    _instance = None
+
+    def __new__(self,
                  host: typing.AnyStr = None,
                  port: int = None,
                  name: typing.AnyStr = None,
                  level: typing.AnyStr = None,
                  index_name: typing.AnyStr = None,
                  **kwargs):
-        self.host = host
-        self.port = port
-        self.name = name
-        self.level = LoggingLevelEnum.get_enum_by_name(level).value
-        self.es_index = index_name + "-" + datetime.now().strftime("%Y-%m-%d")
+        if self._instance is None:
+            self._instance = super(ElasticSearchLogger, self).__new__(self)
+            self.host = host
+            self.port = port
+            self.name = name
+            self.level = LoggingLevelEnum.get_enum_by_name(level).value
+            self.es_index = index_name + "-" + datetime.now().strftime("%Y-%m-%d")
 
-        self.logger = self.__init_logger()
+            self.logger = ElasticSearchLogger.__init_logger(self)
+
+        return self._instance
 
     def __init_logger(self):
         handler = CMRESHandler(hosts=[{'host': self.host, 'port': self.port}],

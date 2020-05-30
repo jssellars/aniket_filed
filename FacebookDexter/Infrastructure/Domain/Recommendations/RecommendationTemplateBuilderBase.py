@@ -1,6 +1,7 @@
 from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 
-
+# todo: introduce types to setter methods
 class RecommendationTemplateBuilderBase:
 
     def __init__(self):
@@ -17,6 +18,8 @@ class RecommendationTemplateBuilderBase:
         self._facebook_config = None
         self._business_owner_id = None
         self.__logger = None
+        self._date_stop = None
+        self._time_interval = None
 
     @property
     def logger(self):
@@ -63,4 +66,12 @@ class RecommendationTemplateBuilderBase:
 
     def set_business_owner_id(self, business_owner_id):
         self._business_owner_id = business_owner_id
+        return self
+
+    def set_date_stop(self, date_stop):
+        self._date_stop = date_stop
+        return self
+
+    def set_time_interval(self, time_interval: DaysEnum = None):
+        self._time_interval = time_interval
         return self

@@ -55,8 +55,7 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.use_new_app_click,
         FieldsMetadata.lifetime_min_spend_target,
         FieldsMetadata.ad_rules_governed,
-        FieldsMetadata.targetingsentencelines,
-        FieldsMetadata.amount_spent
+        FieldsMetadata.targetingsentencelines
     ]
 
     insights_fields = [

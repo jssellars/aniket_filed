@@ -11,22 +11,28 @@ from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 class FileLogger:
     LOGS_FOLDER = 'logs'
     DAY = 24 * 3600
+    _instance = None
 
-    def __init__(self,
+    def __new__(self,
                  name: typing.AnyStr = None,
                  level: typing.AnyStr = None,
                  index_name: typing.AnyStr = None,
                  **kwargs):
-        self.name = name
-        self.level = LoggingLevelEnum.get_enum_by_name(level).value
-        self.file_name = os.path.join(self.LOGS_FOLDER, index_name + datetime.now().strftime("%Y-%m-%d") + ".log")
+        if self._instance is None:
+            self._instance = super(FileLogger, self).__new__(self)
 
-        if not os.path.exists(self.LOGS_FOLDER):
-            os.makedirs(self.LOGS_FOLDER)
+            self.name = name
+            self.level = LoggingLevelEnum.get_enum_by_name(level).value
+            self.file_name = os.path.join(self.LOGS_FOLDER, index_name + datetime.now().strftime("%Y-%m-%d") + ".log")
 
-        self.logger = self.__init_logger()
+            if not os.path.exists(self.LOGS_FOLDER):
+                os.makedirs(self.LOGS_FOLDER)
 
-    def __init_logger(self):
+            self.logger = FileLogger.init_logger(self)
+
+        return self._instance
+
+    def init_logger(self):
         # define logs format
         formatter = CustomJsonFormatter('(timestamp):(level):(name):(message)')
 

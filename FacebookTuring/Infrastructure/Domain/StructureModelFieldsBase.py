@@ -10,7 +10,7 @@ class StructureModelFieldBase:
     def get_structure_fields(cls):
         fields = [field.facebook_fields for field in cls.structure_fields]
         fields = functools.reduce(operator.iconcat, fields, [])
-        return fields
+        return list(set(fields))
 
     @classmethod
     def get_insights_fields(cls):

@@ -35,6 +35,8 @@ class AdsManagerUpdateStructureCommandHandler:
                                                                                        business_owner_permanent_token=business_owner_permanent_token,
                                                                                        fields=structure_fields.get_structure_fields())
             updated_structure, _ = graph_api_client.call_facebook()
+            if isinstance(updated_structure, Exception):
+                raise updated_structure
 
             # Map Facebook structure to domain model
             mapping = StructureMapping.get(level)

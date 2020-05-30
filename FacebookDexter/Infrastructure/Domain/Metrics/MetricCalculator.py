@@ -31,7 +31,7 @@ class MetricCalculator(MetricCalculatorBuilder):
     def __init__(self):
         super().__init__()
         self.__calculator = None
-        value = str(random.randint(0, 1e20)) + datetime.now().strftime(DEFAULT_DATETIME_ISO)
+        value = str(random.randint(0, 1e20)) + self._date_stop.strftime(DEFAULT_DATETIME_ISO)
         self.__calculator_id = hashlib.sha1(value.encode('utf-8')).hexdigest()
 
         if self._repository is not None:
@@ -85,9 +85,7 @@ class MetricCalculator(MetricCalculatorBuilder):
     def compute_value(self, atype: AntecedentTypeEnum = None,
                       time_interval: typing.Union[DaysEnum, int] = DaysEnum.ONE) -> \
             typing.Tuple[typing.Any, typing.Any]:
-        date_stop = datetime.now()
-        # todo: remove after testing
-        # date_stop = datetime(2020, 5, 20)
+        date_stop = self._date_stop
         try:
             date_start = date_stop - timedelta(days=time_interval)
         except TypeError:
@@ -136,7 +134,7 @@ class MetricCalculator(MetricCalculatorBuilder):
                                breakdown: BreakdownEnum = None,
                                action_breakdown: ActionBreakdownEnum = None,
                                time_interval: DaysEnum = None) -> typing.List[BreakdownMetadata]:
-        date_stop = datetime.now()
+        date_stop = self._date_stop
         date_start = date_stop - timedelta(days=time_interval.value)
 
         try:
@@ -185,7 +183,8 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         try:
             ad_account = AdAccount(fbid=ad_account_id)
-            audience_size_estimate = ad_account.get_reach_estimate(params={'targeting_spec': audience_details})
+            # TODO: add optimization_goal value from structure_details
+            audience_size_estimate = ad_account.get_delivery_estimate(params={'targeting_spec': audience_details})
         except Exception as e:
             audience_size_estimate = None
 
@@ -343,7 +342,7 @@ class MetricCalculator(MetricCalculatorBuilder):
         return self.__compute_aggregated_value(data)
 
     def categorical_value(self, *args, **kwargs) -> typing.AnyStr:
-        date_stop = datetime.now()
+        date_stop = self._date_stop
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
 
         data = self.__get_metrics_values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
@@ -363,7 +362,7 @@ class MetricCalculator(MetricCalculatorBuilder):
         return value
 
     def min_max_value(self):
-        date_stop = datetime.now()
+        date_stop = self._date_stop
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
         min_data = min(data) if data else None
@@ -371,13 +370,13 @@ class MetricCalculator(MetricCalculatorBuilder):
         return min_data, max_data
 
     def min_value(self):
-        date_stop = datetime.now()
+        date_stop = self._date_stop
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
         return min(data) if data else None
 
     def max_value(self):
-        date_stop = datetime.now()
+        date_stop = self._date_stop
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
         return max(data) if data else None
@@ -387,7 +386,6 @@ class MetricCalculator(MetricCalculatorBuilder):
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
         current_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
 
-        # todo: remember to uncomment this
         if current_value is None:
             return None
 
@@ -428,36 +426,39 @@ class MetricCalculator(MetricCalculatorBuilder):
             set_level(self._level). \
             set_metric(AvailableMetricEnum.AVERAGE_SPEND.value). \
             set_repository(self._repository). \
+            set_date_stop(self._date_stop). \
+            set_time_interval(self._time_interval). \
             set_breakdown_metadata(self._breakdown_metadata)
 
         # todo: change to max_interval --> 3 months
-        max_spend, _ = mc.compute_value(AntecedentTypeEnum.VALUE, time_interval=DaysEnum.MONTH)
+        max_spend, _ = mc.compute_value(AntecedentTypeEnum.VALUE, self._time_interval)
         slopes = []
         for time_bucket in MetricTrendTimeBucketEnum:
-            date_start = (_date_stop - timedelta(days=time_bucket.value))
+            if time_bucket.value <= self._time_interval:
+                date_start = (_date_stop - timedelta(days=time_bucket.value))
 
-            if date_start >= _date_start:
-                date_start = date_start.strftime(DEFAULT_DATETIME)
-                bucket_value = self.aggregated_value(date_start=date_start, date_stop=date_stop)
+                if date_start >= _date_start:
+                    date_start = date_start.strftime(DEFAULT_DATETIME)
+                    bucket_value = self.aggregated_value(date_start=date_start, date_stop=date_stop)
 
-                if bucket_value:
-                    dy = current_value - bucket_value
-                    dt = time_bucket.value
-                    spend, _ = mc.compute_value(AntecedentTypeEnum.VALUE, time_interval=time_bucket)
-                    weighted_spend = float(spend) / float(max_spend)
-                    weighted_time_bucket = float(time_bucket.value) / float(DaysEnum.MONTH.value)
-                    w = time_bucket_weighting_by_spend(weighted_spend, weighted_time_bucket)
-                    slope = w * np.arctan2(dy, dt)
-                    slopes.append(slope)
-                else:
-                    slopes.append(None)
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                            name="MetricCalculator",
-                                            description=f"Time bucket for interval {time_bucket.value} is None.",
-                                            extra_data={
-                                                "state": self.__current_state()
-                                            })
-                    self._logger.logger.info(log)
+                    if bucket_value:
+                        dy = current_value - bucket_value
+                        dt = time_bucket.value
+                        spend, _ = mc.compute_value(AntecedentTypeEnum.VALUE, time_interval=time_bucket)
+                        weighted_spend = float(spend) / float(max_spend)
+                        weighted_time_bucket = float(time_bucket.value) / float(DaysEnum.MONTH.value)
+                        w = time_bucket_weighting_by_spend(weighted_spend, weighted_time_bucket)
+                        slope = w * np.arctan2(dy, dt)
+                        slopes.append(slope)
+                    else:
+                        slopes.append(None)
+                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                                name="MetricCalculator",
+                                                description=f"Time bucket for interval {time_bucket.value} is None.",
+                                                extra_data={
+                                                    "state": self.__current_state()
+                                                })
+                        self._logger.logger.info(log)
 
         trend = self.__compute_resultant_slope(slopes)
 
@@ -486,13 +487,16 @@ class MetricCalculator(MetricCalculatorBuilder):
 
     def __min_max_normalized_value(self,
                                    date_start: typing.AnyStr = None,
-                                   date_stop: typing.AnyStr = None) -> typing.Union[int, float]:
+                                   date_stop: typing.AnyStr = None) -> typing.Union[int, float, typing.NoReturn]:
         value = self.aggregated_value(date_start, date_stop)
         min_value, max_value = self.min_max_value()
         if min_value is None:
             min_value = 0.0
         if value and min_value is not None and max_value is not None:
-            scaled_value = (value - min_value) / (max_value - min_value)
+            if max_value - min_value != 0:
+                scaled_value = (value - min_value) / (max_value - min_value)
+            else:
+                return None
         else:
             scaled_value = None
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,

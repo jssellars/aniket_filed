@@ -93,8 +93,8 @@ class GraphAPIInsightsHandler:
                             permanent_token: typing.AnyStr = None,
                             ad_account_id: typing.AnyStr = None,
                             level: typing.AnyStr = None,
-                            fields: typing.List[typing.AnyStr] = None) -> typing.Tuple[
-        typing.List[typing.Dict], typing.List[typing.Dict]]:
+                            fields: typing.List[typing.AnyStr] = None) -> \
+            typing.Tuple[typing.List[typing.Dict], typing.List[typing.Dict]]:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_structure_config(permanent_token=permanent_token,
                                                                  ad_account_id=ad_account_id,
@@ -129,6 +129,7 @@ class GraphAPIInsightsHandler:
                                                              ad_account_id=ad_account_id,
                                                              level=level,
                                                              fields=structure_fields)
+            #  todo: map structure fields
             response = cls.join_insights_and_structures(level=level,
                                                         requested_fields=requested_fields,
                                                         insights=insights_response,

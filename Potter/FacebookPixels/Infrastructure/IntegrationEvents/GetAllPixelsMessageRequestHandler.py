@@ -35,13 +35,10 @@ class GetAllPixelsMessageRequestHandler:
             pixels, errors = GraphAPIPixelHandler.get_pixels(permanent_token=permanent_token,
                                                              account_id=message.ad_account_id, startup=startup)
 
-            #  Publish pixel details to pixels outbound queue
-            # todo: use below after c# changes ErrorMessage
-            # response = GetAllPixelsMessageResponse(ad_account_id=message.ad_account_id, pixels=pixels, errors=errors)
             response = GetAllPixelsMessageResponse(business_owner_facebook_id=message.business_owner_facebook_id,
                                                    ad_account_id=message.ad_account_id,
                                                    pixels=pixels,
-                                                   errors=[])
+                                                   errors=errors)
             cls.__publish(response)
         except Exception as e:
             raise e

@@ -322,7 +322,7 @@ class GraphAPIAdSetBuilderHandler(object):
                                     targeting = adSetTemplate['targeting']
 
                                     # Remove unused field
-                                    targeting.pop('inMemoryTargetingData', None)
+                                    targeting.pop('in_memory_targeting_data', None)
 
                                     #  Change device
                                     targeting['device_platforms'] = deviceGroup

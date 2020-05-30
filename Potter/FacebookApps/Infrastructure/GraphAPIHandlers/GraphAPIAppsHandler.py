@@ -1,3 +1,4 @@
+import copy
 import typing
 
 from facebook_business.adobjects.adaccount import AdAccount
@@ -28,22 +29,31 @@ class GraphAPIAppsHandler:
         # get apps
         errors = []
         try:
-            apps = cls.__get_apps_base(account_id=account_id)
+            apps, errors = cls.__get_apps_base(account_id=account_id)
         except Exception as e:
             apps = []
-            errors.append(Tools.create_error(e, "GraphAPIAppsHandler.get_apps()"))
+            errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
         return apps, errors
 
     @classmethod
-    def __get_apps_base(cls, account_id: typing.AnyStr = None) -> typing.List[GraphAPIAppDto]:
-        ad_account = AdAccount(fbid=account_id)
-        response = ad_account.get_applications(fields=GraphAPIAppFields.get_values())
-        mapper = GraphAPIAppMapping(target=GraphAPIAppDto)
-        fb_apps = mapper.load(response, many=True)
+    def __get_apps_base(cls, account_id: typing.AnyStr = None) -> typing.Tuple[typing.List[GraphAPIAppDto], typing.List[typing.Dict]]:
+        errors = []
+        try:
+            ad_account = AdAccount(fbid=account_id)
+            response = ad_account.get_applications(fields=GraphAPIAppFields.get_values())
+            mapper = GraphAPIAppMapping(target=GraphAPIAppDto)
+            fb_apps = mapper.load(response, many=True)
+        except Exception as e:
+            errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
+            return [], errors
+
         for fb_app in fb_apps:
-            fb_app.app_event_types = cls.__get_app_event_types(fb_app.id)
-        return fb_apps
+            try:
+                fb_app.app_event_types = cls.__get_app_event_types(fb_app.id)
+            except Exception as e:
+                errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
+        return fb_apps, errors
 
     @classmethod
     def __get_app_event_types(cls, facebook_id: typing.AnyStr = None) -> typing.List[GraphAPIAppEventTypeDto]:

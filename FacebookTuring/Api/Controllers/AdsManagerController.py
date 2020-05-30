@@ -16,6 +16,8 @@ from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler
     AdsManagerDeleteStructureCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDiscardDraftCommandHandler import \
     AdsManagerDiscardDraftCommandHandler
+from FacebookTuring.Api.CommandsHandlers.AdsManagerDuplicateStructureCommandHandler import \
+    AdsManagerDuplicateStructureCommandHandler, AdsManagerDuplicateStructureCommandHandlerException
 from FacebookTuring.Api.CommandsHandlers.AdsManagerSaveDraftCommandHandler import AdsManagerSaveDraftCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import \
     AdsManagerUpdateStructureCommandHandler
@@ -160,7 +162,10 @@ class AdsManagerEndpoint(Resource):
                                     description=str(e),
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())
-            return Response(response=json.dumps({"message": f"Failed to update structure {facebook_id}."}), status=400,
+            # todo: remove after testing
+            from Core.Web.FacebookGraphAPI.Tools import Tools
+            error = Tools.create_error(e)
+            return Response(response=json.dumps(error), status=400,
                             mimetype='application/json')
 
     @jwt_required
@@ -249,8 +254,17 @@ class AdsManagerDuplicateStructureEndpoint(Resource):
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
         try:
-            AdsManagerUpdateStructureCommandHandler.handle(command, level, facebook_id, business_owner_facebook_id)
+            command_handler = AdsManagerDuplicateStructureCommandHandler()
+            command_handler.handle(command, level, facebook_id, business_owner_facebook_id)
             return Response(status=204, mimetype="application/json")
+        except AdsManagerDuplicateStructureCommandHandlerException as ex:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="AdsManagerUpdateStructureDraftEndpoint",
+                                    description=str(ex),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            return Response(response=json.dumps({"message": f"Could not find structure {facebook_id} tree."}),
+                            status=404, mimetype='application/json')
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="AdsManagerUpdateStructureDraftEndpoint",

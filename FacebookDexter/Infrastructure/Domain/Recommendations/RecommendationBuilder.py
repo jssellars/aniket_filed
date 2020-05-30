@@ -5,6 +5,7 @@ from datetime import datetime
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME_ISO
 from FacebookDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionDetailsBuilder
+from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.Metric import MetricBase
 from FacebookDexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTypeEnum
@@ -62,12 +63,16 @@ class RecommendationBuilder:
     def __init__(self, mongo_repository: DexterMongoRepository = None,
                  business_owner_repo_session: typing.Any = None,
                  facebook_config: typing.Any = None,
-                 business_owner_id: typing.Any = None):
+                 business_owner_id: typing.Any = None,
+                 date_stop: typing.AnyStr = None,
+                 time_interval: DaysEnum = DaysEnum.MONTH):
         self.__mongo_repository = mongo_repository
         self.__structure_details = None
         self.__business_owner_repo_session = business_owner_repo_session
         self.__facebook_config = facebook_config
         self.__business_owner_id = business_owner_id
+        self._date_stop = date_stop
+        self._time_interval = time_interval
 
         self.recommendation_id = None
         self.category = None
@@ -165,6 +170,8 @@ class RecommendationBuilder:
                          set_business_onwer_repo_session(self.__business_owner_repo_session).
                          set_facebook_config(self.__facebook_config).
                          set_business_owner_id(self.__business_owner_id).
+                         set_date_stop(self._date_stop).
+                         set_time_interval(self._time_interval).
                          build_template(template=rule.template))
         return self
 

@@ -8,6 +8,7 @@ from FacebookDexter.Engine.Algorithms.RuleEvaluatorFactory import RuleEvaluatorF
 from FacebookDexter.Engine.Algorithms.RulesFactory import RulesFactory
 from FacebookDexter.Engine.MasterWorker.OrchestratorBuilder import OrchestratorBuilder
 from FacebookDexter.Engine.MasterWorker.RunStatus import RunStatus
+from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEntryModel import DexterJournalEntryModel
 from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import DexterEngineRunJournalEnum, \
     RunStatusDexterEngineJournal
@@ -69,7 +70,6 @@ class Orchestrator(OrchestratorBuilder):
         rule_algorithm = AlgorithmsFactory.get(algorithm_type=alg_type, level=level)
         rules = RulesFactory.get(algorithm_type=alg_type, level=level)
         fuzzyfier_factory = FuzzyfierFactory.get(algorithm_type=alg_type, level=level)
-        rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=alg_type, level=level)
 
         try:
             rule_algorithm = rule_algorithm. \
@@ -80,8 +80,7 @@ class Orchestrator(OrchestratorBuilder):
                 set_dexter_config(self.startup.dexter_config). \
                 set_repository(self._data_repository). \
                 set_fuzzyfier_factory(fuzzyfier_factory). \
-                set_rules(rules). \
-                set_rule_evaluator(rule_evaluator)
+                set_rules(rules)
         except Exception as e:
             raise e
 
@@ -145,33 +144,50 @@ class Orchestrator(OrchestratorBuilder):
 
     def __run_algorithm(self, search_query):
         try:
-            campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
-            for campaign_id in campaigns_ids:
-                algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.CAMPAIGN)
-                should_run = algorithm. \
-                    set_dexter_config(self.startup.dexter_config). \
-                    set_repository(self._data_repository). \
-                    check_run_status(campaign_id)
+            for time_interval in self.startup.dexter_config.time_intervals:
+                time_interval_enum = DaysEnum(time_interval)
+                campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
+                for campaign_id in campaigns_ids:
+                    algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.CAMPAIGN)
+                    rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.CAMPAIGN)
+                    rule_evaluator.set_time_interval(time_interval_enum)
+                    algorithm.set_rule_evaluator(rule_evaluator)
+                    should_run = algorithm. \
+                        set_dexter_config(self.startup.dexter_config). \
+                        set_repository(self._data_repository). \
+                        set_date_stop(self.startup.dexter_config.date_stop).\
+                        set_time_interval(time_interval_enum). \
+                        check_run_status(campaign_id)
 
-                if should_run:
-                    recommendations = algorithm.run(campaign_id)
-                    self._recommendations_repository.save_recommendations(recommendations,
-                                                                          self.startup.dexter_config.recommendation_days_last_updated)
-                    adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
-                    for adset_id in adset_ids:
-                        algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.ADSET)
-                        recommendations = algorithm.run(adset_id)
+                    if should_run:
+                        recommendations = algorithm.run(campaign_id)
                         self._recommendations_repository.save_recommendations(recommendations,
                                                                               self.startup.dexter_config.recommendation_days_last_updated)
+                        adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
+                        for adset_id in adset_ids:
+                            algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.ADSET)
+                            rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.ADSET)
+                            rule_evaluator.set_time_interval(time_interval_enum)
+                            algorithm.set_rule_evaluator(rule_evaluator).\
+                                set_time_interval(time_interval_enum).\
+                                set_date_stop(self.startup.dexter_config.date_stop)
+                            recommendations = algorithm.run(adset_id)
+                            self._recommendations_repository.save_recommendations(recommendations,
+                                                                                  self.startup.dexter_config.recommendation_days_last_updated)
 
-                        algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.AD)
-                        recommendations = algorithm.run(adset_id)
-                        self._recommendations_repository.save_recommendations(recommendations,
-                                                                              self.startup.dexter_config.recommendation_days_last_updated)
+                            algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.AD)
+                            rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.AD)
+                            rule_evaluator.set_time_interval(time_interval_enum)
+                            algorithm.set_rule_evaluator(rule_evaluator). \
+                                set_time_interval(time_interval_enum). \
+                                set_date_stop(self.startup.dexter_config.date_stop)
+                            recommendations = algorithm.run(adset_id)
+                            self._recommendations_repository.save_recommendations(recommendations,
+                                                                                  self.startup.dexter_config.recommendation_days_last_updated)
 
-                update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
+                    update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
 
-                self._journal_repository.update_one(search_query, update_query)
+                    self._journal_repository.update_one(search_query, update_query)
 
         except Exception as failed_to_run_exception:
             print(failed_to_run_exception.__traceback__)
