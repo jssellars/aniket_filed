@@ -90,6 +90,8 @@ def GetRecommendationsPage():
                 mongoSort.append((key, 1))
             else:
                 mongoSort.append((key, -1))
+    filter['confidence'] = {'$gte' : 0.5 }
+
     try :
         recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
         response = make_response((json.dumps(recommendationsList)))
@@ -218,7 +220,7 @@ def getCountsByCategory():
         if (isinstance(channel, list)):
             count_filter['channel'] = {'$in': channel}
         else:
-            count_filter['channel'] = channel
+            count_filter['channel'] = channel        
 
         counts = recommendation_repository.get_counts(count_filter)
         response = make_response(json.dumps(counts))

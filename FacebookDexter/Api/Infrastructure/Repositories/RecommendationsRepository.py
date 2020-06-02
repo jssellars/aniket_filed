@@ -38,7 +38,8 @@ class RecommendationsRepository(object):
         aggreagation = [
           { '$match' : {
                 'ad_account_id': adAccountId,
-                'channel': channel 
+                'channel': channel,
+                'confidence': {'$gte': 0.5}
                 }
           },
           { '$group': {
@@ -78,7 +79,7 @@ class RecommendationsRepository(object):
         counts_filter = {}
         if (filter is not None):
             if ('campaign_id' in filter):
-                counts_filter['campaign_id'] = {'$in': filter['campaign_id']}
+                counts_filter['campaign_id'] = {'$in': filter['campaign_id']}            
         counts_by_type = self.get_counts_by_type(counts_filter);
         response_dict['countsByType'] = counts_by_type
         return response_dict
@@ -123,6 +124,7 @@ class RecommendationsRepository(object):
         counts_by_type = {}
         match_filter = copy.deepcopy(filter)
         match_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
+        match_filter['confidence'] = {'$gte' : 0.5 }
         match_aggregation = { '$match' : match_filter}
         count_aggregation = { '$group' : {
             '_id' : '$recommendation_type',
@@ -147,6 +149,7 @@ class RecommendationsRepository(object):
         counts_by_category = {}        
         match_filter = copy.deepcopy(filter)
         match_filter['status'] = { '$nin' : [ RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value ] }
+        match_filter['confidence'] = {'$gte' : 0.5 }
         match_aggregation = { '$match' : match_filter}
         count_aggregation = { '$group' : {
             '_id' : '$category',
