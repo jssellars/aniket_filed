@@ -1,0 +1,4 @@
+# Find latest recommendations, replace date with your current
+db.recommendations.find({last_updated_at: "2020-06-02"})
+   .projection({})
+   .sort({_id:-1})

@@ -58,6 +58,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                 keyword_id = int(keyword.split("&")[0].split("=")[1])
                 keyword_values = [x for x in keywords_values if x.id == keyword_id][0]
                 value = self.__get_value_for_keyword(keyword, keyword_values)
+                if not value or value == '0.0':
+                    return None
                 template = template.replace("<" + keyword + ">", value)
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,

@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 
 # todo: introduce types to setter methods

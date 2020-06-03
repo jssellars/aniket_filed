@@ -92,7 +92,7 @@ if __name__ == "__main__":
                                      startup.exchange_details.outbound_queue.key,
                                      inbound_queue=startup.exchange_details.inbound_queue.name)
 
-    schedule.every().day.at("02:05").do(run_daily_sync)
+    schedule.every().day.at("01:00").do(run_daily_sync)
 
     rabbit_thread = Thread(target=rabbitmq_client.register_callback(callback)
                            .register_consumer(consumer_tag=startup.rabbitmq_config.consumer_name)

@@ -62,7 +62,7 @@ class MetricCalculatorBuilder:
         self._business_owner_repo_session = business_owner_repo_session
         return self
 
-    def set_date_stop(self, date_stop: str = None) -> typing.Any:
+    def set_date_stop(self, date_stop: datetime = None) -> typing.Any:
         self._date_stop = date_stop
         return self
 

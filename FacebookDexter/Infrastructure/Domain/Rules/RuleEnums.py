@@ -35,7 +35,7 @@ class RuleCategoryEnum(Enum):
     IMPROVE_ROAS = "roas"
     IMPROVE_CONVERSION_RATE = "conversion_rate"
     IMPROVE_ENGAGEMENT = "engagement"
-    OPTIMIZE_TARGETING = "audience"
+    OPTIMIZE_TARGETING = "targeting"
     OPTIMIZE_BUDGET = "budget"
 
 

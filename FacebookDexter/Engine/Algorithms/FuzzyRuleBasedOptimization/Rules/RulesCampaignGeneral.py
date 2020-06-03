@@ -5,6 +5,7 @@ from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
+from FacebookDexter.Infrastructure.Domain.ObjectiveEnum import ObjectiveEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Connective import Connective
@@ -23,20 +24,20 @@ RULES_CAMPAIGN_GENERAL = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your app install <id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8>"
-                      "are decreasing in the last <id=1&time_interval=7>. Dexter recommends AB testing new ad copy or "
+             template="Your <id=1&metric_name=APP_INSTALLS&metric_type=1&antecedent_type=8> "
+                      "are decreasing in the last <id=1&time_interval=7> days. Dexter recommends AB testing new ad copy or "
                       "new creatives to drive a better results with your app installs.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
-                 # Antecedent(aid=1,
-                 #            atype=AntecedentTypeEnum.VALUE,
-                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
-                 #            operator=LogicOperatorEnum.EQUALS,
-                 #            expected_value=ObjectiveEnum.APP_INSTALLS.value),
                  Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.VALUE,
+                            metric=AvailableMetricEnum.OBJECTIVE.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=ObjectiveEnum.APP_INSTALLS.value),
+                 Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
                             metric=AvailableMetricEnum.RESULTS.value,
                             operator=LogicOperatorEnum.EQUALS,
@@ -106,7 +107,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
              template="You’re reaching tons of new people each day, <id=1&metric_name=REACH&metric_type=1&antecedent_type=1>"
-                      " <id=1&value=null> people in the last <id=1&time_interval=7> to be "
+                      " <id=1&value=null> people in the last <id=1&time_interval=7> days to be "
                       "exact. Your cost per click is relatively stable, too. Dexter suggests increasing your budget by 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -573,7 +574,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
              template="Your <id=1&metric_name=COST_PER_THRUPLAY&metric_type=1&antecedent_type=7> has gone up "
-                      "id=1&value=null> over the last <id=1&time_interval=7> days. "
+                      "<id=1&value=null> over the last <id=1&time_interval=7> days. "
                       "Have you optimised your delivery by age and gender or for the best performing placement?",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

@@ -596,16 +596,26 @@ class MetricCalculator(MetricCalculatorBuilder):
 
     def percentage_difference(self,
                               date_start: typing.AnyStr = None,
-                              date_stop: typing.AnyStr = None) -> typing.Union[int, float]:
+                              date_stop: typing.AnyStr = None) -> typing.Union[int, float, typing.NoReturn]:
         initial_metric_value = self.aggregated_value(date_start=date_start, date_stop=date_start)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if initial_metric_value is not None and current_metric_value is not None:
             try:
                 difference = 100 * (current_metric_value - initial_metric_value) / initial_metric_value
             except ZeroDivisionError:
-                difference = 100 * current_metric_value
+                if current_metric_value == 0.0:
+                    difference = None
+                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                            name="MetricCalculator",
+                                            description="Ill-defined percentage difference. Initial metric value and current metric value are none.",
+                                            extra_data={
+                                                "state": self.__current_state()
+                                            })
+                    self._logger.logger.info(log)
+                else:
+                    difference = 100 * current_metric_value
         elif initial_metric_value is None and current_metric_value is not None:
-            difference = 100
+            difference = None
 
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                     name="MetricCalculator",
@@ -615,7 +625,7 @@ class MetricCalculator(MetricCalculatorBuilder):
                                     })
             self._logger.logger.info(log)
         elif initial_metric_value is not None and current_metric_value is None:
-            difference = -100
+            difference = None
 
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
                                     name="MetricCalculator",

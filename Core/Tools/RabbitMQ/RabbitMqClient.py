@@ -75,6 +75,7 @@ class RabbitMqClient:
         connection = pika.BlockingConnection(self.__connection_parameters)
 
         self.__channel = connection.channel()
+        self.__channel.basic_qos(prefetch_count=1)
         self.__channel.basic_consume(self.__inbound_queue, self.__callback, auto_ack=False, consumer_tag=consumer_tag)
 
         return self

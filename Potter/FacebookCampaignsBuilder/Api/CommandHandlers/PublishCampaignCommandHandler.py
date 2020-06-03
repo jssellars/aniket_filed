@@ -85,6 +85,7 @@ class PublishCampaignCommandHandler(object):
                             'countries' in adSet['targeting']['geo_locations'] and \
                             adSet['targeting']['geo_locations']['countries'] == [None]:
                         del adSet['targeting']['geo_locations']['countries']
+                    adSet['debug'] = "all"
                     facebookAdSet = adAccount.create_ad_set(params=adSet)
                     adSetFacebookId = facebookAdSet.get_id()
 

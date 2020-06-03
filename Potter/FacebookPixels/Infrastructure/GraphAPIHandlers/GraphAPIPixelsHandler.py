@@ -1,5 +1,6 @@
 import copy
 import hashlib
+import json
 import typing
 from datetime import datetime, timedelta
 
@@ -109,8 +110,8 @@ class GraphAPIPixelHandler:
             pixel_dto.date_created = pixel.creation_time
             pixel_dto.last_updated = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             pixel_dto.domain = pixel.domain
-            pixel_dto.creator = pixel.creator.name
-            pixel_dto.owner_business_name = pixel.owner_business.name
+            pixel_dto.creator = pixel.creator.name if pixel.creator else None
+            pixel_dto.owner_business_name = pixel.owner_business.name if pixel.owner_business else None
             pixel_dto.audiences = custom_audiences
             pixel_dto.da_checks = da_checks
         except Exception as e:
@@ -166,6 +167,8 @@ class GraphAPIPixelHandler:
         event.details_as_json = object_to_json(custom_conversion)
         event.state = int(not custom_conversion.is_unavailable)
         event.event_activity = custom_conversion.last_fired_time
+        event.custom_event_type = custom_conversion.custom_event_type if custom_conversion.custom_event_type else None
+        event.rule_as_json = json.loads(custom_conversion.rule) if custom_conversion.rule else None
 
         return event
 
@@ -175,8 +178,9 @@ class GraphAPIPixelHandler:
         grouped_pixel_stats = group_pixel_stats_by_value(pixel_stats)
         events = []
         for event_type, event_stats in grouped_pixel_stats.items():
-            event_type_enum = EventType.get_by_name(humps.depascalize(event_type).upper())
-            event_type_enum = EventType.UNKNOWN.value if not event_type_enum else event_type_enum
+            event_type_name = humps.depascalize(event_type)
+            event_type_enum = EventType.get_by_name(event_type_name.lower())
+
             if event_type_enum:
                 event = Event()
                 event.name = event_type
@@ -185,6 +189,8 @@ class GraphAPIPixelHandler:
                 event.event_activity = max([row.start_time for row in event_stats])
                 event.event_count = sum([row.count for row in event_stats])
                 event.last_updated = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                event.custom_event_type = (event_type_name.upper()
+                                           if event_type_enum != EventType.UNKNOWN.value else None)
 
                 last_week = datetime.now() - timedelta(days=7)
                 event_last_fired_time = datetime.strptime(

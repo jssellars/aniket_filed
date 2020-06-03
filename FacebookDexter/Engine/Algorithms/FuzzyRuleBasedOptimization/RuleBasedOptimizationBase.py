@@ -50,7 +50,8 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
             if rule_data:
                 try:
                     current_recommendation = self.__create_recommendation(facebook_id, rule, rule_data)
-                    recommendations.append(copy.deepcopy(current_recommendation))
+                    if current_recommendation.template:
+                        recommendations.append(copy.deepcopy(current_recommendation.to_dict()))
                 except Exception as e:
                     pass
 
@@ -59,14 +60,14 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
     def __create_recommendation(self,
                                 facebook_id: typing.AnyStr = None,
                                 rule: RuleBase = None,
-                                rule_data: typing.List[typing.List[RuleEvaluatorData]] = None) -> typing.Dict:
+                                rule_data: typing.List[typing.List[RuleEvaluatorData]] = None) -> RecommendationBuilder:
         recommendation = RecommendationBuilder(mongo_repository=self._mongo_repository,
                                                facebook_config=self._facebook_config,
                                                business_owner_repo_session=self._business_owner_repo_session,
                                                business_owner_id=self._business_owner_id,
                                                date_stop=self._date_stop,
                                                time_interval=self._time_interval)
-        return recommendation.create(facebook_id, rule, rule_data, external_services=self._external_services).to_dict()
+        return recommendation.create(facebook_id, rule, rule_data, external_services=self._external_services)
 
     def evaluate_remove_rules(self,
                               facebook_id: typing.AnyStr = None,

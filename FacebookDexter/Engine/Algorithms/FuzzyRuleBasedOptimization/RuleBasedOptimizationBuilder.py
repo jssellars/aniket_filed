@@ -75,8 +75,8 @@ class RuleBasedOptimizationBuilder:
         self._dexter_config = dexter_config
         return self
 
-    def set_date_stop(self, date_stop: typing.AnyStr = None):
-        self._date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
+    def set_date_stop(self, date_stop: datetime = None):
+        self._date_stop = date_stop
         return self
 
     def set_time_interval(self, time_interval: DaysEnum = None):

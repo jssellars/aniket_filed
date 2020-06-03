@@ -2,6 +2,7 @@ import json
 import os
 import typing
 from datetime import datetime
+from threading import Thread
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
 
@@ -20,13 +21,21 @@ class RabbitFileLogger:
             try:
                 message['type'] = LoggerMessageTypeEnum.INTEGRATION_EVENT.value
                 message['details']['event_body'] = json.loads(message['details']['event_body']) \
-                    if isinstance(message['details']['event_body'], str) else message['details']['event_body']
+                    if isinstance(message['details']['event_body'], str) or \
+                       isinstance(message['details']['event_body'], bytes) \
+                    else message['details']['event_body']
                 file_name = os.path.join(self.LOGS_FOLDER, message['details']['name'] + "_" + datetime.now().strftime(
                     "%Y-%m-%dT%H-%M-%S") + ".json")
-                with open(file_name, 'w') as json_file:
-                    json.dump(message, json_file)
+                t = Thread(target=self.save_to_file_async, args=(file_name, message))
+                t.start()
+                t.join()
             except Exception as e:
                 pass
+
+        def save_to_file_async(self, file_name, message):
+            json_file = open(file_name, 'w')
+            json.dump(message, json_file)
+            json_file.close()
 
     def __new__(self, **kwargs):
         if self._instance is None:

@@ -8,6 +8,7 @@ from FacebookDexter.Engine.Algorithms.RuleEvaluatorFactory import RuleEvaluatorF
 from FacebookDexter.Engine.Algorithms.RulesFactory import RulesFactory
 from FacebookDexter.Engine.MasterWorker.OrchestratorBuilder import OrchestratorBuilder
 from FacebookDexter.Engine.MasterWorker.RunStatus import RunStatus
+from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEntryModel import DexterJournalEntryModel
 from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import DexterEngineRunJournalEnum, \
@@ -144,6 +145,8 @@ class Orchestrator(OrchestratorBuilder):
 
     def __run_algorithm(self, search_query):
         try:
+            if not self.startup.dexter_config.date_stop:
+                self.startup.dexter_config.date_stop = datetime.now()
             for time_interval in self.startup.dexter_config.time_intervals:
                 time_interval_enum = DaysEnum(time_interval)
                 campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
