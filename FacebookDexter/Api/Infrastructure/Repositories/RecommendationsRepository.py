@@ -15,20 +15,22 @@ class RecommendationsRepository(object):
     collection_name = None
     ssh = None
     def __init__ (self, config: MongoConfig):
-        self.ssh = config.sshTunnel
-        mongoHost = config.mongoHost
-        mongoSSHUser = config.mongoSSHUser
-        mongoSSHPass = config.mongoSSHPass
-        remote_bind = (config.remoteIP, config.remotePort)
-        server = SSHTunnelForwarder(
-            (mongoHost, 22),
-            ssh_username = mongoSSHUser,
-            ssh_password = mongoSSHPass,
-            remote_bind_address = remote_bind
-            )
-        server.start()
-        self.client = pymongo.MongoClient(host='127.0.0.1', port=server.local_bind_port, username=config.mongoUser, password=config.mongoPass)
-
+        if (config.sshTunnel):
+            self.ssh = config.sshTunnel
+            mongoHost = config.mongoHost
+            mongoSSHUser = config.mongoSSHUser
+            mongoSSHPass = config.mongoSSHPass
+            remote_bind = (config.remoteIP, config.remotePort)
+            server = SSHTunnelForwarder(
+                (mongoHost, 22),
+                ssh_username = mongoSSHUser,
+                ssh_password = mongoSSHPass,
+                remote_bind_address = remote_bind
+                )
+            server.start()
+            self.client = pymongo.MongoClient(host='127.0.0.1', port=server.local_bind_port, username=config.mongoUser, password=config.mongoPass)
+        else:
+            self.client = pymongo.MongoClient(config.connectionString)
         self.database_name = config.recommendationDatabaseName
         self.collection_name = config.recommendationCollectionName
         self.database = self.client[self.database_name]
