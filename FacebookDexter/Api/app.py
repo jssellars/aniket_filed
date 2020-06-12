@@ -15,25 +15,26 @@ import requests
 
 app = Flask(__name__)
 CORS(app)
-#api = Api(app)
+# api = Api(app)
 
 mongoConfig = None
 recommendationRepository = None
 # Make the WSGI interface available at the top level so wfastcgi can get it.
 wsgi_app = app.wsgi_app
 
+
 @app.route('/')
-def hello():   
+def hello():
     return "Hello World!!!"
 
-@app.route('/GetRecommendationsPage', methods = ['POST'])
-def GetRecommendationsPage():
 
+@app.route('/GetRecommendationsPage', methods=['POST'])
+def GetRecommendationsPage():
     permittedFilters = ['campaign_id', 'channel', 'category', 'optimization_type', 'level', 'importance', 'confidence',
-                       'recommendation_type', 'source', 'structure_id', 'ad_account_id', 'search_term', 'parent_id']
+                        'recommendation_type', 'source', 'structure_id', 'ad_account_id', 'search_term', 'parent_id']
 
     permitted_sort_criteria = ['recommendation_type', 'optimization_type', 'created_at', 'importance', 'confidence']
-    data = request.get_json()        
+    data = request.get_json()
 
     pageNumber = data['PageNumber'] if 'PageNumber' in data else 1
     if (pageNumber is None):
@@ -41,23 +42,22 @@ def GetRecommendationsPage():
 
     pageSize = data['PageSize'] if 'PageSize' in data else 10
     if (pageSize is None):
-        pageSize = 10   
-
+        pageSize = 10
 
     filter = data['Filter'] if 'Filter' in data else None
 
     if filter is not None:
         channel = data['Filter']['channel'] if 'channel' in data['Filter'] else 'facebook'
     else:
-        channel='facebook'
+        channel = 'facebook'
 
     bad_filters = []
     if (filter is not None):
         if (isinstance(filter, dict) == False):
-             return 'invalid filter', 400
+            return 'invalid filter', 400
         for key in filter:
             if key not in permittedFilters:
-                return f"invalid filter criterion {key}", 400            
+                return f"invalid filter criterion {key}", 400
             if filter[key] == []:
                 bad_filters.append(key)
             if key in ['importance']:
@@ -65,11 +65,10 @@ def GetRecommendationsPage():
                 for value in filter[key]:
                     mappedValues.append(ImportanceMapper.get_importance_value(value))
                 filter[key] = mappedValues
-                
-    
+
         for key in bad_filters:
-            del filter[key]    
-    
+            del filter[key]
+
     excludedIds = data['ExcludedIds'] if 'ExcludedIds' in data else None
 
     sort = None
@@ -90,53 +89,57 @@ def GetRecommendationsPage():
                 mongoSort.append((key, 1))
             else:
                 mongoSort.append((key, -1))
-    filter['confidence'] = {'$gte' : 0.5 }
+    filter['confidence'] = {'$gte': 0.5}
 
-    try :
+    try:
         recommendationsList = recommendation_repository.get_recommendations_page(pageNumber, pageSize, channel, filter, mongoSort, excludedIds)
         response = make_response((json.dumps(recommendationsList)))
         response.headers['Content-Type'] = "application/json"
         return response
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
+
 
 @app.route('/ApplyRecommendation', methods=['PATCH'])
 def applyRecommendation():
     id = request.args.get('id')
     headers = request.headers
-    
+
     bearer = headers.get('HTTP_AUTHORIZATION')
     print(bearer)
     try:
         recommendation = recommendation_repository.get_recommendation_by_id(id)
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
 
     details = recommendation.get('applicationDetails', None)
     if (details is None):
         return 400, 'Unable to apply recommendation'
-    
+
     request_payload = details
-    request_header = { 'HTTP_AUTHORIZATION' : bearer }
+    request_header = {'HTTP_AUTHORIZATION': bearer}
     url = "https://dev.filed.com:42220/api/v1/"
     url += recommendation['level'] + '/'
-    url += recommendation['structureId']    
+    structure_id = recommendation['structureId']
+    url += structure_id
     try:
-        apply_request = requests.put(url, request_payload, headers=request_header);
-        if (apply_request.status_code == 200):
-            applieddRecommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
-            if (applieddRecommendation['status'] == RecommendationStatus.APPLIED.value):
+        apply_request = requests.put(url, request_payload, headers=request_header)
+        if apply_request.status_code == 200:
+            recommendation_repository.set_recommendation_statuses_by_structure_id(structure_id, RecommendationStatus.DISMISSED.value)
+            applied_recommendation = recommendation_repository.set_recommendation_status(id, RecommendationStatus.APPLIED.value)
+            if applied_recommendation['status'] == RecommendationStatus.APPLIED.value:
                 response = make_response({})
                 response.headers['Content-Type'] = "application/json"
                 return response
         else:
-            return 'unable to apply recommendation', 500            
+            return 'unable to apply recommendation', 500
 
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
+
 
 @app.route('/DismissRecommendation', methods=['PATCH'])
 def dismissRecommendation():
@@ -150,8 +153,9 @@ def dismissRecommendation():
         else:
             return 'unable to reject recommendation', 500
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
+
 
 @app.route('/GetRecommendation')
 def GetRecommendationById():
@@ -162,11 +166,12 @@ def GetRecommendationById():
         response.headers['Content-Type'] = "application/json"
         return response
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
 
+
 @app.route('/GetCampaigns')
-def GetCampaings():   
+def GetCampaings():
     try:
         adAcccountId = request.args.get('adAccountId')
         channel = request.args.get('channel')
@@ -175,8 +180,9 @@ def GetCampaings():
         response.headers['Content-Type'] = "application/json"
         return response
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
+
 
 @app.route('/GetRecommendations')
 def GetRecommendations():
@@ -189,7 +195,7 @@ def GetRecommendations():
         response.headers['Content-Type'] = "application/json"
         return response
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
 
 
@@ -201,12 +207,13 @@ def GetActionHistory():
         response = make_response(json.dumps(history))
         return response
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
+
 
 @app.route('/GetCountByCategory', methods=['POST'])
 def getCountsByCategory():
-    try:        
+    try:
         data = request.get_json()
         campaign_ids = data['campaignIds']
         channel = data['channel']
@@ -220,24 +227,23 @@ def getCountsByCategory():
         if (isinstance(channel, list)):
             count_filter['channel'] = {'$in': channel}
         else:
-            count_filter['channel'] = channel        
+            count_filter['channel'] = channel
 
         counts = recommendation_repository.get_counts(count_filter)
         response = make_response(json.dumps(counts))
         return response
     except Exception as e:
-        print (e)
+        print(e)
         return 500, 'An error occcured'
 
-if __name__ == '__main__':        
 
+if __name__ == '__main__':
     with open(path.abspath('Settings/JSON/app.settings.dev.json')) as appsettings:
         configDict = json.load(appsettings)
         mongoConfig = MongoConfig(configDict['mongoDatabase'])
         recommendation_repository = RecommendationsRepository(mongoConfig)
         app_config = configDict['flaskApp']
         flask_host = app_config['flask_host']
-        PORT = app_config['flask_port']        
-    
+        PORT = app_config['flask_port']
+
     app.run(flask_host, PORT)
-    

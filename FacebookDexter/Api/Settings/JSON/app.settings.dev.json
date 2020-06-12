@@ -1,7 +1,7 @@
 {
   "mongoDatabase": {
-    "sshTunnel": false,
-    "connectionString": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
+    "sshTunnel": true,
+    "connectionString": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
     "mongoUser": "mongo-admin",
     "mongoPass": "7YPbhiYTEtM=",
     "mongoHost": "18.130.129.216",
@@ -9,7 +9,7 @@
     "mongoSSHPass": "7YPbhiYTEtM=",
     "remoteIP": "192.168.2.91",
     "remotePort": 27017,
-    "recommendationDatabaseName": "dev_dexter_fuzzy_inference",
+    "recommendationDatabaseName": "dev_dexter_fuzzy_inference_recommendations",
     "recommendationCollectionName": "recommendations"
   },
   "flaskApp": {
