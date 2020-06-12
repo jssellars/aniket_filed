@@ -28,12 +28,6 @@ spec:
         - name: dev2-filed-potter-facebook-audiences-background-tasks
           image: ct.filed.com/dev2-filed-potter-facebook-audiences-background-tasks:v0.1
           imagePullPolicy: Always
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 80
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 5
         ports: 
         - containerPort : 47241
       imagePullSecrets:
