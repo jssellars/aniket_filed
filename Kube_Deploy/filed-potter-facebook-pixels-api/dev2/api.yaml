@@ -10,7 +10,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 1       
       maxUnavailable: 0
   template:
     metadata:
@@ -23,12 +23,12 @@ spec:
           - "dev2.filed.com"
         - ip: "192.168.2.91"
           hostnames:
-          - "dev2.mongodb"
+          - "dev2.mongodb"            
       imagePullSecrets:
-        - name: regcred
+      - name: regcred         
       containers:
-        - name: dev2-filed-potter-facebook-pixels-api
-          image: ct.filed.com/dev2-filed-potter-facebook-pixels-api:v0.1
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 47250
+      - name: dev2-filed-potter-facebook-pixels-api
+        image: ct.filed.com/dev2-filed-potter-facebook-pixels-api:v0.1
+        imagePullPolicy: Always
+        ports: 
+        - containerPort : 47250

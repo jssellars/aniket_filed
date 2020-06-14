@@ -23,5 +23,18 @@ spec:
       - name: prod-filed-potter-facebook-accounts-api
         image: ct.filed.com/prod-filed-potter-facebook-accounts-api:v0.1
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /api/v1/facebook-accounts/version
+            port: 47200
+          initialDelaySeconds: 5
+          periodSeconds: 5  
         ports: 
         - containerPort : 47200
+      #   volumeMounts:
+      #   - name: persistent-storage
+      #     mountPath: /app/Filed.Users.API/logs
+      # volumes:
+      # - name: persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: mss-logs-claim

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev2-mongodb-service
+  labels:
+    app: dev2-mongodb
+spec:
+  clusterIP: None
+  selector:
+    app: dev2-mongodb

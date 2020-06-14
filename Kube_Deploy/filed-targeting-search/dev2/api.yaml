@@ -23,12 +23,12 @@ spec:
           - "dev2.filed.com"
         - ip: "192.168.2.91"
           hostnames:
-          - "dev2.mongodb" 
+          - "dev2.mongodb"            
+      imagePullSecrets:
+      - name: regcred         
       containers:
-        - name: dev2-filed-targeting-search
-          image: ct.filed.com/dev2-filed-targeting-search:v0.1
-          imagePullPolicy: Always
+      - name: dev2-filed-targeting-search
+        image: ct.filed.com/dev2-filed-targeting-search:v0.1
+        imagePullPolicy: Always
         ports: 
         - containerPort : 47222
-      imagePullSecrets:
-        - name: regcred  

@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prod-filed-ad-preview
+  name: dev2-filed-dexter-api
 spec:
   selector:
     matchLabels:
-      run: prod-filed-ad-preview
-  replicas: 2
+      run: dev2-filed-dexter-api
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -15,13 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        run: prod-filed-ad-preview
+        run: dev2-filed-dexter-api
     spec:
       imagePullSecrets:
-      - name: regcred         
+      - name: regcred          
       containers:
-      - name: prod-filed-ad-preview
-        image: ct.filed.com/prod-filed-ad-preview:v0.1
+      - name: dev2-filed-dexter-api
+        image: ct.filed.com/dev2-filed-dexter-api:v0.1
         imagePullPolicy: Always
         # livenessProbe:
         #   httpGet:
@@ -30,11 +30,11 @@ spec:
         #   initialDelaySeconds: 5
         #   periodSeconds: 5  
         ports: 
-        - containerPort : 47221
+        - containerPort : 43700
         volumeMounts:
         - name: persistent-storage
           mountPath: /app/logs
       volumes:
       - name: persistent-storage
         persistentVolumeClaim:
-          claimName: prod-mss-logs-claim
+          claimName: dev2-mss-logs-claim
