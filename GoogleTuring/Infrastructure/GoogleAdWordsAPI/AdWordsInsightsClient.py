@@ -6,7 +6,7 @@ import pandas as pd
 from googleads import adwords
 
 from Core.Tools.QueryBuilder.QueryBuilderGoogleRequestParser import QueryBuilderGoogleRequestParser
-from Core.Web.GoogleAdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
+from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
 from GoogleTuring.Infrastructure.Mappings.AdWordsAPIInsightsMapper import AdWordsAPIInsightsMapper
 
 

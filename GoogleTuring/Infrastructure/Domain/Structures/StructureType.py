@@ -3,9 +3,9 @@ from Core.Tools.Misc.EnumerationBase import EnumerationBase
 
 class StructureType(EnumerationBase):
     AD = 'ad'
-    AD_GROUP = 'ad_group'
+    AD_GROUP = 'adgroup'
     CAMPAIGN = 'campaign'
-    AD_GROUP_KEYWORDS = 'ad_group_keywords'
+    AD_GROUP_KEYWORDS = 'keywords'
 
 
 LEVELS = [
@@ -17,7 +17,7 @@ LEVELS = [
 
 LEVEL_TO_ID = {
     StructureType.AD: 'ad_id',
-    StructureType.AD_GROUP: 'ad_group_id',
+    StructureType.AD_GROUP: 'adgroup_id',
     StructureType.CAMPAIGN: 'campaign_id',
     StructureType.AD_GROUP_KEYWORDS: 'keywords_id'
 }

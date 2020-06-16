@@ -1,0 +1,73 @@
+{
+  "rabbitmq": {
+    "consumer_name": "prod.bt.google.dexter.consumer",
+    "username": "eirjtnyh",
+    "password": "cAFjL8M2hdTULtKSa7RgLMwgBGKWt3FZ",
+    "hostname": "frizzy-dragonfly.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "eirjtnyh",
+    "exchanges": [
+      {
+        "name": "prod.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "prod.google.dexter.inbound",
+          "inbound_routing_key": "prod.google.dexter.inbound.key",
+          "outbound": "prod.google.dexter.outbound",
+          "outbound_routing_key": "prod.google.dexter.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "mongo": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "recommendations_database_name": "prod_google_dexter_fuzzy_inference_recommendations",
+    "recommendations_collection_name": "recommendations",
+    "journal_database_name": "prod_google_dexter_engine_run_journal",
+    "journal_collection_name": "dexter_journal",
+    "structures_database": "prod_google_turing_structures",
+    "insights_database": "prod_google_turing_insights",
+    "accounts_database": "prod_google_turing_accounts",
+    "accounts_collection_name": "google_accounts",
+    "logs_database": "prod_google_dexter_logs"
+  },
+  "external_services": {
+    "targeting_search": "https://targetingsearch.filed.com/interests/suggestions/"
+  },
+  "dexter_config": {
+    "min_results": 50,
+    "days_since_last_change": 3,
+    "recommendation_days_last_updated": 3,
+    "time_intervals": [
+      3,
+      7,
+      14,
+      30
+    ],
+    "date_stop": "2020-05-22"
+  },
+  "environment": "prod",
+  "api_name": "GoogleDexterBackgroundTasks",
+  "api_version": "1.0.0",
+  "service_name": "GoogleDexterBackgroundTasks",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "docker_filename": "filed-google-dexter-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "prod-elasticsearch",
+  "es_port": 9200
+}

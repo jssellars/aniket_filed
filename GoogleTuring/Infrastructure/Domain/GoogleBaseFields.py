@@ -10,9 +10,11 @@ BASE_FIELDS = [
     GoogleFieldsMetadata.all_conversions,
     GoogleFieldsMetadata.conversions,
     GoogleFieldsMetadata.conversion_value,
+    GoogleFieldsMetadata.cost_per_conversion,
     GoogleFieldsMetadata.clicks,
     GoogleFieldsMetadata.link_clicks,
     GoogleFieldsMetadata.leads,
     GoogleFieldsMetadata.purchases,
+    GoogleFieldsMetadata.purchase_value,
     GoogleFieldsMetadata.date
 ]

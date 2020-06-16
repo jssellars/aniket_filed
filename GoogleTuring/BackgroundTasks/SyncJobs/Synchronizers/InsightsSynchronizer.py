@@ -163,10 +163,10 @@ class InsightsSynchronizer(BaseSynchronizer):
         self._adwords_client.set_client_customer_id(self._account_id)
         report_downloader = self._adwords_client.get_report_downloader()
 
-        if self.__last_update_time:
-            start_date = self.__last_update_time
+        if self.__last_update_time and type(self.__last_update_time) == str:
+            start_date = datetime.strptime(self.__last_update_time, '%Y-%m-%d')
         else:
-            start_date = datetime.now() - relativedelta(months=3)
+            start_date = datetime.now() - relativedelta(months=1)
 
         end_date = datetime.now()
 
@@ -207,7 +207,7 @@ class InsightsSynchronizer(BaseSynchronizer):
                                                        report_downloader=report_downloader, report_name=report_name,
                                                        start_date=start_date, end_date=end_date)
 
-                        collection_name = insights_definition.level.value + '-none-' + action_breakdown.value
+                        collection_name = insights_definition.level.value + '_none_' + action_breakdown.value
                         insights_data_list.append((collection_name, df, filtered_fields, compound_fields))
                         insights_breakdown_type.append(
                             (insights_definition.breakdowns, insights_definition.breakdown_type))
@@ -239,7 +239,7 @@ class InsightsSynchronizer(BaseSynchronizer):
                                                                report_downloader=report_downloader,
                                                                report_name=report_name,
                                                                start_date=start_date, end_date=end_date)
-                                collection_name = level.value + '-' + breakdown.value + '-' + action_breakdown.value
+                                collection_name = level.value + '_' + breakdown.value + '_' + action_breakdown.value
                                 insights_data_list.append((collection_name, df, filtered_fields, compound_fields))
                                 insights_breakdown_type.append((breakdown, insights_definition.breakdown_type))
                             except Exception as e:
@@ -252,5 +252,4 @@ class InsightsSynchronizer(BaseSynchronizer):
                 self.__mongo_repository.update_locations_if_needed(df, breakdown, self._adwords_client)
 
             if not df.empty:
-                self.__mongo_repository.insert_insights_into_db(collection_name, df, filtered_fields, compound_fields,
-                                                                start_date, end_date)
+                self.__mongo_repository.insert_insights_into_db(collection_name, df, filtered_fields, compound_fields)

@@ -339,13 +339,13 @@ class GoogleFieldsMetadata:
                                                 field_name="AdGroupDesktopBidModifier",
                                                 field_type=GoogleFieldType.ATTRIBUTE)
 
-    ad_group_id = GoogleField(name="ad_group_id", field_name="AdGroupId", field_type=GoogleFieldType.ATTRIBUTE,
+    ad_group_id = GoogleField(name="adgroup_id", field_name="AdGroupId", field_type=GoogleFieldType.ATTRIBUTE,
                               conversion_function=id_to_string)
 
     ad_group_mobile_bid_modifier = GoogleField(name="AdGroupMobileBidModifier", field_name="AdGroupMobileBidModifier",
                                                field_type=GoogleFieldType.ATTRIBUTE)
 
-    ad_group_name = GoogleField(name="ad_group_name", field_name="AdGroupName", field_type=GoogleFieldType.ATTRIBUTE)
+    ad_group_name = GoogleField(name="adgroup_name", field_name="AdGroupName", field_type=GoogleFieldType.ATTRIBUTE)
 
     ad_group_tablet_bid_modifier = GoogleField(name="AdGroupTabletBidModifier", field_name="AdGroupTabletBidModifier",
                                                field_type=GoogleFieldType.ATTRIBUTE)
@@ -710,12 +710,16 @@ class GoogleFieldsMetadata:
                         join_condition=JoinCondition(compare_field=conversion_category_name, equal_to='Lead',
                                                      target_field=conversions))
 
+    conversion_value = GoogleField(name="conversion_value", field_name="ConversionValue",
+                                   field_type=GoogleFieldType.METRIC)
     purchases = GoogleField(name='purchases', join_condition=JoinCondition(compare_field=conversion_category_name,
                                                                            equal_to='Purchase/Sale',
                                                                            target_field=conversions))
 
-    conversion_value = GoogleField(name="conversion_value", field_name="ConversionValue",
-                                   field_type=GoogleFieldType.METRIC)
+    purchase_value = GoogleField(name='purchase_value',
+                                 join_condition=JoinCondition(compare_field=conversion_category_name,
+                                                              equal_to='Purchase/Sale',
+                                                              target_field=conversion_value))
 
     cost = GoogleField(name="cost", field_name="Cost", field_type=GoogleFieldType.METRIC,
                        conversion_function=money_conversion)
@@ -724,7 +728,7 @@ class GoogleFieldsMetadata:
                                           field_type=GoogleFieldType.METRIC,
                                           conversion_function=money_conversion)
 
-    cost_per_conversion = GoogleField(name="CostPerConversion", field_name="CostPerConversion",
+    cost_per_conversion = GoogleField(name="cost_per_conversion", field_name="CostPerConversion",
                                       field_type=GoogleFieldType.METRIC,
                                       conversion_function=money_conversion)
 
@@ -883,7 +887,7 @@ class GoogleFieldsMetadata:
                                                        field_name="ContentBudgetLostImpressionShare",
                                                        field_type=GoogleFieldType.METRIC)
 
-    impression_reach = GoogleField(name="ImpressionReach", field_name="ImpressionReach",
+    impression_reach = GoogleField(name="reach", field_name="ImpressionReach",
                                    field_type=GoogleFieldType.METRIC)
 
     invalid_click_rate = GoogleField(name="InvalidClickRate", field_name="InvalidClickRate",

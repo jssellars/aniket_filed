@@ -3,7 +3,7 @@ from datetime import datetime
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from Core.Web.GoogleAdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
+from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
 from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.StructuresSynchronizer import StructuresSynchronizer

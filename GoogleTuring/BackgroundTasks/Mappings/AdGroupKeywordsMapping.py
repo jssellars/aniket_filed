@@ -6,6 +6,7 @@ from zeep import helpers
 
 from GoogleTuring.BackgroundTasks.Mappings.StructureMapping import StructureMapping
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import GOOGLE_STATUS_MAPPING
+from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID, StructureType
 
 
 class AdGroupKeywordsMapping(StructureMapping):
@@ -16,27 +17,27 @@ class AdGroupKeywordsMapping(StructureMapping):
         self.__ad_group_details = ad_group_details
 
     def _set_structure_id(self):
-        self._structure_id = 'keywords_id'
+        self._structure_id = LEVEL_TO_ID[StructureType.AD_GROUP_KEYWORDS]
 
     def process(self):
         processed_entries = []
 
         for entry in self._entries:
             processed_entry = dict(business_owner_id=self._business_owner_id, account_id=self._account_id)
-            ad_group_id = entry['adGroupId']
-            processed_entry['ad_group_id'] = ad_group_id
+            ad_group_id = str(entry['adGroupId'])
+            processed_entry[LEVEL_TO_ID[StructureType.AD_GROUP]] = ad_group_id
 
             if ad_group_id in self.__ad_group_details:
                 ad_group_info = self.__ad_group_details[ad_group_id]
-                processed_entry['ad_group_name'] = ad_group_info['ad_group_name']
+                processed_entry['adgroup_name'] = ad_group_info['adgroup_name']
                 processed_entry['campaign_name'] = ad_group_info['campaign_name']
                 processed_entry['campaign_id'] = ad_group_info['campaign_id']
             else:
-                processed_entry['ad_group_name'] = None
+                processed_entry['adgroup_name'] = None
                 processed_entry['campaign_name'] = None
                 processed_entry['campaign_id'] = None
 
-            processed_entry[self._structure_id] = entry['criterion']['id']
+            processed_entry[self._structure_id] = str(entry['criterion']['id'])
             processed_entry['keywords'] = entry['criterion']['text']
             processed_entry['match_type'] = entry['criterion']['matchType']
             processed_entry['last_updated_at'] = datetime.now()
@@ -48,6 +49,10 @@ class AdGroupKeywordsMapping(StructureMapping):
             else:
                 # for negative criteria
                 processed_entry['status'] = GOOGLE_STATUS_MAPPING['ENABLED']
+
+            for key, value in processed_entry.items():
+                entry[key] = value
+
             processed_entry['details'] = entry
 
             processed_entry = helpers.serialize_object(processed_entry)

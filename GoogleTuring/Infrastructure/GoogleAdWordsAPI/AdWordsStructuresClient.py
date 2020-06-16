@@ -1,6 +1,6 @@
 from googleads import adwords
 
-from Core.Web.GoogleAdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
+from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType

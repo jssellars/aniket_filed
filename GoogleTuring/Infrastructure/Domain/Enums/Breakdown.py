@@ -5,7 +5,7 @@ from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFields
 
 class Breakdown(Enum):
     # age_range
-    AGE_RANGE = 'age_range'
+    AGE_RANGE = 'age'
 
     # gender
     GENDER = 'gender'

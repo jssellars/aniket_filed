@@ -4,7 +4,8 @@ from functools import reduce
 import pandas as pd
 
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import BREAKDOWN_TO_FIELD, DEFAULT_GEO_BREAKDOWN
+from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import BREAKDOWN_TO_FIELD, DEFAULT_GEO_BREAKDOWN, \
+    DEFAULT_TIME_BREAKDOWN_FIELD
 from GoogleTuring.Infrastructure.PersistanceLayer.MongoIdToNameCache import MongoIdToNameCache
 
 
@@ -43,7 +44,7 @@ class GoogleTuringInsightsMongoRepository(MongoRepositoryBase):
         self.add_many(locations_to_be_added)
         MongoIdToNameCache.update_id_to_location_cache(locations_to_be_added)
 
-    def insert_insights_into_db(self, collection_name, df, fields, compound_fields, start_date, end_date):
+    def insert_insights_into_db(self, collection_name, df, fields, compound_fields):
         def custom_concat(series):
             return reduce(lambda x, y: x + " " + y if x is not None and y is not None else None, series)
 
@@ -63,8 +64,8 @@ class GoogleTuringInsightsMongoRepository(MongoRepositoryBase):
             corresponding_field_names = list(map(lambda x: x.name, corresponding_fields))
             df[field_name] = df[corresponding_field_names].agg(custom_concat, axis=1)
 
-        df['start_date'] = start_date
-        df['end_date'] = end_date
+        df['date_start'] = df[DEFAULT_TIME_BREAKDOWN_FIELD.name]
+        df['date_stop'] = df[DEFAULT_TIME_BREAKDOWN_FIELD.name]
 
         extra_field_names = list(map(lambda x: x.name, extra_fields))
         df = df.drop(columns=extra_field_names)

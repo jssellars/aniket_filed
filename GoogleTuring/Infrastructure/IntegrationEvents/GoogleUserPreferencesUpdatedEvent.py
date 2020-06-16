@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class Customer:
     name: str = None
     id: int = None
-    google_id: str = None
+    google_id: int = None
 
 
 @dataclass

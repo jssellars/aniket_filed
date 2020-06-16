@@ -10,11 +10,11 @@ class UpdateStructureOperandMapper:
 
         if additional_info and level not in [StructureType.AD, StructureType.CAMPAIGN]:
             operand['xsi_type'] = 'BiddableAdGroupCriterion'
-            operand['adGroupId'] = additional_info['ad_group_id']
+            operand['adGroupId'] = additional_info['adgroup_id']
             operand['criterion'] = {}
             operand['criterion']['id'] = structure_id
         elif additional_info and level == StructureType.AD:
-            operand['adGroupId'] = additional_info['ad_group_id']
+            operand['adGroupId'] = additional_info['adgroup_id']
             operand['ad'] = {}
             operand['ad']['id'] = structure_id
         else:

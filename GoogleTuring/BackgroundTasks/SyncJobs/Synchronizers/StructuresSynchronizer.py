@@ -36,7 +36,7 @@ class StructuresSynchronizer(BaseSynchronizer):
             self.__mongo_repository.collection = level.value
             structure_mapping = structures_mapping_factory.get_structure_mapping(level=level,
                                                                                  business_owner_id=self._business_owner_id,
-                                                                                 account_id=self._account_id,
+                                                                                 account_id=str(self._account_id),
                                                                                  additional_info=additional_info)
             self.__mongo_repository.add_structures(structure_mapping)
             if level == StructureType.AD_GROUP:

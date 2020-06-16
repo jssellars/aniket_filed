@@ -3,7 +3,7 @@ from io import StringIO
 from googleads import adwords
 from yaml import safe_load, dump
 
-from Core.Web.GoogleAdWordsAPI.Enums.AdWordsServiceType import AdWordsServiceType
+from Core.Web.GoogleAdWordsAPI.AdWordsAPI.Enums.AdWordsServiceType import AdWordsServiceType
 
 
 class AdWordsBaseClient:

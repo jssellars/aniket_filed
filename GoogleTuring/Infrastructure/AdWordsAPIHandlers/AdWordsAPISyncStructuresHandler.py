@@ -2,7 +2,7 @@ from datetime import datetime
 
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Web.GoogleAdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
+from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
 from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.StructuresSynchronizer import StructuresSynchronizer
@@ -26,7 +26,7 @@ class AdWordsAPISyncStructuresHandler:
                                                               collection_name=startup.mongo_config[
                                                                   'accounts_collection_name'])
 
-        account_info = list(set([(customer.google_id, customer.name) for customer in request.customers]))
+        account_info = list(set([(str(customer.google_id), customer.name) for customer in request.customers]))
         bo_google_id = request.google_id
         bo_email_address = request.email_address
 
@@ -53,7 +53,7 @@ class AdWordsAPISyncStructuresHandler:
                 active_google_accounts}
             removed_customer_ids = list(set(client_customer_ids) - set(account_ids))
             mongo_repository.change_status_many(ids=removed_customer_ids, new_status=GoogleAccountStatus.REMOVED.value,
-                                                id_key="client_customer_id")
+                                                id_key="client_customer_id.google_id")
 
         mongo_structures_repository = GoogleTuringStructuresMongoRepository(client=mongo_conn_handler.client,
                                                                             database_name=startup.mongo_config[
