@@ -42,7 +42,8 @@ class RecommendationsRepository(object):
             {'$match': {
                 'ad_account_id': adAccountId,
                 'channel': channel,
-                'confidence': {'$gte': 0.5}
+                'confidence': {'$gte': 0.5},
+                'status': {'$nin': [RecommendationStatus.DISMISSED.value, RecommendationStatus.APPLIED.value]}
             }
             },
             {'$group': {
