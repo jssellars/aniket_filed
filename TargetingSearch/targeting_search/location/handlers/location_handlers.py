@@ -1,9 +1,12 @@
 import json
 from copy import deepcopy
+from queue import Queue
+from threading import Thread
+
+from django.core import serializers
 
 from algorithms.string_matching import match_strings
 from app_config.app_config import FACEBOOK_CONFIG
-from django.core import serializers
 from location.models import *
 from tools.facebook_worker import FacebookLocationsWorker
 
@@ -34,7 +37,10 @@ COUNTRY_GROUPS_LEGEND = {
 def serialize_country_groups(raw_results):
     results = []
     for result in raw_results:
-        result['country_codes'] = json.loads(result['country_codes'])
+        try:
+            result['country_codes'] = json.loads(result['country_codes'])
+        except Exception as e:
+            pass
         results.append(result)
     return results
 
@@ -153,18 +159,30 @@ def match_locations_handler(request):
 
 
 def search_location_handler(query_string):
-    limit = 5000
+    limit = 50
     worker = FacebookLocationsWorker(business_owner_facebook_id=FACEBOOK_CONFIG['business_owner_facebook_id'],
                                      facebook_config=FACEBOOK_CONFIG)
-    search_results = []
+    responses = []
+    threads = []
+    queue = Queue()
     for location_type in worker.__LOCATION_SEARCH_TYPES__:
-        try:
-            results = worker.search(query_string=query_string, location_types=[location_type], limit=limit)
-            if results:
-                search_results.extend(deepcopy(results))
-        except Exception as e:
-            raise e
-    return search_results
+        t = Thread(target=lambda q, arg1, arg2, arg3: q.put(worker.search(query_string=arg1,
+                                                                          location_types=[arg2],
+                                                                          limit=arg3)),
+                   args=(queue, query_string, location_type, limit))
+        threads.append(t)
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    if queue.not_empty:
+        responses = [entry
+                     for element in queue.queue
+                     for entry in element]
+    return responses
 
 
 def update_locations_handler():

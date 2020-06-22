@@ -29,22 +29,22 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "prod.filed.com",
+    "host": "35.176.246.229",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
-    "name": "Facebook.Potter.FacebookAccounts"
+    "username": "tempsa",
+    "password": "KoalaBearSplitsaStair",
+    "name": "Prod.Filed.Facebook.Potter.Accounts"
   },
   "mongo_database": {
     "ssh_tunnel": true,
     "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
-    "mongo_user": "mongo-admin",
-    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_user": "root",
+    "mongo_pass": "BlokeyWokeySystemChokey",
     "mongo_host": "18.130.129.216",
     "mongo_ssh_user": "mongo",
     "mongo_ssh_pass": "7YPbhiYTEtM=",
     "retry_writes": false,
-    "remote_ip": "192.168.2.91",
+    "remote_ip": "192.168.2.189",
     "remote_port": 27017,
     "insights_database_name": "prod_facebook_turing_insights",
     "structures_database_name": "prod_facebook_turing_structures"
@@ -56,8 +56,9 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47350,
-  "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
-  "debug_mode": true,
+  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
+  "jwt_secret_key_reports": "ko2VGB20fbBmKlN8UzIOAbp5wXEUIsw2vWsIm7LhICU5TdN8eDcVVWmNv5x67i+M3eWX8wfrgcf1dD9EoG8EMxWq5wPrlnIUh/X9aTAFuroyCfgyHobGuYYl2DtqWZe1",
+  "debug_mode": false,
   "docker_filename": "filed-facebook-turing-api",
   "logger_type": "elasticsearch_logger",
   "rabbit_logger_type": "rabbit_elasticsearch_logger",

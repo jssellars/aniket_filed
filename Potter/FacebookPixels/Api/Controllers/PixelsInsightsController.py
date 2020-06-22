@@ -9,6 +9,7 @@ from flask_restful import Resource
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMessageBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Potter.FacebookPixels.Api.Commands.PixelsInsightsCommand import PixelsInsightsCommand
 from Potter.FacebookPixels.Api.CommandsHandlers.PixelsInsightsCommandHandlers import PixelsInsightsCommandHandler
@@ -48,5 +49,6 @@ class PixelsInsightsEndpoint(Resource):
                                     description=str(e),
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())
-            response = json.dumps([])
+            response = Tools.create_error(e, code='POTTER_BAD_REQUEST')
+            response = json.dumps(response)
             return Response(response=response, status=400, mimetype='application/json')

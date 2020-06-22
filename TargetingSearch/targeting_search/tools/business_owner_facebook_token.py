@@ -2,7 +2,7 @@ import pymssql
 
 from app_config.app_config import DATABASE_CONFIG
 
-__GET_USER_TOKEN__ = """SELECT TOP(1) token FROM FacebookUserTokens WHERE FacebookUserTokens.user_id = '{user_id}'"""
+__GET_USER_TOKEN__ = """SELECT TOP(1) token FROM BusinessOwners WHERE BusinessOwners.facebook_id = '{user_id}'"""
 
 
 def get_user_token(business_owner_facebook_id=None):

@@ -3,7 +3,7 @@ import FacebookTuring.Api.Catalogs.Breakdowns.DeliveryBreakdowns
 import FacebookTuring.Api.Catalogs.Breakdowns.TimeBreakdowns
 from Core.Tools.Misc.ObjectSerializers import object_to_json, object_to_attribute_values_list
 from FacebookTuring.Api.Catalogs.Breakdowns.BreakdownsCombinations import BreakdownsCombinations
-from FacebookTuring.Api.Catalogs.Views.ViewMaster import ViewMaster
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewMaster import ViewMaster
 
 
 class AdsManagerCatalogsMetacolumnsDto:

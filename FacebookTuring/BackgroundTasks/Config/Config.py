@@ -51,11 +51,16 @@ class MongoConfig(BaseConfig):
 
     @property
     def connection_string(self):
-        connection_string = self.connection_string.substitute(password=self.password,
-                                                              host=self.host,
-                                                              port=self.port,
-                                                              database=self.name)
-        return connection_string
+        _connection_string = self.connection_string_url
+        try:
+            _connection_string = _connection_string.substitute(password=self.password,
+                                                               host=self.host,
+                                                               port=self.port,
+                                                               database=self.name)
+        except Exception as e:
+            pass
+
+        return _connection_string
 
 
 class ExternalServicesConfig(BaseConfig):

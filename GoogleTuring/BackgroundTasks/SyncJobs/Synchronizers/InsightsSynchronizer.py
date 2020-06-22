@@ -22,7 +22,7 @@ from GoogleTuring.Infrastructure.Domain.Insights.Levels.GoogleAdGroupInsightsDef
 from GoogleTuring.Infrastructure.Domain.Insights.Levels.GoogleAdInsighstDefinition import GoogleAdInsightsDefinition
 from GoogleTuring.Infrastructure.Domain.Insights.Levels.GoogleCampaignInsightsDefinition import \
     GoogleCampaignInsightsDefinition
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleTuringInsightsMongoRepository import \
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringInsightsMongoRepository import \
     GoogleTuringInsightsMongoRepository
 
 CHUNK_SIZE = 16 * 1024

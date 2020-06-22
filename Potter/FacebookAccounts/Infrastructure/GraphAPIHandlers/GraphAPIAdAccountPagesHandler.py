@@ -13,6 +13,8 @@ from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestBusi
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestClientPages import \
     GraphAPIRequestClientPages
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestOwnedPages import GraphAPIRequestOwnedPages
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestPromotePages import \
+    GraphAPIRequestPromotePages
 
 
 class GraphAPIAdAccountPagesHandler:
@@ -47,6 +49,13 @@ class GraphAPIAdAccountPagesHandler:
         response, _ = graph_api_client.call_facebook()
         client_pages = pages_mapping.load(response)
 
-        pages = owned_pages.pages + client_pages.pages
+        # get promoted pages
+        config.request = GraphAPIRequestPromotePages(api_version=startup.facebook_config.api_version,
+                                                     access_token=permanent_token,
+                                                     account_id=account_id)
+        response, _ = graph_api_client.call_facebook()
+        promote_pages = pages_mapping.load(response)
+
+        pages = owned_pages.pages + client_pages.pages + promote_pages.pages
 
         return pages

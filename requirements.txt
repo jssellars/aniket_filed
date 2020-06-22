@@ -63,3 +63,5 @@ schedule==0.6.0
 PyYAML==5.3
 CMRESHandler
 python-json-logger
+dnspython
+forex_python

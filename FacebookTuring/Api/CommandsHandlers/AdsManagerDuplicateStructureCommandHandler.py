@@ -150,7 +150,6 @@ class AdsManagerDuplicateStructureCommandHandler:
                                            collection_name=level)
         structure_id = getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
         repository.add_structure(level=Level(level), key_value=structure_id, document=structure)
-        repository.close()
 
     @staticmethod
     def __build_facebook_api_client_get_details_config(business_owner_permanent_token, facebook_id, fields):

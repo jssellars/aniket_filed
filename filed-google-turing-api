@@ -4,8 +4,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils && ap
 FROM build
 
 ARG STAGE
-ENV LISTEN_PORT 47350
-EXPOSE 47350
+ENV LISTEN_PORT 47550
+EXPOSE 47550
 ENV PYTHON_SOLUTION_PATH=''
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/GoogleTuring/Api/uwsgi.ini

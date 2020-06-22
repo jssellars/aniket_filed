@@ -47,9 +47,9 @@ class Startup(object):
         self.api_name = app_config['api_name']
         self.api_version = app_config['api_version']
         self.base_url = app_config['base_url']
-        self.port = app_config["port"]
-        self.jwt_secret_key = app_config["jwt_secret_key"]
-        self.debug_mode = app_config["debug_mode"]
+        self.port = app_config.get("port")
+        self.jwt_secret_key = app_config.get("jwt_secret_key")
+        self.debug_mode = app_config.get("debug_mode")
         self.docker_filename = app_config["docker_filename"]
         self.logger_type = app_config["logger_type"]
         self.rabbit_logger_type = app_config["rabbit_logger_type"]

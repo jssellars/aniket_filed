@@ -154,7 +154,7 @@ RULES_ADSET_REMOVE_AGE_GROUPS = [
              level=LevelEnum.ADGROUP,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=ROAS&metric_type=1&antecedent_type=8> has decreased by <id=1&value=null>% in the last "
+             template="Your <id=1&metric_name=ROAS&metric_type=1&antecedent_type=7> has decreased by <id=1&value=null> in the last "
                       "<id=1&time_interval=7> days for some of the age groups you are targeting. Dexter recommends "
                       "you stop targeting the "
                       "following age ranges <id=1&breakdown_values=null>.",

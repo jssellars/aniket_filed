@@ -38,4 +38,3 @@ def converter_dot_placeholder(obj, convert):
         new = obj.__class__(converter_dot_placeholder(v, convert) for v in obj)
     else:
         return obj
-    return new

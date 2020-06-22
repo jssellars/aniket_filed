@@ -7,11 +7,12 @@ class GraphAPIRequestBase:
     _api_version = "v5.0"
 
     def __init__(self, facebook_id=None, business_owner_permanent_token=None, fields=None, params=None,
-                 api_version=None, limit=None):
+                 filter_params=None, api_version=None, limit=None):
         self._facebook_id = facebook_id
         self.business_owner_permanent_token = business_owner_permanent_token
         self._fields = fields
         self._params = params
+        self._filter = filter_params
 
         self._graph_api_base_url = ""
 
@@ -49,6 +50,10 @@ class GraphAPIRequestBase:
                     graph_api_request += "&{key}={value}".format(key=key, value=json.dumps(value))
                 else:
                     graph_api_request += "&{key}={value}".format(key=key, value=value)
+
+        # Build filtering part of the FB Graph API request
+        if self._filter:
+            graph_api_request += "&filtering={value}".format(value=self._filter)
 
         #  Combine request components
         graph_api_request_other_params = Template(

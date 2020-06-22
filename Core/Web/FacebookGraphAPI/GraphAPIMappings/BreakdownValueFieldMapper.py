@@ -18,7 +18,7 @@ class BreakdownValueFieldMapper(FieldMapperBase):
         try:
             breakdown_values = [data[field_name] for field_name in self.facebook_field_names]
         except KeyError as key_err:
-            raise KeyError(str(key_err))
+            breakdown_values = []
         except Exception as e:
             raise NotImplementedError(str(e))
         field_value = ", ".join(breakdown_values)

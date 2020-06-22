@@ -1,3 +1,9 @@
+from copy import deepcopy
+
+from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.targetingsearch import TargetingSearch
 from facebook_business.api import FacebookAdsApi
 
@@ -31,6 +37,7 @@ class BaseFacebookWorker(object):
 
 
 class FacebookLanguagesWorker(BaseFacebookWorker):
+
     __MAXIMUM_RESULTS_NUMBER__ = int(1e6)
     __GET_ALL_LANGUAGES_PARAMETERS__ = {
         'q': '',
@@ -82,10 +89,12 @@ class FacebookLocationsWorker(BaseFacebookWorker):
             'location_types': location_types,
             'limit': limit
         }
+        try:
+            results = TargetingSearch.search(params=params)
 
-        results = TargetingSearch.search(params=params)
-
-        results = self._facebook_results_to_json(results)
+            results = self._facebook_results_to_json(results)
+        except Exception as e:
+            pass
 
         return results
 
@@ -127,10 +136,55 @@ class FacebookInterestsWorker(BaseFacebookWorker):
 
         params = {
             'interest_list': source_interests,
-            'type': 'adinterestsuggestion',
+            'type': TargetingSearch.TargetingSearchTypes.interest_suggestion,
             'limit': self.__MAXIMUM_RESULTS_NUMBER__
         }
 
         results = TargetingSearch.search(api=self._facebook_ads_api, params=params)
 
         return self._facebook_results_to_json(results)
+
+
+class MarketingRecommendationsWorker(BaseFacebookWorker):
+
+    def GetRecommendations(self, adAccountFacebookId, level):
+        adAccount = AdAccount(fbid=adAccountFacebookId)
+
+        if level.lower() == 'campaign':
+            rawRecommendationsFacebook = adAccount.get_campaigns(fields=[Campaign.Field.recommendations])
+        elif level.lower() == 'adset':
+            rawRecommendationsFacebook = adAccount.get_ad_sets(fields=[AdSet.Field.recommendations])
+        elif level.lower() == 'ad':
+            rawRecommendationsFacebook = adAccount.get_ads(fields=[Ad.Field.recommendations])
+        else:
+            raise ValueError('Invalid level provided. Please try again using on of: campaign, adset, or ad')
+
+        rawRecommendationsFacebook = self._facebook_results_to_json(rawRecommendationsFacebook)
+
+        mappedRecommendations = []
+        for rawRecommendationFacebook in rawRecommendationsFacebook:
+            mappedRecommendation = self._MapRecommendation(rawRecommendationFacebook)
+            if mappedRecommendation:
+                mappedRecommendations.append(deepcopy(mappedRecommendation))
+
+        return mappedRecommendations
+
+    @staticmethod
+    def _MapRecommendation(recommendationFacebook):
+        if 'recommendations' in recommendationFacebook.keys():
+            mappedRecommendation = {
+                'facebookId': recommendationFacebook['id'],
+                'recommendations': []
+            }
+            for recommendation in recommendationFacebook['recommendations']:
+                entry = {
+                    'title': recommendation.get('title', None),
+                    'message': recommendation.get('message', None),
+                    'importance': recommendation.get('importance', None),
+                    'confidence': recommendation.get('confidence', None),
+                    'blame_field': recommendation.get('blame_field', None)
+                }
+
+                mappedRecommendation['recommendations'].append(deepcopy(entry))
+
+            return mappedRecommendation

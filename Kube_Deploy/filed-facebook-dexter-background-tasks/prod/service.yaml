@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod-filed-facebook-dexter-background-tasks
+  labels:
+    run: prod-filed-facebook-dexter-background-tasks
+spec:
+  ports:
+    - port: 43701
+  selector:
+    run: prod-filed-facebook-dexter-background-tasks

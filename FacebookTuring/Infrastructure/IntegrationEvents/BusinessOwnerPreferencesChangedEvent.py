@@ -15,7 +15,7 @@ class AdAccountDetails:
     id: typing.AnyStr = None
     name: typing.AnyStr = None
     business_name: typing.AnyStr = None
-    business_id: typing.AnyStr = None
+    business_facebook_id: typing.AnyStr = None
 
 
 @dataclass

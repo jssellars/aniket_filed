@@ -54,7 +54,8 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                 MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
             }
         }
-        return self.get(query)
+        results = self.get(query)
+        return results
 
     def get_last_updated_accounts(self, business_owner_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         query = {
@@ -115,8 +116,6 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             entry[MiscFieldsEnum.account_id] = entry.pop(MiscFieldsEnum.id).split("_")[1]
             entry[MiscFieldsEnum.business_owner_id] = business_owner_id
             entry[MiscFieldsEnum.status] = StructureStatusEnum.ACTIVE.value
-            #  todo: replace to last 3 months after we are sure everything works.
-            #  It takes too long for 3months. Makes testing hard.
             entry[MiscFieldsEnum.last_synced_on] = (datetime.now() -
                                                     timedelta(days=MiscFieldsEnum.last_one_months))
             new_accounts.append(copy.deepcopy(entry))

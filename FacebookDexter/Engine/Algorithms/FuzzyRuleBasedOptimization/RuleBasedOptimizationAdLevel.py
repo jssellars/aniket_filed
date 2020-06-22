@@ -1,5 +1,7 @@
 import traceback
 import typing
+from queue import Queue
+from threading import Thread
 
 import numpy as np
 
@@ -12,6 +14,7 @@ from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.MetricCalculator import MetricCalculator
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
+from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 
 
 class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
@@ -34,14 +37,29 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
         recommendations = []
         for ad_id in lowest_25p_performing_ads:
             if self.is_available(ad_id):
-                recommendations += self.evaluate_pause_rules(facebook_id=ad_id,
-                                                             fuzzyfier_factory=self._fuzzyfier_factory)
-                recommendations += self.evaluate_decrease_budget_rules(facebook_id=ad_id,
-                                                                       fuzzyfier_factory=self._fuzzyfier_factory)
-                recommendations += self.evaluate_increase_budget_rules(facebook_id=ad_id,
-                                                                       fuzzyfier_factory=self._fuzzyfier_factory)
-                recommendations += self.evaluate_general_rules(facebook_id=ad_id,
-                                                               fuzzyfier_factory=self._fuzzyfier_factory)
+                que = Queue()
+
+                # TODO: refactor this
+                t1 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_general_rules(arg1, arg2)),
+                            args=(que, ad_id, self._fuzzyfier_factory))
+                t2 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_pause_rules(arg1, arg2)),
+                            args=(que, ad_id, self._fuzzyfier_factory))
+                t3 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_increase_budget_rules(arg1, arg2)),
+                            args=(que, ad_id, self._fuzzyfier_factory))
+                t4 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_decrease_budget_rules(arg1, arg2)),
+                            args=(que, ad_id, self._fuzzyfier_factory))
+
+                t_list = [t1, t2, t3, t4]
+
+                for t in t_list:
+                    t.start()
+
+                for t in t_list:
+                    t.join()
+
+                while not que.empty():
+                    recommendations += que.get()
+
         return recommendations
 
     def __load_ids(self):
@@ -51,15 +69,15 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
         if not ad_performance_time_range:
             ad_performance_time_range = self._time_interval
 
-        calculator = MetricCalculator()
-        calculator = calculator. \
-            set_level(LevelEnum.AD). \
-            set_metric(AvailableMetricEnum.CLICKS.value). \
-            set_repository(self._mongo_repository). \
-            set_date_stop(self._date_stop). \
-            set_time_interval(self._time_interval). \
-            set_breakdown_metadata(
-            BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
+        calculator = (MetricCalculator().
+                      set_level(LevelEnum.AD).
+                      set_metric(AvailableMetricEnum.CLICKS.value).
+                      set_repository(self._mongo_repository).
+                      set_date_stop(self._date_stop).
+                      set_time_interval(self._time_interval).
+                      set_debug_mode(self._debug).
+                      set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                               action_breakdown=ActionBreakdownEnum.NONE)))
 
         average_metric_values = [
             (ad_id, calculator.set_facebook_id(ad_id).compute_value(atype=AntecedentTypeEnum.VALUE,
@@ -70,26 +88,28 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
             sorted_values = sorted(average_metric_values, key=lambda x: x[1][0])
             lowest_25p_ad_ids = [value[0] for value in sorted_values][lowest_25p_slice]
         except TypeError as type_error:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="RuleBasedOptimizationCampaignLevel",
-                                    description=f"Cannot find lowest performing ads for {self.__adset_id}",
-                                    extra_data={
-                                        "facebook_id": self.__adset_id,
-                                        "config": self._dexter_config,
-                                        "error": traceback.format_exc()
-                                    })
-            self.get_logger().logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="RuleBasedOptimizationCampaignLevel",
+                                        description=f"Cannot find lowest performing ads for {self.__adset_id}",
+                                        extra_data={
+                                            "facebook_id": self.__adset_id,
+                                            "config": self._dexter_config,
+                                            "error": traceback.format_exc()
+                                        })
+                self.get_logger().logger.info(log)
             lowest_25p_ad_ids = []
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="RuleBasedOptimizationCampaignLevel",
-                                    description=f"Error finding lowest performing ads for {self.__adset_id}",
-                                    extra_data={
-                                        "facebook_id": self.__adset_id,
-                                        "config": self._dexter_config,
-                                        "error": traceback.format_exc()
-                                    })
-            self.get_logger().logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="RuleBasedOptimizationCampaignLevel",
+                                        description=f"Error finding lowest performing ads for {self.__adset_id}",
+                                        extra_data={
+                                            "facebook_id": self.__adset_id,
+                                            "config": self._dexter_config,
+                                            "error": traceback.format_exc()
+                                        })
+                self.get_logger().logger.info(log)
             raise e
 
         return lowest_25p_ad_ids

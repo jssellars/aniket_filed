@@ -11,7 +11,8 @@ from FacebookDexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEva
 class RuleEvaluator(RuleEvaluatorBuilder):
     OTHER_METRIC_TYPES = [MetricTypeEnum.AUDIENCE, MetricTypeEnum.CREATIVE,
                           MetricTypeEnum.PIXEL, MetricTypeEnum.INSIGHT_CATEGORICAL,
-                          MetricTypeEnum.PROSPECTING, MetricTypeEnum.STRUCTURE]
+                          MetricTypeEnum.PROSPECTING, MetricTypeEnum.STRUCTURE,
+                          MetricTypeEnum.NUMBER_OF_ADS]
 
     def evaluate(self) -> typing.List[typing.List[RuleEvaluatorData]]:
         # evaluate every antecedent for all possible breakdown values
@@ -45,10 +46,14 @@ class RuleEvaluator(RuleEvaluatorBuilder):
 
     def __split_evaluator_data_by_metric_type(self, evaluator_data: typing.Dict = None) -> typing.Dict:
         data = defaultdict(list)
+        # todo: remove try execpt
         for key, value in evaluator_data.items():
-            #  We need to use key-1 because antecedents is a list, index starts at ZERO and ids start at ONE
-            metric_type = self._rule.antecedents[key - 1].metric.type
-            data[metric_type] += value
+            try:
+                #  We need to use key-1 because antecedents is a list, index starts at ZERO and ids start at ONE
+                metric_type = self._rule.antecedents[key - 1].metric.type
+                data[metric_type] += value
+            except:
+                return defaultdict(list)
         return data
 
     @staticmethod

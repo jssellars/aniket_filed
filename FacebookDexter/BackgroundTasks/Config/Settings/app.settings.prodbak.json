@@ -1,0 +1,85 @@
+{
+  "rabbitmq": {
+    "consumer_name": "prodbak.bt.facebook.dexter.consumer",
+    "username": "eirjtnyh",
+    "password": "cAFjL8M2hdTULtKSa7RgLMwgBGKWt3FZ",
+    "hostname": "frizzy-dragonfly.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "eirjtnyh",
+    "exchanges": [
+      {
+        "name": "prod.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "prod.facebook.dexter.inbound",
+          "inbound_routing_key": "prod.facebook.dexter.inbound.key",
+          "outbound": "prod.facebook.dexter.outbound",
+          "outbound_routing_key": "prod.facebook.dexter.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "35.176.246.229",
+    "port": 1433,
+    "username": "tempsa",
+    "password": "KoalaBearSplitsaStair",
+    "name": "Prod.Filed.Facebook.Potter.Accounts"
+  },
+  "mongo": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "root",
+    "mongo_pass": "BlokeyWokeySystemChokey",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.189",
+    "remote_port": 27017,
+    "recommendations_database_name": "prod_dexter_fuzzy_inference_recommendations",
+    "recommendations_collection_name": "recommendations",
+    "journal_database_name": "prod_dexter_engine_run_journal",
+    "journal_collection_name": "dexter_journal",
+    "structures_database": "prod_facebook_turing_structures",
+    "insights_database": "prod_facebook_turing_insights",
+    "logs_database": "prod_facebook_dexter_logs"
+  },
+  "external_services": {
+    "targeting_search": "https://prod-api-facebook-potter-targetingsearch.filed.com/interests/suggestions/"
+  },
+  "dexter_config": {
+    "min_results": 50,
+    "days_since_last_change": 3,
+    "recommendation_days_last_updated": 3,
+    "time_intervals": [
+      3,
+      7,
+      14,
+      30
+    ],
+    "date_stop": null
+  },
+  "debug": false,
+  "environment": "prodbak",
+  "api_name": "FacebookDexterBackgroundTasks",
+  "api_version": "1.0.0",
+  "service_name": "FacebookDexterBackgroundTasks",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "docker_filename": "filed-facebook-dexter-background-tasks",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": null,
+  "es_port": null
+}

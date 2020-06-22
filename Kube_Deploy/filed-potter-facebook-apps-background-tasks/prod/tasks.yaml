@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-filed-potter-facebook-apps-background-tasks
+spec:
+  selector:
+    matchLabels:
+      run: prod-filed-potter-facebook-apps-background-tasks
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        run: prod-filed-potter-facebook-apps-background-tasks
+    spec:
+      hostAliases:
+        - ip: "192.168.5.223"
+          hostnames:
+            - "prod.filed.com"
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: prod-filed-potter-facebook-apps-background-tasks
+          image: ct.filed.com/prod-filed-potter-facebook-apps-background-tasks:v0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 47231
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /app/logs
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: prod-mss-logs-claim

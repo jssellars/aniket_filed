@@ -21,6 +21,8 @@ class FieldMapperBase:
 
     @staticmethod
     def _convert_to_float(value):
+        if value is None:
+            return value
         try:
             converted_value = ast.literal_eval(value)
         except:

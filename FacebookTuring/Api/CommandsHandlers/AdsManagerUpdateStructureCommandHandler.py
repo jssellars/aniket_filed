@@ -53,7 +53,6 @@ class AdsManagerUpdateStructureCommandHandler:
             structure_id = getattr(updated_structure,
                                    LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
             repository.add_structure(level=Level(level), key_value=structure_id, document=updated_structure)
-            repository.close()
         except Exception as e:
             raise e
 

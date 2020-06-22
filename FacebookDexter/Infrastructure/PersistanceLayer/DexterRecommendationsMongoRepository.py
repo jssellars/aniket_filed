@@ -71,7 +71,7 @@ class DexterRecommendationsMongoRepository(MongoRepositoryBase):
 
         return [result['recommendation_id'] for result in results]
 
-    def __deprecate_recommendations(self, recommendation_ids: typing.List[typing.AnyStr]) -> typing.NoReturn:
+    def deprecate_recommendations(self, recommendation_ids: typing.List[typing.AnyStr]) -> typing.NoReturn:
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -94,6 +94,16 @@ class DexterRecommendationsMongoRepository(MongoRepositoryBase):
         }
         self.update_many(query_filter, query)
 
+    def get_active_recommendations(self) -> typing.List:
+        query_filter = {
+                    'status': {
+                        MongoOperator.EQUALS.value: RecommendationStatusEnum.ACTIVE.value
+                    }
+        }
+        results = self.get(query_filter)
+
+        return results
+
     def save_recommendations(self, recommendations: typing.List[typing.Any],
                              time_interval: int = None) -> typing.NoReturn:
         self._database = self._client[self._config.recommendations_database_name]
@@ -107,7 +117,7 @@ class DexterRecommendationsMongoRepository(MongoRepositoryBase):
 
         # deprecate recommendations
         old_recommendations = self.__get_old_recommendations(date)
-        self.__deprecate_recommendations(old_recommendations)
+        self.deprecate_recommendations(old_recommendations)
 
         # add new recommendations
         new_recommendations_ids = set(recommendation_ids) - set(existing_recommendations)

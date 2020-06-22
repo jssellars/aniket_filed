@@ -49,6 +49,9 @@ class ActionFieldCondition:
         if self.field_value_map:
             self.field_value = self.field_value_map(data)
         try:
-            return self.filter_operator(data[self.field_name], self.field_value)
+            field = data.get(self.field_name, None)
+            if field:
+                return self.filter_operator(field, self.field_value)
+            return False
         except Exception as e:
             raise NotImplementedError(str(e))

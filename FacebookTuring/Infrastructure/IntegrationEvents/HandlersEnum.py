@@ -1,7 +1,10 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEventHandler import \
     BusinessOwnerPreferencesChangedEventHandler
+from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEventHandler import CampaignCreatedEventHandler
 
 
 class HandlersEnum(EnumerationBase):
     BUSINESS_OWNER_UPDATE_EVENT = BusinessOwnerPreferencesChangedEventHandler
+    BUSINESS_OWNER_CREATED_EVENT = BusinessOwnerPreferencesChangedEventHandler
+    CAMPAIGN_CREATED_EVENT = CampaignCreatedEventHandler

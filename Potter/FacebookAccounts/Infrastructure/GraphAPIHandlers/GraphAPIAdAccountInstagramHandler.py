@@ -11,6 +11,8 @@ from Potter.FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountIn
     GraphAPIAdAccountInstagramMapping
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestBusiness import GraphAPIRequestBusiness
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInstagram import GraphAPIRequestInstagram
+from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInstagramByAccountId import \
+    GraphAPIRequestInstagramByAccountId
 
 
 class GraphAPIAdAccountInstagramHandler:
@@ -29,13 +31,34 @@ class GraphAPIAdAccountInstagramHandler:
         response, _ = graph_api_client.call_facebook()
         business = business_mapping.load(response)
 
-        # get instagram accounts
+        # get business instagram accounts
         instagram_mapping = GraphAPIAdAccountInstagramMapping(GraphAPIInstagramDto)
         config.request = GraphAPIRequestInstagram(api_version=startup.facebook_config.api_version,
                                                   access_token=permanent_token,
                                                   business_id=business.id)
         graph_api_client.config = config
-        response, _ = graph_api_client.call_facebook()
-        instagram_accounts = instagram_mapping.load(response)
 
-        return instagram_accounts.ig_accounts
+        business_instagram_accounts = GraphAPIInstagramDto()
+        try:
+            response, _ = graph_api_client.call_facebook()
+            business_instagram_accounts = instagram_mapping.load(response)
+        except Exception as e:
+            pass
+
+        # get ad account instagram accounts
+        instagram_mapping = GraphAPIAdAccountInstagramMapping(GraphAPIInstagramDto)
+        config.request = GraphAPIRequestInstagramByAccountId(api_version=startup.facebook_config.api_version,
+                                                             access_token=permanent_token,
+                                                             account_id=account_id)
+        graph_api_client.config = config
+
+        ad_account_instagram_accounts = GraphAPIInstagramDto()
+        try:
+            response, _ = graph_api_client.call_facebook()
+            ad_account_instagram_accounts = instagram_mapping.load(response)
+        except Exception as e:
+            pass
+
+        response = business_instagram_accounts.ig_accounts + ad_account_instagram_accounts.ig_accounts
+
+        return response

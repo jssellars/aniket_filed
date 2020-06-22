@@ -7,7 +7,7 @@ from facebook_business.exceptions import FacebookRequestError
 
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from Core.Web.FacebookGraphAPI.Models.Field import Field
+from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSyncronizerBreakdownEnum
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields import INSIGHTS_SYNCRONIZER_FIELDS
@@ -64,9 +64,6 @@ class InsightsSyncronizer:
         self.__mongo_repository = mongo_repository
         return self
 
-    def close_database_connection(self):
-        self.__mongo_repository.close()
-
     @property
     def permanent_token(self) -> typing.AnyStr:
         if self.__permanent_token is None:
@@ -75,9 +72,9 @@ class InsightsSyncronizer:
         return self.__permanent_token
 
     def __get_fields(self) -> typing.List[typing.AnyStr]:
-        fields = [field.facebook_fields for field in self.__requested_fields]
+        fields = [field.facebook_fields for field in self.__requested_fields if field.field_type == FieldType.INSIGHT]
         fields = functools.reduce(operator.iconcat, fields, [])
-        return fields
+        return list(set(fields))
 
     def __get_breakdowns(self) -> typing.List[typing.AnyStr]:
         return self.breakdown.facebook_fields if self.breakdown.name != FieldsMetadata.breakdown_none.name else []

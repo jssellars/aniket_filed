@@ -1,6 +1,6 @@
 import copy
-import copy
 import typing
+import math
 from collections import defaultdict
 from threading import Thread
 
@@ -61,7 +61,7 @@ class Orchestrator:
         # for each BO for each ad account, start a structures sync thread and an insights sync thread
         for business_owner_id, business_owner_details in business_owners.items():
             tasks = list()
-            step = round(self.ACCOUNTS_PER_THREAD * len(business_owner_details))
+            step = math.ceil(self.ACCOUNTS_PER_THREAD * len(business_owner_details))
             for index in range(0, len(business_owner_details), step):
                 entry = business_owner_details[index:index + step]
                 tasks.append(Thread(target=sync,

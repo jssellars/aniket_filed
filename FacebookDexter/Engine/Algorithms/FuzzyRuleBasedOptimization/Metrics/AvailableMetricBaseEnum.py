@@ -33,3 +33,5 @@ class AvailableMetricBaseEnum(Enum):
     INTERESTS = MetricBase("interests", "Interests")
     PIXEL = MetricBase("pixel", "Pixel")
     PROSPECTING_CAMPAIGN = MetricBase("prospecting_campaign", "Prospecting campaign")
+    NUMBER_OF_ADS = MetricBase("number_of_ads", "Number of ads")
+    DUPLICATE_AD = MetricBase("duplicate_ad", "Duplicate ad")

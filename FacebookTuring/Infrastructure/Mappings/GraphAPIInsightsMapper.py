@@ -24,12 +24,17 @@ class GraphAPIInsightsMapper:
     def map_response(cls, requested_fields: typing.List[Field] = None, response: typing.List[typing.Dict] = None):
         mapped_response = []
         for data in response:
+            mapped_fields = []
             try:
                 mapped_fields = cls.map_field_all(requested_fields, data)
-            except:
-                mapped_fields = []
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                pass
 
             if mapped_fields:
+                # todo: fix this shit
+                mapped_fields = [field for field in mapped_fields if field is not None]
                 mapped_data = [dict(ChainMap(*entry)) for entry in itertools.product(*mapped_fields)]
                 mapped_response.extend(mapped_data)
         return mapped_response
@@ -43,21 +48,25 @@ class GraphAPIInsightsMapper:
         for index in range(len(requested_fields)):
             if requested_fields[index].field_type != FieldType.ACTION_BREAKDOWN:
                 if requested_fields[index].name == FieldsMetadata.results.name or \
-                        requested_fields[index].name == FieldsMetadata.cost_per_result.name:
+                        requested_fields[index].name == FieldsMetadata.cost_per_result.name or \
+                        requested_fields[index].name == FieldsMetadata.purchases_value.name:
                     facebook_results_field_value = map_objective_to_results_field_value(data)
                     field_filter = [ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                          operator=ActionFieldConditionOperatorEnum.LIKE,
                                                          field_value=facebook_results_field_value)]
-                    mapped_fields.append(
-                        requested_fields[index].mapper.set_filter(field_filter).map(data, requested_fields[index]))
+                    (mapped_fields.
+                     append(requested_fields[index].
+                            mapper.set_filter(field_filter).
+                            map(data, requested_fields[index])))
                 else:
-                    mapped_fields.append(requested_fields[index].mapper.map(data, requested_fields[index]))
+                    (mapped_fields.append(requested_fields[index].
+                                          mapper.map(data, requested_fields[index])))
         return mapped_fields
 
     @classmethod
     def __append_requested_action_breakdowns(cls, requested_fields: typing.List[Field]):
         action_breakdowns = [field for field in requested_fields
-                             if field.field_type == FieldType.ACTION_BREAKDOWN]
+                             if field is not None and field.field_type == FieldType.ACTION_BREAKDOWN]
         for index in range(len(requested_fields)):
             if requested_fields[index].field_type == FieldType.ACTION_INSIGHT:
                 requested_fields[index].requested_action_breakdowns.extend(action_breakdowns)

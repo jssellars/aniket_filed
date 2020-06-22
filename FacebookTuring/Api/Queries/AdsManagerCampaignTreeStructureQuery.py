@@ -64,7 +64,6 @@ class AdsManagerCampaignTreeStructureQuery:
         except Exception as e:
             raise e
 
-        repository.close()
         return tree
 
     @classmethod

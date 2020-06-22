@@ -1,4 +1,3 @@
-# todo: this handler needs refactoring after we introduce the generic table on the accounts page
 import copy
 import typing
 from datetime import datetime
@@ -45,20 +44,16 @@ class GraphAPIAdAccountInsightsHandler:
 
         graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=config)
         response, _ = graph_api_client.call_facebook()
-
-        return cls.__map_response(response, business_owner_facebook_id, permanent_token)
+        if isinstance(response, Exception):
+            raise response
+        return cls.__map_response(response)
 
     @classmethod
     def __map_response(cls,
-                       response: typing.List[typing.Any] = None,
-                       business_owner_facebook_id: typing.AnyStr = None,
-                       permanent_token: typing.AnyStr = None) -> typing.List[typing.Dict]:
+                       response: typing.List[typing.Any] = None) -> typing.List[typing.Dict]:
         for index, entry in enumerate(response):
             if not isinstance(entry, dict):
                 entry = Tools.convert_to_json(entry)
-
-            #  map number of campaigns
-            # entry = cls.__map_number_of_campaigns(entry, business_owner_facebook_id, permanent_token)
 
             # map business
             entry = cls.__map_business(entry)
@@ -103,21 +98,6 @@ class GraphAPIAdAccountInsightsHandler:
 
         return response
 
-    # todo: implement this if reaaaally is critical
-    # @classmethod
-    # def __map_number_of_campaigns(cls,
-    #                               response: typing.Dict,
-    #                               business_owner_facebook_id: typing.AnyStr,
-    #                               permanent_token: typing.AnyStr) -> typing.Dict:
-    #     url = cls.__build_get_campaigns_url(business_owner_facebook_id, permanent_token)
-    #     campaigns = HTTPRequestBase.loop_pages(response, url)
-    #     response["number_of_campaigns"] = len([c for c in campaigns if c["effective_status"] == "ACTIVE"])
-    #     return response
-
-    # @classmethod
-    # def __build_get_campaigns_url(cls, business_owner_facebook_id, permanent_token):
-    #     return ""
-
     @classmethod
     def __map_conversions(cls, response: typing.Dict) -> typing.Dict:
         response["conversions"] = None
@@ -136,7 +116,6 @@ class GraphAPIAdAccountInsightsHandler:
         else:
             actions = insights["actions"]
 
-        # todo: discuss with Chase how to define these metrics better
         response["conversions"] = sum(
             [float(entry["value"]) for entry in list(filter(lambda x: x["action_type"].find("omni") > -1, actions)) if
              entry["value"]])

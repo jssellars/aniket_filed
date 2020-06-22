@@ -2,7 +2,6 @@
 import os
 import sys
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
@@ -10,7 +9,7 @@ if path:
 else:
     sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
 # ====== END OF CONFIG SECTION ====== #
-
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Potter.FacebookAudiences.BackgroundTasks.Startup import startup, rabbit_logger, logger
 from Potter.FacebookAudiences.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum

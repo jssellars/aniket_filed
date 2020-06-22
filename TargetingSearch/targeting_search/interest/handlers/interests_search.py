@@ -1,5 +1,6 @@
-import requests
+import urllib.parse
 
+import requests
 from app_config.app_config import FACEBOOK_CONFIG
 from app_config.app_config import FACEBOOK_SEARCH_URL, SUGGEST_INTEREST_URL
 from tools.business_owner_facebook_token import get_user_token
@@ -8,7 +9,7 @@ from tools.business_owner_facebook_token import get_user_token
 def search_interests(search_input=None):
     if search_input is None:
         search_input = ''
-
+    search_input = urllib.parse.unquote(search_input)
     # Get user token
     token = get_user_token(FACEBOOK_CONFIG['business_owner_facebook_id'])
 
@@ -18,7 +19,8 @@ def search_interests(search_input=None):
                                      search_input=search_input,
                                      token=token)
     # Run search on FB   
-    results = requests.get(url).json()['data']
+    results = requests.get(url).json()
+    results = results.get('data', [])
     for index, _ in enumerate(results):
         results[index]['key'] = results[index]['id']
 
@@ -27,6 +29,8 @@ def search_interests(search_input=None):
 
 def suggest_interests(interests):
     if isinstance(interests, str):
+        interests = urllib.parse.unquote(interests)
+        interests = interests.replace('&', '')
         interests = [i.title() for i in interests.split(',')]
 
     token = get_user_token(FACEBOOK_CONFIG['business_owner_facebook_id'])
@@ -34,7 +38,9 @@ def suggest_interests(interests):
     url = SUGGEST_INTEREST_URL.format(api_version=FACEBOOK_CONFIG['api_version'],
                                       interests=interests,
                                       token=token)
-    results = requests.get(url).json()['data']
+
+    results = requests.get(url).json()
+    results = results.get('data', [])
     for index, _ in enumerate(results):
         results[index]['key'] = results[index]['id']
 

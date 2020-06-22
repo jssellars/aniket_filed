@@ -23,5 +23,6 @@ class OneToOneFieldMapper(FieldMapperBase):
         if field.name in self.__non_convertible_fields:
             field_value = data.get(self.facebook_field_name, None)
         else:
-            field_value = self._convert_to_float(data.get(self.facebook_field_name, None))
+            field_value = data.get(self.facebook_field_name, None)
+            field_value = self._convert_to_float(field_value)
         return [FieldMapperResult().set_field(field.name, field_value)]

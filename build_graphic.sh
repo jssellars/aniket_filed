@@ -32,7 +32,6 @@ declare -a services=(filed-ad-preview
                      filed-potter-facebook-campaigns-builder-api
                      filed-potter-facebook-pixels-api
                      filed-targeting-search
-                     filed-turing-api
                      filed-potter-facebook-accounts-background-tasks
                      filed-potter-facebook-audiences-background-tasks
                      filed-potter-facebook-pixels-background-tasks

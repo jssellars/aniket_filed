@@ -30,6 +30,7 @@ class PublishCampaignEndpoint(Resource):
             business_owner_id = extract_business_owner_facebook_id(get_jwt())
             permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
             campaigns = PublishCampaignCommandHandler.handle(request=request_json, permanent_token=permanent_token,
+                                                             business_owner_id=business_owner_id,
                                                              facebook_config=startup.facebook_config)
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,

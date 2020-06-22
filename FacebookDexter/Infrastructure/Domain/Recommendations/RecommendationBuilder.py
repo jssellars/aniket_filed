@@ -3,8 +3,11 @@ import typing
 from datetime import datetime
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
 from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME_ISO
 from FacebookDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionDetailsBuilder
+from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import GenderEnum
+from FacebookDexter.Infrastructure.Domain.Breakdowns import BreakdownEnum
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.Metric import MetricBase
@@ -65,14 +68,17 @@ class RecommendationBuilder:
                  facebook_config: typing.Any = None,
                  business_owner_id: typing.Any = None,
                  date_stop: typing.AnyStr = None,
-                 time_interval: DaysEnum = DaysEnum.MONTH):
+                 time_interval: DaysEnum = DaysEnum.MONTH,
+                 debug_mode=None):
         self.__mongo_repository = mongo_repository
         self.__structure_details = None
         self.__business_owner_repo_session = business_owner_repo_session
         self.__facebook_config = facebook_config
         self.__business_owner_id = business_owner_id
+        self.__use_alternative_template = False
         self._date_stop = date_stop
-        self._time_interval = time_interval
+        self.time_interval = time_interval
+        self.debug = debug_mode
 
         self.recommendation_id = None
         self.category = None
@@ -113,8 +119,8 @@ class RecommendationBuilder:
         self.set_rule_metadata(rule)
         self.set_optimization_type(optimization_type)
         self.set_metrics(rule.antecedents)
-        self.set_template(facebook_id, rule, rule_data, external_services)
         self.set_action_details(facebook_id, rule, rule_data)
+        self.set_template(facebook_id, rule, rule_data, external_services)
         self.set_confidence(rule_data)
         self.set_meta_information(facebook_id, rule.level)
         self.last_updated_at = datetime.now().strftime(DEFAULT_DATETIME_ISO)
@@ -151,6 +157,11 @@ class RecommendationBuilder:
         self.metrics = [MetricBase(antecedent.metric.name, antecedent.metric.display_name) for antecedent in
                         antecedents
                         if antecedent.metric.type == MetricTypeEnum.INSIGHT]
+
+        # TODO: make a default of this in the future, maybe?
+        if not self.metrics:
+            self.metrics = [MetricBase(AvailableMetricEnum.CPC.value.name, AvailableMetricEnum.CPC.value.display_name)]
+
         return self
 
     def set_template(self,
@@ -158,7 +169,14 @@ class RecommendationBuilder:
                      rule: RuleBase = None,
                      rule_data: typing.List[typing.List[RuleEvaluatorData]] = None,
                      external_services: typing.AnyStr = None):
-        breakdown_values = self.__build_action_details_value(rule_data)
+        breakdown_values = self.__build_action_details_value(rule_data=rule_data)
+        # FB has an UNKNOWN gender value. we need to remove it from the template, as you cannot directly specify
+        # it on FB
+        if rule.breakdown_metadata.breakdown == BreakdownEnum.GENDER:
+            breakdown_values = [value for value in breakdown_values if value != GenderEnum.UNKNOWN.value[0]]
+        elif rule.breakdown_metadata.breakdown == BreakdownEnum.PLACEMENT:
+            breakdown_values = [value.replace(", ", "-") for value in breakdown_values]
+
         self.template = (RecommendationTemplateBuilder(breakdown_values).
                          set_repository(self.__mongo_repository).
                          set_structure_id(facebook_id).
@@ -171,26 +189,38 @@ class RecommendationBuilder:
                          set_facebook_config(self.__facebook_config).
                          set_business_owner_id(self.__business_owner_id).
                          set_date_stop(self._date_stop).
-                         set_time_interval(self._time_interval).
-                         build_template(template=rule.template))
+                         set_time_interval(self.time_interval).
+                         set_debug_mode(self.debug))
+
+        if self.__use_alternative_template:
+            self.template = self.template.build_template(template=rule.alternative_template)
+        else:
+            self.template = self.template.build_template(template=rule.template)
+
         return self
 
     def set_action_details(self,
                            facebook_id: typing.AnyStr = None,
                            rule: RuleBase = None,
                            rule_data: typing.List[typing.List[RuleEvaluatorData]] = None) -> typing.Any:
-        action_details_builder = ActionDetailsBuilder()
+        action_details_builder = ActionDetailsBuilder(facebook_id=facebook_id,
+                                                      repository=self.__mongo_repository,
+                                                      time_interval=self.time_interval,
+                                                      debug=self.debug,
+                                                      date_stop=self._date_stop)
         value = self.__build_action_details_value(rule_data)
-        self.application_details = action_details_builder.build(action=rule.action,
-                                                                breakdown=rule.breakdown_metadata.breakdown,
-                                                                action_breakdown=rule.breakdown_metadata.action_breakdown,
-                                                                structure_details=self._structure_details(facebook_id,
-                                                                                                          rule.level),
-                                                                value=value)
+        self.application_details, self.__use_alternative_template = action_details_builder.build(action=rule.action,
+                                                                                                 breakdown=rule.breakdown_metadata.breakdown,
+                                                                                                 action_breakdown=rule.breakdown_metadata.action_breakdown,
+                                                                                                 structure_details=self._structure_details(
+                                                                                                     facebook_id=facebook_id,
+                                                                                                     level=rule.level),
+                                                                                                 value=value)
         return self
 
-    @staticmethod
-    def __build_action_details_value(rule_data: typing.List[typing.List[RuleEvaluatorData]]) -> typing.Any:
+    def __build_action_details_value(self,
+                                     rule_data: typing.List[typing.List[RuleEvaluatorData]] = None) -> \
+            typing.Union[typing.List[typing.AnyStr], typing.List[int]]:
         value = [data.breakdown_metadata.breakdown_value
                  for rule_data_entry in rule_data
                  for data in rule_data_entry
@@ -214,9 +244,12 @@ class RecommendationBuilder:
         return self
 
     def __set_id(self):
-        hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + \
-                     self.action_breakdown['name']
-        self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
+        try:
+            hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + \
+                         self.action_breakdown['name']
+            self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
+        except:
+            self.recommendation_id = None
 
     def to_dict(self):
         return object_to_json(self)

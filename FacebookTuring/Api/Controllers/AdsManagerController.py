@@ -7,6 +7,7 @@ from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Misc import snake_to_camelcase
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
@@ -162,8 +163,6 @@ class AdsManagerEndpoint(Resource):
                                     description=str(e),
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())
-            # todo: remove after testing
-            from Core.Web.FacebookGraphAPI.Tools import Tools
             error = Tools.create_error(e)
             return Response(response=json.dumps(error), status=400,
                             mimetype='application/json')

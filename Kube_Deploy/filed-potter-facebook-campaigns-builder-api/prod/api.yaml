@@ -10,7 +10,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1       
+      maxSurge: 1
       maxUnavailable: 0
   template:
     metadata:
@@ -21,6 +21,9 @@ spec:
         - ip: "192.168.5.223"
           hostnames:
             - "prod.filed.com"
+        - ip: "192.168.2.91"
+          hostnames:
+            - "prod.mongodb"
       imagePullSecrets:
         - name: regcred
       containers:

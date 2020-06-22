@@ -22,7 +22,13 @@ class CampaignMapping(MapperBase):
         if not isinstance(data, typing.MutableMapping):
             data = Tools.convert_to_json(data)
 
+        if not data:
+            return data
+
         data[MiscFieldsEnum.business_owner_facebook_id] = None
+        if GraphAPIInsightsFields.account_id in data.keys():
+            data[GraphAPIInsightsFields.account_id] = data.get(GraphAPIInsightsFields.account_id)
+
         if GraphAPIInsightsFields.name in data.keys():
             data[GraphAPIInsightsFields.campaign_name] = data.get(GraphAPIInsightsFields.name)
 

@@ -9,8 +9,6 @@ from Potter.FacebookAccounts.Api.Dtos.BusinessOwnerCreatedDto import BusinessOwn
 from Potter.FacebookAccounts.Api.Startup import startup, rabbit_logger
 from Potter.FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountHandler import GraphAPIAdAccountHandler
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
-    DeletePermissionsGraphAPIRequest
-from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
     ExchangeTemporaryTokenGraphAPIRequest
 from Potter.FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
     GeneratePermanentTokenGraphAPIRequest
@@ -119,19 +117,3 @@ class BusinessOwnerCreateCommandHandler:
             raise e
 
         return businesses
-
-
-class BusinessOwnerUpdateCommandHandler:
-    """TODO: Finish implementation after discussion with Sebastian + Vlad on how it is best to do this"""
-
-    @classmethod
-    def handle(cls, command):
-        try:
-            business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
-                command.facebook_id)
-            delete_permissions_url = DeletePermissionsGraphAPIRequest.generate_url(command.facebook_id,
-                                                                                   business_owner_permanent_token)
-
-            HTTPRequestBase.delete(delete_permissions_url)
-        except Exception as e:
-            raise e

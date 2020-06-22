@@ -167,6 +167,35 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.get(query, projection)
         return self.__encode_structure_details_to_bson(structures)
 
+    def get_all_structures_by_ad_account_id(self, level: Level = None, account_id: typing.AnyStr = None) -> \
+            typing.List[typing.Dict]:
+        self.set_collection(collection_name=level.value)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelToFacebookIdKeyMapping.ACCOUNT.value: {
+                        MongoOperator.EQUALS.value: account_id
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
+                                                    StructureStatusEnum.REMOVED.value,
+                                                    StructureStatusEnum.DEPRECATED.value]
+                    }
+                }
+            ]
+        }
+
+        projection = {
+            MiscFieldsEnum.details: MongoProjectionState.ON.value,
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        structures = self.get(query, projection)
+        structures = self.__encode_structure_details_to_bson(structures)
+        return [structure[MiscFieldsEnum.details] for structure in structures]
+
     @staticmethod
     def __encode_structure_details_to_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:
         for index in range(len(structures)):

@@ -32,7 +32,7 @@ class AdsManagerCatalogsInsightsReportByLevelDto:
         CampaignKeywordsPerformanceReport
     ]
 
-    ad_group = [
+    adgroup = [
         AdGroupPerformanceReport,
         AdGroupGenderPerformanceReport,
         AdGroupAgeRangePerformanceReport,

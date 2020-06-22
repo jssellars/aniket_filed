@@ -3,6 +3,7 @@ import traceback
 import typing
 from collections import defaultdict
 
+import numpy as np
 import requests
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
@@ -29,7 +30,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         "id": lambda x: int(x),
         "metric_count": lambda x: int(x),
         "value": lambda x: None,
-        "breakdown_values": lambda x: None
+        "breakdown_values": lambda x: None,
+        "display_metric_name": lambda x: int(x)
     }
 
     def __init__(self, breakdown_values: typing.List[typing.AnyStr] = None):
@@ -39,8 +41,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
     @property
     def __keyword_value_map(self):
         return {
-            'metric_name': lambda x: x.metric_name.value.display_name,
-            'value': lambda x: x.value,
+            'metric_name': lambda x: x.metric_name.value.display_name if x.display_metric_name else '',
+            'value': lambda x: x.value if x.value else None,
             'time_interval': lambda x: str(self._time_interval.value),
             'linguistic_variable': lambda x: LinguisticVariableEnum(x).name,
             'breakdown_values': lambda x: x.breakdown_values
@@ -58,22 +60,23 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                 keyword_id = int(keyword.split("&")[0].split("=")[1])
                 keyword_values = [x for x in keywords_values if x.id == keyword_id][0]
                 value = self.__get_value_for_keyword(keyword, keyword_values)
-                if not value or value == '0.0':
+                if value is None:
                     return None
-                template = template.replace("<" + keyword + ">", value)
+                template = template.replace("__" + keyword + "__", value)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="RecommendationTemplateBuilder",
-                                    description=f"Failed to compute keyword value for template {template}",
-                                    extra_data={
-                                        "error": traceback.format_exc()
-                                    })
-            self.logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="RecommendationTemplateBuilder",
+                                        description=f"Failed to compute keyword value for template {template}",
+                                        extra_data={
+                                            "error": traceback.format_exc()
+                                        })
+                self.logger.logger.info(log)
             raise e
         return template
 
     def __build_rule_keyword_templates(self, template: typing.AnyStr = None) -> typing.List[RuleTemplateKeyword]:
-        self._keywords = re.findall('<(.+?)>', template)
+        self._keywords = re.findall('__(.+?)__', template)
 
         if not self._keywords:
             return []
@@ -97,25 +100,29 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                     value = self.__find_suggested_interests(keyword)
                 elif keyword.metric_type == MetricTypeEnum.AUDIENCE:
                     value = self.__find_audience_size(keyword)
+                elif keyword.metric_type == MetricTypeEnum.DUPLICATE_AD:
+                    value = self.__find_best_performing_ad_name(keyword)
                 else:
                     value = ''
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                    if self._debug:
+                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                                name="RecommendationTemplateBuilder",
+                                                description=f"Failed to compute keyword value for "
+                                                            f"metric {keyword.metric_name.value.name}")
+                        self.logger.logger.info(log)
+            except Exception as e:
+                if self._debug:
+                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                             name="RecommendationTemplateBuilder",
                                             description=f"Failed to compute keyword value for "
-                                                        f"metric {keyword.metric_name.value.name}")
+                                                        f"metric {keyword.metric_name.value.name}",
+                                            extra_data={
+                                                "error": traceback.format_exc()
+                                            })
                     self.logger.logger.info(log)
-            except Exception as e:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="RecommendationTemplateBuilder",
-                                        description=f"Failed to compute keyword value for "
-                                                    f"metric {keyword.metric_name.value.name}",
-                                        extra_data={
-                                            "error": traceback.format_exc()
-                                        })
-                self.logger.logger.info(log)
                 raise e
 
-        keyword.value = str(value) if value is not None else ''
+        keyword.value = str(value) if value else ''
 
         return keyword
 
@@ -169,19 +176,18 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         return True
 
     def __find_insight_value(self, keyword: RuleTemplateKeyword = None):
-        mc = MetricCalculator()
-        mc = mc. \
-            set_facebook_id(self._structure_id). \
-            set_level(self._level). \
-            set_metric(keyword.metric_name.value). \
-            set_repository(self._repository). \
-            set_date_stop(self._date_stop). \
-            set_time_interval(keyword.time_interval). \
-            set_breakdown_metadata(
-            BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
+        mc = (MetricCalculator().
+              set_facebook_id(self._structure_id).
+              set_level(self._level).
+              set_metric(keyword.metric_name.value).
+              set_repository(self._repository).
+              set_date_stop(self._date_stop).
+              set_time_interval(keyword.time_interval).
+              set_debug_mode(self._debug).
+              set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE)))
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=keyword.time_interval)
 
-        if value:
+        if value is not None:
             value = abs(int(value))
 
         return value
@@ -201,26 +207,28 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             else:
                 return ''
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="RecommendationTemplateBuilder",
-                                    description="Failed to get interests from structure targeting.",
-                                    extra_data={
-                                        "error": traceback.format_exc()
-                                    })
-            self.logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="RecommendationTemplateBuilder",
+                                        description="Failed to get interests from structure targeting.",
+                                        extra_data={
+                                            "error": traceback.format_exc()
+                                        })
+                self.logger.logger.info(log)
             raise e
 
         self._external_services.targeting_search += ','.join(interests)
 
         response = requests.get(url=self._external_services.targeting_search)
         if response.status_code != 200:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="RecommendationTemplateBuilder",
-                                    description="Failed to get interests from structure targeting.",
-                                    extra_data={
-                                        "error": response.json()
-                                    })
-            self.logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="RecommendationTemplateBuilder",
+                                        description="Failed to get interests from structure targeting.",
+                                        extra_data={
+                                            "error": response.json()
+                                        })
+                self.logger.logger.info(log)
             return ''
 
         response = response.json()
@@ -239,18 +247,35 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         return value
 
     def __find_audience_size(self, keyword: RuleTemplateKeyword):
-        mc = MetricCalculator()
-        mc = mc. \
-            set_facebook_id(self._structure_id). \
-            set_level(self._level). \
-            set_metric(keyword.metric_name.value). \
-            set_repository(self._repository). \
-            set_business_owner_repo_session(self._business_owner_repo_session). \
-            set_facebook_config(self._facebook_config). \
-            set_business_owner_id(self._business_owner_id). \
-            set_date_stop(self._date_stop). \
-            set_breakdown_metadata(
-            BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE))
+        mc = (MetricCalculator().
+              set_facebook_id(self._structure_id).
+              set_level(self._level).
+              set_metric(keyword.metric_name.value).
+              set_repository(self._repository).
+              set_business_owner_repo_session(self._business_owner_repo_session).
+              set_facebook_config(self._facebook_config).
+              set_business_owner_id(self._business_owner_id).
+              set_date_stop(self._date_stop).
+              set_debug_mode(self._debug).
+              set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                       action_breakdown=ActionBreakdownEnum.NONE)))
         value, _ = mc.compute_value(atype=keyword.antecedent_type)
 
         return int(value)
+
+    def __find_best_performing_ad_name(self, keyword):
+        mc = (MetricCalculator().
+              set_facebook_id(self._structure_id).
+              set_level(self._level).
+              set_metric(keyword.metric_name.value).
+              set_repository(self._repository).
+              set_business_owner_repo_session(self._business_owner_repo_session).
+              set_facebook_config(self._facebook_config).
+              set_business_owner_id(self._business_owner_id).
+              set_date_stop(self._date_stop).
+              set_debug_mode(self._debug).
+              set_time_interval(self._time_interval).
+              set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                       action_breakdown=ActionBreakdownEnum.NONE)))
+        ad_id, ad_name = mc.compute_value(atype=keyword.antecedent_type)
+        return ad_name

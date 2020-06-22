@@ -5,7 +5,7 @@ from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import CAMPAI
     AD_GROUP_STRUCTURE_FIELDS, \
     AD_GROUP_CRITERIA_FIELDS
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType, LEVELS
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleTuringStructuresMongoRepository import \
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
 
 

@@ -1,8 +1,6 @@
-import json
-
 from django.http import HttpResponse
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 from location.handlers.location_handlers import *
 
 
@@ -12,7 +10,7 @@ def get_all(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(json.dumps({'results': results}), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200, content_type='application/json')
 
 
 def get_countries(request):
@@ -21,7 +19,8 @@ def get_countries(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': results}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200,
+                        content_type='application/json')
 
 
 def get_country_groups(request):
@@ -29,7 +28,7 @@ def get_country_groups(request):
         results = get_country_groups_handler()
     else:
         return HttpResponse(status=400)
-    return HttpResponse(JsonResponse({'results': results}, safe=False), status=200,
+    return HttpResponse(content=json.dumps({'results': results}), status=200,
                         content_type='application/json')
 
 
@@ -39,7 +38,7 @@ def get_regions(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(json.dumps({'results': results}), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200, content_type='application/json')
 
 
 def get_geo_markets(request):
@@ -48,7 +47,7 @@ def get_geo_markets(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': results}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200, content_type='application/json')
 
 
 def get_electoral_districts(request):
@@ -57,7 +56,7 @@ def get_electoral_districts(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': results}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200, content_type='application/json')
 
 
 @csrf_exempt
@@ -67,7 +66,7 @@ def search_location(request, query_string):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': results}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200, content_type='application/json')
 
 
 @csrf_exempt
@@ -77,7 +76,7 @@ def update_locations(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': errors}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': errors}), status=200, content_type='application/json')
 
 
 @csrf_exempt
@@ -87,7 +86,7 @@ def update_country_groups(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': errors}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': errors}), status=200, content_type='application/json')
 
 
 @csrf_exempt
@@ -97,4 +96,4 @@ def match_locations(request):
     else:
         return HttpResponse(status=400)
 
-    return HttpResponse(JsonResponse({'results': results}, safe=False), status=200, content_type='application/json')
+    return HttpResponse(content=json.dumps({'results': results}), status=200, content_type='application/json')

@@ -63,7 +63,10 @@ def flattenData(data):
     }
     for nodeData in data:
         if 'type' in nodeData.keys():
-            node_type = " ".join(nodeData['type'].title().split("_"))
+            if nodeData['type'] and isinstance(nodeData['type'], str):
+                node_type = " ".join(nodeData['type'].title().split("_"))
+            else:
+                node_type = ""
             if isinstance(nodeData['path'], list):
                 if node_type not in nodeData['path']:
                     nodeData['path'].insert(0, node_type)
@@ -72,7 +75,6 @@ def flattenData(data):
             # del nodeData['type']
 
         if node_type in extraNodes.keys():
-            print(extraNodes[node_type])
             node_type = extraNodes[node_type]
             nodeData['path'].insert(0, node_type)
 
@@ -85,13 +87,18 @@ def flattenData(data):
     return data
 
 
-def get_interests_tree_handler():
-    raw_results = json.loads(serializers.serialize('json', RawInterest.objects.all()))
+def get_interests_tree_handler(raw_interests=None):
+    if not raw_interests:
+        raw_results = json.loads(serializers.serialize('json', RawInterest.objects.all()))
+    else:
+        raw_results = raw_interests
     results = []
     for result in raw_results:
-        result = result['fields']
+        if 'fields' in result.keys():
+            result = result['fields']
         try:
-            result['path'] = json.loads(result['path'])
+            if isinstance(result['path'], str):
+                result['path'] = json.loads(result['path'])
         except KeyError:
             pass
         except TypeError:

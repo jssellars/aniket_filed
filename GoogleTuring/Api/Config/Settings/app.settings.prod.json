@@ -2,13 +2,13 @@
   "mongo_database": {
     "ssh_tunnel": true,
     "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
-    "mongo_user": "mongo-admin",
-    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_user": "root",
+    "mongo_pass": "BlokeyWokeySystemChokey",
     "mongo_host": "18.130.129.216",
     "mongo_ssh_user": "mongo",
     "mongo_ssh_pass": "7YPbhiYTEtM=",
     "retry_writes": false,
-    "remote_ip": "192.168.2.91",
+    "remote_ip": "192.168.2.189",
     "remote_port": 27017,
     "google_insights_database_name": "prod_google_turing_insights",
     "google_accounts_database_name": "prod_google_turing_accounts",
@@ -29,7 +29,7 @@
   "service_name": "GoogleTuringAPI",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
-  "port": 27182,
+  "port": 47550,
   "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
-  "debug_mode": true
+  "debug_mode": false
 }

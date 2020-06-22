@@ -34,10 +34,10 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
 # Version / Healthcheck
-healthcheck_controller = "{base_url}/turing/healthcheck".format(base_url=startup.base_url.lower())
+healthcheck_controller = "{base_url}/healthcheck".format(base_url=startup.base_url.lower())
 api.add_resource(HealthCheckEndpoint, healthcheck_controller)
 
-version_controller = "{base_url}/turing/version".format(base_url=startup.base_url.lower())
+version_controller = "{base_url}/version".format(base_url=startup.base_url.lower())
 api.add_resource(VersionEndpoint, version_controller)
 
 # Insights 

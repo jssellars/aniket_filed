@@ -8,6 +8,7 @@ from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizer import Ins
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import \
     InsightsSyncronizerBreakdownEnum, InsightsSyncronizerActionBreakdownEnum
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
+from FacebookTuring.BackgroundTasks.Startup import startup
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
@@ -69,8 +70,10 @@ def sync_structures(structures_repository: TuringMongoRepository = None,
         syncronizer = StructuresSyncronizer(business_owner_id=business_owner_id,
                                             account_id=account_id,
                                             level=level)
-        syncronizer.set_mongo_repository(structures_repository).run()
-        syncronizer.close_database_connection()
+        (syncronizer.
+         set_mongo_repository(structures_repository).
+         set_facebook_config(startup.facebook_config).
+         run())
 
 
 def sync_insights(insights_repository: TuringMongoRepository = None,
@@ -119,5 +122,3 @@ def sync_insights_base(syncronizer: InsightsSyncronizer = None,
             syncronizer.run()
 
             date_start = current_date_stop + NEXT_DAY
-
-    syncronizer.close_database_connection()

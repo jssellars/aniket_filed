@@ -21,7 +21,10 @@ class ObjectiveToResultsFieldValueEnum(EnumerationBase):
 
 def map_objective_to_results_field_value(data: typing.Dict = None):
     objective = data.get(GraphAPIInsightsFields.objective, None)
-    try:
-        return ObjectiveToResultsFieldValueEnum.get_enum_by_name(objective).value
-    except Exception as e:
-        raise e
+    if not objective:
+        return ""
+    results_field_value = ObjectiveToResultsFieldValueEnum.get_enum_by_name(objective)
+    if results_field_value:
+        return results_field_value.value
+    else:
+        return ""

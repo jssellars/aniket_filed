@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev2-filed-facebook-turing-background-tasks
+  labels:
+    run: dev2-filed-facebook-turing-background-tasks
+spec:
+  ports:
+    - port: 47351
+  selector:
+    run: dev2-filed-facebook-turing-background-tasks

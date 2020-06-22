@@ -155,7 +155,4 @@ class QueryBuilderFacebookRequestParser:
         self.__remove_structure_fields = True
 
     def map(self, name: typing.AnyStr) -> Field:
-        for field_name in dir(FieldsMetadata):
-            field = getattr(FieldsMetadata, field_name)
-            if isinstance(field, Field) and field.name == name:
-                return field
+        return getattr(FieldsMetadata, name, None)

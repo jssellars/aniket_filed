@@ -6,6 +6,8 @@ from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdGe
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdIncreaseBudget import \
     RULES_AD_INCREASE_BUDGET
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdPause import RULES_AD_PAUSE
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdSetCreateAds import \
+    RULES_ADSET_CREATE_ADS
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdSetDecreaseBudget import \
     RULES_ADSET_DECREASE_BUDGET
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdSetGeneral import RULES_ADSET_GENERAL
@@ -23,8 +25,10 @@ from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdSe
     RULES_ADSET_REMOVE_PLATFORM
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignCreateAudience import \
     RULES_CAMPAIGN_CREATE_AUDIENCE
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignDecreaseBudget import RULES_CAMPAIGN_DECREASE_BUDGET
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignGeneral import \
     RULES_CAMPAIGN_GENERAL
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignIncreaseBudget import RULES_CAMPAIGN_INCREASE_BUDGET
 from FacebookDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
@@ -36,11 +40,14 @@ class Rules:
               *RULES_ADSET_REMOVE_PLACEMENT,
               *RULES_ADSET_REMOVE_DEVICE,
               *RULES_ADSET_REMOVE_PLATFORM]
-    create = [*RULES_CAMPAIGN_CREATE_AUDIENCE]
+    create = [*RULES_CAMPAIGN_CREATE_AUDIENCE,
+              *RULES_ADSET_CREATE_ADS]
     pause = [*RULES_AD_PAUSE]
-    decrease_budget = [*RULES_ADSET_DECREASE_BUDGET,
+    decrease_budget = [*RULES_CAMPAIGN_DECREASE_BUDGET,
+                       *RULES_ADSET_DECREASE_BUDGET,
                        *RULES_AD_DECREASE_BUDGET]
-    increase_budget = [*RULES_ADSET_INCREASE_BUDGET,
+    increase_budget = [*RULES_CAMPAIGN_INCREASE_BUDGET,
+                       *RULES_ADSET_INCREASE_BUDGET,
                        *RULES_AD_INCREASE_BUDGET]
     general = [*RULES_CAMPAIGN_GENERAL,
                *RULES_ADSET_GENERAL,

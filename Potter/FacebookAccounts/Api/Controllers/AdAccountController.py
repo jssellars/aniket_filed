@@ -7,6 +7,7 @@ from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Potter.FacebookAccounts.Api.Commands.AdAccountInsightsCommand import AdAccountInsightsCommand
 from Potter.FacebookAccounts.Api.Mappings.AdAccountInsightsCommandMapping import AdAccountInsightsCommandMapping
@@ -121,5 +122,6 @@ class AdAccountInsightsEndpoint(Resource):
                                     description=str(e),
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())
-            response = json.dumps({"message": f"Failed to retrieve insights. Error {str(e)}"})
+            response = Tools.create_error(e, 'POTTER_FACEBOOK_ACCOUNTS_BAD_REQUEST')
+            response = json.dumps(response)
             return Response(response=response, status=400, mimetype='application/json')

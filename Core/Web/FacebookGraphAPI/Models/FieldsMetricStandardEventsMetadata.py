@@ -1040,8 +1040,8 @@ class FieldsMetricStandardEventsMetadata:
                             facebook_fields=[GraphAPIInsightsFields.action_values],
                             mapper=ActionFieldMapper(
                                 field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
-                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.purchases)]),
+                                                                   operator=ActionFieldConditionOperatorEnum.LIKE,
+                                                                   field_value_map=None)]),
                             action_breakdowns=[GraphAPIInsightsFields.action_type],
                             field_type=FieldType.ACTION_INSIGHT)
     mobile_app_purchases_value = Field(name='mobile_app_purchases_value',

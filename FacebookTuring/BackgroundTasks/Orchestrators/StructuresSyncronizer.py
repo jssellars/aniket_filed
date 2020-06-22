@@ -6,9 +6,12 @@ from time import sleep
 from facebook_business.exceptions import FacebookRequestError
 
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from FacebookTuring.BackgroundTasks.Startup import startup
-from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
+from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -29,6 +32,7 @@ class StructuresSyncronizer:
         self.__ad_account_id = "act_" + self.account_id
         self.__permanent_token = None
         self.__mongo_repository = None
+        self.__facebook_config = None
 
     def run(self) -> typing.NoReturn:
         try:
@@ -39,18 +43,13 @@ class StructuresSyncronizer:
             if not fields:
                 return
 
-            structures_response, _ = GraphAPIInsightsHandler.get_structures_base(permanent_token=self.permanent_token,
-                                                                                 ad_account_id=self.__ad_account_id,
-                                                                                 level=self.level.value,
-                                                                                 fields=self.__get_fields(
-                                                                                     fields.structure_fields))
-
-            # map Facebook structure to domain model
-            mapping = StructureMapping.get(self.level.value)
-            structures = mapping.load(structures_response, many=True)
+            structures_response = self.__sync(permanent_token=self.permanent_token,
+                                              level=self.level,
+                                              account_id=self.__ad_account_id,
+                                              fields=fields.get_structure_fields())
 
             # set business owner id
-            structures = self.__set_business_owner_id(structures, self.business_owner_id)
+            structures = self.__set_business_owner_id(structures_response, self.business_owner_id)
 
             # insert structures
             self.__mongo_repository.add_structure_many(self.account_id, self.level, structures)
@@ -60,12 +59,59 @@ class StructuresSyncronizer:
         except Exception as e:
             raise e
 
+    def __sync(self,
+               level: Level = None,
+               account_id: typing.AnyStr = None,
+               permanent_token: typing.AnyStr = None,
+               fields: typing.List[typing.AnyStr] = None) -> typing.NoReturn:
+
+        # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
+        _ = GraphAPISdkBase(self.__facebook_config, permanent_token)
+
+        try:
+            graph_api_client = GraphAPIClientBase(permanent_token)
+            graph_api_client.config = self.build_get_structure_config(permanent_token=permanent_token,
+                                                                      level=level.value,
+                                                                      ad_account_id=account_id,
+                                                                      fields=fields)
+            structures, _ = graph_api_client.call_facebook()
+            if isinstance(structures, Exception):
+                raise structures
+
+            # Map Facebook structure to domain model
+            mapping = StructureMapping.get(level.value)
+            structures = mapping.load(structures, many=True)
+        except Exception as e:
+            raise e
+
+        return structures
+
+    def build_get_structure_config(self,
+                                   permanent_token: typing.AnyStr = None,
+                                   level: typing.AnyStr = None,
+                                   ad_account_id: typing.AnyStr = None,
+                                   fields: typing.List[typing.AnyStr] = None,
+                                   filter_params: typing.List[typing.Dict] = None) -> GraphAPIClientBaseConfig:
+        get_structure_config = GraphAPIClientBaseConfig()
+        get_structure_config.try_partial_requests = True
+        get_structure_config.fields = fields
+        get_structure_config.required_field = 'id'
+        level = level + "s"  # todo: find a better way to get the endpoint level for multiple actors by ad account
+        get_structure_config.request = GraphAPIRequestStructures(facebook_id=ad_account_id,
+                                                                 business_owner_permanent_token=permanent_token,
+                                                                 level=level,
+                                                                 fields=fields,
+                                                                 filter_params=filter_params)
+
+        return get_structure_config
+
     def set_mongo_repository(self, mongo_repository: TuringMongoRepository = None) -> typing.Any:
         self.__mongo_repository = mongo_repository
         return self
 
-    def close_database_connection(self):
-        self.__mongo_repository.close()
+    def set_facebook_config(self, facebook_config=None):
+        self.__facebook_config = facebook_config
+        return self
 
     @property
     def permanent_token(self) -> typing.AnyStr:

@@ -1,7 +1,6 @@
 import typing
 from datetime import datetime
 
-from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME
 from FacebookDexter.Infrastructure.Domain.Breakdowns import BreakdownMetadata
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
@@ -25,6 +24,7 @@ class MetricCalculatorBuilder:
         self._business_owner_repo_session = None
         self._date_stop = datetime.now()
         self._time_interval = None
+        self._debug = None
 
     def set_fuzzyfier_factory(self, fuzzyfier_factory: typing.Any) -> typing.Any:
         self._fuzzyfier_factory = fuzzyfier_factory
@@ -68,4 +68,8 @@ class MetricCalculatorBuilder:
 
     def set_time_interval(self, time_interval: DaysEnum = None) -> typing.Any:
         self._time_interval = time_interval
+        return self
+
+    def set_debug_mode(self, debug):
+        self._debug = debug
         return self

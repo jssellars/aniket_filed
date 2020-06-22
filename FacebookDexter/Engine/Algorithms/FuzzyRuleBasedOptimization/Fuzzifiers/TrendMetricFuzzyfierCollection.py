@@ -15,6 +15,16 @@ DECREASING_LINEAR_PARAMS = {
     "b": 0.0
 }
 
+INCREASING_LINEAR_PARAMS_CPM = {
+    "a": 16 / (7 * np.pi),
+    "b": -(1 / 7)
+}
+
+DECREASING_LINEAR_PARAMS_CPM = {
+    "a": -16 / (7 * np.pi),
+    "b": -(1 / 7)
+}
+
 TREND_METRIC_FUZZYFIER_COLLECTION = [
     Fuzzyfier(metric_name=AvailableMetricEnum.CPC.value.name,
               linguistic_levels=[LinguisticVariable(LinguisticVariableEnum.DECREASING,
@@ -23,9 +33,9 @@ TREND_METRIC_FUZZYFIER_COLLECTION = [
                                                     LinearMembershipFunction(**INCREASING_LINEAR_PARAMS))]),
     Fuzzyfier(metric_name=AvailableMetricEnum.CPM.value.name,
               linguistic_levels=[LinguisticVariable(LinguisticVariableEnum.DECREASING,
-                                                    LinearMembershipFunction(**DECREASING_LINEAR_PARAMS)),
+                                                    LinearMembershipFunction(**DECREASING_LINEAR_PARAMS_CPM)),
                                  LinguisticVariable(LinguisticVariableEnum.INCREASING,
-                                                    LinearMembershipFunction(**INCREASING_LINEAR_PARAMS))]),
+                                                    LinearMembershipFunction(**INCREASING_LINEAR_PARAMS_CPM))]),
     Fuzzyfier(metric_name=AvailableMetricEnum.CTR.value.name,
               linguistic_levels=[LinguisticVariable(LinguisticVariableEnum.DECREASING,
                                                     LinearMembershipFunction(**DECREASING_LINEAR_PARAMS)),

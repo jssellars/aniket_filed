@@ -6,28 +6,33 @@ spec:
   selector:
     matchLabels:
       run: prod-filed-potter-facebook-accounts-background-tasks
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1       
+      maxSurge: 1
       maxUnavailable: 0
   template:
     metadata:
       labels:
         run: prod-filed-potter-facebook-accounts-background-tasks
     spec:
-      containers:
-      - name: prod-filed-potter-facebook-accounts-background-tasks
-        image: ct.filed.com/prod-filed-potter-facebook-accounts-background-tasks:v0.1
-        imagePullPolicy: Always
-        # livenessProbe:
-        #   httpGet:
-        #     path: /
-        #     port: 80
-        #   initialDelaySeconds: 5
-        #   periodSeconds: 5  
-        ports: 
-        - containerPort : 42201
+      hostAliases:
+        - ip: "192.168.5.223"
+          hostnames:
+            - "prod.filed.com"
       imagePullSecrets:
-        - name: regcred  
+        - name: regcred
+      containers:
+        - name: prod-filed-potter-facebook-accounts-background-tasks
+          image: ct.filed.com/prod-filed-potter-facebook-accounts-background-tasks:v0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 42201
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /app/logs
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: prod-mss-logs-claim

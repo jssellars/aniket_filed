@@ -29,11 +29,11 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "prod.filed.com",
+    "host": "35.176.246.229",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
-    "name": "Facebook.Potter.FacebookAccounts"
+    "username": "tempsa",
+    "password": "KoalaBearSplitsaStair",
+    "name": "Prod.Filed.Facebook.Potter.Accounts"
   },
   "environment": "prod",
   "api_name": "FacebookPixels",

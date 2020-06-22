@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-    name: prod-mongodb-storage
+  name: prod-mongodb-storage
 spec:
   capacity:
     storage: 20Gi
@@ -15,9 +15,9 @@ spec:
   nodeAffinity:
     required:
       nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-            - mongodb-node
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - mongodb-node
 ---

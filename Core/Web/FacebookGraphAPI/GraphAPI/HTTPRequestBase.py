@@ -63,7 +63,7 @@ class HTTPRequestBase(object):
                         response.extend(page['data'])
             except Exception as e:
                 # TODO: Log error and continue. This is a common error when looping through all the pages
-                print(e)
+                pass
         return response, summary
 
     @staticmethod

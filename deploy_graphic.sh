@@ -18,11 +18,11 @@ declare -a services_api=(filed-ad-preview
                          filed-facebook-turing-api)
 
 declare -a services_tasks=(filed-potter-facebook-accounts-background-tasks
+                           filed-potter-facebook-apps-background-tasks
                            filed-potter-facebook-audiences-background-tasks
                            filed-potter-facebook-pixels-background-tasks
                            filed-facebook-dexter-background-tasks
-                           filed-facebook-turing-background-tasks
-                           filed-potter-facebook-apps-background-tasks)
+                           filed-facebook-turing-background-tasks)
 
 HEIGHT=20
 WIDTH=100
@@ -98,7 +98,7 @@ case $CHOICE in
             do
             echo -e  "=> ${GREEN}Begin deployment of : ${api}${NC}"
             echo -e  "=> ${RED}Deleting previous deployment...${NC}"
-            kubectl delete -f Kube_Deploy/${asks}/prod/api.yaml
+            kubectl delete -f Kube_Deploy/${tasks}/prod/api.yaml
             echo -e  "=> ${YELLOW}Apply new deployment...${NC}"
             kubectl apply -f Kube_Deploy/${tasks}/prod/api.yaml
             echo -e  "=> ${GREEN}PROD environment deployment completed ! Check for errors...${NC}"

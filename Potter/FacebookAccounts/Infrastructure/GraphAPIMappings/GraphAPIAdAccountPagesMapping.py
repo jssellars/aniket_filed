@@ -18,6 +18,8 @@ class GraphAPIAdAccountPagesMapping(MapperBase):
             pages = data.pop("owned_pages")["data"]
         elif "client_pages" in data.keys():
             pages = data.pop("client_pages")["data"]
+        elif "promote_pages" in data.keys():
+            pages = data.pop("promote_pages")["data"]
         else:
             pages = []
 

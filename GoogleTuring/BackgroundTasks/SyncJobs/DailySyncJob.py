@@ -7,7 +7,7 @@ from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseCl
 from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.StructuresSynchronizer import StructuresSynchronizer
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleBusinessOwnerMongoRepository import \
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoRepository import \
     GoogleBusinessOwnerMongoRepository
 
 
@@ -61,5 +61,3 @@ def daily_sync_job():
                                                     mongo_conn_handler=mongo_conn_handler)
         insight_synchronizer.synchronize()
         set_update_time(account_id, mongo_conn_handler)
-
-    mongo_conn_handler.close()

@@ -1,4 +1,4 @@
-from GoogleTuring.Infrastructure.PersistanceLayer.MongoIdToNameCache import MongoIdToNameCache
+from GoogleTuring.Infrastructure.PersistenceLayer.MongoIdToNameCache import MongoIdToNameCache
 
 
 def id_to_string(x):

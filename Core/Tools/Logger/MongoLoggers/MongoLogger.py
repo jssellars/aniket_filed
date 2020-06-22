@@ -21,6 +21,6 @@ class MongoLogger:
         if self._instance is None:
             self._instance = super(MongoLogger, self).__new__(self)
 
-            self.logger = MongoLogger.Logger(repository, database_name)
+        self.logger = MongoLogger.Logger(repository, database_name)
 
         return self._instance

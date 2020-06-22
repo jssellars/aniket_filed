@@ -14,8 +14,9 @@ class RuleTemplateKeyword:
     metric_name: Metric = None
     metric_type: MetricTypeEnum = None
     antecedent_type: AntecedentTypeEnum = None
-    time_interval: DaysEnum = None
+    time_interval: DaysEnum = DaysEnum.THREE
     linguistic_variable: LinguisticVariableEnum = None
     metric_count: int = 0
     value: typing.AnyStr = None
     breakdown_values: typing.List[typing.AnyStr] = None
+    display_metric_name: int = 1

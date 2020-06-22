@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: prod-filed-dexter-api
+  name: prod-filed-facebook-dexter-api
   labels:
-    run: prod-filed-dexter-api
+    run: prod-filed-facebook-dexter-api
 spec:
   ports:
   - port: 43700
   selector:
-    run: prod-filed-dexter-api
+    run: prod-filed-facebook-dexter-api

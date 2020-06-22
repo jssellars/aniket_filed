@@ -37,7 +37,7 @@
   },
   "mongo": {
     "ssh_tunnel": true,
-    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "connection_string": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -47,7 +47,7 @@
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
     "recommendations_database_name": "dev_dexter_fuzzy_inference_recommendations",
-    "recommendations_collection_name": "recommendations",
+    "recommendations_collection_name": "recommendations_20200616T135000",
     "journal_database_name": "dev_dexter_engine_run_journal",
     "journal_collection_name": "dexter_journal",
     "structures_database": "dev_facebook_turing_structures",
@@ -61,9 +61,15 @@
     "min_results": 0,
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
-    "time_intervals": [30],
-    "date_stop": null
+    "time_intervals": [
+      3,
+      7,
+      14,
+      30
+    ],
+    "date_stop": "2020-06-11"
   },
+  "debug": false,
   "environment": "dev",
   "api_name": "FacebookDexterBackgroundTasks",
   "api_version": "1.0.0",

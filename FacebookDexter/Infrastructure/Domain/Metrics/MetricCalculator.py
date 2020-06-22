@@ -3,6 +3,7 @@ import random
 import traceback
 import typing
 from datetime import datetime, timedelta
+from functools import lru_cache
 
 import numpy as np
 from facebook_business.adobjects.ad import Ad
@@ -12,6 +13,7 @@ from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessage
 from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.TimeBucketWeightingMethods.TimeBucketWeightingBySpend import \
     time_bucket_weighting_by_spend
@@ -27,6 +29,7 @@ from FacebookDexter.Infrastructure.FuzzyEngine.FuzzySets.FuzzySets import Lingui
 
 
 class MetricCalculator(MetricCalculatorBuilder):
+    __MAX_CACHE_SIZE = 2048
 
     def __init__(self):
         super().__init__()
@@ -54,7 +57,7 @@ class MetricCalculator(MetricCalculatorBuilder):
 
     @property
     def _logger(self):
-        if self.__logger is None and self._repository is not None:
+        if self.__logger is None or self._repository is not None:
             self.__logger = MongoLogger(repository=self._repository,
                                         database_name=self._repository.config.logs_database, )
         return self.__logger
@@ -77,7 +80,9 @@ class MetricCalculator(MetricCalculatorBuilder):
                 (AntecedentTypeEnum.VALUE, MetricTypeEnum.PIXEL): self.has_pixel,
                 (AntecedentTypeEnum.VALUE, MetricTypeEnum.CREATIVE): self.has_over_20p_text,
                 (AntecedentTypeEnum.VALUE, MetricTypeEnum.PROSPECTING): self.is_prospecting_campaign,
-                (AntecedentTypeEnum.VALUE, MetricTypeEnum.INSIGHT_CATEGORICAL): self.categorical_value
+                (AntecedentTypeEnum.VALUE, MetricTypeEnum.INSIGHT_CATEGORICAL): self.categorical_value,
+                (AntecedentTypeEnum.VALUE, MetricTypeEnum.NUMBER_OF_ADS): self.number_of_ads_per_adset,
+                (AntecedentTypeEnum.VALUE, MetricTypeEnum.DUPLICATE_AD): self.duplicate_best_performing_ad,
             }
 
         return self.__calculator
@@ -91,38 +96,44 @@ class MetricCalculator(MetricCalculatorBuilder):
         except TypeError:
             date_start = date_stop - timedelta(days=time_interval.value)
         except Exception:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description=f"Failed to process date start and date stop for "
-                                                f"time interval {time_interval}.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description=f"Failed to process date start and date stop for "
+                                                    f"time interval {time_interval}.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             date_start = date_stop
 
         calculator = self.calculator.get((atype, self._metric.type), None)
 
         if calculator is None:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Invalid antecedent and metric type combination.",
-                                    extra_data={"state": self.__current_state()})
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Invalid antecedent and metric type combination.",
+                                        extra_data={"state": self.__current_state()})
+                self._logger.logger.info(log)
             return None, None
 
         try:
-            result = calculator(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
+            result = calculator(date_start.strftime(DEFAULT_DATETIME),
+                                date_stop.strftime(DEFAULT_DATETIME),
+                                metric=self._metric,
+                                facebook_id=self._facebook_id)
         except Exception:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Other calculator exception.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Other calculator exception.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             return None, None
 
         if not isinstance(result, list) and not isinstance(result, tuple):
@@ -145,14 +156,15 @@ class MetricCalculator(MetricCalculatorBuilder):
                                                                      breakdown=breakdown,
                                                                      action_breakdown=action_breakdown)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Failed to get breakdown values.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Failed to get breakdown values.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             raise e
 
         if breakdown_values:
@@ -172,8 +184,9 @@ class MetricCalculator(MetricCalculatorBuilder):
         return [AggregatorEnum.SUM.value([entry[metric.name] for metric in self._metric.denominator]) for entry in
                 data]
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def audience_size(self, *args, **kwargs) -> typing.Any:
-        audience_details = self.structure_value()
+        structure_details = self._repository.get_structure_details(self._facebook_id, self._level)
 
         permanent_token = BusinessOwnerRepository(self._business_owner_repo_session).get_permanent_token(
             self._business_owner_id)
@@ -183,22 +196,31 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         try:
             ad_account = AdAccount(fbid=ad_account_id)
-            # TODO: add optimization_goal value from structure_details
-            audience_size_estimate = ad_account.get_delivery_estimate(params={'targeting_spec': audience_details})
+            targeting_spec = structure_details.get('targeting', None)
+            optimization_goal = structure_details.get('optimization_goal', None)
+            if targeting_spec is not None and optimization_goal is not None:
+                response = ad_account.get_delivery_estimate(fields=['estimate_mau'],
+                                                            params={'targeting_spec': targeting_spec,
+                                                                    'optimization_goal': optimization_goal})
+                response = Tools.convert_to_json(response)
+                audience_size_estimate = response.get('estimate_mau', None)
+            else:
+                audience_size_estimate = None
         except Exception as e:
             audience_size_estimate = None
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Failed to get audience size.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Failed to get audience size.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
 
         return audience_size_estimate
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def has_pixel(self, *args, **kwargs) -> typing.Any:
         permanent_token = BusinessOwnerRepository(self._business_owner_repo_session).get_permanent_token(
             self._business_owner_id)
@@ -211,18 +233,19 @@ class MetricCalculator(MetricCalculatorBuilder):
             pixels = ad_account.get_ads_pixels()
         except Exception as e:
             pixels = []
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Failed to get pixels.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Failed to get pixels.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
 
         return len(pixels) > 0
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def has_over_20p_text(self, *args, **kwargs):
         structure_details = self._repository.get_structure_details(key_value=self._facebook_id, level=self._level)
         text_overlay_rec_codes = [1942017, 1942018, 1942019]
@@ -232,6 +255,7 @@ class MetricCalculator(MetricCalculatorBuilder):
                     return True
         return False
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def structure_value(self, *args, **kwargs) -> typing.Any:
         structure_details = self._repository.get_structure_details(key_value=self._facebook_id, level=self._level)
         return structure_details.get(self._metric.name)
@@ -250,6 +274,7 @@ class MetricCalculator(MetricCalculatorBuilder):
 
         return True
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def is_prospecting_campaign(self, *args, **kwargs) -> bool:
         if self._level == LevelEnum.CAMPAIGN:
             structure_id = self._repository.get_adset_id_by_campaign_id(key_value=self._facebook_id)
@@ -278,14 +303,15 @@ class MetricCalculator(MetricCalculatorBuilder):
             else:
                 return False
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Failed to get interests from structure targeting.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Failed to get interests from structure targeting.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             return False
 
     def values(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.List[float]:
@@ -295,13 +321,14 @@ class MetricCalculator(MetricCalculatorBuilder):
         denominator = self.__compute_denominator_values(data=data)
 
         if len(numerator) != len(denominator):
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Numerator and denominator data mismatch.",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Numerator and denominator data mismatch.",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
 
             raise ValueError("Numerator and denominator data mismatch.")
 
@@ -328,19 +355,22 @@ class MetricCalculator(MetricCalculatorBuilder):
             else:
                 return self._metric.multiplier * aggregated_numerator
         except Exception:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Failed to compute aggregated metric value",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Failed to compute aggregated metric value",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
 
-    def aggregated_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> float:
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
+    def aggregated_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         data = self.__get_metrics_values(date_start=date_start, date_stop=date_stop)
         return self.__compute_aggregated_value(data)
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def categorical_value(self, *args, **kwargs) -> typing.AnyStr:
         date_stop = self._date_stop
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
@@ -350,14 +380,15 @@ class MetricCalculator(MetricCalculatorBuilder):
         value = data[-1].get(self._metric.name, None) if data else None
 
         if value is None:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Categorical value is none",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "values": data
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Categorical value is none",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "values": data
+                                        })
+                self._logger.logger.info(log)
 
         return value
 
@@ -381,7 +412,9 @@ class MetricCalculator(MetricCalculatorBuilder):
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
         return max(data) if data else None
 
-    def trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.Union[typing.NoReturn, float]:
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
+    def trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> typing.Union[
+        typing.NoReturn, float]:
         _date_start = datetime.strptime(date_start, DEFAULT_DATETIME)
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
         current_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
@@ -403,32 +436,34 @@ class MetricCalculator(MetricCalculatorBuilder):
                     slopes.append(np.arctan2(dy, dt))
                 else:
                     slopes.append(None)
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                            name="MetricCalculator",
-                                            description=f"Time bucket for interval {time_bucket.value} is None.",
-                                            extra_data={
-                                                "state": self.__current_state()
-                                            })
-                    self._logger.logger.info(log)
+                    if self._debug:
+                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                                name="MetricCalculator",
+                                                description=f"Time bucket for interval {time_bucket.value} is None.",
+                                                extra_data={
+                                                    "state": self.__current_state()
+                                                })
+                        self._logger.logger.info(log)
 
         trend = self.__compute_resultant_slope(slopes)
 
         return trend
 
-    def weighted_trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> float:
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
+    def weighted_trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         _date_start = datetime.strptime(date_start, DEFAULT_DATETIME)
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
         current_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
 
-        mc = MetricCalculator()
-        mc = mc. \
-            set_facebook_id(self._facebook_id). \
-            set_level(self._level). \
-            set_metric(AvailableMetricEnum.AVERAGE_SPEND.value). \
-            set_repository(self._repository). \
-            set_date_stop(self._date_stop). \
-            set_time_interval(self._time_interval). \
-            set_breakdown_metadata(self._breakdown_metadata)
+        mc = (MetricCalculator().
+              set_facebook_id(self._facebook_id).
+              set_level(self._level).
+              set_metric(AvailableMetricEnum.AVERAGE_SPEND.value).
+              set_repository(self._repository).
+              set_date_stop(self._date_stop).
+              set_time_interval(self._time_interval).
+              set_debug_mode(self._debug).
+              set_breakdown_metadata(self._breakdown_metadata))
 
         # todo: change to max_interval --> 3 months
         max_spend, _ = mc.compute_value(AntecedentTypeEnum.VALUE, self._time_interval)
@@ -452,13 +487,14 @@ class MetricCalculator(MetricCalculatorBuilder):
                         slopes.append(slope)
                     else:
                         slopes.append(None)
-                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                                name="MetricCalculator",
-                                                description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                extra_data={
-                                                    "state": self.__current_state()
-                                                })
-                        self._logger.logger.info(log)
+                        if self._debug:
+                            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                                    name="MetricCalculator",
+                                                    description=f"Time bucket for interval {time_bucket.value} is None.",
+                                                    extra_data={
+                                                        "state": self.__current_state()
+                                                    })
+                            self._logger.logger.info(log)
 
         trend = self.__compute_resultant_slope(slopes)
 
@@ -474,14 +510,15 @@ class MetricCalculator(MetricCalculatorBuilder):
             try:
                 resultant_slope = np.arctan2(mean_unit_vector[1], mean_unit_vector[0])
             except Exception:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to compute resultant slope.",
-                                        extra_data={
-                                            "state": self.__current_state(),
-                                            "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                if self._debug:
+                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                            name="MetricCalculator",
+                                            description="Failed to compute resultant slope.",
+                                            extra_data={
+                                                "state": self.__current_state(),
+                                                "error": traceback.format_exc()
+                                            })
+                    self._logger.logger.info(log)
 
         return resultant_slope
 
@@ -499,32 +536,39 @@ class MetricCalculator(MetricCalculatorBuilder):
                 return None
         else:
             scaled_value = None
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description=f"Couldn't compute the min-max normalized value "
-                                                f"for {value}, {min_value}, {max_value}.",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description=f"Couldn't compute the min-max normalized value "
+                                                    f"for {value}, {min_value}, {max_value}.",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
 
         return scaled_value
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def fuzzy_value(self,
                     date_start: typing.AnyStr = None,
-                    date_stop: typing.AnyStr = None) -> typing.Tuple[LinguisticVariableEnum, float]:
+                    date_stop: typing.AnyStr = None,
+                    **kwargs) -> typing.Tuple[LinguisticVariableEnum, float]:
         value = self.__min_max_normalized_value(date_start, date_stop)
         return self.__fuzzy_value_base(value, AntecedentTypeEnum.FUZZY_VALUE)
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def fuzzy_trend(self,
                     date_start: typing.AnyStr = None,
-                    date_stop: typing.AnyStr = None) -> typing.Tuple[LinguisticVariableEnum, float]:
+                    date_stop: typing.AnyStr = None,
+                    **kwargs) -> typing.Tuple[LinguisticVariableEnum, float]:
         value = self.trend(date_start, date_stop)
         return self.__fuzzy_value_base(value, AntecedentTypeEnum.FUZZY_TREND)
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def weighted_fuzzy_trend(self,
                              date_start: typing.AnyStr = None,
-                             date_stop: typing.AnyStr = None) -> typing.Tuple[LinguisticVariableEnum, float]:
+                             date_stop: typing.AnyStr = None,
+                             **kwargs) -> typing.Tuple[LinguisticVariableEnum, float]:
         value = self.weighted_trend(date_start, date_stop)
         return self.__fuzzy_value_base(value, AntecedentTypeEnum.WEIGHTED_FUZZY_TREND)
 
@@ -542,61 +586,66 @@ class MetricCalculator(MetricCalculatorBuilder):
                     fuzzy_class = current_fuzzy_class
                     fuzzy_membership_value = current_fuzzy_membership_value
         except Exception:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description=f"Couldn't compute fuzzy value for {value} and "
-                                                f"fuzzyfier {fuzzyfier_type.value}.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "fuzzyfier": fuzzyfier,
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description=f"Couldn't compute fuzzy value for {value} and "
+                                                    f"fuzzyfier {fuzzyfier_type.value}.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "fuzzyfier": fuzzyfier,
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
 
         return fuzzy_class, fuzzy_membership_value
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def difference(self,
                    date_start: typing.AnyStr = None,
-                   date_stop: typing.AnyStr = None) -> typing.Union[int, float]:
+                   date_stop: typing.AnyStr = None,
+                   **kwargs) -> typing.Union[int, float, typing.NoReturn]:
         initial_metric_value = self.aggregated_value(date_start=date_start, date_stop=date_start)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if initial_metric_value is not None and current_metric_value is not None:
             difference = current_metric_value - initial_metric_value
         elif initial_metric_value is None and current_metric_value is not None:
             difference = current_metric_value
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Ill-defined difference. Initial metric value is none.",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Ill-defined difference. Initial metric value is none.",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         elif initial_metric_value is not None and current_metric_value is None:
             difference = initial_metric_value
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Ill-defined difference. Current metric value is none.",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Ill-defined difference. Current metric value is none.",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         else:
             difference = None
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Ill-defined difference. Both initial and current metrics are none",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Ill-defined difference. Both initial and current metrics are none",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         return difference
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def percentage_difference(self,
                               date_start: typing.AnyStr = None,
-                              date_stop: typing.AnyStr = None) -> typing.Union[int, float, typing.NoReturn]:
+                              date_stop: typing.AnyStr = None,
+                              **kwargs) -> typing.Union[int, float, typing.NoReturn]:
         initial_metric_value = self.aggregated_value(date_start=date_start, date_stop=date_start)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if initial_metric_value is not None and current_metric_value is not None:
@@ -605,61 +654,69 @@ class MetricCalculator(MetricCalculatorBuilder):
             except ZeroDivisionError:
                 if current_metric_value == 0.0:
                     difference = None
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                            name="MetricCalculator",
-                                            description="Ill-defined percentage difference. Initial metric value and current metric value are none.",
-                                            extra_data={
-                                                "state": self.__current_state()
-                                            })
-                    self._logger.logger.info(log)
+                    if self._debug:
+                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                                name="MetricCalculator",
+                                                description="Ill-defined percentage difference. Initial metric value and current metric value are none.",
+                                                extra_data={
+                                                    "state": self.__current_state()
+                                                })
+                        self._logger.logger.info(log)
                 else:
                     difference = 100 * current_metric_value
         elif initial_metric_value is None and current_metric_value is not None:
             difference = None
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Ill-defined percentage difference. Initial metric value is none.",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Ill-defined percentage difference. Initial metric value is none.",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         elif initial_metric_value is not None and current_metric_value is None:
             difference = None
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Ill-defined percentage difference. Current metric value is none.",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Ill-defined percentage difference. Current metric value is none.",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         else:
             difference = None
-
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Ill-defined percentage difference. Both initial and "
-                                                "current metrics are none",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Ill-defined percentage difference. Both initial and "
+                                                    "current metrics are none",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         return difference
 
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
     def raw_value(self, date_start: typing.AnyStr = None, *args, **kwargs) -> typing.Union[int, float]:
         result = self.aggregated_value(date_start=date_start, date_stop=date_start)
 
         if result is None:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="Metric evaluated to none",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="Metric evaluated to none",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
 
         return result
+
+    @lru_cache(maxsize=__MAX_CACHE_SIZE)
+    def number_of_ads_per_adset(self, *args, **kwargs):
+        ads = self._repository.get_all_ads_by_adset_id(key_value=self._facebook_id)
+        return len(ads)
 
     def __get_metrics(self):
         metrics = [value.name for value in self._metric.numerator if value]
@@ -678,24 +735,26 @@ class MetricCalculator(MetricCalculatorBuilder):
                                                                  level=self._level,
                                                                  breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Failed to get metric values.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Failed to get metric values.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             raise e
 
         if not metrics_values:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="No metric values returned from DB",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="No metric values returned from DB",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
         return metrics_values
 
     def __get_min_metrics_values(self):
@@ -705,24 +764,26 @@ class MetricCalculator(MetricCalculatorBuilder):
                                                         level=self._level,
                                                         breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Failed to get min metric values.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Failed to get min metric values.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             raise e
 
         if not min_values:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="No min metric values returned from DB",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="No min metric values returned from DB",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
 
         return min_values
 
@@ -733,23 +794,57 @@ class MetricCalculator(MetricCalculatorBuilder):
                                                         level=self._level,
                                                         breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="MetricCalculator",
-                                    description="Failed to get max metric values.",
-                                    extra_data={
-                                        "state": self.__current_state(),
-                                        "error": traceback.format_exc()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="MetricCalculator",
+                                        description="Failed to get max metric values.",
+                                        extra_data={
+                                            "state": self.__current_state(),
+                                            "error": traceback.format_exc()
+                                        })
+                self._logger.logger.info(log)
             raise e
 
         if not max_values:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="MetricCalculator",
-                                    description="No max metric values returned from DB",
-                                    extra_data={
-                                        "state": self.__current_state()
-                                    })
-            self._logger.logger.info(log)
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
+                                        name="MetricCalculator",
+                                        description="No max metric values returned from DB",
+                                        extra_data={
+                                            "state": self.__current_state()
+                                        })
+                self._logger.logger.info(log)
 
         return max_values
+
+    def duplicate_best_performing_ad(self, *args, **kwargs):
+        ad_ids = self._repository.get_ads_by_adset_id(key_value=self._facebook_id)
+
+        calculator = (MetricCalculator().
+                      set_level(LevelEnum.AD).
+                      set_metric(AvailableMetricEnum.CLICKS.value).
+                      set_repository(self._repository).
+                      set_date_stop(self._date_stop).
+                      set_time_interval(self._time_interval).
+                      set_debug_mode(self._debug).
+                      set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                               action_breakdown=ActionBreakdownEnum.NONE)))
+
+        average_metric_values = [
+            (ad_id, calculator.
+             set_facebook_id(ad_id).
+             compute_value(atype=AntecedentTypeEnum.VALUE,
+                           time_interval=self._time_interval)) for ad_id in ad_ids]
+        try:
+            sorted_values = sorted(average_metric_values, key=lambda x: x[1][0], reverse=True)
+            if sorted_values[0][1][0]:
+                best_performing_ad_id = sorted_values[0][0]
+            else:
+                return None, None
+        except TypeError:
+            import traceback
+            traceback.print_exc()
+            return None
+
+        best_performing_ad_name = self._repository.get_ad_name_by_ad_id(best_performing_ad_id)
+        return best_performing_ad_id, best_performing_ad_name

@@ -19,7 +19,7 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewTargetingAndCreative import V
     ViewAdSetTargetingAndCreative, ViewAdTargetingAndCreative
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewVideoEngagement import ViewCampaignVideoEngagement, \
     ViewAdSetVideoEngagement, ViewAdVideoEngagement
-from FacebookTuring.Api.Catalogs.Views.ViewMaster import ViewMaster
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewMaster import ViewMaster
 
 
 class AdsManagerCatalogsViewsByLevelDto:

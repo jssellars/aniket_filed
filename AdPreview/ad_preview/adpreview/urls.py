@@ -20,10 +20,7 @@ from staticpreview import views as static_preview_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('generate-static-preview/', static_preview_views.generate_static_preview),
-    path('get-all/', static_preview_views.get_all),
-    path('get-preview/<str:preview_type>/', static_preview_views.get_preview_by_type),
-    path('generate-preview/', static_preview_views.generate_preview_by_type),
+    path('generate-preview/', static_preview_views.GenerateAdPreview),
     path('<str:business_owner_facebook_id>/ad-images/<str:ad_account_id>', facebook_assets_views.GetAdImages),
     path('<str:business_owner_facebook_id>/ad-videos/<str:ad_account_id>', facebook_assets_views.GetAdVideos),
     path('<str:business_owner_facebook_id>/page-posts/<str:page_facebook_id>',

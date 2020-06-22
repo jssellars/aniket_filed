@@ -1,0 +1,53 @@
+{
+  "rabbitmq": {
+    "consumer_name": "prodbak.api.facebook.potter.pixels.consumer",
+    "username": "eirjtnyh",
+    "password": "cAFjL8M2hdTULtKSa7RgLMwgBGKWt3FZ",
+    "hostname": "frizzy-dragonfly.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "eirjtnyh",
+    "exchanges": [
+      {
+        "name": "prod.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "prod.facebook.pixels.inbound",
+          "inbound_routing_key": "prod.facebook.pixels.inbound.key",
+          "outbound": "prod.facebook.pixels.outbound",
+          "outbound_routing_key": "prod.facebook.pixels.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "35.176.246.229",
+    "port": 1433,
+    "username": "tempsa",
+    "password": "KoalaBearSplitsaStair",
+    "name": "Prod.Filed.Facebook.Potter.Accounts"
+  },
+  "environment": "prodbak",
+  "api_name": "FacebookPixels",
+  "api_version": "1.0.0",
+  "service_name": "FacebookPixels",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "port": 47250,
+  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
+  "debug_mode": false,
+  "docker_filename": "filed-potter-pixels-api",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": null,
+  "es_port": null
+}

@@ -12,6 +12,5 @@ class AdsManagerDiscardDraftCommandHandler:
                                                database_name=startup.mongo_config['structures_database_name'],
                                                collection_name=level)
             repository.discard_structure_draft(Level(level), facebook_id)
-            repository.close()
         except Exception as e:
             raise e

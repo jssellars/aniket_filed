@@ -1,4 +1,16 @@
-# Find latest recommendations, replace date with your current
+# Find latest recommendations (replace date with your latest dexter run time)
 db.recommendations.find({last_updated_at: "2020-06-02"})
    .projection({})
    .sort({_id:-1})
+
+# In logs, find all ERRORS after a specific date and time (replace with your latest dexter run time)
+db.logs.find({timestamp: {$gt: "2020-06-04T12:00:00"},
+              "type.name": {$ne: "WARNING"}
+})
+   .projection({})
+   .sort({_id:-1})
+
+# Get accounts in order by the last_synced_on date
+db.journal.find({})
+   .projection({})
+   .sort({last_synced_on:-1})

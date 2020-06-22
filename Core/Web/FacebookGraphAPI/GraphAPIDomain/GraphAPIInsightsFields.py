@@ -1,3 +1,5 @@
+# todo: clean up this list after complete metrics refactoring
+
 class GraphAPIInsightsFields:
     #  ====== MISC ====== #
     since = 'since'
@@ -112,6 +114,14 @@ class GraphAPIInsightsFields:
     video_play_actions = 'video_play_actions'
     cost_per_thruplay = 'cost_per_thruplay'
     link_click = 'link_click'
+    inline_link_click = 'inline_link_clicks'
+    inline_link_click_ctr = 'inline_link_click_ctr'
+    unique_inline_link_click = 'unique_inline_link_clicks'
+    unique_inline_link_click_ctr = 'unique_inline_link_click_ctr'
+    cost_per_inline_link_click = 'cost_per_inline_link_click'
+    cost_per_unique_inline_link_click = 'cost_per_unique_inline_link_click'
+    inline_post_engagement = 'inline_post_engagements'
+    cost_per_inline_post_engagement = 'cost_per_inline_post_engagement'
     outbound_clicks = 'outbound_clicks'
     outbound_click = 'outbound_click'
     unique_outbound_clicks = 'unique_outbound_clicks'
@@ -125,7 +135,6 @@ class GraphAPIInsightsFields:
     omni_purchase = 'omni_purchase'
     purchase_roas = 'purchase_roas'
     results = 'results'
-    mobile_app_install = 'mobile_app_install'
     conversions = 'offsite_conversion.fb_pixel_purchase'
     product_catalog_sales = "omni_purchase"  # "offsite_conversion.fb_pixel_purchase:catalog_sales"
     value = 'value'
@@ -143,7 +152,6 @@ class GraphAPIInsightsFields:
     mobile_app_content_views = 'app_custom_event.fb_mobile_content_view'
     website_content_views = 'offsite_conversion.fb_pixel_view_content'
     content_views = 'view_content'
-    mobile_app_credit_spends = 'app_custom_event.fb_mobile_spent_credits'
     credit_spends = 'credit_spent'
     custom_events = 'offsite_conversion.fb_pixel_custom'
     desktop_app_engagements = 'app_engagement'
@@ -156,7 +164,6 @@ class GraphAPIInsightsFields:
     on_facebook_leads = 'onsite_conversion.lead_grouped'
     on_facebook_workflow_completions = 'onsite_conversion.flow_complete'
     mobile_app_purchase_roas = 'mobile_app_roas'
-    mobile_app_purchases = 'app_custom_event.fb_mobile_purchase'
     website_purchases = 'offsite_conversion.fb_pixel_purchase'
     purchases = 'purchase'
     on_facebook_purchases = 'onsite_conversion.purchase'
@@ -164,11 +171,9 @@ class GraphAPIInsightsFields:
     mobile_app_registrations_completed = 'app_custom_event.fb_mobile_complete_registration'
     website_registrations_completed = 'offsite_conversion.fb_pixel_complete_registration'
     searches = 'search'
-    mobile_app_searches = 'app_custom_event.fb_mobile_search'
     website_searches = 'offsite_conversion.fb_pixel_search'
     subscriptions = 'subscribe'
     tutorials_completed = 'omni_tutorial_completed'
-    mobile_app_tutorials_completed = 'app_custom_event.fb_mobile_tutorial_completion'
 
     # ====== STRUCTURE ====== #
     name = 'name'
@@ -269,3 +274,23 @@ class GraphAPIInsightsFields:
     url_parameters = 'url_tags'
     page_id_structure = 'page'
     app_event_structure = 'application'
+
+    # ====== MOBILE APP STANDARD EVENTS ====== #
+    mobile_app_achievement_unlocked = 'app_custom_event.fb_mobile_achievement_unlocked'
+    mobile_app_activate_app = 'app_custom_event.fb_mobile_activate_app'
+    mobile_app_add_payment_info = 'app_custom_event.fb_mobile_add_payment_info'
+    mobile_app_add_to_cart = 'app_custom_event.fb_mobile_add_to_cart'
+    mobile_app_add_to_wishlist = 'app_custom_event.fb_mobile_add_to_wishlist'
+    mobile_app_complete_registration = 'app_custom_event.fb_mobile_complete_registration'
+    mobile_app_content_view = 'app_custom_event.fb_mobile_content_view'
+    mobile_app_initiated_checkout = 'app_custom_event.fb_mobile_initiated_checkout'
+    mobile_app_level_achieved = 'app_custom_event.fb_mobile_level_achieved'
+    mobile_app_purchases = 'app_custom_event.fb_mobile_purchase'
+    mobile_app_rating = 'app_custom_event.fb_mobile_rate'
+    mobile_app_searches = 'app_custom_event.fb_mobile_search'
+    mobile_app_credit_spends = 'app_custom_event.fb_mobile_spent_credits'
+    mobile_app_tutorials_completed = 'app_custom_event.fb_mobile_tutorial_completion'
+    mobile_app_other = 'app_custom_event.other'
+    mobile_app_install = 'mobile_app_install'
+    mobile_app_retention = 'mobile_app_retention'
+    mobile_app_roas = 'mobile_app_roas'

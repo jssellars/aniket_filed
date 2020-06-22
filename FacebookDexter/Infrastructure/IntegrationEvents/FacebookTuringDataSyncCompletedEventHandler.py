@@ -57,6 +57,5 @@ class FacebookTuringDataSyncCompletedEventHandler:
             #  Uncomment if you want to run in single thread
             MasterWorker.start_dexter_for_business_owner(business_owner,
                                                          cls.__startup,
-                                                         cls.__data_repository,
                                                          cls.__recommendations_repository,
                                                          cls.__journal_repository)

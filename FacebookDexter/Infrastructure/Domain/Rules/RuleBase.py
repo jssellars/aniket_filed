@@ -19,6 +19,7 @@ class RuleBase:
                  antecedents: typing.List[Antecedent] = None,
                  connective: Connective = None,
                  template: typing.AnyStr = None,
+                 alternative_template: typing.AnyStr = None,
                  importance: RuleImportanceEnum = RuleImportanceEnum.HIGH,
                  source: RuleSourceEnum = RuleSourceEnum.DEXTER,
                  level: LevelEnum = None,
@@ -32,6 +33,7 @@ class RuleBase:
         self.antecedents = antecedents
         self.connective = connective if connective else Connective(LogicOperatorEnum.AND)
         self.template = template
+        self.alternative_template = alternative_template
         self.importance = importance
         self.source = source
         self.level = level

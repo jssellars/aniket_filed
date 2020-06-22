@@ -69,3 +69,6 @@ target/
 
 # Random folders
 Experiments/
+/Notebooks/Misc/
+/Notebooks/.ipynb_checkpoints/
+/dexter-results/

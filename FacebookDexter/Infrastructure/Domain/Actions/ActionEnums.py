@@ -9,6 +9,7 @@ class ActionEnum(Enum):
     DECREASE_BUDGET = "decrease_budget"
     INCREASE_BUDGET = "increase_budget"
     GENERAL = "general"
+    DUPLICATE = "duplicate"
 
 
 class BudgetTypeEnum(Enum):

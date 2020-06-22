@@ -10,7 +10,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1       
+      maxSurge: 1
       maxUnavailable: 0
   template:
     metadata:
@@ -20,15 +20,12 @@ spec:
       hostAliases:
         - ip: "192.168.1.211"
           hostnames:
-          - "dev2.filed.com"
-        - ip: "192.168.2.91"
-          hostnames:
-          - "dev2.mongodb"            
-      imagePullSecrets:
-      - name: regcred         
+            - "dev2.filed.com"
       containers:
-      - name: dev2-filed-targeting-search
-        image: ct.filed.com/dev2-filed-targeting-search:v0.1
-        imagePullPolicy: Always
-        ports: 
-        - containerPort : 47222
+        - name: dev2-filed-targeting-search
+          image: ct.filed.com/dev2-filed-targeting-search:v0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 47222
+      imagePullSecrets:
+        - name: regcred  

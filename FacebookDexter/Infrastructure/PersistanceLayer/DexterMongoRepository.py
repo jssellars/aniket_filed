@@ -418,10 +418,8 @@ class DexterMongoRepository(MongoRepositoryBase):
         return structure_details
 
     def get_ads_by_adset_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
-        self._database = self._client[self._config.insights_database]
-        collection_name = (LevelEnum.AD.value + "_" +
-                           BreakdownEnum.NONE.value.name + "_" +
-                           ActionBreakdownEnum.NONE.value.name)
+        self._database = self._client[self._config.structures_database]
+        collection_name = LevelEnum.AD.value
         self.set_collection(collection_name)
 
         query = {
@@ -432,8 +430,30 @@ class DexterMongoRepository(MongoRepositoryBase):
             "_id": MongoProjectionState.OFF.value,
             LevelIdKeyEnum.AD.value: MongoProjectionState.ON.value
         }
+        results = self.get(query, projection)
+        return list(set([entry[LevelIdKeyEnum.AD.value] for entry in results]))
 
-        return list(set([entry[LevelIdKeyEnum.AD.value] for entry in self.get(query, projection)]))
+    def get_all_ads_by_adset_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
+        self.set_database(self._config.structures_database)
+        self.set_collection(LevelEnum.AD.value)
+
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelIdKeyEnum.ADSET.value: {MongoOperator.EQUALS.value: key_value}
+                },
+                {
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                }
+            ]
+        }
+
+        projection = {
+            "_id": MongoProjectionState.OFF.value,
+            LevelIdKeyEnum.AD.value: MongoProjectionState.ON.value
+        }
+        results = self.get(query, projection)
+        return list(set([entry[LevelIdKeyEnum.AD.value] for entry in results]))
 
     def get_adsets_by_campaign_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         self._database = self._client[self._config.insights_database]
@@ -453,10 +473,8 @@ class DexterMongoRepository(MongoRepositoryBase):
         return list(set([entry[LevelIdKeyEnum.ADSET.value] for entry in self.get(query, projection)]))
 
     def get_campaigns_by_account_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
-        self._database = self._client[self._config.insights_database]
-        collection_name = (LevelEnum.CAMPAIGN.value + "_" +
-                           BreakdownEnum.NONE.value.name + "_" +
-                           ActionBreakdownEnum.NONE.value.name)
+        self._database = self._client[self._config.structures_database]
+        collection_name = LevelEnum.CAMPAIGN.value
         self.set_collection(collection_name)
 
         query = {
@@ -491,6 +509,27 @@ class DexterMongoRepository(MongoRepositoryBase):
         result = self.first_or_default(query, projection)
         return result.get(LevelIdKeyEnum.ADSET.value)
 
+    def get_adset_ids_by_campaign_id(self, key_value: typing.AnyStr = None) -> typing.List:
+        self._database = self._client[self._config.structures_database]
+        self.set_collection(LevelEnum.ADSET.value)
+
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelIdKeyEnum.CAMPAIGN.value: {MongoOperator.EQUALS.value: key_value},
+                },
+                {
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                }
+            ]
+        }
+        projection = {
+            "_id": MongoProjectionState.OFF.value,
+            LevelIdKeyEnum.ADSET.value: MongoProjectionState.ON.value
+        }
+
+        return list(set([entry[LevelIdKeyEnum.ADSET.value] for entry in self.get(query, projection)]))
+
     def get_adset_id_by_ad_id(self, key_value: typing.AnyStr = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
         self.set_collection(LevelEnum.AD.value)
@@ -512,3 +551,33 @@ class DexterMongoRepository(MongoRepositoryBase):
 
         result = self.first_or_default(query, projection)
         return result.get(LevelIdKeyEnum.ADSET.value)
+
+    def get_ad_name_by_ad_id(self, ad_id):
+        self._database = self._client[self._config.structures_database]
+        self.set_collection(LevelEnum.AD.value)
+
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelIdKeyEnum.AD.value: {MongoOperator.EQUALS.value: ad_id},
+                },
+                {
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                }
+            ]
+        }
+        projection = {
+            "_id": MongoProjectionState.OFF.value,
+            LevelNameKeyEnum.AD.value: MongoProjectionState.ON.value
+        }
+
+        result = self.first_or_default(query, projection)
+        return result.get(LevelNameKeyEnum.AD.value)
+
+    def new_repository(self):
+        if self._client:
+            self.close()
+            self._client = None
+
+        repository = DexterMongoRepository(config=self.config, database_name=self.config.insights_database)
+        return repository

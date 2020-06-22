@@ -19,9 +19,8 @@ class BudgetFieldMapper(FieldMapperBase):
         self.facebook_field_names = facebook_field_names
         return self
 
-    def map(self, data: typing.Dict, fields: typing.List[typing.Any] = None, **kwargs) -> typing.List[FieldMapperResult]:
-        for field in fields:
-            budget = data.get(field.name, None)
-            if budget is not None:
-                field_value = self._convert_to_float(budget)
-                return [FieldMapperResult().set_field(field.name, field_value)]
+    def map(self, data: typing.Dict, field: typing.Any = None, **kwargs) -> typing.List[FieldMapperResult]:
+        budget = data.get(field.name, None)
+        if budget is not None:
+            field_value = self._convert_to_float(budget)
+            return [FieldMapperResult().set_field(field.name, field_value)]

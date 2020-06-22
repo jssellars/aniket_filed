@@ -2,14 +2,20 @@ import copy
 import typing
 from collections import OrderedDict
 from operator import getitem
+from queue import Queue
+from threading import Thread
+from time import sleep
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
+from Core.Web.FacebookGraphAPI.Models.Field import FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 class GraphAPIInsightsHandler:
@@ -71,8 +77,8 @@ class GraphAPIInsightsHandler:
                           fields: typing.List[typing.AnyStr] = None,
                           parameters: typing.Dict = None,
                           requested_fields: typing.List[FieldsMetadata] = None,
-                          add_totals: bool = False) -> typing.Tuple[
-        typing.List[typing.Dict], typing.List[typing.Dict]]:
+                          add_totals: bool = False,
+                          thread: typing.Union[typing.AnyStr, int] = None) -> typing.Dict:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_insights_config(permanent_token=permanent_token,
                                                                 ad_account_id=ad_account_id,
@@ -82,9 +88,10 @@ class GraphAPIInsightsHandler:
 
         try:
             response, summary = graph_api_client.call_facebook()
-            insights_response = GraphAPIInsightsMapper().map(requested_fields, response)
+            insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
+            summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
             insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
-            return insights_response, summary
+            return copy.deepcopy({thread: (insights_response, summary_response)})
         except Exception as e:
             raise e
 
@@ -93,16 +100,26 @@ class GraphAPIInsightsHandler:
                             permanent_token: typing.AnyStr = None,
                             ad_account_id: typing.AnyStr = None,
                             level: typing.AnyStr = None,
-                            fields: typing.List[typing.AnyStr] = None) -> \
-            typing.Tuple[typing.List[typing.Dict], typing.List[typing.Dict]]:
+                            fields: typing.List[typing.AnyStr] = None,
+                            filter_params: typing.List[typing.Dict] = None,
+                            structure_fields: typing.List[FieldsMetadata] = None,
+                            thread: typing.Union[typing.AnyStr, int] = None) -> typing.Dict:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_structure_config(permanent_token=permanent_token,
                                                                  ad_account_id=ad_account_id,
                                                                  level=level,
-                                                                 fields=fields)
+                                                                 fields=fields,
+                                                                 filter_params=filter_params)
         try:
-            structures_response, summary = graph_api_client.call_facebook()
-            return structures_response, summary
+            # structures_response, summary = graph_api_client.call_facebook()
+            repository = TuringMongoRepository(config=startup.mongo_config,
+                                               database_name=startup.mongo_config.structures_database_name)
+            summary = []
+            account_id = ad_account_id.split("_")[1]
+            structures = repository.get_all_structures_by_ad_account_id(level=Level(level), account_id=account_id)
+            structures_response = GraphAPIInsightsMapper().map(structure_fields, structures)
+            structures_response = list(map(dict, set(tuple(x.items()) for x in structures_response)))
+            return copy.deepcopy({thread: (structures_response, summary)})
         except Exception as e:
             raise e
 
@@ -114,27 +131,74 @@ class GraphAPIInsightsHandler:
                      fields: typing.List[typing.AnyStr] = None,
                      parameters: typing.Dict = None,
                      structure_fields: typing.List[typing.AnyStr] = None,
-                     requested_fields: typing.List[FieldsMetadata] = None) -> typing.List[typing.Dict]:
-        insights_response, _ = cls.get_insights_base(permanent_token=permanent_token,
-                                                     ad_account_id=ad_account_id,
-                                                     fields=fields,
-                                                     parameters=parameters,
-                                                     requested_fields=requested_fields)
+                     requested_fields: typing.List[FieldsMetadata] = None,
+                     filter_params: typing.List[typing.Dict] = None) -> typing.List[typing.Dict]:
+        insights_thread = 0
+        structure_thread = 1
+        queue = Queue()
 
-        if not structure_fields:
-            return cls.map_to_requested_fields(level=level, requested_fields=requested_fields,
-                                               response=insights_response)
-        else:
-            structures_response, _ = cls.get_structures_base(permanent_token=permanent_token,
-                                                             ad_account_id=ad_account_id,
-                                                             level=level,
-                                                             fields=structure_fields)
-            #  todo: map structure fields
-            response = cls.join_insights_and_structures(level=level,
-                                                        requested_fields=requested_fields,
-                                                        insights=insights_response,
-                                                        structures=structures_response)
-            return response
+        def _get_insights(cls,
+                          permanent_token: str = None,
+                          level: str = None,
+                          ad_account_id: str = None,
+                          fields: typing.List[typing.AnyStr] = None,
+                          parameters: typing.Dict = None,
+                          structure_fields: typing.List[typing.AnyStr] = None,
+                          requested_fields: typing.List[FieldsMetadata] = None,
+                          filter_params: typing.List[typing.Dict] = None) -> typing.List[typing.Dict]:
+            # get insights
+            t1 = Thread(
+                target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6: q.put(cls.get_insights_base(
+                    permanent_token=arg1,
+                    ad_account_id=arg2,
+                    fields=arg3,
+                    parameters=arg4,
+                    requested_fields=arg5,
+                    thread=arg6)),
+                args=(queue, permanent_token, ad_account_id, fields, parameters, requested_fields, insights_thread))
+            t1.start()
+
+            # get structures
+            requested_structure_fields = [getattr(FieldsMetadata, entry) for entry in structure_fields]
+            t2 = Thread(target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6, arg7: q.put(cls.get_structures_base(
+                permanent_token=arg1,
+                ad_account_id=arg2,
+                level=arg3,
+                fields=arg4,
+                filter_params=arg5,
+                structure_fields=arg6,
+                thread=arg7)),
+                        args=(queue, permanent_token, ad_account_id, level, structure_fields, filter_params,
+                              requested_structure_fields, structure_thread))
+            t2.start()
+
+            #  get responses
+            responses = []
+            while not len(queue.queue) == 2:
+                sleep(1)
+            else:
+                responses += [element for element in queue.queue]
+            return responses
+
+        responses = _get_insights(cls=cls,
+                                  permanent_token=permanent_token,
+                                  level=level,
+                                  ad_account_id=ad_account_id,
+                                  fields=fields,
+                                  parameters=parameters,
+                                  structure_fields=structure_fields,
+                                  requested_fields=requested_fields,
+                                  filter_params=filter_params)
+
+        #  combine responses
+        insights = next(filter(lambda x: insights_thread in x.keys(), responses), None)
+        structures = next(filter(lambda x: structure_thread in x.keys(), responses), None)
+
+        response = cls.join_insights_and_structures(level=level,
+                                                    requested_fields=requested_fields,
+                                                    insights=insights[insights_thread][0],
+                                                    structures=structures[structure_thread][0])
+        return response
 
     @classmethod
     def get_insights_with_totals(cls,
@@ -144,48 +208,118 @@ class GraphAPIInsightsHandler:
                                  fields: typing.List[typing.AnyStr] = None,
                                  parameters: typing.Dict = None,
                                  structure_fields: typing.List[typing.AnyStr] = None,
-                                 requested_fields: typing.List[FieldsMetadata] = None) -> typing.Dict:
-        # get data with breakdowns
-        insights, summary = cls.get_insights_base(permanent_token=permanent_token,
-                                                  ad_account_id=ad_account_id,
-                                                  fields=fields,
-                                                  parameters=parameters,
-                                                  requested_fields=requested_fields,
-                                                  add_totals=True)
+                                 requested_fields: typing.List[FieldsMetadata] = None,
+                                 filter_params: typing.List[typing.Dict] = None) -> typing.Dict:
+        insights_thread = 0
+        insights_without_breakdowns_thread = 1
+        structure_thread = 2
 
-        if parameters["breakdowns"]:
-            # get data without breakdowns
-            parameters_without_breakdowns = copy.deepcopy(parameters)
-            del parameters_without_breakdowns["action_breakdowns"]
-            del parameters_without_breakdowns["breakdowns"]
-            insights_without_breakdowns, _ = cls.get_insights_base(permanent_token=permanent_token,
-                                                                   ad_account_id=ad_account_id,
-                                                                   fields=fields,
-                                                                   parameters=parameters_without_breakdowns,
-                                                                   requested_fields=requested_fields)
+        queue = Queue()
+
+        def _get_insights(cls,
+                          permanent_token: typing.AnyStr = None,
+                          level: typing.AnyStr = None,
+                          ad_account_id: typing.AnyStr = None,
+                          fields: typing.List[typing.AnyStr] = None,
+                          parameters: typing.Dict = None,
+                          structure_fields: typing.List[typing.AnyStr] = None,
+                          requested_fields: typing.List[FieldsMetadata] = None,
+                          filter_params: typing.List[typing.Dict] = None) -> typing.List[typing.Dict]:
+            # get insights
+            t1 = Thread(
+                target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6, arg7: q.put(cls.get_insights_base(
+                    permanent_token=arg1,
+                    ad_account_id=arg2,
+                    fields=arg3,
+                    parameters=arg4,
+                    requested_fields=arg5,
+                    thread=arg6,
+                    add_totals=arg7)),
+                args=(queue, permanent_token, ad_account_id, fields,
+                      parameters, requested_fields, insights_thread, True))
+            t1.start()
+
+            # get structures
+            requested_structure_fields = [getattr(FieldsMetadata, entry) for entry in structure_fields]
+            t2 = Thread(target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6, arg7: q.put(cls.get_structures_base(
+                permanent_token=arg1,
+                ad_account_id=arg2,
+                level=arg3,
+                fields=arg4,
+                filter_params=arg5,
+                structure_fields=arg6,
+                thread=arg7)),
+                        args=(queue, permanent_token, ad_account_id, level, structure_fields, filter_params,
+                              requested_structure_fields, structure_thread))
+            t2.start()
+
+            # get insights without breakdowns
+            t3 = None
+            if parameters["breakdowns"]:
+                # get data without breakdowns
+                parameters_without_breakdowns = copy.deepcopy(parameters)
+                del parameters_without_breakdowns["action_breakdowns"]
+                del parameters_without_breakdowns["breakdowns"]
+                requested_fields_without_breakdowns = [field for field in requested_fields
+                                                       if field.field_type != FieldType.BREAKDOWN]
+                t3 = Thread(
+                    target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6: q.put(cls.get_insights_base(
+                        permanent_token=arg1,
+                        ad_account_id=arg2,
+                        fields=arg3,
+                        parameters=arg4,
+                        requested_fields=arg5,
+                        thread=arg6)),
+                    args=(
+                        queue, permanent_token, ad_account_id, fields, parameters_without_breakdowns,
+                        requested_fields_without_breakdowns, insights_without_breakdowns_thread))
+                t3.start()
+
+            t1.join()
+            t2.join()
+            if t3:
+                t3.join()
+
+            #  get responses
+            responses = []
+            if queue.not_empty:
+                responses = [element for element in queue.queue]
+            return responses
+
+        responses = _get_insights(cls=cls,
+                                  permanent_token=permanent_token,
+                                  level=level,
+                                  ad_account_id=ad_account_id,
+                                  fields=fields,
+                                  parameters=parameters,
+                                  structure_fields=structure_fields,
+                                  requested_fields=requested_fields,
+                                  filter_params=filter_params)
+
+        #  combine responses
+        insights_response = next(filter(lambda x: insights_thread in x.keys(), responses), None)
+        insights = insights_response[insights_thread][0]
+        summary = insights_response[insights_thread][1]
+
+        insights_without_breakdowns_response = next(filter(lambda x: insights_without_breakdowns_thread in x.keys(),
+                                                           responses), None)
+        if insights_without_breakdowns_response:
+            insights_without_breakdowns = insights_without_breakdowns_response[insights_without_breakdowns_thread][0]
         else:
             insights_without_breakdowns = []
 
-        # Combine insights without breakdowns with insights with breakdowns
-        combined_insights = cls.join_insights(insights=insights,
-                                              insights_without_breakdowns=insights_without_breakdowns)
+        structures_response = next(filter(lambda x: structure_thread in x.keys(), responses), None)
+        structures = structures_response[structure_thread][0]
 
-        # Get structure information
-        if not structure_fields:
-            return {"data": cls.map_to_requested_fields(level=level,
-                                                        requested_fields=requested_fields,
-                                                        response=combined_insights),
-                    "summary": summary}
-        else:
-            structures_response, _ = cls.get_structures_base(permanent_token=permanent_token,
-                                                             ad_account_id=ad_account_id,
-                                                             level=level,
-                                                             fields=structure_fields)
-            response = cls.join_insights_and_structures(level=level,
-                                                        requested_fields=requested_fields,
-                                                        insights=combined_insights,
-                                                        structures=structures_response)
-            return {"data": response, "summary": summary}
+        # Combine insights without breakdowns with insights with breakdowns
+        if insights_without_breakdowns:
+            insights = insights + insights_without_breakdowns
+
+        response = cls.join_insights_and_structures(level=level,
+                                                    requested_fields=requested_fields,
+                                                    insights=insights,
+                                                    structures=structures)
+        return {"data": response, "summary": summary}
 
     @classmethod
     def get_reports_insights(cls,
@@ -194,18 +328,14 @@ class GraphAPIInsightsHandler:
                              fields: typing.List[typing.AnyStr] = None,
                              parameters: typing.Dict = None,
                              requested_fields: typing.List[FieldsMetadata] = None) -> typing.List[typing.Dict]:
-        insights_response, _ = cls.get_insights_base(permanent_token=permanent_token,
-                                                     ad_account_id=ad_account_id,
-                                                     fields=fields,
-                                                     parameters=parameters,
-                                                     requested_fields=requested_fields)
-        return insights_response
-
-    @classmethod
-    def join_insights(cls,
-                      insights: typing.List[typing.Dict] = None,
-                      insights_without_breakdowns: typing.List[typing.Dict] = None) -> typing.List[typing.Dict]:
-        return insights + insights_without_breakdowns
+        report_insights_thread = 1
+        insights_response = cls.get_insights_base(permanent_token=permanent_token,
+                                                  ad_account_id=ad_account_id,
+                                                  fields=fields,
+                                                  parameters=parameters,
+                                                  requested_fields=requested_fields,
+                                                  thread=report_insights_thread)
+        return insights_response[report_insights_thread][0]
 
     @classmethod
     def join_insights_and_structures(cls,
@@ -219,20 +349,23 @@ class GraphAPIInsightsHandler:
         if not structures and not insights:
             return []
         elif structures and not insights:
-            response = cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=structures)
+            return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=structures)
         elif not structures and insights:
-            response = cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=insights)
+            return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=insights)
         else:
             requested_fields_names = [field.name for field in requested_fields]
-            response = [{**insight, **structure}
-                        for structure in structures
-                        for insight in list(
-                    filter(lambda x: getitem(x, insight_id_key) == getitem(structure, structure_id_key), insights))] + \
-                       [{**dict.fromkeys(requested_fields_names), **structure}
-                        for structure in structures
-                        if not list(
-                           filter(lambda x: getitem(x, insight_id_key) == getitem(structure, structure_id_key),
-                                  insights))]
+            active_structures = [{**insight, **structure}
+                                 for structure in structures
+                                 for insight in list(
+                    filter(lambda x: getitem(x, insight_id_key) == str(getitem(structure, structure_id_key)),
+                           insights))]
+            empty_structure_dict = dict.fromkeys(requested_fields_names)
+            inactive_structures = [{**empty_structure_dict, **structure}
+                                   for structure in structures
+                                   if not list(
+                    filter(lambda x: getitem(x, insight_id_key) == str(getitem(structure, structure_id_key)),
+                           insights))]
+            response = active_structures + inactive_structures
 
         return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=response)
 
@@ -246,8 +379,7 @@ class GraphAPIInsightsHandler:
         def f(entry):
             sorted_response = {**OrderedDict.fromkeys(sorted_fields), **OrderedDict(sorted(entry.items()))}
             for structure_key, insight_key in cls.__structure_insights_keymap[level].items():
-                if sorted_response.get(structure_key):
-                    sorted_response[insight_key] = sorted_response.pop(structure_key)
+                sorted_response[insight_key] = sorted_response.pop(structure_key, None)
 
             return sorted_response
 
@@ -258,7 +390,8 @@ class GraphAPIInsightsHandler:
                                    permanent_token: typing.AnyStr = None,
                                    level: typing.AnyStr = None,
                                    ad_account_id: typing.AnyStr = None,
-                                   fields: typing.List[typing.AnyStr] = None) -> GraphAPIClientBaseConfig:
+                                   fields: typing.List[typing.AnyStr] = None,
+                                   filter_params: typing.List[typing.Dict] = None) -> GraphAPIClientBaseConfig:
         get_structure_config = GraphAPIClientBaseConfig()
         get_structure_config.try_partial_requests = True
         get_structure_config.required_field = cls.__ids_keymap[level]["structure"]
@@ -266,7 +399,8 @@ class GraphAPIInsightsHandler:
         get_structure_config.request = GraphAPIRequestStructures(facebook_id=ad_account_id,
                                                                  business_owner_permanent_token=permanent_token,
                                                                  level=cls.__insights_to_structures_level_map[level],
-                                                                 fields=fields)
+                                                                 fields=fields,
+                                                                 filter_params=filter_params)
 
         return get_structure_config
 

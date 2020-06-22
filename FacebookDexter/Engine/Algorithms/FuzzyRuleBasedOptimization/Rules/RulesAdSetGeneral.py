@@ -5,6 +5,7 @@ from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
+from FacebookDexter.Infrastructure.Domain.ObjectiveEnum import ObjectiveEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
 from FacebookDexter.Infrastructure.Domain.Rules.Connective import Connective
@@ -14,6 +15,300 @@ from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeEnum, R
 from FacebookDexter.Infrastructure.FuzzyEngine.FuzzySets.FuzzySets import LinguisticVariableEnum
 
 RULES_ADSET_GENERAL = [
+    # catalog sales
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_ROAS,
+             importance=RuleImportanceEnum.HIGH,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Did you know that you can bring your cost per purchase down significantly by running retargeting campaigns? "
+                      "Start this process now to see better results! You can do this by duplicating your best performing ad "
+                      "<strong>__id=1&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=1&value=null__</strong> "
+                      "and adding retargeting in as your next audience to target.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.PRODUCT_CATALOG_SALES.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_PURCHASE.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.INCREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPR,
+             importance=RuleImportanceEnum.MEDIUM,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Dexter has identified that your cost per result has increased over the last __id=1&time_interval=7__ days. "
+                      "Have you tried creating a lookalikes campaign on messenger to bring your cost down even more? "
+                      "You can do this by duplicating your best performing ad "
+                      "<strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=2&value=null__</strong> "
+                      "and adding retargeting or lookalikes as your next audience to target.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.LINK_CLICKS.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_RESULT.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.INCREASING)
+             ]),
+    # messenger
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPR,
+             importance=RuleImportanceEnum.MEDIUM,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Dexter loves good results. However, we’ve seen your results decrease lately. Have you considered "
+                      "launching new ad copy or creatives to boost your results? You can do this by duplicating your best performing "
+                      "ad <strong>__id=1&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=1&value=null__</strong> "
+                      "now and changing the adcopy or creatives.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.MESSAGES.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.RESULTS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CTR,
+             importance=RuleImportanceEnum.MEDIUM,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="We've noticed your __id=1&metric_name=CTR&metric_type=1&antecedent_type=8__ decreasing over "
+                      "__id=1&time_interval=7__ days which is a sign of ad fatigue. "
+                      "Dexter suggests launching new ad creatives to help with this. Adding new creatives will give a boost to an existing campaign. "
+                      "You do this quickly by duplicating your best performing ad "
+                      "<strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=2&value=null__</strong> now "
+                      "and adding new creatives to this adset.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.LEAD_GENERATION.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.CTR.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CONVERSION_RATE,
+             importance=RuleImportanceEnum.LOW,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Dexter doesn’t like __id=1&metric_name=CR&metric_type=1&antecedent_type=8__ rates dropping by __id=1&value=null__% "
+                      "in the last __id=1&time_interval=7__ days. Usually CR drops are from ad fatigue, or it can be bad targeting. Refresh your ad creatives "
+                      "as a first step to give them a boost. You can do this by duplicating your best performing ad "
+                      "<strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=2&value=null__</strong> now!",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.LEAD_GENERATION.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.CR.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+    # lead generation
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPR,
+             importance=RuleImportanceEnum.HIGH,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ has decreased by "
+                      "__id=1&value=null__% in the last __id=1&time_interval=7__ days. "
+                      "Dexter suggests creating lookalikes from your most engaged customer base. You can do this by "
+                      "duplicating your best performing ad <strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0__"
+                      "__id=2&value=null__</strong> and adding a lookalike as your next audience to target.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.LEAD_GENERATION.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_RESULT.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_ROAS,
+             importance=RuleImportanceEnum.MEDIUM,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Your __id=1&metric_name=ROAS&metric_type=1&antecedent_type=7__ has decreased by "
+                      "__id=1&value=null__ in the last __id=1&time_interval=7__ days. "
+                      "We suggest you consider using lookalike audiences or custom audiences to increase your score. "
+                      "You can do this by duplicating your best performing ad "
+                      "<strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=2&value=null__</strong> "
+                      "and adding retargeting or lookalikes as your next audience to target.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.CONVERSIONS.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.ROAS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPC,
+             importance=RuleImportanceEnum.HIGH,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Your __id=1&metric_name=APP_INSTALLS&metric_type=1&antecedent_type=8__ has increased by __id=1&value=null__% "
+                      "in the last __id=1&time_interval=7__ days. Dexter recommends "
+                      "combining your best performing ad copy and creatives to decrease your cost per install. "
+                      "You could do this now by duplicating your best ad "
+                      "<strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=2&value=null__</strong> now.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.VALUE,
+                            metric=AvailableMetricEnum.OBJECTIVE.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=ObjectiveEnum.APP_INSTALLS.value),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_APP_INSTALL.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.INCREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPC,
+             importance=RuleImportanceEnum.LOW,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Your ad frequency on your campaign is near or above 3.0, which is when ads start to lose their effectiveness. Dexter "
+                      "suggests launching new ad creatives to help bring the score back down. "
+                      "Do this now by duplicating your best ad <strong>__id=1&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0__"
+                      "__id=1&value=null__ </strong> now!",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.APP_INSTALLS.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_VALUE,
+                            metric=AvailableMetricEnum.FREQUENCY.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.HIGH)
+             ]),
+    # app installs
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPR,
+             importance=RuleImportanceEnum.HIGH,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Your __id=1&metric_name=APP_INSTALLS&metric_type=1&antecedent_type=8__ "
+                      "are decreasing in the last __id=1&time_interval=7__ days. Dexter recommends AB testing new ad copy or "
+                      "new creatives to drive a better results with your app installs. "
+                      "You could start by duplicating this ad <strong>__id=2&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0__"
+                      "__id=2&value=null__</strong> now!.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.VALUE,
+                            metric=AvailableMetricEnum.OBJECTIVE.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=ObjectiveEnum.APP_INSTALLS.value),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.RESULTS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+
     # app Installs
     RuleBase(rtype=RuleTypeEnum.AUDIENCE,
              channel=ChannelEnum.FACEBOOK,
@@ -22,12 +317,14 @@ RULES_ADSET_GENERAL = [
              source=RuleSourceEnum.DEXTER,
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
-             redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your <id=1&metric_name=CPM&metric_type=1&antecedent_type=1> has increased too much "
-                      "for Dexter in the last <id=1&time_interval=7> days."
-                      " This could mean several things. However, Dexter suggests that you launch "
+             redirect=RuleRedirectEnum.DUPLICATE,
+             template="Your __id=1&metric_name=CPM&metric_type=1&antecedent_type=1__ has increased too much "
+                      "for Dexter in the last __id=1&time_interval=7__ days. "
+                      "This could mean several things. However, Dexter suggests that you launch "
                       "your best performing ads with "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null>.",
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ __id=2&value=null__. "
+                      "You can do this by duplicating this ad now "
+                      "<strong>__id=3&metric_name=DUPLICATE_AD&metric_type=10&antecedent_type=1&display_metric_name=0____id=3&value=null__</strong>.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -46,6 +343,7 @@ RULES_ADSET_GENERAL = [
              ]),
 
     # brand awareness
+    # TODO: should cpm be % in the value field?
     RuleBase(rtype=RuleTypeEnum.AUDIENCE,
              channel=ChannelEnum.FACEBOOK,
              category=RuleCategoryEnum.OPTIMIZE_TARGETING,
@@ -55,11 +353,11 @@ RULES_ADSET_GENERAL = [
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
              template="Dexter has been monitoring your campaigns very closely, and "
-                      "your <id=1&metric_name=CPM&metric_type=1&antecedent_type=1> "
-                      "has increased by <id=1&value=null>% in the last <id=1&time_interval=7> days. "
-                      "He recommends you try these new interests "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3>: "
-                      "<id=2&value=null>, to find the cheapest cost",
+                      "your __id=1&metric_name=CPM&metric_type=1&antecedent_type=1__ "
+                      "has increased by __id=1&value=null__% in the last __id=1&time_interval=7__ days. "
+                      "He recommends you try these new "
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ "
+                      "__id=2&value=null__, to find the cheapest cost between interests that are similar.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -86,10 +384,10 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=1> have decreased over "
-                      "the last <id=1&time_interval=7> days. Dexter "
-                      "suggests testing <id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5>: "
-                      "<id=2&value=null> to "
+             template="Your __id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=1__ have decreased over "
+                      "the last __id=1&time_interval=7__ days. Dexter "
+                      "suggests testing these __id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5__ "
+                      "__id=2&value=null__ to "
                       "help broaden your reach and get more results.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -117,9 +415,9 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Dexter sees your <id=1&metric_name=RSVPS&metric_type=1&antecedent_type=8> are decreasing by <id=1&value=null>% "
-                      "over the last <id=1&time_interval=7> days. Have you tried opening up your targeting to be broader? Dexter suggests targeting these interests "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5> <id=2&value=null> to get started.",
+             template="Dexter sees your __id=1&metric_name=RSVPS&metric_type=1&antecedent_type=8__ are decreasing by __id=1&value=null__% "
+                      "over the last __id=1&time_interval=7__ days. Have you tried opening up your targeting to be broader? Dexter suggests targeting these "
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5__ __id=2&value=null__ to get started.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -144,9 +442,9 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% in the last "
-                      "<id=1&time_interval=7> days. Dexter thinks you should add more interests in your targeting. Add these suggested interests "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5> <id=2&value=null> to get started.",
+             template="Your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ has increased by __id=1&value=null__% in the last "
+                      "__id=1&time_interval=7__ days. Dexter thinks you should add more interests in your targeting. Add these suggested "
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5__ __id=2&value=null__ to get started.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -164,34 +462,6 @@ RULES_ADSET_GENERAL = [
                             expected_value=LinguisticVariableEnum.INCREASING)
              ]),
 
-    # lead generation
-    RuleBase(rtype=RuleTypeEnum.BUDGET_AND_BID,
-             channel=ChannelEnum.FACEBOOK,
-             category=RuleCategoryEnum.OPTIMIZE_BUDGET,
-             importance=RuleImportanceEnum.HIGH,
-             source=RuleSourceEnum.DEXTER,
-             level=LevelEnum.ADSET,
-             action=ActionEnum.NONE,
-             redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="We love a steady flow of leads on the cheap. Nice work on your lead gen campaign, you're smashing it! Dexter suggests you "
-                      "increase your budget by 25% to maximize those leads!",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
-                                                  action_breakdown=ActionBreakdownEnum.NONE),
-             time_interval=DaysEnum.THREE_MONTHS,
-             connective=Connective(LogicOperatorEnum.AND),
-             antecedents=[
-                 # Antecedent(aid=1,
-                 #            atype=AntecedentTypeEnum.VALUE,
-                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
-                 #            operator=LogicOperatorEnum.EQUALS,
-                 #            expected_value=ObjectiveEnum.LEAD_GENERATION.value),
-                 Antecedent(aid=1,
-                            atype=AntecedentTypeEnum.FUZZY_TREND,
-                            metric=AvailableMetricEnum.LEADS.value,
-                            operator=LogicOperatorEnum.EQUALS,
-                            expected_value=LinguisticVariableEnum.INCREASING)
-             ]),
-
     # link clicks
     RuleBase(rtype=RuleTypeEnum.AUDIENCE,
              channel=ChannelEnum.FACEBOOK,
@@ -201,9 +471,9 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Dexter noticed your <id=1&metric_name=CPC&metric_type=1&antecedent_type=8> has increased by <id=1&value=null>% over "
-                      "the last <id=1&time_interval=7> days. Consider launching these new "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null> "
+             template="Dexter noticed your __id=1&metric_name=CPC&metric_type=1&antecedent_type=8__ has increased by __id=1&value=null__% over "
+                      "the last __id=1&time_interval=7__ days. Consider launching these new "
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ __id=2&value=null__ "
                       "to help grow your reach and find new users that'll convert at a lower cost.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -232,8 +502,8 @@ RULES_ADSET_GENERAL = [
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
              template="Dexter has identified that your cost per result has increased lately. Have you tried adding new interests to "
-                      "target? Do so now by adding the following <id=1&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> "
-                      "<id=1&value=null>.",
+                      "target? Do so now by adding the following __id=1&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ "
+                      "__id=1&value=null__.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -259,8 +529,8 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your messenger ads aren't reaching a enough people. Dexter suggests these "
-                      "id=1&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=1&value=null> to find new prospects you wouldn't have "
+             template="Your messenger ads aren't reaching enough people. Dexter suggests these "
+                      "__id=1&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ __id=1&value=null__ to find new prospects you wouldn't have "
                       "normally found otherwise!",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -288,10 +558,10 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Dexter has identified that your <id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=1> has decreased over the last "
-                      "<id=1&time_interval=7> days. We suggest you create a new adset and consider targeting the following "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null> "
-                      "to get more likes to your page. ",
+             template="Dexter has identified that your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ has decreased over the last "
+                      "__id=1&time_interval=7__ days. We suggest you create a new adset and consider targeting the following "
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ __id=2&value=null__ "
+                      "to get more likes to your page.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -316,9 +586,9 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=PAGE_LIKES&metric_type=1&antecedent_type=8> have decreased by  <id=1&value=null>% over the last "
-                      "<id=1&time_interval=7>days. Have you considered targeting "
-                      "these <id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null>?",
+             template="Your __id=1&metric_name=PAGE_LIKES&metric_type=1&antecedent_type=8__ have decreased by __id=1&value=null__% over the last "
+                      "__id=1&time_interval=7__ days. Have you considered targeting "
+                      "these __id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ __id=2&value=null__?",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -347,7 +617,7 @@ RULES_ADSET_GENERAL = [
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
              template="The bigger the audience the more impressions. This also means the more likely it is for your ad to be seen and engaged with. "
                       "Dexter recommends you target these "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5> <id=2&value=null> to reach more people. ",
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5__ __id=2&value=null__ to reach more people.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -374,9 +644,9 @@ RULES_ADSET_GENERAL = [
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Dexter has noticed your <id=1&metric_name=PURCHASES&metric_type=1&antecedent_type=8> have slowed down by <id=1&value=null>% "
-                      "over the last <id=1&time_interval=7> days. Try targeting these interests "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3> <id=2&value=null> to increase your sales!",
+             template="Dexter has noticed your __id=1&metric_name=PURCHASES&metric_type=1&antecedent_type=8__ have slowed down by __id=1&value=null__% "
+                      "over the last __id=1&time_interval=7__ days. Try targeting these "
+                      "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=3__ __id=2&value=null__ to increase your sales!",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -397,16 +667,43 @@ RULES_ADSET_GENERAL = [
     # reach
     RuleBase(rtype=RuleTypeEnum.AUDIENCE,
              channel=ChannelEnum.FACEBOOK,
-             category=RuleCategoryEnum.IMPROVE_CPR,
-             importance=RuleImportanceEnum.HIGH,
+             category=RuleCategoryEnum.IMPROVE_ROAS,
+             importance=RuleImportanceEnum.MEDIUM,
              source=RuleSourceEnum.DEXTER,
              level=LevelEnum.ADSET,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your <id=1&metric_name=FREQUENCY&metric_type=1&antecedent_type=1> is fairly high <id=1&value=null>  in the last "
-                      "id=1&time_interval=7> days compared to our industry benchmarks. Have you considered these audiences "
-                      "<id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5> <id=2&value=null>? "
-                      "Let's test them now, and we'll find the best performing ad for you!",
+             template="Your __id=1&metric_name=ROAS&metric_type=1&antecedent_type=7__ has decreased by __id=1&value=null__ in the last __id=1&time_interval=7__ days. "
+                      "Have you optimized for the best age and gender, or looked at your best performing placement "
+                      "to make sure your ad is set up for maximum success?",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.PRODUCT_CATALOG_SALES.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.ROAS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
+    # TODO: modified CPM from percentage to value
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_CPR,
+             importance=RuleImportanceEnum.MEDIUM,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.NONE,
+             redirect=RuleRedirectEnum.EDIT_STRUCTURE,
+             template="Your __id=1&metric_name=CPM&metric_type=1&antecedent_type=1__ has increased by __id=1&value=null__ in the last "
+                      "__id=1&time_interval=3__ days. It’s one of two reasons: Your frequency is high or your ad isn’t resonating with your "
+                      "target audience. Take a look and make the right adjustments!",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -419,10 +716,96 @@ RULES_ADSET_GENERAL = [
                  #            expected_value=ObjectiveEnum.REACH.value),
                  Antecedent(aid=1,
                             atype=AntecedentTypeEnum.FUZZY_VALUE,
-                            metric=AvailableMetricEnum.FREQUENCY.value,
+                            metric=AvailableMetricEnum.CPM.value,
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=LinguisticVariableEnum.HIGH)
              ]),
-
-    #  video views
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_ENGAGEMENT,
+             importance=RuleImportanceEnum.HIGH,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.NONE,
+             redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
+             template="Your __id=1&metric_name=COST_PER_THRUPLAY&metric_type=1&antecedent_type=8__ has gone up by "
+                      "__id=1&value=null__% over the last __id=1&time_interval=7__ days. "
+                      "Have you optimised your delivery by age and gender or for the best performing placement?",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.VIDEO_VIEWS.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_THRUPLAY.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.INCREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.CREATIVE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_ENGAGEMENT,
+             importance=RuleImportanceEnum.HIGH,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.NONE,
+             redirect=RuleRedirectEnum.EDIT_STRUCTURE,
+             template="Your videos are smashing it and your cost per play is really competitive. Have you tried creating more videos for other "
+                      "campaigns that you're running?",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.VIDEO_VIEWS.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_THRUPLAY.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.VIDEO_PLAYS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.INCREASING)
+             ]),
+    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+             channel=ChannelEnum.FACEBOOK,
+             category=RuleCategoryEnum.IMPROVE_ROAS,
+             importance=RuleImportanceEnum.MEDIUM,
+             source=RuleSourceEnum.DEXTER,
+             level=LevelEnum.ADSET,
+             action=ActionEnum.DUPLICATE,
+             redirect=RuleRedirectEnum.CREATE_LOOKALIKE_AUDIENCE,
+             template="Did you know that you can bring your "
+                      "__id=1&metric_name=COST_PER_PURCHASE&metric_type=1&antecedent_type=8__ down significantly "
+                      "by running retargeting campaigns? Start this process now to see better results! "
+                      "You can do this by duplicating your best performing ad <strong>__id=2&metric_name=DUPLICATE_AD"
+                      "&metric_type=10&antecedent_type=1&display_metric_name=0____id=2&value=null__</strong> and adding "
+                      "retargeting in as your next audience to target.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
+                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE_MONTHS,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 # Antecedent(aid=1,
+                 #            atype=AntecedentTypeEnum.VALUE,
+                 #            metric=AvailableMetricEnum.OBJECTIVE.value,
+                 #            operator=LogicOperatorEnum.EQUALS,
+                 #            expected_value=ObjectiveEnum.LEAD_GENERATION.value),
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=AvailableMetricEnum.COST_PER_RESULT.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=LinguisticVariableEnum.DECREASING)
+             ]),
 ]

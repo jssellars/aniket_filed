@@ -6,35 +6,26 @@ spec:
   selector:
     matchLabels:
       run: prod-filed-potter-facebook-accounts-api
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1       
+      maxSurge: 1
       maxUnavailable: 0
   template:
     metadata:
       labels:
         run: prod-filed-potter-facebook-accounts-api
     spec:
+      hostAliases:
+        - ip: "192.168.5.223"
+          hostnames:
+            - "prod.filed.com"
       imagePullSecrets:
-      - name: regcred        
+        - name: regcred
       containers:
-      - name: prod-filed-potter-facebook-accounts-api
-        image: ct.filed.com/prod-filed-potter-facebook-accounts-api:v0.1
-        imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /api/v1/facebook-accounts/version
-            port: 47200
-          initialDelaySeconds: 5
-          periodSeconds: 5  
-        ports: 
-        - containerPort : 47200
-      #   volumeMounts:
-      #   - name: persistent-storage
-      #     mountPath: /app/Filed.Users.API/logs
-      # volumes:
-      # - name: persistent-storage
-      #   persistentVolumeClaim:
-      #     claimName: mss-logs-claim
+        - name: prod-filed-potter-facebook-accounts-api
+          image: ct.filed.com/prod-filed-potter-facebook-accounts-api:v0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 47200

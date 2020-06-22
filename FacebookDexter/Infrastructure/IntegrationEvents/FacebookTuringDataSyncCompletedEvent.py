@@ -2,7 +2,7 @@ import math
 import typing
 from dataclasses import dataclass
 
-BATCH_SIZE = 0.01
+BATCH_SIZE = 0.1
 
 
 @dataclass

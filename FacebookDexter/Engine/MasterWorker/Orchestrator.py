@@ -1,6 +1,6 @@
 import traceback
 import typing
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from FacebookDexter.Engine.Algorithms.AlgorithmsFactory import AlgorithmsFactory
 from FacebookDexter.Engine.Algorithms.FuzzyfierFactory import FuzzyfierFactory
@@ -33,6 +33,31 @@ class Orchestrator(OrchestratorBuilder):
         self.startup = startup
 
         super().__init__()
+
+    def keep_latest_recommendations(self):
+
+        grouped_recommendations = {}
+        ids_to_deprecate = []
+        recommendations = self._recommendations_repository.get_active_recommendations()
+        for recommendation in recommendations:
+            id = recommendation['recommendation_id']
+            time_interval = recommendation['time_interval']
+            ad_account_id = recommendation['ad_account_id']
+            metric = recommendation['metrics'][0]['display_name']
+            breakdown = recommendation['breakdown']['name']
+            level = recommendation['level']
+
+            group_tuple = (ad_account_id, metric, breakdown, level)
+            if group_tuple not in grouped_recommendations.keys():
+                grouped_recommendations[group_tuple] = [(id, time_interval)]
+            else:
+                grouped_recommendations[group_tuple].append((id, time_interval))
+
+        for rec_list in grouped_recommendations.values():
+            sorted_rec_list = sorted(rec_list, key=lambda x: x[1]['value'])
+            ids_to_deprecate = list(map(lambda x: x[0], sorted_rec_list))
+
+        self._recommendations_repository.deprecate_recommendations(recommendation_ids=ids_to_deprecate)
 
     def orchestrate(self):
         query = DexterJournalMongoRepositoryHelper.get_search_for_other_instances_query(
@@ -73,15 +98,17 @@ class Orchestrator(OrchestratorBuilder):
         fuzzyfier_factory = FuzzyfierFactory.get(algorithm_type=alg_type, level=level)
 
         try:
-            rule_algorithm = rule_algorithm. \
-                set_business_owner_id(self.business_owner_id). \
-                set_facebook_config(self.startup.facebook_config). \
-                set_business_owner_repo_session(self.startup.session). \
-                set_external_services(self.startup.external_services). \
-                set_dexter_config(self.startup.dexter_config). \
-                set_repository(self._data_repository). \
-                set_fuzzyfier_factory(fuzzyfier_factory). \
-                set_rules(rules)
+            rule_algorithm = (rule_algorithm.
+                              set_business_owner_id(self.business_owner_id).
+                              set_facebook_config(self.startup.facebook_config).
+                              set_business_owner_repo_session(self.startup.session).
+                              set_external_services(self.startup.external_services).
+                              set_dexter_config(self.startup.dexter_config).
+                              set_fuzzyfier_factory(fuzzyfier_factory).
+                              set_rules(rules).
+                              set_debug_mode(self.startup.debug).
+                              set_mongo_config(self.startup.mongo_config).
+                              create_mongo_repository())
         except Exception as e:
             raise e
 
@@ -146,7 +173,9 @@ class Orchestrator(OrchestratorBuilder):
     def __run_algorithm(self, search_query):
         try:
             if not self.startup.dexter_config.date_stop:
-                self.startup.dexter_config.date_stop = datetime.now()
+                date_stop = datetime.now() - timedelta(days=1)
+            else:
+                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - timedelta(days=1)
             for time_interval in self.startup.dexter_config.time_intervals:
                 time_interval_enum = DaysEnum(time_interval)
                 campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
@@ -155,15 +184,16 @@ class Orchestrator(OrchestratorBuilder):
                     rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.CAMPAIGN)
                     rule_evaluator.set_time_interval(time_interval_enum)
                     algorithm.set_rule_evaluator(rule_evaluator)
-                    should_run = algorithm. \
-                        set_dexter_config(self.startup.dexter_config). \
-                        set_repository(self._data_repository). \
-                        set_date_stop(self.startup.dexter_config.date_stop).\
-                        set_time_interval(time_interval_enum). \
-                        check_run_status(campaign_id)
-
+                    should_run = (algorithm.
+                                  set_dexter_config(self.startup.dexter_config).
+                                  set_date_stop(date_stop).
+                                  set_time_interval(time_interval_enum).
+                                  check_run_status(campaign_id))
                     if should_run:
                         recommendations = algorithm.run(campaign_id)
+                        # algorithm.close_mongo_repository()
+
+                        print("{} --> {}".format(campaign_id, len(recommendations)))
                         self._recommendations_repository.save_recommendations(recommendations,
                                                                               self.startup.dexter_config.recommendation_days_last_updated)
                         adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
@@ -171,25 +201,28 @@ class Orchestrator(OrchestratorBuilder):
                             algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.ADSET)
                             rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.ADSET)
                             rule_evaluator.set_time_interval(time_interval_enum)
-                            algorithm.set_rule_evaluator(rule_evaluator).\
-                                set_time_interval(time_interval_enum).\
-                                set_date_stop(self.startup.dexter_config.date_stop)
+                            algorithm.set_rule_evaluator(rule_evaluator). \
+                                set_time_interval(time_interval_enum). \
+                                set_date_stop(date_stop)
                             recommendations = algorithm.run(adset_id)
+                            # algorithm.close_mongo_repository()
+
                             self._recommendations_repository.save_recommendations(recommendations,
                                                                                   self.startup.dexter_config.recommendation_days_last_updated)
-
                             algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.AD)
                             rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.AD)
                             rule_evaluator.set_time_interval(time_interval_enum)
-                            algorithm.set_rule_evaluator(rule_evaluator). \
-                                set_time_interval(time_interval_enum). \
-                                set_date_stop(self.startup.dexter_config.date_stop)
+                            (algorithm.set_rule_evaluator(rule_evaluator).
+                             set_time_interval(time_interval_enum).
+                             set_date_stop(date_stop))
                             recommendations = algorithm.run(adset_id)
+                            # algorithm.close_mongo_repository()
+
                             self._recommendations_repository.save_recommendations(recommendations,
                                                                                   self.startup.dexter_config.recommendation_days_last_updated)
+                        # algorithm.close_mongo_repository()
 
                     update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
-
                     self._journal_repository.update_one(search_query, update_query)
 
         except Exception as failed_to_run_exception:
@@ -197,6 +230,8 @@ class Orchestrator(OrchestratorBuilder):
             traceback.print_exc()
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_failed()
             self._journal_repository.update_one(search_query, update_query)
+
+        self.keep_latest_recommendations()
 
     def __create_journal_entry_object(self, run_status):
         journal_object = DexterJournalEntryModel()

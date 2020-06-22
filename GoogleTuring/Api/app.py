@@ -3,8 +3,11 @@ import os
 import sys
 
 from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, \
-    AdsManagerCatalogsViewsByLevelEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint
+    AdsManagerCatalogsViewsByLevelEndpoint, AdsManagerReportsEndpoint, AdsManagerDimensionsEndpoint, \
+    AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetAdsEndpoint, \
+    AdsManagerGetAdGroupsEndpoint, \
+    AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, \
     AdsManagerInsightsWithTotalsEndpoint
 from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
@@ -34,6 +37,18 @@ jwt = JWTManager(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 api = Api(app)
+reports_controller = "{base_url}/get-reports".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportsEndpoint, reports_controller)
+
+dimensions_controller = "{base_url}/get-dimensions".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerDimensionsEndpoint, dimensions_controller)
+
+metrics_controller = "{base_url}/get-metrics".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerMetricsEndpoint, metrics_controller)
+
+breakdowns_controller = "{base_url}/get-breakdowns".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerBreakdownsEndpoint, breakdowns_controller)
+
 views_controller = "{base_url}/views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsMetaColumnsEndpoint, views_controller)
 
@@ -47,16 +62,29 @@ api.add_resource(AdsManagerInsightsEndpoint, insights_controller)
 insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
 
+# Structures
+structures_controller = "{base_url}/campaigns/<string:account_id>".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerGetCampaignsEndpoint, structures_controller)
+
+structures_controller = "{base_url}/adgroups/<string:account_id>".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerGetAdGroupsEndpoint, structures_controller)
+
+structures_controller = "{base_url}/ads/<string:account_id>".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerGetAdsEndpoint, structures_controller)
+
+structures_controller = "{base_url}/keywords/<string:account_id>".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerGetKeywordsEndpoint, structures_controller)
+
 # Structure updates
 structure_details_controller = "{base_url}/<int:account_id>/<string:level>/<int:structure_id>".format(
     base_url=startup.base_url.lower())
 api.add_resource(AdsManagerEndpoint, structure_details_controller)
 
 # Version / Healthcheck
-healthcheck_controller = "{base_url}/turing/healthcheck".format(base_url=startup.base_url.lower())
+healthcheck_controller = "{base_url}/healthcheck".format(base_url=startup.base_url.lower())
 api.add_resource(HealthCheckEndpoint, healthcheck_controller)
 
-version_controller = "{base_url/turing/version".format(base_url=startup.base_url.lower())
+version_controller = "{base_url}/version".format(base_url=startup.base_url.lower())
 api.add_resource(VersionEndpoint, version_controller)
 
 if __name__ == "__main__":

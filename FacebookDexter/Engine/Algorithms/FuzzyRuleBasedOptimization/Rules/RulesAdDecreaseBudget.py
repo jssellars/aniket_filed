@@ -43,7 +43,7 @@ RULES_AD_DECREASE_BUDGET = [
              ]),
     RuleBase(rtype=RuleTypeEnum.BUDGET_AND_BID,
              channel=ChannelEnum.FACEBOOK,
-             category=RuleCategoryEnum.IMPROVE_CPR,
+             category=RuleCategoryEnum.IMPROVE_CPC,
              importance=RuleImportanceEnum.HIGH,
              source=RuleSourceEnum.DEXTER,
              level=LevelEnum.AD,

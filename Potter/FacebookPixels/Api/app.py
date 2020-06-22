@@ -35,10 +35,10 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
 # Version / Healthcheck
-healthcheck_controller = "{base_url}/facebook-pixels/healthcheck".format(base_url=startup.base_url.lower())
+healthcheck_controller = "{base_url}/healthcheck".format(base_url=startup.base_url.lower())
 api.add_resource(HealthCheckEndpoint, healthcheck_controller)
 
-version_controller = "{base_url}/facebook-pixels/version".format(base_url=startup.base_url.lower())
+version_controller = "{base_url}/version".format(base_url=startup.base_url.lower())
 api.add_resource(VersionEndpoint, version_controller)
 
 # Pixel insights catalogs controller

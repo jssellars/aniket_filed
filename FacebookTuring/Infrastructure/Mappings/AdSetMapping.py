@@ -23,6 +23,10 @@ class AdSetMapping(MapperBase):
             data = Tools.convert_to_json(data)
 
         data[MiscFieldsEnum.business_owner_facebook_id] = None
+
+        if GraphAPIInsightsFields.account_id in data.keys():
+            data[GraphAPIInsightsFields.account_id] = data.get(GraphAPIInsightsFields.account_id)
+
         if GraphAPIInsightsFields.name in data.keys():
             data[GraphAPIInsightsFields.adset_name] = data.get(GraphAPIInsightsFields.name)
 

@@ -97,7 +97,6 @@ class FieldsMetricEngagementMetadata:
                               facebook_fields=[GraphAPIInsightsFields.full_view_reach],
                               mapper=OneToOneFieldMapper(),
                               field_type=FieldType.INSIGHT)
-    #  TODO: find alternative method to get effect_share as it is not directly available from GraphAPI v5.0
     cost_per_page_engagement = Field(name="cost_per_page_engagement",
                                      facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
                                      mapper=ActionFieldMapper(field_filter=[
@@ -138,6 +137,22 @@ class FieldsMetricEngagementMetadata:
                                                                field_value=GraphAPIInsightsFields.new_messaging_connections)]),
                                       action_breakdowns=[GraphAPIInsightsFields.action_type],
                                       field_type=FieldType.ACTION_INSIGHT)
+    messaging_first_reply = Field(name="messaging_first_reply",
+                                  facebook_fields=[GraphAPIInsightsFields.actions],
+                                  mapper=ActionFieldMapper(field_filter=[
+                                      ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                           operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                           field_value=GraphAPIInsightsFields.new_messaging_connections)]),
+                                  action_breakdowns=[GraphAPIInsightsFields.action_type],
+                                  field_type=FieldType.ACTION_INSIGHT)
+    messaging_conversations_started = Field(name="messaging_conversations_started",
+                                            facebook_fields=[GraphAPIInsightsFields.actions],
+                                            mapper=ActionFieldMapper(field_filter=[
+                                                ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                                     operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                                     field_value=GraphAPIInsightsFields.messaging_conversation_started_7d)]),
+                                            action_breakdowns=[GraphAPIInsightsFields.action_type],
+                                            field_type=FieldType.ACTION_INSIGHT)
     blocked_messaging_connections = Field(name="blocked_messaging_connections",
                                           facebook_fields=[GraphAPIInsightsFields.actions],
                                           mapper=ActionFieldMapper(field_filter=[
@@ -154,6 +169,32 @@ class FieldsMetricEngagementMetadata:
                                                                        field_value=GraphAPIInsightsFields.new_messaging_connections)]),
                                               action_breakdowns=[GraphAPIInsightsFields.action_type],
                                               field_type=FieldType.ACTION_INSIGHT)
+    cost_per_messaging_first_reply = Field(name="cost_per_messaging_first_reply",
+                                           facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
+                                           mapper=ActionFieldMapper(field_filter=[
+                                               ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                                    operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                                    field_value=GraphAPIInsightsFields.new_messaging_connections)]),
+                                           action_breakdowns=[GraphAPIInsightsFields.action_type],
+                                           field_type=FieldType.ACTION_INSIGHT)
+    cost_per_blocked_messaging_connections = Field(name="cost_per_blocked_messaging_connections",
+                                                   facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
+                                                   mapper=ActionFieldMapper(field_filter=[
+                                                       ActionFieldCondition(
+                                                           field_name=GraphAPIInsightsFields.action_type,
+                                                           operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                           field_value=GraphAPIInsightsFields.blocked_messaging_connections)]),
+                                                   action_breakdowns=[GraphAPIInsightsFields.action_type],
+                                                   field_type=FieldType.ACTION_INSIGHT)
+    cost_per_messaging_conversation_started = Field(name="cost_per_messaging_conversation_started",
+                                                    facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
+                                                    mapper=ActionFieldMapper(field_filter=[
+                                                        ActionFieldCondition(
+                                                            field_name=GraphAPIInsightsFields.action_type,
+                                                            operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                            field_value=GraphAPIInsightsFields.messaging_conversation_started_7d)]),
+                                                    action_breakdowns=[GraphAPIInsightsFields.action_type],
+                                                    field_type=FieldType.ACTION_INSIGHT)
     continuous_video_plays_2s_unique = Field(name="continuous_video_plays_2s_unique",
                                              facebook_fields=[GraphAPIInsightsFields.unique_actions],
                                              mapper=ActionFieldMapper(field_filter=[
@@ -277,6 +318,14 @@ class FieldsMetricEngagementMetadata:
                                                                        field_value=GraphAPIInsightsFields.video_view)]),
                                               action_breakdowns=[GraphAPIInsightsFields.action_type],
                                               field_type=FieldType.ACTION_INSIGHT)
+    cost_per_video_view = Field(name="cost_per_video_view",
+                                facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
+                                mapper=ActionFieldMapper(field_filter=[
+                                    ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                         operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                         field_value=GraphAPIInsightsFields.video_view)]),
+                                action_breakdowns=[GraphAPIInsightsFields.action_type],
+                                field_type=FieldType.ACTION_INSIGHT)
     cost_per_thru_play = Field(name="cost_per_thru_play",
                                facebook_fields=[GraphAPIInsightsFields.cost_per_thruplay],
                                mapper=ActionFieldMapper(
@@ -301,6 +350,39 @@ class FieldsMetricEngagementMetadata:
                                                                       field_value=GraphAPIInsightsFields.link_click)]),
                                action_breakdowns=[GraphAPIInsightsFields.action_type],
                                field_type=FieldType.ACTION_INSIGHT)
+    inline_link_click = Field(name=GraphAPIInsightsFields.inline_link_click,
+                              facebook_fields=[GraphAPIInsightsFields.inline_link_click],
+                              mapper=OneToOneFieldMapper(),
+                              field_type=FieldType.INSIGHT)
+    inline_link_click_ctr = Field(name=GraphAPIInsightsFields.inline_link_click_ctr,
+                                  facebook_fields=[GraphAPIInsightsFields.inline_link_click_ctr],
+                                  mapper=OneToOneFieldMapper(),
+                                  field_type=FieldType.INSIGHT)
+    unique_inline_link_click = Field(name=GraphAPIInsightsFields.unique_inline_link_click,
+                                     facebook_fields=[GraphAPIInsightsFields.unique_inline_link_click],
+                                     mapper=OneToOneFieldMapper(),
+                                     field_type=FieldType.INSIGHT)
+    unique_inline_link_click_ctr = Field(name=GraphAPIInsightsFields.unique_inline_link_click_ctr,
+                                         facebook_fields=[GraphAPIInsightsFields.unique_inline_link_click_ctr],
+                                         mapper=OneToOneFieldMapper(),
+                                         field_type=FieldType.INSIGHT)
+    cost_per_inline_link_click = Field(name=GraphAPIInsightsFields.cost_per_inline_link_click,
+                                       facebook_fields=[GraphAPIInsightsFields.cost_per_inline_link_click],
+                                       mapper=OneToOneFieldMapper(),
+                                       field_type=FieldType.INSIGHT)
+    cost_per_unique_inline_link_click = Field(name=GraphAPIInsightsFields.cost_per_unique_inline_link_click,
+                                              facebook_fields=[
+                                                  GraphAPIInsightsFields.cost_per_unique_inline_link_click],
+                                              mapper=OneToOneFieldMapper(),
+                                              field_type=FieldType.INSIGHT)
+    inline_post_engagement = Field(name=GraphAPIInsightsFields.inline_post_engagement,
+                                   facebook_fields=[GraphAPIInsightsFields.inline_post_engagement],
+                                   mapper=OneToOneFieldMapper(),
+                                   field_type=FieldType.INSIGHT)
+    cost_per_inline_post_engagement = Field(name=GraphAPIInsightsFields.cost_per_inline_post_engagement,
+                                            facebook_fields=[GraphAPIInsightsFields.cost_per_inline_post_engagement],
+                                            mapper=OneToOneFieldMapper(),
+                                            field_type=FieldType.INSIGHT)
     outbound_clicks = Field(name="outbound_clicks",
                             facebook_fields=[GraphAPIInsightsFields.outbound_clicks],
                             mapper=ActionFieldMapper(

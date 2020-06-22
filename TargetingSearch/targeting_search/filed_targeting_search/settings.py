@@ -24,7 +24,20 @@ SECRET_KEY = '6v^a2pol*s6i%jc54hrspt-b=pb+dkzwzxth)(9_7nhi-!p3o2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['35.176.104.149', 'localhost', '127.0.0.1', 'targetingsearch.filed.com']
+ALLOWED_HOSTS = ['35.176.104.149',
+                 'localhost',
+                 '127.0.0.1',
+                 'targetingsearch.filed.com',
+                 'dev2-filed-targeting-search',
+                 'dev2-filed-targeting-search.filed.com',
+                 'prod-filed-targeting-search.filed.com',
+                 'prod-filed-targeting-search',
+                 'dev-api-facebook-potter-adpreview.filed.com',
+                 'dev2-api-facebook-potter-targetingsearch.filed.com',
+                 'staging-api-facebook-potter-targetingsearch.filed.com',
+                 'prod-api-facebook-potter-targetingsearch.filed.com',
+                 'prodbak-api-facebook-potter-targetingsearch.filed.com']
+
 APPEND_SLASH = False
 
 # Application definition
@@ -41,7 +54,8 @@ INSTALLED_APPS = [
     'language',
     'location',
     'corsheaders',
-    'algorithms'
+    'algorithms',
+    'misc'
 ]
 
 MIDDLEWARE = [

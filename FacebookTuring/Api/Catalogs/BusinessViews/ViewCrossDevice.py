@@ -1,5 +1,5 @@
-from FacebookTuring.Api.Catalogs.Views.ViewBase import View
-from FacebookTuring.Api.Catalogs.Views.ViewColumnsMaster import ViewColumnsMaster
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import View
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
 
 
 class ViewCrossDeviceBase(View):

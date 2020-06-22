@@ -33,7 +33,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Staging.Facebook.Potter.FacebookAccounts"
+    "name": "Staging.Filed.Facebook.Potter.Accounts"
   },
   "mongo_database": {
     "ssh_tunnel": true,

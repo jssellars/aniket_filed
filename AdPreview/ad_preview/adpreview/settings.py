@@ -71,6 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'adpreview.wsgi.application'
 
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -132,4 +133,12 @@ CSRF_COOKIE_SECURE = True
 
 X_FRAME_OPTIONS = 'DENY'
 
-ALLOWED_HOSTS = ['localhost', '35.178.206.139', 'adpreview.filed.com', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost',
+                 '3.8.156.37',
+                 'dev.api.facebook.potter.adpreview.filed.com',
+                 '127.0.0.1',
+                 'dev-api-facebook-potter-adpreview.filed.com',
+                 'dev2-api-facebook-potter-adpreview.filed.com',
+                 'staging-api-facebook-potter-adpreview.filed.com',
+                 'prod-api-facebook-potter-adpreview.filed.com',
+                 'prodbak-api-facebook-potter-adpreview.filed.com']

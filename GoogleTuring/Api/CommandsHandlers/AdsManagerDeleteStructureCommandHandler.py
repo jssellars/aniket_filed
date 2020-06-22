@@ -3,7 +3,7 @@ from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleTuringStructuresMongoRepository import \
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
 
 

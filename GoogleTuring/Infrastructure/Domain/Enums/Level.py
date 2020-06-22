@@ -9,6 +9,7 @@ class Level(Enum):
     CAMPAIGN = 'campaign'
     AD_GROUP = 'adgroup'
     AD = 'ad'
+    KEYWORDS = 'keywords'
 
 
 LEVEL_TO_FIELDS = {

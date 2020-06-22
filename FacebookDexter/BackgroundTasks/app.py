@@ -15,7 +15,6 @@ from FacebookDexter.BackgroundTasks.Startup import startup, rabbit_logger, logge
 from FacebookDexter.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
-from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterRecommendationsMongoRepository import \
     DexterRecommendationsMongoRepository
 
@@ -41,7 +40,6 @@ def callback(ch, method, properties, body):
 
     try:
         # initialize all repos
-        data_repository = DexterMongoRepository(config=startup.mongo_config)
         recommendations_repository = DexterRecommendationsMongoRepository(config=startup.mongo_config,
                                                                           database_name=startup.mongo_config.recommendations_database_name,
                                                                           collection_name=startup.mongo_config.recommendations_collection_name)
@@ -51,7 +49,6 @@ def callback(ch, method, properties, body):
 
         request_handler. \
             set_startup(startup). \
-            set_data_repository(data_repository). \
             set_journal_repository(journal_repository). \
             set_recommendations_repository(recommendations_repository). \
             handle(body)

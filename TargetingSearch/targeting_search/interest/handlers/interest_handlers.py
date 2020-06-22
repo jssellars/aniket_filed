@@ -1,10 +1,12 @@
 import json
 from copy import deepcopy
 
+from django.core import serializers
+
 from algorithms.string_matching import match_strings
 from app_config.app_config import FACEBOOK_CONFIG
-from django.core import serializers
 from interest.handlers.interests_search import search_interests, suggest_interests
+from interest.handlers.interests_tree_handler import get_interests_tree_handler
 from interest.models import *
 from tools.facebook_worker import FacebookInterestsWorker
 
@@ -25,7 +27,10 @@ def get_all_handler():
 
 
 def get_interest_by_key_handler(interest_key):
-    results = json.loads(serializers.serialize('json', RawInterest.objects.filter(key=interest_key)))[0]['fields']
+    if not interest_key:
+        results = json.loads(serializers.serialize('json', RawInterest.objects.filter(key=interest_key)))[0]['fields']
+    else:
+        results = get_interests_tree_handler()
     try:
         results['path'] = json.loads(results['path'])
     except KeyError:
@@ -44,6 +49,7 @@ def search_interest_handler(search_input):
 
 def suggest_interests_handlers(interests):
     suggested_interests = suggest_interests(interests=interests)
+    suggested_interests = get_interests_tree_handler(suggested_interests)
 
     return suggested_interests
 

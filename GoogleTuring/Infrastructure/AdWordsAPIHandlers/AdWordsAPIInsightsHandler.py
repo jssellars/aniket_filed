@@ -1,4 +1,4 @@
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.Startup import startup  # todo: inject this.
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIBaseHandler import AdWordsAPIBaseHandler
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import REPORT_TO_STATUS_FIELD
 from GoogleTuring.Infrastructure.GoogleAdWordsAPI.AdWordsInsightsClient import AdWordsInsightsClient

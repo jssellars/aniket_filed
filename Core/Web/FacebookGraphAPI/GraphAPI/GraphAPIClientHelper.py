@@ -57,8 +57,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
                 if not isinstance(partial_response, Exception) and partial_response:
                     partial_responses.append(deepcopy(partial_response))
                 elif isinstance(partial_response, Exception):
-                    # todo: log error
-                    pass
+                    raise partial_response
             # Combine partial responses for different groups of fields into one response
             response = self._combine_partial_responses(partial_responses, config.required_field)
         except Exception as e:
@@ -98,8 +97,8 @@ class GraphAPIGetHelper(HTTPRequestBase):
     def sorted_zip_longest(l1, l2, key, fillvalue=None):
         if fillvalue is None:
             fillvalue = {}
-        l1 = iter(sorted(l1, key=lambda x: x[key]))
-        l2 = iter(sorted(l2, key=lambda x: x[key]))
+        l1 = iter(sorted(l1, key=lambda x: x.get(key)))
+        l2 = iter(sorted(l2, key=lambda x: x.get(key)))
         u = next(l1, None)
         v = next(l2, None)
 

@@ -39,6 +39,7 @@ class Startup(object):
         self.exchange_details.outbound_queue = QueueDetails(direct_exchange_config["queues"]["outbound"],
                                                             direct_exchange_config["queues"]["outbound_routing_key"])
 
+        self.debug = app_config["debug"]
         self.environment = app_config["environment"]
         self.service_name = app_config["service_name"]
         self.service_version = app_config["service_version"]

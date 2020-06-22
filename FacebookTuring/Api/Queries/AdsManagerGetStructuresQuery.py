@@ -18,7 +18,6 @@ class AdsManagerGetStructuresQuery:
                                                collection_name=collection_name)
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id)
-            repository.close()
             if not response:
                 return
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
@@ -37,7 +36,6 @@ class AdsManagerGetStructuresQuery:
                                                database_name=startup.mongo_config.structures_database_name,
                                                collection_name=collection_name)
             structure_details = repository.get_structure_details(Level(level), facebook_id)
-            repository.close()
             if not structure_details:
                 return
 

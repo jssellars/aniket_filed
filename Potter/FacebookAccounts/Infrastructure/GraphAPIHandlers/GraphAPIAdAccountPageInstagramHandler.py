@@ -1,4 +1,3 @@
-# todo: check after reapply for permissions. Requires manage_pages permission to access
 import typing
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase

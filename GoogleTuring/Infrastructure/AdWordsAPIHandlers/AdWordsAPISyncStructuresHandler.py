@@ -7,9 +7,9 @@ from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.StructuresSynchronizer import StructuresSynchronizer
 from GoogleTuring.Infrastructure.Domain.Enums.GoogleAccountStatus import GoogleAccountStatus
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleBusinessOwnerMongoRepository import \
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoRepository import \
     GoogleBusinessOwnerMongoRepository
-from GoogleTuring.Infrastructure.PersistanceLayer.GoogleTuringStructuresMongoRepository import \
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
 
 
@@ -85,4 +85,3 @@ class AdWordsAPISyncStructuresHandler:
             else:
                 mongo_repository.add_one(google_account_doc)
 
-        mongo_conn_handler.close()

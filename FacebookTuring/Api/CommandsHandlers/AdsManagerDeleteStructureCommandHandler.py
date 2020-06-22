@@ -10,6 +10,14 @@ class AdsManagerDeleteStructureCommandHandler:
 
     @classmethod
     def handle(cls, level, facebook_id, business_owner_facebook_id):
+        repository = TuringMongoRepository(config=startup.mongo_config,
+                                           database_name=startup.mongo_config['structures_database_name'],
+                                           collection_name=level)
+
+        existing_structure_id = repository.get_structure_details(level=Level(level), key_value=facebook_id)
+        if not existing_structure_id:
+            return False
+
         # get business owner permanent Facebook token
         business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
             business_owner_facebook_id)
@@ -24,10 +32,10 @@ class AdsManagerDeleteStructureCommandHandler:
 
         # Update structure to REMOVED in our DB
         try:
-            repository = TuringMongoRepository(config=startup.mongo_config,
-                                               database_name=startup.mongo_config['structures_database_name'],
-                                               collection_name=level)
-            repository.change_status(level=Level(level), new_status=StructureStatusEnum.REMOVED.value)
-            repository.close()
+            repository.change_status(level=Level(level),
+                                     new_status=StructureStatusEnum.REMOVED.value,
+                                     key_value=facebook_id)
         except Exception as e:
             raise e
+
+        return True

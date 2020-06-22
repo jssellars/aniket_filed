@@ -10,7 +10,7 @@ ENV PYTHON_SOLUTION_PATH=''
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/uwsgi.ini
 
-COPY ./TargetingSearch/targeting_search /app
+COPY ./TargetingSearch/targeting_search/ /app
 
 WORKDIR /app
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

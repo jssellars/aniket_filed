@@ -101,7 +101,6 @@ class GraphAPIPixelHandler:
                       pixel_stats: typing.List[GraphAPIPixelStatsDto] = None,
                       errors: typing.List[typing.Any] = None) -> Pixel:
         # todo: add pixel total count
-
         pixel_dto = Pixel()
         pixel_dto.details_as_json = object_to_json(pixel)
         try:

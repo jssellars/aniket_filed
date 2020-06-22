@@ -5,7 +5,6 @@ from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Fuzzifiers.RuleBasedOptimizationFuzzyfierFactory import \
     RuleBasedOptimizationFuzzyfierFactory
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules import Rules
-from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Rules.RuleEvaluator import RuleEvaluator
@@ -28,6 +27,8 @@ class RuleBasedOptimizationBuilder:
         self.__logger = None
         self._date_stop = None
         self._time_interval = None
+        self._debug = None
+        self._mongo_config = None
 
     def get_logger(self):
         if self._mongo_repository is not None:
@@ -81,4 +82,20 @@ class RuleBasedOptimizationBuilder:
 
     def set_time_interval(self, time_interval: DaysEnum = None):
         self._time_interval = time_interval
+        return self
+
+    def set_debug_mode(self, debug):
+        self._debug = debug
+        return self
+
+    def set_mongo_config(self, mongo_config: typing.Any = None):
+        self._mongo_config = mongo_config
+        return self
+
+    def create_mongo_repository(self):
+        self._mongo_repository = DexterMongoRepository(config=self._mongo_config)
+        return self
+
+    def close_mongo_repository(self):
+        self._mongo_repository.close()
         return self

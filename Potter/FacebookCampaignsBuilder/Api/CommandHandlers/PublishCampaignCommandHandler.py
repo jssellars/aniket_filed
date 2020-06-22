@@ -6,19 +6,30 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Potter.FacebookCampaignsBuilder.Api.Startup import startup, rabbit_logger
 from Potter.FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderHandler import \
     GraphAPIAdBuilderHandler
 from Potter.FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdSetBuilderHandler import \
     GraphAPIAdSetBuilderHandler
 from Potter.FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPICampaignBuilderHandler import \
     GraphAPICampaignBuilderHandler
+from Potter.FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignCreatedEvent
+from Potter.FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEventMapping import \
+    CampaignCreatedEventMapping
 
 
 class PublishCampaignCommandHandler(object):
 
     @classmethod
-    def handle(cls, request: typing.Dict = None, facebook_config: typing.Any = None, permanent_token: str = None):
+    def handle(cls,
+               request: typing.Dict = None,
+               business_owner_id: typing.AnyStr = None,
+               facebook_config: typing.Any = None,
+               permanent_token: str = None) -> typing.List[typing.Dict]:
+
         _ = GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
         campaignStructure = request['campaign_optimization_details']['campaign_structure']
@@ -114,6 +125,15 @@ class PublishCampaignCommandHandler(object):
                 cls._DeleteIncompleteCampaigns(campaignTree)
                 raise e
 
+        try:
+            mapper = CampaignCreatedEventMapping(target=CampaignCreatedEvent)
+            response = mapper.load(campaignTree)
+            response.business_owner_id = business_owner_id
+            response.account_id = request['ad_account_id']
+            cls.publish_response(response)
+        except Exception as e:
+            raise e
+
         return campaignTree
 
     @staticmethod
@@ -158,5 +178,20 @@ class PublishCampaignCommandHandler(object):
         try:
             ad = Ad(fbid=facebookId)
             ad.api_delete()
+        except Exception as e:
+            raise e
+
+    @classmethod
+    def publish_response(cls, response):
+        try:
+            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name,
+                                             startup.exchange_details.outbound_queue.key)
+            rabbitmq_client.publish(response)
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+                                    name=response.message_type,
+                                    extra_data={
+                                        "event_body": rabbitmq_client.serialize_message(response)
+                                    })
+            rabbit_logger.logger.info(log.to_dict())
         except Exception as e:
             raise e

@@ -1,5 +1,5 @@
-from FacebookTuring.Api.Catalogs.Views.ViewBase import View
-from FacebookTuring.Api.Catalogs.Views.ViewColumnsMaster import ViewColumnsMaster
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import View
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
 
 
 class ViewCampaignPerformance(View):
@@ -59,15 +59,15 @@ class ViewAdPerformance(View):
 
 
 class ViewCampaignFallback(ViewCampaignPerformance):
-    name = "Cristian's requested changed name"
+    name = "Filed default view"
     type = "Fallback"
 
 
 class ViewAdSetFallback(ViewAdSetPerformance):
-    name = "Cristian's requested changed name"
+    name = "Filed default view"
     type = "Fallback"
 
 
 class ViewAdFallback(ViewAdPerformance):
-    name = "Cristian's requested changed name"
+    name = "Filed default view"
     type = "Fallback"

@@ -40,7 +40,8 @@ class AvailableMetricEnum(EnumerationBase):
     # conversions / unique clicks
     CR = Metric(name=FieldsMetadata.conversion_rate_ranking.name, display_name="Conversion rate",
                 numerator=AvailableMetricBaseEnum.CONVERSIONS.value,
-                denominator=AvailableMetricBaseEnum.UNIQUE_CLICKS.value, mtype=MetricTypeEnum.INSIGHT)
+                denominator=AvailableMetricBaseEnum.UNIQUE_CLICKS.value, mtype=MetricTypeEnum.INSIGHT,
+                multiplier=1000)
     #  engagement_rate = ( likes + comments + shares + clicks + views) / reach. FB provides this metric
     ENGAGEMENT_RATE = Metric(name=FieldsMetadata.post_engagement.name, display_name="Engagement rate",
                              numerator=[AvailableMetricBaseEnum.POST_ENGAGEMENT.value],
@@ -142,3 +143,11 @@ class AvailableMetricEnum(EnumerationBase):
     PROSPECTING_CAMPAIGN = Metric(name="prospecting_campaign", display_name="Prospecting campaign",
                                   numerator=AvailableMetricBaseEnum.PROSPECTING_CAMPAIGN.value,
                                   mtype=MetricTypeEnum.PROSPECTING)
+
+    NUMBER_OF_ADS = Metric(name="number_of_ads", display_name="Number of ads",
+                           numerator=AvailableMetricBaseEnum.NUMBER_OF_ADS.value,
+                           mtype=MetricTypeEnum.NUMBER_OF_ADS)
+
+    DUPLICATE_AD = Metric(name="duplicate_ad", display_name="Duplicate ad",
+                          numerator=AvailableMetricBaseEnum.DUPLICATE_AD.value,
+                          mtype=MetricTypeEnum.DUPLICATE_AD)
