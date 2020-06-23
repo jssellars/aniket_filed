@@ -19,12 +19,7 @@ class AdWordsBaseClient:
             self._client = self.__init_client_with_client_info()
 
     def __init_client_with_client_info(self):
-        stream_data = StringIO()
-        with open(self._config.client_config_path, 'r') as fp:
-            stream_data.write(fp.read())
-
-        stream_data.seek(0)
-        config_yaml = safe_load(stream_data)
+        config_yaml = {'adwords': {}}
         config_yaml['adwords']['refresh_token'] = self._refresh_token
         config_yaml['adwords']['developer_token'] = self._config.developer_token
         config_yaml['adwords']['client_id'] = self._config.client_id

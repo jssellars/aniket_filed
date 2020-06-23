@@ -348,3 +348,9 @@ class GoogleAttributeFieldsMetadata:
     cpm_bid_source = GoogleFieldsMetadata.cpm_bid_source
 
     is_restrict = GoogleFieldsMetadata.is_restrict
+
+    can_manage_clients = GoogleFieldsMetadata.can_manage_clients
+
+    is_auto_tagging_enabled = GoogleFieldsMetadata.is_auto_tagging_enabled
+
+    is_test_account = GoogleFieldsMetadata.is_test_account

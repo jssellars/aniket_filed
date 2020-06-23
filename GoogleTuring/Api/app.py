@@ -2,6 +2,7 @@
 import os
 import sys
 
+from GoogleTuring.Api.Controllers.AdAccountInsightsController import AdAccountInsightsEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, \
     AdsManagerCatalogsViewsByLevelEndpoint, AdsManagerReportsEndpoint, AdsManagerDimensionsEndpoint, \
     AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
@@ -54,6 +55,9 @@ api.add_resource(AdsManagerCatalogsMetaColumnsEndpoint, views_controller)
 
 views_by_level_controller = "{base_url}/views/views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsViewsByLevelEndpoint, views_by_level_controller)
+
+ad_account_insights_controller = "{base_url}/google-accounts-insights".format(base_url=startup.base_url.lower())
+api.add_resource(AdAccountInsightsEndpoint, ad_account_insights_controller)
 
 # Insights
 insights_controller = '{base_url}/insights'.format(base_url=startup.base_url.lower())

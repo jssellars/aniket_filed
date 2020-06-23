@@ -1,4 +1,4 @@
-from GoogleTuring.Api.CommandsHandlers.AdsManagerBaseCommandHandler import AdsManagerBaseCommandHandler
+from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
 from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
@@ -7,14 +7,15 @@ from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRep
     GoogleTuringStructuresMongoRepository
 
 
-class AdsManagerDeleteStructureCommandHandler(AdsManagerBaseCommandHandler):
+class AdsManagerDeleteStructureCommandHandler(GoogleTokenGetter):
 
     @classmethod
-    def handle(cls, account_id, level, structure_id, business_owner_google_id):
+    def handle(cls, config, account_id, level, structure_id, business_owner_google_id):
         business_owner_permanent_token = cls._get_permanent_token(business_owner_google_id)
         if business_owner_permanent_token:
             try:
-                AdWordsAPIStructuresHandler.delete_structure(permanent_token=business_owner_permanent_token,
+                AdWordsAPIStructuresHandler.delete_structure(config=config,
+                                                             permanent_token=business_owner_permanent_token,
                                                              client_customer_id=account_id,
                                                              level=level,
                                                              structure_id=structure_id)

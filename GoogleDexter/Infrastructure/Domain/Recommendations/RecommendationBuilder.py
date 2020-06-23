@@ -211,7 +211,7 @@ class RecommendationBuilder:
 
     def __set_id(self):
         hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + self.action_breakdown[
-            'name']
+            'name'] + str(self._time_interval.value)
         self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
 
     def to_dict(self):

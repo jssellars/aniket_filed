@@ -1,4 +1,4 @@
-from GoogleTuring.Api.CommandsHandlers.AdsManagerBaseCommandHandler import AdsManagerBaseCommandHandler
+from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
 from GoogleTuring.Api.Startup import startup
 from GoogleTuring.BackgroundTasks.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
@@ -8,9 +8,9 @@ from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRep
     GoogleTuringStructuresMongoRepository
 
 
-class AdsManagerUpdateStructureCommandHandler(AdsManagerBaseCommandHandler):
+class AdsManagerUpdateStructureCommandHandler(GoogleTokenGetter):
     @classmethod
-    def handle(cls, command, account_id, level, structure_id, business_owner_google_id):
+    def handle(cls, config, command, account_id, level, structure_id, business_owner_google_id):
         business_owner_permanent_token = cls._get_permanent_token(business_owner_google_id)
         additional_info = None
         if business_owner_permanent_token:
@@ -24,6 +24,7 @@ class AdsManagerUpdateStructureCommandHandler(AdsManagerBaseCommandHandler):
                     additional_info = mongo_repository.get_additional_info(level, structure_id)
 
                 updated_structure, helper_service = AdWordsAPIStructuresHandler.update_structure(
+                    config=config,
                     permanent_token=business_owner_permanent_token,
                     client_customer_id=account_id,
                     level=level,

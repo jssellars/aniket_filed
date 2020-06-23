@@ -9,14 +9,14 @@ class LevelEnum(EnumerationBase):
 
 
 class LevelIdKeyEnum(EnumerationBase):
-    ACCOUNT = "account_id"
+    ACCOUNT = "ad_account_id"
     CAMPAIGN = "campaign_id"
     ADGROUP = "adgroup_id"
     AD = "ad_id"
 
 
 class LevelNameKeyEnum(EnumerationBase):
-    ACCOUNT = "account_name"
+    ACCOUNT = "ad_account_name"
     CAMPAIGN = "campaign_name"
     ADGROUP = "adgroup_name"
     AD = "ad_name"

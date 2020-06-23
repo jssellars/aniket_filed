@@ -1,20 +1,15 @@
 import sys
-from datetime import datetime
 from io import StringIO
 
 import pandas as pd
 from googleads import adwords
 
-from Core.Tools.QueryBuilder.QueryBuilderGoogleRequestParser import QueryBuilderGoogleRequestParser
 from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
 from GoogleTuring.Infrastructure.Mappings.AdWordsAPIInsightsMapper import AdWordsAPIInsightsMapper
 
 
 class AdWordsInsightsClient(AdWordsBaseClient):
-    def get_insights(self, report_name, status_field, fields, time_range, skip_summary=True):
-        start_date = datetime.strptime(time_range[QueryBuilderGoogleRequestParser.TimeRangeEnum.SINCE], '%Y-%m-%d')
-        end_date = datetime.strptime(time_range[QueryBuilderGoogleRequestParser.TimeRangeEnum.UNTIL], '%Y-%m-%d')
-
+    def get_insights(self, report_name, status_field, fields, start_date, end_date, skip_summary=True):
         status_field_name = status_field.field_name
         field_names = list(map(lambda x: x.field_name, fields))
         report_query = (adwords.ReportQueryBuilder()
@@ -61,5 +56,5 @@ class AdWordsInsightsClient(AdWordsBaseClient):
             summary[fields[0].field_name] = None
             return {'data': data, 'summary': summary}
 
-    def get_insights_with_totals(self, report_name, status_field, fields, time_range):
-        return self.get_insights(report_name, status_field, fields, time_range, skip_summary=False)
+    def get_insights_with_totals(self, report_name, status_field, fields, start_date, end_date):
+        return self.get_insights(report_name, status_field, fields, start_date, end_date, skip_summary=False)

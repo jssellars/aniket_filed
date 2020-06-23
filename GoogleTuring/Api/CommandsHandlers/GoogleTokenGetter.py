@@ -4,7 +4,7 @@ from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoReposi
     GoogleBusinessOwnerMongoRepository
 
 
-class AdsManagerBaseCommandHandler:
+class GoogleTokenGetter:
     @classmethod
     def _get_permanent_token(cls, business_owner_google_id):
         mongo_conn_handler = MongoConnectionHandler(startup.mongo_config)

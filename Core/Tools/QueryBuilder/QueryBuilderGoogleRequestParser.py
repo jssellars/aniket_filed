@@ -1,8 +1,10 @@
+from datetime import datetime
 from enum import Enum
 
 from Cython.Utils import OrderedSet
 
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
+from GoogleTuring.Infrastructure.Constants import DEFAULT_DATETIME
 from GoogleTuring.Infrastructure.Domain.GoogleField import GoogleField
 from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
@@ -43,8 +45,14 @@ class QueryBuilderGoogleRequestParser:
         return self.__google_id
 
     @property
-    def time_range(self):
-        return self.__time_range
+    def start_date(self):
+        return datetime.strptime(self.__time_range[QueryBuilderGoogleRequestParser.TimeRangeEnum.SINCE],
+                                 DEFAULT_DATETIME)
+
+    @property
+    def end_date(self):
+        return datetime.strptime(self.__time_range[QueryBuilderGoogleRequestParser.TimeRangeEnum.UNTIL],
+                                 DEFAULT_DATETIME)
 
     def __parse_query_conditions(self, query_conditions):
         for entry in query_conditions:

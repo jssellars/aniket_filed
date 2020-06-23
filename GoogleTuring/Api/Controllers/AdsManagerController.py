@@ -15,7 +15,7 @@ from GoogleTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler i
     AdsManagerUpdateStructureCommandHandler
 from GoogleTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from GoogleTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
-from GoogleTuring.Api.Startup import logger
+from GoogleTuring.Api.Startup import logger, startup
 from GoogleTuring.Infrastructure.Domain.Enums.Level import Level
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
 
@@ -28,7 +28,8 @@ class AdsManagerEndpoint(Resource):
             raw_request = request.get_json(force=True)
             mapping = AdsManagerUpdateStructureCommandMapping(target=AdsManagerUpdateStructureCommand)
             command = mapping.load(raw_request)
-            AdsManagerUpdateStructureCommandHandler.handle(command=command,
+            AdsManagerUpdateStructureCommandHandler.handle(config=startup.google_config,
+                                                           command=command,
                                                            account_id=account_id,
                                                            level=level,
                                                            structure_id=structure_id,
@@ -43,7 +44,8 @@ class AdsManagerEndpoint(Resource):
         try:
             level = StructureType.get_enum_by_value(level)
             business_owner_google_id = extract_business_owner_google_id(get_jwt())
-            AdsManagerDeleteStructureCommandHandler.handle(account_id=account_id,
+            AdsManagerDeleteStructureCommandHandler.handle(config=startup.google_config,
+                                                           account_id=account_id,
                                                            level=level,
                                                            structure_id=structure_id,
                                                            business_owner_google_id=business_owner_google_id)

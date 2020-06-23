@@ -124,7 +124,7 @@ class GoogleFieldsMetadata:
                                                    field_name="ExpandedTextAdHeadlinePart3",
                                                    field_type=GoogleFieldType.ATTRIBUTE)
 
-    external_customer_id = GoogleField(name="account_id", field_name="ExternalCustomerId",
+    external_customer_id = GoogleField(name="ad_account_id", field_name="ExternalCustomerId",
                                        field_type=GoogleFieldType.ATTRIBUTE, conversion_function=id_to_string)
 
     format_setting = GoogleField(name="FormatSetting", field_name="FormatSetting",
@@ -332,7 +332,7 @@ class GoogleFieldsMetadata:
                                                    field_name="UniversalAppAdYouTubeVideos",
                                                    field_type=GoogleFieldType.ATTRIBUTE)
 
-    account_descriptive_name = GoogleField(name="account_name", field_name="AccountDescriptiveName",
+    account_descriptive_name = GoogleField(name="ad_account_name", field_name="AccountDescriptiveName",
                                            field_type=GoogleFieldType.ATTRIBUTE)
 
     ad_group_desktop_bid_modifier = GoogleField(name="AdGroupDesktopBidModifier",
@@ -549,6 +549,13 @@ class GoogleFieldsMetadata:
 
     is_restrict = GoogleField(name="IsRestrict", field_name="IsRestrict", field_type=GoogleFieldType.ATTRIBUTE)
 
+    can_manage_clients = GoogleField(name="CanManageClients", field_name="CanManageClients",
+                                     field_type=GoogleFieldType.ATTRIBUTE)
+    is_auto_tagging_enabled = GoogleField(name="IsAutoTaggingEnabled", field_name="IsAutoTaggingEnabled",
+                                          field_type=GoogleFieldType.ATTRIBUTE)
+    is_test_account = GoogleField(name="IsTestAccount", field_name="IsTestAccount",
+                                  field_type=GoogleFieldType.ATTRIBUTE)
+
     # Segments
     ad_network_type_1 = GoogleField(name="AdNetworkType1", field_name="AdNetworkType1",
                                     field_type=GoogleFieldType.SEGMENT)
@@ -700,7 +707,7 @@ class GoogleFieldsMetadata:
                               join_condition=JoinCondition(compare_field=click_type, equal_to='URL_CLICKS',
                                                            target_field=clicks))
 
-    conversion_rate = GoogleField(name="ConversionRate", field_name="ConversionRate",
+    conversion_rate = GoogleField(name="conversion_rate", field_name="ConversionRate",
                                   field_type=GoogleFieldType.METRIC,
                                   conversion_function=percentage_to_float)
 
