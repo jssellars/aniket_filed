@@ -3,11 +3,14 @@ import typing
 from datetime import datetime
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
+from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnum import \
+    FacebookRecommendationConfidenceEnum, FacebookRecommendationImportanceEnum
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
 from FacebookDexter.Infrastructure.Constants import DEFAULT_DATETIME_ISO
 from FacebookDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionDetailsBuilder
 from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import GenderEnum
-from FacebookDexter.Infrastructure.Domain.Breakdowns import BreakdownEnum
+from FacebookDexter.Infrastructure.Domain.Breakdowns import BreakdownEnum, ActionBreakdownEnum
+from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.Metric import MetricBase
@@ -18,6 +21,8 @@ from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationTemplate
     RecommendationTemplateBuilder
 from FacebookDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
 from FacebookDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleCategoryEnum, RuleTypeEnum, RuleSourceEnum, \
+    RuleRedirectEnum
 from FacebookDexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEvaluatorData
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 
@@ -77,9 +82,9 @@ class RecommendationBuilder:
         self.__business_owner_id = business_owner_id
         self.__use_alternative_template = False
         self._date_stop = date_stop
-        self.time_interval = time_interval
-        self.debug = debug_mode
+        self._debug = debug_mode
 
+        self.time_interval = time_interval
         self.recommendation_id = None
         self.category = None
         self.metrics = []
@@ -124,6 +129,33 @@ class RecommendationBuilder:
         self.set_confidence(rule_data)
         self.set_meta_information(facebook_id, rule.level)
         self.last_updated_at = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+        self.__set_id()
+
+        return self
+
+    def create_facebook_recommendation(self, facebook_id: typing.AnyStr = None,
+                                       level: LevelEnum = None,
+                                       template: typing.AnyStr = None,
+                                       confidence: float = None,
+                                       importance: FacebookRecommendationImportanceEnum = None):
+        self.category = RuleCategoryEnum.IMPROVE_CPR.value
+        self.metrics = [MetricBase(name='cpc_all', display_name="CPC")]
+        self.breakdown = BreakdownEnum.NONE.value.to_dict()
+        self.action_breakdown = ActionBreakdownEnum.NONE.value.to_dict()
+        self.channel = ChannelEnum.FACEBOOK.value
+        self.optimization_type = RecommendationOptimizationTypeEnum.FACEBOOK.value
+        self.recommendation_type = RuleTypeEnum.PERFORMANCE.value
+        self.source = RuleSourceEnum.FACEBOOK.value
+        self.created_at = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+        self.application_details = {}
+        self.redirect_for_edit = RuleRedirectEnum.CAMPAIGN_MANAGER.value
+        self.set_meta_information(facebook_id=facebook_id, level=level)
+        self.status = RecommendationStatusEnum.ACTIVE.value
+        self.last_updated_at = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+        self.level = level.value
+        self.template = template
+        self.confidence = confidence
+        self.importance = importance.value
         self.__set_id()
 
         return self
@@ -190,7 +222,7 @@ class RecommendationBuilder:
                          set_business_owner_id(self.__business_owner_id).
                          set_date_stop(self._date_stop).
                          set_time_interval(self.time_interval).
-                         set_debug_mode(self.debug))
+                         set_debug_mode(self._debug))
 
         if self.__use_alternative_template:
             self.template = self.template.build_template(template=rule.alternative_template)
@@ -206,7 +238,7 @@ class RecommendationBuilder:
         action_details_builder = ActionDetailsBuilder(facebook_id=facebook_id,
                                                       repository=self.__mongo_repository,
                                                       time_interval=self.time_interval,
-                                                      debug=self.debug,
+                                                      debug=self._debug,
                                                       date_stop=self._date_stop)
         value = self.__build_action_details_value(rule_data)
         self.application_details, self.__use_alternative_template = action_details_builder.build(action=rule.action,
@@ -246,9 +278,9 @@ class RecommendationBuilder:
     def __set_id(self):
         try:
             hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + \
-                         self.action_breakdown['name']
+                         self.action_breakdown['name'] + str(self.time_interval.value)
             self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
-        except:
+        except Exception as e:
             self.recommendation_id = None
 
     def to_dict(self):

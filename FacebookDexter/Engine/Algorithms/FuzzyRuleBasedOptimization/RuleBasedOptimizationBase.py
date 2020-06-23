@@ -19,6 +19,9 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
     def run(self, **kwargs) -> typing.List[typing.Dict]:
         raise NotImplementedError("Method run() not implemented.")
 
+    def check_run_status(self, **kwargs):
+        return True
+
     def is_available(self, facebook_id: typing.AnyStr):
         return self._mongo_repository.is_available(self._level, facebook_id)
 

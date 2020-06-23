@@ -47,7 +47,7 @@
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
     "recommendations_database_name": "dev_dexter_fuzzy_inference_recommendations",
-    "recommendations_collection_name": "recommendations_20200616T135000",
+    "recommendations_collection_name": "recommendations_20200623T093500",
     "journal_database_name": "dev_dexter_engine_run_journal",
     "journal_collection_name": "dexter_journal",
     "structures_database": "dev_facebook_turing_structures",
@@ -55,7 +55,7 @@
     "logs_database": "dev_facebook_dexter_logs"
   },
   "external_services": {
-    "targeting_search": "https://targetingsearch.filed.com/interests/suggestions/"
+    "targeting_search": "https://dev-api-facebook-potter-campaignsbuilder.filed.com/api/v1/targeting-search/interests/suggestions/"
   },
   "dexter_config": {
     "min_results": 0,

@@ -18,11 +18,13 @@ class RabbitMqClient:
                  config: typing.Any,
                  exchange_name: typing.AnyStr = None,
                  outbound_routing_key: typing.AnyStr = None,
-                 inbound_queue: typing.AnyStr = None):
+                 inbound_queue: typing.AnyStr = None,
+                 prefetch_count: int = None):
         self.__config = config
         self.__exchange_name = exchange_name
         self.__inbound_queue = inbound_queue
         self.__outbound_routing_key = outbound_routing_key
+        self.__prefetch_count = prefetch_count
         self.__callback = None
 
         self.consumer_started = False
@@ -75,7 +77,7 @@ class RabbitMqClient:
         connection = pika.BlockingConnection(self.__connection_parameters)
 
         self.__channel = connection.channel()
-        self.__channel.basic_qos(prefetch_count=1)
+        self.__channel.basic_qos(prefetch_count=self.__prefetch_count)
         self.__channel.basic_consume(self.__inbound_queue, self.__callback, auto_ack=False, consumer_tag=consumer_tag)
 
         return self

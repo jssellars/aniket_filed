@@ -2,6 +2,7 @@ import traceback
 import typing
 from datetime import datetime, timedelta
 
+from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import AlgorithmsEnum
 from FacebookDexter.Engine.Algorithms.AlgorithmsFactory import AlgorithmsFactory
 from FacebookDexter.Engine.Algorithms.FuzzyfierFactory import FuzzyfierFactory
 from FacebookDexter.Engine.Algorithms.RuleEvaluatorFactory import RuleEvaluatorFactory
@@ -37,25 +38,26 @@ class Orchestrator(OrchestratorBuilder):
     def keep_latest_recommendations(self):
 
         grouped_recommendations = {}
-        ids_to_deprecate = []
         recommendations = self._recommendations_repository.get_active_recommendations()
         for recommendation in recommendations:
             id = recommendation['recommendation_id']
             time_interval = recommendation['time_interval']
             ad_account_id = recommendation['ad_account_id']
+            structure_id = recommendation['structure_id']
             metric = recommendation['metrics'][0]['display_name']
             breakdown = recommendation['breakdown']['name']
             level = recommendation['level']
 
-            group_tuple = (ad_account_id, metric, breakdown, level)
+            group_tuple = (ad_account_id, metric, breakdown, level, structure_id)
             if group_tuple not in grouped_recommendations.keys():
                 grouped_recommendations[group_tuple] = [(id, time_interval)]
             else:
                 grouped_recommendations[group_tuple].append((id, time_interval))
 
+        ids_to_deprecate = []
         for rec_list in grouped_recommendations.values():
             sorted_rec_list = sorted(rec_list, key=lambda x: x[1]['value'])
-            ids_to_deprecate = list(map(lambda x: x[0], sorted_rec_list))
+            ids_to_deprecate += list(map(lambda x: x[0], sorted_rec_list))[1:]
 
         self._recommendations_repository.deprecate_recommendations(recommendation_ids=ids_to_deprecate)
 
@@ -93,12 +95,12 @@ class Orchestrator(OrchestratorBuilder):
             self.__run_first_time()
 
     def __init_algorithm(self, alg_type, level) -> typing.Any:
-        rule_algorithm = AlgorithmsFactory.get(algorithm_type=alg_type, level=level)
+        algorithm = AlgorithmsFactory.get(algorithm_type=alg_type, level=level)
         rules = RulesFactory.get(algorithm_type=alg_type, level=level)
         fuzzyfier_factory = FuzzyfierFactory.get(algorithm_type=alg_type, level=level)
 
         try:
-            rule_algorithm = (rule_algorithm.
+            algorithm = (algorithm.
                               set_business_owner_id(self.business_owner_id).
                               set_facebook_config(self.startup.facebook_config).
                               set_business_owner_repo_session(self.startup.session).
@@ -108,11 +110,13 @@ class Orchestrator(OrchestratorBuilder):
                               set_rules(rules).
                               set_debug_mode(self.startup.debug).
                               set_mongo_config(self.startup.mongo_config).
+                              set_dexter_config(self.startup.dexter_config).
+                              set_level(self.level).
                               create_mongo_repository())
         except Exception as e:
             raise e
 
-        return rule_algorithm
+        return algorithm
 
     def __run_first_time(self):
         journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
@@ -172,58 +176,36 @@ class Orchestrator(OrchestratorBuilder):
 
     def __run_algorithm(self, search_query):
         try:
+            algorithm = self.__init_algorithm(self.algorithm_type, level=self.level)
+            rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=self.level)
+
             if not self.startup.dexter_config.date_stop:
                 date_stop = datetime.now() - timedelta(days=1)
             else:
-                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - timedelta(days=1)
+                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - \
+                            timedelta(days=1)
             for time_interval in self.startup.dexter_config.time_intervals:
                 time_interval_enum = DaysEnum(time_interval)
-                campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
-                for campaign_id in campaigns_ids:
-                    algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.CAMPAIGN)
-                    rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.CAMPAIGN)
+                if self.algorithm_type == AlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
                     rule_evaluator.set_time_interval(time_interval_enum)
-                    algorithm.set_rule_evaluator(rule_evaluator)
-                    should_run = (algorithm.
-                                  set_dexter_config(self.startup.dexter_config).
-                                  set_date_stop(date_stop).
-                                  set_time_interval(time_interval_enum).
-                                  check_run_status(campaign_id))
-                    if should_run:
-                        recommendations = algorithm.run(campaign_id)
-                        # algorithm.close_mongo_repository()
+                    (algorithm.set_date_stop(date_stop).
+                     set_time_interval(time_interval_enum).
+                     set_rule_evaluator(rule_evaluator))
+                elif self.algorithm_type == AlgorithmsEnum.FACEBOOK_ENHANCER:
+                    (algorithm.set_date_stop(date_stop).
+                     set_time_interval(time_interval_enum))
 
-                        print("{} --> {}".format(campaign_id, len(recommendations)))
-                        self._recommendations_repository.save_recommendations(recommendations,
-                                                                              self.startup.dexter_config.recommendation_days_last_updated)
-                        adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
-                        for adset_id in adset_ids:
-                            algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.ADSET)
-                            rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.ADSET)
-                            rule_evaluator.set_time_interval(time_interval_enum)
-                            algorithm.set_rule_evaluator(rule_evaluator). \
-                                set_time_interval(time_interval_enum). \
-                                set_date_stop(date_stop)
-                            recommendations = algorithm.run(adset_id)
-                            # algorithm.close_mongo_repository()
+                if self.level == LevelEnum.CAMPAIGN:
+                    self.run_on_campaign(algorithm)
 
-                            self._recommendations_repository.save_recommendations(recommendations,
-                                                                                  self.startup.dexter_config.recommendation_days_last_updated)
-                            algorithm = self.__init_algorithm(self.algorithm_type, level=LevelEnum.AD)
-                            rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=LevelEnum.AD)
-                            rule_evaluator.set_time_interval(time_interval_enum)
-                            (algorithm.set_rule_evaluator(rule_evaluator).
-                             set_time_interval(time_interval_enum).
-                             set_date_stop(date_stop))
-                            recommendations = algorithm.run(adset_id)
-                            # algorithm.close_mongo_repository()
+                elif self.level == LevelEnum.ADSET:
+                    self.run_on_adset(algorithm)
 
-                            self._recommendations_repository.save_recommendations(recommendations,
-                                                                                  self.startup.dexter_config.recommendation_days_last_updated)
-                        # algorithm.close_mongo_repository()
+                elif self.level == LevelEnum.AD:
+                    self.run_on_ad(algorithm)
 
-                    update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
-                    self._journal_repository.update_one(search_query, update_query)
+                update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
+                self._journal_repository.update_one(search_query, update_query)
 
         except Exception as failed_to_run_exception:
             print(failed_to_run_exception.__traceback__)
@@ -232,6 +214,44 @@ class Orchestrator(OrchestratorBuilder):
             self._journal_repository.update_one(search_query, update_query)
 
         self.keep_latest_recommendations()
+
+    def run_on_ad(self, algorithm):
+        campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
+        for campaign_id in campaigns_ids:
+            should_run = algorithm.check_run_status(campaign_id)
+            if should_run:
+                adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
+                for adset_id in adset_ids:
+                    if self.algorithm_type == AlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
+                        recommendations = algorithm.run(adset_id)
+                        self._recommendations_repository.save_recommendations(recommendations,
+                                                                              self.startup.dexter_config.recommendation_days_last_updated)
+                    elif self.algorithm_type == AlgorithmsEnum.FACEBOOK_ENHANCER:
+                        ad_ids = self._data_repository.get_ads_by_adset_id(key_value=adset_id)
+                        for ad_id in ad_ids:
+                            recommendations = algorithm.run(ad_id)
+                            self._recommendations_repository.save_recommendations(recommendations,
+                                                                                  self.startup.dexter_config.recommendation_days_last_updated)
+
+    def run_on_adset(self, algorithm):
+        campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
+        for campaign_id in campaigns_ids:
+            should_run = algorithm.check_run_status(campaign_id)
+            if should_run:
+                adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
+                for adset_id in adset_ids:
+                    recommendations = algorithm.run(adset_id)
+                    self._recommendations_repository.save_recommendations(recommendations,
+                                                                          self.startup.dexter_config.recommendation_days_last_updated)
+
+    def run_on_campaign(self, algorithm):
+        campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
+        for campaign_id in campaigns_ids:
+            should_run = algorithm.check_run_status(campaign_id)
+            if should_run:
+                recommendations = algorithm.run(campaign_id)
+                self._recommendations_repository.save_recommendations(recommendations,
+                                                                      self.startup.dexter_config.recommendation_days_last_updated)
 
     def __create_journal_entry_object(self, run_status):
         journal_object = DexterJournalEntryModel()

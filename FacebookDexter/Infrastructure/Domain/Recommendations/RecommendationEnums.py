@@ -3,6 +3,7 @@ from enum import Enum
 
 class RecommendationOptimizationTypeEnum(Enum):
     RULE_BASED = "Rule Based"
+    FACEBOOK = 'Facebook'
 
 
 class RecommendationStatusEnum(Enum):
