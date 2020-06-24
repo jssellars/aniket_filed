@@ -19,7 +19,7 @@ class RabbitMqClient:
                  exchange_name: typing.AnyStr = None,
                  outbound_routing_key: typing.AnyStr = None,
                  inbound_queue: typing.AnyStr = None,
-                 prefetch_count: int = None):
+                 prefetch_count: int = 50):
         self.__config = config
         self.__exchange_name = exchange_name
         self.__inbound_queue = inbound_queue
