@@ -30,6 +30,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47550,
-  "jwt_secret_key": "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12",
+  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
   "debug_mode": false
 }
