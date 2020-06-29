@@ -31,8 +31,8 @@ def start_algorithm_for_accounts_set(ad_account_ids: typing.List[typing.AnyStr] 
 
         (orchestrator.
             set_auth_token(auth_token=auth_token).
-            orchestrate().
-            update_remaining_null_dates())
+            orchestrate())
+        orchestrator.update_remaining_null_dates()
 
 
 def start_dexter_for_business_owner(business_owner: typing.AnyStr = None,
