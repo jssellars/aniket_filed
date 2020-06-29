@@ -72,7 +72,8 @@ class InsightsSyncronizer:
         return self.__permanent_token
 
     def __get_fields(self) -> typing.List[typing.AnyStr]:
-        fields = [field.facebook_fields for field in self.__requested_fields if field.field_type == FieldType.INSIGHT]
+        fields = [field.facebook_fields for field in self.__requested_fields
+                  if field.field_type == FieldType.INSIGHT or field.field_type == FieldType.ACTION_INSIGHT]
         fields = functools.reduce(operator.iconcat, fields, [])
         return list(set(fields))
 

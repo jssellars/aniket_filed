@@ -87,7 +87,8 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
                                                business_owner_id=self._business_owner_id,
                                                date_stop=self._date_stop,
                                                time_interval=self._time_interval,
-                                               debug_mode=self._debug)
+                                               debug_mode=self._debug,
+                                               headers=self._auth_token)
         return recommendation.create(facebook_id, rule, rule_data, external_services=self._external_services)
 
     def evaluate_remove_rules(self,

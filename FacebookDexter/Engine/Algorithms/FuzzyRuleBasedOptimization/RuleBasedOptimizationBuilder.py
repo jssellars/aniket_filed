@@ -29,6 +29,7 @@ class RuleBasedOptimizationBuilder:
         self._time_interval = None
         self._debug = None
         self._mongo_config = None
+        self._auth_token = None
 
     def get_logger(self):
         if self._mongo_repository is not None:
@@ -98,4 +99,8 @@ class RuleBasedOptimizationBuilder:
 
     def close_mongo_repository(self):
         self._mongo_repository.close()
+        return self
+
+    def set_auth_token(self, auth_token: typing.AnyStr = None):
+        self._auth_token = auth_token
         return self

@@ -19,6 +19,7 @@ class OrchestratorBuilder:
         self._data_repository = None
         self._recommendations_repository = None
         self._journal_repository = None
+        self._auth_token = None
 
     def set_business_owner_id(self, business_owner_id: typing.AnyStr = None):
         self.business_owner_id = business_owner_id
@@ -50,4 +51,8 @@ class OrchestratorBuilder:
 
     def set_journal_repository(self, repository: DexterJournalMongoRepository = None):
         self._journal_repository = repository
+        return self
+
+    def set_auth_token(self, auth_token: typing.AnyStr = None):
+        self._auth_token = auth_token
         return self

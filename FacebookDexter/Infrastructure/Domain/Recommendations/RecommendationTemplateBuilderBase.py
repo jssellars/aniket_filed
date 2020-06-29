@@ -26,6 +26,7 @@ class RecommendationTemplateBuilderBase:
         self._date_stop = None
         self._time_interval = None
         self._debug = None
+        self._headers = None
 
     @property
     def logger(self):
@@ -84,4 +85,8 @@ class RecommendationTemplateBuilderBase:
 
     def set_debug_mode(self, debug: bool = None):
         self._debug = debug
+        return self
+
+    def set_headers(self, headers: typing.AnyStr = None):
+        self._headers = headers
         return self

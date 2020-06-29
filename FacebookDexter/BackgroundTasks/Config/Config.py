@@ -18,6 +18,9 @@ class ExternalServicesConfig(BaseConfig):
 class DexterConfig(BaseConfig):
     pass
 
+class AdminUserconfig(BaseConfig):
+    pass
+
 
 class RabbitMqConfig(BaseConfig):
     """Configuration for RabbitMQ Client"""

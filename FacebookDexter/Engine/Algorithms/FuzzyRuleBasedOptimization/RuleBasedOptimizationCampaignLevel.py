@@ -53,14 +53,11 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
         return recommendations
 
     def check_run_status(self, campaign_id):
-        print("Started checking")
         self._mongo_repository = DexterMongoRepository(config=self._mongo_config)
         if self.__check_last_x_days_since_update(campaign_id):
-            print("Finished")
             return True
 
         result = self.__check_in_last_x_days(campaign_id)
-        print("Finished")
         return result
 
     def __check_in_last_x_days(self, campaign_id):

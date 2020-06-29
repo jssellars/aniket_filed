@@ -11,10 +11,10 @@
         "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "local.facebook.dexter.inbound",
-          "inbound_routing_key": "local.facebook.dexter.inbound.key",
-          "outbound": "local.facebook.dexter.outbound",
-          "outbound_routing_key": "local.facebook.dexter.outbound.key"
+          "inbound": "dev.facebook.dexter.inbound",
+          "inbound_routing_key": "dev.facebook.dexter.inbound.key",
+          "outbound": "dev.facebook.dexter.outbound",
+          "outbound_routing_key": "dev.facebook.dexter.outbound.key"
         }
       }
     ],
@@ -55,10 +55,16 @@
     "logs_database": "dev_facebook_dexter_logs"
   },
   "external_services": {
-    "targeting_search": "https://dev-api-facebook-potter-campaignsbuilder.filed.com/api/v1/targeting-search/interests/suggestions/"
+    "targeting_search": "https://dev-api-facebook-potter-campaignsbuilder.filed.com/api/v1/targeting-search/interests/suggestions/",
+    "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://dev.filed.com:41000/api/v1/users/get-technical-jwt"
+  },
+  "admin_user": {
+    "email": "admin@filed.com",
+    "password": "Adm1n@Fil3ed"
   },
   "dexter_config": {
-    "min_results": 5,
+    "min_results": 0,
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
     "time_intervals": [
@@ -67,7 +73,7 @@
       14,
       30
     ],
-    "date_stop": "2020-06-15"
+    "date_stop": "2020-06-25"
   },
   "debug": false,
   "environment": "dev",

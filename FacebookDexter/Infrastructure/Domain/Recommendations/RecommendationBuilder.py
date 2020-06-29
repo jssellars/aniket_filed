@@ -74,7 +74,8 @@ class RecommendationBuilder:
                  business_owner_id: typing.Any = None,
                  date_stop: typing.AnyStr = None,
                  time_interval: DaysEnum = DaysEnum.MONTH,
-                 debug_mode=None):
+                 debug_mode = None,
+                 headers: typing.AnyStr = None):
         self.__mongo_repository = mongo_repository
         self.__structure_details = None
         self.__business_owner_repo_session = business_owner_repo_session
@@ -83,6 +84,7 @@ class RecommendationBuilder:
         self.__use_alternative_template = False
         self._date_stop = date_stop
         self._debug = debug_mode
+        self._headers = headers
 
         self.time_interval = time_interval
         self.recommendation_id = None
@@ -222,6 +224,7 @@ class RecommendationBuilder:
                          set_business_owner_id(self.__business_owner_id).
                          set_date_stop(self._date_stop).
                          set_time_interval(self.time_interval).
+                         set_headers(self._headers).
                          set_debug_mode(self._debug))
 
         if self.__use_alternative_template:
@@ -278,7 +281,7 @@ class RecommendationBuilder:
     def __set_id(self):
         try:
             hash_value = self.template + self.structure_id + self.level + self.breakdown['name'] + \
-                         self.action_breakdown['name'] + str(self.time_interval.value)
+                         self.action_breakdown['name']
             self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
         except Exception as e:
             self.recommendation_id = None

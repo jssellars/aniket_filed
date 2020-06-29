@@ -8,7 +8,7 @@ from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
 from FacebookDexter.BackgroundTasks.Config.Config import RabbitMqConfig, MongoConfig, ExternalServicesConfig, \
-    FacebookConfig, SQLAlchemyConfig, DexterConfig
+    FacebookConfig, SQLAlchemyConfig, DexterConfig, AdminUserconfig
 
 
 class Startup(object):
@@ -25,6 +25,7 @@ class Startup(object):
         self.database_config = SQLAlchemyConfig(app_config['sql_server_database'])
         self.external_services = ExternalServicesConfig(app_config["external_services"])
         self.dexter_config = DexterConfig(app_config["dexter_config"])
+        self.admin_user = AdminUserconfig(app_config["admin_user"])
 
         # Initialize connections to DB
         self.engine = create_engine(self.database_config.connection_string)

@@ -111,6 +111,7 @@ class Orchestrator(OrchestratorBuilder):
                              set_rules(rules).
                              set_debug_mode(self.startup.debug).
                              set_mongo_config(self.startup.mongo_config).
+                             set_auth_token(self._auth_token).
                              create_mongo_repository())
             elif alg_type == AlgorithmsEnum.FACEBOOK_ENHANCER:
                 algorithm = (algorithm.

@@ -1,6 +1,7 @@
 import threading
 import typing
 
+from Core.Web.Security.Authorization import generate_technical_token, add_bearer_token
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import AlgorithmsEnum
 from FacebookDexter.Engine.MasterWorker.Orchestrator import Orchestrator
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
@@ -21,13 +22,17 @@ def start_algorithm_for_accounts_set(ad_account_ids: typing.List[typing.AnyStr] 
                     set_journal_repository(journal_repository).
                     set_data_repository(data_repository))
 
+    auth_token = add_bearer_token(token=generate_technical_token(startup))
+
     for ad_account_id in ad_account_ids:
         orchestrator.business_owner_id = business_owner_id
         orchestrator.ad_account_id = ad_account_id
         orchestrator.startup = startup
 
-        orchestrator.orchestrate()
-        orchestrator.update_remaining_null_dates()
+        (orchestrator.
+            set_auth_token(auth_token=auth_token).
+            orchestrate().
+            update_remaining_null_dates())
 
 
 def start_dexter_for_business_owner(business_owner: typing.AnyStr = None,
