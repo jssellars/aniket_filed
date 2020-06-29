@@ -13,6 +13,7 @@ from FacebookDexter.Infrastructure.Domain.Breakdowns import BreakdownMetadata, B
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.MetricCalculator import MetricCalculator
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
+from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeSelectionEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 
 
@@ -22,18 +23,23 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
         super().__init__()
         self.set_level(LevelEnum.CAMPAIGN)
 
-    def run(self, campaign_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def run(self, campaign_id: typing.AnyStr = None, rule_selection_types: typing.List = None) -> typing.List[typing.Dict]:
         recommendations = []
         if self.is_available(campaign_id):
             que = Queue()
-
+            t_list = []
+            for rule_selection_type in rule_selection_types:
+                for evaluate_function in self.rules_selector(rule_selection_type):
+                    t = Thread(target=lambda q, arg1, arg2: q.put(evaluate_function(arg1, arg2)),
+                               args=(que, campaign_id, self._fuzzyfier_factory))
+                    t_list.append(t)
             # TODO: refactor this
-            t1 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_general_rules(arg1, arg2)),
-                        args=(que, campaign_id, self._fuzzyfier_factory))
-            t2 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_create_rules(arg1, arg2)),
-                        args=(que, campaign_id, self._fuzzyfier_factory))
-
-            t_list = [t1, t2]
+            # t1 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_general_rules(arg1, arg2)),
+            #             args=(que, campaign_id, self._fuzzyfier_factory))
+            # t2 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_create_rules(arg1, arg2)),
+            #             args=(que, campaign_id, self._fuzzyfier_factory))
+            #
+            # t_list = [t1, t2]
 
             for t in t_list:
                 t.start()
@@ -47,13 +53,14 @@ class RuleBasedOptimizationCampaignLevel(RuleBasedOptimizationBase):
         return recommendations
 
     def check_run_status(self, campaign_id):
+        print("Started checking")
         self._mongo_repository = DexterMongoRepository(config=self._mongo_config)
         if self.__check_last_x_days_since_update(campaign_id):
-            # self._mongo_repository.close()
+            print("Finished")
             return True
 
         result = self.__check_in_last_x_days(campaign_id)
-        # self._mongo_repository.close()
+        print("Finished")
         return result
 
     def __check_in_last_x_days(self, campaign_id):

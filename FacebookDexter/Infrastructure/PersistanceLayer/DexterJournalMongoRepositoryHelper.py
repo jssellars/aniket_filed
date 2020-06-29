@@ -6,19 +6,17 @@ from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums impor
 class DexterJournalMongoRepositoryHelper:
 
     @staticmethod
-    def get_search_in_progress_query(ad_account_id, algorithm_type, business_owner_id):
+    def get_search_in_progress_query(ad_account_id, business_owner_id):
         return {
             'ad_account_id': ad_account_id,
-            'algorithm_type': algorithm_type.value,
             'business_owner_id': business_owner_id,
             'run_status': RunStatusDexterEngineJournal.IN_PROGRESS.value
         }
 
     @staticmethod
-    def get_search_pending_query(ad_account_id, algorithm_type, business_owner_id):
+    def get_search_pending_query(ad_account_id, business_owner_id):
         return {
             'ad_account_id': ad_account_id,
-            'algorithm_type': algorithm_type.value,
             'business_owner_id': business_owner_id,
             'run_status': RunStatusDexterEngineJournal.PENDING.value
         }
@@ -68,12 +66,10 @@ class DexterJournalMongoRepositoryHelper:
         }
 
     @staticmethod
-    def get_search_for_other_instances_query(business_owner_id, algorithm_type, ad_account_id, level):
+    def get_search_for_other_instances_query(business_owner_id, ad_account_id):
         return {
             "business_owner_id": business_owner_id,
-            "algorithm_type": algorithm_type.value,
             "ad_account_id": ad_account_id,
-            "level": level.value
         }
 
     @staticmethod

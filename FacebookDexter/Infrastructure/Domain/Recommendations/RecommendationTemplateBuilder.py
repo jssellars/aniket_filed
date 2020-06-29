@@ -1,9 +1,9 @@
+import itertools
 import re
 import traceback
 import typing
 from collections import defaultdict
 
-import numpy as np
 import requests
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
@@ -177,14 +177,15 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
     def __find_insight_value(self, keyword: RuleTemplateKeyword = None):
         mc = (MetricCalculator().
-              set_facebook_id(self._structure_id).
-              set_level(self._level).
-              set_metric(keyword.metric_name.value).
-              set_repository(self._repository).
-              set_date_stop(self._date_stop).
-              set_time_interval(keyword.time_interval).
-              set_debug_mode(self._debug).
-              set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE)))
+            set_facebook_id(self._structure_id).
+            set_level(self._level).
+            set_metric(keyword.metric_name.value).
+            set_repository(self._repository).
+            set_date_stop(self._date_stop).
+            set_time_interval(keyword.time_interval).
+            set_debug_mode(self._debug).
+            set_breakdown_metadata(
+            BreakdownMetadata(breakdown=BreakdownEnum.NONE, action_breakdown=ActionBreakdownEnum.NONE)))
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=keyword.time_interval)
 
         if value is not None:
@@ -192,9 +193,39 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         return value
 
+    def _get_top_interests(self, top_number, endpoint, headers):
+        # todo: get must have auth
+        response = requests.get(url=endpoint, headers=headers)
+        if response.status_code != 200:
+            if self._debug:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="RecommendationTemplateBuilder",
+                                        description="Failed to get interests from structure targeting.",
+                                        extra_data={
+                                            "error": response.json()
+                                        })
+                self.logger.logger.info(log)
+            return ''
+
+        results_root = response.json()
+        interests_accumulator = []
+        for response in results_root:
+            self.__in_order_traversal(node=response, accumulator=interests_accumulator)
+
+        # todo: check if this needs list(list(something))
+        top_interests = list(
+            list(sorted(interests_accumulator, key=lambda x: x[1] if x[1] is not None else 0, reverse=True)))
+
+        top_interests = list(map(lambda x: x[0], top_interests))
+        value = ', '.join(top_interests)[:top_number]
+
+        return value
+
     def __find_suggested_interests(self, keyword: RuleTemplateKeyword):
         structure = self._repository.get_structure_details(self._structure_id, LevelEnum.ADSET)
 
+        token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZWFiYWM0NC02NzdkLTQ0MTAtOWJkMy0xMWQxMWY3MTIxYTgiLCJzdWIiOiJhbmRyZWlAZmlsZWQuY29tIiwiVXNlckRldGFpbHNLZXkiOiJ7XCJGaWxlZElkXCI6OCxcIkZpbGVkRmlyc3ROYW1lXCI6XCJBbmRyZWlcIixcIkZpbGVkTGFzdE5hbWVcIjpcIkx1Y2hpY2lcIixcIkZpbGVkUGFyZW50SWRcIjoyLFwiRmFjZWJvb2tCdXNpbmVzc093bmVySWRcIjpcIjE2MjM5NTA2NjEyMzA4NzVcIixcIlJvbGVzXCI6WzVdLFwiQWNjb3VudFN0YXRlXCI6MSxcIkZhY2Vib29rQWRBY2NvdW50UGVybWlzc2lvbnNcIjp7XCJJZHNcIjpbXCJhY3RfMTAxNTIwODIxMDg3MTc5MDlcIixcImFjdF8xMDIwMDg1NjI1NDQwMzM3MVwiLFwiYWN0XzEwNDE2OTQyNzYxNjM1NzlcIixcImFjdF8xMDUwNDA5NDMxOTY5ODZcIixcImFjdF8xMDY1MDY3MDMzMDU2MjFcIixcImFjdF8xMTM2MTE3NDA5OTIxMzA2XCIsXCJhY3RfMTE1NjY4Nzk5MzAxNDU4XCIsXCJhY3RfMTE4MTUzMzAyMDAxODkwXCIsXCJhY3RfMTIwMzYxODI4NjM4MTM4NFwiLFwiYWN0XzEyNDY3ODcyMTMyNTExNFwiLFwiYWN0XzEyNDgwNjg1MTIwNTIwNzZcIixcImFjdF8xMzAzNTM1ODY5NzEyNjc5XCIsXCJhY3RfMTMwNjM3OTZcIixcImFjdF8xMzA5MjgzMjQ5MjY5OTc4XCIsXCJhY3RfMTM0ODQ1NjEzMTk5MTg4NlwiLFwiYWN0XzE0NDQ4ODM0XCIsXCJhY3RfMTUyMjI2NDE2ODA2NjE5MlwiLFwiYWN0XzE1MjY0NzIxODIwNDY4N1wiLFwiYWN0XzE1NDAyOTI5MjI3NjE0ODdcIixcImFjdF8xNjU0ODY5NTMxMzI4NzU5XCIsXCJhY3RfMTY5MzUyODY2NTM0MDEyXCIsXCJhY3RfMTcwMDEyNDQxMDgzODE5XCIsXCJhY3RfMTcyMTQ5Mzk4NzkxNzU1N1wiLFwiYWN0XzE3MjM5ODU0NTQ0ODE3NThcIixcImFjdF8xNzI1NzgwNTc0MzAyMjQ2XCIsXCJhY3RfMTcyNTc4MDYzMDk2ODkwN1wiLFwiYWN0XzE3MjY4NDY0MDc1Mjg5OTZcIixcImFjdF8xNzc3NzA0MjY5MTE0MTU4XCIsXCJhY3RfMTc5NTEyMTI1MDUzNTc3OFwiLFwiYWN0XzE4MTAzMjU4MjI1MTQzODdcIixcImFjdF8xODI1NTU5ODI4NTU4OTRcIixcImFjdF8xODM0MzcwNjczMjQ1OTE1XCIsXCJhY3RfMTg1MzE2NTE5NTgyMTY0XCIsXCJhY3RfMTg5Njc3MDk3NzAwNTg4NFwiLFwiYWN0XzE4OTgzOTc4MzAzNzM4NTJcIixcImFjdF8xOTIxNjM3MTM0NzE2NTg4XCIsXCJhY3RfMTkzNjE5OTMxMTkxNDI1XCIsXCJhY3RfMTk2NjI1Njk4NjkyMTI2OVwiLFwiYWN0XzE5ODI2NzY1NzUyNzkzMTBcIixcImFjdF8yMDM1OTU1NzA4NzY2MTVcIixcImFjdF8yMDQyMzEzMjE5MTUxMDI4XCIsXCJhY3RfMjA2NjkwNDQ2MDE4OTg1NFwiLFwiYWN0XzIwNzY3OTc4Mzc4MTA4MlwiLFwiYWN0XzIyMTAyNjA5NTIzNDMwNTdcIixcImFjdF8yMjE3NDM5MDM4NTAxMTQ4XCIsXCJhY3RfMjI1MDg1MTkxOTQ1NDU5XCIsXCJhY3RfMjMxOTMyNzczMTcyMTExMlwiLFwiYWN0XzIzNDU4MzE4OTU2NjY1MjJcIixcImFjdF8yMzU1ODc3NDExMTg2MzBcIixcImFjdF8yMzgxNzkwNzQxODY4NzM1XCIsXCJhY3RfMjQyMjExMDEwMTg0MzUxXCIsXCJhY3RfMjQ1MTA0NTcyODU0MjQzNFwiLFwiYWN0XzI0Njc1ODc1OTM1NTgyMVwiLFwiYWN0XzI1MjY0NDEwMjY0OTM3OVwiLFwiYWN0XzI1MzkzOTYxOTE2NzgyNVwiLFwiYWN0XzI2MTg3NTExNlwiLFwiYWN0XzI3MzUzODc4OTk0NzE4NlwiLFwiYWN0XzI3NTU3ODc4NFwiLFwiYWN0XzI5MDg2NDY5NDI1MzM2MjNcIixcImFjdF8yOTU3NDg5NVwiLFwiYWN0XzMwNjIwNjEyNzA1MTI4ODdcIixcImFjdF8zNTY4MzU4NzE0NzEzOTFcIixcImFjdF8zNzc5NzkxNFwiLFwiYWN0XzM4OTEwOTE1ODU4ODA2NVwiLFwiYWN0XzQwMDgxNDEwMDg0NTAxMlwiLFwiYWN0XzQwMjk0MTI4Njc5NzgxMFwiLFwiYWN0XzQwMzg1NzM3Njk4MjkyMFwiLFwiYWN0XzQyMDc0NjM5NTQ4NDc1OVwiLFwiYWN0XzQ0NjQyNDkxMjM1OTkyM1wiLFwiYWN0XzQ1MzAxMzkwMjAyNjUxNFwiLFwiYWN0XzQ4MTgxODUyNTcxNjc4MFwiLFwiYWN0XzQ5NDY4MDgxODA5Mzc5MVwiLFwiYWN0XzUxNDc4ODc1OTM4MDczM1wiLFwiYWN0XzUyMTI3OTg4XCIsXCJhY3RfNTIyOTYyNDg4NDI0MTUyXCIsXCJhY3RfNTIzODY2Nzg1MDEwNTgzXCIsXCJhY3RfNTI1NzEwMTg0NTY2NDE0XCIsXCJhY3RfNTU5MzExOTMxMjE3NDI3XCIsXCJhY3RfNTc0NDEwOTI5ODU2NjExXCIsXCJhY3RfNjA0MzQ4NDgzNzUyODY1XCIsXCJhY3RfNjI4NTQ0NTBcIixcImFjdF82MzUwNzAzODM2NTU1OTBcIixcImFjdF83MDk2OTU3MFwiLFwiYWN0Xzc0NDE5OTAwOTM1NTA4OFwiLFwiYWN0Xzc1Njg4MjIzMTM5OTExN1wiLFwiYWN0Xzc5MjM2NTYxNzQ5NjM3NlwiLFwiYWN0Xzg0NjYyMTIyMjM2MjI4NFwiLFwiYWN0Xzg2MTgxMjQ2NzU5NzAwMVwiLFwiYWN0Xzg2NzMxMjg1NzAyMzUwNVwiLFwiYWN0XzkwODA2MjQ5NjMxODE5NlwiLFwiYWN0Xzk4MjA4NTMwODgxMTg5OFwiLFwiYWN0Xzk4NDk0Mzg3MTU2NDgzNFwiXSxcIlJvbGVzXCI6WzAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMCwwLDAsMF19LFwiRmFjZWJvb2tCdXNpbmVzc1Blcm1pc3Npb25zXCI6e1wiSWRzXCI6W1wiMTM3NTM5MjQ0MzQzMzc5XCIsXCIxNzIxMjg1OTQ4MDg1MDQyXCIsXCIxNzg5OTAzNTAxMTYwNjBcIixcIjMxNjAwNjg2NTU2OTM0N1wiLFwiMzM0NzE2MDQwNzA3ODM0XCIsXCI0NzQ4NDQ4ODMxMjExMTJcIixcIjUyMDA5ODE3NDg1MDUzOVwiXSxcIlJvbGVzXCI6WzAsMCwwLDAsMCwwLDBdfSxcIklzRnJvbnRPZmZpY2VVc2VyXCI6dHJ1ZX0iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJGYWNlYm9vayBCdXNpbmVzcyBPd25lciIsImV4cCI6MTU5ODEzNjE5OCwiaXNzIjoiRmlsZWQtVG9rZW4tSXNzdWVyIiwiYXVkIjoiRmlsZWQtQ2xpZW50LUFwcHMifQ.H7tPnXOwPqzak0UlPOQ_5sCvpUqkA3E50Exk2u0_ZoU'
+        headers = {'Authorization': 'Bearer ' + token}
         try:
             if 'flexible_spec' in structure['targeting'].keys():
                 interests = [interest_dict['name']
@@ -217,34 +248,19 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                 self.logger.logger.info(log)
             raise e
 
-        self._external_services.targeting_search += ','.join(interests)
+        combinations_of_interests = sum(
+            [list(map(list, itertools.combinations(interests, i))) for i in range(len(interests) + 1)], [])
+        combinations_of_interests = list(sorted(combinations_of_interests, key=lambda x: len(x), reverse=True))
 
-        response = requests.get(url=self._external_services.targeting_search)
-        if response.status_code != 200:
-            if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="RecommendationTemplateBuilder",
-                                        description="Failed to get interests from structure targeting.",
-                                        extra_data={
-                                            "error": response.json()
-                                        })
-                self.logger.logger.info(log)
-            return ''
+        for combination in combinations_of_interests:
+            endpoint = self._external_services.targeting_search + ','.join(combination)
+            value = self._get_top_interests(top_number=keyword.metric_count,
+                                            endpoint=endpoint,
+                                            headers=headers)
+            if value:
+                return value
 
-        response = response.json()
-        results_root = response['results']
-        interests_accumulator = []
-        for response in results_root:
-            self.__in_order_traversal(node=response, accumulator=interests_accumulator)
-
-        top_interests = list(
-            list(sorted(interests_accumulator, key=lambda x: x[1] if x[1] is not None else 0, reverse=True))[
-            :keyword.metric_count])
-        top_interests = list(map(lambda x: x[0], top_interests))
-
-        value = ', '.join(top_interests)
-
-        return value
+        return ''
 
     def __find_audience_size(self, keyword: RuleTemplateKeyword):
         mc = (MetricCalculator().

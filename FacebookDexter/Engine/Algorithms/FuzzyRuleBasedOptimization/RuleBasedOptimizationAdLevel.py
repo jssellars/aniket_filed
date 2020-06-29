@@ -14,6 +14,7 @@ from FacebookDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.MetricCalculator import MetricCalculator
 from FacebookDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
+from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeSelectionEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 
 
@@ -26,7 +27,7 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
         self.__ids = None
         self.set_level(LevelEnum.AD)
 
-    def run(self, adset_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def run(self, adset_id: typing.AnyStr = None, rule_selection_types: typing.List = None) -> typing.List[typing.Dict]:
         self.__adset_id = adset_id
         self.__load_ids()
         if not self.__ids:
@@ -38,18 +39,22 @@ class RuleBasedOptimizationAdLevel(RuleBasedOptimizationBase):
         for ad_id in lowest_25p_performing_ads:
             if self.is_available(ad_id):
                 que = Queue()
+                t_list = []
+                for rule_selection_type in rule_selection_types:
+                    for evaluate_function in self.rules_selector(rule_selection_type):
+                        t = Thread(target=lambda q, arg1, arg2: q.put(evaluate_function(arg1, arg2)),
+                                args=(que, ad_id, self._fuzzyfier_factory))
+                        t_list.append(t)
 
                 # TODO: refactor this
-                t1 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_general_rules(arg1, arg2)),
-                            args=(que, ad_id, self._fuzzyfier_factory))
-                t2 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_pause_rules(arg1, arg2)),
-                            args=(que, ad_id, self._fuzzyfier_factory))
-                t3 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_increase_budget_rules(arg1, arg2)),
-                            args=(que, ad_id, self._fuzzyfier_factory))
-                t4 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_decrease_budget_rules(arg1, arg2)),
-                            args=(que, ad_id, self._fuzzyfier_factory))
-
-                t_list = [t1, t2, t3, t4]
+                # t1 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_general_rules(arg1, arg2)),
+                #             args=(que, ad_id, self._fuzzyfier_factory))
+                # t2 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_pause_rules(arg1, arg2)),
+                #             args=(que, ad_id, self._fuzzyfier_factory))
+                # t3 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_increase_budget_rules(arg1, arg2)),
+                #             args=(que, ad_id, self._fuzzyfier_factory))
+                # t4 = Thread(target=lambda q, arg1, arg2: q.put(self.evaluate_decrease_budget_rules(arg1, arg2)),
+                #             args=(que, ad_id, self._fuzzyfier_factory))
 
                 for t in t_list:
                     t.start()

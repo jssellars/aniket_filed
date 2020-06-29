@@ -1,6 +1,7 @@
 import traceback
 import typing
 from datetime import datetime, timedelta
+from threading import Thread
 
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import AlgorithmsEnum
 from FacebookDexter.Engine.Algorithms.AlgorithmsFactory import AlgorithmsFactory
@@ -15,6 +16,7 @@ from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEntryModel 
 from FacebookDexter.Infrastructure.Domain.DexterJournal.DexterJournalEnums import DexterEngineRunJournalEnum, \
     RunStatusDexterEngineJournal
 from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeSelectionEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepositoryHelper import \
     DexterJournalMongoRepositoryHelper
 
@@ -64,9 +66,7 @@ class Orchestrator(OrchestratorBuilder):
     def orchestrate(self):
         query = DexterJournalMongoRepositoryHelper.get_search_for_other_instances_query(
             business_owner_id=self.business_owner_id,
-            algorithm_type=self.algorithm_type,
-            ad_account_id=self.ad_account_id,
-            level=self.level)
+            ad_account_id=self.ad_account_id)
         sort_query = DexterJournalMongoRepositoryHelper.get_sort_descending_by_start_date_query()
 
         ad_account_id_journal = list(self._journal_repository.get_last_two_entries(query, sort_query))
@@ -86,9 +86,9 @@ class Orchestrator(OrchestratorBuilder):
                 if RunStatus.is_completed_or_failed(doc=antecedent_doc):
                     self.__run_from_pending()
                 else:
-                    search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(self.ad_account_id,
-                                                                                               self.algorithm_type,
-                                                                                               self.business_owner_id)
+                    search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(
+                        ad_account_id=self.ad_account_id,
+                        business_owner_id=self.business_owner_id)
                     update_query = DexterJournalMongoRepositoryHelper.get_update_query_start_date_only()
                     self._journal_repository.update_one(search_query, update_query)
         else:
@@ -100,19 +100,23 @@ class Orchestrator(OrchestratorBuilder):
         fuzzyfier_factory = FuzzyfierFactory.get(algorithm_type=alg_type, level=level)
 
         try:
-            algorithm = (algorithm.
-                              set_business_owner_id(self.business_owner_id).
-                              set_facebook_config(self.startup.facebook_config).
-                              set_business_owner_repo_session(self.startup.session).
-                              set_external_services(self.startup.external_services).
-                              set_dexter_config(self.startup.dexter_config).
-                              set_fuzzyfier_factory(fuzzyfier_factory).
-                              set_rules(rules).
-                              set_debug_mode(self.startup.debug).
-                              set_mongo_config(self.startup.mongo_config).
-                              set_dexter_config(self.startup.dexter_config).
-                              set_level(self.level).
-                              create_mongo_repository())
+            if alg_type == AlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
+                algorithm = (algorithm.
+                             set_business_owner_id(self.business_owner_id).
+                             set_facebook_config(self.startup.facebook_config).
+                             set_business_owner_repo_session(self.startup.session).
+                             set_external_services(self.startup.external_services).
+                             set_dexter_config(self.startup.dexter_config).
+                             set_fuzzyfier_factory(fuzzyfier_factory).
+                             set_rules(rules).
+                             set_debug_mode(self.startup.debug).
+                             set_mongo_config(self.startup.mongo_config).
+                             create_mongo_repository())
+            elif alg_type == AlgorithmsEnum.FACEBOOK_ENHANCER:
+                algorithm = (algorithm.
+                             set_debug_mode(self.startup.debug).
+                             set_mongo_config(self.startup.mongo_config).
+                             create_mongo_repository())
         except Exception as e:
             raise e
 
@@ -122,7 +126,6 @@ class Orchestrator(OrchestratorBuilder):
         journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
 
         search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                       self.algorithm_type,
                                                                                        self.business_owner_id)
         self._journal_repository.add_one(journal_object_saving)
 
@@ -130,13 +133,11 @@ class Orchestrator(OrchestratorBuilder):
 
     def __run_from_pending(self):
         search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(self.ad_account_id,
-                                                                                   self.algorithm_type,
                                                                                    self.business_owner_id)
         update_query = DexterJournalMongoRepositoryHelper.get_update_query_in_progress()
         self._journal_repository.update_one(search_query, update_query)
 
         search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                       self.algorithm_type,
                                                                                        self.business_owner_id)
 
         self.__run_algorithm(search_query=search_query)
@@ -148,7 +149,6 @@ class Orchestrator(OrchestratorBuilder):
     def __run_from_completed_or_failed(self):
         journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
         search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                       self.algorithm_type,
                                                                                        self.business_owner_id)
         self._journal_repository.add_one(journal_object_saving)
         self.__run_algorithm(search_query=search_query)
@@ -176,9 +176,6 @@ class Orchestrator(OrchestratorBuilder):
 
     def __run_algorithm(self, search_query):
         try:
-            algorithm = self.__init_algorithm(self.algorithm_type, level=self.level)
-            rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=self.algorithm_type, level=self.level)
-
             if not self.startup.dexter_config.date_stop:
                 date_stop = datetime.now() - timedelta(days=1)
             else:
@@ -186,23 +183,87 @@ class Orchestrator(OrchestratorBuilder):
                             timedelta(days=1)
             for time_interval in self.startup.dexter_config.time_intervals:
                 time_interval_enum = DaysEnum(time_interval)
-                if self.algorithm_type == AlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
+
+                last_updated = self.startup.dexter_config.recommendation_days_last_updated
+
+                campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
+                for campaign_id in campaign_ids:
+                    rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
+                                                              level=LevelEnum.CAMPAIGN)
                     rule_evaluator.set_time_interval(time_interval_enum)
-                    (algorithm.set_date_stop(date_stop).
-                     set_time_interval(time_interval_enum).
-                     set_rule_evaluator(rule_evaluator))
-                elif self.algorithm_type == AlgorithmsEnum.FACEBOOK_ENHANCER:
-                    (algorithm.set_date_stop(date_stop).
-                     set_time_interval(time_interval_enum))
+                    rule_algorithm_campaign = self.get_rule_algorithm(date_stop,
+                                                                      rule_evaluator,
+                                                                      time_interval_enum,
+                                                                      LevelEnum.CAMPAIGN)
+                    should_stop = False
+                    adset_ids = self._data_repository.get_adset_ids_by_campaign_id(campaign_id)
+                    for adset_id in adset_ids:
+                        t = Thread(target=self.run_facebook_enhancer,
+                                   args=(adset_id, date_stop, time_interval_enum, LevelEnum.ADSET))
+                        t.start()
 
-                if self.level == LevelEnum.CAMPAIGN:
-                    self.run_on_campaign(algorithm)
+                        ad_ids = self._data_repository.get_ads_by_adset_id(adset_id)
+                        for ad_id in ad_ids:
+                            t = Thread(target=self.run_facebook_enhancer,
+                                       args=(ad_id, date_stop, time_interval_enum, LevelEnum.AD))
+                            t.start()
+                    if rule_algorithm_campaign.check_run_status(campaign_id):
+                        for adset_id in adset_ids:
+                            rule_evaluator = RuleEvaluatorFactory.get(
+                                algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
+                            rule_evaluator.set_time_interval(time_interval_enum)
+                            rule_algorithm_adset_breakdown = self.get_rule_algorithm(date_stop,
+                                                                                     rule_evaluator,
+                                                                                     time_interval_enum,
+                                                                                     LevelEnum.ADSET)
+                            rule_based_recommendations = rule_algorithm_adset_breakdown.run(adset_id,
+                                                                                            [
+                                                                                                RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
+                            if rule_based_recommendations:
+                                should_stop = True
+                                self._recommendations_repository.save_recommendations(rule_based_recommendations,
+                                                                                      last_updated)
+                            if not should_stop:
+                                rule_evaluator = RuleEvaluatorFactory.get(
+                                    algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.AD)
+                                rule_evaluator.set_time_interval(time_interval_enum)
+                                rule_algorithm_ad = self.get_rule_algorithm(date_stop,
+                                                                            rule_evaluator,
+                                                                            time_interval_enum,
+                                                                            LevelEnum.AD)
+                                rule_based_recommendations = rule_algorithm_ad.run(adset_id,
+                                                                                   [RuleTypeSelectionEnum.GENERAL,
+                                                                                    RuleTypeSelectionEnum.BUDGET])
+                                if rule_based_recommendations:
+                                    should_stop = True
+                                    self._recommendations_repository.save_recommendations(rule_based_recommendations,
+                                                                                          last_updated)
+                                else:
 
-                elif self.level == LevelEnum.ADSET:
-                    self.run_on_adset(algorithm)
+                                    rule_evaluator = RuleEvaluatorFactory.get(
+                                        algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
+                                    rule_evaluator.set_time_interval(time_interval_enum)
+                                    rule_algorithm_adset_other = self.get_rule_algorithm(date_stop,
+                                                                                         rule_evaluator,
+                                                                                         time_interval_enum,
+                                                                                         LevelEnum.ADSET)
+                                    rule_based_recommendations = rule_algorithm_adset_other.run(adset_id,
+                                                                                                [
+                                                                                                    RuleTypeSelectionEnum.GENERAL,
+                                                                                                    RuleTypeSelectionEnum.CREATE,
+                                                                                                    RuleTypeSelectionEnum.BUDGET])
+                                    if rule_based_recommendations:
+                                        should_stop = True
+                                        self._recommendations_repository.save_recommendations(
+                                            rule_based_recommendations,
+                                            last_updated)
 
-                elif self.level == LevelEnum.AD:
-                    self.run_on_ad(algorithm)
+                        rule_based_recommendations = rule_algorithm_campaign.run(campaign_id,
+                                                                                 [RuleTypeSelectionEnum.GENERAL,
+                                                                                  RuleTypeSelectionEnum.BUDGET])
+                        self._recommendations_repository.save_recommendations(
+                            rule_based_recommendations,
+                            last_updated)
 
                 update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
                 self._journal_repository.update_one(search_query, update_query)
@@ -215,50 +276,35 @@ class Orchestrator(OrchestratorBuilder):
 
         self.keep_latest_recommendations()
 
-    def run_on_ad(self, algorithm):
-        campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
-        for campaign_id in campaigns_ids:
-            should_run = algorithm.check_run_status(campaign_id)
-            if should_run:
-                adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
-                for adset_id in adset_ids:
-                    if self.algorithm_type == AlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
-                        recommendations = algorithm.run(adset_id)
-                        self._recommendations_repository.save_recommendations(recommendations,
-                                                                              self.startup.dexter_config.recommendation_days_last_updated)
-                    elif self.algorithm_type == AlgorithmsEnum.FACEBOOK_ENHANCER:
-                        ad_ids = self._data_repository.get_ads_by_adset_id(key_value=adset_id)
-                        for ad_id in ad_ids:
-                            recommendations = algorithm.run(ad_id)
-                            self._recommendations_repository.save_recommendations(recommendations,
-                                                                                  self.startup.dexter_config.recommendation_days_last_updated)
+    def run_facebook_enhancer(self, structure_id, date_stop, time_interval_enum, level):
+        facebook_enhancer_algorithm = self.get_facebook_enhancer_algorithm(date_stop,
+                                                                           time_interval_enum,
+                                                                           level)
+        facebook_recommendations = facebook_enhancer_algorithm.run(structure_id)
+        self._recommendations_repository.save_recommendations(facebook_recommendations,
+                                                              self.startup.dexter_config.recommendation_days_last_updated)
 
-    def run_on_adset(self, algorithm):
-        campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
-        for campaign_id in campaigns_ids:
-            should_run = algorithm.check_run_status(campaign_id)
-            if should_run:
-                adset_ids = self._data_repository.get_adsets_by_campaign_id(key_value=campaign_id)
-                for adset_id in adset_ids:
-                    recommendations = algorithm.run(adset_id)
-                    self._recommendations_repository.save_recommendations(recommendations,
-                                                                          self.startup.dexter_config.recommendation_days_last_updated)
+    def get_facebook_enhancer_algorithm(self, date_stop, time_interval_enum, level):
+        facebook_enhancer_algorithm = self.__init_algorithm(alg_type=AlgorithmsEnum.FACEBOOK_ENHANCER,
+                                                            level=level)
+        (facebook_enhancer_algorithm.
+         set_date_stop(date_stop).
+         set_time_interval(time_interval_enum))
+        return facebook_enhancer_algorithm
 
-    def run_on_campaign(self, algorithm):
-        campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
-        for campaign_id in campaigns_ids:
-            should_run = algorithm.check_run_status(campaign_id)
-            if should_run:
-                recommendations = algorithm.run(campaign_id)
-                self._recommendations_repository.save_recommendations(recommendations,
-                                                                      self.startup.dexter_config.recommendation_days_last_updated)
+    def get_rule_algorithm(self, date_stop, rule_evaluator, time_interval_enum, level):
+        rule_algorithm = self.__init_algorithm(alg_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
+                                               level=level)
+        (rule_algorithm.
+         set_date_stop(date_stop).
+         set_time_interval(time_interval_enum).
+         set_rule_evaluator(rule_evaluator))
+        return rule_algorithm
 
     def __create_journal_entry_object(self, run_status):
         journal_object = DexterJournalEntryModel()
         journal_object.business_owner_id = self.business_owner_id
         journal_object.ad_account_id = self.ad_account_id
-        journal_object.algorithm_type = self.algorithm_type.value
-        journal_object.level = self.level.value
         journal_object.run_status = run_status.value
         journal_object.start_timestamp = datetime.now()
         journal_object.end_timestamp = None

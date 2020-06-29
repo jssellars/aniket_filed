@@ -47,3 +47,10 @@ class RuleRedirectEnum(Enum):
     CREATE_LOOKALIKE_AUDIENCE = 5
     CREATE_RETARGETING_AUDIENCE = 6
     DUPLICATE = 7
+
+class RuleTypeSelectionEnum(Enum):
+    REMOVE_BREAKDOWN = 0
+    GENERAL = 1
+    BUDGET = 2
+    PAUSE = 3
+    CREATE = 4

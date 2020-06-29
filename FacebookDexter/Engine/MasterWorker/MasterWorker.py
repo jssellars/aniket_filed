@@ -21,24 +21,13 @@ def start_algorithm_for_accounts_set(ad_account_ids: typing.List[typing.AnyStr] 
                     set_journal_repository(journal_repository).
                     set_data_repository(data_repository))
 
-    levels = [LevelEnum.AD, LevelEnum.CAMPAIGN, LevelEnum.ADSET]
-
-    generator = ((ad_account_id, algorithm_type, level)
-                 for ad_account_id in ad_account_ids
-                 for algorithm_type in AlgorithmsEnum
-                 for level in levels)
-
-    for ad_account_id, algorithm_type, level in generator:
+    for ad_account_id in ad_account_ids:
         orchestrator.business_owner_id = business_owner_id
         orchestrator.ad_account_id = ad_account_id
-        orchestrator.algorithm_type = algorithm_type
-        orchestrator.level = level
         orchestrator.startup = startup
 
         orchestrator.orchestrate()
         orchestrator.update_remaining_null_dates()
-
-    # data_repository.close()
 
 
 def start_dexter_for_business_owner(business_owner: typing.AnyStr = None,

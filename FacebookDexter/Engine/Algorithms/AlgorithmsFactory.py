@@ -1,7 +1,9 @@
 import typing
 
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import AlgorithmsEnum
-from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnhancer import FacebookRecommendationEnhancer
+from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnhancerAdLevel import \
+    FacebookRecommendationEnhancerAdLevel
+from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnhancerAdSetLevel import FacebookRecommendationEnhancerAdSetLevel
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.RuleBasedOptimizationAdLevel import \
     RuleBasedOptimizationAdLevel
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.RuleBasedOptimizationAdSetLevel import \
@@ -22,8 +24,8 @@ class AlgorithmsFactory:
         (AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, LevelEnum.CAMPAIGN): RuleBasedOptimizationCampaignLevel(),
         (AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, LevelEnum.ADSET): RuleBasedOptimizationAdSetLevel(),
         (AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, LevelEnum.AD): RuleBasedOptimizationAdLevel(),
-        (AlgorithmsEnum.FACEBOOK_ENHANCER, LevelEnum.ADSET): FacebookRecommendationEnhancer(),
-        (AlgorithmsEnum.FACEBOOK_ENHANCER, LevelEnum.AD): FacebookRecommendationEnhancer()
+        (AlgorithmsEnum.FACEBOOK_ENHANCER, LevelEnum.ADSET): FacebookRecommendationEnhancerAdSetLevel(),
+        (AlgorithmsEnum.FACEBOOK_ENHANCER, LevelEnum.AD): FacebookRecommendationEnhancerAdLevel()
     }
 
     @classmethod

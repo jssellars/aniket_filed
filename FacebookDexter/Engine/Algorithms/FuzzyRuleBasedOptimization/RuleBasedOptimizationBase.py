@@ -8,6 +8,7 @@ from FacebookDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import Ac
 from FacebookDexter.Infrastructure.Domain.Metrics.MetricCalculator import MetricCalculator
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationBuilder import RecommendationBuilder
 from FacebookDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from FacebookDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeSelectionEnum
 from FacebookDexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEvaluatorData
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 
@@ -16,10 +17,20 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
     def __init__(self):
         super().__init__()
 
-    def run(self, **kwargs) -> typing.List[typing.Dict]:
+    def rules_selector(self, rule_type: RuleTypeSelectionEnum = None):
+        mapper = {
+            RuleTypeSelectionEnum.REMOVE_BREAKDOWN: [self.evaluate_remove_rules],
+            RuleTypeSelectionEnum.GENERAL: [self.evaluate_general_rules],
+            RuleTypeSelectionEnum.BUDGET: [self.evaluate_increase_budget_rules, self.evaluate_decrease_budget_rules],
+            RuleTypeSelectionEnum.PAUSE: [self.evaluate_pause_rules],
+            RuleTypeSelectionEnum.CREATE: [self.evaluate_create_rules]
+        }
+        return mapper[rule_type]
+
+    def run(self, *args, **kwargs) -> typing.List[typing.Dict]:
         raise NotImplementedError("Method run() not implemented.")
 
-    def check_run_status(self, **kwargs):
+    def check_run_status(self, *args, **kwargs):
         return True
 
     def is_available(self, facebook_id: typing.AnyStr):
