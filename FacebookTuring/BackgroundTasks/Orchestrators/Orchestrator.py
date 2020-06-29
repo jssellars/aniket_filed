@@ -1,6 +1,6 @@
 import copy
-import typing
 import math
+import typing
 from collections import defaultdict
 from threading import Thread
 
@@ -18,7 +18,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 class Orchestrator:
-    ACCOUNTS_PER_THREAD = 0.1
+    ACCOUNTS_PER_THREAD = 0.50
 
     def __init__(self,
                  insights_repository: TuringMongoRepository = None,
@@ -53,9 +53,10 @@ class Orchestrator:
         self.__rabbit_logger = logger
         return self
 
-    def run(self):
+    def run(self, business_owner_id: typing.AnyStr = None):
         # get latest ad account state for all BO
-        ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active()
+        ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active(
+            business_owner_id=business_owner_id)
         business_owners = self.__group_by_business_owner_id(ad_accounts_details)
 
         # for each BO for each ad account, start a structures sync thread and an insights sync thread

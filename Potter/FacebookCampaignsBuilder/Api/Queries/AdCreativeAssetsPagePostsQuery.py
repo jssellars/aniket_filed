@@ -29,7 +29,7 @@ class AdCreativeAssetsPagePostsQuery(AdCreativeAssetsBaseQuery):
         try:
             page = Page(fbid=page_facebook_id)
             page_posts_raw = page.get_posts(fields=self.__page_posts_minimal_fields)
-            page_posts = Tools.convert_to_json(page_posts_raw)
+            page_posts = [Tools.convert_to_json(entry) for entry in page_posts_raw]
         except Exception as e:
             raise e
 

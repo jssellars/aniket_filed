@@ -40,7 +40,8 @@ class CampaignModelFields(StructureModelFieldBase):
         FieldsMetadata.top_line_id,
         FieldsMetadata.updated_time,
         FieldsMetadata.ad_rules_governed,
-        FieldsMetadata.copies
+        FieldsMetadata.copies,
+        FieldsMetadata.recommendations
     ]
 
     insights_fields = [

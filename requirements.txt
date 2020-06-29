@@ -65,3 +65,5 @@ CMRESHandler
 python-json-logger
 dnspython
 forex_python
+cython
+fastnumbers

@@ -17,7 +17,7 @@ class AdCreativeAssetsImagesQuery(AdCreativeAssetsBaseQuery):
         try:
             ad_account = AdAccount(fbid=ad_account_id)
             ad_account_images_raw = ad_account.get_ad_images(fields=self.__ad_images_minimal_fields)
-            ad_account_images = Tools.convert_to_json(ad_account_images_raw)
+            ad_account_images = [Tools.convert_to_json(entry) for entry in ad_account_images_raw]
         except Exception as e:
             raise e
 

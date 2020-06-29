@@ -48,12 +48,22 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         }
         return self.get(query=query)
 
-    def get_latest_accounts_active(self):
+    def get_latest_accounts_active(self, business_owner_id: typing.AnyStr = None):
         query = {
-            MiscFieldsEnum.status: {
-                MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
-            }
+            MongoOperator.AND.value: [
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
+                    }
+                }
+            ]
         }
+        if business_owner_id:
+            query[MongoOperator.AND.value].append({MiscFieldsEnum.business_owner_id:
+                {
+                    MongoOperator.EQUALS.value: business_owner_id
+                }
+            })
         results = self.get(query)
         return results
 

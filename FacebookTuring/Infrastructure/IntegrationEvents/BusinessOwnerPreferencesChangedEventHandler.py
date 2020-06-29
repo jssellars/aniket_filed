@@ -54,6 +54,6 @@ class BusinessOwnerPreferencesChangedEventHandler:
 
         # start syncing
         try:
-            cls.__orchestrator.run()
+            cls.__orchestrator.run(business_owner_id=message.id)
         except Exception as e:
             raise e

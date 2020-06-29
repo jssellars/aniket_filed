@@ -19,7 +19,7 @@ class AdCreativeAssetsVideosQuery(AdCreativeAssetsBaseQuery):
         try:
             ad_account = AdAccount(fbid=ad_account_id)
             ad_account_videos_raw = ad_account.get_ad_videos(fields=self.__ad_videos_minimal_fields)
-            ad_account_videos = Tools.convert_to_json(ad_account_videos_raw)
+            ad_account_videos = [Tools.convert_to_json(entry) for entry in ad_account_videos_raw]
             for index, ad_video in enumerate(ad_account_videos):
                 ad_account_videos[index]['permalink_url'] = self.__base_permalink_url + \
                                                             ad_account_videos[index]['permalink_url']

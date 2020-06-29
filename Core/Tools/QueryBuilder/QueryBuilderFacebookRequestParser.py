@@ -36,6 +36,7 @@ class QueryBuilderFacebookRequestParser:
         self.level = None
         self.__structure_fields = []
         self.__remove_structure_fields = False
+        self.__sort = None
 
     @property
     def parameters(self):
@@ -46,7 +47,8 @@ class QueryBuilderFacebookRequestParser:
             "action_attribution_windows": self.__action_attribution_windows,
             "time_increment": self.time_increment,
             "time_range": self.time_range,
-            "filtering": self.filtering
+            "filtering": self.filtering,
+            "sort": self.__sort
         }
 
         return parameters
@@ -142,6 +144,10 @@ class QueryBuilderFacebookRequestParser:
                 facebook_filter = QueryBuilderFilter(entry)
                 self.filtering.append(facebook_filter.as_dict())
 
+    def sort_insights_by_time(self):
+        if self.parameters.get('time_increment'):
+            self.__sort = ['date_start']
+
     def parse(self, request, parse_breakdowns=True):
         self.level = request.get_level()
         self.parse_query_columns(request.Columns, parse_breakdowns=parse_breakdowns,
@@ -149,6 +155,7 @@ class QueryBuilderFacebookRequestParser:
         self.parse_query_columns(request.Dimensions, parse_breakdowns=parse_breakdowns,
                                  column_type=self.QueryBuilderColumnName.DIMENSION)
         self.parse_query_conditions(request.Conditions)
+        self.sort_insights_by_time()
 
     def remove_structure_fields(self):
         self.__structure_fields = []

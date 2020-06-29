@@ -1,13 +1,13 @@
 import typing
 
-from marshmallow import EXCLUDE, post_load
+from marshmallow import post_load, INCLUDE
 
 from Core.Tools.Mapper.MapperBase import MapperBase
 
 
 class AdPreviewCommandMapping(MapperBase):
     class Meta:
-        unknown = EXCLUDE
+        unknown = INCLUDE
 
     @post_load
     def build(self, data: typing.Any, **kwargs):

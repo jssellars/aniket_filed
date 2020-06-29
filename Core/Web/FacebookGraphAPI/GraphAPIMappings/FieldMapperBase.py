@@ -1,5 +1,6 @@
-import ast
 import typing
+
+from fastnumbers import fast_real
 
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition
 
@@ -21,10 +22,8 @@ class FieldMapperBase:
 
     @staticmethod
     def _convert_to_float(value):
-        if value is None:
-            return value
         try:
-            converted_value = ast.literal_eval(value)
-        except:
+            converted_value = fast_real(value)
+        except Exception as e:
             converted_value = value
         return converted_value

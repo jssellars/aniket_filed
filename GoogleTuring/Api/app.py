@@ -2,17 +2,6 @@
 import os
 import sys
 
-from GoogleTuring.Api.Controllers.AdAccountInsightsController import AdAccountInsightsEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, \
-    AdsManagerCatalogsViewsByLevelEndpoint, AdsManagerReportsEndpoint, AdsManagerDimensionsEndpoint, \
-    AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetAdsEndpoint, \
-    AdsManagerGetAdGroupsEndpoint, \
-    AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, \
-    AdsManagerInsightsWithTotalsEndpoint
-from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
-
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -25,6 +14,16 @@ from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_simple import JWTManager
 from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.Controllers.AdAccountInsightsController import AdAccountInsightsEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, \
+    AdsManagerCatalogsViewsByLevelEndpoint, AdsManagerReportsEndpoint, AdsManagerDimensionsEndpoint, \
+    AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetAdsEndpoint, \
+    AdsManagerGetAdGroupsEndpoint, \
+    AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, \
+    AdsManagerInsightsWithTotalsEndpoint
+from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = os.environ[

@@ -29,11 +29,11 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "host": "dev.filed.com",
     "port": 1433,
-    "username": "admin",
-    "password": "F2!irf0q",
-    "name": "filed-facebook-tokens"
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Dev.Filed.Facebook.Potter.Accounts"
   },
   "external_services": {
     "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",

@@ -29,11 +29,11 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "filed-dev-database-instance.cjjxmuvqxehb.eu-west-2.rds.amazonaws.com",
+    "host": "dev.filed.com",
     "port": 1433,
-    "username": "admin",
-    "password": "F2!irf0q",
-    "name": "filed-facebook-tokens"
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Dev.Filed.Facebook.Potter.Accounts"
   },
   "environment": "dev",
   "api_name": "FacebookAccountsBackgroundTasks",

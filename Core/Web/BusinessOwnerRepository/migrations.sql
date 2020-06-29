@@ -1,5 +1,6 @@
-CREATE TABLE BusinessOwners (
-    id int IDENTITY(1,1),
+create database "Prod.Filed.Facebook.Potter.Accounts";
+create table BusinessOwners (
+    id int identity (1,1),
 	facebook_id varchar(255) not null,
 	name varchar(255),
 	email varchar(255),

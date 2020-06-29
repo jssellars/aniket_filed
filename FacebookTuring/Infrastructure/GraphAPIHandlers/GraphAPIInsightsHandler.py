@@ -90,7 +90,7 @@ class GraphAPIInsightsHandler:
             response, summary = graph_api_client.call_facebook()
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
             summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
-            insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
+            # insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
             return copy.deepcopy({thread: (insights_response, summary_response)})
         except Exception as e:
             raise e

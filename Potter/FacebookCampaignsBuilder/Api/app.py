@@ -14,6 +14,11 @@ from flask_cors import CORS
 from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
+from Potter.FacebookCampaignsBuilder.Api.Controllers.BudgetValidationController import BudgetValidationEndpoint
+from Potter.FacebookCampaignsBuilder.Api.Controllers.TargetingSearchController import \
+    TargetingSearchInterestsTreeEndpoint, TargetingSearchInterestsSearchEndpoint, \
+    TargetingSearchInterestsSuggestionsEndpoint, TargetingSearchLocationSearchEndpoint, \
+    TargetingSearchLocationsEndpoint, TargetingSearchLanguagesEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.AudienceSizeController import AudienceSizeEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.PublishCampaignController import PublishCampaignEndpoint
@@ -71,6 +76,34 @@ ad_preview_endpoint = "{base_url}/advert-preview".format(base_url=startup.base_u
 api.add_resource(AdPreviewEndpoint, ad_preview_endpoint)
 
 # Targeting search controller
+targeting_search_interests_tree_endpoint = ("{base_url}/targeting-search/interests/tree".
+                                            format(base_url=startup.base_url.lower()))
+api.add_resource(TargetingSearchInterestsTreeEndpoint, targeting_search_interests_tree_endpoint)
+
+targeting_search_interests_search_endpoint = ("{base_url}/targeting-search/interests/search/<string:query_string>".
+                                              format(base_url=startup.base_url.lower()))
+api.add_resource(TargetingSearchInterestsSearchEndpoint, targeting_search_interests_search_endpoint)
+
+targeting_search_interests_suggestions_endpoint = (
+    "{base_url}/targeting-search/interests/suggestions/<string:query_string>".
+        format(base_url=startup.base_url.lower()))
+api.add_resource(TargetingSearchInterestsSuggestionsEndpoint, targeting_search_interests_suggestions_endpoint)
+
+targeting_search_locations_endpoint = "{base_url}/targeting-search/locations/country-groups".format(
+    base_url=startup.base_url.lower())
+api.add_resource(TargetingSearchLocationsEndpoint, targeting_search_locations_endpoint)
+
+targeting_search_locations_search_endpoint = ("{base_url}/targeting-search/locations/search/<string:query_string>".
+                                              format(base_url=startup.base_url.lower()))
+api.add_resource(TargetingSearchLocationSearchEndpoint, targeting_search_locations_search_endpoint)
+
+targeting_search_languages_endpoint = "{base_url}/targeting-search/languages".format(base_url=startup.base_url.lower())
+api.add_resource(TargetingSearchLanguagesEndpoint, targeting_search_languages_endpoint)
+
+# Budget validation controller
+budget_validation_endpoint = ("{base_url}/budget-validation/<string:business_owner_id>/<string:account_id>".
+                              format(base_url=startup.base_url.lower()))
+api.add_resource(BudgetValidationEndpoint, budget_validation_endpoint)
 
 if __name__ == "__main__":
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

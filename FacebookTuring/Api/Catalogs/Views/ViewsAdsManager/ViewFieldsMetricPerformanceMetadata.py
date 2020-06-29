@@ -29,7 +29,7 @@ class ViewFieldsMetricPerformanceMetadata:
                             primary_value=FieldsMetadata.clicks_all,
                             type_id=ViewColumnTypeEnum.NUMBER.value,
                             category_id=ViewColumnCategoryEnum.PERFORMANCE.value, is_fixed=False)
-    cpc_all = ViewColumn(Autoincrement.hex_string('cpc_all'), display_name="Cost per click (All)",
+    cpc_all = ViewColumn(Autoincrement.hex_string('cpc_all'), display_name="CPC (All)",
                          primary_value=FieldsMetadata.cpc_all,
                          type_id=ViewColumnTypeEnum.CURRENCY.value,
                          category_id=ViewColumnCategoryEnum.PERFORMANCE.value, is_fixed=False)
