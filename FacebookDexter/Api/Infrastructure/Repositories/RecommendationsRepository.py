@@ -110,7 +110,7 @@ class RecommendationsRepository(object):
         query_filter = {}
         if (filter is not None):
             for key in filter:
-                if (key == 'searchTerm'):
+                if (key == 'search_term'):
                     search_filter = {}
                     search_filter['$regex'] = filter[key]
                     search_filter['$options'] = 'i'  # ignore case
