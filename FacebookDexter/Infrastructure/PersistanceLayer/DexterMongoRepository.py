@@ -478,7 +478,14 @@ class DexterMongoRepository(MongoRepositoryBase):
         self.set_collection(collection_name)
 
         query = {
-            LevelIdKeyEnum.ACCOUNT.value: {MongoOperator.EQUALS.value: key_value}
+            MongoOperator.AND.value: [
+                {
+                    LevelIdKeyEnum.ACCOUNT.value: {MongoOperator.EQUALS.value: key_value}
+                },
+                {
+                    'status': {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                }
+            ]
         }
         projection = {
             "_id": MongoProjectionState.OFF.value,

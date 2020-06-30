@@ -1,3 +1,4 @@
+import time
 import traceback
 import typing
 from datetime import datetime, timedelta
@@ -64,35 +65,37 @@ class Orchestrator(OrchestratorBuilder):
         self._recommendations_repository.deprecate_recommendations(recommendation_ids=ids_to_deprecate)
 
     def orchestrate(self):
-        query = DexterJournalMongoRepositoryHelper.get_search_for_other_instances_query(
-            business_owner_id=self.business_owner_id,
-            ad_account_id=self.ad_account_id)
-        sort_query = DexterJournalMongoRepositoryHelper.get_sort_descending_by_start_date_query()
+        for time_interval in self.startup.dexter_config.time_intervals:
+            query = DexterJournalMongoRepositoryHelper.get_search_for_other_instances_query(
+                business_owner_id=self.business_owner_id,
+                ad_account_id=self.ad_account_id,
+                time_interval=time_interval)
 
-        ad_account_id_journal = list(self._journal_repository.get_last_two_entries(query, sort_query))
+            sort_query = DexterJournalMongoRepositoryHelper.get_sort_descending_by_start_date_query()
+            ad_account_id_journal = list(self._journal_repository.get_last_two_entries(query, sort_query))
 
-        if ad_account_id_journal:
-            doc = ad_account_id_journal[0]
+            if ad_account_id_journal:
+                doc = ad_account_id_journal[0]
 
-            if RunStatus.is_completed_or_failed(doc=doc):
-                self.__run_from_completed_or_failed()
+                if RunStatus.is_completed_or_failed(doc=doc):
+                    self.__run_from_completed_or_failed(time_interval=time_interval)
 
-            elif RunStatus.is_in_progress(doc=doc):
-                self.__save_pending_entry_to_journal()
+                elif RunStatus.is_in_progress(doc=doc):
+                    self.__save_pending_entry_to_journal(time_interval=time_interval)
 
-            elif RunStatus.is_pending(doc=doc):
+                elif RunStatus.is_pending(doc=doc):
 
-                antecedent_doc = ad_account_id_journal[1]
-                if RunStatus.is_completed_or_failed(doc=antecedent_doc):
-                    self.__run_from_pending()
-                else:
-                    search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(
-                        ad_account_id=self.ad_account_id,
-                        business_owner_id=self.business_owner_id)
-                    update_query = DexterJournalMongoRepositoryHelper.get_update_query_start_date_only()
-                    self._journal_repository.update_one(search_query, update_query)
-        else:
-            self.__run_first_time()
+                    antecedent_doc = ad_account_id_journal[1]
+                    if RunStatus.is_completed_or_failed(doc=antecedent_doc):
+                        self.__run_from_pending(time_interval=time_interval)
+                    else:
+                        search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(
+                            ad_account_id=self.ad_account_id,
+                            business_owner_id=self.business_owner_id)
+                        update_query = DexterJournalMongoRepositoryHelper.get_update_query_start_date_only()
+                        self._journal_repository.update_one(search_query, update_query)
+            else:
+                self.__run_first_time(time_interval=time_interval)
 
     def __init_algorithm(self, alg_type, level) -> typing.Any:
         algorithm = AlgorithmsFactory.get(algorithm_type=alg_type, level=level)
@@ -123,36 +126,43 @@ class Orchestrator(OrchestratorBuilder):
 
         return algorithm
 
-    def __run_first_time(self):
-        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
+    def __run_first_time(self, time_interval):
+        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS,
+                                                                   time_interval)
 
         search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                       self.business_owner_id)
+                                                                                       self.business_owner_id,
+                                                                                       time_interval)
         self._journal_repository.add_one(journal_object_saving)
 
-        self.__run_algorithm(search_query=search_query)
+        self.__run_algorithm(search_query=search_query, time_interval=time_interval)
 
-    def __run_from_pending(self):
+    def __run_from_pending(self, time_interval):
         search_query = DexterJournalMongoRepositoryHelper.get_search_pending_query(self.ad_account_id,
-                                                                                   self.business_owner_id)
+                                                                                   self.business_owner_id,
+                                                                                   time_interval)
         update_query = DexterJournalMongoRepositoryHelper.get_update_query_in_progress()
         self._journal_repository.update_one(search_query, update_query)
 
         search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                       self.business_owner_id)
+                                                                                       self.business_owner_id,
+                                                                                       time_interval)
 
-        self.__run_algorithm(search_query=search_query)
+        self.__run_algorithm(search_query=search_query, time_interval=time_interval)
 
-    def __save_pending_entry_to_journal(self):
-        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.PENDING)
+    def __save_pending_entry_to_journal(self, time_interval):
+        journal_object_saving = self.__create_journal_entry_object(run_status=RunStatusDexterEngineJournal.PENDING,
+                                                                   time_interval=time_interval)
         self._journal_repository.add_one(journal_object_saving)
 
-    def __run_from_completed_or_failed(self):
-        journal_object_saving = self.__create_journal_entry_object(RunStatusDexterEngineJournal.IN_PROGRESS)
+    def __run_from_completed_or_failed(self, time_interval):
+        journal_object_saving = self.__create_journal_entry_object(run_status=RunStatusDexterEngineJournal.IN_PROGRESS,
+                                                                   time_interval=time_interval)
         search_query = DexterJournalMongoRepositoryHelper.get_search_in_progress_query(self.ad_account_id,
-                                                                                       self.business_owner_id)
+                                                                                       self.business_owner_id,
+                                                                                       time_interval)
         self._journal_repository.add_one(journal_object_saving)
-        self.__run_algorithm(search_query=search_query)
+        self.__run_algorithm(search_query=search_query, time_interval=time_interval)
 
     def update_remaining_null_dates(self):
         search_null_end_date_query = DexterJournalMongoRepositoryHelper.get_search_for_null_end_date(
@@ -175,99 +185,103 @@ class Orchestrator(OrchestratorBuilder):
                 }
                 self._journal_repository.update_one(search_query, update_query)
 
-    def __run_algorithm(self, search_query):
+    def __run_algorithm(self, search_query, time_interval):
         try:
             if not self.startup.dexter_config.date_stop:
                 date_stop = datetime.now() - timedelta(days=1)
             else:
                 date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - \
                             timedelta(days=1)
-            for time_interval in self.startup.dexter_config.time_intervals:
-                time_interval_enum = DaysEnum(time_interval)
 
-                last_updated = self.startup.dexter_config.recommendation_days_last_updated
+            time_interval_enum = DaysEnum(time_interval)
+            last_updated = self.startup.dexter_config.recommendation_days_last_updated
 
-                campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
-                for campaign_id in campaign_ids:
-                    rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
-                                                              level=LevelEnum.CAMPAIGN)
-                    rule_evaluator.set_time_interval(time_interval_enum)
-                    rule_algorithm_campaign = self.get_rule_algorithm(date_stop,
-                                                                      rule_evaluator,
-                                                                      time_interval_enum,
-                                                                      LevelEnum.CAMPAIGN)
-                    should_stop = False
-                    adset_ids = self._data_repository.get_adset_ids_by_campaign_id(campaign_id)
-                    for adset_id in adset_ids:
+            campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
+            c = 1
+            for campaign_id in campaign_ids:
+                print('Started campaign {}[id: {}] out of {}'.format(c, campaign_id, len(campaign_ids)))
+                c+=1
+                start_time = time.time()
+                rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
+                                                          level=LevelEnum.CAMPAIGN)
+                rule_evaluator.set_time_interval(time_interval_enum)
+                rule_algorithm_campaign = self.get_rule_algorithm(date_stop,
+                                                                  rule_evaluator,
+                                                                  time_interval_enum,
+                                                                  LevelEnum.CAMPAIGN)
+                should_stop = False
+                adset_ids = self._data_repository.get_adset_ids_by_campaign_id(campaign_id)
+                for adset_id in adset_ids:
+                    t = Thread(target=self.run_facebook_enhancer,
+                               args=(adset_id, date_stop, time_interval_enum, LevelEnum.ADSET))
+                    t.start()
+
+                    ad_ids = self._data_repository.get_ads_by_adset_id(adset_id)
+                    for ad_id in ad_ids:
                         t = Thread(target=self.run_facebook_enhancer,
-                                   args=(adset_id, date_stop, time_interval_enum, LevelEnum.ADSET))
+                                   args=(ad_id, date_stop, time_interval_enum, LevelEnum.AD))
                         t.start()
-
-                        ad_ids = self._data_repository.get_ads_by_adset_id(adset_id)
-                        for ad_id in ad_ids:
-                            t = Thread(target=self.run_facebook_enhancer,
-                                       args=(ad_id, date_stop, time_interval_enum, LevelEnum.AD))
-                            t.start()
-                    if rule_algorithm_campaign.check_run_status(campaign_id):
-                        for adset_id in adset_ids:
+                if rule_algorithm_campaign.check_run_status(campaign_id):
+                    for adset_id in adset_ids:
+                        rule_evaluator = RuleEvaluatorFactory.get(
+                            algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
+                        rule_evaluator.set_time_interval(time_interval_enum)
+                        rule_algorithm_adset_breakdown = self.get_rule_algorithm(date_stop,
+                                                                                 rule_evaluator,
+                                                                                 time_interval_enum,
+                                                                                 LevelEnum.ADSET)
+                        rule_based_recommendations = rule_algorithm_adset_breakdown.run(adset_id,
+                                                                            [RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
+                        if rule_based_recommendations:
+                            should_stop = True
+                            self._recommendations_repository.save_recommendations(rule_based_recommendations,
+                                                                                  last_updated)
+                        if not should_stop:
                             rule_evaluator = RuleEvaluatorFactory.get(
-                                algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
+                                algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.AD)
                             rule_evaluator.set_time_interval(time_interval_enum)
-                            rule_algorithm_adset_breakdown = self.get_rule_algorithm(date_stop,
-                                                                                     rule_evaluator,
-                                                                                     time_interval_enum,
-                                                                                     LevelEnum.ADSET)
-                            rule_based_recommendations = rule_algorithm_adset_breakdown.run(adset_id,
-                                                                                            [
-                                                                                                RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
+                            rule_algorithm_ad = self.get_rule_algorithm(date_stop,
+                                                                        rule_evaluator,
+                                                                        time_interval_enum,
+                                                                        LevelEnum.AD)
+                            rule_based_recommendations = rule_algorithm_ad.run(adset_id,
+                                                                               [RuleTypeSelectionEnum.GENERAL,
+                                                                                RuleTypeSelectionEnum.BUDGET])
                             if rule_based_recommendations:
                                 should_stop = True
                                 self._recommendations_repository.save_recommendations(rule_based_recommendations,
                                                                                       last_updated)
-                            if not should_stop:
+                            else:
+
                                 rule_evaluator = RuleEvaluatorFactory.get(
-                                    algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.AD)
+                                    algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
                                 rule_evaluator.set_time_interval(time_interval_enum)
-                                rule_algorithm_ad = self.get_rule_algorithm(date_stop,
-                                                                            rule_evaluator,
-                                                                            time_interval_enum,
-                                                                            LevelEnum.AD)
-                                rule_based_recommendations = rule_algorithm_ad.run(adset_id,
-                                                                                   [RuleTypeSelectionEnum.GENERAL,
-                                                                                    RuleTypeSelectionEnum.BUDGET])
+                                rule_algorithm_adset_other = self.get_rule_algorithm(date_stop,
+                                                                                     rule_evaluator,
+                                                                                     time_interval_enum,
+                                                                                     LevelEnum.ADSET)
+                                rule_based_recommendations = rule_algorithm_adset_other.run(adset_id,
+                                                                                            [
+                                                                                                RuleTypeSelectionEnum.GENERAL,
+                                                                                                RuleTypeSelectionEnum.CREATE,
+                                                                                                RuleTypeSelectionEnum.BUDGET])
                                 if rule_based_recommendations:
                                     should_stop = True
-                                    self._recommendations_repository.save_recommendations(rule_based_recommendations,
-                                                                                          last_updated)
-                                else:
+                                    self._recommendations_repository.save_recommendations(
+                                        rule_based_recommendations,
+                                        last_updated)
 
-                                    rule_evaluator = RuleEvaluatorFactory.get(
-                                        algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
-                                    rule_evaluator.set_time_interval(time_interval_enum)
-                                    rule_algorithm_adset_other = self.get_rule_algorithm(date_stop,
-                                                                                         rule_evaluator,
-                                                                                         time_interval_enum,
-                                                                                         LevelEnum.ADSET)
-                                    rule_based_recommendations = rule_algorithm_adset_other.run(adset_id,
-                                                                                                [
-                                                                                                    RuleTypeSelectionEnum.GENERAL,
-                                                                                                    RuleTypeSelectionEnum.CREATE,
-                                                                                                    RuleTypeSelectionEnum.BUDGET])
-                                    if rule_based_recommendations:
-                                        should_stop = True
-                                        self._recommendations_repository.save_recommendations(
-                                            rule_based_recommendations,
-                                            last_updated)
+                    rule_based_recommendations = rule_algorithm_campaign.run(campaign_id,
+                                                                             [RuleTypeSelectionEnum.GENERAL,
+                                                                              RuleTypeSelectionEnum.BUDGET])
+                    self._recommendations_repository.save_recommendations(
+                        rule_based_recommendations,
+                        last_updated)
 
-                        rule_based_recommendations = rule_algorithm_campaign.run(campaign_id,
-                                                                                 [RuleTypeSelectionEnum.GENERAL,
-                                                                                  RuleTypeSelectionEnum.BUDGET])
-                        self._recommendations_repository.save_recommendations(
-                            rule_based_recommendations,
-                            last_updated)
+                    print("Elapsed time: {}".format(time.time() - start_time))
 
-                update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
-                self._journal_repository.update_one(search_query, update_query)
+            update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
+            self._journal_repository.update_one(search_query, update_query)
 
         except Exception as failed_to_run_exception:
             print(failed_to_run_exception.__traceback__)
@@ -302,13 +316,13 @@ class Orchestrator(OrchestratorBuilder):
          set_rule_evaluator(rule_evaluator))
         return rule_algorithm
 
-    def __create_journal_entry_object(self, run_status):
+    def __create_journal_entry_object(self, run_status, time_interval):
         journal_object = DexterJournalEntryModel()
         journal_object.business_owner_id = self.business_owner_id
         journal_object.ad_account_id = self.ad_account_id
         journal_object.run_status = run_status.value
         journal_object.start_timestamp = datetime.now()
-        journal_object.end_timestamp = None
+        journal_object.time_interval = time_interval
         journal_object_saving = journal_object.__dict__
 
         return journal_object_saving
