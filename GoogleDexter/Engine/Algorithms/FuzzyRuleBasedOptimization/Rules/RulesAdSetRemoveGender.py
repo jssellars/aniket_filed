@@ -384,7 +384,7 @@ RULES_ADSET_REMOVE_GENDER = [
              antecedents=[
                  Antecedent(aid=1,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
-                            metric=AvailableMetricEnum.COST_PER_PURCHASE.value,
+                            metric=AvailableMetricEnum.COST_PER_CONVERSION.value,
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=LinguisticVariableEnum.INCREASING)
              ]),

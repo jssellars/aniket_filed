@@ -10,24 +10,20 @@ from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum impor
 class AdsManagerInsightsCommandHandler(GoogleTokenGetter):
 
     @classmethod
-    def __map_query(cls, query):
-        query_builder_request = QueryBuilderRequestMapper(query, FiledGoogleInsightsTableEnum)
-        query = QueryBuilderGoogleRequestParser()
-        query.from_query(query_builder_request)
-        return query
+    def __map_query(cls, query_builder_request_parser):
+        query_builder_request = QueryBuilderRequestMapper(query_builder_request_parser, FiledGoogleInsightsTableEnum)
+        query_builder_request_parser = QueryBuilderGoogleRequestParser()
+        query_builder_request_parser.from_query(query_builder_request)
+        return query_builder_request_parser
 
     @classmethod
     def get_insights(cls, config, query_json, business_owner_google_id):
         business_owner_permanent_token = cls._get_permanent_token(business_owner_google_id)
         if business_owner_permanent_token:
-            query = cls.__map_query(query_json)
+            query_builder_request_parser = cls.__map_query(query_json)
             response = AdWordsAPIInsightsHandler.get_insights(config=config,
                                                               permanent_token=business_owner_permanent_token,
-                                                              client_customer_id=query.google_id,
-                                                              report=query.report,
-                                                              fields=query.google_fields,
-                                                              start_date=query.start_date,
-                                                              end_date=query.end_date)
+                                                              query_builder_request_parser=query_builder_request_parser)
             return response, 200
         else:
             return make_response(jsonify(error_message="Google account not found"), 404)
@@ -36,15 +32,11 @@ class AdsManagerInsightsCommandHandler(GoogleTokenGetter):
     def get_insights_with_totals(cls, config, query_json, business_owner_google_id):
         business_owner_permanent_token = cls._get_permanent_token(business_owner_google_id)
         if business_owner_permanent_token:
-            query = cls.__map_query(query_json)
+            query_builder_request_parser = cls.__map_query(query_json)
             response = AdWordsAPIInsightsHandler.get_insights_with_totals(
                 config=config,
                 permanent_token=business_owner_permanent_token,
-                client_customer_id=query.google_id,
-                report=query.report,
-                fields=query.google_fields,
-                start_date=query.start_date,
-                end_date=query.end_date)
+                query_builder_request_parser=query_builder_request_parser)
             return response, 200
         else:
             return make_response(jsonify(error_message="Google account not found"), 404)

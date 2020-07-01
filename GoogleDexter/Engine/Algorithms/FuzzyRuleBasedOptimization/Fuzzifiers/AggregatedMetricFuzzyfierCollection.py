@@ -50,7 +50,7 @@ AGGREGATED_METRIC_FUZZYFIER_COLLECTION = [
     #               LinguisticVariable(LinguisticVariableEnum.LOW, LinearMembershipFunction(**LOW_LINEAR_PARAMS)),
     #               LinguisticVariable(LinguisticVariableEnum.MEDIUM, TrapezeMembershipFunction(**MEDIUM_LINEAR_PARAMS)),
     #               LinguisticVariable(LinguisticVariableEnum.HIGH, LinearMembershipFunction(**HIGH_LINEAR_PARAMS))]),
-    Fuzzyfier(metric_name=AvailableMetricEnum.COST_PER_PURCHASE.value.name,
+    Fuzzyfier(metric_name=AvailableMetricEnum.COST_PER_CONVERSION.value.name,
               linguistic_levels=[
                   LinguisticVariable(LinguisticVariableEnum.LOW, LinearMembershipFunction(**LOW_LINEAR_PARAMS)),
                   LinguisticVariable(LinguisticVariableEnum.MEDIUM, TrapezeMembershipFunction(**MEDIUM_LINEAR_PARAMS)),

@@ -13,7 +13,7 @@ from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRep
     GoogleTuringStructuresMongoRepository
 
 
-class AdWordsAPISyncStructuresHandler:
+class AdWordsAPIDataSyncHandler:
 
     @classmethod
     def handle(cls, request):
@@ -84,4 +84,3 @@ class AdWordsAPISyncStructuresHandler:
                 mongo_repository.update_one(query_filter=query_filter, query=query)
             else:
                 mongo_repository.add_one(google_account_doc)
-

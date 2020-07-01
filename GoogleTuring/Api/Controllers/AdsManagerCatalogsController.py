@@ -3,37 +3,15 @@ from flask import request
 from flask_jwt_simple import jwt_required
 from flask_restful import Resource, abort
 
+from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogReportsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsBreakdownsDto import AdsManagerCatalogsBreakdownsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsDimensionsDto import AdsManagerCatalogsDimensionsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsMetricsDto import AdsManagerCatalogsMetricsDto
-from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogReportsDto
-from GoogleTuring.Api.Dtos.AdsManagerCatalogsInsightsReportByLevelDto import AdsManagerCatalogsInsightsReportByLevelDto
-from GoogleTuring.Api.Dtos.AdsManagerCatalogsViewsByLevelDto import AdsManagerCatalogsViewsByLevelDto
 
 LEVEL_KEY = 'level'
 REPORT_KEY = 'report'
 DIMENSION_KEY = 'dimension'
 METRICS_KEY = 'metrics'
-
-
-class AdsManagerCatalogsViewsByLevelEndpoint(Resource):
-    @jwt_required
-    def get(self, level):
-        try:
-            response = AdsManagerCatalogsViewsByLevelDto.get(level)
-            return humps.camelize(response)
-        except Exception as e:
-            abort(400, message=f"Invalid views definition request. Error {str(e)}")
-
-
-class AdsManagerCatalogsMetaColumnsEndpoint(Resource):
-    @jwt_required
-    def get(self, level):
-        try:
-            response = AdsManagerCatalogsInsightsReportByLevelDto.get(level)
-            return humps.camelize(response)
-        except Exception as e:
-            abort(400, message=f"Invalid metacolumns definition request. Error {str(e)}")
 
 
 class AdsManagerReportsEndpoint(Resource):

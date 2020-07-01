@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class AdWordsAPIAccountInsightsMapper:
+class AdWordsAPIInsightsMapper:
 
     @classmethod
     def map(cls, fields, df):

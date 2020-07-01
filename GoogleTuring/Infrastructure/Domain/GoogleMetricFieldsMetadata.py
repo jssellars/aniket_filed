@@ -50,11 +50,19 @@ class GoogleMetricFieldsMetadata:
 
     clicks = GoogleFieldsMetadata.clicks
 
+    link_clicks = GoogleFieldsMetadata.link_clicks
+
     conversion_rate = GoogleFieldsMetadata.conversion_rate
 
     conversions = GoogleFieldsMetadata.conversions
 
+    leads = GoogleFieldsMetadata.leads
+
     conversion_value = GoogleFieldsMetadata.conversion_value
+
+    purchases = GoogleFieldsMetadata.purchases
+
+    purchase_value = GoogleFieldsMetadata.purchase_value
 
     cost = GoogleFieldsMetadata.cost
 

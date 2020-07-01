@@ -41,7 +41,7 @@ TREND_METRIC_FUZZYFIER_COLLECTION = [
     #                                                 LinearMembershipFunction(**DECREASING_LINEAR_PARAMS)),
     #                              LinguisticVariable(LinguisticVariableEnum.INCREASING,
     #                                                 LinearMembershipFunction(**INCREASING_LINEAR_PARAMS))]),
-    Fuzzyfier(metric_name=AvailableMetricEnum.COST_PER_PURCHASE.value.name,
+    Fuzzyfier(metric_name=AvailableMetricEnum.COST_PER_CONVERSION.value.name,
               linguistic_levels=[LinguisticVariable(LinguisticVariableEnum.DECREASING,
                                                     LinearMembershipFunction(**DECREASING_LINEAR_PARAMS)),
                                  LinguisticVariable(LinguisticVariableEnum.INCREASING,

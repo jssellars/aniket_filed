@@ -8,7 +8,7 @@ from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseCl
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
 from GoogleTuring.Infrastructure.Domain.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
-from GoogleTuring.Infrastructure.Mappings.AdWordsAPIInsightsMapper import AdWordsAPIInsightsMapper
+from GoogleTuring.Infrastructure.Mappings.AdWordsAPIInsightsMapper import AdWordsAPIAccountInsightsMapper
 
 
 class AdWordsAccountInsightsClient(AdWordsBaseClient):
@@ -58,7 +58,7 @@ class AdWordsAccountInsightsClient(AdWordsBaseClient):
         finally:
             report_data.seek(0)
             df = pd.read_csv(report_data)
-            df = AdWordsAPIInsightsMapper.map(fields=self.__ACCOUNT_FIELDS, df=df)
+            df = AdWordsAPIAccountInsightsMapper.map(fields=self.__ACCOUNT_FIELDS, df=df)
 
             report_data.close()
             stream_data.close()

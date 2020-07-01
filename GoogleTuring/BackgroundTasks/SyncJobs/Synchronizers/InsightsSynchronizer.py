@@ -119,7 +119,7 @@ def create_join_dataframe(df_to_join, join_fields, breakdown, action_breakdown, 
         finally:
             report_data.seek(0)
             df = pd.read_csv(report_data)
-            df = df.drop(columns=compare_field.field_name)
+            df = df.drop(compare_field.name, axis=1)
             report_data.close()
             stream_data.close()
 

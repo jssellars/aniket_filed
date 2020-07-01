@@ -11,18 +11,39 @@ class AdWordsAPIInsightsHandler(AdWordsAPIBaseHandler):
         return adwords_client
 
     @classmethod
-    def get_insights(cls, config, permanent_token, client_customer_id, report, fields, start_date, end_date):
-        adwords_client = cls._build_client(config, client_customer_id, permanent_token)
+    def get_insights(cls, config, permanent_token, query_builder_request_parser):
+        client_customer_id = query_builder_request_parser.google_id
+        report = query_builder_request_parser.report
         report_name = report.value
         status_field = REPORT_TO_STATUS_FIELD[report]
+        level = query_builder_request_parser.level
+        fields = query_builder_request_parser.google_fields
+        start_date = query_builder_request_parser.start_date
+        end_date = query_builder_request_parser.end_date
+        time_increment = query_builder_request_parser.time_increment
+        filtering = query_builder_request_parser.filtering
+
+        adwords_client = cls._build_client(config, client_customer_id, permanent_token)
         return adwords_client.get_insights(report_name=report_name, status_field=status_field,
-                                           fields=fields, start_date=start_date, end_date=end_date)
+                                           fields=fields, start_date=start_date, end_date=end_date,
+                                           time_increment=time_increment,
+                                           filtering=filtering, level=level)
 
     @classmethod
-    def get_insights_with_totals(cls, config, permanent_token, client_customer_id, report, fields, start_date,
-                                 end_date):
-        adwords_client = cls._build_client(config, client_customer_id, permanent_token)
+    def get_insights_with_totals(cls, config, permanent_token, query_builder_request_parser):
+        client_customer_id = query_builder_request_parser.google_id
+        report = query_builder_request_parser.report
         report_name = report.value
         status_field = REPORT_TO_STATUS_FIELD[report]
+        level = query_builder_request_parser.level
+        fields = query_builder_request_parser.google_fields
+        start_date = query_builder_request_parser.start_date
+        end_date = query_builder_request_parser.end_date
+        time_increment = query_builder_request_parser.time_increment
+        filtering = query_builder_request_parser.filtering
+
+        adwords_client = cls._build_client(config, client_customer_id, permanent_token)
         return adwords_client.get_insights_with_totals(report_name=report_name, status_field=status_field,
-                                                       fields=fields, start_date=start_date, end_date=end_date)
+                                                       fields=fields, start_date=start_date, end_date=end_date,
+                                                       time_increment=time_increment,
+                                                       filtering=filtering, level=level)

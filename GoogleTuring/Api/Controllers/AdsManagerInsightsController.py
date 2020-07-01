@@ -7,7 +7,7 @@ from GoogleTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import A
 from GoogleTuring.Api.Startup import startup
 
 
-class AdsManagerInsightsEndpoint(Resource):
+class AdsManagerReportInsightsEndpoint(Resource):
 
     @jwt_required
     def post(self):

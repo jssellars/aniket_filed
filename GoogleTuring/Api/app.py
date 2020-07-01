@@ -15,13 +15,13 @@ from flask_restful import Api
 from flask_jwt_simple import JWTManager
 from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Api.Controllers.AdAccountInsightsController import AdAccountInsightsEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsMetaColumnsEndpoint, \
-    AdsManagerCatalogsViewsByLevelEndpoint, AdsManagerReportsEndpoint, AdsManagerDimensionsEndpoint, \
+from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerReportsEndpoint, \
+    AdsManagerDimensionsEndpoint, \
     AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetAdsEndpoint, \
     AdsManagerGetAdGroupsEndpoint, \
     AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsEndpoint, \
+from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerReportInsightsEndpoint, \
     AdsManagerInsightsWithTotalsEndpoint
 from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 
@@ -49,18 +49,12 @@ api.add_resource(AdsManagerMetricsEndpoint, metrics_controller)
 breakdowns_controller = "{base_url}/get-breakdowns".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerBreakdownsEndpoint, breakdowns_controller)
 
-views_controller = "{base_url}/views/<string:level>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsMetaColumnsEndpoint, views_controller)
-
-views_by_level_controller = "{base_url}/views/views/<string:level>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsViewsByLevelEndpoint, views_by_level_controller)
-
 ad_account_insights_controller = "{base_url}/google-accounts-insights".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountInsightsEndpoint, ad_account_insights_controller)
 
 # Insights
-insights_controller = '{base_url}/insights'.format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsEndpoint, insights_controller)
+insights_controller = '{base_url}/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportInsightsEndpoint, insights_controller)
 
 insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)

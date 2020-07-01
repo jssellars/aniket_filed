@@ -141,6 +141,11 @@ class MetricColumnsMaster:
                           primary_value=GoogleMetricMetadataColumnsPool.clicks, type_id=ViewColumnType.text.id,
                           category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
+    link_clicks = MetricColumn(__id.increment_as_string(), display_name='Link clicks',
+                               primary_value=GoogleMetricMetadataColumnsPool.link_clicks,
+                               type_id=ViewColumnType.text.id,
+                               category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
+
     conversion_rate = MetricColumn(__id.increment_as_string(), display_name='Conversion rate',
                                    primary_value=GoogleMetricMetadataColumnsPool.conversion_rate,
                                    type_id=ViewColumnType.text.id,
@@ -151,10 +156,25 @@ class MetricColumnsMaster:
                                type_id=ViewColumnType.text.id,
                                category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
+    leads = MetricColumn(__id.increment_as_string(), display_name='Leads',
+                         primary_value=GoogleMetricMetadataColumnsPool.leads,
+                         type_id=ViewColumnType.text.id,
+                         category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
+
     conversion_value = MetricColumn(__id.increment_as_string(), display_name='Conversion value',
                                     primary_value=GoogleMetricMetadataColumnsPool.conversion_value,
                                     type_id=ViewColumnType.text.id,
                                     category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
+
+    purchases = MetricColumn(__id.increment_as_string(), display_name='Purchases',
+                             primary_value=GoogleMetricMetadataColumnsPool.purchases,
+                             type_id=ViewColumnType.text.id,
+                             category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
+
+    purchase_value = MetricColumn(__id.increment_as_string(), display_name='Purchase value',
+                                  primary_value=GoogleMetricMetadataColumnsPool.purchase_value,
+                                  type_id=ViewColumnType.text.id,
+                                  category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     cost = MetricColumn(__id.increment_as_string(), display_name='Cost',
                         primary_value=GoogleMetricMetadataColumnsPool.cost,

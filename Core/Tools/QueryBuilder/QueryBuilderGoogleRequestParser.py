@@ -3,8 +3,10 @@ from enum import Enum
 
 from Cython.Utils import OrderedSet
 
-from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
+from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import QueryBuilderGoogleFilter
 from GoogleTuring.Infrastructure.Constants import DEFAULT_DATETIME
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import PERFORMANCE_REPORT_TO_INFO
+from GoogleTuring.Infrastructure.Domain.GoogleConditionFieldsMetadata import GoogleConditionFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.GoogleField import GoogleField
 from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 
@@ -27,14 +29,19 @@ class QueryBuilderGoogleRequestParser:
         super().__init__()
         self.__google_fields = []
         self.__google_id = None
-        self.time_increment = "all_days"
+        self.time_increment = 1
         self.__time_range = {}
         self.filtering = []
         self.__report = None
+        self.__level = None
 
     @property
     def report(self):
         return self.__report
+
+    @property
+    def level(self):
+        return self.__level
 
     @property
     def google_fields(self):
@@ -46,32 +53,30 @@ class QueryBuilderGoogleRequestParser:
 
     @property
     def start_date(self):
-        return datetime.strptime(self.__time_range[QueryBuilderGoogleRequestParser.TimeRangeEnum.SINCE],
-                                 DEFAULT_DATETIME)
+        return datetime.strptime(self.__time_range[self.TimeRangeEnum.SINCE], DEFAULT_DATETIME)
 
     @property
     def end_date(self):
-        return datetime.strptime(self.__time_range[QueryBuilderGoogleRequestParser.TimeRangeEnum.UNTIL],
-                                 DEFAULT_DATETIME)
+        return datetime.strptime(self.__time_range[self.TimeRangeEnum.UNTIL], DEFAULT_DATETIME)
 
     def __parse_query_conditions(self, query_conditions):
         for entry in query_conditions:
-            mapped_condition = self.map(entry.ColumnName)
+            mapped_field = self.map_condition_field(entry.ColumnName)
             if entry.ColumnName == self.TimeIntervalEnum.DATE_START.value:
                 self.__time_range[self.TimeRangeEnum.SINCE] = entry.Value
 
             elif entry.ColumnName == self.TimeIntervalEnum.DATE_STOP.value:
                 self.__time_range[self.TimeRangeEnum.UNTIL] = entry.Value
 
-            elif mapped_condition and mapped_condition == GoogleFieldsMetadata.external_customer_id:
+            elif mapped_field and mapped_field == GoogleConditionFieldsMetadata.account_id:
                 self.__google_id = entry.Value
 
             elif entry.ColumnName == self.TimeIntervalEnum.TIME_INCREMENT.value:
                 self.time_increment = entry.Value
 
-            else:
-                google_filter = QueryBuilderFilter(entry)
-                self.filtering.append(google_filter.as_dict())
+            elif mapped_field:
+                google_filter = QueryBuilderGoogleFilter(mapped_field, entry)
+                self.filtering.append(google_filter)
 
     def __parse_query_columns(self, query_columns, column_type=None):
         for entry in query_columns:
@@ -80,12 +85,17 @@ class QueryBuilderGoogleRequestParser:
                 self.__google_fields.append(mapped_entry)
 
     def from_query(self, request):
-        self.__report = request.get_report()
+        self.__report, self.__level = PERFORMANCE_REPORT_TO_INFO[request.TableName]
         self.__parse_query_columns(request.Dimensions, column_type=self.QueryBuilderColumnName.DIMENSION)
         self.__parse_query_columns(request.Columns, column_type=self.QueryBuilderColumnName.COLUMN)
         self.__parse_query_conditions(request.Conditions)
 
     @staticmethod
     def map(name):
-        return next(filter(lambda x: x.field_name == name if isinstance(x, GoogleField) else None,
+        return next(filter(lambda x: x.name == name if isinstance(x, GoogleField) else None,
                            GoogleFieldsMetadata.__dict__.values()), None)
+
+    @staticmethod
+    def map_condition_field(name):
+        return next(filter(lambda x: x.name == name if isinstance(x, GoogleField) else None,
+                           GoogleConditionFieldsMetadata.__dict__.values()), None)
