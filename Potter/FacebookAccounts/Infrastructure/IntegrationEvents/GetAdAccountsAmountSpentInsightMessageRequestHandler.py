@@ -1,3 +1,4 @@
+import json
 import typing
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMessageBase
@@ -24,6 +25,8 @@ class GetAdAccountsAmountSpentInsightMessageRequestHandler:
     @classmethod
     def handle(cls, message_body):
         try:
+            if isinstance(message_body, str) or isinstance(message_body, bytes):
+                message_body = json.loads(message_body)
             request_mapper = GetAdAccountsAmountSpentInsightMessageRequestMapping(
                 GetAdAccountsAmountSpentInsightMessageRequest)
             request = request_mapper.load(message_body)
@@ -32,7 +35,9 @@ class GetAdAccountsAmountSpentInsightMessageRequestHandler:
 
             response = GetAdAccountsAmountSpentInsightMessageResponse(filed_user_id=request.filed_user_id,
                                                                       user_id=request.user_id,
-                                                                      ad_accounts_amount_spent=ad_accounts_amount_spent)
+                                                                      ad_accounts_amount_spent=ad_accounts_amount_spent,
+                                                                      from_date=request.from_date,
+                                                                      to_date=request.to_date)
         except Exception as e:
             raise e
 

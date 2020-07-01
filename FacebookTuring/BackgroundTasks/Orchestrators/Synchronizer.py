@@ -17,8 +17,8 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 NEXT_DAY = timedelta(days=1)
 SYNC_DAYS_INTERVAL = 3
-DEFAULT_DATETIME_FORMAT = '%y-%m-%d'
-DEFAULT_DATETIME_ISO_FORMAT = '%y-%m-%d %H:%M:%S'
+DEFAULT_DATETIME_FORMAT = '%Y-%m-%d'
+DEFAULT_DATETIME_ISO_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 def sync(structures_repository: TuringMongoRepository = None,

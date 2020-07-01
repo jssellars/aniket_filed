@@ -56,8 +56,8 @@
   },
   "external_services": {
     "targeting_search": "https://dev2-api-facebook-potter-targetingsearch.filed.com/interests/suggestions/",
-    "users_signin_endpoint": "https://dev2.filed.com:41000/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://dev2.filed.com:41000/api/v1/users/get-technical-jwt"
+    "users_signin_endpoint": "https://dev2-api-users.filed.com/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://dev2-api-users.filed.com/api/v1/users/get-technical-jwt"
   },
   "admin_user": {
     "email": "admin@filed.com",

@@ -165,22 +165,23 @@ class Orchestrator(OrchestratorBuilder):
         self.__run_algorithm(search_query=search_query, time_interval=time_interval)
 
     def update_remaining_null_dates(self):
-        search_null_end_date_query = DexterJournalMongoRepositoryHelper.get_search_for_null_end_date(
-            self.business_owner_id, self.ad_account_id)
+        search_null_end_date_query = (DexterJournalMongoRepositoryHelper.
+                                      get_search_for_null_end_date(self.business_owner_id, self.ad_account_id))
         null_entries = list(self._journal_repository.get_all_by_query(search_null_end_date_query))
         for entry in null_entries:
-            if entry[DexterEngineRunJournalEnum.END_TIMESTAMP.value] is None:
+            if entry[DexterEngineRunJournalEnum.END_TIMESTAMP.value] is None and \
+                    DexterEngineRunJournalEnum.ALGORITHM_TYPE.value in entry:
                 update_query = DexterJournalMongoRepositoryHelper.get_update_query_for_null_entries()
                 search_query = {
-                    DexterEngineRunJournalEnum.AD_ACCOUNT_ID.value: entry[
-                        DexterEngineRunJournalEnum.AD_ACCOUNT_ID.value],
-                    DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value: entry[
-                        DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value],
+                    DexterEngineRunJournalEnum.AD_ACCOUNT_ID.value:
+                        entry[DexterEngineRunJournalEnum.AD_ACCOUNT_ID.value],
+                    DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value:
+                        entry[DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value],
                     DexterEngineRunJournalEnum.RUN_STATUS.value: entry[DexterEngineRunJournalEnum.RUN_STATUS.value],
-                    DexterEngineRunJournalEnum.ALGORITHM_TYPE.value: entry[
-                        DexterEngineRunJournalEnum.ALGORITHM_TYPE.value],
-                    DexterEngineRunJournalEnum.START_TIMESTAMP.value: entry[
-                        DexterEngineRunJournalEnum.START_TIMESTAMP.value],
+                    DexterEngineRunJournalEnum.ALGORITHM_TYPE.value:
+                        entry[DexterEngineRunJournalEnum.ALGORITHM_TYPE.value],
+                    DexterEngineRunJournalEnum.START_TIMESTAMP.value:
+                        entry[DexterEngineRunJournalEnum.START_TIMESTAMP.value],
                     DexterEngineRunJournalEnum.LEVEL.value: entry[DexterEngineRunJournalEnum.LEVEL.value],
                 }
                 self._journal_repository.update_one(search_query, update_query)
@@ -200,7 +201,7 @@ class Orchestrator(OrchestratorBuilder):
             c = 1
             for campaign_id in campaign_ids:
                 print('Started campaign {}[id: {}] out of {}'.format(c, campaign_id, len(campaign_ids)))
-                c+=1
+                c += 1
                 start_time = time.time()
                 rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
                                                           level=LevelEnum.CAMPAIGN)
@@ -231,7 +232,8 @@ class Orchestrator(OrchestratorBuilder):
                                                                                  time_interval_enum,
                                                                                  LevelEnum.ADSET)
                         rule_based_recommendations = rule_algorithm_adset_breakdown.run(adset_id,
-                                                                            [RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
+                                                                                        [
+                                                                                            RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
                         if rule_based_recommendations:
                             should_stop = True
                             self._recommendations_repository.save_recommendations(rule_based_recommendations,

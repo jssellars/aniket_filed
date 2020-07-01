@@ -34,7 +34,8 @@ class GraphAPIAdAccountSpentHandler:
             if isinstance(response, list) and len(response) == 1:
                 response = response[0]
 
-            ad_accounts_amount_spent.append(response_mapper.load(response))
+            mapped_response = response_mapper.load(response)
+            ad_accounts_amount_spent.append(mapped_response)
 
         return ad_accounts_amount_spent, []
 

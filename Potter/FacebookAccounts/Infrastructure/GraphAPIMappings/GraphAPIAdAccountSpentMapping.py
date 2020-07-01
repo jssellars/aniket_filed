@@ -34,6 +34,8 @@ class GraphAPIAdAccountSpentMapping(MapperBase):
 
         if "insights" in data.keys():
             data["amount_spent"] = data["insights"]["data"][0]["spend"]
+            if data["amount_spent"] is None:
+                data["amount_spent"] = 0.0
             del data["insights"]
 
         return data

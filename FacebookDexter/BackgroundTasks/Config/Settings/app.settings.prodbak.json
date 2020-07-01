@@ -55,16 +55,16 @@
     "logs_database": "prod_facebook_dexter_logs"
   },
   "external_services": {
-    "targeting_search": "https://prod-api-facebook-potter-targetingsearch.filed.com/interests/suggestions/",
-    "users_signin_endpoint": "https://prodbak.filed.com:41000/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://prodbak.filed.com:41000/api/v1/users/get-technical-jwt"
+    "targeting_search": "https://prodbak-api-facebook-potter-targetingsearch.filed.com/interests/suggestions/",
+    "users_signin_endpoint": "https://prodbak-api-users.filed.com/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://prodbak-api-users.filed.com/api/v1/users/get-technical-jwt"
   },
   "admin_user": {
     "email": "admin@filed.com",
     "password": "Adm1n@Fil3ed"
   },
   "dexter_config": {
-    "min_results": 50,
+    "min_results": 5,
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
     "time_intervals": [

@@ -47,9 +47,9 @@
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
     "recommendations_database_name": "dev_dexter_fuzzy_inference_recommendations",
-    "recommendations_collection_name": "recommendations_test_dev_antoine",
+    "recommendations_collection_name": "recommendations_antoine_20200630T1212",
     "journal_database_name": "dev_dexter_engine_run_journal",
-    "journal_collection_name": "dexter_journal_test_dev_antoine",
+    "journal_collection_name": "dexter_journal",
     "structures_database": "dev_facebook_turing_structures",
     "insights_database": "dev_facebook_turing_insights",
     "logs_database": "dev_facebook_dexter_logs"
@@ -64,7 +64,7 @@
     "password": "Adm1n@Fil3ed"
   },
   "dexter_config": {
-    "min_results": 5,
+    "min_results": 0,
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
     "time_intervals": [
@@ -73,7 +73,7 @@
       14,
       30
     ],
-    "date_stop": null
+    "date_stop": "2020-06-29"
   },
   "debug": false,
   "environment": "dev",

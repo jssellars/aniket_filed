@@ -9,7 +9,7 @@
     "mongoSSHPass": "7YPbhiYTEtM=",
     "remoteIP": "192.168.2.189",
     "remotePort": 27017,
-    "recommendationDatabaseName": "dev_dexter_fuzzy_inference_recommendations",
+    "recommendationDatabaseName": "prod_dexter_fuzzy_inference_recommendations",
     "recommendationCollectionName": "recommendations"
   },
   "flaskApp": {
