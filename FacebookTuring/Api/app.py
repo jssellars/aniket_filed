@@ -6,7 +6,7 @@ path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
 else:
-    sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
+    sys.path.append("/Users/luchicla/Work/Filed/Filed.Python/")
 # ====== END OF CONFIG SECTION ====== #
 
 from flask import Flask
