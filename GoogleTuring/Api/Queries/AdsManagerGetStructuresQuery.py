@@ -19,7 +19,7 @@ class AdsManagerGetStructuresQuery:
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id)
             if not response:
-                return
+                return []
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
             response = mapping.load(response, many=True)
             return response

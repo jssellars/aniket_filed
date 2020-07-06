@@ -7,5 +7,8 @@ class RecommendationOptimizationTypeEnum(Enum):
 
 
 class RecommendationStatusEnum(Enum):
-    DEPRECATED = 0
-    ACTIVE = 1
+    ACTIVE = 'active'
+    DISMISSED = 'dismissed'
+    APPLIED = 'applied'
+    DEPRECATED = 'deprecated'
+

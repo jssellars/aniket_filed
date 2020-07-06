@@ -1,0 +1,34 @@
+{
+
+  "api_name": "Dexter API",
+  "environment": "dev",
+  "api_version": "1.0.0",
+  "base_url": "/api/v1",
+  "port": 47300,
+  "debug_mode": true,
+  "mongo_database": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "recommendation_database_name": "dev_dexter_fuzzy_inference_recommendations",
+    "recommendation_collection_name": "recommendations",
+    "retry_writes": false
+  },
+  "external_services": {
+    "facebook_auto_apply" : "https://dev.api.facebook.turing.filed.com/api/v1/{level}/{structureId}",
+    "google_auto_apply": ""
+  },
+  "logging": {
+    "docker_filename": "filed-dexter-api",
+    "logger_type": "file_logger",
+    "logger_level": "DEBUG",
+    "es_host": "localhost",
+    "es_port": 9200
+  }
+}
