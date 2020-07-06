@@ -74,7 +74,7 @@ class GraphAPIAdPreviewBuilderHandler:
 
         # Create AdImage
         ad_image = AdImage(parent_id=account_id)
-        ad_image[AdImage.Field.filename] = 'temporary_ad_image.jpg'
+        ad_image[AdImage.Field.filename] = 'adCreativeImage.jpg'
         ad_image.remote_create()
 
         return ad_image

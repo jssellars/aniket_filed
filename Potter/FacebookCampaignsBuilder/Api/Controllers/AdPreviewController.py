@@ -34,7 +34,7 @@ class AdPreviewEndpoint(Resource):
                                                                permanent_token=permanent_token)
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="PublishCampaignEndpoint",
+                                    name="AdPreviewEndpoint",
                                     description=str(e),
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())

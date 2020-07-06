@@ -56,7 +56,8 @@ class Startup(object):
 env = os.environ.get("PYTHON_ENV")
 if not env:
     env = "dev"
-config_file = f"Config/Settings/app.settings.{env}.json"
+# config_file = f"Config/Settings/app.settings.{env}.json"
+config_file = "/Users/luchicla/Work/Filed/Filed.Python/Potter/FacebookApps/BackgroundTasks/Config/Settings/app.settings.dev.json"
 
 with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)

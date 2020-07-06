@@ -26,7 +26,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
 
         removed_ad_accounts = list(set(existing_ad_accounts_ids) - set(ad_accounts_ids))
         if removed_ad_accounts:
-            self.update_ad_accounts_status(removed_ad_accounts, StructureStatusEnum.REMOVED)
+            self.update_ad_accounts_status(removed_ad_accounts, StructureStatusEnum.REMOVED.value)
 
         new_ad_accounts_ids = list(set(ad_accounts_ids) - set(existing_ad_accounts_ids))
         if new_ad_accounts_ids:

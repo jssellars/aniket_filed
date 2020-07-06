@@ -84,13 +84,16 @@ class GraphAPIAdSetBuilderHandler(object):
         if 'promoted_object' in adSetTemplate.keys():
             self.adSetTemplate[AdSet.Field.promoted_object] = adSetTemplate['promoted_object']
         if 'promoted_object' in self.adSetTemplate.keys():
-            if 'pixel_rule' in self.adSetTemplate['promoted_object'].keys() and isinstance(
-                    adSetTemplate['promoted_object']['pixel_rule'], str):
+            if 'pixel_rule' in self.adSetTemplate['promoted_object'].keys() and \
+                    isinstance(adSetTemplate['promoted_object']['pixel_rule'], str):
                 pixelRule = json.loads(adSetTemplate['promoted_object']['pixel_rule']).replace('\\', '')
                 self.adSetTemplate['promoted_object']['pixel_rule'] = pixelRule
-            elif 'pixel_rule' in self.adSetTemplate['promoted_object'].keys() and not isinstance(
-                    adSetTemplate['promoted_object']['pixel_rule'], str):
+            elif 'pixel_rule' in self.adSetTemplate['promoted_object'].keys() and \
+                    not isinstance(adSetTemplate['promoted_object']['pixel_rule'], str):
                 self.adSetTemplate['promoted_object']['pixel_rule'] = adSetTemplate['promoted_object']['pixel_rule']
+
+        if not self.adSetTemplate['promoted_object']['pixel_rule']:
+            self.adSetTemplate['promoted_object'].pop('pixel_rule')
 
     def _appendAdSetMobileTargeting(self, adSetTemplate):
         pass
