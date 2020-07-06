@@ -415,6 +415,12 @@ class DexterMongoRepository(MongoRepositoryBase):
         structure_details = self.first_or_default(query=query, projection=projection)
         if structure_details:
             structure_details = BSON.decode(structure_details.get("details", {}))
+            try:
+                if structure_details['effective_status'] == 'ACTIVE':
+                    return structure_details
+            except:
+                return {}
+
         return structure_details
 
     def get_ads_by_adset_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
