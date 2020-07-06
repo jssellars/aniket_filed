@@ -32,17 +32,13 @@ PERFORMANCE_REPORT_TO_INFO = {
     AdGroupReportEnum.AD_GROUP_GEO_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.GEO, Level.AD_GROUP),
     AdGroupReportEnum.AD_GROUP_KEYWORDS_PERFORMANCE_REPORT.value: (
         FiledGoogleInsightsTableEnum.KEYWORDS, Level.CAMPAIGN.AD_GROUP),
-    AdReportEnum.AD_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.AD, Level.AD_GROUP)
+    AdReportEnum.AD_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.AD, Level.AD)
 }
 
-REPORT_TO_STATUS_FIELD = {
-    FiledGoogleInsightsTableEnum.CAMPAIGN: GoogleFieldsMetadata.campaign_status,
-    FiledGoogleInsightsTableEnum.AD_GROUP: GoogleFieldsMetadata.ad_group_status,
-    FiledGoogleInsightsTableEnum.AD: GoogleFieldsMetadata.status,
-    FiledGoogleInsightsTableEnum.GENDER: GoogleFieldsMetadata.status,
-    FiledGoogleInsightsTableEnum.AGE_RANGE: GoogleFieldsMetadata.status,
-    FiledGoogleInsightsTableEnum.GEO: GoogleFieldsMetadata.campaign_status,  # TODO: check if this is true
-    FiledGoogleInsightsTableEnum.KEYWORDS: GoogleFieldsMetadata.status
+LEVEL_TO_STATUS_FIELD = {
+    Level.CAMPAIGN: GoogleFieldsMetadata.campaign_status,
+    Level.AD_GROUP: GoogleFieldsMetadata.ad_group_status,
+    Level.AD: GoogleFieldsMetadata.status
 }
 
 REPORT_TO_LEVEL = {

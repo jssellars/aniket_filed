@@ -1,5 +1,5 @@
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIBaseHandler import AdWordsAPIBaseHandler
-from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import REPORT_TO_STATUS_FIELD
+from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import LEVEL_TO_STATUS_FIELD
 from GoogleTuring.Infrastructure.GoogleAdWordsAPI.AdWordsInsightsClient import AdWordsInsightsClient
 
 
@@ -15,8 +15,8 @@ class AdWordsAPIInsightsHandler(AdWordsAPIBaseHandler):
         client_customer_id = query_builder_request_parser.google_id
         report = query_builder_request_parser.report
         report_name = report.value
-        status_field = REPORT_TO_STATUS_FIELD[report]
         level = query_builder_request_parser.level
+        status_field = LEVEL_TO_STATUS_FIELD[level]
         fields = query_builder_request_parser.google_fields
         start_date = query_builder_request_parser.start_date
         end_date = query_builder_request_parser.end_date
@@ -34,8 +34,8 @@ class AdWordsAPIInsightsHandler(AdWordsAPIBaseHandler):
         client_customer_id = query_builder_request_parser.google_id
         report = query_builder_request_parser.report
         report_name = report.value
-        status_field = REPORT_TO_STATUS_FIELD[report]
         level = query_builder_request_parser.level
+        status_field = LEVEL_TO_STATUS_FIELD[level]
         fields = query_builder_request_parser.google_fields
         start_date = query_builder_request_parser.start_date
         end_date = query_builder_request_parser.end_date

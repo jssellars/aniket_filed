@@ -27,7 +27,7 @@ class AdGroupStructureMapping(StructureMapping):
         processed_entries = []
         ad_group_id_to_entry = {}
         for entry in self._entries:
-            processed_entry = dict(business_owner_id=self._business_owner_id, account_id=self._account_id)
+            processed_entry = dict(business_owner_id=self._business_owner_id, ad_account_id=self._account_id)
             processed_entry['adgroup_name'] = entry['name']
             ad_group_id = str(entry['id'])
             processed_entry[self._structure_id] = ad_group_id

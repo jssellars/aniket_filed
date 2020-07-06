@@ -21,7 +21,7 @@ class CampaignStructureMapping(StructureMapping):
         processed_entries = []
 
         for entry in self._entries:
-            processed_entry = dict(business_owner_id=self._business_owner_id, account_id=self._account_id)
+            processed_entry = dict(business_owner_id=self._business_owner_id, ad_account_id=self._account_id)
             processed_entry['campaign_name'] = entry['name']
             processed_entry[self._structure_id] = str(entry['id'])
             processed_entry['last_updated_at'] = datetime.now()

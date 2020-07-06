@@ -10,7 +10,7 @@ from GoogleTuring.Infrastructure.Mappings.LevelMapping import LevelToGoogleNameK
 
 class AdsManagerStructureMinimalMapping(MapperBase):
     google_id = fields.String()
-    name = fields.String()
+    name = fields.String(allow_none=True)
 
     def __init__(self, level=None, **kwargs):
         self.__level = level
