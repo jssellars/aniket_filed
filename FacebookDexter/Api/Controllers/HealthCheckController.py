@@ -1,6 +1,7 @@
 import json
 
 from flask import request, Response
+from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
@@ -8,12 +9,14 @@ from FacebookDexter.Api.Startup import logger, startup
 
 
 class DexterApiHealthCheck(Resource):
+    @jwt_required
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         return Response(status=200, mimetype='application/json')
 
 
 class DexterApiVersion(Resource):
+    @jwt_required
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         response = {"api_name": startup.api_name,

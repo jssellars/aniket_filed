@@ -4,11 +4,9 @@ import requests
 from flask import Response
 
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
-from FacebookDexter.Api.Config.Config import MongoConfig
-
-from FacebookDexter.Api.Infrastructure.PersistenceLayer.RecommendationsRepository import RecommendationsRepository
+from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from FacebookDexter.Api.Models.Domain.RuleRedirect import RuleRedirectEnum
+from FacebookDexter.Infrastructure.Domain.Recommendations.RuleRedirect import RuleRedirectEnum
 from FacebookDexter.Api.Startup import startup
 from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 
@@ -17,8 +15,7 @@ class DexterApiApplyRecommendationCommandHandler:
     def handle(self, command: DexterApiApplyRecommendationCommand):
         try:
             recommendation_id = command.id
-            mongo_config = MongoConfig(startup.mongo_config)
-            recommendation_repository = RecommendationsRepository(mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config)
             recommendation = recommendation_repository.get_recommendation_by_id(recommendation_id)
             external_services = startup.external_services
             if not recommendation:

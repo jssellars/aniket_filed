@@ -1,14 +1,14 @@
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from FacebookDexter.Api.Config.Config import MongoConfig
 import pymongo
-from FacebookDexter.Api.Models.Domain.Recommendation import Recommendation
-from FacebookDexter.Api.Models.Domain.RecommendationType import RecommendationType
+from FacebookDexter.Infrastructure.Domain.Recommendations.Recommendation import Recommendation
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from FacebookDexter.Api.Models.Domain.RecommendationCategory import RecommendationCategory
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
 from datetime import datetime
 from bson import ObjectId
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from FacebookDexter.Api.Models.Domain.RecommendationFields import RecommendationField
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 import copy
 
 
@@ -46,10 +46,10 @@ class RecommendationsRepository(MongoRepositoryBase):
                               for campaign in campaigns]
         return distinct_campaigns
 
-    def get_recommendation_by_id(self, id: str):
+    def get_recommendation_by_id(self, recommendation_id: str):
         try:
             recommendation = self.collection.find_one(
-                {RecommendationField.OBJECT_ID.value: ObjectId(id),
+                {RecommendationField.OBJECT_ID.value: ObjectId(recommendation_id),
                  RecommendationField.STATUS.value: RecommendationStatusEnum.ACTIVE.value
                  })
 

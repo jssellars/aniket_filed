@@ -1,6 +1,7 @@
 import json
 
 from flask import request, Response
+from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
@@ -30,6 +31,7 @@ from FacebookDexter.Api.Startup import logger
 
 
 class DexterApiGetRecommendationsPage(Resource):
+    @jwt_required
     def post(self):
         data = request.get_json()
         validator = DexterApiRecommendationsPageCommandValidator()
@@ -61,6 +63,7 @@ class DexterApiGetRecommendationsPage(Resource):
 
 
 class DexterApiGetCountsByCategory(Resource):
+    @jwt_required
     def post(self):
         data = request.get_json()
         validator = DexterApiGetCountsByCategoryCommandValidator()
@@ -89,6 +92,7 @@ class DexterApiGetCountsByCategory(Resource):
 
 
 class DexterApiDismissRecommendation(Resource):
+    @jwt_required
     def patch(self):
         data = request.args
         validator = DexterApiDismissRecommendationCommandValidator()
@@ -111,6 +115,7 @@ class DexterApiDismissRecommendation(Resource):
 
 
 class DexterApiApplyRecommendation(Resource):
+    @jwt_required
     def patch(self):
         data = request.args
         headers = request.headers

@@ -3,8 +3,7 @@ import json
 from flask import Response
 
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
-from FacebookDexter.Api.Config.Config import MongoConfig
-from FacebookDexter.Api.Infrastructure.PersistenceLayer.RecommendationsRepository import RecommendationsRepository
+from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from FacebookDexter.Api.Startup import startup
 
@@ -13,8 +12,7 @@ class DexterApiDismissRecommendationCommandHandler():
     def handle(self, command: DexterApiDismissRecommendationCommand):
         try:
             recommendation_id = command.id
-            mongo_config = MongoConfig(startup.mongo_config)
-            recommendation_repository = RecommendationsRepository(mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config)
             recommendation = recommendation_repository.get_recommendation_by_id(recommendation_id)
             if not recommendation:
                 error_message = (f'Recommendation with id {recommendation_id} does not exist or was'

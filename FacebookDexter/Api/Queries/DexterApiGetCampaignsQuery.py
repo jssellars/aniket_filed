@@ -1,18 +1,19 @@
 import json
 
 from flask import request, Response
+from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from FacebookDexter.Api.Config.Config import MongoConfig
-from FacebookDexter.Api.Infrastructure.PersistenceLayer.RecommendationsRepository import RecommendationsRepository
+from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 from FacebookDexter.Api.QueryParamsValidators.DexterApiGetCampaignsQueryValidator import \
     DexterApiGetCampaignsQueryValidator
 from FacebookDexter.Api.Startup import startup, logger
 
 
 class DexterApiGetCampaignsQuery(Resource):
+    @jwt_required
     def get(self):
         try:
             request_args = request.args
@@ -21,8 +22,7 @@ class DexterApiGetCampaignsQuery(Resource):
             if isinstance(error_response_or_paramaters, Response):
                 return error_response_or_paramaters
 
-            mongo_config = MongoConfig(startup.mongo_config)
-            recommendation_repository = RecommendationsRepository(mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config)
             campaigns = recommendation_repository.get_campaigns(error_response_or_paramaters['ad_account_id'],
                                                                 error_response_or_paramaters['channel'])
             response = Response(response=json.dumps(campaigns), status=200, mimetype='application/json')
