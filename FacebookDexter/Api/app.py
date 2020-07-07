@@ -11,12 +11,13 @@ from FacebookDexter.Api.Controllers.RecommendationsController import (DexterApiG
                                                                       DexterApiApplyRecommendation)
 from FacebookDexter.Api.Queries.DexterApiGetActionHistoryQuery import DexterApiGetActionHistoryQuery
 from FacebookDexter.Api.Queries.DexterApiGetCampaignsQuery import DexterApiGetCampaignsQuery
-from FacebookDexter.Api .Queries.DexterApiGetRecommendationQuery import DexterApiGetRecommendationQuery
+from FacebookDexter.Api.Queries.DexterApiGetRecommendationQuery import DexterApiGetRecommendationQuery
 from FacebookDexter.Api.Startup import startup
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+app.url_map.strict_slashes = False
 
 # Make the WSGI interface available at the top level so wfastcgi can get it.
 wsgi_app = app.wsgi_app
