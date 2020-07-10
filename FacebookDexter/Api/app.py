@@ -36,7 +36,7 @@ app.url_map.strict_slashes = False
 
 jwt = JWTManager(app)
 
-CORS(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 app.url_map.strict_slashes = False
 
