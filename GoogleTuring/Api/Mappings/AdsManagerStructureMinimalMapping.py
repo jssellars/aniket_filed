@@ -9,8 +9,8 @@ from GoogleTuring.Infrastructure.Mappings.LevelMapping import LevelToGoogleNameK
 
 
 class AdsManagerStructureMinimalMapping(MapperBase):
-    google_id = fields.String()
-    name = fields.String(allow_none=True)
+    key = fields.String()
+    display_name = fields.String(allow_none=True)
 
     def __init__(self, level=None, **kwargs):
         self.__level = level
@@ -22,9 +22,9 @@ class AdsManagerStructureMinimalMapping(MapperBase):
             data = object_to_json(data)
 
         id_field_key = LevelToGoogleIdKeyMapping.get_by_name(self.__level)
-        data["google_id"] = data.pop(id_field_key)
+        data["key"] = data.pop(id_field_key)
 
         name_field_key = LevelToGoogleNameKeyMapping.get_by_name(self.__level)
-        data["name"] = data.pop(name_field_key)
+        data["display_name"] = data.pop(name_field_key)
 
         return data
