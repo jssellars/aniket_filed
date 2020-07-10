@@ -92,7 +92,8 @@ class GraphAPIAdSetBuilderHandler(object):
                     not isinstance(adSetTemplate['promoted_object']['pixel_rule'], str):
                 self.adSetTemplate['promoted_object']['pixel_rule'] = adSetTemplate['promoted_object']['pixel_rule']
 
-        if not self.adSetTemplate['promoted_object']['pixel_rule']:
+        if 'pixel_rule' in self.adSetTemplate['promoted_object'].keys() and \
+                not self.adSetTemplate['promoted_object']['pixel_rule']:
             self.adSetTemplate['promoted_object'].pop('pixel_rule')
 
     def _appendAdSetMobileTargeting(self, adSetTemplate):

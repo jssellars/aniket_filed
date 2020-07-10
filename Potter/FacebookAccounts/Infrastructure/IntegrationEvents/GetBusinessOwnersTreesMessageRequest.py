@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class BusinessOwner:
-    facebook_id: str = None
+    id: str = None
 
 
 @dataclass
