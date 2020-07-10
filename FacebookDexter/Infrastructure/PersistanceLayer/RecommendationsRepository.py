@@ -16,8 +16,8 @@ class RecommendationsRepository(MongoRepositoryBase):
 
     def __init__(self, config: MongoConfig):
         super().__init__(config=config)
-        self.database = config['recommendation_database_name']
-        self.collection = config['recommendation_collection_name']
+        self.database = config['recommendations_database_name']
+        self.collection = config['recommendations_collection_name']
 
     def get_campaigns(self, ad_account_id, channel):
         aggregation = [
