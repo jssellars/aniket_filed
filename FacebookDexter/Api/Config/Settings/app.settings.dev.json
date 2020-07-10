@@ -3,7 +3,7 @@
   "api_name": "Dexter API",
   "environment": "dev",
   "api_version": "1.0.0",
-  "base_url": "/api/v1",
+  "base_url": "",
   "port": 47300,
   "debug_mode": true,
   "docker_filename": "filed-dexter-api",
