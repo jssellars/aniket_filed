@@ -37,7 +37,7 @@ class Startup(object):
 env = os.environ.get("PYTHON_ENV")
 if not env:
     env = "dev"
-config_file = os.path.join(os.getcwd(), f"Api/Config/Settings/app.settings.{env}.json")
+config_file = f"Config/Settings/app.settings.{env}.json"
 
 with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
