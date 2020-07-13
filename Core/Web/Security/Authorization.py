@@ -13,7 +13,7 @@ def add_bearer_token(token, headers=None):
 
 def generate_technical_token(startup):
     technical_token_cache = startup.technical_token_cache
-    token = technical_token_cache.get_token(startup)
+    token = technical_token_cache.get_token()
     return token
 
 
