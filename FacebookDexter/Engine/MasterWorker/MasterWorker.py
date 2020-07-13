@@ -1,10 +1,8 @@
-import threading
 import typing
+from threading import Thread
 
 from Core.Web.Security.Authorization import generate_technical_token, add_bearer_token
-from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import AlgorithmsEnum
 from FacebookDexter.Engine.MasterWorker.Orchestrator import Orchestrator
-from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.DexterRecommendationsMongoRepository import \
@@ -30,8 +28,8 @@ def start_algorithm_for_accounts_set(ad_account_ids: typing.List[typing.AnyStr] 
         orchestrator.startup = startup
 
         (orchestrator.
-            set_auth_token(auth_token=auth_token).
-            orchestrate())
+         set_auth_token(auth_token=auth_token).
+         orchestrate())
         orchestrator.update_remaining_null_dates()
 
 
@@ -44,12 +42,12 @@ def start_dexter_for_business_owner(business_owner: typing.AnyStr = None,
 
     for start in range(0, number_of_account_ids, batch_size):
         if start + batch_size < number_of_account_ids:
-            child_thread = threading.Thread(target=start_algorithm_for_accounts_set,
-                                            args=(business_owner.ad_account_ids[start:start + batch_size],
-                                                  business_owner.business_owner_facebook_id,
-                                                  startup,
-                                                  recommendations_repository,
-                                                  journal_repository))
+            child_thread = Thread(target=start_algorithm_for_accounts_set,
+                                  args=(business_owner.ad_account_ids[start:start + batch_size],
+                                        business_owner.business_owner_facebook_id,
+                                        startup,
+                                        recommendations_repository,
+                                        journal_repository))
             child_thread.start()
 
             #  Uncomment if you want to run in single thread
@@ -59,12 +57,12 @@ def start_dexter_for_business_owner(business_owner: typing.AnyStr = None,
             #                                  recommendations_repository,
             #                                  journal_repository)
         else:
-            child_thread = threading.Thread(target=start_algorithm_for_accounts_set,
-                                            args=(business_owner.ad_account_ids[start:],
-                                                  business_owner.business_owner_facebook_id,
-                                                  startup,
-                                                  recommendations_repository,
-                                                  journal_repository))
+            child_thread = Thread(target=start_algorithm_for_accounts_set,
+                                  args=(business_owner.ad_account_ids[start:],
+                                        business_owner.business_owner_facebook_id,
+                                        startup,
+                                        recommendations_repository,
+                                        journal_repository))
             child_thread.start()
 
             #  Uncomment if you want to run in single thread

@@ -66,8 +66,13 @@
   "dexter_config": {
     "min_results": 50,
     "days_since_last_change": 3,
-    "recommendation_days_last_updated" : 3,
-    "time_intervals": [3, 7, 14, 30],
+    "recommendation_days_last_updated": 3,
+    "time_intervals": [
+      3,
+      7,
+      14,
+      30
+    ],
     "date_stop": "2020-05-22"
   },
   "debug": false,
@@ -77,6 +82,7 @@
   "service_name": "FacebookDexterBackgroundTasks",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
+  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "docker_filename": "filed-facebook-dexter-background-tasks",
   "logger_type": "elasticsearch_logger",
   "rabbit_logger_type": "rabbit_elasticsearch_logger",

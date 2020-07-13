@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 from Potter.FacebookAccounts.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig, \
     ExternalServicesConfig, AdminUserConfig
 
@@ -53,6 +54,7 @@ class Startup(object):
         self.logger_level = app_config["logger_level"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
+        self.technical_token_cache = TechnicalTokenManager()
 
     def create_sql_connection(self):
         return sessionmaker(bind=self.engine)

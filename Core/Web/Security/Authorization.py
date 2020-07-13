@@ -1,7 +1,6 @@
 import os
 
 import jwt
-import requests
 
 
 def add_bearer_token(token, headers=None):
@@ -13,29 +12,9 @@ def add_bearer_token(token, headers=None):
 
 
 def generate_technical_token(startup):
-    params = {
-        "EmailAddress": startup.admin_user.email,
-        "Password": startup.admin_user.password
-    }
-
-    sigin_response = requests.post(startup.external_services.users_signin_endpoint, json=params,
-                                   headers={"Content-Type": "application/json"})
-
-    filed_admin_token = None
-    if sigin_response.status_code == 200:
-        filed_admin_token = sigin_response.json()
-        filed_admin_token = filed_admin_token.replace('"', '')
-
-    headers = add_bearer_token(filed_admin_token)
-
-    response = requests.get(startup.external_services.users_technical_token_endpoint, headers=headers)
-
-    technical_token = None
-    if response.status_code == 200:
-        response = response.json()
-        technical_token = response.replace('"', '')
-
-    return technical_token
+    technical_token_cache = startup.technical_token_cache
+    token = technical_token_cache.get_token(startup)
+    return token
 
 
 def auth_jwt_base(token):

@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 from FacebookDexter.BackgroundTasks.Config.Config import RabbitMqConfig, MongoConfig, ExternalServicesConfig, \
     FacebookConfig, SQLAlchemyConfig, DexterConfig, AdminUserconfig
 
@@ -47,12 +48,14 @@ class Startup(object):
         self.api_name = app_config["api_name"]
         self.api_version = app_config["api_version"]
         self.base_url = app_config["base_url"]
+        self.jwt_secret_key = app_config.get("jwt_secret_key")
         self.docker_filename = app_config["docker_filename"]
         self.logger_type = app_config["logger_type"]
         self.rabbit_logger_type = app_config["rabbit_logger_type"]
         self.logger_level = app_config["logger_level"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
+        self.technical_token_cache = TechnicalTokenManager()
 
     def create_sql_session(self):
         return sessionmaker(bind=self.engine)

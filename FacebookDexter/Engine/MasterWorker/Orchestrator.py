@@ -200,7 +200,9 @@ class Orchestrator(OrchestratorBuilder):
             campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
             c = 1
             for campaign_id in campaign_ids:
-                print('Started campaign {} [id: {}] out of {} ---> acc_id: {}'.format(c, campaign_id, len(campaign_ids), self.ad_account_id))
+                print(
+                    'Started campaign {} [id: {}] out of {} ---> acc_id: {}'.format(c, campaign_id, len(campaign_ids),
+                                                                                    self.ad_account_id))
                 c += 1
                 start_time = time.time()
                 rule_evaluator = RuleEvaluatorFactory.get(algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
