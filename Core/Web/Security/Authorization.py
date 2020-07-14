@@ -11,9 +11,8 @@ def add_bearer_token(token, headers=None):
     return headers
 
 
-def generate_technical_token(startup):
-    technical_token_cache = startup.technical_token_cache
-    token = technical_token_cache.get_token()
+def generate_technical_token(technical_token_manager):
+    token = technical_token_manager.get_token()
     return token
 
 

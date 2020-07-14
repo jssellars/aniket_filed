@@ -41,7 +41,7 @@ class BusinessOwnerCreateCommandHandler:
     @classmethod
     def activate_new_user(cls, command, startup):
         try:
-            technical_token = generate_technical_token(startup)
+            technical_token = generate_technical_token(startup.technical_token_manager)
 
             headers = add_bearer_token(technical_token)
 

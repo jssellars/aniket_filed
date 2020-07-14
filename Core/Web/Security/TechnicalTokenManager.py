@@ -8,6 +8,8 @@ from Core.Web.Security.Authorization import add_bearer_token
 
 
 class TechnicalTokenManager:
+    __NUM_OF_RETRIES = 3
+
     def __init__(self, admin_user, external_services, jwt_secret_key):
         self.__admin_user = admin_user
         self.__external_services = external_services
@@ -35,7 +37,6 @@ class TechnicalTokenManager:
             self.__get_token_lock.release()
             return self.__token
         else:
-            print('generated!')
             params = {
                 "EmailAddress": self.__admin_user.email,
                 "Password": self.__admin_user.password
@@ -43,20 +44,30 @@ class TechnicalTokenManager:
 
             sign_in_response = requests.post(self.__external_services.users_signin_endpoint, json=params,
                                              headers={"Content-Type": "application/json"})
+            counter = 1
+            while sign_in_response.status_code != 200 and counter != self.__NUM_OF_RETRIES:
+                counter += 1
+                sign_in_response = requests.post(self.__external_services.users_signin_endpoint, json=params,
+                                                 headers={"Content-Type": "application/json"})
+            if sign_in_response.status_code != 200:
+                raise Exception('Sign in failed!')
 
-            filed_admin_token = None
-            if sign_in_response.status_code == 200:
-                filed_admin_token = sign_in_response.json()
-                filed_admin_token = filed_admin_token.replace('"', '')
+            filed_admin_token = sign_in_response.json()
+            filed_admin_token = filed_admin_token.replace('"', '')
 
             headers = add_bearer_token(filed_admin_token)
-
             response = requests.get(self.__external_services.users_technical_token_endpoint, headers=headers)
+            counter = 1
 
-            technical_token = None
-            if response.status_code == 200:
-                response = response.json()
-                technical_token = response.replace('"', '')
+            while response.status_code != 200 and counter != self.__NUM_OF_RETRIES:
+                counter += 1
+                response = requests.get(self.__external_services.users_technical_token_endpoint, headers=headers)
+
+            if response.status_code != 200:
+                raise Exception('Could not retrieve the technical token!')
+
+            response = response.json()
+            technical_token = response.replace('"', '')
 
             self.__set_token(technical_token, self.__jwt_secret_key)
             self.__get_token_lock.release()

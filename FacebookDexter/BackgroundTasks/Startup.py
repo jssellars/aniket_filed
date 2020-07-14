@@ -55,8 +55,8 @@ class Startup(object):
         self.logger_level = app_config["logger_level"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
-        self.technical_token_cache = TechnicalTokenManager(self.admin_user, self.external_services,
-                                                           self.jwt_secret_key)
+        self.technical_token_manager = TechnicalTokenManager(self.admin_user, self.external_services,
+                                                             self.jwt_secret_key)
 
     def create_sql_session(self):
         return sessionmaker(bind=self.engine)

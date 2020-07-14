@@ -20,7 +20,7 @@ def start_algorithm_for_accounts_set(ad_account_ids: typing.List[typing.AnyStr] 
                     set_journal_repository(journal_repository).
                     set_data_repository(data_repository))
 
-    auth_token = add_bearer_token(token=generate_technical_token(startup))
+    auth_token = add_bearer_token(token=generate_technical_token(startup.technical_token_manager))
 
     for ad_account_id in ad_account_ids:
         orchestrator.business_owner_id = business_owner_id
