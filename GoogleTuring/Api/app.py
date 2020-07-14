@@ -64,7 +64,7 @@ api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_cont
 structures_controller = "{base_url}/campaigns/<string:account_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerGetCampaignsEndpoint, structures_controller)
 
-structures_controller = "{base_url}/adgroups/<string:account_id>".format(base_url=startup.base_url.lower())
+structures_controller = "{base_url}/adsets/<string:account_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerGetAdGroupsEndpoint, structures_controller)
 
 structures_controller = "{base_url}/ads/<string:account_id>".format(base_url=startup.base_url.lower())
