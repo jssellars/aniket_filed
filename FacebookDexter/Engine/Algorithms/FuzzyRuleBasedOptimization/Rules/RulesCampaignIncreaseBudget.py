@@ -22,7 +22,7 @@ RULES_CAMPAIGN_INCREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your clicks are increasing and your CPM is decreasing, while results are steady. "
+             template="Dexter noticed your clicks are increasing and your CPM is decreasing, while results are steady. "
                       "Dexter suggests increasing the budget by 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -53,8 +53,8 @@ RULES_CAMPAIGN_INCREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your cost per result is decreasing while your results are steady. "
-                      "Dexter suggests increasing the budget by 25%.",
+             template="Dexter noticed your cost per result is decreasing while your results are steady. "
+                      "Dexter suggests increasing the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -79,8 +79,8 @@ RULES_CAMPAIGN_INCREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your clicks are decreasing and your CPM is decreasing. "
-                      "Dexter suggests increasing the budget by 25%.",
+             template="Dexter noticed your clicks are decreasing and your CPM is decreasing. "
+                      "Dexter suggests increasing the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -97,7 +97,6 @@ RULES_CAMPAIGN_INCREASE_BUDGET = [
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=LinguisticVariableEnum.DECREASING)
              ]),
-    # todo: added 2020-06-15 - Bogdan
     RuleBase(rtype=RuleTypeEnum.BUDGET_AND_BID,
              channel=ChannelEnum.FACEBOOK,
              category=RuleCategoryEnum.IMPROVE_CPR,
@@ -106,8 +105,8 @@ RULES_CAMPAIGN_INCREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your cost per result is low and your conversions are high. "
-                      "Dexter suggests increasing the budget by 25%.",
+             template="Dexter noticed your cost per result is low and your conversions are high. "
+                      "Dexter suggests increasing the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -132,8 +131,8 @@ RULES_CAMPAIGN_INCREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.INCREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CTR and conversion rate are both increasing. You should increase the "
-                      "budget by maximum 25%.",
+             template="Dexter noticed your CTR and conversion rate are both increasing. Dexter suggests increasing "
+                      "the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,

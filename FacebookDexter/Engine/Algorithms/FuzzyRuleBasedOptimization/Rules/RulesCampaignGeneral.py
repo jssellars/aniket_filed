@@ -24,9 +24,10 @@ RULES_CAMPAIGN_GENERAL = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="You’re __id=1&metric_name=REACH&metric_type=1&antecedent_type=1__ing tons of new people each day, "
-                      "__id=1&value=null__ people in the last __id=1&time_interval=7__ days to be "
-                      "exact. Your cost per click is relatively stable, too. Dexter suggests increasing your budget by 25%.",
+             template="Dexter noticed you’re __id=1&metric_name=REACH&metric_type=1&antecedent_type=1__ing tons of "
+                      "new people each day, __id=1&value=null__ people in the last __id=1&time_interval=7__ "
+                      "days to be exact. Dexter also noticed your cost per click is relatively stable, too. "
+                      "Dexter suggests increasing your budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -52,9 +53,10 @@ RULES_CAMPAIGN_GENERAL = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ has increased by __id=1&value=null__% in last "
-                      "__id=1&time_interval=7__ days. Have you tried targeting a more specific audience and excluding audiences you "
-                      "know won't work or who have converted already?",
+             template="Dexter noticed your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ "
+                      "has increased by __id=1&value=null__% in last __id=1&time_interval=7__ days. "
+                      "Dexter suggests targeting a more specific audience and excluding audiences you "
+                      "know won't work or who have converted already.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -81,8 +83,9 @@ RULES_CAMPAIGN_GENERAL = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="We love a steady flow of leads on the cheap. Nice work on your lead gen campaign, you're smashing it! Dexter suggests you "
-                      "increase your budget by 25% to maximize those leads!",
+             template="Dexter loves a steady flow of leads on the cheap. Nice work on your lead gen campaign, "
+                      "you're smashing it! Dexter suggests you "
+                      "increase your budget by maximum 25% to maximize those leads!",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -100,7 +103,6 @@ RULES_CAMPAIGN_GENERAL = [
                             expected_value=LinguisticVariableEnum.INCREASING)
              ]),
     # link clicks
-    # TODO: also check with chase if difference or percentage
     RuleBase(rtype=RuleTypeEnum.CREATIVE,
              channel=ChannelEnum.FACEBOOK,
              category=RuleCategoryEnum.IMPROVE_CPC,
@@ -109,9 +111,9 @@ RULES_CAMPAIGN_GENERAL = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your __id=1&metric_name=LINK_CLICKS&metric_type=1&antecedent_type=8__ have fallen by "
-                      "__id=1&value=null__% over the last __id=1&time_interval=7__ days. "
-                      "Have you considered testing different variations of ad copy or creative?",
+             template="Dexter noticed your __id=1&metric_name=LINK_CLICKS&metric_type=1&antecedent_type=8__ have "
+                      "fallen by __id=1&value=null__% over the last __id=1&time_interval=7__ days. "
+                      "Dexter suggests testing different variations of ad copy or creative.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -137,8 +139,8 @@ RULES_CAMPAIGN_GENERAL = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your clicks are decreasing and your CPM is increasing, while results are low. "
-                      "Dexter suggests decreasing the budget by 25%.",
+             template="Dexter noticed your clicks are decreasing and your CPM is increasing, while results are low. "
+                      "Dexter suggests decreasing the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,

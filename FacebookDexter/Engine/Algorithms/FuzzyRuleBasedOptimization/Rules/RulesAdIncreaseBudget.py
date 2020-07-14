@@ -52,8 +52,7 @@ RULES_AD_INCREASE_BUDGET = [
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed your ads quality and CTR are high, and you have a large audience. "
-                      "You should increase your budget by a maximum 25% to "
-                      "reach as many people as possible.",
+                      "Dexter suggests increasing your budget by a maximum 25% to reach as many people as possible.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,

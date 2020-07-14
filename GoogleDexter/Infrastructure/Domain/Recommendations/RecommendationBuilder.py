@@ -65,7 +65,6 @@ class RecommendationBuilder:
                  date_stop: typing.AnyStr = None,
                  time_interval: DaysEnum = DaysEnum.MONTH):
         self.__mongo_repository = mongo_repository
-        self.__structure_details = None
         self.__business_owner_repo_session = business_owner_repo_session
         self.__business_owner_id = business_owner_id
         self._date_stop = date_stop
@@ -120,10 +119,8 @@ class RecommendationBuilder:
         return self
 
     def _structure_details(self, structure_id: typing.AnyStr = None, level: LevelEnum = None) -> typing.Dict:
-        if not self.__structure_details:
-            self.__structure_details = self.__mongo_repository.get_structure_details(key_value=structure_id,
-                                                                                     level=level)
-        return self.__structure_details
+        return self.__mongo_repository.get_structure_details(key_value=structure_id,
+                                                             level=level)
 
     def set_optimization_type(self, optimization_type: RecommendationOptimizationTypeEnum = None) -> typing.Any:
         self.optimization_type = optimization_type

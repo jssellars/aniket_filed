@@ -23,7 +23,8 @@ RULES_CAMPAIGN_DECREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per result is high while your CTR remains low. Dexter suggests decreasing your budget by 25%.",
+             template="Dexter noticed your cost per result is high while your CTR remains low. "
+                      "Dexter suggests decreasing your budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -48,7 +49,7 @@ RULES_CAMPAIGN_DECREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.DECREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per result is high while your audience is narrow. You should "
+             template="Dexter noticed your cost per result is high while your audience is narrow. Dexter suggests you "
                       "decrease the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -74,8 +75,8 @@ RULES_CAMPAIGN_DECREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.DECREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per result increased while your conversions remain low. You should "
-                      "decrease the budget by maximum 25%.",
+             template="Dexter noticed your cost per result increased while your conversions remain low. Dexter "
+                      "suggests you decrease the budget by maximum 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -100,7 +101,7 @@ RULES_CAMPAIGN_DECREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.DECREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your ads quality is low and your results are also low. "
+             template="Dexter noticed your ads quality is low and your results are also low. "
                       "Dexter suggests decreasing the budget by 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -126,7 +127,7 @@ RULES_CAMPAIGN_DECREASE_BUDGET = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.DECREASE_BUDGET,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your ads quality is low while your CPC is high. "
+             template="Dexter noticed your ads quality is low while your CPC is high. "
                       "Dexter suggests decreasing the budget by 25%.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),

@@ -1,6 +1,5 @@
 import copy
 import typing
-from datetime import datetime
 
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.RuleBasedOptimizationBuilder import \
     RuleBasedOptimizationBuilder
@@ -59,11 +58,7 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
                                  set_breakdown_metadata(rule.breakdown_metadata).
                                  set_debug_mode(self._debug))
 
-            rule_data = (self._rule_evaluator.
-                         set_id_and_rule(facebook_id=facebook_id, rule=rule).
-                         set_metric_calculator(metric_calculator).
-                         set_time_interval(self._time_interval).
-                         evaluate())
+            rule_data = self._rule_evaluator.evaluate(rule=rule, metric_calculator=metric_calculator)
 
             if rule_data:
                 try:
@@ -74,13 +69,13 @@ class RuleBasedOptimizationBase(RuleBasedOptimizationBuilder):
                     import traceback
                     traceback.print_exc()
 
-        # mongo_repository.close()
         return recommendations
 
     def __create_recommendation(self,
                                 facebook_id: typing.AnyStr = None,
                                 rule: RuleBase = None,
-                                rule_data: typing.List[typing.List[RuleEvaluatorData]] = None) -> RecommendationBuilder:
+                                rule_data: typing.List[
+                                    typing.List[RuleEvaluatorData]] = None) -> RecommendationBuilder:
         recommendation = RecommendationBuilder(mongo_repository=self._mongo_repository,
                                                facebook_config=self._facebook_config,
                                                business_owner_repo_session=self._business_owner_repo_session,

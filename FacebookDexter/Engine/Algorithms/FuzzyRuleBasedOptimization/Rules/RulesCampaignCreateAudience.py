@@ -22,8 +22,9 @@ RULES_CAMPAIGN_CREATE_AUDIENCE = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CREATE_RETARGETING_AUDIENCE,
-             template="Dexter noticed your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ has increased by __id=1&value=null__% in the last "
-                      "__id=1&time_interval=14__ days. You should create a retargeting audience and give your campaign a boost.",
+             template="Dexter noticed your __id=1&metric_name=COST_PER_RESULT&metric_type=1&antecedent_type=8__ has "
+                      "increased by __id=1&value=null__% in the last __id=1&time_interval=14__ days. "
+                      "Dexter suggests creating a retargeting audience and give your campaign a boost.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -40,7 +41,6 @@ RULES_CAMPAIGN_CREATE_AUDIENCE = [
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=True)
              ]),
-    # TODO: check with Chase if this is value or percentage
     RuleBase(rtype=RuleTypeEnum.AUDIENCE,
              channel=ChannelEnum.FACEBOOK,
              category=RuleCategoryEnum.IMPROVE_CPR,
@@ -49,8 +49,9 @@ RULES_CAMPAIGN_CREATE_AUDIENCE = [
              level=LevelEnum.CAMPAIGN,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CREATE_RETARGETING_AUDIENCE,
-             template="Dexter noticed your __id=1&metric_name=ROAS&metric_type=1&antecedent_type=7__ has decreased by __id=1&value=null__ in the last "
-                      "__id=1&time_interval=14__ days. You should create a retargeting audience and give your campaign a boost.",
+             template="Dexter noticed your __id=1&metric_name=ROAS&metric_type=1&antecedent_type=7__ has decreased by "
+                      "__id=1&value=null__ in the last __id=1&time_interval=14__ days. Dexter suggests creating a "
+                      "retargeting audience and give your campaign a boost.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,

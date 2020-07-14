@@ -25,7 +25,7 @@ RULES_ADSET_CREATE_ADS = [
              redirect=RuleRedirectEnum.CREATE,
              template="Dexter noticed you don't have many ads in this adset. "
                       "A best practice is to have at least 3 ads running to ensure you get the best results. "
-                      "Let your imagination flow and add a few more ads to your adset.",
+                      "Dexter suggests you let your imagination flow and add a few more ads to your adset.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,

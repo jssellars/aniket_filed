@@ -22,14 +22,14 @@ RULES_ADSET_REMOVE_GENDER = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by "
-                      "__id=1&value=null__% in the last "
-                      "__id=1&time_interval=7__ days for some of the genders groups you are targeting. Dexter "
-                      "recommends you stop targeting the following genders __id=1&breakdown_values=null__.",
-             alternative_template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by __id=1&value=null__% in the last "
-                                  "__id=1&time_interval=7__ days for all genders you are targeting. Dexter "
-                                  "recommends you pause this ad set.",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
+             template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have "
+                      "decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days for some of the "
+                      "genders groups you are targeting. Dexter suggests you stop targeting the following genders "
+                      "__id=1&breakdown_values=null__.",
+             alternative_template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ "
+                                  "have decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days "
+                                  "for all genders you are targeting. Dexter suggests you pause this ad set.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.GENDER,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
@@ -58,14 +58,14 @@ RULES_ADSET_REMOVE_GENDER = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by "
-                      "__id=1&value=null__% in the last "
-                      "__id=1&time_interval=7__ days for some of the genders you are targeting. Dexter "
-                      "recommends you stop targeting the following age ranges __id=1&breakdown_values=null__.",
-             alternative_template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by __id=1&value=null__% in the last "
-                                  "__id=1&time_interval=7__ days for all genders you are targeting. Dexter "
-                                  "recommends you pause this ad set.",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
+             template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have "
+                      "decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days for some of the "
+                      "genders you are targeting. Dexter suggests you stop targeting the following genders "
+                      "__id=1&breakdown_values=null__.",
+             alternative_template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ "
+                                  "have decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days "
+                                  "for all genders you are targeting. Dexter suggests you pause this ad set.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.GENDER,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
@@ -94,15 +94,14 @@ RULES_ADSET_REMOVE_GENDER = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by "
-                      "__id=1&value=null__% in the last "
-                      "__id=1&time_interval=7__ days for some of the genders you are targeting. Dexter recommends "
-                      "you stop targeting the "
-                      "following genders __id=1&breakdown_values=null__.",
-             alternative_template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by __id=1&value=null__% in the last "
-                                  "__id=1&time_interval=7__ days for all genders you are targeting. Dexter recommends "
-                                  "you pause this ad set.",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
+             template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have "
+                      "decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days for some of the "
+                      "genders you are targeting. Dexter suggests you stop targeting the following genders "
+                      "__id=1&breakdown_values=null__.",
+             alternative_template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ "
+                                  "have decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days "
+                                  "for all genders you are targeting. Dexter suggests you pause this ad set.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.GENDER,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
@@ -126,15 +125,14 @@ RULES_ADSET_REMOVE_GENDER = [
              level=LevelEnum.ADSET,
              action=ActionEnum.REMOVE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by "
-                      "__id=1&value=null__% in the last "
-                      "__id=1&time_interval=7__ days for some of the genders you are targeting. Dexter recommends "
-                      "you stop targeting the "
+             template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have "
+                      "decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days for some of the "
+                      "genders you are targeting. Dexter suggests you stop targeting the "
                       "following genders __id=1&breakdown_values=null__.",
-             alternative_template="Your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ have decreased by __id=1&value=null__% in the last "
-                                  "__id=1&time_interval=7__ days for all genders you are targeting. Dexter recommends "
-                                  "you pause this ad set.",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.AGE,
+             alternative_template="Dexter noticed your __id=1&metric_name=RESULTS&metric_type=1&antecedent_type=8__ "
+                                  "have decreased by __id=1&value=null__% in the last __id=1&time_interval=7__ days "
+                                  "for all genders you are targeting. Dexter suggests you pause this ad set.",
+             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.GENDER,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),

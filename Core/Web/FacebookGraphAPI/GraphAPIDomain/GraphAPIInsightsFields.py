@@ -274,6 +274,7 @@ class GraphAPIInsightsFields:
     url_parameters = 'url_tags'
     page_id_structure = 'page'
     app_event_structure = 'application'
+    learning_stage_info = 'learning_stage_info'
 
     # ====== MOBILE APP STANDARD EVENTS ====== #
     mobile_app_achievement_unlocked = 'app_custom_event.fb_mobile_achievement_unlocked'

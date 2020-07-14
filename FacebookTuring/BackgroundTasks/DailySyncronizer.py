@@ -1,6 +1,6 @@
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from FacebookTuring.BackgroundTasks.Orchestrators.Orchestrator import Orchestrator
-from FacebookTuring.BackgroundTasks.Startup import startup, logger
+from FacebookTuring.BackgroundTasks.Startup import startup, logger, rabbit_logger
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
     TuringAdAccountJournalRepository
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -20,6 +20,8 @@ def run_daily_sync():
         orchestrator = Orchestrator(). \
             set_account_journal_repository(account_journal_repository). \
             set_insights_repository(insights_repository). \
+            set_logger(logger). \
+            set_rabbit_logger(rabbit_logger). \
             set_structures_repository(structures_repository)
         orchestrator.run()
     except:

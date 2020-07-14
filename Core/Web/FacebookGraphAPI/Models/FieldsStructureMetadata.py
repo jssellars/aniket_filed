@@ -614,6 +614,12 @@ class FieldsStructureMetadata:
                   field_type=FieldType.STRUCTURE,
                   data_type_id=FieldDataTypeEnum.TEXT.value,
                   aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    learning_stage_info = Field(name="learning_stage_info",
+                                facebook_fields=[GraphAPIInsightsFields.learning_stage_info],
+                                mapper=StructureFieldMapper(),
+                                field_type=FieldType.STRUCTURE,
+                                data_type_id=FieldDataTypeEnum.TEXT.value,
+                                aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
     # todo: check app event values from tracking spec
     app_event = Field(name="app_event",
                       facebook_fields=[GraphAPIInsightsFields.app_event_structure],

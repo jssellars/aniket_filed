@@ -186,6 +186,17 @@ class Orchestrator(OrchestratorBuilder):
                 }
                 self._journal_repository.update_one(search_query, update_query)
 
+    def adset_is_olp(self, adset_id):
+        structure_details = self._data_repository.get_structure_details(level=LevelEnum.ADSET, key_value=adset_id)
+        try:
+            status = structure_details['learning_stage_info']['status']
+            if status == 'SUCCESS':
+                return 1
+        except:
+            return 0
+
+        return 0
+
     def __run_algorithm(self, search_query, time_interval):
         try:
             if not self.startup.dexter_config.date_stop:
@@ -200,6 +211,7 @@ class Orchestrator(OrchestratorBuilder):
             campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
             c = 1
             for campaign_id in campaign_ids:
+                all_adsets_olp = True
                 print(
                     'Started campaign {} [id: {}] out of {} ---> acc_id: {}'.format(c, campaign_id, len(campaign_ids),
                                                                                     self.ad_account_id))
@@ -212,35 +224,22 @@ class Orchestrator(OrchestratorBuilder):
                                                                   rule_evaluator,
                                                                   time_interval_enum,
                                                                   LevelEnum.CAMPAIGN)
-                should_stop = False
+
                 adset_ids = self._data_repository.get_adset_ids_by_campaign_id(campaign_id)
                 for adset_id in adset_ids:
-                    t = Thread(target=self.run_facebook_enhancer,
-                               args=(adset_id, date_stop, time_interval_enum, LevelEnum.ADSET))
-                    t.start()
+                    thread = Thread(target=self.run_facebook_enhancer,
+                                    args=(adset_id, date_stop, time_interval_enum, LevelEnum.ADSET))
+                    thread.start()
 
                     ad_ids = self._data_repository.get_ads_by_adset_id(adset_id)
                     for ad_id in ad_ids:
-                        t = Thread(target=self.run_facebook_enhancer,
-                                   args=(ad_id, date_stop, time_interval_enum, LevelEnum.AD))
-                        t.start()
+                        thread = Thread(target=self.run_facebook_enhancer,
+                                        args=(ad_id, date_stop, time_interval_enum, LevelEnum.AD))
+                        thread.start()
+
                 if rule_algorithm_campaign.check_run_status(campaign_id):
                     for adset_id in adset_ids:
-                        rule_evaluator = RuleEvaluatorFactory.get(
-                            algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
-                        rule_evaluator.set_time_interval(time_interval_enum)
-                        rule_algorithm_adset_breakdown = self.get_rule_algorithm(date_stop,
-                                                                                 rule_evaluator,
-                                                                                 time_interval_enum,
-                                                                                 LevelEnum.ADSET)
-                        rule_based_recommendations = rule_algorithm_adset_breakdown.run(adset_id,
-                                                                                        [
-                                                                                            RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
-                        if rule_based_recommendations:
-                            should_stop = True
-                            self._recommendations_repository.save_recommendations(rule_based_recommendations,
-                                                                                  last_updated)
-                        if not should_stop:
+                        if self.adset_is_olp(adset_id):
                             rule_evaluator = RuleEvaluatorFactory.get(
                                 algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.AD)
                             rule_evaluator.set_time_interval(time_interval_enum)
@@ -251,12 +250,9 @@ class Orchestrator(OrchestratorBuilder):
                             rule_based_recommendations = rule_algorithm_ad.run(adset_id,
                                                                                [RuleTypeSelectionEnum.GENERAL,
                                                                                 RuleTypeSelectionEnum.BUDGET])
-                            if rule_based_recommendations:
-                                should_stop = True
-                                self._recommendations_repository.save_recommendations(rule_based_recommendations,
-                                                                                      last_updated)
-                            else:
-
+                            self._recommendations_repository.save_recommendations(rule_based_recommendations,
+                                                                                  last_updated)
+                            if not rule_based_recommendations:
                                 rule_evaluator = RuleEvaluatorFactory.get(
                                     algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
                                 rule_evaluator.set_time_interval(time_interval_enum)
@@ -269,18 +265,30 @@ class Orchestrator(OrchestratorBuilder):
                                                                                                 RuleTypeSelectionEnum.GENERAL,
                                                                                                 RuleTypeSelectionEnum.CREATE,
                                                                                                 RuleTypeSelectionEnum.BUDGET])
-                                if rule_based_recommendations:
-                                    should_stop = True
-                                    self._recommendations_repository.save_recommendations(
-                                        rule_based_recommendations,
-                                        last_updated)
-
-                    rule_based_recommendations = rule_algorithm_campaign.run(campaign_id,
-                                                                             [RuleTypeSelectionEnum.GENERAL,
-                                                                              RuleTypeSelectionEnum.BUDGET])
-                    self._recommendations_repository.save_recommendations(
-                        rule_based_recommendations,
-                        last_updated)
+                                self._recommendations_repository.save_recommendations(
+                                    rule_based_recommendations,
+                                    last_updated)
+                        else:
+                            all_adsets_olp = False
+                            rule_evaluator = RuleEvaluatorFactory.get(
+                                algorithm_type=AlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.ADSET)
+                            rule_evaluator.set_time_interval(time_interval_enum)
+                            rule_algorithm_adset_breakdown = self.get_rule_algorithm(date_stop,
+                                                                                     rule_evaluator,
+                                                                                     time_interval_enum,
+                                                                                     LevelEnum.ADSET)
+                            rule_based_recommendations = rule_algorithm_adset_breakdown.run(adset_id,
+                                                                                            [
+                                                                                                RuleTypeSelectionEnum.REMOVE_BREAKDOWN])
+                            self._recommendations_repository.save_recommendations(rule_based_recommendations,
+                                                                                  last_updated)
+                    if all_adsets_olp:
+                        rule_based_recommendations = rule_algorithm_campaign.run(campaign_id,
+                                                                                 [RuleTypeSelectionEnum.GENERAL,
+                                                                                  RuleTypeSelectionEnum.BUDGET])
+                        self._recommendations_repository.save_recommendations(
+                            rule_based_recommendations,
+                            last_updated)
 
                     print("Elapsed time: {}".format(time.time() - start_time))
 

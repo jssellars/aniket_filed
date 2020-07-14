@@ -23,7 +23,7 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your reach has decreased, but why? Your ads quality is also low, at this point your "
+             template="Dexter noticed your reach has decreased! Your ads quality is also low, at this point your "
                       "ads are being penalized and delivery "
                       "is being affected. Dexter suggests creating new ads with new targeting.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
@@ -55,7 +55,7 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your ad isn’t receiving much engagement. More engagement on brand awareness campaigns helps deliver ads for a reduced cost, "
+             template="Dexter noticed your ad isn’t receiving much engagement. More engagement on brand awareness campaigns helps deliver ads for a reduced cost, "
                       "so Dexter suggests asking a question in the first part of the adcopy to create more engagement.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -81,7 +81,7 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=CR&metric_type=1&antecedent_type=8__ has fallen by"
+             template="Dexter noticed that your __id=1&metric_name=CR&metric_type=1&antecedent_type=8__ has fallen by"
                       " __id=1&value=null__% over the last __id=1&time_interval=7__ days. "
                       "Dexter knows video is king right now is proven to help with results. Have you tried uploading a video? Try it now!",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
@@ -109,8 +109,8 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Did you know you can drastically improve your post engagement by asking a question in the first sentence of your ad? Dexter "
-                      "suggests you make this change to help improve your results!",
+             template="You can drastically improve your post engagement by asking a question in the first sentence of your ad? Dexter "
+                      "suggests making this change to help get more engagement on your ad.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -135,8 +135,9 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Did you know that your cost per result will decrease as you get more post engagement on your ad? Try asking a question, "
-                      "keeping in mind who your audience is, to further engage your audience!",
+             template="Did you know that your cost per result will decrease as you get more post engagement on your ad? "
+                      "Dexter suggests you should try asking a question, keeping in mind who your audience is, "
+                      "to further engage your audience!",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -161,8 +162,10 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your reach has decreased, but why? Your relevancy score is below most likely very low, at this point your ads are being penalized "
-                      "and delivery is being affected. Dexter suggests creating new ads with new targeting.",
+             template="Dexter noticed that your reach has decreased and your relevancy score is low. "
+                      "It's possible your ads are being penalized and your ad delivery could be affected "
+                      "because of this. Dexter suggests creating new ads with new targeting "
+                      "to improve your performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -187,7 +190,8 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
-             template="Your __id=1&metric_name=FREQUENCY&metric_type=1&antecedent_type=1__ is fairly high __id=1&value=null__ in the last "
+             template="Dexter noticed your __id=1&metric_name=FREQUENCY&metric_type=1&antecedent_type=1__ "
+                      "is fairly high __id=1&value=null__ in the last "
                       "__id=1&time_interval=7__ days compared to our industry benchmarks. Have you considered these "
                       "__id=2&metric_name=INTERESTS&metric_type=4&antecedent_type=6&metric_count=5__ __id=2&value=null__? "
                       "Let's test them now, and we'll find the best performing ad for you!",

@@ -23,7 +23,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CPC increased while your results remain low. You should pause this "
+             template="Dexter noticed your CPC increased while your results remain low. Dexter suggests you pause this "
                       "ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -54,8 +54,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your clicks are decreasing and your cost per result is also decreasing. You should pause this "
-                      "ad to improve performance.",
+             template="Dexter noticed your clicks are decreasing and your cost per result is also decreasing. "
+                      "Dexter suggests you pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -85,8 +85,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per result is increasing while your frequency is high. You should pause this "
-                      "ad to improve performance.",
+             template="Dexter noticed your cost per result is increasing while your frequency is high. "
+                      "Dexter suggests you pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -116,8 +116,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your clicks are decreasing, your cost per result is decreasing and CPM is increasing. "
-                      "Dexter suggests pausing the ad.",
+             template="Dexter noticed your clicks are decreasing, your cost per result is decreasing "
+                      "and CPM is increasing. Dexter suggests pausing the ad.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -147,7 +147,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your clicks are increasing, while your frequency is high. "
+             template="Dexter noticed your clicks are increasing, while your frequency is high. "
                       "Dexter suggests pausing the ad.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -173,7 +173,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your impressions increased while your results remain low. You should "
+             template="Dexter noticed your impressions increased while your results remain low. Dexter suggests you "
                       "pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -204,7 +204,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your cost per result is at historical high levels. You should pause "
+             template="Dexter noticed your cost per result is at historical high levels. Dexter suggests you pause "
                       "this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -230,7 +230,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CTR is decreasing while your results remain low. You should pause "
+             template="Dexter noticed your CTR is decreasing while your results remain low. Dexter suggests you pause "
                       "this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -256,7 +256,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your impressions increased while your audience is small. You should "
+             template="Dexter noticed your impressions increased while your audience is small. Dexter suggests you "
                       "pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
@@ -282,8 +282,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CTR is decreasing while your conversions remain low. You should pause "
-                      "this ad to improve performance.",
+             template="Dexter noticed your CTR is decreasing while your conversions remain low. Dexter suggests you"
+                      " pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -308,8 +308,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your CTR is decreasing while your cost per result is high. You should pause "
-                      "this ad to improve performance.",
+             template="Dexter noticed your CTR is decreasing while your cost per result is high. Dexter suggests you "
+                      "pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -334,8 +334,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.PAUSE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed your conversions are low while your cost per result is high. You should pause "
-                      "this ad to improve performance.",
+             template="Dexter noticed your conversions are low while your cost per result is high. Dexter suggests you "
+                      "pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -360,8 +360,8 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your ads quality is low and your results are also low. You should pause "
-                      "this ad to improve performance.",
+             template="Dexter noticed your ads quality is low and your results are also low. Dexter suggests you "
+                      "pause this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
@@ -386,7 +386,7 @@ RULES_AD_PAUSE = [
              level=LevelEnum.AD,
              action=ActionEnum.NONE,
              redirect=RuleRedirectEnum.EDIT_STRUCTURE,
-             template="Your ads quality is low while your CPC is high. You should pause "
+             template="Dexter noticed your ads quality is low while your CPC is high. Dexter suggests you pause "
                       "this ad to improve performance.",
              breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
                                                   action_breakdown=ActionBreakdownEnum.NONE),
