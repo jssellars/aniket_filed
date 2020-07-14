@@ -2,6 +2,8 @@
 import os
 import sys
 
+
+
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -13,7 +15,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_simple import JWTManager
 from flask_restful import Api
-
+from Potter.FacebookCampaignsBuilder.Api.Controllers.SmartCreateCatalogsController import SmartCreateCatalogsEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.BudgetValidationController import BudgetValidationEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.TargetingSearchController import \
     TargetingSearchInterestsTreeEndpoint, TargetingSearchInterestsSearchEndpoint, \
@@ -105,6 +107,11 @@ api.add_resource(TargetingSearchLanguagesEndpoint, targeting_search_languages_en
 budget_validation_endpoint = ("{base_url}/budget-validation/<string:business_owner_id>/<string:account_id>".
                               format(base_url=startup.base_url.lower()))
 api.add_resource(BudgetValidationEndpoint, budget_validation_endpoint)
+
+# Facebook Catalogs for smart create
+smart_create_catalogs_endpoint = "{base_url}/smart-create/catalogs".format(base_url=startup.base_url.lower())
+api.add_resource(SmartCreateCatalogsEndpoint, smart_create_catalogs_endpoint)
+
 
 if __name__ == "__main__":
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)
