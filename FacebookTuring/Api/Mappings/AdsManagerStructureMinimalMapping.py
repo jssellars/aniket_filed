@@ -9,8 +9,8 @@ from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookN
 
 
 class AdsManagerStructureMinimalMapping(MapperBase):
-    facebook_id = fields.String()
-    name = fields.String()
+    key = fields.String()
+    display_name = fields.String()
 
     def __init__(self, level=None, **kwargs):
         self.__level = level
@@ -22,9 +22,9 @@ class AdsManagerStructureMinimalMapping(MapperBase):
             data = object_to_json(data)
 
         id_field_key = LevelToFacebookIdKeyMapping.get_by_name(self.__level)
-        data["facebook_id"] = data.pop(id_field_key)
+        data["key"] = data.pop(id_field_key)
 
         name_field_key = LevelToFacebookNameKeyMapping.get_by_name(self.__level)
-        data["name"] = data.pop(name_field_key)
+        data["display_name"] = data.pop(name_field_key)
 
         return data
