@@ -13,7 +13,7 @@ from GoogleTuring.Infrastructure.Mappings.AdWordsAPIAccountInsightsMapper import
 
 class AdWordsInsightsClient(AdWordsBaseClient):
     __TIME_INCREMENT_TO_FIELD = {
-        # default -> all days
+        0: None,
         1: GoogleFieldsMetadata.date,
         7: GoogleFieldsMetadata.week,
         30: GoogleFieldsMetadata.month

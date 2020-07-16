@@ -29,7 +29,7 @@ class QueryBuilderGoogleRequestParser:
         super().__init__()
         self.__google_fields = []
         self.__google_id = None
-        self.time_increment = 1
+        self.time_increment = 0
         self.__time_range = {}
         self.filtering = []
         self.__report = None
