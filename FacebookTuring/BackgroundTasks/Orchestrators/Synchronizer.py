@@ -85,7 +85,7 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
     levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
 
     for level in levels:
-        if level == Level.ADSET:
+        if level == Level.ADSET or level == Level.CAMPAIGN:
             for breakdown in InsightsSyncronizerBreakdownEnum:
                 for action_breakdown in InsightsSyncronizerActionBreakdownEnum:
                     syncronizer = InsightsSyncronizer(business_owner_id=business_owner_id,

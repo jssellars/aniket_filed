@@ -10,6 +10,7 @@ class InsightsSyncronizerBreakdownEnum(Enum):
     PLACEMENT = FieldsMetadata.placement
     DEVICE = FieldsMetadata.impression_device
     PLATFORM = FieldsMetadata.publisher_platform
+    HOUR = FieldsMetadata.hourly_stats_aggregated_by_advertiser_time_zone
 
 
 class InsightsSyncronizerActionBreakdownEnum(Enum):
