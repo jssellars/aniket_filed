@@ -33,5 +33,6 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.ad_id,
     FieldsMetadata.ad_name,
     FieldsMetadata.date_start,
-    FieldsMetadata.date_stop
+    FieldsMetadata.date_stop,
+    FieldsMetadata.frequency
 ]

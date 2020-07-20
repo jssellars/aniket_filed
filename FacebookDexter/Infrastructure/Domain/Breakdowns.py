@@ -33,7 +33,7 @@ class BreakdownEnum(Enum):
     PLACEMENT = BreakdownBase(name="placement", display_name="Placement")
     DEVICE = BreakdownBase(name="impression_device", display_name="Device")
     PLATFORM = BreakdownBase(name="platform_position", display_name="Publisher platform")
-
+    HOUR = BreakdownBase(name="hourly_stats_aggregated_by_advertiser_time_zone", display_name="Time of day")
 
 class ActionBreakdownEnum(Enum):
     NONE = BreakdownBase(name="none", display_name="")

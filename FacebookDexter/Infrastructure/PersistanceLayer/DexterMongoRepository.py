@@ -135,10 +135,17 @@ class DexterMongoRepository(MongoRepositoryBase):
                 breakdown_metadata.breakdown.value.name] = \
                 f"{MongoOperator.DOLLAR_SIGN.value}{breakdown_metadata.breakdown.value.name}"
 
-            breakdown_value_filter = {
-                f"{MongoOperator.GROUP_KEY.value}.{breakdown_metadata.breakdown.value.name}": {
-                    MongoOperator.EQUALS.value: breakdown_metadata.breakdown_value}
-            }
+            if not isinstance(breakdown_metadata.breakdown_value, list):
+                breakdown_value_filter = {
+                    f"{MongoOperator.GROUP_KEY.value}.{breakdown_metadata.breakdown.value.name}": {
+                        MongoOperator.EQUALS.value: breakdown_metadata.breakdown_value}
+                }
+            else:
+                breakdown_value_filter = {
+                    f"{MongoOperator.GROUP_KEY.value}.{breakdown_metadata.breakdown.value.name}": {
+                        MongoOperator.IN.value: breakdown_metadata.breakdown_value}
+                }
+
             query[1][MongoOperator.MATCH.value][MongoOperator.AND.value].append(breakdown_value_filter)
 
         # add action breakdown to group by

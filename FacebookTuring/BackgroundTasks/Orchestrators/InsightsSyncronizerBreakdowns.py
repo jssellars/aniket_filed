@@ -11,7 +11,14 @@ class InsightsSyncronizerBreakdownEnum(Enum):
     DEVICE = FieldsMetadata.impression_device
     PLATFORM = FieldsMetadata.publisher_platform
     HOUR = FieldsMetadata.hourly_stats_aggregated_by_advertiser_time_zone
-
+    FREQUENCY_VALUE = FieldsMetadata.frequency_value
+    DAY = FieldsMetadata.day
+    COUNTRY = FieldsMetadata.country
+    REGION = FieldsMetadata.region
 
 class InsightsSyncronizerActionBreakdownEnum(Enum):
     NONE = FieldsMetadata.action_none
+    CONVERSION_DEVICE = FieldsMetadata.device
+    VIDEO_VIEW_TYPE = FieldsMetadata.video_type
+    VIDEO_SOUND = FieldsMetadata.video_sound
+    CAROUSEL_CARD_NAME = FieldsMetadata.carousel_card_name
