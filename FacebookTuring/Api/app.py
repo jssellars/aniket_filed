@@ -77,6 +77,10 @@ api.add_resource(AdsManagerController.AdsManagerGetAdSetsEndpoint, structures_co
 structures_controller = "{base_url}/ads/<string:account_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerController.AdsManagerGetAdsEndpoint, structures_controller)
 
+filtered_structures_controller = "{base_url}/filtered-structures/<string:level>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(AdsManagerController.AdsManagerFilteredStructuresEndpoint, filtered_structures_controller)
+
 # Campaign Tree
 campaign_tree_structure_controller = "{base_url}/campaign-structure-tree/<string:level>/<string:facebook_id>".format(
     base_url=startup.base_url.lower())

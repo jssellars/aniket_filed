@@ -1,5 +1,6 @@
 # todo: update GoogleTuring repo to latest MongoRepositoryBase
 import typing
+from copy import deepcopy
 
 from bson import BSON
 
@@ -9,9 +10,9 @@ from GoogleTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
-from GoogleTuring.Infrastructure.PersistenceLayer.StatusChangerMongoRepository import StatusChangerMongoRepository
 from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGoogleIdKeyMapping, \
     LevelToGoogleNameKeyMapping
+from GoogleTuring.Infrastructure.PersistenceLayer.StatusChangerMongoRepository import StatusChangerMongoRepository
 
 
 class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
@@ -80,8 +81,11 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
         additional_info = self.get(query)[-1]
         return additional_info
 
-    def get_structure_ids_and_names(self, level: Level = None, account_id: typing.AnyStr = None) -> typing.List[
-        typing.Dict]:
+    def get_structure_ids_and_names(self,
+                                    level: Level = None,
+                                    account_id: typing.AnyStr = None,
+                                    campaign_ids: typing.List[typing.AnyStr] = None,
+                                    adgroup_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
         self.set_collection(collection_name=level.value)
         query = {
             MongoOperator.AND.value: [
@@ -100,6 +104,21 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                 }
             ]
         }
+        if campaign_ids:
+            query_by_campaign_ids = {
+                LevelToGoogleIdKeyMapping.get_enum_by_name(Level.CAMPAIGN.name).value: {
+                    MongoOperator.IN.value: campaign_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(deepcopy(query_by_campaign_ids))
+
+        if adgroup_ids:
+            query_by_adgroup_ids = {
+                LevelToGoogleIdKeyMapping.get_enum_by_name(Level.ADGROUP.name).value: {
+                    MongoOperator.IN.value: adgroup_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(deepcopy(query_by_adgroup_ids))
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
             LevelToGoogleIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,

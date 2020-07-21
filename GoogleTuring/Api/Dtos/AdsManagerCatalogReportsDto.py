@@ -20,7 +20,7 @@ class AdsManagerCatalogReportsDto:
         CampaignKeywordsPerformanceReportModel
     ]
 
-    adgroup = [
+    adset = [
         AdGroupPerformanceReportModel,
         AdGroupGenderPerformanceReportModel,
         AdGroupAgeRangePerformanceReportModel,

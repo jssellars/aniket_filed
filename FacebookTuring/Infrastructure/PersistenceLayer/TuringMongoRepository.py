@@ -1,4 +1,5 @@
 import typing
+from copy import deepcopy
 from datetime import datetime
 
 from bson import BSON
@@ -69,9 +70,13 @@ class TuringMongoRepository(MongoRepositoryBase):
         return [structure_id.get(LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value) for structure_id in
                 structure_ids]
 
-    def get_structure_ids_and_names(self, level: Level = None, account_id: typing.AnyStr = None) -> typing.List[
-        typing.Dict]:
+    def get_structure_ids_and_names(self,
+                                    level: Level = None,
+                                    account_id: typing.AnyStr = None,
+                                    campaign_ids: typing.List[typing.AnyStr] = None,
+                                    adset_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
         self.set_collection(collection_name=level.value)
+
         query = {
             MongoOperator.AND.value: [
                 {
@@ -89,6 +94,22 @@ class TuringMongoRepository(MongoRepositoryBase):
                 }
             ]
         }
+        if campaign_ids:
+            query_by_campaign_ids = {
+                LevelToFacebookIdKeyMapping.get_enum_by_name(Level.CAMPAIGN.name).value: {
+                    MongoOperator.IN.value: campaign_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(deepcopy(query_by_campaign_ids))
+
+        if adset_ids:
+            query_by_adset_ids = {
+                LevelToFacebookIdKeyMapping.get_enum_by_name(Level.ADSET.name).value: {
+                    MongoOperator.IN.value: adset_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(deepcopy(query_by_adset_ids))
+
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
             LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,

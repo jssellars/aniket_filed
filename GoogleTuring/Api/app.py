@@ -20,7 +20,7 @@ from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManager
     AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetAdsEndpoint, \
     AdsManagerGetAdGroupsEndpoint, \
-    AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint
+    AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint, AdsManagerFilteredStructuresEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerReportInsightsEndpoint, \
     AdsManagerInsightsWithTotalsEndpoint
 from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
@@ -72,6 +72,10 @@ api.add_resource(AdsManagerGetAdsEndpoint, structures_controller)
 
 structures_controller = "{base_url}/keywords/<string:account_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerGetKeywordsEndpoint, structures_controller)
+
+filtered_structures_controller = "{base_url}/filtered-structures/<string:level>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(AdsManagerFilteredStructuresEndpoint, filtered_structures_controller)
 
 # Structure updates
 structure_details_controller = "{base_url}/<int:account_id>/<string:level>/<int:structure_id>".format(

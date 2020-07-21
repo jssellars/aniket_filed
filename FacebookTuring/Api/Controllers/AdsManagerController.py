@@ -1,4 +1,5 @@
 import json
+import typing
 
 import humps
 from flask import request, Response
@@ -11,6 +12,7 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Misc import snake_to_camelcase
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
+from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from FacebookTuring.Api.Commands.AdsManagerSaveDraftCommand import AdsManagerSaveDraftCommand
 from FacebookTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import \
@@ -19,11 +21,15 @@ from FacebookTuring.Api.CommandsHandlers.AdsManagerDiscardDraftCommandHandler im
     AdsManagerDiscardDraftCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDuplicateStructureCommandHandler import \
     AdsManagerDuplicateStructureCommandHandler, AdsManagerDuplicateStructureCommandHandlerException
+from FacebookTuring.Api.CommandsHandlers.AdsManagerFilteredStructuresCommandHandler import \
+    AdsManagerFilteredStructuresCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerSaveDraftCommandHandler import AdsManagerSaveDraftCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import \
     AdsManagerUpdateStructureCommandHandler
 from FacebookTuring.Api.Mappings.AdsManagerDuplicateStructureCommandMapping import \
     AdsManagerDuplicateStructureCommandMapping
+from FacebookTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import \
+    AdsManagerFilteredStructuresCommandMapping
 from FacebookTuring.Api.Mappings.AdsManagerSaveDraftCommandMapping import AdsManagerSaveDraftCommandMapping
 from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
@@ -113,6 +119,38 @@ class AdsManagerGetAdsEndpoint(Resource):
             logger.logger.exception(log.to_dict())
             return Response(response=json.dumps({"message": f"Could not retrieve {level} for {account_id}"}),
                             status=400, mimetype='application/json')
+
+
+class AdsManagerFilteredStructuresEndpoint(Resource):
+
+    @jwt_required
+    def post(self, level: typing.AnyStr = None):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        try:
+            raw_request = humps.decamelize(request.get_json(force=True))
+            mapping = AdsManagerFilteredStructuresCommandMapping(target=AdsManagerFilteredStructuresCommand)
+            command = mapping.load(raw_request)
+        except Exception as e:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="AdsManagerFilteredStructuresEndpoint",
+                                    description=str(e),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            return Response(response=json.dumps({"message": str(e)}), status=400,
+                            mimetype='application/json')
+
+        try:
+            response = AdsManagerFilteredStructuresCommandHandler.handle(level=level, command=command)
+            response = json.dumps(response)
+            return Response(response=response, status=200, mimetype="application/json")
+        except Exception as e:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="AdsManagerFilteredStructuresEndpoint",
+                                    description=str(e),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            error = Tools.create_error(e)
+            return Response(response=json.dumps(error), status=400, mimetype='application/json')
 
 
 class AdsManagerEndpoint(Resource):
