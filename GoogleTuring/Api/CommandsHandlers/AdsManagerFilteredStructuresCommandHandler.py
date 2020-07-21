@@ -17,7 +17,7 @@ class AdsManagerFilteredStructuresCommandHandler:
 
         try:
             repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
-                                                               database_name=startup.mongo_config.structures_database_name,
+                                                               database_name=startup.mongo_config.google_structures_database_name,
                                                                collection_name=collection_name)
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id,

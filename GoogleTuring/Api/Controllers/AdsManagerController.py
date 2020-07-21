@@ -150,6 +150,8 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
 
     @jwt_required
     def post(self, level: typing.AnyStr = None):
+        if level == 'adset':
+            level = 'adgroup'
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
@@ -166,6 +168,7 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
 
         try:
             response = AdsManagerFilteredStructuresCommandHandler.handle(level=level, command=command)
+            response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype="application/json")
         except Exception as e:
