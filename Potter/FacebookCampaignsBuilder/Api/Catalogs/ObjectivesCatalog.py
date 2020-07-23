@@ -2,7 +2,6 @@ from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogBase import CatalogBase
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogNode import CatalogNode
 from facebook_business.adobjects.campaign import Campaign
 
-
 # Conversions children
 store_traffic = CatalogNode(Campaign.Objective.local_awareness, 'Store Traffic', None,
                             'Increase the number of visits to your store.')
@@ -28,7 +27,7 @@ app_installs = CatalogNode(Campaign.Objective.app_installs, 'App Installs', None
                            'Get more people to install your app.')
 
 
-    # engagement children
+# engagement children
 post_likes = CatalogNode(Campaign.Objective.post_engagement, 'Post Likes')
 page_likes = CatalogNode(Campaign.Objective.page_likes, 'Page Likes')
 
@@ -51,9 +50,10 @@ class ObjectivesCatalog(CatalogBase):
 
     A_awareness = CatalogNode('AWARENESS', 'Awareness', 'awareness', None, [brand_awareness, reach])
 
+    # The messages objective is also conceptually here but we do not support it yet
     B_consideration = CatalogNode('CONSIDERATION', 'Consideration', 'consideration', None, [traffic, engagement,
                                                                                             video_views, lead_generation
-                                                                                            , messages])
+                                                                                            ])
 
     C_conversions = CatalogNode(Campaign.Objective.conversions, 'Conversions', 'conversions',
                               None, [store_traffic, catalog_sales, conversions_leaf])

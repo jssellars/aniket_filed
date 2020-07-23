@@ -1,11 +1,6 @@
 import typing
 from dataclasses import dataclass
-
 import humps
-
-from Core.Tools.Misc.ObjectManipulators import extract_class_attributes_values
-from Core.Tools.Misc.ObjectSerializers import object_to_json
-
 
 @dataclass
 class CatalogNode:

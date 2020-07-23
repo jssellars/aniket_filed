@@ -1,5 +1,4 @@
 import copy
-
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogBase import CatalogBase
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogNode import CatalogNode
 from facebook_business.adobjects.campaign import Campaign
