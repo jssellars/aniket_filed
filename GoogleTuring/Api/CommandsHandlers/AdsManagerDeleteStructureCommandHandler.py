@@ -1,7 +1,7 @@
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
 from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
-from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
+from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
@@ -32,7 +32,7 @@ class AdsManagerDeleteStructureCommandHandler(GoogleTokenGetter):
                                                                          'google_structures_database_name'],
                                                                      collection_name=level)
             id_key = LEVEL_TO_ID[level]
-            mongo_repository.change_status_many(ids=[structure_id], new_status=StructureStatus.REMOVED.value,
+            mongo_repository.change_status_many(ids=[structure_id], new_status=StructureStatusEnum.REMOVED.value,
                                                 id_key=id_key)
         except Exception as e:
             raise e

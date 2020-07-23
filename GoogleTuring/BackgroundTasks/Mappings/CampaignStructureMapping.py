@@ -4,7 +4,7 @@ from bson import BSON
 from zeep import helpers
 
 from GoogleTuring.BackgroundTasks.Mappings.StructureMapping import StructureMapping
-from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import GOOGLE_STATUS_MAPPING
+from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import GOOGLE_STATUS_MAPPING
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID, StructureType
 
 

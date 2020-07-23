@@ -8,7 +8,6 @@ from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoProjectionState
 from GoogleTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
-from GoogleTuring.Infrastructure.Domain.Structures.StructureStatus import StructureStatus
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
 from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGoogleIdKeyMapping, \
     LevelToGoogleNameKeyMapping
@@ -21,7 +20,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
             collection_names = self.database.list_collection_names()
             for collection_name in collection_names:
                 self.collection = collection_name
-                self.change_status_many(ids=deleted_customer_ids, new_status=StructureStatus.REMOVED.value,
+                self.change_status_many(ids=deleted_customer_ids, new_status=StructureStatusEnum.REMOVED.value,
                                         id_key="account_id")
 
     def add_structures(self, structure_mapping):
@@ -34,7 +33,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                 id_key: {
                     MongoOperator.IN.value: structure_ids
                 },
-                "status": {MongoOperator.IN.value: [StructureStatus.ENABLED.value, StructureStatus.PAUSED.value]}
+                "status": {MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]}
             }]
         }
 
@@ -43,7 +42,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
 
         removed_structures_ids = list(set(existing_ids) - set(structure_ids))
         if removed_structures_ids:
-            self.change_status_many(ids=removed_structures_ids, new_status=StructureStatus.REMOVED.value,
+            self.change_status_many(ids=removed_structures_ids, new_status=StructureStatusEnum.REMOVED.value,
                                     id_key=id_key)
 
         new_structures_ids = list(set(structure_ids) - set(existing_ids))
@@ -55,7 +54,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
         common_structures = list(filter(lambda x: x[id_key] in common_structures_ids, processed_entries))
 
         if common_structures_ids:
-            self.change_status_many(ids=common_structures_ids, new_status=StructureStatus.DEPRECATED.value,
+            self.change_status_many(ids=common_structures_ids, new_status=StructureStatusEnum.DEPRECATED.value,
                                     id_key=id_key)
             self.add_many(common_structures)
 
@@ -64,7 +63,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
         id_key = structure_mapping.get_structure_id()
         structure_id = processed_entry[id_key]
 
-        self.change_status_many(ids=[structure_id], new_status=StructureStatus.DEPRECATED.value, id_key=id_key)
+        self.change_status_many(ids=[structure_id], new_status=StructureStatusEnum.DEPRECATED.value, id_key=id_key)
         self.add_one(processed_entry)
 
     def get_additional_info(self, level, structure_id):
@@ -74,7 +73,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                 id_key: {
                     MongoOperator.EQUALS.value: structure_id
                 },
-                "status": {MongoOperator.IN.value: [StructureStatus.ENABLED.value, StructureStatus.PAUSED.value]}
+                "status": {MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]}
             }]
         }
 
@@ -85,21 +84,15 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                                     level: Level = None,
                                     account_id: typing.AnyStr = None,
                                     campaign_ids: typing.List[typing.AnyStr] = None,
-                                    adgroup_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
+                                    adgroup_ids: typing.List[typing.AnyStr] = None,
+                                    statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
+
         self.set_collection(collection_name=level.value)
         query = {
             MongoOperator.AND.value: [
                 {
                     LevelToGoogleIdKeyMapping.get_enum_by_name(Level.ACCOUNT.name).value: {
                         MongoOperator.EQUALS.value: account_id
-                    }
-                },
-                {
-                    MiscFieldsEnum.status: {
-                        MongoOperator.IN.value: [
-                            StructureStatusEnum.ACTIVE.value,
-                            StructureStatusEnum.REMOVED.value
-                        ]
                     }
                 }
             ]
@@ -119,6 +112,17 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                 }
             }
             query[MongoOperator.AND.value].append(deepcopy(query_by_adgroup_ids))
+
+        if statuses is None:
+            statuses = [StructureStatusEnum.ACTIVE.value]
+
+        query_by_status = {
+            MiscFieldsEnum.status: {
+                MongoOperator.IN.value: statuses
+            }
+        }
+        query[MongoOperator.AND.value].append(deepcopy(query_by_status))
+
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
             LevelToGoogleIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,

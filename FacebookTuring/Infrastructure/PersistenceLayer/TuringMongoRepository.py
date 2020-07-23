@@ -74,7 +74,8 @@ class TuringMongoRepository(MongoRepositoryBase):
                                     level: Level = None,
                                     account_id: typing.AnyStr = None,
                                     campaign_ids: typing.List[typing.AnyStr] = None,
-                                    adset_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
+                                    adset_ids: typing.List[typing.AnyStr] = None,
+                                    statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
         self.set_collection(collection_name=level.value)
 
         query = {
@@ -82,14 +83,6 @@ class TuringMongoRepository(MongoRepositoryBase):
                 {
                     LevelToFacebookIdKeyMapping.get_enum_by_name(Level.ACCOUNT.name).value: {
                         MongoOperator.EQUALS.value: account_id
-                    }
-                },
-                {
-                    MiscFieldsEnum.status: {
-                        MongoOperator.IN.value: [
-                            StructureStatusEnum.ACTIVE.value,
-                            StructureStatusEnum.REMOVED.value
-                        ]
                     }
                 }
             ]
@@ -109,6 +102,16 @@ class TuringMongoRepository(MongoRepositoryBase):
                 }
             }
             query[MongoOperator.AND.value].append(deepcopy(query_by_adset_ids))
+
+        if statuses is None:
+            statuses = [StructureStatusEnum.ACTIVE.value]
+
+        query_by_status = {
+            MiscFieldsEnum.status: {
+                MongoOperator.IN.value: statuses
+            }
+        }
+        query[MongoOperator.AND.value].append(deepcopy(query_by_status))
 
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,

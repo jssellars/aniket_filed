@@ -22,7 +22,8 @@ class AdsManagerFilteredStructuresCommandHandler:
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id,
                                                               campaign_ids=command.campaign_ids,
-                                                              adgroup_ids=command.adset_ids)
+                                                              adgroup_ids=command.adset_ids,
+                                                              statuses=command.statuses)
             if not response:
                 return
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
