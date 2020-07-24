@@ -11,7 +11,7 @@ class MongoConnectionHandler(object):
 
     class _ConnectionHandler:
         __localhost = '127.0.0.1'
-        __keep_alive_interval_in_seconds = 3600
+        __keep_alive_interval_in_seconds = 60 * 60 * 24  # 24h
 
         def __init__(self, config):
             if config.ssh_tunnel:

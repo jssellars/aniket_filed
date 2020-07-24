@@ -141,6 +141,10 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
 
         try:
             response = AdsManagerFilteredStructuresCommandHandler.handle(level=level, command=command)
+            if not response:
+                return Response(response=json.dumps({'error_message': 'Structures not found!'}), status=404,
+                                mimetype='application/json')
+
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype="application/json")
         except Exception as e:

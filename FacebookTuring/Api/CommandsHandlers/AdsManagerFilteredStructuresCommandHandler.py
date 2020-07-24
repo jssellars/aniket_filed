@@ -23,8 +23,7 @@ class AdsManagerFilteredStructuresCommandHandler:
                                                               campaign_ids=command.campaign_ids,
                                                               adset_ids=command.adset_ids,
                                                               statuses=command.statuses)
-            if not response:
-                return
+
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
             response = mapping.load(response, many=True)
             return response
