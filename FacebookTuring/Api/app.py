@@ -18,6 +18,8 @@ from FacebookTuring.Api.Controllers import AdsManagerCatalogsController, AdsMana
     AdsManagerController
 from FacebookTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.Controllers.AdsManagerCatalogsReportsController import AdsManagerReportsEndpoint, \
+    AdsManagerReportsDimensionsEndpoint, AdsManagerReportsMetricsEndpoint, AdsManagerReportsBreakdownsEndpoint
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = os.environ[
@@ -100,6 +102,19 @@ api.add_resource(AdsManagerController.AdsManagerDuplicateStructureEndpoint, dupl
 update_draft_controller = "{base_url}/<string:level>/<string:facebook_id>/draft".format(
     base_url=startup.base_url.lower())
 api.add_resource(AdsManagerController.AdsManagerUpdateStructureDraftEndpoint, update_draft_controller)
+
+# Report catalogs
+reports_controller = "{base_url}/get-reports".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportsEndpoint, reports_controller)
+
+dimensions_controller = "{base_url}/get-dimensions".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportsDimensionsEndpoint, dimensions_controller)
+
+metrics_controller = "{base_url}/get-metrics".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportsMetricsEndpoint, metrics_controller)
+
+reporting_breakdowns_controller = "{base_url}/get-breakdowns".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportsBreakdownsEndpoint, reporting_breakdowns_controller)
 
 if __name__ == "__main__":
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

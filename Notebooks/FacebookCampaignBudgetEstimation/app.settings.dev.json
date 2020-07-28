@@ -1,0 +1,68 @@
+{
+  "rabbitmq": {
+    "consumer_name": "dev.api.facebook.turing.consumer",
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "dev.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "dev.facebook.turing.inbound",
+          "inbound_routing_key": "dev.facebook.turing.inbound.inbound.key",
+          "outbound": "dev.facebook.turing.outbound",
+          "outbound_routing_key": "dev.facebook.turing.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "dev.filed.com",
+    "port": 1433,
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Dev.Filed.Facebook.Potter.Accounts"
+  },
+  "mongo_database": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb://admin:Brancus!@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "insights_database_name": "dev_facebook_turing_insights",
+    "structures_database_name": "dev_facebook_turing_structures"
+  },
+  "environment": "dev",
+  "api_name": "Turing",
+  "api_version": "1.0.0",
+  "service_name": "Turing",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "port": 47350,
+  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
+  "jwt_secret_key_reports": "sDpdWYr+xtj85NfoDn+GQPSXLhES+GoMIiEUBpblEXX9X040usDeZSLKqAupO4ncgsi7Ks+2pm8WJBrfwu84U1boiiyKQKzItxG7Dc8NhRYigoHnbZkmWkPPz6gq+6EU",
+  "debug_mode": true,
+  "docker_filename": "filed-facebook-turing-api",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
+}

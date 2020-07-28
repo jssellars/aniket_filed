@@ -2,7 +2,7 @@ from Core.Tools.Misc.Autoincrement import Autoincrement
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Catalogs.Breakdowns.BreakdownsEnumeration import BreakdownsEnumeration
 
-action_breakdown_id = Autoincrement(0)
+action_breakdown_id = Autoincrement(100)
 
 
 class ActionBreakdowns:

@@ -53,3 +53,7 @@ class ViewFieldsMetricStructureMetadata:
                            primary_value=FieldsMetadata.date_stop,
                            type_id=ViewColumnTypeEnum.DATE.value, category_id=ViewColumnCategoryEnum.SETTINGS.value,
                            is_fixed=False)
+    date_time = ViewColumn(Autoincrement.hex_string('date_start'), display_name="Date",
+                           primary_value=FieldsMetadata.date_start,
+                           type_id=ViewColumnTypeEnum.DATE.value, category_id=ViewColumnCategoryEnum.SETTINGS.value,
+                           is_fixed=False)
