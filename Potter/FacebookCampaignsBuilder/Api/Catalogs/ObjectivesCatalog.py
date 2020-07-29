@@ -51,13 +51,14 @@ class ObjectivesCatalog(CatalogBase):
 
     A_awareness = CatalogNode('AWARENESS', 'Awareness', 'awareness', None, [brand_awareness, reach])
 
-    # The messages objective is also conceptually here but we do not support it yet
+    # The messages objective is also conceptually here, but we do not support it (yet)
     B_consideration = CatalogNode('CONSIDERATION', 'Consideration', 'consideration', None, [traffic, engagement,
                                                                                             video_views, lead_generation
                                                                                             ])
 
+    # The store traffic objective is also conceptually here, but we do not support it (yet)
     C_conversions = CatalogNode(Campaign.Objective.conversions, 'Conversions', 'conversions',
-                              None, [store_traffic, catalog_sales, conversions_leaf])
+                              None, [catalog_sales, conversions_leaf])
 
     D_app_activity = CatalogNode('App Activity', 'App Activity', 'appactivity', None,
                                [traffic, app_installs, conversions_leaf])

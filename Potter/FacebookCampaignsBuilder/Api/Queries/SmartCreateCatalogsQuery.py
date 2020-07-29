@@ -1,3 +1,4 @@
+from Potter.FacebookCampaignsBuilder.Api.Catalogs.CTACatalog import CTACatalog
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CampaignBidStrategyCatalog import CampaignBidStrategyCatalog
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.ObjectivesCatalog import ObjectivesCatalog
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.PlacementCatalog import PlacementCatalog
@@ -14,8 +15,11 @@ class SmartCreateCatalogsQuery:
 
         placement = PlacementCatalog()
 
+        cta = CTACatalog()
+
         all_catalogs = {'SpecialAdCategory': special_ad_category.to_json(),
                         'Objectives': objectives.to_json(),
                         'BidStrategy': campaign_bid.to_json(),
-                        'Placement': placement.to_json()}
+                        'Placement': placement.to_json(),
+                        'CTA': cta.to_json()}
         return all_catalogs

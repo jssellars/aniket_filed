@@ -25,8 +25,7 @@
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
     "recommendations_database_name": "dev_dexter_fuzzy_inference_recommendations",
-    "recommendations_collection_name": "recommendations",
-    "retry_writes": false
+    "recommendations_collection_name": "recommendations"
   },
 
   "external_services": {
