@@ -6,7 +6,8 @@ from facebook_business.adobjects.campaign import Campaign
 store_traffic = CatalogNode(Campaign.Objective.local_awareness, 'Store Traffic', None,
                             'Increase the number of visits to your store.')
 
-conversions_leaf = CatalogNode(Campaign.Objective.conversions, 'Conversions', None, 'Get more conversions.')
+conversions_leaf = CatalogNode(Campaign.Objective.conversions, 'Conversions', None,
+                               'Grow your audience over time with quality audiences')
 
 catalog_sales = CatalogNode(Campaign.Objective.product_catalog_sales, 'Catalog Sales', None,
                             'Get more people to buy from your catalog')
