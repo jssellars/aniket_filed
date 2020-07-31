@@ -1,0 +1,50 @@
+{
+  "rabbitmq": {
+    "consumer_name": "staging.bt.facebook.potter.productcatalogs.consumer",
+    "username": "ecsubdgh",
+    "password": "ieNetipc0tqrtZvzRkSrqaW6ADyASym0",
+    "hostname": "spotted-starfish.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ecsubdgh",
+    "exchanges": [
+      {
+        "name": "staging.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "staging.facebook.productcatalogs.inbound",
+          "inbound_routing_key": "staging.facebook.productcatalogs.inbound.key",
+          "outbound": "staging.facebook.productcatalogs.outbound",
+          "outbound_routing_key": "staging.facebook.productcatalogs.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "staging.filed.com",
+    "port": 1433,
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Staging.Filed.Facebook.Potter.Accounts"
+  },
+  "environment": "staging",
+  "api_name": "FacebookProductCatalogs",
+  "api_version": "1.0.0",
+  "service_name": "FacebookProductCatalogs",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "docker_filename": "filed-potter-productcatalogs-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "staging-elasticsearch",
+  "es_port": 9200
+}
