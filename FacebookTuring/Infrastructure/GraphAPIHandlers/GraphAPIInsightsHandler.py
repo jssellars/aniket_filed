@@ -388,7 +388,7 @@ class GraphAPIInsightsHandler:
                     found = False
                     underscore = '_'
                     for key in insight_key:
-                        if sorted_response.get(key) is not None:
+                        if sorted_response.get(key) is not None and sorted_response.get(key) != 0:
                             value = sorted_response.pop(key)
                             if structure_key == FieldsMetadata.budget.name:
                                 value = value / 100
