@@ -16,6 +16,7 @@ from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures im
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
 
 
 class GraphAPIInsightsHandler:
@@ -49,12 +50,16 @@ class GraphAPIInsightsHandler:
 
         Level.CAMPAIGN.value: {
             FieldsMetadata.name.name: FieldsMetadata.campaign_name.name,
-            FieldsMetadata.id.name: FieldsMetadata.campaign_id.name
+            FieldsMetadata.id.name: FieldsMetadata.campaign_id.name,
+            FieldsMetadata.budget.name: [FieldsMetadata.daily_budget.name, FieldsMetadata.lifetime_budget.name,
+                                         BudgetMessageEnum.NO_CAMPAIGN_BUDGET.value]
         },
 
         Level.ADSET.value: {
             FieldsMetadata.name.name: FieldsMetadata.adset_name.name,
-            FieldsMetadata.id.name: FieldsMetadata.adset_id.name
+            FieldsMetadata.id.name: FieldsMetadata.adset_id.name,
+            FieldsMetadata.budget.name: [FieldsMetadata.daily_budget.name, FieldsMetadata.lifetime_budget.name,
+                                         BudgetMessageEnum.NO_ADSET_BUDGET.value]
         },
 
         Level.AD.value: {
@@ -379,7 +384,22 @@ class GraphAPIInsightsHandler:
         def f(entry):
             sorted_response = {**OrderedDict.fromkeys(sorted_fields), **OrderedDict(sorted(entry.items()))}
             for structure_key, insight_key in cls.__structure_insights_keymap[level].items():
-                sorted_response[insight_key] = sorted_response.pop(structure_key, None)
+                if isinstance(insight_key, list):
+                    found = False
+                    underscore = '_'
+                    for key in insight_key:
+                        if sorted_response.get(key) is not None:
+                            value = sorted_response.pop(key)
+                            if structure_key == FieldsMetadata.budget.name:
+                                value = value / 100
+                            answer = f'{value}({key.split(underscore)[0]})'
+                            sorted_response[structure_key] = answer
+                            found = True
+                            break
+                    if not found:
+                        sorted_response[structure_key] = insight_key[-1]
+                else:
+                    sorted_response[insight_key] = sorted_response.pop(structure_key, None)
 
             return sorted_response
 
