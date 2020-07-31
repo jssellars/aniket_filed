@@ -1,7 +1,9 @@
 from enum import Enum
 
+from Core.Dexter.Infrastructure.Domain.Actions.ActionEnumBase import ActionEnumBase
 
-class ActionEnum(Enum):
+
+class GoogleActionEnum(ActionEnumBase):
     NONE = None
     REMOVE = "remove"
     PAUSE = "pause"
@@ -11,29 +13,29 @@ class ActionEnum(Enum):
     GENERAL = "general"
 
 
-class BudgetTypeEnum(Enum):
+class GoogleBudgetTypeEnum(Enum):
     LIFETIME = "lifetime_budget"
     DAILY = "daily_budget"
 
 
-class GenderEnum(Enum):
+class GoogleGenderEnum(Enum):
     UNKNOWN = ("unknown", 0)
     MALE = ("male", 1)
     FEMALE = ("female", 2)
 
 
-class PlacementPositionEnum(Enum):
+class GooglePlacementPositionEnum(Enum):
     FACEBOOK = "facebook_positions"
     INSTAGRAM = "instagram_positions"
     AUDIENCE_NETWORK = "audience_network_positions"
     MESSENGER = "messenger_positions"
 
 
-class PlacementEnum(Enum):
+class GooglePlacementEnum(Enum):
     PUBLISHER_PLATFORMS = "publisher_platforms"
     DEVICE_PLATFORMS = "device_platforms"
-    PLACEMENT_POSITIONS = PlacementPositionEnum
+    PLACEMENT_POSITIONS = GooglePlacementPositionEnum
 
 
-class ImpressionDeviceEnum(Enum):
+class GoogleImpressionDeviceEnum(Enum):
     USER_DEVICE = "user_device"

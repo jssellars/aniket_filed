@@ -11,10 +11,10 @@
         "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev.google.dexter.inbound",
-          "inbound_routing_key": "dev.google.dexter.inbound.key",
-          "outbound": "dev.google.dexter.outbound",
-          "outbound_routing_key": "dev.google.dexter.outbound.key"
+          "inbound": "local.google.dexter.inbound",
+          "inbound_routing_key": "local.google.dexter.inbound.key",
+          "outbound": "local.google.dexter.outbound",
+          "outbound_routing_key": "local.google.dexter.outbound.key"
         }
       }
     ],
@@ -34,9 +34,9 @@
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
     "recommendations_database_name": "dev_google_dexter_fuzzy_inference_recommendations",
-    "recommendations_collection_name": "recommendations",
+    "recommendations_collection_name": "recommendations_google_test",
     "journal_database_name": "dev_google_dexter_engine_run_journal",
-    "journal_collection_name": "dexter_journal",
+    "journal_collection_name": "dexter_journal_google_test",
     "structures_database": "dev_google_turing_structures",
     "insights_database": "dev_google_turing_insights",
     "accounts_database": "dev_google_turing_accounts",
@@ -51,9 +51,12 @@
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
     "time_intervals": [
-      7
+      3,
+      7,
+      14,
+      30
     ],
-    "date_stop": "2020-06-03"
+    "date_stop": "2020-07-27"
   },
   "environment": "dev",
   "api_name": "GoogleDexterBackgroundTasks",

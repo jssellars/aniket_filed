@@ -1,5 +1,5 @@
+from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
-from GoogleDexter.Infrastructure.Domain.DaysEnum import DaysEnum
 
 
 class RecommendationTemplateBuilderBase:

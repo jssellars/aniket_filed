@@ -2,7 +2,7 @@ import typing
 
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
 
-
+# todo: this should be refactored and redone. it's not functional
 class MongoLogger:
     _instance = None
 

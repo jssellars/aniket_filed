@@ -1,6 +1,6 @@
 from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnhancerBase import \
     FacebookRecommendationEnhancerBase
-from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 
 
 class FacebookRecommendationEnhancerAdLevel(FacebookRecommendationEnhancerBase):

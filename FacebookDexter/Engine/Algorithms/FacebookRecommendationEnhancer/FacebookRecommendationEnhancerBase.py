@@ -6,7 +6,7 @@ from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRec
     FacebookRecommendationEnhancerBuilder
 from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnum import \
     FacebookRecommendationImportanceEnum, FacebookRecommendationConfidenceEnum, FacebookRecommendationFieldsEnum
-from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationBuilder import RecommendationBuilder
+from FacebookDexter.Infrastructure.Domain.Recommendations.FacebookRecommendationBuilder import FacebookRecommendationBuilder
 
 
 class FacebookRecommendationEnhancerBase(FacebookRecommendationEnhancerBuilder):
@@ -59,8 +59,8 @@ class FacebookRecommendationEnhancerBase(FacebookRecommendationEnhancerBuilder):
                 facebook_recommendation.blame_field = facebook_recommendation_raw.get(
                     FacebookRecommendationFieldsEnum.BLAME_FIELD.value, None)
 
-                recommendation = RecommendationBuilder(mongo_repository=self._mongo_repository,
-                                                       time_interval=self._time_interval)
+                recommendation = FacebookRecommendationBuilder(mongo_repository=self._mongo_repository,
+                                                               time_interval=self._time_interval)
                 recommendation = recommendation.create_facebook_recommendation(facebook_id=structure_id,
                                                                                level=self._level,
                                                                                template=facebook_recommendation.message,

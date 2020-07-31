@@ -12,3 +12,9 @@ class CampaignModel:
     details: dict = None
     actions: dict = None
     status: str = None
+    objective: str = None
+    daily_budget: str = None
+    lifetime_budget: str = None
+    created_time: str = None
+    start_time: str = None
+    end_time: str = None

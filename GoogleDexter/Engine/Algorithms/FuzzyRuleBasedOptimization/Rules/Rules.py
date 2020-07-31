@@ -1,5 +1,7 @@
 import typing
 
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdDecreaseBudget import \
     RULES_AD_DECREASE_BUDGET
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdGeneral import RULES_AD_GENERAL
@@ -25,9 +27,7 @@ from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampai
     RULES_CAMPAIGN_CREATE_AUDIENCE
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignGeneral import \
     RULES_CAMPAIGN_GENERAL
-from GoogleDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionEnum
-from GoogleDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from GoogleDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from GoogleDexter.Infrastructure.Domain.Actions.ActionEnums import GoogleActionEnum
 
 
 class Rules:
@@ -48,13 +48,13 @@ class Rules:
                *RULES_AD_GENERAL]
 
     def get_rules_by_action_and_metric(self,
-                                       action: ActionEnum = None,
+                                       action: GoogleActionEnum = None,
                                        metric: typing.AnyStr = None) -> typing.List[RuleBase]:
         rules = getattr(self, action.value)
         available_rules = [rule for rule in rules if metric in self.__get_rule_metrics_metadata(rule)]
         return available_rules
 
-    def get_rules_by_action(self, action: ActionEnum = None, level: LevelEnum = None) -> typing.List[RuleBase]:
+    def get_rules_by_action(self, action: GoogleActionEnum = None, level: LevelEnum = None) -> typing.List[RuleBase]:
         available_rules = getattr(self, action.value)
         return [rule for rule in available_rules if rule.level == level]
 

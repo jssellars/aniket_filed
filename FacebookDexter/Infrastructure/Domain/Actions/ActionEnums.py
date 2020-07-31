@@ -1,7 +1,9 @@
 from enum import Enum
 
+from Core.Dexter.Infrastructure.Domain.Actions.ActionEnumBase import ActionEnumBase
 
-class ActionEnum(Enum):
+
+class FacebookActionEnum(ActionEnumBase):
     NONE = None
     REMOVE = "remove"
     PAUSE = "pause"
@@ -12,29 +14,29 @@ class ActionEnum(Enum):
     DUPLICATE = "duplicate"
 
 
-class BudgetTypeEnum(Enum):
+class FacebookBudgetTypeEnum(Enum):
     LIFETIME = "lifetime_budget"
     DAILY = "daily_budget"
 
 
-class GenderEnum(Enum):
+class FacebookGenderEnum(Enum):
     UNKNOWN = ("unknown", 0)
     MALE = ("male", 1)
     FEMALE = ("female", 2)
 
 
-class PlacementPositionEnum(Enum):
+class FacebookPlacementPositionEnum(Enum):
     FACEBOOK = "facebook_positions"
     INSTAGRAM = "instagram_positions"
     AUDIENCE_NETWORK = "audience_network_positions"
     MESSENGER = "messenger_positions"
 
 
-class PlacementEnum(Enum):
+class FacebookPlacementEnum(Enum):
     PUBLISHER_PLATFORMS = "publisher_platforms"
     DEVICE_PLATFORMS = "device_platforms"
-    PLACEMENT_POSITIONS = PlacementPositionEnum
+    PLACEMENT_POSITIONS = FacebookPlacementPositionEnum
 
 
-class ImpressionDeviceEnum(Enum):
+class FacebookImpressionDeviceEnum(Enum):
     USER_DEVICE = "user_device"

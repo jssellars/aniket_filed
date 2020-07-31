@@ -35,9 +35,27 @@ class CampaignMapping(MapperBase):
         if GraphAPIInsightsFields.structure_id in data.keys():
             data[GraphAPIInsightsFields.campaign_id] = data.get(GraphAPIInsightsFields.structure_id)
 
+        if GraphAPIInsightsFields.objective in data.keys():
+            data[GraphAPIInsightsFields.objective] = data.get(GraphAPIInsightsFields.objective)
+
+        if GraphAPIInsightsFields.daily_budget in data.keys():
+            data[GraphAPIInsightsFields.daily_budget] = data.get(GraphAPIInsightsFields.daily_budget)
+
+        if GraphAPIInsightsFields.lifetime_budget in data.keys():
+            data[GraphAPIInsightsFields.lifetime_budget] = data.get(GraphAPIInsightsFields.lifetime_budget)
+
+        if GraphAPIInsightsFields.created_time in data.keys():
+            data[GraphAPIInsightsFields.created_time] = data[GraphAPIInsightsFields.created_time]
+
+        if GraphAPIInsightsFields.start_time in data.keys():
+            data[GraphAPIInsightsFields.start_time] = data[GraphAPIInsightsFields.start_time]
+
+        if GraphAPIInsightsFields.end_time in data.keys():
+            data[GraphAPIInsightsFields.end_time] = data[GraphAPIInsightsFields.end_time]
+
         data[MiscFieldsEnum.last_updated_at] = data.get(GraphAPIInsightsFields.updated_time, None)
         data[MiscFieldsEnum.details] = BSON.encode(copy.deepcopy(data))
         data[MiscFieldsEnum.actions] = {}
-        data[MiscFieldsEnum.status] = map_facebook_status(data.get(GraphAPIInsightsFields.status, None))
-
+        data[MiscFieldsEnum.status] = map_facebook_status(data.get(GraphAPIInsightsFields.effective_status, None))
+        ceva = self._remove_unknown_data(data)
         return self._remove_unknown_data(data)

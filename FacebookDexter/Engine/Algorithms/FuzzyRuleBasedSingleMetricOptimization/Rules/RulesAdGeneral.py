@@ -1,0 +1,3 @@
+RULES_AD_GENERAL = [
+
+]

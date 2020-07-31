@@ -2,6 +2,8 @@
 import os
 import sys
 
+from GoogleDexter.Infrastructure.PersistanceLayer.GoogleDexterMongoRepository import GoogleDexterMongoRepository
+
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -9,15 +11,13 @@ else:
     sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
 # ====== END OF CONFIG SECTION ====== #
 
+from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
+from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from GoogleDexter.BackgroundTasks.Startup import startup, rabbit_logger, logger
 from GoogleDexter.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterRecommendationsMongoRepository import \
-    DexterRecommendationsMongoRepository
 
 
 def callback(ch, method, properties, body):
@@ -41,7 +41,7 @@ def callback(ch, method, properties, body):
 
     try:
         # initialize all repos
-        data_repository = DexterMongoRepository(config=startup.mongo_config)
+        # data_repository = GoogleDexterMongoRepository(config=startup.mongo_config)
         recommendations_repository = DexterRecommendationsMongoRepository(config=startup.mongo_config,
                                                                           database_name=startup.mongo_config.recommendations_database_name,
                                                                           collection_name=startup.mongo_config.recommendations_collection_name)
@@ -51,7 +51,7 @@ def callback(ch, method, properties, body):
 
         (request_handler.
          set_startup(startup).
-         set_data_repository(data_repository).
+         # set_data_repository(data_repository).
          set_journal_repository(journal_repository).
          set_recommendations_repository(recommendations_repository).
          handle(body))

@@ -36,6 +36,15 @@ class AdMapping(MapperBase):
         if GraphAPIInsightsFields.adset in data.keys():
             data[GraphAPIInsightsFields.adset_name] = data[GraphAPIInsightsFields.adset][GraphAPIInsightsFields.name]
 
+        if GraphAPIInsightsFields.created_time in data.keys():
+            data[GraphAPIInsightsFields.created_time] = data[GraphAPIInsightsFields.created_time]
+
+        if GraphAPIInsightsFields.start_time in data.keys():
+            data[GraphAPIInsightsFields.start_time] = data[GraphAPIInsightsFields.start_time]
+
+        if GraphAPIInsightsFields.end_time in data.keys():
+            data[GraphAPIInsightsFields.end_time] = data[GraphAPIInsightsFields.end_time]
+
         if GraphAPIInsightsFields.campaign in data.keys():
             data[GraphAPIInsightsFields.campaign_name] = data[GraphAPIInsightsFields.campaign][
                 GraphAPIInsightsFields.name]
@@ -43,6 +52,6 @@ class AdMapping(MapperBase):
         data[MiscFieldsEnum.last_updated_at] = data.get(GraphAPIInsightsFields.updated_time, None)
         data[MiscFieldsEnum.details] = BSON.encode(copy.deepcopy(data))
         data[MiscFieldsEnum.actions] = {}
-        data[MiscFieldsEnum.status] = map_facebook_status(data.get(GraphAPIInsightsFields.status, None))
+        data[MiscFieldsEnum.status] = map_facebook_status(data.get(GraphAPIInsightsFields.effective_status, None))
 
         return self._remove_unknown_data(data)

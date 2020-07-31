@@ -1,14 +1,14 @@
 import json
 
-from GoogleDexter.Engine.MasterWorker import MasterWorker
+from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
+from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
+from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
+from GoogleDexter.Engine.MasterWorker.GoogleMasterWorker import GoogleMasterWorker
 from GoogleDexter.Infrastructure.IntegrationEvents.GoogleTuringDataSyncCompletedEvent import \
     GoogleTuringDataSyncCompletedEvent
 from GoogleDexter.Infrastructure.IntegrationEvents.GoogleTuringDataSyncCompletedEventMapping import \
     GoogleTuringDataSyncCompletedEventMapping
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterRecommendationsMongoRepository import \
-    DexterRecommendationsMongoRepository
+from GoogleDexter.Infrastructure.PersistanceLayer.GoogleDexterMongoRepository import GoogleDexterMongoRepository
 
 
 class GoogleTuringDataSyncCompletedEventHandler:
@@ -24,7 +24,7 @@ class GoogleTuringDataSyncCompletedEventHandler:
         return cls
 
     @classmethod
-    def set_data_repository(cls, repository: DexterMongoRepository = None):
+    def set_data_repository(cls, repository: GoogleDexterMongoRepository = None):
         cls.__data_repository = repository
         return cls
 
@@ -44,7 +44,7 @@ class GoogleTuringDataSyncCompletedEventHandler:
 
         mapper = GoogleTuringDataSyncCompletedEventMapping(target=GoogleTuringDataSyncCompletedEvent)
         business_owners = mapper.load(body.get("business_owners", []), many=True)
-
+        google_mw = GoogleMasterWorker()
         for business_owner in business_owners:
             # business_owner_thread = threading.Thread(target=MasterWorker.start_dexter_for_business_owner,
             #                                          args=(business_owner,
@@ -53,8 +53,9 @@ class GoogleTuringDataSyncCompletedEventHandler:
             #                                                cls.__recommendations_repository,
             #                                                cls.__journal_repository))
             # business_owner_thread.start()
-            MasterWorker.start_dexter_for_business_owner(business_owner,
-                                                         cls.__startup,
-                                                         cls.__data_repository,
-                                                         cls.__recommendations_repository,
-                                                         cls.__journal_repository)
+            google_mw.start_dexter_for_business_owner(business_owner.business_owner_google_id,
+                                                      business_owner.ad_account_ids,
+                                                      cls.__startup,
+                                                      cls.__recommendations_repository,
+                                                      cls.__journal_repository,
+                                                      ChannelEnum.GOOGLE)

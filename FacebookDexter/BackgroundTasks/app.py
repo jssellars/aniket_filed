@@ -9,14 +9,13 @@ else:
     sys.path.append("/Users/luchicla/Work/Filed/Source/Filed.Python/")
 # ====== END OF CONFIG SECTION ====== #
 
+from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
+from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookDexter.BackgroundTasks.Startup import startup, rabbit_logger, logger
 from FacebookDexter.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
-from FacebookDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
-from FacebookDexter.Infrastructure.PersistanceLayer.DexterRecommendationsMongoRepository import \
-    DexterRecommendationsMongoRepository
 
 
 def callback(ch, method, properties, body):

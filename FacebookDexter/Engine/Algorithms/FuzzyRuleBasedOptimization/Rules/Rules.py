@@ -1,5 +1,7 @@
 import typing
 
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdDecreaseBudget import \
     RULES_AD_DECREASE_BUDGET
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdGeneral import RULES_AD_GENERAL
@@ -25,13 +27,13 @@ from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesAdSe
     RULES_ADSET_REMOVE_PLATFORM
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignCreateAudience import \
     RULES_CAMPAIGN_CREATE_AUDIENCE
-from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignDecreaseBudget import RULES_CAMPAIGN_DECREASE_BUDGET
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignDecreaseBudget import \
+    RULES_CAMPAIGN_DECREASE_BUDGET
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignGeneral import \
     RULES_CAMPAIGN_GENERAL
-from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignIncreaseBudget import RULES_CAMPAIGN_INCREASE_BUDGET
-from FacebookDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionEnum
-from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from FacebookDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.RulesCampaignIncreaseBudget import \
+    RULES_CAMPAIGN_INCREASE_BUDGET
+from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import FacebookActionEnum
 
 
 class Rules:
@@ -54,13 +56,13 @@ class Rules:
                *RULES_AD_GENERAL]
 
     def get_rules_by_action_and_metric(self,
-                                       action: ActionEnum = None,
+                                       action: FacebookActionEnum = None,
                                        metric: typing.AnyStr = None) -> typing.List[RuleBase]:
         rules = getattr(self, action.value)
         available_rules = [rule for rule in rules if metric in self.__get_rule_metrics_metadata(rule)]
         return available_rules
 
-    def get_rules_by_action(self, action: ActionEnum = None, level: LevelEnum = None) -> typing.List[RuleBase]:
+    def get_rules_by_action(self, action: FacebookActionEnum = None, level: LevelEnum = None) -> typing.List[RuleBase]:
         available_rules = getattr(self, action.value)
         return [rule for rule in available_rules if rule.level == level]
 

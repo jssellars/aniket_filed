@@ -4,11 +4,12 @@ from threading import Thread
 
 from dateutil.parser import parse
 
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizer import InsightsSyncronizer
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import \
     InsightsSyncronizerBreakdownEnum, InsightsSyncronizerActionBreakdownEnum
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.Startup import startup, logger
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
@@ -108,8 +109,16 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
 def sync_insights_base(syncronizer: InsightsSyncronizer = None,
                        date_start: datetime = None,
                        date_stop: datetime = None):
-    data_available = syncronizer.check_data(date_start.strftime(DEFAULT_DATETIME_FORMAT),
-                                            date_stop.strftime(DEFAULT_DATETIME_FORMAT))
+    try:
+        data_available = syncronizer.check_data(date_start.strftime(DEFAULT_DATETIME_FORMAT),
+                                                date_stop.strftime(DEFAULT_DATETIME_FORMAT))
+    except:
+        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                name="Facebook Turing Daily Sync Error",
+                                description="There was no data for dates {} and {}".format(date_start,
+                                                                                             date_stop))
+        logger.logger.exception(log.to_dict())
+        data_available = []
 
     if data_available:
         while date_stop >= date_start:
@@ -119,6 +128,13 @@ def sync_insights_base(syncronizer: InsightsSyncronizer = None,
 
             syncronizer.date_start = date_start_sync
             syncronizer.date_stop = date_stop_sync
-            syncronizer.run()
+            try:
+                syncronizer.run()
+            except:
+                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                        name="Facebook Turing Daily Sync Error",
+                                        description="Failed to sync data for dates {} and {}".format(date_start_sync,
+                                                                                                     date_stop_sync))
+                logger.logger.exception(log.to_dict())
 
             date_start = current_date_stop + NEXT_DAY

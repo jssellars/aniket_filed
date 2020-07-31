@@ -1,35 +1,36 @@
-from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
-from GoogleDexter.Infrastructure.Domain.Actions.ActionEnums import ActionEnum
-from GoogleDexter.Infrastructure.Domain.Breakdowns import BreakdownMetadata, BreakdownEnum, ActionBreakdownEnum
-from GoogleDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
-from GoogleDexter.Infrastructure.Domain.DaysEnum import DaysEnum
-from GoogleDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from GoogleDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
-from GoogleDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
-from GoogleDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from GoogleDexter.Infrastructure.Domain.Rules.Connective import Connective
-from GoogleDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
-from GoogleDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeEnum, RuleCategoryEnum, RuleImportanceEnum, \
-    RuleSourceEnum, RuleRedirectEnum
+from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
+from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
+from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
+from Core.Dexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
+from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
+from Core.Dexter.Infrastructure.Domain.Rules.Connective import Connective
+from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import GoogleAvailableMetricEnum
+from GoogleDexter.Infrastructure.Domain.Actions.ActionEnums import GoogleActionEnum
+from GoogleDexter.Infrastructure.Domain.Breakdowns import GoogleBreakdownEnum, GoogleActionBreakdownEnum
+from GoogleDexter.Infrastructure.Domain.Rules.GoogleRuleEnums import GoogleRuleTypeEnum, GoogleRuleCategoryEnum, \
+    GoogleRuleImportanceEnum, GoogleRuleSourceEnum, GoogleRuleRedirectEnum
 
 RULES_ADSET_GENERAL = [
-    RuleBase(rtype=RuleTypeEnum.PERFORMANCE,
+    RuleBase(rtype=GoogleRuleTypeEnum.PERFORMANCE,
              channel=ChannelEnum.GOOGLE,
-             category=RuleCategoryEnum.OPTIMIZE_TARGETING,
-             importance=RuleImportanceEnum.HIGH,
-             source=RuleSourceEnum.DEXTER,
+             category=GoogleRuleCategoryEnum.OPTIMIZE_TARGETING,
+             importance=GoogleRuleImportanceEnum.HIGH,
+             source=GoogleRuleSourceEnum.DEXTER,
              level=LevelEnum.ADGROUP,
-             action=ActionEnum.NONE,
-             redirect=RuleRedirectEnum.CAMPAIGN_MANAGER,
+             action=GoogleActionEnum.NONE,
+             redirect=GoogleRuleRedirectEnum.CAMPAIGN_MANAGER,
              template="You have multiple keywords in your ad groups!",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
-                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             breakdown_metadata=BreakdownMetadataBase(breakdown=GoogleBreakdownEnum.NONE,
+                                                  action_breakdown=GoogleActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
                  Antecedent(aid=1,
                             atype=AntecedentTypeEnum.VALUE,
-                            metric=AvailableMetricEnum.MULTIPLE_KEYWORDS_PER_ADGROUP.value,
+                            metric=GoogleAvailableMetricEnum.MULTIPLE_KEYWORDS_PER_ADGROUP.value,
                             operator=LogicOperatorEnum.EQUALS,
                             expected_value=True),
              ]),

@@ -64,7 +64,7 @@
     "password": "Adm1n@Fil3ed"
   },
   "dexter_config": {
-    "min_results": 5,
+    "min_results": 50,
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
     "time_intervals": [

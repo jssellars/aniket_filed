@@ -1,43 +1,44 @@
-from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
-from GoogleDexter.Infrastructure.Domain.Actions.ActionEnums import ActionEnum
-from GoogleDexter.Infrastructure.Domain.Breakdowns import BreakdownMetadata, BreakdownEnum, ActionBreakdownEnum
-from GoogleDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
-from GoogleDexter.Infrastructure.Domain.DaysEnum import DaysEnum
-from GoogleDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from GoogleDexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
-from GoogleDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
-from GoogleDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from GoogleDexter.Infrastructure.Domain.Rules.Connective import Connective
-from GoogleDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
-from GoogleDexter.Infrastructure.Domain.Rules.RuleEnums import RuleTypeEnum, RuleCategoryEnum, RuleImportanceEnum, \
-    RuleSourceEnum, RuleRedirectEnum
-from GoogleDexter.Infrastructure.FuzzyEngine.FuzzySets.FuzzySets import LinguisticVariableEnum
+from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
+from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
+from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.LogicalOperatorEnum import LogicOperatorEnum
+from Core.Dexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
+from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
+from Core.Dexter.Infrastructure.Domain.Rules.Connective import Connective
+from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import GoogleAvailableMetricEnum
+from GoogleDexter.Infrastructure.Domain.Actions.ActionEnums import GoogleActionEnum
+from GoogleDexter.Infrastructure.Domain.Breakdowns import GoogleBreakdownEnum, GoogleActionBreakdownEnum
+from GoogleDexter.Infrastructure.Domain.Rules.GoogleRuleEnums import GoogleRuleRedirectEnum, GoogleRuleSourceEnum, \
+    GoogleRuleImportanceEnum, GoogleRuleCategoryEnum, GoogleRuleTypeEnum
+from GoogleDexter.Infrastructure.FuzzyEngine.GoogleFuzzySets import GoogleLinguisticVariableEnum
 
 RULES_ADSET_DECREASE_BUDGET = [
-    RuleBase(rtype=RuleTypeEnum.BUDGET_AND_BID,
+    RuleBase(rtype=GoogleRuleTypeEnum.BUDGET_AND_BID,
              channel=ChannelEnum.GOOGLE,
-             category=RuleCategoryEnum.IMPROVE_CPR,
-             importance=RuleImportanceEnum.HIGH,
-             source=RuleSourceEnum.DEXTER,
+             category=GoogleRuleCategoryEnum.IMPROVE_CPR,
+             importance=GoogleRuleImportanceEnum.HIGH,
+             source=GoogleRuleSourceEnum.DEXTER,
              level=LevelEnum.ADGROUP,
-             action=ActionEnum.DECREASE_BUDGET,
-             redirect=RuleRedirectEnum.EDIT_STRUCTURE,
+             action=GoogleActionEnum.DECREASE_BUDGET,
+             redirect=GoogleRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed your CPR increased while your CTR remains low. You should decrease the budget by maximum 25%.",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
-                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             breakdown_metadata=BreakdownMetadataBase(breakdown=GoogleBreakdownEnum.NONE,
+                                                  action_breakdown=GoogleActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
                  Antecedent(aid=1,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
-                            metric=AvailableMetricEnum.COST_PER_RESULT.value,
+                            metric=GoogleAvailableMetricEnum.COST_PER_RESULT.value,
                             operator=LogicOperatorEnum.EQUALS,
-                            expected_value=LinguisticVariableEnum.INCREASING),
+                            expected_value=GoogleLinguisticVariableEnum.INCREASING),
                  Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_VALUE,
-                            metric=AvailableMetricEnum.CTR.value,
+                            metric=GoogleAvailableMetricEnum.CTR.value,
                             operator=LogicOperatorEnum.EQUALS,
-                            expected_value=LinguisticVariableEnum.LOW)
+                            expected_value=GoogleLinguisticVariableEnum.LOW)
              ]),
     # RuleBase(rtype=RuleTypeEnum.BUDGET_AND_BID,
     #          channel=ChannelEnum.FACEBOOK,
@@ -64,29 +65,29 @@ RULES_ADSET_DECREASE_BUDGET = [
     #                         operator=LogicOperatorEnum.LESS_THAN,
     #                         expected_value=NARROW_AUDIENCE_SIZE)
     #          ]),
-    RuleBase(rtype=RuleTypeEnum.BUDGET_AND_BID,
+    RuleBase(rtype=GoogleRuleTypeEnum.BUDGET_AND_BID,
              channel=ChannelEnum.GOOGLE,
-             category=RuleCategoryEnum.IMPROVE_CPR,
-             importance=RuleImportanceEnum.HIGH,
-             source=RuleSourceEnum.DEXTER,
+             category=GoogleRuleCategoryEnum.IMPROVE_CPR,
+             importance=GoogleRuleImportanceEnum.HIGH,
+             source=GoogleRuleSourceEnum.DEXTER,
              level=LevelEnum.ADGROUP,
-             action=ActionEnum.DECREASE_BUDGET,
-             redirect=RuleRedirectEnum.EDIT_STRUCTURE,
+             action=GoogleActionEnum.DECREASE_BUDGET,
+             redirect=GoogleRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed your CPR increased while your conversions remains low. You should decrease the budget by maximum 25%. ",
-             breakdown_metadata=BreakdownMetadata(breakdown=BreakdownEnum.NONE,
-                                                  action_breakdown=ActionBreakdownEnum.NONE),
+             breakdown_metadata=BreakdownMetadataBase(breakdown=GoogleBreakdownEnum.NONE,
+                                                  action_breakdown=GoogleActionBreakdownEnum.NONE),
              time_interval=DaysEnum.THREE_MONTHS,
              connective=Connective(LogicOperatorEnum.AND),
              antecedents=[
                  Antecedent(aid=1,
                             atype=AntecedentTypeEnum.FUZZY_TREND,
-                            metric=AvailableMetricEnum.COST_PER_RESULT.value,
+                            metric=GoogleAvailableMetricEnum.COST_PER_RESULT.value,
                             operator=LogicOperatorEnum.EQUALS,
-                            expected_value=LinguisticVariableEnum.INCREASING),
+                            expected_value=GoogleLinguisticVariableEnum.INCREASING),
                  Antecedent(aid=2,
                             atype=AntecedentTypeEnum.FUZZY_VALUE,
-                            metric=AvailableMetricEnum.CONVERSIONS.value,
+                            metric=GoogleAvailableMetricEnum.CONVERSIONS.value,
                             operator=LogicOperatorEnum.EQUALS,
-                            expected_value=LinguisticVariableEnum.LOW)
+                            expected_value=GoogleLinguisticVariableEnum.LOW)
              ])
 ]

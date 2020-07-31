@@ -5,27 +5,29 @@ from collections import defaultdict
 
 import requests
 
+from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
+from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.AvailableMetricEnum import AvailableMetricEnum
-from GoogleDexter.Infrastructure.Domain.Breakdowns import BreakdownMetadata, BreakdownEnum, ActionBreakdownEnum
-from GoogleDexter.Infrastructure.Domain.DaysEnum import DaysEnum
-from GoogleDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from GoogleDexter.Infrastructure.Domain.Metrics.MetricCalculator import MetricCalculator
-from GoogleDexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTypeEnum
+from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import \
+    GoogleAvailableMetricEnum
+from GoogleDexter.Infrastructure.Domain.Breakdowns import GoogleBreakdownEnum, GoogleActionBreakdownEnum
+from GoogleDexter.Infrastructure.Domain.GoogleRuleTemplateKeyword import GoogleRuleTemplateKeyword
+from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricCalculator import GoogleMetricCalculator
+from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricEnums import GoogleMetricTypeEnum
 from GoogleDexter.Infrastructure.Domain.Recommendations.RecommendationTemplateBuilderBase import \
     RecommendationTemplateBuilderBase
-from GoogleDexter.Infrastructure.Domain.RuleTemplateKeyword import RuleTemplateKeyword
-from GoogleDexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from GoogleDexter.Infrastructure.FuzzyEngine.FuzzySets.FuzzySets import LinguisticVariableEnum
+from GoogleDexter.Infrastructure.FuzzyEngine.GoogleFuzzySets import GoogleLinguisticVariableEnum
 
 
 class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
     __keywords_map = {
         "time_interval": DaysEnum,
-        "metric_name": AvailableMetricEnum.get_enum_by_name,
-        "metric_type": MetricTypeEnum,
+        "metric_name": GoogleAvailableMetricEnum.get_enum_by_name,
+        "metric_type": GoogleMetricTypeEnum,
         "antecedent_type": AntecedentTypeEnum,
-        "linguistic_variable": LinguisticVariableEnum,
+        "linguistic_variable": GoogleLinguisticVariableEnum,
         "id": lambda x: int(x),
         "metric_count": lambda x: int(x),
         "value": lambda x: None,
@@ -42,7 +44,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             'metric_name': lambda x: x.metric_name.value.display_name,
             'value': lambda x: x.value,
             'time_interval': lambda x: str(self._time_interval.value),
-            'linguistic_variable': lambda x: LinguisticVariableEnum(x).name,
+            'linguistic_variable': lambda x: GoogleLinguisticVariableEnum(x).name,
             'breakdown_values': lambda x: x.breakdown_values
         }
 
@@ -72,7 +74,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             raise e
         return template
 
-    def __build_rule_keyword_templates(self, template: typing.AnyStr = None) -> typing.List[RuleTemplateKeyword]:
+    def __build_rule_keyword_templates(self, template: typing.AnyStr = None) -> typing.List[GoogleRuleTemplateKeyword]:
         self._keywords = re.findall('<(.+?)>', template)
 
         if not self._keywords:
@@ -82,20 +84,20 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         for keyword in self._keywords:
             keyword_id = self.__find_keyword_id(keyword)
-            keyword_dict.setdefault(keyword_id, RuleTemplateKeyword())
+            keyword_dict.setdefault(keyword_id, GoogleRuleTemplateKeyword())
             keyword_dict[keyword_id] = self.__build_rule_template_keyword(keyword_dict[keyword_id], keyword)
 
         return list(keyword_dict.values())
 
-    def __find_keywords_values(self, keyword: RuleTemplateKeyword):
+    def __find_keywords_values(self, keyword: GoogleRuleTemplateKeyword):
         value = ''
         if keyword.metric_name:
             try:
-                if keyword.metric_type == MetricTypeEnum.INSIGHT:
+                if keyword.metric_type == GoogleMetricTypeEnum.INSIGHT:
                     value = self.__find_insight_value(keyword)
-                elif keyword.metric_type == MetricTypeEnum.INTERESTS:
+                elif keyword.metric_type == GoogleMetricTypeEnum.INTERESTS:
                     value = self.__find_suggested_interests(keyword)
-                elif keyword.metric_type == MetricTypeEnum.AUDIENCE:
+                elif keyword.metric_type == GoogleMetricTypeEnum.AUDIENCE:
                     value = self.__find_audience_size(keyword)
                 else:
                     value = ''
@@ -133,8 +135,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
         return keyword_id
 
     def __build_rule_template_keyword(self,
-                                      rule_template_keyword: RuleTemplateKeyword = None,
-                                      keyword: typing.AnyStr = None) -> RuleTemplateKeyword:
+                                      rule_template_keyword: GoogleRuleTemplateKeyword = None,
+                                      keyword: typing.AnyStr = None) -> GoogleRuleTemplateKeyword:
         keywords_list = keyword.split('&')
 
         for entry in keywords_list:
@@ -147,7 +149,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         return rule_template_keyword
 
-    def __get_value_for_keyword(self, keyword: typing.AnyStr = None, keywords_values: RuleTemplateKeyword = None):
+    def __get_value_for_keyword(self, keyword: typing.AnyStr = None,
+                                keywords_values: GoogleRuleTemplateKeyword = None):
         key, value = keyword.split('&')[1].split('=')
         return self.__keyword_value_map[key](keywords_values)
 
@@ -166,8 +169,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         return True
 
-    def __find_insight_value(self, keyword: RuleTemplateKeyword = None):
-        mc = MetricCalculator()
+    def __find_insight_value(self, keyword: GoogleRuleTemplateKeyword = None):
+        mc = GoogleMetricCalculator()
         mc = (mc.
               set_structure_id(self._structure_id).
               set_level(self._level).
@@ -175,8 +178,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
               set_repository(self._repository).
               set_date_stop(self._date_stop).
               set_time_interval(keyword.time_interval).
-              set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE,
-                                                       action_breakdown=ActionBreakdownEnum.NONE)))
+              set_breakdown_metadata(BreakdownMetadataBase(breakdown=GoogleBreakdownEnum.NONE,
+                                                           action_breakdown=GoogleActionBreakdownEnum.NONE)))
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=keyword.time_interval)
 
         if value:
@@ -184,7 +187,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         return value
 
-    def __find_suggested_interests(self, keyword: RuleTemplateKeyword):
+    def __find_suggested_interests(self, keyword: GoogleRuleTemplateKeyword):
         structure = self._repository.get_structure_details(self._structure_id, LevelEnum.ADGROUP)
 
         try:
@@ -236,8 +239,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
 
         return value
 
-    def __find_audience_size(self, keyword: RuleTemplateKeyword):
-        mc = MetricCalculator()
+    def __find_audience_size(self, keyword: GoogleRuleTemplateKeyword):
+        mc = GoogleMetricCalculator()
         mc = (mc.
               set_structure_id(self._structure_id).
               set_level(self._level).
@@ -246,8 +249,8 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
               set_business_owner_repo_session(self._business_owner_repo_session).
               set_business_owner_id(self._business_owner_id).
               set_date_stop(self._date_stop).
-              set_breakdown_metadata(BreakdownMetadata(breakdown=BreakdownEnum.NONE,
-                                                       action_breakdown=ActionBreakdownEnum.NONE)))
+              set_breakdown_metadata(BreakdownMetadataBase(breakdown=GoogleBreakdownEnum.NONE,
+                                                           action_breakdown=GoogleActionBreakdownEnum.NONE)))
         value, _ = mc.compute_value(atype=keyword.antecedent_type)
 
         return int(value)

@@ -1,13 +1,6 @@
-import typing
-
-from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendation import \
-    FacebookRecommendation
 from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnhancerBase import \
     FacebookRecommendationEnhancerBase
-from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnum import \
-    FacebookRecommendationImportanceEnum, FacebookRecommendationConfidenceEnum, FacebookRecommendationFieldsEnum
-from FacebookDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationBuilder import RecommendationBuilder
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 
 
 class FacebookRecommendationEnhancerAdSetLevel(FacebookRecommendationEnhancerBase):

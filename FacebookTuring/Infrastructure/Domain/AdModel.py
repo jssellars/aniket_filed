@@ -16,3 +16,6 @@ class AdModel:
     details: dict = None
     actions: dict = None
     status: str = None
+    created_time: str = None
+    start_time: str = None
+    end_time: str = None

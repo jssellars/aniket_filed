@@ -1,14 +1,14 @@
 import json
 
-from FacebookDexter.Engine.MasterWorker import MasterWorker
+from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
+from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
+from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
+from FacebookDexter.Engine.MasterWorker.FacebookMasterWorker import FacebookMasterWorker
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import \
     FacebookTuringDataSyncCompletedEvent
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEventMapping import \
     FacebookTuringDataSyncCompletedEventMapping
-from FacebookDexter.Infrastructure.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
-from FacebookDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
-from FacebookDexter.Infrastructure.PersistanceLayer.DexterRecommendationsMongoRepository import \
-    DexterRecommendationsMongoRepository
+from FacebookDexter.Infrastructure.PersistanceLayer.FacebookDexterMongoRepository import FacebookDexterMongoRepository
 
 
 class FacebookTuringDataSyncCompletedEventHandler:
@@ -24,7 +24,7 @@ class FacebookTuringDataSyncCompletedEventHandler:
         return cls
 
     @classmethod
-    def set_data_repository(cls, repository: DexterMongoRepository = None):
+    def set_data_repository(cls, repository: FacebookDexterMongoRepository = None):
         cls.__data_repository = repository
         return cls
 
@@ -44,18 +44,11 @@ class FacebookTuringDataSyncCompletedEventHandler:
 
         mapper = FacebookTuringDataSyncCompletedEventMapping(target=FacebookTuringDataSyncCompletedEvent)
         business_owners = mapper.load(body.get("business_owners", []), many=True)
-
+        fb_mw = FacebookMasterWorker()
         for business_owner in business_owners:
-            # business_owner_thread = threading.Thread(target=MasterWorker.start_dexter_for_business_owner,
-            #                                          args=(business_owner,
-            #                                                cls.__startup,
-            #                                                cls.__data_repository,
-            #                                                cls.__recommendations_repository,
-            #                                                cls.__journal_repository))
-            # business_owner_thread.start()
-
-            #  Uncomment if you want to run in single thread
-            MasterWorker.start_dexter_for_business_owner(business_owner,
-                                                         cls.__startup,
-                                                         cls.__recommendations_repository,
-                                                         cls.__journal_repository)
+            fb_mw.start_dexter_for_business_owner(business_owner.business_owner_facebook_id,
+                                                  business_owner.ad_account_ids,
+                                                  cls.__startup,
+                                                  cls.__recommendations_repository,
+                                                  cls.__journal_repository,
+                                                  channel=ChannelEnum.FACEBOOK)

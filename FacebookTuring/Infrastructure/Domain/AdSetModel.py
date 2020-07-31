@@ -14,3 +14,10 @@ class AdSetModel:
     details: dict = None
     actions: dict = None
     status: str = None
+    budget_remaining: str = None
+    daily_budget: str = None
+    lifetime_budget: str = None
+    learning_stage_info: str = None
+    created_time: str = None
+    start_time: str = None
+    end_time: str = None

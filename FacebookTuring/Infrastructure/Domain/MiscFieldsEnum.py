@@ -12,3 +12,4 @@ class MiscFieldsEnum:
     actions = 'actions'
     last_updated_at = 'last_updated_at'
     details = 'details'
+    effective_status = 'effective_status'

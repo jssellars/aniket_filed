@@ -2,21 +2,21 @@ import hashlib
 import typing
 from datetime import datetime
 
+from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Dexter.Infrastructure.Domain.Metrics.Metric import MetricBase
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationOptimizationTypeEnum, \
+    RecommendationStatusEnum
+from Core.Dexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
+from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
+from Core.Dexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEvaluatorData
+from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from GoogleDexter.Infrastructure.Constants import DEFAULT_DATETIME_ISO
 from GoogleDexter.Infrastructure.Domain.Actions.ActionDetailsBuilder import ActionDetailsBuilder
-from GoogleDexter.Infrastructure.Domain.DaysEnum import DaysEnum
-from GoogleDexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from GoogleDexter.Infrastructure.Domain.Metrics.Metric import MetricBase
-from GoogleDexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTypeEnum
-from GoogleDexter.Infrastructure.Domain.Recommendations.RecommendationEnums import \
-    RecommendationOptimizationTypeEnum, RecommendationStatusEnum
+from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricEnums import GoogleMetricTypeEnum
 from GoogleDexter.Infrastructure.Domain.Recommendations.RecommendationTemplateBuilder import \
     RecommendationTemplateBuilder
-from GoogleDexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
-from GoogleDexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
-from GoogleDexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEvaluatorData
-from GoogleDexter.Infrastructure.PersistanceLayer.DexterMongoRepository import DexterMongoRepository
+from GoogleDexter.Infrastructure.PersistanceLayer.GoogleDexterMongoRepository import GoogleDexterMongoRepository
 
 
 class RecommendationMetaInformationMapping:
@@ -59,7 +59,7 @@ class RecommendationMetaInformationMapping:
 
 class RecommendationBuilder:
 
-    def __init__(self, mongo_repository: DexterMongoRepository = None,
+    def __init__(self, mongo_repository: GoogleDexterMongoRepository = None,
                  business_owner_repo_session: typing.Any = None,
                  business_owner_id: typing.Any = None,
                  date_stop: typing.AnyStr = None,
@@ -129,8 +129,8 @@ class RecommendationBuilder:
     def set_rule_metadata(self, rule: RuleBase = None) -> typing.Any:
         self.channel = rule.channel.value
         self.category = rule.category.value
-        self.breakdown = rule.breakdown_metadata.breakdown.value.to_dict()
-        self.action_breakdown = rule.breakdown_metadata.action_breakdown.value.to_dict()
+        self.breakdown = rule.breakdown_metadata.breakdown.value
+        self.action_breakdown = rule.breakdown_metadata.action_breakdown.value
         self.template = rule.template
         self.importance = rule.importance.value
         self.source = rule.source.value
@@ -144,7 +144,7 @@ class RecommendationBuilder:
     def set_metrics(self, antecedents: typing.List[Antecedent] = None) -> typing.Any:
         self.metrics = [MetricBase(antecedent.metric.name, antecedent.metric.display_name) for antecedent in
                         antecedents
-                        if antecedent.metric.type == MetricTypeEnum.INSIGHT]
+                        if antecedent.metric.type == GoogleMetricTypeEnum.INSIGHT]
         return self
 
     def set_template(self,
