@@ -18,6 +18,8 @@ class FiledAdFormatEnum(Enum):
     COLLECTION = 3
     SLIDESHOW = 4
     VIDEO = 5
+    EXISTING_POST = 6
+
 
 
 class GraphAPIAdPreviewBuilderHandler:
@@ -241,3 +243,4 @@ class GraphAPIAdPreviewBuilderHandler:
         elif ad_template['ad_format'] == FiledAdFormatEnum.CAROUSEL.value:
             self.__build_carousel_ad_creative_link_data(ad_template, account_id)
             self.__build_carousel_ad_creative(account_id, ad_template, page_facebook_id, instagram_facebook_id)
+        # TODO : build existing post ad creative

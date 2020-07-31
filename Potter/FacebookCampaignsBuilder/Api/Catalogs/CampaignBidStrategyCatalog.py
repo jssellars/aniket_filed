@@ -3,10 +3,11 @@ from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogBase import CatalogBase
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogNode import CatalogNode
 from facebook_business.adobjects.campaign import Campaign
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.ObjectivesCatalog import (video_views, lead_generation, messages,
-                                                                            post_likes, page_likes, traffic,
+                                                                            post_likes, page_likes,
                                                                             app_installs, store_traffic,
                                                                             conversions_leaf, catalog_sales,
-                                                                            brand_awareness, reach)
+                                                                            brand_awareness, reach, website_traffic,
+                                                                            app_traffic)
 
 
 standard_delivery = CatalogNode('standard', 'Standard')
@@ -38,13 +39,17 @@ page_likes_bid = copy.deepcopy(page_likes)
 page_likes_bid.children = [lowest_cost]
 page_likes_bid.description = None
 
-traffic_bid = copy.deepcopy(traffic)
-traffic_bid.children = [lowest_cost]
-traffic_bid.description = None
+website_traffic_bid = copy.deepcopy(website_traffic)
+website_traffic_bid.children = [lowest_cost]
+website_traffic_bid.description = None
 
 app_installs_bid = copy.deepcopy(app_installs)
 app_installs_bid.children = [lowest_cost]
 app_installs_bid.description = None
+
+app_traffic_bid = copy.deepcopy(app_traffic)
+app_traffic_bid.children = [lowest_cost]
+app_traffic_bid.description = None
 
 store_traffic_bid = copy.deepcopy(store_traffic)
 store_traffic_bid.children = [lowest_cost]
@@ -74,7 +79,8 @@ class CampaignBidStrategyCatalog(CatalogBase):
     messages = messages_bid
     post_likes = post_likes_bid
     page_likes = page_likes_bid
-    traffic = traffic_bid
+    website_traffic = website_traffic_bid
+    app_traffic = app_traffic_bid
     app_installs = app_installs_bid
     store_traffic = store_traffic_bid
     conversions = conversions_bid

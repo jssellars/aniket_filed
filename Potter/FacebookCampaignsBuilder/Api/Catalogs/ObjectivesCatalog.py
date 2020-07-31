@@ -23,7 +23,7 @@ reach = CatalogNode(Campaign.Objective.reach, 'Reach', None,
 
 # App Activity children
 
-traffic = CatalogNode(Campaign.Objective.link_clicks, 'Traffic', None, 'Increase the number of visits to your website.')
+app_traffic = CatalogNode(Campaign.Objective.link_clicks, 'Traffic', None, 'Increase the number of visits to your app.')
 app_installs = CatalogNode(Campaign.Objective.app_installs, 'App Installs', None,
                            'Get more people to install your app.')
 
@@ -31,12 +31,14 @@ app_installs = CatalogNode(Campaign.Objective.app_installs, 'App Installs', None
 # engagement children
 post_likes = CatalogNode(Campaign.Objective.post_engagement, 'Post Likes')
 page_likes = CatalogNode(Campaign.Objective.page_likes, 'Page Likes')
+# event responses is not selectable yet
+event_responses = CatalogNode(Campaign.Objective.event_responses, 'Event Responses')
 
 # Consideration Children
 engagement = CatalogNode('ENGAGEMENT', 'Engagement', None, 'Get more people to see and engage with your post or page',
                          [post_likes, page_likes])
 video_views = CatalogNode(Campaign.Objective.video_views, 'Video Views', None,
-                          'Promote videos that show behind-the-scenes footage, product launches or ??? stories to '
+                          'Promote videos that show behind-the-scenes footage, product launches or customer stories to '
                           'rise brand awareness.')
 
 lead_generation = CatalogNode(Campaign.Objective.lead_generation, 'Lead Generation', None,
@@ -46,13 +48,15 @@ messages = CatalogNode(Campaign.Objective.messages, 'Messages', None,
                        'Get more people to have conversations with your business to generate leads, '
                        'drive transactions, answer question or offer support')
 
+website_traffic = CatalogNode(Campaign.Objective.link_clicks, 'Traffic', None, 'Increase the number of visits to your website.')
+
 
 class ObjectivesCatalog(CatalogBase):
 
     A_awareness = CatalogNode('AWARENESS', 'Awareness', 'awareness', None, [brand_awareness, reach])
 
     # The messages objective is also conceptually here, but we do not support it (yet)
-    B_consideration = CatalogNode('CONSIDERATION', 'Consideration', 'consideration', None, [traffic, engagement,
+    B_consideration = CatalogNode('CONSIDERATION', 'Consideration', 'consideration', None, [website_traffic, engagement,
                                                                                             video_views, lead_generation
                                                                                             ])
 
@@ -61,6 +65,6 @@ class ObjectivesCatalog(CatalogBase):
                               None, [catalog_sales, conversions_leaf])
 
     D_app_activity = CatalogNode('App Activity', 'App Activity', 'appactivity', None,
-                               [traffic, app_installs, conversions_leaf])
+                               [app_traffic, app_installs, conversions_leaf])
 
 

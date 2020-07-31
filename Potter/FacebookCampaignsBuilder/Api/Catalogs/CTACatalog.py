@@ -1,12 +1,14 @@
 import copy
 
 from facebook_business.adobjects.adcreative import AdCreative
+from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.campaign import Campaign
 
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogBase import CatalogBase
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.CatalogNode import CatalogNode
-from Potter.FacebookCampaignsBuilder.Api.Catalogs.ObjectivesCatalog import brand_awareness, reach, traffic, engagement,\
-    video_views, lead_generation, post_likes, page_likes, catalog_sales, conversions_leaf, app_installs
+from Potter.FacebookCampaignsBuilder.Api.Catalogs.ObjectivesCatalog import brand_awareness, reach, engagement, \
+    video_views, lead_generation, post_likes, page_likes, catalog_sales, conversions_leaf, app_installs, app_traffic, \
+    website_traffic
 
 add_to_cart = CatalogNode(AdCreative.CallToActionType.add_to_cart, 'Add to Cart')
 apply_now = CatalogNode(AdCreative.CallToActionType.apply_now, 'Apply Now')
@@ -74,7 +76,7 @@ reach_cta.children = [no_button, message_page, apply_now, book_travel, contact_u
                       learn_more, listen_now, see_menu, call, shop_now, get_directions, sign_up, subscribe, watch_more,
                       whatsapp_message]
 
-traffic_website_cta = copy.deepcopy(traffic)
+traffic_website_cta = copy.deepcopy(website_traffic)
 traffic_website_cta.image_name = None
 traffic_website_cta.description = None
 traffic_website_cta.children = [no_button, apply_now, book_travel, contact_us, download, get_quote, get_showtimes,
@@ -97,7 +99,7 @@ app_installs_cta.description = None
 app_installs_cta.children = [no_button, play_game, book_travel, download, learn_more, listen_now, shop_now, sign_up,
                              subscribe, watch_more, install_app, use_app]
 
-traffic_app_cta = copy.deepcopy(traffic)
+traffic_app_cta = copy.deepcopy(app_traffic)
 traffic_app_cta.image_name = None
 traffic_app_cta.description = None
 traffic_app_cta.children = [no_button, open_link, play_game, use_app, book_travel, learn_more, listen_now, shop_now,
