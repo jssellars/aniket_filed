@@ -6,14 +6,18 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47200
 EXPOSE 47200
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookAccounts/Api/uwsgi.ini
 
-
-COPY ./Potter /app/Potter
+# copy source files
+COPY ./Potter/FacebookAccounts/Api /app/Potter/FacebookAccounts/Api
+COPY ./Potter/FacebookAccounts/Infrastructure /app/Potter/FacebookAccounts/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/Potter/FacebookAccounts/Api
+COPY ./Potter/uwsgi.ini /app/Potter/FacebookAccounts/Api
 
 WORKDIR /app/Potter/FacebookAccounts/Api
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

@@ -6,13 +6,18 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47220
 EXPOSE 47220
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookCampaignsBuilder/Api/uwsgi.ini
 
-COPY ./Potter /app/Potter
+# copy source files
+COPY ./Potter/FacebookCampaignsBuilder/Api /app/Potter/FacebookCampaignsBuilder/Api
+COPY ./Potter/FacebookCampaignsBuilder/Infrastructure /app/Potter/FacebookCampaignsBuilder/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/Potter/FacebookCampaignsBuilder/Api
+COPY ./Potter/uwsgi.ini /app/Potter/FacebookCampaignsBuilder/Api
 
 WORKDIR /app/Potter/FacebookCampaignsBuilder/Api
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

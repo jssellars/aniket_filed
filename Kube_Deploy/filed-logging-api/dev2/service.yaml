@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev2-filed-logging-api
+  labels:
+    run: dev2-filed-logging-api
+spec:
+  ports:
+    - port: 40666
+  selector:
+    run: dev2-filed-logging-api

@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
-from Potter.FacebookAccounts.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig
+from Potter.FacebookAccounts.BackgroundTasks.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig
 
 
 class Startup(object):

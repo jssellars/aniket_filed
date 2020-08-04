@@ -7,11 +7,16 @@ ENV LISTEN_PORT 47301
 EXPOSE 43701
 ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
-COPY ./FacebookDexter/uwsgi.ini /app/FacebookDexter/BackgroundTasks/
+
+# copy source files
 COPY ./FacebookDexter/BackgroundTasks /app/FacebookDexter/BackgroundTasks/
 COPY ./FacebookDexter/Engine /app/FacebookDexter/Engine/
 COPY ./FacebookDexter/Infrastructure /app/FacebookDexter/Infrastructure/
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/FacebookDexter/BackgroundTasks/
+COPY ./FacebookDexter/uwsgi.ini /app/FacebookDexter/BackgroundTasks/
+
 WORKDIR /app/FacebookDexter/BackgroundTasks
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

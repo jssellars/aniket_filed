@@ -10,9 +10,14 @@ ENV PYTHON_SOLUTION_PATH=''
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookApps/BackgroundTasks/uwsgi.ini
 
-COPY ./Potter /app/Potter
+# copy source files
+COPY ./Potter/FacebookApps/BackgroundTasks /app/Potter/FacebookApps/BackgroundTasks
+COPY ./Potter/FacebookApps/Infrastructure /app/Potter/FacebookApps/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/Potter/FacebookApps/BackgroundTasks
+COPY ./Potter/uwsgi.ini /app/Potter/FacebookApps/BackgroundTasks
 
 WORKDIR /app/Potter/FacebookApps/BackgroundTasks
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod-filed-google-turing-api
+  labels:
+    run: prod-filed-google-turing-api
+spec:
+  ports:
+    - port: 47550
+  selector:
+    run: prod-filed-google-turing-api

@@ -6,13 +6,18 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47241
 EXPOSE 47241
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookAudiences/BackgroundTasks/uwsgi.ini
 
-COPY ./Potter /app/Potter
+# copy source files
+COPY ./Potter/FacebookAudiences/BackgroundTasks /app/Potter/FacebookAudiences/BackgroundTasks
+COPY ./Potter/FacebookAudiences/Infrastructure /app/Potter/FacebookAudiences/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/Potter/FacebookAudiences/BackgroundTasks
+COPY ./Potter/uwsgi.ini /app/Potter/FacebookAudiences/BackgroundTasks
 
 WORKDIR /app/Potter/FacebookAudiences/BackgroundTasks
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

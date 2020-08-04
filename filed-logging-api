@@ -4,20 +4,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils && ap
 FROM build
 
 ARG STAGE
-ENV LISTEN_PORT 47550
-EXPOSE 47550
+ENV LISTEN_PORT 40666
+EXPOSE 40666
 ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
-ENV UWSGI_INI /app/GoogleTuring/Api/uwsgi.ini
 
 # copy source files
-COPY ./GoogleTuring/Api /app/GoogleTuring/Api
-COPY ./GoogleTuring/Infrastructure /app/GoogleTuring/Infrastructure
+COPY ./Logging/Api /app/Logging/Api
+COPY ./Logging/Infrastructure /app/Logging/Infrastructure
 COPY ./Core /app/Core
 
 # copy requirements and uwsgi files
-COPY ./requirements.txt /app/GoogleTuring/Api
-COPY ./GoogleTuring/uwsgi.ini /app/GoogleTuring/Api
+COPY ./requirements.txt /app/Logging/Api
+COPY ./Logging/uwsgi.ini /app/Logging/Api
 
-WORKDIR /app/GoogleTuring/Api
+WORKDIR /app/Logging/Api
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

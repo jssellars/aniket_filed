@@ -6,12 +6,16 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47350
 EXPOSE 47350
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/FacebookTuring/Api/uwsgi.ini
 
-COPY ./FacebookTuring /app/FacebookTuring
+# copy source files
+COPY ./FacebookTuring/Api /app/FacebookTuring/Api
+COPY ./FacebookTuring/Infrastructure /app/FacebookTuring/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/FacebookTuring/Api
 COPY ./FacebookTuring/uwsgi.ini /app/FacebookTuring/Api
 

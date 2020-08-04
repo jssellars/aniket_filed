@@ -67,6 +67,7 @@ services:
       dockerfile: filed-potter-facebook-apps-background-tasks
       args:
         STAGE: ${STAGE}
+
   # Potter-Facebook-Campaigns-Builder-Api
   filed-potter-facebook-campaigns-builder-api:
     image: ct.filed.com/${STAGE}-filed-potter-facebook-campaigns-builder-api:v0.1
@@ -75,6 +76,17 @@ services:
     build:
       context: .
       dockerfile: filed-potter-facebook-campaigns-builder-api
+      args:
+        STAGE: ${STAGE}
+
+  # Potter-Facebook-Product-Catalogs-Background-Tasks
+  filed-potter-facebook-product-catalogs-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-potter-facebook-product-catalogs-background-tasks:v0.1
+    ports:
+      - "46351:46351"
+    build:
+      context: .
+      dockerfile: filed-potter-facebook-product-catalogs-background-tasks
       args:
         STAGE: ${STAGE}
 
@@ -91,6 +103,7 @@ services:
       args:
         STAGE: ${STAGE}
 
+  # Facebook-Dexter-Background-Tasks
   filed-facebook-dexter-background-tasks:
     image: ct.filed.com/${STAGE}-filed-facebook-dexter-background-tasks:v0.1
     ports:
@@ -100,9 +113,20 @@ services:
       dockerfile: filed-facebook-dexter-background-tasks
       args:
         STAGE: ${STAGE}
+
+  # Facebook-Dexter-Background-Tasks
+  filed-google-dexter-background-tasks:
+    image: ct.filed.com/${STAGE}-filed-google-dexter-background-tasks:v0.1
+    ports:
+      - "47401:47401"
+    build:
+      context: .
+      dockerfile: filed-google-dexter-background-tasks
+      args:
+        STAGE: ${STAGE}
   ###################################################################
   ########################### Facebook-Turing ################################
-  # Facebook-Turing
+  # Facebook-Turing-Api
   filed-facebook-turing-api:
     image: ct.filed.com/${STAGE}-filed-facebook-turing-api:v0.1
     ports:
@@ -113,6 +137,7 @@ services:
       args:
         STAGE: ${STAGE}
 
+  # Facebook-Turing-Background-Tasks
   filed-facebook-turing-background-tasks:
     image: ct.filed.com/${STAGE}-filed-facebook-turing-background-tasks:v0.1
     ports:
@@ -125,7 +150,7 @@ services:
 
   ###################################################################
   ########################### Google-Turing ################################
-  # Google-Turing
+  # Google-Turing-Api
   filed-google-turing-api:
     image: ct.filed.com/${STAGE}-filed-google-turing-api:v0.1
     ports:
@@ -136,41 +161,27 @@ services:
       args:
         STAGE: ${STAGE}
 
+  # Google-Turing-Background-Tasks
   filed-google-turing-background-tasks:
     image: ct.filed.com/${STAGE}-filed-google-turing-background-tasks:v0.1
     ports:
       - "47350:47350"
     build:
       context: .
-      dockerfile: filed-turing-api
+      dockerfile: filed-google-turing-background-tasks
       args:
         STAGE: ${STAGE}
 
   ###################################################################
-  ########################### Ad-Preview ############################
-  # Filed-Ad-Preview
-  filed-ad-preview:
-    image: ct.filed.com/${STAGE}-filed-ad-preview:v0.1
+  ########################### Filed Logging ################################
+  # Logging Api
+  filed-logging-api:
+    image: ct.filed.com/${STAGE}-filed-logging-api:v0.1
     ports:
-      - "47221:47221"
+      - "40666:40666"
     build:
       context: .
-      dockerfile: filed-ad-preview
+      dockerfile: filed-logging-api
       args:
         STAGE: ${STAGE}
 
-  ###################################################################
-  ########################### Targeting-Search ######################
-
-  # Filed-Targeting-Search
-  filed-targeting-search:
-    image: ct.filed.com/${STAGE}-filed-targeting-search:v0.1
-    ports:
-      - "47222:47222"
-    build:
-      context: .
-      dockerfile: filed-targeting-search
-      args:
-        STAGE: ${STAGE}
-
-###################################################################

@@ -6,16 +6,18 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47351
 EXPOSE 47351
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
-ENV UWSGI_INI /app/FacebookTuring/BackgroundTasks/uwsgi.ini
+ENV UWSGI_INI /app/FacebookTuring/uwsgi.ini
 
-COPY ./FacebookTuring /app/FacebookTuring
+# copy source files
+COPY ./FacebookTuring/BackgroundTasks /app/FacebookTuring/BackgroundTasks
+COPY ./FacebookTuring/Infrastructure /app/FacebookTuring/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/FacebookTuring/BackgroundTasks
 COPY ./FacebookTuring/uwsgi.ini /app/FacebookTuring/BackgroundTasks
 
 WORKDIR /app/FacebookTuring/BackgroundTasks
 RUN pip install --upgrade pip && pip3 install -r requirements.txt
-
-ENTRYPOINT ["python3", "app.py"]

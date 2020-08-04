@@ -6,12 +6,16 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47551
 EXPOSE 47551
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/GoogleTuring/BackgroundTasks/uwsgi.ini
 
-COPY ./GoogleTuring /app/GoogleTuring
+# copy source files
+COPY ./GoogleTuring/BackgroundTasks /app/GoogleTuring/BackgroundTasks
+COPY ./GoogleTuring/Infrastructure /app/GoogleTuring/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/GoogleTuring/BackgroundTasks
 COPY ./GoogleTuring/uwsgi.ini /app/GoogleTuring/BackgroundTasks
 

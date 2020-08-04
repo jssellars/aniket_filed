@@ -6,13 +6,18 @@ FROM build
 ARG STAGE
 ENV LISTEN_PORT 47251
 EXPOSE 47251
-ENV PYTHON_SOLUTION_PATH=''
+ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/Potter/FacebookPixels/BackgroundTasks/uwsgi.ini
 
-COPY ./Potter /app/Potter
+# copy source files
+COPY ./Potter/FacebookPixels/BackgroundTasks /app/Potter/FacebookPixels/BackgroundTasks
+COPY ./Potter/FacebookPixels/Infrastructure /app/Potter/FacebookPixels/Infrastructure
 COPY ./Core /app/Core
+
+# copy requirements and uwsgi files
 COPY ./requirements.txt /app/Potter/FacebookPixels/BackgroundTasks
+COPY ./Potter/uwsgi.ini /app/Potter/FacebookPixels/BackgroundTasks
 
 WORKDIR /app/Potter/FacebookPixels/BackgroundTasks
 RUN pip install --upgrade pip && pip3 install -r requirements.txt

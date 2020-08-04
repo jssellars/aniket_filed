@@ -1,6 +1,5 @@
 import logging
 import typing
-from datetime import datetime
 
 from cmreslogging.handlers import CMRESHandler
 
@@ -23,7 +22,7 @@ class ElasticSearchLogger:
             self.port = port
             self.name = name
             self.level = LoggingLevelEnum.get_enum_by_name(level).value
-            self.es_index = index_name + "-" + datetime.now().strftime("%Y-%m-%d")
+            self.es_index = index_name
 
             self.logger = ElasticSearchLogger.__init_logger(self)
 
