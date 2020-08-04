@@ -72,7 +72,7 @@ class FieldsMetricPerformanceMetadata:
                                     field_type=FieldType.INSIGHT,
                                     data_type_id=FieldDataTypeEnum.TEXT.value,
                                     aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
-    cost_per_1000_people_reached = Field(name="cpp_all",
+    cost_per_1000_people_reached = Field(name="cost_per_1000_people_reached",
                                          facebook_fields=[GraphAPIInsightsFields.cpp],
                                          mapper=OneToOneFieldMapper(),
                                          field_type=FieldType.INSIGHT)
