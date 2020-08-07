@@ -104,7 +104,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             query[MongoOperator.AND.value].append(deepcopy(query_by_adset_ids))
 
         if statuses is None:
-            statuses = [StructureStatusEnum.ACTIVE.value]
+            statuses = [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
 
         query_by_status = {
             MiscFieldsEnum.status: {

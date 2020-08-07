@@ -55,21 +55,20 @@ def callback(ch, method, properties, body):
         logger.logger.exception(log.to_dict())
 
 
-if __name__ == "__main__":
-    SLEEP_TIME = 5
+SLEEP_TIME = 5
 
-    rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
-                                     startup.exchange_details.name,
-                                     startup.exchange_details.outbound_queue.key,
-                                     inbound_queue=startup.exchange_details.inbound_queue.name)
+rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
+                                 startup.exchange_details.name,
+                                 startup.exchange_details.outbound_queue.key,
+                                 inbound_queue=startup.exchange_details.inbound_queue.name)
 
-    schedule.every().day.at("15:35").do(run_daily_sync)
+schedule.every().day.at("15:35").do(run_daily_sync)
 
-    rabbit_thread = Thread(target=rabbitmq_client.register_callback(callback)
-                           .register_consumer(consumer_tag=startup.rabbitmq_config.consumer_name)
-                           .start_consuming)
-    rabbit_thread.start()
+rabbit_thread = Thread(target=rabbitmq_client.register_callback(callback)
+                       .register_consumer(consumer_tag=startup.rabbitmq_config.consumer_name)
+                       .start_consuming)
+rabbit_thread.start()
 
-    while True:
-        schedule.run_pending()
-        sleep(SLEEP_TIME)
+while True:
+    schedule.run_pending()
+    sleep(SLEEP_TIME)

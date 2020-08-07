@@ -8,10 +8,11 @@ ENV LISTEN_PORT 47351
 EXPOSE 47351
 ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
-ENV UWSGI_INI /app/FacebookTuring/uwsgi.ini
+ENV UWSGI_INI /app/FacebookTuring/BackgroundTasks/uwsgi.ini
 
 # copy source files
 COPY ./FacebookTuring/BackgroundTasks /app/FacebookTuring/BackgroundTasks
+COPY ./FacebookTuring/Api /app/FacebookTuring/Api
 COPY ./FacebookTuring/Infrastructure /app/FacebookTuring/Infrastructure
 COPY ./Core /app/Core
 

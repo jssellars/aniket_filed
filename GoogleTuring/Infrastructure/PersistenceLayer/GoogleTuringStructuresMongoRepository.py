@@ -114,7 +114,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
             query[MongoOperator.AND.value].append(deepcopy(query_by_adgroup_ids))
 
         if statuses is None:
-            statuses = [StructureStatusEnum.ACTIVE.value]
+            statuses = [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
 
         query_by_status = {
             MiscFieldsEnum.status: {

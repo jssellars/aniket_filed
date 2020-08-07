@@ -19,7 +19,7 @@ class AdsManagerGetStructuresQuery:
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id)
             if not response:
-                return
+                return []
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
             response = mapping.load(response,
                                     many=True)  # [{"facebookId": entry['id'], "name": entry["name"]} for entry in response]
@@ -37,7 +37,7 @@ class AdsManagerGetStructuresQuery:
                                                collection_name=collection_name)
             structure_details = repository.get_structure_details(Level(level), facebook_id)
             if not structure_details:
-                return
+                return {}
 
             mapping = AdsManagerStructureMapping(level=level)
             response = mapping.load(structure_details)

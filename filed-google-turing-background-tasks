@@ -11,6 +11,7 @@ ENV PYTHON_ENV=${STAGE}
 ENV UWSGI_INI /app/GoogleTuring/BackgroundTasks/uwsgi.ini
 
 # copy source files
+COPY ./GoogleTuring/Api /app/GoogleTuring/Api
 COPY ./GoogleTuring/BackgroundTasks /app/GoogleTuring/BackgroundTasks
 COPY ./GoogleTuring/Infrastructure /app/GoogleTuring/Infrastructure
 COPY ./Core /app/Core

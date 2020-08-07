@@ -2,8 +2,6 @@
 import os
 import sys
 
-from GoogleDexter.Infrastructure.PersistanceLayer.GoogleDexterMongoRepository import GoogleDexterMongoRepository
-
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -66,10 +64,9 @@ def callback(ch, method, properties, body):
         logger.logger.exception(log.to_dict())
 
 
-if __name__ == "__main__":
-    rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
-                                     startup.exchange_details.name,
-                                     startup.exchange_details.outbound_queue.key,
-                                     inbound_queue=startup.exchange_details.inbound_queue.name)
-    rabbitmq_client.register_callback(callback).register_consumer(
-        consumer_tag=startup.rabbitmq_config.consumer_name).start_consuming()
+rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
+                                 startup.exchange_details.name,
+                                 startup.exchange_details.outbound_queue.key,
+                                 inbound_queue=startup.exchange_details.inbound_queue.name)
+rabbitmq_client.register_callback(callback).register_consumer(
+    consumer_tag=startup.rabbitmq_config.consumer_name).start_consuming()

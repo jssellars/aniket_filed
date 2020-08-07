@@ -36,7 +36,7 @@ class AdsManagerGetStructuresQuery:
                                                                collection_name=collection_name)
             structure_details = repository.get_structure_details(Level(level), google_id)
             if not structure_details:
-                return
+                return {}
 
             mapping = AdsManagerStructureMapping(level=level)
             response = mapping.load(structure_details)

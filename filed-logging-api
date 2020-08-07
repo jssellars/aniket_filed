@@ -8,6 +8,7 @@ ENV LISTEN_PORT 40666
 EXPOSE 40666
 ENV PYTHON_SOLUTION_PATH='/app'
 ENV PYTHON_ENV=${STAGE}
+ENV UWSGI_INI /app/Logging/Api/uwsgi.ini
 
 # copy source files
 COPY ./Logging/Api /app/Logging/Api

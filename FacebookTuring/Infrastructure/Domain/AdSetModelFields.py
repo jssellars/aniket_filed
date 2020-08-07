@@ -54,7 +54,7 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.time_based_ad_rotation_id_blocks,
         FieldsMetadata.use_new_app_click,
         FieldsMetadata.lifetime_min_spend_target,
-        FieldsMetadata.ad_rules_governed,
+        # FieldsMetadata.ad_rules_governed,
         FieldsMetadata.targetingsentencelines,
         FieldsMetadata.recommendations,
         FieldsMetadata.learning_stage_info
