@@ -1,5 +1,7 @@
 import asyncio
 from copy import deepcopy
+from queue import Queue
+from threading import Thread
 
 from facebook_business.adobjects.adreportrun import AdReportRun
 
@@ -51,14 +53,30 @@ class GraphAPIGetHelper(HTTPRequestBase):
         try:
             partial_responses = []
             summary = []
+            workers = []
+            queue = Queue()
+
             for partial_fields in self._get_fields_partitions(config.fields, config.required_field):
                 config.request.modify_fields_and_params(partial_fields, config.params)
-                partial_response, summary = self._get_graph_api_base(config)
+
+                worker_thread = Thread(target=lambda q, arg1: q.put(self._get_graph_api_base(arg1)),
+                                       args=(queue, deepcopy(config)))
+                workers.append(worker_thread)
+
+            # Combine partial responses for different groups of fields into one response
+            for thread in workers:
+                thread.start()
+
+            for thread in workers:
+                thread.join()
+
+            while not queue.empty():
+                partial_response, summary = queue.get()
                 if not isinstance(partial_response, Exception) and partial_response:
                     partial_responses.append(deepcopy(partial_response))
                 elif isinstance(partial_response, Exception):
                     raise partial_response
-            # Combine partial responses for different groups of fields into one response
+
             response = self._combine_partial_responses(partial_responses, config.required_field)
         except Exception as e:
             raise e

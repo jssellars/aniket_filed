@@ -189,8 +189,6 @@ class InsightsSynchronizer(BaseSynchronizer):
             if insights_definition.breakdowns is None:
                 for action_breakdown in insights_definition.action_breakdowns:
                     fields = insights_definition.fields[action_breakdown]
-                    print('[Insights BT] {}-{}-{}'.format(insights_definition.level.value, 'none',
-                                                          action_breakdown.value))
 
                     compound_fields, required_fields = extract_compound_and_required_fields(fields)
                     join_fields = list(filter(lambda x: x is not None and x.join_condition is not None, fields))

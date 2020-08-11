@@ -39,7 +39,6 @@ def set_update_time(ad_account_id, mongo_conn_handler):
 
 
 def daily_sync_job():
-    print('[Structure BT] Daily sync started')
     mongo_conn_handler = MongoConnectionHandler(startup.mongo_config)
     ad_accounts_to_sync = get_ad_accounts_details(mongo_conn_handler)
 

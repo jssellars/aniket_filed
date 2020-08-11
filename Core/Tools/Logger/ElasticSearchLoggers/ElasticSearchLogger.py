@@ -10,12 +10,12 @@ class ElasticSearchLogger:
     _instance = None
 
     def __new__(self,
-                 host: typing.AnyStr = None,
-                 port: int = None,
-                 name: typing.AnyStr = None,
-                 level: typing.AnyStr = None,
-                 index_name: typing.AnyStr = None,
-                 **kwargs):
+                host: typing.AnyStr = None,
+                port: int = None,
+                name: typing.AnyStr = None,
+                level: typing.AnyStr = None,
+                index_name: typing.AnyStr = None,
+                **kwargs):
         if self._instance is None:
             self._instance = super(ElasticSearchLogger, self).__new__(self)
             self.host = host

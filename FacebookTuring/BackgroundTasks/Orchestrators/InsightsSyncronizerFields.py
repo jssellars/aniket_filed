@@ -34,5 +34,20 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.ad_name,
     FieldsMetadata.date_start,
     FieldsMetadata.date_stop,
-    FieldsMetadata.frequency
+    FieldsMetadata.frequency,
+    FieldsMetadata.video_plays_3s,
+    FieldsMetadata.video_plays_95p,
+    FieldsMetadata.video_average_play_time,
+    FieldsMetadata.adds_to_cart_total,
+    FieldsMetadata.adds_to_cart_value,
+    FieldsMetadata.website_checkouts_initiated_value,
+    FieldsMetadata.unique_clicks_all,
+    FieldsMetadata.unique_ctr_all,
+    FieldsMetadata.messaging_conversations_started,
+    FieldsMetadata.unique_link_click_through_rate,
+    FieldsMetadata.content_views_unique_total,
+    FieldsMetadata.adds_to_cart_unique,
+    FieldsMetadata.checkouts_initiated_unique_total,
+    FieldsMetadata.website_purchases_value,
+    FieldsMetadata.photo_views
 ]

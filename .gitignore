@@ -67,6 +67,9 @@ target/
 # VS code
 .vs
 
+# csvs
+*.csv
+
 # Random folders
 Experiments/
 /Notebooks/Misc/

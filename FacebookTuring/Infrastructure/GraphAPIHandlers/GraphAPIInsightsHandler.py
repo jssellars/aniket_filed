@@ -11,12 +11,12 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClie
 from Core.Web.FacebookGraphAPI.Models.Field import FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
-from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
 
 
 class GraphAPIInsightsHandler:
@@ -95,7 +95,6 @@ class GraphAPIInsightsHandler:
             response, summary = graph_api_client.call_facebook()
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
             summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
-            # insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
             return copy.deepcopy({thread: (insights_response, summary_response)})
         except Exception as e:
             raise e

@@ -353,6 +353,16 @@ class FieldsMetricStandardEventsMetadata:
                                                                        field_value=GraphAPIInsightsFields.adds_to_cart)]),
                                 action_breakdowns=[GraphAPIInsightsFields.action_type],
                                 field_type=FieldType.ACTION_INSIGHT)
+
+    adds_to_cart_total = Field(name='adds_to_cart_total',
+                               facebook_fields=[GraphAPIInsightsFields.actions],
+                               mapper=ActionFieldMapper(
+                                   field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                                      operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                                      field_value=GraphAPIInsightsFields.adds_to_cart)]),
+                               action_breakdowns=[GraphAPIInsightsFields.action_type],
+                               field_type=FieldType.ACTION_INSIGHT)
+
     mobile_adds_to_cart_value = Field(name='mobile_adds_to_cart_value',
                                       facebook_fields=[GraphAPIInsightsFields.action_values],
                                       mapper=ActionFieldMapper(field_filter=[
@@ -397,6 +407,15 @@ class FieldsMetricStandardEventsMetadata:
                                        action_breakdowns=[GraphAPIInsightsFields.action_type,
                                                           GraphAPIInsightsFields.action_device],
                                        field_type=FieldType.ACTION_INSIGHT)
+    adds_to_cart_value = Field(name='adds_to_cart_value',
+                               facebook_fields=[GraphAPIInsightsFields.action_values],
+                               mapper=ActionFieldMapper(field_filter=[
+                                   ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                        operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                        field_value=GraphAPIInsightsFields.adds_to_cart)]),
+                               action_breakdowns=[GraphAPIInsightsFields.action_type],
+                               field_type=FieldType.ACTION_INSIGHT)
+
     adds_to_cart_cost = Field(name='adds_to_cart_cost',
                               facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
                               mapper=ActionFieldMapper(
@@ -511,6 +530,8 @@ class FieldsMetricStandardEventsMetadata:
                                                                       field_value=GraphAPIInsightsFields.mobile_app_checkouts_initiated)]),
                                              action_breakdowns=[GraphAPIInsightsFields.action_type],
                                              field_type=FieldType.ACTION_INSIGHT)
+
+    # this field should be renamed to checkouts_initiated_total
     website_checkouts_initiated_total = Field(name='website_checkouts_initiated_total',
                                               facebook_fields=[GraphAPIInsightsFields.actions],
                                               mapper=ActionFieldMapper(field_filter=[
@@ -1052,6 +1073,8 @@ class FieldsMetricStandardEventsMetadata:
                                                                 field_value=GraphAPIInsightsFields.mobile_app_purchases)]),
                                        action_breakdowns=[GraphAPIInsightsFields.action_type],
                                        field_type=FieldType.ACTION_INSIGHT)
+
+    # TODO: this filed should be renamed to purchase_conversion_value
     website_purchases_value = Field(name='website_purchases_value',
                                     facebook_fields=[GraphAPIInsightsFields.action_values],
                                     mapper=ActionFieldMapper(field_filter=[

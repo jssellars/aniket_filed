@@ -31,8 +31,6 @@ class StructuresSynchronizer(BaseSynchronizer):
         self._adwords_client.set_client_customer_id(self._account_id)
         additional_info = None
         for level in LEVELS:
-            print('[Structure BT] Business Owner: {} Level: {} account_id: {}'.format(self._business_owner_id, level,
-                                                                                      self._account_id))
             self.__mongo_repository.collection = level.value
             structure_mapping = structures_mapping_factory.get_structure_mapping(level=level,
                                                                                  business_owner_id=self._business_owner_id,

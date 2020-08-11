@@ -4,7 +4,7 @@ from datetime import datetime
 from Core.Web.BusinessOwnerRepository.Models.BusinessOwnerModel import BusinessOwnerModel
 
 
-class BusinessOwnerRepository(object):
+class BusinessOwnerRepository:
 
     def __init__(self, session):
         self.__session = session()
@@ -50,7 +50,6 @@ class BusinessOwnerRepository(object):
             self.__session.flush()
             self.__session.close()
         except:
-            print('Failed to update user token for: %s' % business_owner_facebook_id)
             self.__session.rollback()
 
     def create_user_token(self,
@@ -73,8 +72,6 @@ class BusinessOwnerRepository(object):
             self.__session.close()
         except Exception as e:
             self.__session.rollback()
-            # todo: log error
-            print('Failed to add new user %s' % entry.facebookId)
             raise e
 
     def user_already_exists(self,

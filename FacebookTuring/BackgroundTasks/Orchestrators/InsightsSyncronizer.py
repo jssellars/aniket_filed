@@ -40,6 +40,7 @@ class InsightsSyncronizer:
         self.__ad_account_id = "act_" + self.account_id
         self.__permanent_token = None
         self.__mongo_repository = None
+        self.__permanent_token_retries = 3
 
     def run(self) -> typing.NoReturn:
         try:
@@ -67,8 +68,19 @@ class InsightsSyncronizer:
     @property
     def permanent_token(self) -> typing.AnyStr:
         if self.__permanent_token is None:
-            self.__permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
-                self.business_owner_id)
+            error = None
+            retries = 0
+            while self.__permanent_token is None and retries < self.__permanent_token_retries:
+                try:
+                    self.__permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+                        self.business_owner_id)
+                except Exception as e:
+                    retries += 1
+                    error = e
+
+            if error:
+                raise error
+
         return self.__permanent_token
 
     def __get_fields(self) -> typing.List[typing.AnyStr]:
