@@ -48,17 +48,18 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
         recommendations = []
         for rule in applicable_rules:
             metric_calculator = (FacebookMetricCalculator().
-                                 set_business_owner_id(self._business_owner_id).
-                                 set_facebook_id(facebook_id).
-                                 set_level(rule.level).
-                                 set_business_owner_repo_session(self._business_owner_repo_session).
-                                 set_facebook_config(self._facebook_config).
-                                 set_fuzzyfier_factory(fuzzyfier_factory).
-                                 set_repository(self._mongo_repository).
-                                 set_date_stop(self._date_stop).
-                                 set_time_interval(self._time_interval).
-                                 set_breakdown_metadata(rule.breakdown_metadata).
-                                 set_debug_mode(self._debug))
+                set_business_owner_id(self._business_owner_id).
+                set_facebook_id(facebook_id).
+                set_level(rule.level).
+                set_business_owner_repo_session(self._business_owner_repo_session).
+                set_facebook_config(self._facebook_config).
+                set_fuzzyfier_factory(fuzzyfier_factory).
+                set_repository(self._mongo_repository).
+                set_date_stop(self._date_stop).
+                set_time_interval(self._time_interval).
+                set_breakdown_metadata(rule.breakdown_metadata).
+                set_debug_mode(self._debug).
+                set_minimum_number_of_data_points(self._minimum_number_of_data_points_dict[str(self._time_interval.value)]))
 
             rule_data = self._rule_evaluator.evaluate(rule=rule, metric_calculator=metric_calculator)
 

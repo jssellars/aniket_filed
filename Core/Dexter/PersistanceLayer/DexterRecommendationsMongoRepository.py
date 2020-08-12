@@ -126,4 +126,13 @@ class DexterRecommendationsMongoRepository(MongoRepositoryBase):
         new_recommendations = [recommendation
                                for recommendation in recommendations
                                if recommendation[RecommendationField.RECOMMENDATION_ID.value] in new_recommendations_ids]
+
         self.add_many(new_recommendations)
+
+        deprecated_recommendations = []
+        for recommendation in recommendations:
+            if recommendation[RecommendationField.RECOMMENDATION_ID.value] not in new_recommendations_ids:
+                recommendation[RecommendationField.STATUS.value] = RecommendationStatusEnum.DEPRECATED.value
+                deprecated_recommendations.append(recommendation)
+
+        self.add_many(deprecated_recommendations)

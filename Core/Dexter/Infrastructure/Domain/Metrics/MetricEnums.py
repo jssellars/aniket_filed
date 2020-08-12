@@ -25,3 +25,4 @@ class AggregatorEnum(Enum):
     AVERAGE = np.mean
     LENGTH = len
     COUNT_DISTINCT = count_distinct
+    STANDARD_DEVIATION = np.std

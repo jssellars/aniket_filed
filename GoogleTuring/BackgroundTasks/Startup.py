@@ -27,6 +27,8 @@ class Startup:
         self.direct_inbound_queue = Queue(queue_details['inbound'],
                                           self.direct_exchange)
 
+        self.sync_time = app_config["sync_time"]
+
         # Generic msrv configuration
         self.environment = config['environment']
         self.service_name = config['service_name']

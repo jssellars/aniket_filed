@@ -51,6 +51,7 @@
     "accounts_journal_database_name": "staging_facebook_turing_accounts_journal",
     "accounts_journal_collection_name": "journal"
   },
+  "sync_time": "00:10",
   "environment": "staging",
   "api_name": "FacebookTuringBackgroundTasks",
   "api_version": "1.0.0",

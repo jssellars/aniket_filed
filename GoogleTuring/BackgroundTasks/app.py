@@ -38,7 +38,7 @@ def sync_callback(ch, method, properties, body):
 rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
                                  inbound_queue=startup.direct_inbound_queue.name)
 
-schedule.every().day.at("00:05").do(daily_sync_job)
+schedule.every().day.at(startup.sync_time).do(daily_sync_job)
 rabbit_thread = Thread(target=rabbitmq_client.register_callback(sync_callback)
                        .register_consumer(consumer_tag="google.turing")
                        .start_consuming)

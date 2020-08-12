@@ -1,7 +1,6 @@
 import traceback
 import typing
 from datetime import timedelta, datetime
-from functools import lru_cache
 
 import numpy as np
 
@@ -18,6 +17,7 @@ from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 
 class MetricCalculatorBase(MetricCalculatorBuilder):
     MAX_CACHE_SIZE = 2048
+    HUNDRED_MULTIPLIER = 100
 
     def __init__(self):
         super().__init__()
@@ -139,7 +139,6 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         return [AggregatorEnum.SUM.value([entry[metric.name] for metric in self._metric.denominator]) for entry in
                 data]
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def structure_value(self, *args, **kwargs) -> typing.Any:
         structure_details = self._repository.get_structure_details(key_value=self._facebook_id, level=self._level)
         return structure_details.get(self._metric.name)
@@ -169,15 +168,14 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         return values
 
-    def average(self, date_stop, date_start, *args, **kwargs):
+    def average(self, date_start, date_stop, *args, **kwargs):
         date_start = datetime.strptime(date_start, DEFAULT_DATETIME) - timedelta(days=1)
         date_start = datetime.strftime(date_start, DEFAULT_DATETIME)
-        value = self.aggregated_value(date_start=date_stop, date_stop=date_start)
-        date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
-        date_start = datetime.strptime(date_start, DEFAULT_DATETIME)
-        days = (date_start - date_stop).days + 1
+        self._metric.numerator_aggregator = AggregatorEnum.AVERAGE
+        self._metric.denominator_aggregator = AggregatorEnum.AVERAGE
+        value = self.aggregated_value(date_start=date_start, date_stop=date_stop)
 
-        return value / days
+        return value
 
     def __compute_aggregated_value(self, data: typing.List[typing.Dict]) -> float:
         try:
@@ -198,7 +196,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                     if aggregated_denominator else None
             else:
                 return self._metric.multiplier * aggregated_numerator
-        except Exception:
+        except Exception as e:
             if self._debug:
                 log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                         name="MetricCalculator",
@@ -209,12 +207,10 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                         })
                 self._logger.logger.info(log)
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def aggregated_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         data = self._get_metrics_values(date_start=date_start, date_stop=date_stop)
         return self.__compute_aggregated_value(data)
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def categorical_value(self, *args, **kwargs) -> typing.AnyStr:
         date_stop = self._date_stop
         date_start = date_stop - timedelta(days=DaysEnum.THREE_MONTHS.value)
@@ -256,11 +252,11 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         data = self.values(date_start.strftime(DEFAULT_DATETIME), date_stop.strftime(DEFAULT_DATETIME))
         return max(data) if data else None
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
-    def trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> typing.Union[
+    def trend(self, date_stop: typing.AnyStr = None, **kwargs) -> typing.Union[
         typing.NoReturn, float]:
-        _date_start = datetime.strptime(date_start, DEFAULT_DATETIME)
+
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
+        _date_start = _date_stop - timedelta(days=30)
         current_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
 
         if current_value is None:
@@ -341,7 +337,6 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         return scaled_value
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def fuzzy_value(self,
                     date_start: typing.AnyStr = None,
                     date_stop: typing.AnyStr = None,
@@ -349,22 +344,19 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         value = self._min_max_normalized_value(date_start, date_stop)
         return self._fuzzy_value_base(value, AntecedentTypeEnum.FUZZY_VALUE)
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def fuzzy_trend(self,
                     date_start: typing.AnyStr = None,
                     date_stop: typing.AnyStr = None,
                     **kwargs):
-        value = self.trend(date_start, date_stop)
+        value = self.trend(date_stop)
         return self._fuzzy_value_base(value, AntecedentTypeEnum.FUZZY_TREND)
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def weighted_fuzzy_trend(self,
                              date_start: typing.AnyStr = None,
                              date_stop: typing.AnyStr = None,
                              **kwargs):
         raise NotImplementedError
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def weighted_trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         raise NotImplementedError
 
@@ -396,7 +388,6 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         return fuzzy_class, fuzzy_membership_value
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def difference(self,
                    date_start: typing.AnyStr = None,
                    date_stop: typing.AnyStr = None,
@@ -437,26 +428,44 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 self._logger.logger.info(log)
         return difference
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
+    def variance(self,
+                 date_start: typing.AnyStr = None,
+                 date_stop: typing.AnyStr = None,
+                 **kwargs) -> typing.Union[int, float, typing.NoReturn]:
+
+        variance = None
+        _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME) - timedelta(days=1)
+        _mean_date_start = _date_stop - timedelta(days=30)
+        _date_stop = datetime.strftime(_date_stop, DEFAULT_DATETIME)
+        _mean_date_start = datetime.strftime(_mean_date_start, DEFAULT_DATETIME)
+
+        mean_on_time_interval = self.average(date_start=_mean_date_start, date_stop=_date_stop)
+
+        self._metric.numerator_aggregator = AggregatorEnum.STANDARD_DEVIATION
+        self._metric.denominator_aggregator = AggregatorEnum.STANDARD_DEVIATION
+        standard_deviation_on_time_interval = self.aggregated_value(date_start=date_start,
+                                                                 date_stop=_date_stop)
+
+        if mean_on_time_interval:
+            variance = self.HUNDRED_MULTIPLIER * (standard_deviation_on_time_interval / mean_on_time_interval)
+
+        return variance
+
     def percentage_difference(self,
                               date_start: typing.AnyStr = None,
                               date_stop: typing.AnyStr = None,
                               **kwargs) -> typing.Union[int, float, typing.NoReturn]:
 
-        date_start_ = datetime.strptime(date_start, DEFAULT_DATETIME) - timedelta(days=1)
-        date_stop_ = datetime.strptime(date_stop, DEFAULT_DATETIME) - timedelta(days=1)
-        days = abs((date_stop_ - date_start_).days)
+        _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME) - timedelta(days=1)
+        _date_stop = datetime.strftime(_date_stop, DEFAULT_DATETIME)
 
-        mean_on_time_interval = self.aggregated_value(date_start=date_start, date_stop=date_stop) / days
+        mean_on_time_interval = self.average(date_start=date_start, date_stop=_date_stop)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if mean_on_time_interval is not None and current_metric_value is not None:
             if mean_on_time_interval == 0.0 or current_metric_value == 0.0:
-                return 100
+                return 1 * self.HUNDRED_MULTIPLIER
             try:
-                if mean_on_time_interval < current_metric_value:
-                    difference = 100 * (current_metric_value - mean_on_time_interval) / current_metric_value
-                else:
-                    difference = 100 * (mean_on_time_interval - current_metric_value) / mean_on_time_interval
+                difference = self.HUNDRED_MULTIPLIER * float(abs((current_metric_value - mean_on_time_interval) / mean_on_time_interval))
             except ZeroDivisionError:
                 if current_metric_value == 0.0:
                     difference = None
@@ -469,7 +478,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                 })
                         self._logger.logger.info(log)
                 else:
-                    difference = 100 * current_metric_value
+                    difference = self.HUNDRED_MULTIPLIER * current_metric_value
         elif mean_on_time_interval is None and current_metric_value is not None:
             difference = None
             if self._debug:
@@ -503,7 +512,6 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 self._logger.logger.info(log)
         return difference
 
-    @lru_cache(maxsize=MAX_CACHE_SIZE)
     def raw_value(self, date_start: typing.AnyStr = None, *args, **kwargs) -> typing.Union[int, float]:
         result = self.aggregated_value(date_start=date_start, date_stop=date_start)
 
@@ -556,6 +564,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                             "state": self._current_state()
                                         })
                 self._logger.logger.info(log)
+
+        if hasattr(self, "minimum_number_of_data_points") \
+                and getattr(self, "minimum_number_of_data_points") is not None \
+                and date_stop != date_start:
+            return metrics_values if len(metrics_values) >= getattr(self, "minimum_number_of_data_points") else []
+
         return metrics_values
 
     def __get_min_metrics_values(self):

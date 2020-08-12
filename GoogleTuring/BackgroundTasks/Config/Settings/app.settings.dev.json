@@ -42,6 +42,7 @@
     "client_id": "17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
     "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
+  "sync_time": "00:10",
   "run_verbose": false,
   "log_errors": true,
   "environment": "dev",

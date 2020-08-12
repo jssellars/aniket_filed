@@ -156,3 +156,9 @@ class FacebookAvailableSingleMetricEnum(EnumerationBase):
     DUPLICATE_AD = Metric(name="duplicate_ad", display_name="Duplicate ad",
                           numerator=FacebookAvailableSingleMetricsEnum.DUPLICATE_AD.value,
                           mtype=FacebookMetricTypeEnum.DUPLICATE_AD)
+
+    LANDING_PAGE_CONVERSION_RATE = Metric(name="landing_page_conversion_rate", display_name="Landing page conversion rate",
+                                          numerator=FacebookAvailableSingleMetricsEnum.CONVERSIONS.value,
+                                          denominator=FacebookAvailableSingleMetricsEnum.LINK_CLICKS.value,
+                                          mtype=FacebookMetricTypeEnum.INSIGHT,
+                                          multiplier=100)

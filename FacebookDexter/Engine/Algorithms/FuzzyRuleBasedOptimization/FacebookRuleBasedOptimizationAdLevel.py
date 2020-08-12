@@ -40,18 +40,18 @@ class FacebookRuleBasedOptimizationAdLevel(FacebookRuleBasedOptimizationBase):
         for ad_id in lowest_25p_performing_ads:
             if self.is_available(ad_id):
                 que = Queue()
-                t_list = []
+                thread_list = []
                 for rule_selection_type in rule_selection_types:
                     for evaluate_function in self.rules_selector(rule_selection_type):
-                        t = Thread(target=lambda q, arg1, arg2: q.put(evaluate_function(arg1, arg2)),
+                        thread = Thread(target=lambda q, arg1, arg2: q.put(evaluate_function(arg1, arg2)),
                                    args=(que, ad_id, self._fuzzyfier_factory))
-                        t_list.append(t)
+                        thread_list.append(thread)
 
-                for t in t_list:
-                    t.start()
+                for thread in thread_list:
+                    thread.start()
 
-                for t in t_list:
-                    t.join()
+                for thread in thread_list:
+                    thread.join()
 
                 while not que.empty():
                     recommendations += que.get()

@@ -63,11 +63,8 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
                 keyword_id = int(keyword.split("&")[0].split("=")[1])
                 keyword_values = [x for x in keywords_values if x.id == keyword_id][0]
                 value = self.__get_value_for_keyword(keyword, keyword_values)
-                if keyword_values.antecedent_type == AntecedentTypeEnum.PERCENTAGE_DIFFERENCE:
-                    if int(keyword_values.value) < self._rule.variance:
-                        return None
                 if value is None:
-                    return None
+                    return value
                 template = template.replace("__" + keyword + "__", value)
         except Exception as e:
             if self._debug:
@@ -196,12 +193,11 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=self._time_interval)
 
         if value is not None:
-            value = abs(int(value))
+            value = abs(float("{:.2f}".format(value)))
 
         return value
 
     def _get_top_interests(self, top_number, endpoint, headers):
-        # todo: get must have auth
         response = requests.get(url=endpoint, headers=headers)
         if response.status_code != 200:
             if self._debug:

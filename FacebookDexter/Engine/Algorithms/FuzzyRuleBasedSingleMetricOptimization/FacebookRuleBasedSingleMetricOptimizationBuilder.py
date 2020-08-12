@@ -31,6 +31,7 @@ class FacebookRuleBasedSingleMetricOptimizationBuilder:
         self._debug = None
         self._mongo_config = None
         self._auth_token = None
+        self._minimum_number_of_data_points_dict = None
 
     def get_logger(self):
         if self._mongo_repository is not None:
@@ -104,4 +105,8 @@ class FacebookRuleBasedSingleMetricOptimizationBuilder:
 
     def set_auth_token(self, auth_token: typing.AnyStr = None):
         self._auth_token = auth_token
+        return self
+
+    def set_minimum_number_of_data_points_dict(self, minimum_number_of_data_points_dict: dict = None):
+        self._minimum_number_of_data_points_dict = minimum_number_of_data_points_dict
         return self

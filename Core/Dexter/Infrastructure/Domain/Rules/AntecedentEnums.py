@@ -13,3 +13,4 @@ class AntecedentTypeEnum(Enum):
     WEIGHTED_FUZZY_TREND = 9
     WEIGHTED_TREND = 10
     AVERAGE = 11
+    VARIANCE = 12

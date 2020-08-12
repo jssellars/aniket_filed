@@ -133,12 +133,9 @@ class FacebookRecommendationBuilder:
         self.optimization_type = optimization_type
         return self
 
-    # todo: breakdown value and action breakdown have to_dict
     def set_rule_metadata(self, rule: RuleBase = None) -> typing.Any:
         self.channel = rule.channel.value
         self.category = rule.category.value
-        # self.breakdown = rule.breakdown_metadata.breakdown.value.to_dict()
-        # self.action_breakdown = rule.breakdown_metadata.action_breakdown.value.to_dict()
         self.breakdown = rule.breakdown_metadata.breakdown.value
         self.action_breakdown = rule.breakdown_metadata.action_breakdown.value
         self.template = rule.template
@@ -152,11 +149,15 @@ class FacebookRecommendationBuilder:
         return self
 
     def set_metrics(self, antecedents: typing.List[Antecedent] = None) -> typing.Any:
-        self.metrics = [MetricBase(antecedent.metric.name, antecedent.metric.display_name) for antecedent in
-                        antecedents
-                        if antecedent.metric.type == FacebookMetricTypeEnum.INSIGHT]
+        antecedent_metrics = [MetricBase(antecedent.metric.name, antecedent.metric.display_name)
+                              for antecedent in antecedents
+                              if antecedent.metric.type == FacebookMetricTypeEnum.INSIGHT]
 
-        # TODO: make a default of this in the future, maybe?
+        for metric in antecedent_metrics:
+            current_metrics = [metric.name for metric in self.metrics]
+            if metric.name not in current_metrics:
+                self.metrics.append(metric)
+
         if not self.metrics:
             self.metrics = [MetricBase(FacebookAvailableMetricEnum.CPC.value.name,
                                        FacebookAvailableMetricEnum.CPC.value.display_name)]
@@ -247,8 +248,8 @@ class FacebookRecommendationBuilder:
 
     def __set_id(self):
         try:
-            hash_value = self.template + self.structure_id + self.level + self.breakdown.name + \
-                         self.action_breakdown.name
+            hash_value = self.structure_id + self.level + self.breakdown.name + self.action_breakdown.name \
+                         + "".join([metric.display_name for metric in self.metrics])
             self.recommendation_id = hashlib.sha1(hash_value.encode('utf-8')).hexdigest()
         except Exception as e:
             self.recommendation_id = None
@@ -256,6 +257,3 @@ class FacebookRecommendationBuilder:
 
     def to_dict(self):
         return object_to_json(self)
-
-    def set_output_extra_information(self, recommendation_builder):
-        self._mean

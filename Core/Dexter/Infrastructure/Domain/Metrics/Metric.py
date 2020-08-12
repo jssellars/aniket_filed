@@ -8,6 +8,9 @@ class MetricBase:
         self.name = name
         self.display_name = display_name
 
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 class Metric(MetricBase):
     DEFAULT_MULTIPLIER = 1.0

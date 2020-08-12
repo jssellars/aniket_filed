@@ -48,6 +48,7 @@ class SingleMetricOrchestrator(OrchestratorBase):
                          set_date_stop(date_stop=date_stop).
                          set_time_interval(time_interval=time_interval).
                          set_rule_evaluator(rule_evaluator=rule_evaluator).
+                         set_minimum_number_of_data_points_dict(self.startup.dexter_config.minimum_number_of_data_points).
                          create_mongo_repository())
         except Exception as e:
             raise e
@@ -66,20 +67,39 @@ class SingleMetricOrchestrator(OrchestratorBase):
 
             time_interval_enum = DaysEnum(time_interval)
             last_updated = self.startup.dexter_config.recommendation_days_last_updated
-
             campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
-            c = 1
+
             for campaign_id in campaign_ids:
-                print("Running {} out of {}".format(c, len(campaign_ids)))
-                c += 1
-                rule_evaluator = FacebookRuleEvaluatorFactory.get(
-                    algorithm_type=FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=LevelEnum.CAMPAIGN)
-                rule_evaluator.set_time_interval(time_interval_enum)
-                campaign_alg = self.__get_rule_algorithm(level=LevelEnum.CAMPAIGN,
-                                                         time_interval=time_interval_enum,
-                                                         date_stop=date_stop,
-                                                         rule_evaluator=rule_evaluator)
-                recommendations = campaign_alg.run(campaign_id, [FacebookRuleTypeSelectionEnum.GENERAL])
-                self._recommendations_repository.save_recommendations(recommendations, last_updated)
+                self.generate_recommendations(structure_id=campaign_id,
+                                              date_stop=date_stop,
+                                              last_updated=last_updated,
+                                              time_interval=time_interval_enum,
+                                              level=LevelEnum.CAMPAIGN)
+
+                adset_ids = self._data_repository.get_adset_ids_by_campaign_id(campaign_id)
+                for adset_id in adset_ids:
+                    self.generate_recommendations(structure_id=adset_id,
+                                                  date_stop=date_stop,
+                                                  last_updated=last_updated,
+                                                  time_interval=time_interval_enum,
+                                                  level=LevelEnum.ADSET)
+
+                    self.generate_recommendations(structure_id=adset_id,
+                                                  date_stop=date_stop,
+                                                  last_updated=last_updated,
+                                                  time_interval=time_interval_enum,
+                                                  level=LevelEnum.AD)
+
         except Exception as e:
             print(e)
+
+    def generate_recommendations(self, structure_id, date_stop, last_updated, time_interval, level):
+        rule_evaluator = FacebookRuleEvaluatorFactory.get(
+            algorithm_type=FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=level)
+        rule_evaluator.set_time_interval(time_interval)
+        algorithm = self.__get_rule_algorithm(level=level,
+                                              time_interval=time_interval,
+                                              date_stop=date_stop,
+                                              rule_evaluator=rule_evaluator)
+        recommendations = algorithm.run(structure_id, [FacebookRuleTypeSelectionEnum.GENERAL])
+        self._recommendations_repository.save_recommendations(recommendations, last_updated)

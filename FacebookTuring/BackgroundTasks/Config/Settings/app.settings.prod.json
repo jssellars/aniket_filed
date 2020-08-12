@@ -51,6 +51,7 @@
     "accounts_journal_database_name": "prod_facebook_turing_accounts_journal",
     "accounts_journal_collection_name": "journal"
   },
+  "sync_time": "00:10",
   "environment": "prod",
   "api_name": "FacebookTuringBackgroundTasks",
   "api_version": "1.0.0",

@@ -3,7 +3,6 @@ import random
 import traceback
 import typing
 from datetime import timedelta, datetime
-from functools import lru_cache
 
 import numpy as np
 from facebook_business.adobjects.ad import Ad
@@ -11,7 +10,6 @@ from facebook_business.adobjects.adaccount import AdAccount
 
 from Core.Dexter.Engine.Algorithms.FuzzyRuleBasedOptimization.TimeBucketWeightingMethods.TimeBucketWeightingBySpend import \
     time_bucket_weighting_by_spend
-
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase, BreakdownBaseEnum, \
     ActionBreakdownBaseEnum
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
@@ -34,6 +32,7 @@ class FacebookMetricCalculator(MetricCalculatorBase):
 
     def __init__(self):
         super().__init__()
+        self.minimum_number_of_data_points = None
         self._calculator = None
         value = str(random.randint(0, 1e20)) + self._date_stop.strftime(DEFAULT_DATETIME_ISO)
         self._calculator_id = hashlib.sha1(value.encode('utf-8')).hexdigest()
@@ -43,6 +42,10 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                                         database_name=self._repository.config.logs_database)
         else:
             self.__logger = None
+
+    def set_minimum_number_of_data_points(self, minimum_number_of_data_points: int = None):
+        self.minimum_number_of_data_points = minimum_number_of_data_points
+        return self
 
     def _current_state(self):
         current_state = {
@@ -77,12 +80,12 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                 (AntecedentTypeEnum.VALUE, FacebookMetricTypeEnum.INSIGHT_CATEGORICAL): self.categorical_value,
                 (AntecedentTypeEnum.VALUE, FacebookMetricTypeEnum.NUMBER_OF_ADS): self.number_of_ads_per_adset,
                 (AntecedentTypeEnum.VALUE, FacebookMetricTypeEnum.DUPLICATE_AD): self.duplicate_best_performing_ad,
-                (AntecedentTypeEnum.AVERAGE, FacebookMetricTypeEnum.INSIGHT): self.average
+                (AntecedentTypeEnum.AVERAGE, FacebookMetricTypeEnum.INSIGHT): self.average,
+                (AntecedentTypeEnum.VARIANCE, FacebookMetricTypeEnum.INSIGHT): self.variance
             }
 
         return self._calculator
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def audience_size(self, *args, **kwargs) -> typing.Any:
         structure_details = self._repository.get_structure_details(self._facebook_id, self._level)
 
@@ -118,7 +121,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
 
         return audience_size_estimate
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def has_pixel(self, *args, **kwargs) -> typing.Any:
         permanent_token = BusinessOwnerRepository(self._business_owner_repo_session).get_permanent_token(
             self._business_owner_id)
@@ -143,7 +145,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
 
         return len(pixels) > 0
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def has_over_20p_text(self, *args, **kwargs):
         structure_details = self._repository.get_structure_details(key_value=self._facebook_id, level=self._level)
         text_overlay_rec_codes = [1942017, 1942018, 1942019]
@@ -167,7 +168,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
 
         return True
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def is_prospecting_campaign(self, *args, **kwargs) -> bool:
         if self._level == LevelEnum.CAMPAIGN:
             structure_id = self._repository.get_adset_id_by_campaign_id(key_value=self._facebook_id)
@@ -207,7 +207,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                 self._logger.logger.info(log)
             return False
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def number_of_ads_per_adset(self, *args, **kwargs):
         ads = self._repository.get_all_ads_by_adset_id(key_value=self._facebook_id)
         return len(ads)
@@ -223,7 +222,7 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                       set_time_interval(self._time_interval).
                       set_debug_mode(self._debug).
                       set_breakdown_metadata(BreakdownMetadataBase(breakdown=BreakdownBaseEnum.NONE,
-                                                               action_breakdown=ActionBreakdownBaseEnum.NONE)))
+                                                                   action_breakdown=ActionBreakdownBaseEnum.NONE)))
 
         average_metric_values = [
             (ad_id, calculator.
@@ -244,7 +243,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
         best_performing_ad_name = self._repository.get_ad_name_by_ad_id(best_performing_ad_id)
         return best_performing_ad_id, best_performing_ad_name
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def weighted_trend(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         _date_start = datetime.strptime(date_start, DEFAULT_DATETIME)
         _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
@@ -294,7 +292,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
 
         return trend
 
-    @lru_cache(maxsize=MetricCalculatorBase.MAX_CACHE_SIZE)
     def weighted_fuzzy_trend(self,
                              date_start: typing.AnyStr = None,
                              date_stop: typing.AnyStr = None,

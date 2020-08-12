@@ -6,7 +6,6 @@ from threading import Thread
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.PersistanceLayer import DexterJournalMongoRepository
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
-from GoogleDexter.Infrastructure.PersistanceLayer.GoogleDexterMongoRepository import GoogleDexterMongoRepository
 
 BATCH_SIZE = 0.25
 SLEEP_TIME = 10

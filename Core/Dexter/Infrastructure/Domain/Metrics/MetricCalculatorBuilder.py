@@ -18,7 +18,6 @@ class MetricCalculatorBuilder:
         self._fuzzyfier_factory = None
         self._business_owner_id = None
         self._permanent_token = None
-        self._metrics = None
         self._facebook_config = None
         self._business_owner_repo_session = None
         self._date_stop = datetime.now()
@@ -77,3 +76,4 @@ class MetricCalculatorBuilder:
     def set_structure_id(self, structure_id):
         self._structure_id = structure_id
         return self
+

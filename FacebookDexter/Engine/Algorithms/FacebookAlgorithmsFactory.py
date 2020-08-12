@@ -12,6 +12,8 @@ from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.FacebookRuleBas
     FacebookRuleBasedOptimizationAdSetLevel
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.FacebookRuleBasedOptimizationCampaignLevel import \
     FacebookRuleBasedOptimizationCampaignLevel
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedSingleMetricOptimization.FacebookRuleBasedSingleMetricOptimizationAdLevel import FacebookRuleBasedSingleMetricOptimizationAdLevel
+from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedSingleMetricOptimization.FacebookRuleBasedSingleMetricOptimizationAdSetLevel import FacebookRuleBasedSingleMetricOptimizationAdSetLevel
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedSingleMetricOptimization.FacebookRuleBasedSingleMetricOptimizationCampaignLevel import \
     FacebookRuleBasedSingleMetricOptimizationCampaignLevel
 from FacebookDexter.Engine.MasterWorker.FacebookStrategyEnum import FacebookStrategyEnum
@@ -32,4 +34,10 @@ class FacebookAlgorithmsFactory(AlgorithmsFactoryBase):
         (FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, LevelEnum.CAMPAIGN,
          ChannelEnum.FACEBOOK,
          FacebookStrategyEnum.SINGLE_METRIC): FacebookRuleBasedSingleMetricOptimizationCampaignLevel(),
+        (FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, LevelEnum.ADSET,
+         ChannelEnum.FACEBOOK,
+         FacebookStrategyEnum.SINGLE_METRIC): FacebookRuleBasedSingleMetricOptimizationAdSetLevel(),
+        (FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, LevelEnum.AD,
+         ChannelEnum.FACEBOOK,
+         FacebookStrategyEnum.SINGLE_METRIC): FacebookRuleBasedSingleMetricOptimizationAdLevel(),
     }
