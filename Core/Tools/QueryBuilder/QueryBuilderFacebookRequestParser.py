@@ -4,10 +4,15 @@ from enum import Enum
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 
 
 class QueryBuilderFacebookRequestParser:
+    class Level:
+        ACCOUNT = 'account'
+        CAMPAIGN = 'campaign'
+        ADSET = 'adset'
+        AD = 'ad'
+
     class QueryBuilderColumnName(Enum):
         COLUMN = "Name"
         DIMENSION = "GroupColumnName"
@@ -20,6 +25,13 @@ class QueryBuilderFacebookRequestParser:
         DATE_START = "date_start"
         DATE_STOP = "date_stop"
         TIME_INCREMENT = "time_increment"
+
+    __request_structure_columns = [FieldsMetadata.campaign_id.name,
+                                   FieldsMetadata.campaign_name.name,
+                                   FieldsMetadata.adset_id.name,
+                                   FieldsMetadata.adset_name.name,
+                                   FieldsMetadata.ad_id.name,
+                                   FieldsMetadata.ad_name.name]
 
     def __init__(self):
         super().__init__()
@@ -76,19 +88,19 @@ class QueryBuilderFacebookRequestParser:
         return list(set(self.__structure_fields))
 
     def __add_structure_meta_information(self):
-        if self.level == Level.CAMPAIGN.value:
+        if self.level == self.Level.CAMPAIGN:
             self.__structure_fields += [FieldsMetadata.account_name.name,
                                         FieldsMetadata.account_id.name,
                                         FieldsMetadata.name.name,
                                         FieldsMetadata.id.name]
-        elif self.level == Level.ADSET.value:
+        elif self.level == self.Level.ADSET:
             self.__structure_fields += [FieldsMetadata.account_name.name,
                                         FieldsMetadata.account_id.name,
                                         FieldsMetadata.campaign_id.name,
                                         FieldsMetadata.campaign_name.name,
                                         FieldsMetadata.name.name,
                                         FieldsMetadata.id.name]
-        elif self.level == Level.AD.value:
+        elif self.level == self.Level.AD:
             self.__structure_fields += [FieldsMetadata.account_name.name,
                                         FieldsMetadata.account_id.name,
                                         FieldsMetadata.campaign_id.name,
@@ -149,7 +161,7 @@ class QueryBuilderFacebookRequestParser:
             self.__sort = ['date_start']
 
     def parse(self, request, parse_breakdowns=True):
-        self.level = request.get_level()
+        self.level = request.set_structure_columns(self.__request_structure_columns).get_level()
         self.parse_query_columns(request.Columns, parse_breakdowns=parse_breakdowns,
                                  column_type=self.QueryBuilderColumnName.COLUMN)
         self.parse_query_columns(request.Dimensions, parse_breakdowns=parse_breakdowns,

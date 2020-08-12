@@ -49,7 +49,8 @@
     "insights_database_name": "prod_facebook_turing_insights",
     "structures_database_name": "prod_facebook_turing_structures",
     "accounts_journal_database_name": "prod_facebook_turing_accounts_journal",
-    "accounts_journal_collection_name": "journal"
+    "accounts_journal_collection_name": "journal",
+    "sync_reports_collection": "sync_reports"
   },
   "sync_time": "00:10",
   "environment": "prodbak",

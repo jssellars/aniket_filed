@@ -33,7 +33,6 @@ class GraphAPIInsightsMapper:
                 pass
 
             if mapped_fields:
-                # todo: fix this shit
                 mapped_fields = [field for field in mapped_fields if field is not None]
                 mapped_data = [dict(ChainMap(*entry)) for entry in itertools.product(*mapped_fields)]
                 mapped_response.extend(mapped_data)

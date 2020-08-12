@@ -29,4 +29,3 @@ def run_daily_sync():
                                 name="Facebook Turing Daily Sync Error",
                                 description="Failed to sync data.")
         logger.logger.exception(log.to_dict())
-        return

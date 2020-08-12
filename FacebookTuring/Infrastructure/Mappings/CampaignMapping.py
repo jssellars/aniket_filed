@@ -57,5 +57,5 @@ class CampaignMapping(MapperBase):
         data[MiscFieldsEnum.details] = BSON.encode(copy.deepcopy(data))
         data[MiscFieldsEnum.actions] = {}
         data[MiscFieldsEnum.status] = map_facebook_status(data.get(GraphAPIInsightsFields.effective_status, None))
-        ceva = self._remove_unknown_data(data)
+
         return self._remove_unknown_data(data)

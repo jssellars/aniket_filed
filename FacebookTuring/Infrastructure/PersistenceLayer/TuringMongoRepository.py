@@ -17,7 +17,63 @@ class TuringMongoRepository(MongoRepositoryBase):
     def __init__(self, *args, **kwargs):
         super(TuringMongoRepository, self).__init__(*args, **kwargs)
 
-    def get_active_structure_ids(self, key_name: typing.AnyStr = None, key_value: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def get_campaigns_by_ad_account(self, account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+        self.set_collection(Level.CAMPAIGN.value)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    MiscFieldsEnum.account_id: {
+                        MongoOperator.EQUALS.value: account_id
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value]
+                    }
+                }
+            ]
+        }
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+        try:
+            campaigns = self.get(query, projection)
+        except Exception as e:
+            raise e
+
+        return self.__encode_structure_details_to_bson(campaigns)
+
+    def get_adsets_by_campaign_id(self, campaign_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
+        self.set_collection(Level.ADSET.value)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelToFacebookIdKeyMapping.CAMPAIGN.value: {
+                        MongoOperator.IN.value: campaign_ids
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value]
+                    }
+                }
+            ]
+        }
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        try:
+            adsets = self.get(query, projection)
+        except Exception as e:
+            raise e
+
+        return self.__encode_structure_details_to_bson(adsets)
+
+    def get_active_structure_ids(self, key_name: typing.AnyStr = None, key_value: typing.AnyStr = None) -> typing.List[
+        typing.Dict]:
         query = {
             MongoOperator.AND.value: [
                 {
@@ -287,6 +343,12 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         self.update_many(query_filter, query)
 
+    def __get_structure_id(self, structure: typing.Any = None, level: Level = None) -> typing.AnyStr:
+        if isinstance(structure, dict):
+            return structure.get(LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
+        else:
+            return getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
+
     def add_structure_many(self, account_id: typing.AnyStr = None, level: Level = None,
                            structures: typing.List[typing.Any] = None) -> typing.NoReturn:
         self.set_collection(collection_name=level.value)
@@ -295,8 +357,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         existing_structures_ids = set(existing_structures_ids)
 
         # get structures ids
-        structure_ids = [getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value) for
-                         structure in structures]
+        structure_ids = [self.__get_structure_id(structure, level) for structure in structures]
         structure_ids = set(structure_ids)
 
         # change current structures status to remove
@@ -310,8 +371,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         # add new structures
         new_structures_ids = list(structure_ids - existing_structures_ids)
         new_structures = [structure for structure in structures
-                          if getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value) in
-                          new_structures_ids]
+                          if self.__get_structure_id(structure, level) in new_structures_ids]
 
         if new_structures:
             self.add_many(new_structures)
@@ -319,8 +379,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         # update common structures
         common_structures_ids = list(existing_structures_ids.intersection(structure_ids))
         common_structures = [structure for structure in structures
-                             if getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
-                             in common_structures_ids]
+                             if self.__get_structure_id(structure, level) in common_structures_ids]
 
         if common_structures:
             self.change_status_many(level=level,
@@ -412,6 +471,34 @@ class TuringMongoRepository(MongoRepositoryBase):
             }
         }
         self.update_one(query_filter, query)
+
+    def get_latest_by_account_id(self,
+                                 database: typing.AnyStr = None,
+                                 collection: typing.AnyStr = None,
+                                 start_date: typing.Union[datetime, typing.AnyStr] = None,
+                                 account_id: typing.AnyStr = None
+                                 ):
+        self.set_database(database)
+        self.set_collection(collection)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    MiscFieldsEnum.account_id: {
+                        MongoOperator.EQUALS.value: account_id
+                    }
+                },
+                {
+                    MiscFieldsEnum.last_updated_at: {
+                        MongoOperator.GREATERTHANEQUAL.value: start_date
+                    }
+                }
+            ]
+        }
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.ON.value
+        }
+        results = self.get(query=query, projection=projection)
+        return results
 
     def new_insights_repository(self):
         repository = TuringMongoRepository(config=self.config, database_name=self.config.insights_database_name)

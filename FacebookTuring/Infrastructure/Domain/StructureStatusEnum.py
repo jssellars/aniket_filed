@@ -7,3 +7,4 @@ class StructureStatusEnum(Enum):
     DEPRECATED = 3
     PAUSED = 4
     ARCHIVED = 5
+    COMPLETED = 6

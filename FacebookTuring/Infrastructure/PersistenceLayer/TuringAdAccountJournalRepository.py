@@ -5,8 +5,10 @@ from datetime import datetime, timedelta
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
+from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
+from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEvent import AdAccountDetails
 
 
@@ -55,6 +57,20 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                     MiscFieldsEnum.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
+                },
+                {
+                    MiscFieldsEnum.structures_sync_status: {
+                        MongoOperator.IN.value: [AdAccountSyncStatusEnum.COMPLETED.value,
+                                                 AdAccountSyncStatusEnum.PENDING.value,
+                                                 AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS.value]
+                    }
+                },
+                {
+                    MiscFieldsEnum.insights_sync_status: {
+                        MongoOperator.IN.value: [AdAccountSyncStatusEnum.COMPLETED.value,
+                                                 AdAccountSyncStatusEnum.PENDING.value,
+                                                 AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS.value]
+                    }
                 }
             ]
         }
@@ -64,7 +80,11 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                     MongoOperator.EQUALS.value: business_owner_id
                 }
             })
-        results = self.get(query)
+
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+        results = self.get(query, projection)
         return results
 
     def get_last_updated_accounts(self, business_owner_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
@@ -92,7 +112,6 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
 
     def update_ad_accounts_status(self, ad_accounts: typing.List[typing.AnyStr] = None,
                                   new_status: StructureStatusEnum = None) -> typing.NoReturn:
-        # ad_accounts = [ad_account for ad_account in ad_accounts]
         query_filter = {
             MiscFieldsEnum.account_id: {
                 MongoOperator.IN.value: ad_accounts
@@ -118,6 +137,30 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         }
         self.update_one(query_filter, query)
 
+    def update_last_sync_time_by_business_owner_id(self, business_owner_id: typing.AnyStr = None) -> typing.NoReturn:
+        # get business owner details
+        query = {
+            MiscFieldsEnum.business_owner_id: {
+                MongoOperator.EQUALS.value: business_owner_id
+            }
+        }
+        business_owner_details = self.get(query)
+
+        # update last synced on to match the time when insights finished syncing for each ad account
+        for detail in business_owner_details:
+            update_last_sync_time_query_filter = {
+                MiscFieldsEnum.account_id: {
+                    MongoOperator.EQUALS.value: detail.get(MiscFieldsEnum.account_id)
+                }
+            }
+            update_last_sync_time_query = {
+                MongoOperator.SET.value: {
+                    MiscFieldsEnum.last_synced_on: detail.get(MiscFieldsEnum.insights_sync_end_date),
+                    MiscFieldsEnum.previous_last_synced_on: detail.get(MiscFieldsEnum.last_synced_on)
+                }
+            }
+            self.update_one(query_filter=update_last_sync_time_query_filter, query=update_last_sync_time_query)
+
     def add_ad_accounts(self, business_owner_id: typing.AnyStr = None,
                         ad_accounts: typing.List[AdAccountDetails] = None) -> typing.NoReturn:
         new_accounts = []
@@ -126,11 +169,131 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             entry[MiscFieldsEnum.account_id] = entry.pop(MiscFieldsEnum.id).split("_")[1]
             entry[MiscFieldsEnum.business_owner_id] = business_owner_id
             entry[MiscFieldsEnum.status] = StructureStatusEnum.ACTIVE.value
+            entry[MiscFieldsEnum.structures_sync_status] = AdAccountSyncStatusEnum.PENDING.value
+            entry[MiscFieldsEnum.insights_sync_status] = AdAccountSyncStatusEnum.PENDING.value
             entry[MiscFieldsEnum.last_synced_on] = (datetime.now() -
                                                     timedelta(days=MiscFieldsEnum.last_one_months))
+            entry[MiscFieldsEnum.previous_last_synced_on] = None
+            entry[MiscFieldsEnum.insights_sync_start_date] = None
+            entry[MiscFieldsEnum.insights_sync_end_date] = None
+            entry[MiscFieldsEnum.structures_sync_start_date] = None
+            entry[MiscFieldsEnum.structures_sync_end_date] = None
+
             new_accounts.append(copy.deepcopy(entry))
 
         self.add_many(new_accounts)
+
+    def change_account_sync_status(self,
+                                   accounts_details: typing.List[typing.Dict] = None,
+                                   sync_status: AdAccountSyncStatusEnum = None) -> typing.NoReturn:
+        self.set_collection(self.config.accounts_journal_collection_name)
+
+        for entry in accounts_details:
+            # create query to filter entries by business owner and ad account id and status
+            query_filter = {
+                MongoOperator.AND.value: [
+                    {
+                        MiscFieldsEnum.business_owner_id: {
+                            MongoOperator.EQUALS.value: entry[MiscFieldsEnum.business_owner_id]
+                        }
+                    },
+                    {
+                        MiscFieldsEnum.account_id: {
+                            MongoOperator.EQUALS.value: entry[MiscFieldsEnum.account_id]
+                        }
+                    },
+                    {
+                        MiscFieldsEnum.status: {
+                            MongoOperator.EQUALS.value: entry[MiscFieldsEnum.status]
+                        }
+                    }
+                ]
+            }
+
+            # create query to update entry status to sync_status
+            query = {
+                MongoOperator.SET.value: {
+                    MiscFieldsEnum.sync_status: sync_status.value
+                }
+            }
+
+            self.update_one(query_filter=query_filter, query=query)
+
+    def change_account_sync_start_date(self, account_id: typing.AnyStr = None) -> typing.NoReturn:
+        self.set_collection(self.config.accounts_journal_collection_name)
+        query_filter = {
+            MiscFieldsEnum.account_id: {
+                MongoOperator.EQUALS.value: account_id
+            }
+        }
+        query = {
+            MongoOperator.SET.value: {
+                MiscFieldsEnum.sync_start_date: datetime.now(),
+                MiscFieldsEnum.sync_end_date: None,
+                MiscFieldsEnum.sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
+                MiscFieldsEnum.insights_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
+                MiscFieldsEnum.structures_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value
+            }
+        }
+        self.update_one(query_filter=query_filter, query=query)
+
+    def change_account_structures_sync_status(self,
+                                              account_id: typing.AnyStr = None,
+                                              new_status: AdAccountSyncStatusEnum = None,
+                                              start_date: datetime = None,
+                                              end_date: datetime = None) -> typing.NoReturn:
+        self.set_collection(self.config.accounts_journal_collection_name)
+        query_filter = {
+            MiscFieldsEnum.account_id: {
+                MongoOperator.EQUALS.value: account_id
+            }
+        }
+
+        query = {
+            MongoOperator.SET.value: {
+                MiscFieldsEnum.structures_sync_status: new_status.value
+            }
+        }
+
+        if start_date:
+            query[MongoOperator.SET.value][MiscFieldsEnum.structures_sync_start_date] = start_date
+        if end_date:
+            query[MongoOperator.SET.value][MiscFieldsEnum.structures_sync_end_date] = end_date
+
+        self.update_one(query_filter, query)
+
+    def change_account_insights_sync_status(self,
+                                            account_id: typing.AnyStr = None,
+                                            new_status: AdAccountSyncStatusEnum = None,
+                                            start_date: datetime = None,
+                                            end_date: datetime = None) -> typing.NoReturn:
+        self.set_collection(self.config.accounts_journal_collection_name)
+        query_filter = {
+            MiscFieldsEnum.account_id: {
+                MongoOperator.EQUALS.value: account_id
+            }
+        }
+        query = {
+            MongoOperator.SET.value: {
+                MiscFieldsEnum.insights_sync_status: new_status.value
+            }
+        }
+        if start_date:
+            query[MongoOperator.SET.value][MiscFieldsEnum.insights_sync_start_date] = start_date
+        if end_date:
+            query[MongoOperator.SET.value][MiscFieldsEnum.insights_sync_end_date] = end_date
+
+        self.update_one(query_filter, query)
+
+    def save_sync_report(self,
+                         report: typing.List[SyncStatusReport] = None,
+                         created_at: datetime = None) -> typing.NoReturn:
+        self.set_collection(self.config.sync_reports_collection)
+        document = {
+            MiscFieldsEnum.created_at: created_at,
+            MiscFieldsEnum.report: object_to_json(report)
+        }
+        self.add_one(document)
 
     def new_ad_account_journal_repository(self):
         repository = TuringAdAccountJournalRepository(config=self.config,

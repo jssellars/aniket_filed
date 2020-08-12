@@ -51,6 +51,8 @@ class QueryBuilderRequestMapper:
 
     table_name = None
 
+    __structure_columns = []
+
     def __init__(self, query_builder_request: typing.Dict = None, table_name: EnumerationBase = None):
         # get table name
         self.TableName = query_builder_request['TableName']
@@ -73,8 +75,29 @@ class QueryBuilderRequestMapper:
 
         self.table_name = table_name
 
+    def set_structure_columns(self, structure_columns: typing.List[typing.AnyStr] = None):
+        self.__structure_columns = structure_columns
+        return self
+
     def get_level(self):
-        return self.table_name.get_by_value(self.TableName).lower()
+        level = self.table_name.get_by_value(self.TableName).lower()
+        if self.__structure_columns:
+            has_structure_field = self.__has_structure_fields()
+            if not has_structure_field:
+                # this string literal should be removed and extracted into a generic level enum
+                level = 'account'
+        return level
+
+    def __has_structure_fields(self):
+        # determine if it has a campaign structure filed. Stop searching for columns if a structure field is found
+        # in the query.
+        for column in self.Columns:
+            if column.Name in self.__structure_columns:
+                return True
+        for column in self.Dimensions:
+            if column.GroupColumnName in self.__structure_columns:
+                return True
+        return False
 
     def get_report(self):
         return self.table_name.get_enum_by_value(self.TableName)

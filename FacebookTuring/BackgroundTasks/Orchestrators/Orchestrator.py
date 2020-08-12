@@ -8,7 +8,9 @@ from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessage
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
 from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import \
     UpdatedBusinessOwnersDetails, \
     FacebookTuringDataSyncCompletedEvent
@@ -18,7 +20,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 class Orchestrator:
-    ACCOUNTS_PER_THREAD = 0.50
+    ACCOUNTS_PER_THREAD = 0.20
 
     def __init__(self,
                  insights_repository: TuringMongoRepository = None,
@@ -32,6 +34,7 @@ class Orchestrator:
         self.__insights_syncronizer = None
         self.__logger = None
         self.__rabbit_logger = None
+        self.__reporter = None
 
     def set_insights_repository(self, insights_repository: TuringMongoRepository = None):
         self.__insights_repository = insights_repository
@@ -45,18 +48,28 @@ class Orchestrator:
         self.__account_journal_repository = account_journal_repository
         return self
 
-    def set_logger(self, logger: typing.Any):
+    def set_logger(self, logger: typing.Any = None):
         self.__logger = logger
         return self
 
-    def set_rabbit_logger(self, logger: typing.Any):
+    def set_rabbit_logger(self, logger: typing.Any = None):
         self.__rabbit_logger = logger
+        return self
+
+    def set_reporter(self, reporter: typing.Any = None):
+        self.__reporter = reporter
         return self
 
     def run(self, business_owner_id: typing.AnyStr = None):
         # get latest ad account state for all BO
         ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active(
             business_owner_id=business_owner_id)
+
+        # mark ad accounts currently being synced as sync_status = IN_PROGRESS
+        self.__account_journal_repository.change_account_sync_status(ad_accounts_details,
+                                                                     AdAccountSyncStatusEnum.IN_PROGRESS)
+
+        # group ad accounts by business owner id
         business_owners = self.__group_by_business_owner_id(ad_accounts_details)
 
         # for each BO for each ad account, start a structures sync thread and an insights sync thread
@@ -72,7 +85,7 @@ class Orchestrator:
                                           entry)))
             for task in tasks:
                 task.start()
-            #  publish event with updated ad accounts to Facebook Dexter
+            # publish event with updated ad accounts to Facebook Dexter
             # this publish event can be modified to publish one update for all BOs available. It makes more sense to
             # publish as they come to minimise the
             # waiting time for Dexter to run and the computation volume.
@@ -85,7 +98,19 @@ class Orchestrator:
             #      self.__account_journal_repository.new_ad_account_journal_repository(),
             #      entry)
 
+            # update ad account last sync time for current business owner based on the time when the insights sync
+            # finished for each ad account.
+            self.__account_journal_repository.update_last_sync_time_by_business_owner_id(business_owner_id)
+
+            # publish message to Dexter Background tasks to start processing the data for the current business owner
             self.__publish_business_owner_synced_event(business_owner_id)
+
+        # compile and send sync status report
+        self.__reporter = SyncStatusReporter(account_journal_repository=self.__account_journal_repository,
+                                             structures_repository=self.__structures_repository)
+
+        sync_report = self.__reporter.compile_report()
+        self.__reporter.commit_report(sync_report)
 
     @staticmethod
     def __group_by_business_owner_id(ad_accounts_details: typing.List[typing.Dict] = None) -> typing.Dict:
