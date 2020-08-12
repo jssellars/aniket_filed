@@ -193,7 +193,7 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
         value, _ = mc.compute_value(atype=keyword.antecedent_type, time_interval=self._time_interval)
 
         if value is not None:
-            value = abs(float("{:.2f}".format(value)))
+            value = float("{:.2f}".format(value))
 
         return value
 

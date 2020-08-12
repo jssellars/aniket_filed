@@ -68,12 +68,18 @@
     "days_since_last_change": 3,
     "recommendation_days_last_updated": 3,
     "time_intervals": [
-      3,
       7,
       14,
+      3,
       30
     ],
-    "date_stop": null
+    "date_stop": null,
+    "minimum_number_of_data_points": {
+      "3": 2,
+      "7": 4,
+      "14": 9,
+      "30": 20
+    }
   },
   "debug": false,
   "environment": "prod",

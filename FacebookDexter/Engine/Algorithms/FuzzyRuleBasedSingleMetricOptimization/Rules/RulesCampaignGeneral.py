@@ -25,7 +25,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=8__ "
-                      "decreased by __id=1&value=null__%, "
+                      "decreased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=3__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=11__. "
                       "This means your competitors have better ad creative or your "
@@ -56,7 +56,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=8__ "
-                      "decreased by __id=1&value=null__%, "
+                      "decreased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=7__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=11__. "
                       "This means your competitors have better ad creative or your "
@@ -87,7 +87,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=8__ "
-                      "decreased by __id=1&value=null__%, "
+                      "decreased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=14__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=11__. "
                       "This means your competitors have better ad creative or your "
@@ -118,7 +118,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=8__ "
-                      "decreased by __id=1&value=null__%, "
+                      "decreased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=30__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=IMPRESSIONS&metric_type=1&antecedent_type=11__. "
                       "This means your competitors have better ad creative or your "
@@ -149,7 +149,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=CPM&metric_type=1&antecedent_type=8__ "
-                      "increased by __id=1&value=null__%, "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=3__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=CPM&metric_type=1&antecedent_type=11__. "
                       "This means your audience saw the ads too many times "
@@ -180,7 +180,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=CPM&metric_type=1&antecedent_type=8__ "
-                      "increased by __id=1&value=null__%, "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=7__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=CPM&metric_type=1&antecedent_type=11__. "
                       "This means your audience saw the ads too many times "
@@ -211,7 +211,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=CPM&metric_type=1&antecedent_type=8__ "
-                      "increased by __id=1&value=null__%, "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=14__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=CPM&metric_type=1&antecedent_type=11__. "
                       "This means your audience saw the ads too many times "
@@ -242,7 +242,7 @@ RULES_CAMPAIGN_GENERAL = [
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
              template="Dexter noticed that your __id=1&metric_name=CPM&metric_type=1&antecedent_type=8__ "
-                      "increased by __id=1&value=null__%, "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
                       "compared to the last __id=1&time_interval=30__ days average "
                       "of __id=2&value=null__ __id=2&metric_name=CPM&metric_type=1&antecedent_type=11__. "
                       "This means your audience saw the ads too many times "
@@ -1840,6 +1840,134 @@ RULES_CAMPAIGN_GENERAL = [
                  Antecedent(aid=2,
                             atype=AntecedentTypeEnum.VARIANCE,
                             metric=FacebookAvailableSingleMetricEnum.LANDING_PAGE_CONVERSION_RATE.value,
+                            operator=LogicOperatorEnum.EQUAL_OR_GREATER_THAN,
+                            expected_value=5)
+             ]),
+    RuleBase(rtype=FacebookRuleTypeEnum.BUDGET_AND_BID,
+             channel=ChannelEnum.FACEBOOK,
+             category=FacebookRuleCategoryEnum.IMPROVE_CONVERSION_RATE,
+             importance=FacebookRuleImportanceEnum.HIGH,
+             source=FacebookRuleSourceEnum.DEXTER,
+             level=LevelEnum.CAMPAIGN,
+             action=FacebookActionEnum.NONE,
+             redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
+             template="Dexter noticed that your __id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=8__ "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
+                      "compared to the last __id=1&time_interval=3__ days average "
+                      "of __id=2&value=null__ __id=2&metric_name=CONVERSIONS&metric_type=1&antecedent_type=11__. "
+                      "This means your Landing Page has some issues or your ad "
+                      "creative doesn't resonate with the Landing Page. "
+                      "Try to convert more people by writing more compelling "
+                      "messages that match your ads and audience's interests. ",
+             breakdown_metadata=BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
+                                                      action_breakdown=FacebookActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.THREE,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=FacebookLinguisticVariableEnum.INCREASING),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.VARIANCE,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUAL_OR_GREATER_THAN,
+                            expected_value=15)
+             ]),
+    RuleBase(rtype=FacebookRuleTypeEnum.BUDGET_AND_BID,
+             channel=ChannelEnum.FACEBOOK,
+             category=FacebookRuleCategoryEnum.IMPROVE_CONVERSION_RATE,
+             importance=FacebookRuleImportanceEnum.HIGH,
+             source=FacebookRuleSourceEnum.DEXTER,
+             level=LevelEnum.CAMPAIGN,
+             action=FacebookActionEnum.NONE,
+             redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
+             template="Dexter noticed that your __id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=8__ "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
+                      "compared to the last __id=1&time_interval=7__ days average "
+                      "of __id=2&value=null__ __id=2&metric_name=CONVERSIONS&metric_type=1&antecedent_type=11__. "
+                      "This means your Landing Page has some issues or your ad "
+                      "creative doesn't resonate with the Landing Page. "
+                      "Try to convert more people by writing more compelling "
+                      "messages that match your ads and audience's interests. ",
+             breakdown_metadata=BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
+                                                      action_breakdown=FacebookActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.SEVEN,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=FacebookLinguisticVariableEnum.INCREASING),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.VARIANCE,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUAL_OR_GREATER_THAN,
+                            expected_value=10)
+             ]),
+    RuleBase(rtype=FacebookRuleTypeEnum.BUDGET_AND_BID,
+             channel=ChannelEnum.FACEBOOK,
+             category=FacebookRuleCategoryEnum.IMPROVE_CONVERSION_RATE,
+             importance=FacebookRuleImportanceEnum.HIGH,
+             source=FacebookRuleSourceEnum.DEXTER,
+             level=LevelEnum.CAMPAIGN,
+             action=FacebookActionEnum.NONE,
+             redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
+             template="Dexter noticed that your __id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=8__ "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
+                      "compared to the last __id=1&time_interval=14__ days average "
+                      "of __id=2&value=null__ __id=2&metric_name=CONVERSIONS&metric_type=1&antecedent_type=11__. "
+                      "This means your Landing Page has some issues or your ad "
+                      "creative doesn't resonate with the Landing Page. "
+                      "Try to convert more people by writing more compelling "
+                      "messages that match your ads and audience's interests. ",
+             breakdown_metadata=BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
+                                                      action_breakdown=FacebookActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.FOURTEEN,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=FacebookLinguisticVariableEnum.INCREASING),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.VARIANCE,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUAL_OR_GREATER_THAN,
+                            expected_value=10)
+             ]),
+    RuleBase(rtype=FacebookRuleTypeEnum.BUDGET_AND_BID,
+             channel=ChannelEnum.FACEBOOK,
+             category=FacebookRuleCategoryEnum.IMPROVE_CONVERSION_RATE,
+             importance=FacebookRuleImportanceEnum.HIGH,
+             source=FacebookRuleSourceEnum.DEXTER,
+             level=LevelEnum.CAMPAIGN,
+             action=FacebookActionEnum.NONE,
+             redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
+             template="Dexter noticed that your __id=1&metric_name=CONVERSIONS&metric_type=1&antecedent_type=8__ "
+                      "increased overtime, but today changed by __id=1&value=null__%, "
+                      "compared to the last __id=1&time_interval=30__ days average "
+                      "of __id=2&value=null__ __id=2&metric_name=CONVERSIONS&metric_type=1&antecedent_type=11__. "
+                      "This means your Landing Page has some issues or your ad "
+                      "creative doesn't resonate with the Landing Page. "
+                      "Try to convert more people by writing more compelling "
+                      "messages that match your ads and audience's interests. ",
+             breakdown_metadata=BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
+                                                      action_breakdown=FacebookActionBreakdownEnum.NONE),
+             time_interval=DaysEnum.MONTH,
+             connective=Connective(LogicOperatorEnum.AND),
+             antecedents=[
+                 Antecedent(aid=1,
+                            atype=AntecedentTypeEnum.FUZZY_TREND,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
+                            operator=LogicOperatorEnum.EQUALS,
+                            expected_value=FacebookLinguisticVariableEnum.INCREASING),
+                 Antecedent(aid=2,
+                            atype=AntecedentTypeEnum.VARIANCE,
+                            metric=FacebookAvailableSingleMetricEnum.CONVERSIONS.value,
                             operator=LogicOperatorEnum.EQUAL_OR_GREATER_THAN,
                             expected_value=5)
              ])

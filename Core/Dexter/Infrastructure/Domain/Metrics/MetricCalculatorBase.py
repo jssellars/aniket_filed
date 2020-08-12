@@ -465,7 +465,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             if mean_on_time_interval == 0.0 or current_metric_value == 0.0:
                 return 1 * self.HUNDRED_MULTIPLIER
             try:
-                difference = self.HUNDRED_MULTIPLIER * float(abs((current_metric_value - mean_on_time_interval) / mean_on_time_interval))
+                difference = self.HUNDRED_MULTIPLIER * float((current_metric_value - mean_on_time_interval) / mean_on_time_interval)
             except ZeroDivisionError:
                 if current_metric_value == 0.0:
                     difference = None

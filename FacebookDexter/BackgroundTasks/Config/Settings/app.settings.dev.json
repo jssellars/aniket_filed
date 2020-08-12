@@ -11,10 +11,10 @@
         "name": "dev.direct",
         "type": "direct",
         "queues": {
-          "inbound": "local.facebook.dexter.inbound",
-          "inbound_routing_key": "local.facebook.dexter.inbound.key",
-          "outbound": "local.facebook.dexter.outbound",
-          "outbound_routing_key": "local.facebook.dexter.outbound.key"
+          "inbound": "dev.facebook.dexter.inbound",
+          "inbound_routing_key": "dev.facebook.dexter.inbound.key",
+          "outbound": "dev.facebook.dexter.outbound",
+          "outbound_routing_key": "dev.facebook.dexter.outbound.key"
         }
       }
     ],
@@ -47,9 +47,9 @@
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
     "recommendations_database_name": "dev_dexter_fuzzy_inference_recommendations",
-    "recommendations_collection_name": "recommendations_test11",
+    "recommendations_collection_name": "recommendations",
     "journal_database_name": "dev_dexter_engine_run_journal",
-    "journal_collection_name": "dexter_journal_test11",
+    "journal_collection_name": "dexter_journal",
     "structures_database": "dev_facebook_turing_structures",
     "insights_database": "dev_facebook_turing_insights",
     "logs_database": "dev_facebook_dexter_logs"
@@ -73,7 +73,7 @@
       3,
       30
     ],
-    "date_stop": "2020-07-26",
+    "date_stop": null,
     "minimum_number_of_data_points": {
       "3": 2,
       "7": 4,
