@@ -13,14 +13,17 @@ PERCENTAGE_MULTIPLIER = 100
 class FacebookAvailableSingleMetricEnum(EnumerationBase):
     CPC = Metric(name=FieldsMetadata.cpc_all.name, display_name="CPC",
                  numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
-                 denominator=FacebookAvailableSingleMetricsEnum.LINK_CLICKS.value, mtype=FacebookMetricTypeEnum.INSIGHT)
-    CPM = Metric(name=FieldsMetadata.cpm.name, display_name="CPM", numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                 denominator=FacebookAvailableSingleMetricsEnum.LINK_CLICKS.value,
+                 mtype=FacebookMetricTypeEnum.INSIGHT)
+    CPM = Metric(name=FieldsMetadata.cpm.name, display_name="CPM",
+                 numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
                  denominator=FacebookAvailableSingleMetricsEnum.IMPRESSIONS.value, multiplier=MILE_MULTIPLIER,
                  mtype=FacebookMetricTypeEnum.INSIGHT)
     # link_clicks / impressions
     CTR = Metric(name=FieldsMetadata.ctr_all.name, display_name="CTR",
                  numerator=FacebookAvailableSingleMetricsEnum.LINK_CLICKS.value,
-                 denominator=FacebookAvailableSingleMetricsEnum.IMPRESSIONS.value, mtype=FacebookMetricTypeEnum.INSIGHT)
+                 denominator=FacebookAvailableSingleMetricsEnum.IMPRESSIONS.value,
+                 mtype=FacebookMetricTypeEnum.INSIGHT)
     COST_PER_RESULT = Metric(name=FieldsMetadata.cost_per_result.name, display_name="Cost per result",
                              numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
                              denominator=FacebookAvailableSingleMetricsEnum.RESULTS.value,
@@ -41,11 +44,13 @@ class FacebookAvailableSingleMetricEnum(EnumerationBase):
     # frequency =  impressions / reach
     FREQUENCY = Metric(name=FieldsMetadata.frequency.name, display_name="Frequency",
                        numerator=FacebookAvailableSingleMetricsEnum.IMPRESSIONS.value,
-                       denominator=FacebookAvailableSingleMetricsEnum.REACH.value, mtype=FacebookMetricTypeEnum.INSIGHT)
+                       denominator=FacebookAvailableSingleMetricsEnum.REACH.value,
+                       mtype=FacebookMetricTypeEnum.INSIGHT)
     # conversions / unique clicks
     CR = Metric(name=FieldsMetadata.conversion_rate_ranking.name, display_name="Conversion rate",
                 numerator=FacebookAvailableSingleMetricsEnum.CONVERSIONS.value,
-                denominator=FacebookAvailableSingleMetricsEnum.UNIQUE_CLICKS.value, mtype=FacebookMetricTypeEnum.INSIGHT,
+                denominator=FacebookAvailableSingleMetricsEnum.UNIQUE_CLICKS.value,
+                mtype=FacebookMetricTypeEnum.INSIGHT,
                 multiplier=1000)
     #  engagement_rate = ( likes + comments + shares + clicks + views) / reach. FB provides this metric
     ENGAGEMENT_RATE = Metric(name=FieldsMetadata.post_engagement.name, display_name="Engagement rate",
@@ -56,7 +61,52 @@ class FacebookAvailableSingleMetricEnum(EnumerationBase):
     ROAS = Metric(name=FieldsMetadata.purchase_roas.name, display_name="ROAS",
                   numerator=FacebookAvailableSingleMetricsEnum.PURCHASES_VALUE.value,
                   denominator=FacebookAvailableSingleMetricsEnum.SPEND.value, mtype=FacebookMetricTypeEnum.INSIGHT)
-
+    COST_PER_UNIQUE_CONTENT_VIEW = Metric(name="cost_per_unique_content_view",
+                                          display_name="Cost per unique content view",
+                                          numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                                          denominator=FacebookAvailableSingleMetricsEnum.CONTENT_VIEWS_UNIQUE.value,
+                                          mtype=FacebookMetricTypeEnum.INSIGHT)
+    COST_PER_UNIQUE_ADD_TO_CARTS = Metric(name='cost_per_unique_add_to_carts',
+                                          display_name="Cost per unique add to carts",
+                                          numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                                          denominator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART_UNIQUE.value,
+                                          mtype=FacebookMetricTypeEnum.INSIGHT)
+    COST_PER_UNIQUE_CHECKOUTS_INITIATED = Metric(name="cost_per_unique_checkouts_initiated",
+                                                 display_name="Cost per unique checkouts initiated",
+                                                 numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                                                 denominator=FacebookAvailableSingleMetricsEnum.CHECKOUTS_INITIATED_UNIQUE.value,
+                                                 mtype=FacebookMetricTypeEnum.INSIGHT)
+    COST_PER_UNIQUE_CLICKS_ALL = Metric(name='cost_per_unique_clicks_all',
+                                        display_name="Cost per unique clicks all",
+                                        numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                                        denominator=FacebookAvailableSingleMetricsEnum.UNIQUE_CLICKS_ALL.value,
+                                        mtype=FacebookMetricTypeEnum.INSIGHT)
+    COST_PER_ADD_TO_CART = Metric(name='cost_per_add_to_cart',
+                                  display_name="Cost per add to cart",
+                                  numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                                  denominator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART.value,
+                                  mtype=FacebookMetricTypeEnum.INSIGHT)
+    COST_PER_CHECKOUT = Metric(name='cost_per_checkout',
+                               display_name="Cost per checkout",
+                               numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                               denominator=FacebookAvailableSingleMetricsEnum.CHECKOUTS_INITIATED.value,
+                               mtype=FacebookMetricTypeEnum.INSIGHT)
+    COST_PER_3S_VIDEO_VIEWS = Metric(name='cost_per_3_s_video_views',
+                                     display_name="Cost per 3 s video views",
+                                     numerator=FacebookAvailableSingleMetricsEnum.SPEND.value,
+                                     denominator=FacebookAvailableSingleMetricsEnum.VIDEO_PLAYS_3S.value,
+                                     mtype=FacebookMetricTypeEnum.INSIGHT)
+    LANDING_PAGE_CONVERSION_RATE = Metric(name='landing_page_conversion_rate',
+                                          display_name="Landing page conversion rate",
+                                          numerator=FacebookAvailableSingleMetricsEnum.CONVERSIONS.value,
+                                          denominator=FacebookAvailableSingleMetricsEnum.LINK_CLICKS.value,
+                                          multiplier=PERCENTAGE_MULTIPLIER,
+                                          mtype=FacebookMetricTypeEnum.INSIGHT)
+    ADD_TO_CART_AVERAGE_VALUE = Metric(name='add_to_cart_average_value',
+                                       display_name="Add to cart average value",
+                                       numerator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART_VALUE.value,
+                                       denominator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART.value,
+                                       mtype=FacebookMetricTypeEnum.INSIGHT)
     # single metrics
     RESULTS = Metric(name=FieldsMetadata.results.name, display_name="Results",
                      numerator=FacebookAvailableSingleMetricsEnum.RESULTS.value, mtype=FacebookMetricTypeEnum.INSIGHT)
@@ -124,6 +174,63 @@ class FacebookAvailableSingleMetricEnum(EnumerationBase):
                              numerator=FacebookAvailableSingleMetricsEnum.QUALITY_RANKING.value,
                              mtype=FacebookMetricTypeEnum.INSIGHT_CATEGORICAL)
 
+    VIDEO_PLAYS_3S = Metric(name=FieldsMetadata.video_plays_3s.name, display_name='Video plays 3s',
+                            numerator=FacebookAvailableSingleMetricsEnum.VIDEO_PLAYS_3S.value,
+                            mtype=FacebookMetricTypeEnum.INSIGHT)
+    VIDEO_PLAYS_95P = Metric(name=FieldsMetadata.video_plays_95p.name, display_name='Video plays 95%',
+                             numerator=FacebookAvailableSingleMetricsEnum.VIDEO_PLAYS_95P.value,
+                             mtype=FacebookMetricTypeEnum.INSIGHT)
+    VIDEO_AVERAGE_PLAY_TIME = Metric(name=FieldsMetadata.video_average_play_time.name,
+                                     display_name='Video play average play time',
+                                     numerator=FacebookAvailableSingleMetricsEnum.VIDEO_AVERAGE_PLAY_TIME.value,
+                                     mtype=FacebookMetricTypeEnum.INSIGHT)
+    ADDS_TO_CART = Metric(name=FieldsMetadata.adds_to_cart_total.name, display_name='Adds to cart',
+                          numerator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART.value,
+                          mtype=FacebookMetricTypeEnum.INSIGHT)
+    ADDS_TO_CART_VALUE = Metric(name=FieldsMetadata.adds_to_cart_value.name, display_name='Adds to cart value',
+                                numerator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART_VALUE.value,
+                                mtype=FacebookMetricTypeEnum.INSIGHT)
+    CHECKOUTS_INITIATED_VALUE = Metric(name=FieldsMetadata.website_checkouts_initiated_value.name,
+                                       display_name='Checkouts initiated value',
+                                       numerator=FacebookAvailableSingleMetricsEnum.CHECKOUTS_INITIATED_VALUE.value,
+                                       mtype=FacebookMetricTypeEnum.INSIGHT)
+    UNIQUE_CLICKS_ALL = Metric(name=FieldsMetadata.unique_clicks_all.name, display_name='Unique clicks',
+                               numerator=FacebookAvailableSingleMetricsEnum.UNIQUE_CLICKS_ALL.value,
+                               mtype=FacebookMetricTypeEnum.INSIGHT)
+    UNIQUE_CTR_ALL = Metric(name=FieldsMetadata.unique_ctr_all.name, display_name='Unique CTR',
+                            numerator=FacebookAvailableSingleMetricsEnum.UNIQUE_CTR_ALL.value,
+                            mtype=FacebookMetricTypeEnum.INSIGHT)
+    MESSAGING_CONVERSATIONS_STARTED = Metric(name=FieldsMetadata.messaging_conversations_started.name,
+                                             display_name='Messaging conversations started',
+                                             numerator=FacebookAvailableSingleMetricsEnum.MESSAGING_CONVERSATIONS_STARTED.value,
+                                             mtype=FacebookMetricTypeEnum.INSIGHT)
+    UNIQUE_LINK_CTR = Metric(name=FieldsMetadata.unique_link_click_through_rate.name, display_name='Unique link CTR',
+                             numerator=FacebookAvailableSingleMetricsEnum.UNIQUE_LINK_CTR.value,
+                             mtype=FacebookMetricTypeEnum.INSIGHT)
+    CONTENT_VIEWS_UNIQUE = Metric(name=FieldsMetadata.content_views_unique_total.name,
+                                  display_name='Content views unique',
+                                  numerator=FacebookAvailableSingleMetricsEnum.CONTENT_VIEWS_UNIQUE.value,
+                                  mtype=FacebookMetricTypeEnum.INSIGHT)
+
+    ADDS_TO_CART_UNIQUE = Metric(name=FieldsMetadata.adds_to_cart_unique.name, display_name='Adds to cart unique',
+                                 numerator=FacebookAvailableSingleMetricsEnum.ADDS_TO_CART_UNIQUE.value,
+                                 mtype=FacebookMetricTypeEnum.INSIGHT)
+    CHECKOUTS_INITIATED_UNIQUE = Metric(name=FieldsMetadata.checkouts_initiated_unique_total.name,
+                                        display_name='Checkouts initiated unique',
+                                        numerator=FacebookAvailableSingleMetricsEnum.CHECKOUTS_INITIATED_UNIQUE.value,
+                                        mtype=FacebookMetricTypeEnum.INSIGHT)
+    WEBSITE_PURCHASES_VALUE = Metric(name=FieldsMetadata.website_purchases_value.name, display_name='Purchases value',
+                                     numerator=FacebookAvailableSingleMetricsEnum.WEBSITE_PURCHASES_VALUE.value,
+                                     mtype=FacebookMetricTypeEnum.INSIGHT)
+    PHOTO_VIEWS = Metric(name=FieldsMetadata.photo_views.name, display_name='Photo views',
+                         numerator=FacebookAvailableSingleMetricsEnum.PHOTO_VIEWS.value,
+                         mtype=FacebookMetricTypeEnum.INSIGHT)
+
+    CHECKOUTS_INITIATED = Metric(name=FieldsMetadata.website_checkouts_initiated_total.name,
+                                 display_name='Checkouts initiated',
+                                 numerator=FacebookAvailableSingleMetricsEnum.CHECKOUTS_INITIATED.value,
+                                 mtype=FacebookMetricTypeEnum.INSIGHT)
+
     # structure metrics
     OBJECTIVE = Metric(name=FieldsMetadata.objective.name, display_name="Objective",
                        numerator=FacebookAvailableSingleMetricsEnum.OBJECTIVE.value,
@@ -157,7 +264,8 @@ class FacebookAvailableSingleMetricEnum(EnumerationBase):
                           numerator=FacebookAvailableSingleMetricsEnum.DUPLICATE_AD.value,
                           mtype=FacebookMetricTypeEnum.DUPLICATE_AD)
 
-    LANDING_PAGE_CONVERSION_RATE = Metric(name="landing_page_conversion_rate", display_name="Landing page conversion rate",
+    LANDING_PAGE_CONVERSION_RATE = Metric(name="landing_page_conversion_rate",
+                                          display_name="Landing page conversion rate",
                                           numerator=FacebookAvailableSingleMetricsEnum.CONVERSIONS.value,
                                           denominator=FacebookAvailableSingleMetricsEnum.LINK_CLICKS.value,
                                           mtype=FacebookMetricTypeEnum.INSIGHT,

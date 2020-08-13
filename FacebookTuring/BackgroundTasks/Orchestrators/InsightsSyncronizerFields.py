@@ -41,6 +41,7 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.adds_to_cart_total,
     FieldsMetadata.adds_to_cart_value,
     FieldsMetadata.website_checkouts_initiated_value,
+    FieldsMetadata.website_checkouts_initiated_total,
     FieldsMetadata.unique_clicks_all,
     FieldsMetadata.unique_ctr_all,
     FieldsMetadata.messaging_conversations_started,
