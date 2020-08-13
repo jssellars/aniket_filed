@@ -2,9 +2,9 @@ import json
 
 from flask import Response
 
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
-from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from FacebookDexter.Api.Startup import startup
 
 

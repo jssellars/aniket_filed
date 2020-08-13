@@ -3,12 +3,12 @@ import json
 import requests
 from flask import Response
 
+from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
+from FacebookDexter.Infrastructure.Domain.Rules.FacebookRuleEnums import FacebookRuleRedirectEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
-from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from FacebookDexter.Infrastructure.Domain.Recommendations.RuleRedirect import RuleRedirectEnum
 from FacebookDexter.Api.Startup import startup
-from FacebookDexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 
 
 class DexterApiApplyRecommendationCommandHandler:
@@ -37,7 +37,7 @@ class DexterApiApplyRecommendationCommandHandler:
             if recommendation['channel'] == ChannelEnum.FACEBOOK.value:
                 url = external_services.facebook_auto_apply.format(level=recommendation['level'],
                                                                       structureId=recommendation['structureId'])
-                if recommendation['redirect_for_edit'] == RuleRedirectEnum.DUPLICATE.value:
+                if recommendation['redirect_for_edit'] == FacebookRuleRedirectEnum.DUPLICATE.value:
                     url += '/duplicate'
                     apply_request = requests.post(url, details, headers=request_header)
                 else:
