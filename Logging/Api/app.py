@@ -28,7 +28,7 @@ app.config["JWT_DECODE_AUDIENCE"] = "Filed-Client-Apps"
 
 jwt = JWTManager(app)
 
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 api = Api(app)
 
