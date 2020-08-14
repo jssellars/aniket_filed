@@ -7,10 +7,10 @@ from Core.Tools.Misc.ObjectSerializers import object_to_json
 
 
 class PixelsInsightsResponseDtoMapping(MapperBase):
-    breakdown = fields.String()
-    value = fields.String()
-    count = fields.Integer()
-    timestamp = fields.String()
+    breakdown = fields.String(allow_none=True)
+    value = fields.String(allow_none=True)
+    count = fields.Integer(allow_none=True)
+    timestamp = fields.String(allow_none=True)
 
     class Meta:
         unknown = EXCLUDE

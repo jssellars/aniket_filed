@@ -1,7 +1,7 @@
 import json
 import typing
-
 import humps
+
 from flask import request, Response
 from flask_jwt_simple import jwt_required, get_jwt
 from flask_restful import Resource

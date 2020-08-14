@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class GraphAPIPixelStatsDataDto:
     value: str = None
     count: int = None
-
+    event: str = None
 
 @dataclass
 class GraphAPIPixelStatsDto:
