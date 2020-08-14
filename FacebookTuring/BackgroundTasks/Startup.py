@@ -46,6 +46,7 @@ class Startup(object):
         self.rabbit_logger_type = app_config["rabbit_logger_type"]
         self.logger_level = app_config["logger_level"]
         self.sync_time = app_config["sync_time"]
+        self.days_to_sync = app_config["days_to_sync"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
 

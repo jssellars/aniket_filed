@@ -32,7 +32,7 @@ def turing_data_sync_handler(request_handler=None, message_body=None, startup=No
      set_mongo_repository(account_journal_repository).
      set_orchestrator(orchestrator).
      set_logger(logger).
-     handle(message_body))
+     handle(message_body, startup.days_to_sync))
 
 
 def campaign_created_handler(request_handler=None, message_body=None, startup=None, logger=None, rabbit_logger=None):

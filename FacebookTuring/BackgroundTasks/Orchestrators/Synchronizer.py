@@ -57,13 +57,18 @@ def sync(structures_repository: TuringMongoRepository = None,
                 # run synchronizer threads
                 structure_thread.start()
                 insights_thread.start()
+
+                # wait for current account sync to finish
+                structure_thread.join()
+                insights_thread.join()
             except Exception as e:
                 log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                         name="Facebook Turing Daily Sync Error",
                                         description="Failed sync data for business owner: %s and ad account: %s. "
-                                                    "Reason: " + str(e) % (entry[MiscFieldsEnum.business_owner_id],
-                                                                           entry[MiscFieldsEnum.account_id]))
-                logger.exception(log.to_dict())
+                                                    "Reason: %s" % (entry[MiscFieldsEnum.business_owner_id],
+                                                                    entry[MiscFieldsEnum.account_id],
+                                                                    str(e)))
+                logger.logger.exception(log.to_dict())
 
 
 def sync_structures(structures_repository: TuringMongoRepository = None,
@@ -89,8 +94,8 @@ def sync_structures(structures_repository: TuringMongoRepository = None,
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="Facebook Turing Daily Sync Error",
                                     description="Failed sync structures for business owner: %s and ad account: %s. "
-                                                "Reason: " + str(e) % (business_owner_id, account_id))
-            logger.exception(log.to_dict())
+                                                "Reason: %s" % (business_owner_id, account_id, str(e)))
+            logger.logger.exception(log.to_dict())
             has_errors = True
 
     # mark campaigns and adsets as completed based on the end time value
@@ -100,8 +105,27 @@ def sync_structures(structures_repository: TuringMongoRepository = None,
         log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                 name="Facebook Turing Daily Sync Error",
                                 description="Failed updating completed structure ids for business owner: %s and ad "
-                                            "account: %s. Reason: " + str(e) % (business_owner_id, account_id))
-        logger.exception(log.to_dict())
+                                            "account: %s. Reason: %s" % (business_owner_id, account_id, str(e)))
+        logger.logger.exception(log.to_dict())
+        has_errors = True
+    if has_errors:
+        sync_status = AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS
+    else:
+        sync_status = AdAccountSyncStatusEnum.COMPLETED
+
+    account_journal_repository.change_account_structures_sync_status(account_id,
+                                                                     sync_status,
+                                                                     end_date=datetime.now())
+
+    # mark campaigns and adsets as completed based on the end time value
+    try:
+        mark_structures_as_completed(account_id=account_id, structures_repository=structures_repository)
+    except Exception as e:
+        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                name="Facebook Turing Daily Sync Error",
+                                description="Failed updating completed structure ids for business owner: %s and ad "
+                                            "account: %s. Reason: %s" % (business_owner_id, account_id, str(e)))
+        logger.logger.exception(log.to_dict())
         has_errors = True
     if has_errors:
         sync_status = AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS
@@ -125,7 +149,7 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
     date_stop = datetime.now()
     levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
     for level in levels:
-        if level == Level.ADSET or level == Level.CAMPAIGN:
+        if level in [Level.CAMPAIGN, Level.ADSET]:
             for breakdown in InsightsSyncronizerBreakdownEnum:
                 for action_breakdown in InsightsSyncronizerActionBreakdownEnum:
                     syncronizer = InsightsSyncronizer(business_owner_id=business_owner_id,
@@ -182,8 +206,8 @@ def sync_insights_base(syncronizer: InsightsSyncronizer = None,
             except Exception as e:
                 log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                         name="Facebook Turing Daily Sync Error",
-                                        description="Failed to sync data for dates {} and {}. Reason: " + str(
-                                            e).format(date_start_sync, date_stop_sync))
+                                        description="Failed to sync data for dates {} and {}. Reason: {}".format(
+                                            date_start_sync, date_stop_sync, str(e)))
                 logger.logger.exception(log.to_dict())
                 has_errors = True
             date_start = current_date_stop + NEXT_DAY

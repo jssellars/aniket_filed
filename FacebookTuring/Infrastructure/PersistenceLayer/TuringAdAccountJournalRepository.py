@@ -20,7 +20,8 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
 
     def update_business_owner(self,
                               business_owner_id: typing.AnyStr = None,
-                              ad_accounts: typing.List[AdAccountDetails] = None) -> typing.NoReturn:
+                              ad_accounts: typing.List[AdAccountDetails] = None,
+                              days_to_sync: int = MiscFieldsEnum.last_three_months) -> typing.NoReturn:
         existing_ad_accounts = self.get_ad_accounts_by_business_owner_id(business_owner_id)
         existing_ad_accounts_ids = [ad_account.get(MiscFieldsEnum.account_id, None) for ad_account in
                                     existing_ad_accounts]
@@ -34,7 +35,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         if new_ad_accounts_ids:
             new_ad_accounts = [ad_account for ad_account in ad_accounts if
                                ad_account.id.split("_")[1] in new_ad_accounts_ids]
-            self.add_ad_accounts(business_owner_id, new_ad_accounts)
+            self.add_ad_accounts(business_owner_id, new_ad_accounts, days_to_sync)
 
     def get_ad_accounts_by_business_owner_id(self, business_owner_id: typing.AnyStr = None):
         query = {
@@ -156,13 +157,15 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             update_last_sync_time_query = {
                 MongoOperator.SET.value: {
                     MiscFieldsEnum.last_synced_on: detail.get(MiscFieldsEnum.insights_sync_end_date),
-                    MiscFieldsEnum.previous_last_synced_on: detail.get(MiscFieldsEnum.last_synced_on)
+                    MiscFieldsEnum.previous_last_synced_on: detail.get(MiscFieldsEnum.last_synced_on),
+                    MiscFieldsEnum.sync_status: AdAccountSyncStatusEnum.COMPLETED.value
                 }
             }
             self.update_one(query_filter=update_last_sync_time_query_filter, query=update_last_sync_time_query)
 
     def add_ad_accounts(self, business_owner_id: typing.AnyStr = None,
-                        ad_accounts: typing.List[AdAccountDetails] = None) -> typing.NoReturn:
+                        ad_accounts: typing.List[AdAccountDetails] = None,
+                        days_to_sync: int = MiscFieldsEnum.last_one_months) -> typing.NoReturn:
         new_accounts = []
         for ad_account in ad_accounts:
             entry = object_to_json(ad_account)
@@ -172,7 +175,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             entry[MiscFieldsEnum.structures_sync_status] = AdAccountSyncStatusEnum.PENDING.value
             entry[MiscFieldsEnum.insights_sync_status] = AdAccountSyncStatusEnum.PENDING.value
             entry[MiscFieldsEnum.last_synced_on] = (datetime.now() -
-                                                    timedelta(days=MiscFieldsEnum.last_one_months))
+                                                    timedelta(days=days_to_sync))
             entry[MiscFieldsEnum.previous_last_synced_on] = None
             entry[MiscFieldsEnum.insights_sync_start_date] = None
             entry[MiscFieldsEnum.insights_sync_end_date] = None
@@ -288,10 +291,10 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def save_sync_report(self,
                          report: typing.List[SyncStatusReport] = None,
                          created_at: datetime = None) -> typing.NoReturn:
-        self.set_collection(self.config.sync_reports_collection)
+        self.set_collection(self.config.accounts_journal_sync_reports_collection_name)
         document = {
             MiscFieldsEnum.created_at: created_at,
-            MiscFieldsEnum.report: object_to_json(report)
+            MiscFieldsEnum.report: [object_to_json(entry) for entry in report]
         }
         self.add_one(document)
 

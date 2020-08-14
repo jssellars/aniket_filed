@@ -106,11 +106,13 @@ class Orchestrator:
             self.__publish_business_owner_synced_event(business_owner_id)
 
         # compile and send sync status report
-        self.__reporter = SyncStatusReporter(account_journal_repository=self.__account_journal_repository,
-                                             structures_repository=self.__structures_repository)
+        if ad_accounts_details:
+            self.__reporter = SyncStatusReporter(account_journal_repository=self.__account_journal_repository,
+                                                 structures_repository=self.__structures_repository,
+                                                 logger=self.__logger)
 
-        sync_report = self.__reporter.compile_report()
-        self.__reporter.commit_report(sync_report)
+            sync_report = self.__reporter.compile_report()
+            self.__reporter.commit_report(sync_report)
 
     @staticmethod
     def __group_by_business_owner_id(ad_accounts_details: typing.List[typing.Dict] = None) -> typing.Dict:

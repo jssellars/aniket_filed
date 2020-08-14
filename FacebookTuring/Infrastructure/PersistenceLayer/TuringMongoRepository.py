@@ -279,7 +279,11 @@ class TuringMongoRepository(MongoRepositoryBase):
     @staticmethod
     def __encode_structure_details_to_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:
         for index in range(len(structures)):
-            structures[index][MiscFieldsEnum.details] = BSON.decode(structures[index].get(MiscFieldsEnum.details, {}))
+            encoded_structure = structures[index].get(MiscFieldsEnum.details, {})
+            if encoded_structure:
+                structures[index][MiscFieldsEnum.details] = encoded_structure
+            else:
+                structures[index][MiscFieldsEnum.details] = {}
         return structures
 
     def change_status(self,
@@ -478,7 +482,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                  start_date: typing.Union[datetime, typing.AnyStr] = None,
                                  account_id: typing.AnyStr = None
                                  ):
-        self.set_database(database)
+        self.set_database(self.config.structures_database_name)
         self.set_collection(collection)
         query = {
             MongoOperator.AND.value: [

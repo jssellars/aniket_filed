@@ -16,9 +16,12 @@ class InsightsSyncronizerBreakdownEnum(Enum):
     COUNTRY = FieldsMetadata.country
     REGION = FieldsMetadata.region
 
+
 class InsightsSyncronizerActionBreakdownEnum(Enum):
     NONE = FieldsMetadata.action_none
-    CONVERSION_DEVICE = FieldsMetadata.device
-    VIDEO_VIEW_TYPE = FieldsMetadata.video_type
-    VIDEO_SOUND = FieldsMetadata.video_sound
-    CAROUSEL_CARD_NAME = FieldsMetadata.carousel_card_name
+    # Commented as these action breakdowns are not relevant at this stage of the project. Haven't deleted it as they
+    # might become relevant in the future.
+    # CONVERSION_DEVICE = FieldsMetadata.device
+    # VIDEO_VIEW_TYPE = FieldsMetadata.video_type
+    # VIDEO_SOUND = FieldsMetadata.video_sound
+    # CAROUSEL_CARD_NAME = FieldsMetadata.carousel_card_name

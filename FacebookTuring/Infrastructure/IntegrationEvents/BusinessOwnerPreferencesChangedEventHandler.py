@@ -35,7 +35,7 @@ class BusinessOwnerPreferencesChangedEventHandler:
         return cls
 
     @classmethod
-    def handle(cls, body: typing.Union[typing.Dict, typing.AnyStr]):
+    def handle(cls, body: typing.Union[typing.Dict, typing.AnyStr], days_to_sync: int = None):
         try:
             body = json.loads(body)
             mapper = BusinessOwnerPreferencesChangedEventMapping(target=BusinessOwnerPreferencesChangedEvent)
@@ -45,7 +45,7 @@ class BusinessOwnerPreferencesChangedEventHandler:
 
         # update ad account states
         try:
-            cls.__mongo_repository.update_business_owner(message.id, message.ad_accounts)
+            cls.__mongo_repository.update_business_owner(message.id, message.ad_accounts, days_to_sync)
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="Failed to update business owners journal",
