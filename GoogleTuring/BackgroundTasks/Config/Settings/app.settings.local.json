@@ -7,11 +7,11 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "dev.google.accounts.fanout",
+        "name": "local.google.accounts.fanout",
         "type": "direct",
         "queues": {
-          "inbound": "dev.google.turing.inbound",
-          "inbound_routing_key": "dev.google.turing.outbound.key"
+          "inbound": "local.google.turing.inbound",
+          "inbound_routing_key": "local.google.turing.outbound.key"
         }
       }
     ],
@@ -43,12 +43,16 @@
     "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
   "sync_time": "00:10",
-  "run_verbose": false,
-  "log_errors": true,
   "environment": "local",
   "api_name": "GoogleTuringBackgroundTask",
   "api_version": "1.0.0",
   "service_name": "GoogleTuringBackgroundTask",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-google-turing-background-tasks",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
 }

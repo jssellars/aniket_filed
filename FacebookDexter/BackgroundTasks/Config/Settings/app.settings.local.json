@@ -1,0 +1,98 @@
+{
+  "rabbitmq": {
+    "consumer_name": "local.bt.facebook.dexter.consumer",
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "local.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "local.facebook.dexter.inbound",
+          "inbound_routing_key": "local.facebook.dexter.inbound.key",
+          "outbound": "local.facebook.dexter.outbound",
+          "outbound_routing_key": "local.facebook.dexter.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "dev.filed.com",
+    "port": 1433,
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Dev.Filed.Facebook.Potter.Accounts"
+  },
+  "mongo": {
+    "ssh_tunnel": true,
+    "connection_string": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
+    "mongo_host": "18.130.129.216",
+    "mongo_ssh_user": "mongo",
+    "mongo_ssh_pass": "7YPbhiYTEtM=",
+    "retry_writes": false,
+    "remote_ip": "192.168.2.91",
+    "remote_port": 27017,
+    "recommendations_database_name": "local_dexter_fuzzy_inference_recommendations",
+    "recommendations_collection_name": "recommendations",
+    "journal_database_name": "local_dexter_engine_run_journal",
+    "journal_collection_name": "dexter_journal",
+    "structures_database": "local_facebook_turing_structures",
+    "insights_database": "local_facebook_turing_insights",
+    "logs_database": "local_facebook_dexter_logs"
+  },
+  "external_services": {
+    "targeting_search": "https://dev-api-facebook-potter-campaignsbuilder.filed.com/api/v1/targeting-search/interests/suggestions/",
+    "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://dev.filed.com:41000/api/v1/users/get-technical-jwt"
+  },
+  "admin_user": {
+    "email": "admin@filed.com",
+    "password": "Adm1n@Fil3ed"
+  },
+  "dexter_config": {
+    "min_results": 50,
+    "days_since_last_change": 3,
+    "recommendation_days_last_updated": 3,
+    "time_intervals": [
+      7,
+      14,
+      3,
+      30
+    ],
+    "date_stop": null,
+    "minimum_number_of_data_points": {
+      "3": 2,
+      "7": 4,
+      "14": 9,
+      "30": 20
+    }
+  },
+  "debug": false,
+  "environment": "local",
+  "api_name": "FacebookDexterBackgroundTasks",
+  "api_version": "1.0.0",
+  "service_name": "FacebookDexterBackgroundTasks",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
+  "docker_filename": "filed-facebook-dexter-background-tasks",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
+}

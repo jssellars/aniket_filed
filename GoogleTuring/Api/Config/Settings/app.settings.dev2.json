@@ -21,8 +21,6 @@
     "client_id": "17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
     "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
-  "run_verbose": false,
-  "log_errors": true,
   "environment": "dev2",
   "api_name": "GoogleTuringAPI",
   "api_version": "1.0.0",
@@ -31,5 +29,11 @@
   "base_url": "/api/v1",
   "port": 47550,
   "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
-  "debug_mode": true
+  "debug_mode": true,
+  "docker_filename": "filed-google-turing-api",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "dev2-elasticsearch",
+  "es_port": 9200
 }

@@ -56,7 +56,7 @@
       14,
       30
     ],
-    "date_stop": "2020-05-22"
+    "date_stop": null
   },
   "environment": "prod",
   "api_name": "GoogleDexterBackgroundTasks",

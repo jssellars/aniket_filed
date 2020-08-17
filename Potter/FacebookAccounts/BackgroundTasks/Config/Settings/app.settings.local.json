@@ -1,0 +1,50 @@
+{
+  "rabbitmq": {
+    "consumer_name": "local.bt.potter.facebook.accounts.consumer",
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "local.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "local.facebook.accounts.inbound",
+          "inbound_routing_key": "local.facebook.accounts.inbound.key",
+          "outbound": "local.facebook.accounts.outbound",
+          "outbound_routing_key": "local.facebook.accounts.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v5.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "dev.filed.com",
+    "port": 1433,
+    "username": "sa",
+    "password": "Parola@20",
+    "name": "Dev.Filed.Facebook.Potter.Accounts"
+  },
+  "environment": "local",
+  "api_name": "FacebookAccountsBackgroundTasks",
+  "api_version": "1.0.0",
+  "service_name": "FacebookAccountsBackgroundTasks",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "docker_filename": "filed-potter-accounts-background-tasks",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": "localhost",
+  "es_port": 9200
+}

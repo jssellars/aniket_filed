@@ -43,12 +43,16 @@
     "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
   "sync_time": "00:10",
-  "run_verbose": false,
-  "log_errors": true,
   "environment": "dev2",
   "api_name": "GoogleTuringBackgroundTask",
   "api_version": "1.0.0",
   "service_name": "GoogleTuringBackgroundTask",
   "service_version": "1.0.0",
-  "base_url": "/api/v1"
+  "base_url": "/api/v1",
+  "docker_filename": "filed-facebook-turing-background-tasks",
+  "logger_type": "elasticsearch_logger",
+  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_level": "DEBUG",
+  "es_host": "dev2-elasticsearch",
+  "es_port": 9200
 }

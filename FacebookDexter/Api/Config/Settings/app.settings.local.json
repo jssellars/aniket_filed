@@ -1,20 +1,21 @@
 {
+
   "api_name": "Dexter API",
-  "environment": "dev2",
+  "environment": "local",
   "api_version": "1.0.0",
   "base_url": "",
   "port": 47300,
   "debug_mode": true,
   "docker_filename": "filed-dexter-api",
-  "logger_type": "elasticsearch_logger",
+  "logger_type": "file_logger",
   "logger_level": "DEBUG",
-  "es_host": "dev2-elasticsearch",
+  "es_host": "localhost",
   "es_port": 9200,
   "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
 
   "mongo_database": {
     "ssh_tunnel": true,
-    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "connection_string": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -23,11 +24,12 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "recommendations_database_name": "dev2_dexter_fuzzy_inference_recommendations",
+    "recommendations_database_name": "local_dexter_fuzzy_inference_recommendations",
     "recommendations_collection_name": "recommendations"
   },
+
   "external_services": {
-    "facebook_auto_apply" : "https://dev2-api-facebook-turing.filed.com/api/v1/{level}/{structureId}",
+    "facebook_auto_apply" : "https://dev.api.facebook.turing.filed.com/api/v1/{level}/{structureId}",
     "google_auto_apply": ""
   }
 }

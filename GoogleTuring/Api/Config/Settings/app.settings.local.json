@@ -1,24 +1,4 @@
 {
-  "rabbitmq": {
-    "username": "ntvkpamp",
-    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
-    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
-    "port": 5672,
-    "virtual_host": "ntvkpamp",
-    "exchanges": [
-      {
-        "name": "dev.google.accounts.fanout",
-        "type": "direct",
-        "queues": {
-          "inbound": "dev.google.turing.inbound",
-          "inbound_routing_key": "dev.google.turing.outbound.key"
-        }
-      }
-    ],
-    "publish_interval": 1,
-    "heartbeat": 0,
-    "connection_timeout": 300
-  },
   "mongo_database": {
     "ssh_tunnel": true,
     "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
@@ -30,10 +10,9 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "google_insights_database_name": "dev_google_turing_insights",
-    "google_accounts_database_name": "dev_google_turing_accounts",
-    "google_structures_database_name": "dev_google_turing_structures",
-    "location_data_collection_name": "location_data",
+    "google_insights_database_name": "local_google_turing_insights",
+    "google_accounts_database_name": "local_google_turing_accounts",
+    "google_structures_database_name": "local_google_turing_structures",
     "accounts_collection_name": "google_accounts"
   },
   "google": {
@@ -42,14 +21,16 @@
     "client_id": "17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
     "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
-  "sync_time": "00:10",
-  "environment": "dev",
-  "api_name": "GoogleTuringBackgroundTask",
+  "environment": "local",
+  "api_name": "GoogleTuringAPI",
   "api_version": "1.0.0",
-  "service_name": "GoogleTuringBackgroundTask",
+  "service_name": "GoogleTuringAPI",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
-  "docker_filename": "filed-google-turing-background-tasks",
+  "port": 47550,
+  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
+  "debug_mode": true,
+  "docker_filename": "filed-google-turing-api",
   "logger_type": "file_logger",
   "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",

@@ -7,11 +7,11 @@
     "virtual_host": "ntvkpamp",
     "exchanges": [
       {
-        "name": "prod.google.accounts.fanout",
+        "name": "dev.google.accounts.fanout",
         "type": "direct",
         "queues": {
-          "inbound": "prod.google.turing.inbound",
-          "inbound_routing_key": "prod.google.turing.outbound.key"
+          "inbound": "dev.google.turing.inbound",
+          "inbound_routing_key": "dev.google.turing.outbound.key"
         }
       }
     ],
@@ -22,17 +22,17 @@
   "mongo_database": {
     "ssh_tunnel": true,
     "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
-    "mongo_user": "root",
-    "mongo_pass": "BlokeyWokeySystemChokey",
+    "mongo_user": "mongo-admin",
+    "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
     "mongo_ssh_user": "mongo",
     "mongo_ssh_pass": "7YPbhiYTEtM=",
     "retry_writes": false,
-    "remote_ip": "192.168.2.189",
+    "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "google_insights_database_name": "prod_google_turing_insights",
-    "google_accounts_database_name": "prod_google_turing_accounts",
-    "google_structures_database_name": "prod_google_turing_structures",
+    "google_insights_database_name": "local_google_turing_insights",
+    "google_accounts_database_name": "local_google_turing_accounts",
+    "google_structures_database_name": "local_google_turing_structures",
     "location_data_collection_name": "location_data",
     "accounts_collection_name": "google_accounts"
   },
@@ -43,16 +43,16 @@
     "client_secret": "bk0Gae3BgAkbbf63GD5kU4jq"
   },
   "sync_time": "00:10",
-  "environment": "prod",
+  "environment": "prodbak",
   "api_name": "GoogleTuringBackgroundTask",
   "api_version": "1.0.0",
   "service_name": "GoogleTuringBackgroundTask",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-google-turing-background-tasks",
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
-  "es_host": "prod-elasticsearch",
-  "es_port": 9200
+  "es_host": null,
+  "es_port": null
 }

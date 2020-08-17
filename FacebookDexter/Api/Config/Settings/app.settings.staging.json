@@ -6,9 +6,9 @@
   "port": 47300,
   "debug_mode": true,
   "docker_filename": "filed-dexter-api",
-  "logger_type": "file_logger",
+  "logger_type": "elasticsearch_logger",
   "logger_level": "DEBUG",
-  "es_host": "localhost",
+  "es_host": "staging-elasticsearch",
   "es_port": 9200,
   "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "mongo_database": {
