@@ -9,24 +9,21 @@ from Potter.FacebookCampaignsBuilder.Api.Catalogs.PlacementCatalogs.Placements i
 from Potter.FacebookCampaignsBuilder.Api.Catalogs.ObjectivesCatalog import page_likes
 
 
-page_likes_mobile_facebook = CatalogNode(ContentDeliveryReport.Platform.facebook, 'Facebook', 'facebook-placement', None,
+page_likes_mobile_facebook = CatalogNode(ContentDeliveryReport.Platform.facebook,
                                          [facebook_in_stream_videos_placement, facebook_marketplace_placement,
                                           facebook_search_results_placement, facebook_video_feeds_placement,
                                           facebook_feed_placement, facebook_stories_placement,
                                           facebook_instant_article_placement])
-page_likes_mobile = CatalogNode(Targeting.DevicePlatforms.mobile, 'Mobile', None, None,
+page_likes_mobile = CatalogNode(Targeting.DevicePlatforms.mobile,
                                 [page_likes_mobile_facebook])
 
-page_likes_desktop_facebook = CatalogNode(ContentDeliveryReport.Platform.facebook, 'Facebook', 'facebook-placement', None,
+page_likes_desktop_facebook = CatalogNode(ContentDeliveryReport.Platform.facebook,
                                           [facebook_in_stream_videos_placement, facebook_feed_placement,
                                            facebook_search_results_placement, facebook_marketplace_placement,
                                            facebook_video_feeds_placement])
 
-page_likes_desktop = CatalogNode(Targeting.DevicePlatforms.desktop, 'Desktop', None, None,
+page_likes_desktop = CatalogNode(Targeting.DevicePlatforms.desktop,
                                  [page_likes_desktop_facebook])
 
 page_likes_placement_catalog = copy.deepcopy(page_likes)
-page_likes_placement_catalog.display_name = None
-page_likes_placement_catalog.description = None
-page_likes_placement_catalog.image_name = None
 page_likes_placement_catalog.children = [page_likes_mobile, page_likes_desktop]

@@ -2,12 +2,10 @@ import typing
 from dataclasses import dataclass
 import humps
 
+
 @dataclass
 class CatalogNode:
     key: typing.AnyStr = None
-    display_name: typing.AnyStr = None
-    image_name: typing.AnyStr = None
-    description: typing.AnyStr = None
     children: typing.List = None
 
     def to_json(self):
