@@ -63,6 +63,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 self._logger.logger.info(log)
             date_start = date_stop
 
+        date_start += timedelta(days=1)
         calculator = self.calculator.get((atype, self._metric.type), None)
 
         if calculator is None:
@@ -169,8 +170,6 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         return values
 
     def average(self, date_start, date_stop, *args, **kwargs):
-        date_start = datetime.strptime(date_start, DEFAULT_DATETIME) - timedelta(days=1)
-        date_start = datetime.strftime(date_start, DEFAULT_DATETIME)
         self._metric.numerator_aggregator = AggregatorEnum.AVERAGE
         self._metric.denominator_aggregator = AggregatorEnum.AVERAGE
         value = self.aggregated_value(date_start=date_start, date_stop=date_stop)
@@ -434,7 +433,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                  **kwargs) -> typing.Union[int, float, typing.NoReturn]:
 
         variance = None
-        _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME) - timedelta(days=1)
+        _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME)
         _mean_date_start = _date_stop - timedelta(days=30)
         _date_stop = datetime.strftime(_date_stop, DEFAULT_DATETIME)
         _mean_date_start = datetime.strftime(_mean_date_start, DEFAULT_DATETIME)
@@ -444,7 +443,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         self._metric.numerator_aggregator = AggregatorEnum.STANDARD_DEVIATION
         self._metric.denominator_aggregator = AggregatorEnum.STANDARD_DEVIATION
         standard_deviation_on_time_interval = self.aggregated_value(date_start=date_start,
-                                                                 date_stop=_date_stop)
+                                                                    date_stop=_date_stop)
 
         if mean_on_time_interval:
             variance = self.HUNDRED_MULTIPLIER * (standard_deviation_on_time_interval / mean_on_time_interval)
@@ -456,16 +455,14 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                               date_stop: typing.AnyStr = None,
                               **kwargs) -> typing.Union[int, float, typing.NoReturn]:
 
-        _date_stop = datetime.strptime(date_stop, DEFAULT_DATETIME) - timedelta(days=1)
-        _date_stop = datetime.strftime(_date_stop, DEFAULT_DATETIME)
-
-        mean_on_time_interval = self.average(date_start=date_start, date_stop=_date_stop)
+        mean_on_time_interval = self.average(date_start=date_start, date_stop=date_stop)
         current_metric_value = self.aggregated_value(date_start=date_stop, date_stop=date_stop)
         if mean_on_time_interval is not None and current_metric_value is not None:
             if mean_on_time_interval == 0.0 or current_metric_value == 0.0:
                 return 1 * self.HUNDRED_MULTIPLIER
             try:
-                difference = self.HUNDRED_MULTIPLIER * float((current_metric_value - mean_on_time_interval) / mean_on_time_interval)
+                difference = self.HUNDRED_MULTIPLIER * float(
+                    (current_metric_value - mean_on_time_interval) / mean_on_time_interval)
             except ZeroDivisionError:
                 if current_metric_value == 0.0:
                     difference = None

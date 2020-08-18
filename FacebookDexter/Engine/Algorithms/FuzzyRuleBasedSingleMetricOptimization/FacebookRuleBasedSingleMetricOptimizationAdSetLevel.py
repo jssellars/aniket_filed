@@ -13,7 +13,8 @@ class FacebookRuleBasedSingleMetricOptimizationAdSetLevel(FacebookRuleBasedSingl
         super().__init__()
         self.set_level(LevelEnum.ADSET)
 
-    def run(self, adset_id: typing.AnyStr = None, rule_selection_types: typing.List = None) -> typing.List[typing.Dict]:
+    def run(self, adset_id: typing.AnyStr = None, rule_selection_types: typing.List = None) -> typing.List[
+        typing.Dict]:
         recommendations = []
         if self.is_available(adset_id):
             que = Queue()
@@ -21,7 +22,7 @@ class FacebookRuleBasedSingleMetricOptimizationAdSetLevel(FacebookRuleBasedSingl
             for rule_selection_type in rule_selection_types:
                 for evaluate_function in self.rules_selector(rule_selection_type):
                     thread = Thread(target=lambda q, arg1, arg2: q.put(evaluate_function(arg1, arg2)),
-                               args=(que, adset_id, self._fuzzyfier_factory))
+                                    args=(que, adset_id, self._fuzzyfier_factory))
                     thread_list.append(thread)
 
             for thread in thread_list:
