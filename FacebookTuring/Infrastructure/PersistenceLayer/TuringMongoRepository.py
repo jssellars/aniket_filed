@@ -42,7 +42,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         except Exception as e:
             raise e
 
-        return self.__encode_structure_details_to_bson(campaigns)
+        return self.__decode_structure_details_from_bson(campaigns)
 
     def get_adsets_by_campaign_id(self, campaign_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
         self.set_collection(Level.ADSET.value)
@@ -70,7 +70,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         except Exception as e:
             raise e
 
-        return self.__encode_structure_details_to_bson(adsets)
+        return self.__decode_structure_details_from_bson(adsets)
 
     def get_active_structure_ids(self, key_name: typing.AnyStr = None, key_value: typing.AnyStr = None) -> typing.List[
         typing.Dict]:
@@ -245,7 +245,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         self.set_collection(collection_name=level.value)
         query, projection = self.__get_structure_details_query(level, key_value)
         structures = self.get(query, projection)
-        return self.__encode_structure_details_to_bson(structures)
+        return self.__decode_structure_details_from_bson(structures)
 
     def get_all_structures_by_ad_account_id(self, level: Level = None, account_id: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
@@ -273,15 +273,15 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
 
         structures = self.get(query, projection)
-        structures = self.__encode_structure_details_to_bson(structures)
+        structures = self.__decode_structure_details_from_bson(structures)
         return [structure[MiscFieldsEnum.details] for structure in structures]
 
     @staticmethod
-    def __encode_structure_details_to_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:
+    def __decode_structure_details_from_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:
         for index in range(len(structures)):
             encoded_structure = structures[index].get(MiscFieldsEnum.details, {})
             if encoded_structure:
-                structures[index][MiscFieldsEnum.details] = encoded_structure
+                structures[index][MiscFieldsEnum.details] = BSON.decode(encoded_structure)
             else:
                 structures[index][MiscFieldsEnum.details] = {}
         return structures
