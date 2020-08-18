@@ -19,12 +19,12 @@ class MetricColumnsMaster:
 
     active_view_cpm = MetricColumn(__id.increment_as_string(), display_name='Active view cpm',
                                    primary_value=GoogleMetricMetadataColumnsPool.active_view_cpm,
-                                   type_id=ViewColumnType.text.id,
+                                   type_id=ViewColumnType.currency.id,
                                    category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     active_view_ctr = MetricColumn(__id.increment_as_string(), display_name='Active view ctr',
                                    primary_value=GoogleMetricMetadataColumnsPool.active_view_ctr,
-                                   type_id=ViewColumnType.text.id,
+                                   type_id=ViewColumnType.percentage.id,
                                    category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     active_view_impressions = MetricColumn(__id.increment_as_string(), display_name='Active view impressions',
@@ -39,7 +39,7 @@ class MetricColumnsMaster:
 
     active_view_measurable_cost = MetricColumn(__id.increment_as_string(), display_name='Active view measurable cost',
                                                primary_value=GoogleMetricMetadataColumnsPool.active_view_measurable_cost,
-                                               type_id=ViewColumnType.text.id,
+                                               type_id=ViewColumnType.currency.id,
                                                category_id=ViewColumnCategory.common.id,
                                                actions=[], not_supported_dimensions=[])
 
@@ -57,7 +57,7 @@ class MetricColumnsMaster:
 
     all_conversion_rate = MetricColumn(__id.increment_as_string(), display_name='All conversion rate',
                                        primary_value=GoogleMetricMetadataColumnsPool.all_conversion_rate,
-                                       type_id=ViewColumnType.text.id,
+                                       type_id=ViewColumnType.percentage.id,
                                        category_id=ViewColumnCategory.common.id, actions=[],
                                        not_supported_dimensions=[])
 
@@ -68,33 +68,33 @@ class MetricColumnsMaster:
 
     all_conversion_value = MetricColumn(__id.increment_as_string(), display_name='All conversion value',
                                         primary_value=GoogleMetricMetadataColumnsPool.all_conversion_value,
-                                        type_id=ViewColumnType.text.id,
+                                        type_id=ViewColumnType.currency.id,
                                         category_id=ViewColumnCategory.common.id, actions=[],
                                         not_supported_dimensions=[])
 
     average_cost = MetricColumn(__id.increment_as_string(), display_name='Average cost',
                                 primary_value=GoogleMetricMetadataColumnsPool.average_cost,
-                                type_id=ViewColumnType.text.id,
+                                type_id=ViewColumnType.currency.id,
                                 category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     average_cpc = MetricColumn(__id.increment_as_string(), display_name='Cpc',
                                primary_value=GoogleMetricMetadataColumnsPool.average_cpc,
-                               type_id=ViewColumnType.text.id,
+                               type_id=ViewColumnType.currency.id,
                                category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     average_cpe = MetricColumn(__id.increment_as_string(), display_name='Average cpe',
                                primary_value=GoogleMetricMetadataColumnsPool.average_cpe,
-                               type_id=ViewColumnType.text.id,
+                               type_id=ViewColumnType.currency.id,
                                category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     average_cpm = MetricColumn(__id.increment_as_string(), display_name='Cpm',
                                primary_value=GoogleMetricMetadataColumnsPool.average_cpm,
-                               type_id=ViewColumnType.text.id,
+                               type_id=ViewColumnType.currency.id,
                                category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     average_cpv = MetricColumn(__id.increment_as_string(), display_name='Average cpv',
                                primary_value=GoogleMetricMetadataColumnsPool.average_cpv,
-                               type_id=ViewColumnType.text.id,
+                               type_id=ViewColumnType.currency.id,
                                category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     average_pageviews = MetricColumn(__id.increment_as_string(), display_name='Average pageviews',
@@ -148,7 +148,7 @@ class MetricColumnsMaster:
 
     conversion_rate = MetricColumn(__id.increment_as_string(), display_name='Conversion rate',
                                    primary_value=GoogleMetricMetadataColumnsPool.conversion_rate,
-                                   type_id=ViewColumnType.text.id,
+                                   type_id=ViewColumnType.percentage.id,
                                    category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     conversions = MetricColumn(__id.increment_as_string(), display_name='Conversions',
@@ -163,7 +163,7 @@ class MetricColumnsMaster:
 
     conversion_value = MetricColumn(__id.increment_as_string(), display_name='Conversion value',
                                     primary_value=GoogleMetricMetadataColumnsPool.conversion_value,
-                                    type_id=ViewColumnType.text.id,
+                                    type_id=ViewColumnType.currency.id,
                                     category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     purchases = MetricColumn(__id.increment_as_string(), display_name='Purchases',
@@ -173,29 +173,29 @@ class MetricColumnsMaster:
 
     purchase_value = MetricColumn(__id.increment_as_string(), display_name='Purchase value',
                                   primary_value=GoogleMetricMetadataColumnsPool.purchase_value,
-                                  type_id=ViewColumnType.text.id,
+                                  type_id=ViewColumnType.currency.id,
                                   category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     cost = MetricColumn(__id.increment_as_string(), display_name='Cost',
                         primary_value=GoogleMetricMetadataColumnsPool.cost,
-                        type_id=ViewColumnType.text.id, category_id=ViewColumnCategory.common.id,
+                        type_id=ViewColumnType.currency.id, category_id=ViewColumnCategory.common.id,
                         actions=[], not_supported_dimensions=[])
 
     cost_per_all_conversion = MetricColumn(__id.increment_as_string(), display_name='Cost per all conversion',
                                            primary_value=GoogleMetricMetadataColumnsPool.cost_per_all_conversion,
-                                           type_id=ViewColumnType.text.id, category_id=ViewColumnCategory.common.id,
+                                           type_id=ViewColumnType.currency.id, category_id=ViewColumnCategory.common.id,
                                            actions=[], not_supported_dimensions=[])
 
     cost_per_conversion = MetricColumn(__id.increment_as_string(), display_name='Cost per conversion',
                                        primary_value=GoogleMetricMetadataColumnsPool.cost_per_conversion,
-                                       type_id=ViewColumnType.text.id,
+                                       type_id=ViewColumnType.currency.id,
                                        category_id=ViewColumnCategory.common.id, actions=[],
                                        not_supported_dimensions=[])
 
     cost_per_current_model_attributed_conversion = MetricColumn(__id.increment_as_string(),
                                                                 display_name='Cost per current model attributed conversion',
                                                                 primary_value=GoogleMetricMetadataColumnsPool.cost_per_current_model_attributed_conversion,
-                                                                type_id=ViewColumnType.text.id,
+                                                                type_id=ViewColumnType.currency.id,
                                                                 category_id=ViewColumnCategory.common.id, actions=[],
                                                                 not_supported_dimensions=[])
 
@@ -206,7 +206,7 @@ class MetricColumnsMaster:
 
     ctr = MetricColumn(__id.increment_as_string(), display_name='Ctr',
                        primary_value=GoogleMetricMetadataColumnsPool.ctr,
-                       type_id=ViewColumnType.text.id, category_id=ViewColumnCategory.common.id,
+                       type_id=ViewColumnType.percentage.id, category_id=ViewColumnCategory.common.id,
                        actions=[], not_supported_dimensions=[])
 
     current_model_attributed_conversions = MetricColumn(__id.increment_as_string(),
@@ -219,13 +219,13 @@ class MetricColumnsMaster:
     current_model_attributed_conversion_value = MetricColumn(__id.increment_as_string(),
                                                              display_name='Current model attributed conversion value',
                                                              primary_value=GoogleMetricMetadataColumnsPool.current_model_attributed_conversion_value,
-                                                             type_id=ViewColumnType.text.id,
+                                                             type_id=ViewColumnType.currency.id,
                                                              category_id=ViewColumnCategory.common.id, actions=[],
                                                              not_supported_dimensions=[])
 
     engagement_rate = MetricColumn(__id.increment_as_string(), display_name='Engagement rate',
                                    primary_value=GoogleMetricMetadataColumnsPool.engagement_rate,
-                                   type_id=ViewColumnType.text.id,
+                                   type_id=ViewColumnType.percentage.id,
                                    category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     engagements = MetricColumn(__id.increment_as_string(), display_name='Engagements',
@@ -265,7 +265,7 @@ class MetricColumnsMaster:
     impression_assisted_conversion_value = MetricColumn(__id.increment_as_string(),
                                                         display_name='Impression assisted conversion value',
                                                         primary_value=GoogleMetricMetadataColumnsPool.impression_assisted_conversion_value,
-                                                        type_id=ViewColumnType.text.id,
+                                                        type_id=ViewColumnType.currency.id,
                                                         category_id=ViewColumnCategory.common.id, actions=[],
                                                         not_supported_dimensions=[])
 
@@ -291,7 +291,7 @@ class MetricColumnsMaster:
 
     percent_new_visitors = MetricColumn(__id.increment_as_string(), display_name='Percent new visitors',
                                         primary_value=GoogleMetricMetadataColumnsPool.percent_new_visitors,
-                                        type_id=ViewColumnType.text.id,
+                                        type_id=ViewColumnType.percentage.id,
                                         category_id=ViewColumnCategory.common.id, actions=[],
                                         not_supported_dimensions=[])
 
@@ -302,19 +302,19 @@ class MetricColumnsMaster:
 
     value_per_all_conversion = MetricColumn(__id.increment_as_string(), display_name='Value per all conversion',
                                             primary_value=GoogleMetricMetadataColumnsPool.value_per_all_conversion,
-                                            type_id=ViewColumnType.text.id, category_id=ViewColumnCategory.common.id,
+                                            type_id=ViewColumnType.currency.id, category_id=ViewColumnCategory.common.id,
                                             actions=[], not_supported_dimensions=[])
 
     value_per_conversion = MetricColumn(__id.increment_as_string(), display_name='Value per conversion',
                                         primary_value=GoogleMetricMetadataColumnsPool.value_per_conversion,
-                                        type_id=ViewColumnType.text.id,
+                                        type_id=ViewColumnType.currency.id,
                                         category_id=ViewColumnCategory.common.id, actions=[],
                                         not_supported_dimensions=[])
 
     value_per_current_model_attributed_conversion = MetricColumn(__id.increment_as_string(),
                                                                  display_name='Value per current model attributed conversion',
                                                                  primary_value=GoogleMetricMetadataColumnsPool.value_per_current_model_attributed_conversion,
-                                                                 type_id=ViewColumnType.text.id,
+                                                                 type_id=ViewColumnType.currency.id,
                                                                  category_id=ViewColumnCategory.common.id, actions=[],
                                                                  not_supported_dimensions=[])
 
@@ -382,7 +382,7 @@ class MetricColumnsMaster:
 
     relative_ctr = MetricColumn(__id.increment_as_string(), display_name='Relative ctr',
                                 primary_value=GoogleMetricMetadataColumnsPool.relative_ctr,
-                                type_id=ViewColumnType.text.id,
+                                type_id=ViewColumnType.percentage.id,
                                 category_id=ViewColumnCategory.common.id, actions=[], not_supported_dimensions=[])
 
     search_absolute_top_impression_share = MetricColumn(__id.increment_as_string(),
@@ -395,53 +395,53 @@ class MetricColumnsMaster:
     search_budget_lost_absolute_top_impression_share = MetricColumn(__id.increment_as_string(),
                                                                     display_name='Search budget lost absolute top impression share',
                                                                     primary_value=GoogleMetricMetadataColumnsPool.search_budget_lost_absolute_top_impression_share,
-                                                                    type_id=ViewColumnType.text.id,
+                                                                    type_id=ViewColumnType.percentage.id,
                                                                     category_id=ViewColumnCategory.common.id,
                                                                     actions=[], not_supported_dimensions=[])
 
     search_budget_lost_top_impression_share = MetricColumn(__id.increment_as_string(),
                                                            display_name='Search budget lost top impression share',
                                                            primary_value=GoogleMetricMetadataColumnsPool.search_budget_lost_top_impression_share,
-                                                           type_id=ViewColumnType.text.id,
+                                                           type_id=ViewColumnType.percentage.id,
                                                            category_id=ViewColumnCategory.common.id, actions=[],
                                                            not_supported_dimensions=[])
 
     search_exact_match_impression_share = MetricColumn(__id.increment_as_string(),
                                                        display_name='Search exact match impression share',
                                                        primary_value=GoogleMetricMetadataColumnsPool.search_exact_match_impression_share,
-                                                       type_id=ViewColumnType.text.id,
+                                                       type_id=ViewColumnType.percentage.id,
                                                        category_id=ViewColumnCategory.common.id, actions=[],
                                                        not_supported_dimensions=[])
 
     search_impression_share = MetricColumn(__id.increment_as_string(), display_name='Search impression share',
                                            primary_value=GoogleMetricMetadataColumnsPool.search_impression_share,
-                                           type_id=ViewColumnType.text.id, category_id=ViewColumnCategory.common.id,
+                                           type_id=ViewColumnType.percentage.id, category_id=ViewColumnCategory.common.id,
                                            actions=[], not_supported_dimensions=[])
 
     search_rank_lost_absolute_top_impression_share = MetricColumn(__id.increment_as_string(),
                                                                   display_name='Search rank lost absolute top impression share',
                                                                   primary_value=GoogleMetricMetadataColumnsPool.search_rank_lost_absolute_top_impression_share,
-                                                                  type_id=ViewColumnType.text.id,
+                                                                  type_id=ViewColumnType.percentage.id,
                                                                   category_id=ViewColumnCategory.common.id, actions=[],
                                                                   not_supported_dimensions=[])
 
     search_rank_lost_impression_share = MetricColumn(__id.increment_as_string(),
                                                      display_name='Search rank lost impression share',
                                                      primary_value=GoogleMetricMetadataColumnsPool.search_rank_lost_impression_share,
-                                                     type_id=ViewColumnType.text.id,
+                                                     type_id=ViewColumnType.percentage.id,
                                                      category_id=ViewColumnCategory.common.id, actions=[],
                                                      not_supported_dimensions=[])
 
     search_rank_lost_top_impression_share = MetricColumn(__id.increment_as_string(),
                                                          display_name='Search rank lost top impression share',
                                                          primary_value=GoogleMetricMetadataColumnsPool.search_rank_lost_top_impression_share,
-                                                         type_id=ViewColumnType.text.id,
+                                                         type_id=ViewColumnType.percentage.id,
                                                          category_id=ViewColumnCategory.common.id, actions=[],
                                                          not_supported_dimensions=[])
 
     search_top_impression_share = MetricColumn(__id.increment_as_string(), display_name='Search top impression share',
                                                primary_value=GoogleMetricMetadataColumnsPool.search_top_impression_share,
-                                               type_id=ViewColumnType.text.id,
+                                               type_id=ViewColumnType.percentage.id,
                                                category_id=ViewColumnCategory.common.id,
                                                actions=[], not_supported_dimensions=[])
 
@@ -453,7 +453,7 @@ class MetricColumnsMaster:
     content_budget_lost_impression_share = MetricColumn(__id.increment_as_string(),
                                                         display_name='Content budget lost impression share',
                                                         primary_value=GoogleMetricMetadataColumnsPool.content_budget_lost_impression_share,
-                                                        type_id=ViewColumnType.text.id,
+                                                        type_id=ViewColumnType.percentage.id,
                                                         category_id=ViewColumnCategory.common.id, actions=[],
                                                         not_supported_dimensions=[])
 
@@ -464,7 +464,7 @@ class MetricColumnsMaster:
 
     invalid_click_rate = MetricColumn(__id.increment_as_string(), display_name='Invalid click rate',
                                       primary_value=GoogleMetricMetadataColumnsPool.invalid_click_rate,
-                                      type_id=ViewColumnType.text.id,
+                                      type_id=ViewColumnType.percentage.id,
                                       category_id=ViewColumnCategory.common.id, actions=[],
                                       not_supported_dimensions=[])
 
@@ -476,13 +476,13 @@ class MetricColumnsMaster:
     search_budget_lost_impression_share = MetricColumn(__id.increment_as_string(),
                                                        display_name='Search budget lost impression share',
                                                        primary_value=GoogleMetricMetadataColumnsPool.search_budget_lost_impression_share,
-                                                       type_id=ViewColumnType.text.id,
+                                                       type_id=ViewColumnType.percentage.id,
                                                        category_id=ViewColumnCategory.common.id, actions=[],
                                                        not_supported_dimensions=[])
 
     search_click_share = MetricColumn(__id.increment_as_string(), display_name='Search click share',
                                       primary_value=GoogleMetricMetadataColumnsPool.search_click_share,
-                                      type_id=ViewColumnType.text.id,
+                                      type_id=ViewColumnType.percentage.id,
                                       category_id=ViewColumnCategory.common.id, actions=[],
                                       not_supported_dimensions=[])
 
@@ -508,6 +508,6 @@ class MetricColumnsMaster:
     historical_search_predicted_ctr = MetricColumn(__id.increment_as_string(),
                                                    display_name='Historical search predicted ctr',
                                                    primary_value=GoogleMetricMetadataColumnsPool.historical_search_predicted_ctr,
-                                                   type_id=ViewColumnType.text.id,
+                                                   type_id=ViewColumnType.percentage.id,
                                                    category_id=ViewColumnCategory.common.id, actions=[],
                                                    not_supported_dimensions=[])
