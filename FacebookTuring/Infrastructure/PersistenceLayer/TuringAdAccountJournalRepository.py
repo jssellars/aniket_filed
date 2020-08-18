@@ -88,7 +88,9 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         results = self.get(query, projection)
         return results
 
-    def get_last_updated_accounts(self, business_owner_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
+    def get_last_updated_accounts(self,
+                                  business_owner_id: typing.AnyStr = None,
+                                  last_updated_at: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         query = {
             MongoOperator.AND.value: [
                 {
@@ -96,7 +98,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                         MongoOperator.EQUALS.value: business_owner_id
                     },
                     MiscFieldsEnum.last_synced_on: {
-                        MongoOperator.EQUALS.value: datetime.now().strftime(self.DEFAULT_DATETIME_FORMAT)
+                        MongoOperator.GREATERTHANEQUAL.value: last_updated_at
                     },
                     MiscFieldsEnum.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value

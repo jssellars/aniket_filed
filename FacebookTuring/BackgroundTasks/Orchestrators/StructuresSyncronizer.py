@@ -9,6 +9,7 @@ from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwn
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from FacebookTuring.BackgroundTasks.Startup import startup
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
@@ -51,6 +52,9 @@ class StructuresSyncronizer:
             # set business owner id
             structures = self.__set_business_owner_id(structures_response, self.business_owner_id)
 
+            # remove incomplete structures
+            structures = [structure for structure in structures if self.__is_complete_structure(structure, self.level)]
+
             # insert structures
             self.__mongo_repository.add_structure_many(self.account_id, self.level, structures)
         except FacebookRequestError as fb_ex:
@@ -58,6 +62,30 @@ class StructuresSyncronizer:
                 sleep(self.SLEEP_ON_RATE_LIMIT_EXCEPTION)
         except Exception as e:
             raise e
+
+    def __is_complete_structure(self, structure=None, level=None) -> bool:
+        if level == Level.CAMPAIGN:
+            if getattr(structure, GraphAPIInsightsFields.campaign_name) is None or \
+                    getattr(structure, GraphAPIInsightsFields.campaign_id) is None:
+                return False
+
+        if level == Level.ADSET:
+            if getattr(structure, GraphAPIInsightsFields.campaign_name) is None or \
+                    getattr(structure, GraphAPIInsightsFields.campaign_id) is None or \
+                    getattr(structure, GraphAPIInsightsFields.adset_name) is None or \
+                    getattr(structure, GraphAPIInsightsFields.adset_id) is None:
+                return False
+
+        if level == Level.AD:
+            if getattr(structure, GraphAPIInsightsFields.campaign_name) is None or \
+                    getattr(structure, GraphAPIInsightsFields.campaign_id) is None or \
+                    getattr(structure, GraphAPIInsightsFields.adset_name) is None or \
+                    getattr(structure, GraphAPIInsightsFields.adset_id) is None or \
+                    getattr(structure, GraphAPIInsightsFields.ad_name) is None or \
+                    getattr(structure, GraphAPIInsightsFields.ad_id) is None:
+                return False
+
+        return True
 
     def __sync(self,
                level: Level = None,

@@ -34,7 +34,7 @@ class FacebookMetricCalculator(MetricCalculatorBase):
         super().__init__()
         self.minimum_number_of_data_points = None
         self._calculator = None
-        value = str(random.randint(0, 1e20)) + self._date_stop.strftime(DEFAULT_DATETIME_ISO)
+        value = str(random.randint(0, int(1e20))) + self._date_stop.strftime(DEFAULT_DATETIME_ISO)
         self._calculator_id = hashlib.sha1(value.encode('utf-8')).hexdigest()
 
         if self._repository is not None:

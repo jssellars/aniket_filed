@@ -2,9 +2,11 @@ import copy
 import math
 import typing
 from collections import defaultdict
+from datetime import datetime
 from threading import Thread
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.Startup import startup
@@ -61,6 +63,7 @@ class Orchestrator:
         return self
 
     def run(self, business_owner_id: typing.AnyStr = None):
+        start_sync_date = datetime.now().strftime(DEFAULT_DATETIME)
         # get latest ad account state for all BO
         ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active(
             business_owner_id=business_owner_id)
@@ -103,7 +106,7 @@ class Orchestrator:
             self.__account_journal_repository.update_last_sync_time_by_business_owner_id(business_owner_id)
 
             # publish message to Dexter Background tasks to start processing the data for the current business owner
-            self.__publish_business_owner_synced_event(business_owner_id)
+            self.__publish_business_owner_synced_event(business_owner_id, start_sync_date)
 
         # compile and send sync status report
         if ad_accounts_details:
@@ -122,8 +125,9 @@ class Orchestrator:
         return business_owner_details
 
     def __publish_business_owner_synced_event(self,
-                                              business_owner_id: typing.AnyStr = None) -> typing.NoReturn:
-        account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id)
+                                              business_owner_id: typing.AnyStr = None,
+                                              sync_start_date: typing.AnyStr = None) -> typing.NoReturn:
+        account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id, sync_start_date)
         business_owner_updated_details = UpdatedBusinessOwnersDetails(business_owner_facebook_id=business_owner_id,
                                                                       ad_account_ids=account_ids)
         business_owner_synced_event = FacebookTuringDataSyncCompletedEvent(

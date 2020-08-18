@@ -53,6 +53,7 @@
     "sync_reports_collection": "sync_reports"
   },
   "sync_time": "00:10",
+  "days_to_sync": 30,
   "environment": "local",
   "api_name": "FacebookTuringBackgroundTasks",
   "api_version": "1.0.0",

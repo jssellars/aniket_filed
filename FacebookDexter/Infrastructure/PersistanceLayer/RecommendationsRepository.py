@@ -1,21 +1,23 @@
+import copy
+from datetime import datetime
+
+import pymongo
+from bson import ObjectId
+
 from Core.Dexter.Infrastructure.Domain.Recommendations.Recommendation import Recommendation
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from FacebookDexter.Api.Config.Config import MongoConfig
-import pymongo
-from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
-from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
-from datetime import datetime
-from bson import ObjectId
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-import copy
+from FacebookDexter.Api.Config.Config import MongoConfig
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
 
 
 class RecommendationsRepository(MongoRepositoryBase):
 
-    def __init__(self, config: MongoConfig):
-        super().__init__(config=config)
+    def __init__(self, config: MongoConfig, **kwargs):
+        super().__init__(config=config, **kwargs)
         self.database = config['recommendations_database_name']
         self.collection = config['recommendations_collection_name']
 

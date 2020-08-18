@@ -146,7 +146,10 @@ def sync_insights(insights_repository: TuringMongoRepository = None,
                                                                    AdAccountSyncStatusEnum.IN_PROGRESS,
                                                                    start_date=datetime.now())
     has_errors = False
-    date_stop = datetime.now()
+    # sync data up to midnight the current day to avoid syncing
+    # partial insights
+    date_stop = datetime.now() - timedelta(days=1)
+
     levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
     for level in levels:
         if level in [Level.CAMPAIGN, Level.ADSET]:

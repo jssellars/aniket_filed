@@ -62,29 +62,32 @@ class Startup(object):
         return sessionmaker(bind=self.engine)
 
 
-#  Initialize startup object
-env = os.environ.get("PYTHON_ENV")
-if not env:
-    env = "dev"
-config_file = f"Config/Settings/app.settings.{env}.json"
+try:
+    #  Initialize startup object
+    env = os.environ.get("PYTHON_ENV")
+    if not env:
+        env = "dev"
+    config_file = f"Config/Settings/app.settings.{env}.json"
 
-with open(config_file, 'r') as app_settings_json_file:
-    app_config = json.load(app_settings_json_file)
+    with open(config_file, 'r') as app_settings_json_file:
+        app_config = json.load(app_settings_json_file)
 
-startup = Startup(app_config)
+    startup = Startup(app_config)
 
-# Initialize logger
-logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
-                                                port=startup.es_port,
-                                                name=startup.api_name,
-                                                level=startup.logger_level,
-                                                index_name=startup.docker_filename)
-rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
-                                                              port=startup.es_port,
-                                                              name=startup.api_name,
-                                                              level=startup.logger_level,
-                                                              index_name=startup.docker_filename)
+    # Initialize logger
+    logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
+                                                    port=startup.es_port,
+                                                    name=startup.api_name,
+                                                    level=startup.logger_level,
+                                                    index_name=startup.docker_filename)
+    rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
+                                                                  port=startup.es_port,
+                                                                  name=startup.api_name,
+                                                                  level=startup.logger_level,
+                                                                  index_name=startup.docker_filename)
 
-# Log startup details
-startup_log = LoggerMessageStartup(app_config=app_config, description="Facebook Dexter Background Tasks")
-logger.logger.info(startup_log.to_dict())
+    # Log startup details
+    startup_log = LoggerMessageStartup(app_config=app_config, description="Facebook Dexter Background Tasks")
+    logger.logger.info(startup_log.to_dict())
+except Exception as e:
+    pass
