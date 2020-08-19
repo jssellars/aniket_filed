@@ -1,5 +1,4 @@
 import typing
-from datetime import datetime
 from enum import Enum
 
 
@@ -24,7 +23,6 @@ class LoggerMessageBase:
         self.code = code
         self.description = description
         self.extra_data = extra_data
-        self.timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
     def to_dict(self):
         details = {
@@ -36,7 +34,8 @@ class LoggerMessageBase:
             }
         }
         try:
-            details["details"].update(self.extra_data)
+            if self.extra_data:
+                details["details"].update(self.extra_data)
         except Exception as e:
             details["details"].update({"error": f"Failed to generate log {str(e)}"})
 

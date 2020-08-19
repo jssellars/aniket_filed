@@ -56,7 +56,7 @@ class StructuresSyncronizer:
             structures = [structure for structure in structures if self.__is_complete_structure(structure, self.level)]
 
             # insert structures
-            self.__mongo_repository.add_structure_many(self.account_id, self.level, structures)
+            self.__mongo_repository.add_structures_many_with_deprecation(level=self.level, structures=structures)
         except FacebookRequestError as fb_ex:
             if fb_ex.http_status() == self.RATE_LIMIT_EXCEPTION_STATUS:
                 sleep(self.SLEEP_ON_RATE_LIMIT_EXCEPTION)

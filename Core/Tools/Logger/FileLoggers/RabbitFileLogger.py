@@ -28,7 +28,6 @@ class RabbitFileLogger:
                     "%Y-%m-%dT%H-%M-%S") + ".json")
                 t = Thread(target=self.save_to_file_async, args=(file_name, message))
                 t.start()
-                # t.join()
             except Exception as e:
                 pass
 

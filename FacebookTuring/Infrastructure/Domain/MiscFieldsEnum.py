@@ -26,3 +26,4 @@ class MiscFieldsEnum:
     end_time = 'end_time'
     created_at = 'created_at'
     report = 'sync_report'
+    date_added = 'date_added'

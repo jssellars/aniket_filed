@@ -4,6 +4,7 @@ from datetime import datetime
 
 from bson import BSON
 
+from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
@@ -221,7 +222,9 @@ class TuringMongoRepository(MongoRepositoryBase):
                 },
                 {
                     MiscFieldsEnum.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value,
+                                                 StructureStatusEnum.COMPLETED.value]
                     }
                 }
             ]
@@ -353,6 +356,62 @@ class TuringMongoRepository(MongoRepositoryBase):
         else:
             return getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
 
+    def add_structures_many_with_deprecation(self,
+                                             level: Level = None,
+                                             structures: typing.List[typing.Any] = None) -> typing.NoReturn:
+        self.set_collection(collection_name=level.value)
+        for structure in structures:
+            structure_id = self.__get_structure_id(structure, level)
+            if isinstance(structure, dict):
+                current_structure_details = structure.get(MiscFieldsEnum.details)
+            else:
+                current_structure_details = BSON.decode(structure.details)
+            existing_structure_details = self.get_structure_details(level=level, key_value=structure_id)
+            if existing_structure_details and \
+                    current_structure_details != existing_structure_details.get(MiscFieldsEnum.details):
+                self.deprecate_structure(level=level, key_value=structure_id)
+                if isinstance(structure, dict):
+                    structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+                else:
+                    structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+                self.add_one(structure)
+            elif not existing_structure_details:
+                if isinstance(structure, dict):
+                    structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+                else:
+                    structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+                self.add_one(structure)
+
+    def deprecate_structure(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
+        self.set_collection(collection_name=level.value)
+        query_filter = {
+            LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
+                MongoOperator.EQUALS.value: key_value
+            }
+        }
+        query = {
+            MongoOperator.SET.value: {
+                MiscFieldsEnum.status: StructureStatusEnum.DEPRECATED.value
+            }
+        }
+        self.update_many(query_filter=query_filter, query=query)
+
+    def deprecate_structures_by_account_id(self,
+                                           account_id: typing.AnyStr = None,
+                                           level: Level = None) -> typing.NoReturn:
+        self.set_collection(collection_name=level.value)
+        query_filter = {
+            MiscFieldsEnum.account_id: {
+                MongoOperator.EQUALS.value: account_id
+            }
+        }
+        query = {
+            MongoOperator.SET.value: {
+                MiscFieldsEnum.status: StructureStatusEnum.DEPRECATED.value
+            }
+        }
+        self.update_many(query_filter, query)
+
     def add_structure_many(self, account_id: typing.AnyStr = None, level: Level = None,
                            structures: typing.List[typing.Any] = None) -> typing.NoReturn:
         self.set_collection(collection_name=level.value)
@@ -477,11 +536,9 @@ class TuringMongoRepository(MongoRepositoryBase):
         self.update_one(query_filter, query)
 
     def get_latest_by_account_id(self,
-                                 database: typing.AnyStr = None,
                                  collection: typing.AnyStr = None,
                                  start_date: typing.Union[datetime, typing.AnyStr] = None,
-                                 account_id: typing.AnyStr = None
-                                 ):
+                                 account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
         self.set_database(self.config.structures_database_name)
         self.set_collection(collection)
         query = {
@@ -492,7 +549,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.last_updated_at: {
+                    MiscFieldsEnum.date_added: {
                         MongoOperator.GREATERTHANEQUAL.value: start_date
                     }
                 }

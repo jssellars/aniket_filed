@@ -21,3 +21,4 @@ class AdSetModel:
     created_time: str = None
     start_time: str = None
     end_time: str = None
+    date_added: str = None

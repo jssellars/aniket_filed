@@ -2,6 +2,7 @@ import typing
 from datetime import datetime, timedelta
 from threading import Thread
 
+from bson import BSON
 from dateutil.parser import parse
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
@@ -218,20 +219,21 @@ def sync_insights_base(syncronizer: InsightsSyncronizer = None,
     return has_errors
 
 
-def mark_structures_as_completed(account_id: typing.AnyStr=None,
+def mark_structures_as_completed(account_id: typing.AnyStr = None,
                                  structures_repository: TuringMongoRepository = None) -> typing.NoReturn:
     campaigns = structures_repository.get_campaigns_by_ad_account(account_id)
     campaign_ids = [campaign[LevelToFacebookIdKeyMapping.CAMPAIGN.value] for campaign in campaigns]
     adsets = structures_repository.get_adsets_by_campaign_id(campaign_ids)
     campaigns, adsets = mark_completed_campaigns_and_adsets(campaigns, adsets)
 
-    structures_repository.add_structure_many(account_id, Level.CAMPAIGN, campaigns)
-    structures_repository.add_structure_many(account_id, Level.ADSET, adsets)
+    structures_repository.add_structures_many_with_deprecation(level=Level.CAMPAIGN, structures=campaigns)
+    structures_repository.add_structures_many_with_deprecation(level=Level.ADSET, structures=adsets)
 
 
 def mark_completed_campaigns_and_adsets(campaigns: typing.List[typing.Dict] = None,
-                                        adsets: typing.List[typing.Dict] = None) -> typing.Tuple[typing.List[typing.Dict],
-                                                                                                 typing.List[typing.Dict]]:
+                                        adsets: typing.List[typing.Dict] = None) -> typing.Tuple[
+    typing.List[typing.Dict],
+    typing.List[typing.Dict]]:
     for index in range(len(campaigns)):
         campaign_id = campaigns[index][LevelToFacebookIdKeyMapping.CAMPAIGN.value]
         campaign_adsets = [adset for adset in adsets
@@ -240,6 +242,11 @@ def mark_completed_campaigns_and_adsets(campaigns: typing.List[typing.Dict] = No
         completed_adsets = mark_completed_adset(campaign_adsets)
         if completed_adsets == len(campaign_adsets):
             campaigns[index][MiscFieldsEnum.status] = StructureStatusEnum.COMPLETED.value
+
+        campaigns[index][MiscFieldsEnum.details] = BSON.encode(campaigns[index][MiscFieldsEnum.details])
+
+    for index in range(len(adsets)):
+        adsets[index][MiscFieldsEnum.details] = BSON.encode(adsets[index][MiscFieldsEnum.details])
 
     return campaigns, adsets
 

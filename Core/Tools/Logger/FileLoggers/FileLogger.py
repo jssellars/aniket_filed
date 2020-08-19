@@ -14,10 +14,10 @@ class FileLogger:
     _instance = None
 
     def __new__(self,
-                 name: typing.AnyStr = None,
-                 level: typing.AnyStr = None,
-                 index_name: typing.AnyStr = None,
-                 **kwargs):
+                name: typing.AnyStr = None,
+                level: typing.AnyStr = None,
+                index_name: typing.AnyStr = None,
+                **kwargs):
         if self._instance is None:
             self._instance = super(FileLogger, self).__new__(self)
 
