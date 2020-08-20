@@ -438,15 +438,15 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         _date_stop = datetime.strftime(_date_stop, DEFAULT_DATETIME)
         _mean_date_start = datetime.strftime(_mean_date_start, DEFAULT_DATETIME)
 
-        mean_on_time_interval = self.average(date_start=_mean_date_start, date_stop=_date_stop)
+        mean_on_thirty_days_interval = self.average(date_start=_mean_date_start, date_stop=_date_stop)
 
         self._metric.numerator_aggregator = AggregatorEnum.STANDARD_DEVIATION
         self._metric.denominator_aggregator = AggregatorEnum.STANDARD_DEVIATION
         standard_deviation_on_time_interval = self.aggregated_value(date_start=date_start,
                                                                     date_stop=_date_stop)
 
-        if mean_on_time_interval:
-            variance = self.HUNDRED_MULTIPLIER * (standard_deviation_on_time_interval / mean_on_time_interval)
+        if mean_on_thirty_days_interval:
+            variance = self.HUNDRED_MULTIPLIER * (standard_deviation_on_time_interval / mean_on_thirty_days_interval)
 
         return variance
 
