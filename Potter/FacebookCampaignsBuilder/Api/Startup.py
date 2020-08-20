@@ -58,7 +58,7 @@ def create_sql_connection(self):
 #  Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
-    env = "dev"
+    env = "local"
 config_file = f"Config/Settings/app.settings.{env}.json"
 
 with open(config_file, 'r') as app_settings_json_file:
