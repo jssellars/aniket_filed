@@ -5,6 +5,7 @@ from datetime import datetime
 from threading import Thread
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
+from Core.Tools.Misc.Constants import FILENAME_DATETIME
 
 RabbitMessageType = typing.Union[typing.AnyStr, typing.Dict]
 
@@ -20,12 +21,13 @@ class RabbitFileLogger:
         def info(self, message: typing.Dict = None):
             try:
                 message['type'] = LoggerMessageTypeEnum.INTEGRATION_EVENT.value
-                message['details']['event_body'] = json.loads(message['details']['event_body']) \
-                    if isinstance(message['details']['event_body'], str) or \
-                       isinstance(message['details']['event_body'], bytes) \
-                    else message['details']['event_body']
-                file_name = os.path.join(self.LOGS_FOLDER, message['details']['name'] + "_" + datetime.now().strftime(
-                    "%Y-%m-%dT%H-%M-%S") + ".json")
+                if isinstance(message['details']['event_body'], str) or \
+                        isinstance(message['details']['event_body'], bytes):
+                    message['details']['event_body'] = json.loads(message['details']['event_body'])
+                else:
+                    message['details']['event_body'] = message['details']['event_body']
+                file_name = message['details']['name'] + datetime.now().strftime(FILENAME_DATETIME) + ".json"
+                file_name = os.path.join(self.LOGS_FOLDER, file_name)
                 t = Thread(target=self.save_to_file_async, args=(file_name, message))
                 t.start()
             except Exception as e:

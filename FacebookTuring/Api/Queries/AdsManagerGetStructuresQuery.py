@@ -1,6 +1,6 @@
 from FacebookTuring.Api.Mappings.AdsManagerStructureMapping import AdsManagerStructureMapping
 from FacebookTuring.Api.Mappings.AdsManagerStructureMinimalMapping import AdsManagerStructureMinimalMapping
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.Startup import startup, logger
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
@@ -15,7 +15,8 @@ class AdsManagerGetStructuresQuery:
         try:
             repository = TuringMongoRepository(config=startup.mongo_config,
                                                database_name=startup.mongo_config.structures_database_name,
-                                               collection_name=collection_name)
+                                               collection_name=collection_name,
+                                               logger=logger)
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id)
             if not response:
@@ -34,7 +35,8 @@ class AdsManagerGetStructuresQuery:
         try:
             repository = TuringMongoRepository(config=startup.mongo_config,
                                                database_name=startup.mongo_config.structures_database_name,
-                                               collection_name=collection_name)
+                                               collection_name=collection_name,
+                                               logger=logger)
             structure_details = repository.get_structure_details(Level(level), facebook_id)
             if not structure_details:
                 return {}

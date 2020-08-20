@@ -13,11 +13,14 @@ def turing_data_sync_handler(request_handler=None, message_body=None, startup=No
     #  Initialize mongo repositories for accounts journal, insights and structures
     account_journal_repository = TuringAdAccountJournalRepository(config=startup.mongo_config,
                                                                   database_name=startup.mongo_config.accounts_journal_database_name,
-                                                                  collection_name=startup.mongo_config.accounts_journal_collection_name)
+                                                                  collection_name=startup.mongo_config.accounts_journal_collection_name,
+                                                                  logger=logger)
     insights_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                database_name=startup.mongo_config.insights_database_name)
+                                                database_name=startup.mongo_config.insights_database_name,
+                                                logger=logger)
     structures_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                  database_name=startup.mongo_config.structures_database_name)
+                                                  database_name=startup.mongo_config.structures_database_name,
+                                                  logger=logger)
 
     #  initialize orchestrator
     orchestrator = (Orchestrator().
@@ -37,7 +40,8 @@ def turing_data_sync_handler(request_handler=None, message_body=None, startup=No
 
 def campaign_created_handler(request_handler=None, message_body=None, startup=None, logger=None, rabbit_logger=None):
     structures_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                  database_name=startup.mongo_config.structures_database_name)
+                                                  database_name=startup.mongo_config.structures_database_name,
+                                                  logger=logger)
 
     body = json.loads(message_body)
     mapper = CampaignCreatedEventMapping(target=CampaignCreatedEvent)

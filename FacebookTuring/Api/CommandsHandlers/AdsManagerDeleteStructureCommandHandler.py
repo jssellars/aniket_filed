@@ -1,6 +1,6 @@
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.Startup import startup, logger
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToGraphAPIStructure, Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -12,7 +12,8 @@ class AdsManagerDeleteStructureCommandHandler:
     def handle(cls, level, facebook_id, business_owner_facebook_id):
         repository = TuringMongoRepository(config=startup.mongo_config,
                                            database_name=startup.mongo_config['structures_database_name'],
-                                           collection_name=level)
+                                           collection_name=level,
+                                           logger=logger)
 
         existing_structure_id = repository.get_structure_details(level=Level(level), key_value=facebook_id)
         if not existing_structure_id:

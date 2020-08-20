@@ -20,6 +20,8 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 class GraphAPIInsightsHandler:
+    __logger = None
+
     __ids_keymap = {
         Level.ACCOUNT.value: {
             "structure": FieldsMetadata.id.name,
@@ -76,6 +78,11 @@ class GraphAPIInsightsHandler:
     }
 
     @classmethod
+    def set_logger(cls, logger):
+        cls.__logger = logger
+        return cls
+
+    @classmethod
     def get_insights_base(cls,
                           permanent_token: typing.AnyStr = None,
                           ad_account_id: typing.AnyStr = None,
@@ -121,7 +128,8 @@ class GraphAPIInsightsHandler:
         try:
             # structures_response, summary = graph_api_client.call_facebook()
             repository = TuringMongoRepository(config=startup.mongo_config,
-                                               database_name=startup.mongo_config.structures_database_name)
+                                               database_name=startup.mongo_config.structures_database_name,
+                                               logger=cls.__logger)
             summary = []
             account_id = ad_account_id.split("_")[1]
             structures = repository.get_all_structures_by_ad_account_id(level=Level(level), account_id=account_id)

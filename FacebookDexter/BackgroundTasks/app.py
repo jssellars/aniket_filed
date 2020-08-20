@@ -41,10 +41,12 @@ def callback(ch, method, properties, body):
         # initialize all repos
         recommendations_repository = DexterRecommendationsMongoRepository(config=startup.mongo_config,
                                                                           database_name=startup.mongo_config.recommendations_database_name,
-                                                                          collection_name=startup.mongo_config.recommendations_collection_name)
+                                                                          collection_name=startup.mongo_config.recommendations_collection_name,
+                                                                          logger=logger)
         journal_repository = DexterJournalMongoRepository(config=startup.mongo_config,
                                                           database_name=startup.mongo_config.journal_database_name,
-                                                          collection_name=startup.mongo_config.journal_collection_name)
+                                                          collection_name=startup.mongo_config.journal_collection_name,
+                                                          logger=logger)
 
         request_handler. \
             set_startup(startup). \

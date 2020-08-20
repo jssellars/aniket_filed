@@ -8,8 +8,7 @@ from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extract_business_owner_google_id, \
-    extract_field_user_id
+from Core.Web.Security.JWTTools import extract_field_user_id
 from Logging.Api.Commands.LoggingCommand import LoggingCommand
 from Logging.Api.Mappings.LoggingCommandMapping import LoggingCommandMapping
 from Logging.Api.Startup import logger, startup
@@ -23,8 +22,6 @@ class LoggingEndpoint(Resource):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             # get business owner
-            business_owner_facebook_id = extract_business_owner_facebook_id(get_jwt())
-            business_owner_google_id = extract_business_owner_google_id(get_jwt())
             user_id = extract_field_user_id(get_jwt())
 
             # get request
@@ -35,17 +32,22 @@ class LoggingEndpoint(Resource):
             mapper = LoggingCommandMapping(target=LoggingCommand)
             command = mapper.load(request_json)
             command.user_id = user_id
-            command.business_owner_facebook_id = business_owner_facebook_id
-            command.business_owner_google_id = business_owner_google_id
             command.correlation_id = request.headers.get("CorrelationId")
-            command.jwt_token = request.headers.get('Authorization')
-            command.jwt_token = command.jwt_token.replace("Bearer ", "")
+            # === WARNING ===
+            # === !! only activate these logs if they are really needed !! ===
+            # business_owner_facebook_id = extract_business_owner_facebook_id(get_jwt())
+            # business_owner_google_id = extract_business_owner_google_id(get_jwt())
+            # command.business_owner_facebook_id = business_owner_facebook_id
+            # command.business_owner_google_id = business_owner_google_id
+            # command.jwt_token = request.headers.get('Authorization')
+            # command.jwt_token = command.jwt_token.replace("Bearer ", "")
             command.timestamp = datetime.isoformat(datetime.now())
 
             # save request
             repository = LoggingMongoRepository(config=startup.mongo_config,
                                                 database_name=startup.mongo_config.logging_database_name,
-                                                collection_name=startup.mongo_config.logging_collection_name)
+                                                collection_name=startup.mongo_config.logging_collection_name,
+                                                logger=logger)
             repository.add_one(command)
 
             return Response(status=200, mimetype='application/json')

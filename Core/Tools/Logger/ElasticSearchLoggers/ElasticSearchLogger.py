@@ -23,7 +23,6 @@ class ElasticSearchLogger:
             self.name = name
             self.level = LoggingLevelEnum.get_enum_by_name(level).value
             self.es_index = index_name
-
             self.logger = ElasticSearchLogger.__init_logger(self)
 
         return self._instance

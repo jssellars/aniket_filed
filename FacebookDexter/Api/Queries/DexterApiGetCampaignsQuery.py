@@ -6,10 +6,10 @@ from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 from FacebookDexter.Api.QueryParamsValidators.DexterApiGetCampaignsQueryValidator import \
     DexterApiGetCampaignsQueryValidator
 from FacebookDexter.Api.Startup import startup, logger
+from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
 class DexterApiGetCampaignsQuery(Resource):
@@ -22,7 +22,7 @@ class DexterApiGetCampaignsQuery(Resource):
             if isinstance(error_response_or_paramaters, Response):
                 return error_response_or_paramaters
 
-            recommendation_repository = RecommendationsRepository(startup.mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config, logger=logger)
             campaigns = recommendation_repository.get_campaigns(error_response_or_paramaters['ad_account_id'],
                                                                 error_response_or_paramaters['channel'])
             response = Response(response=json.dumps(campaigns), status=200, mimetype='application/json')

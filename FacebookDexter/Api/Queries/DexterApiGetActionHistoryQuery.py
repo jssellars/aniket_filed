@@ -6,8 +6,8 @@ from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 from FacebookDexter.Api.Startup import startup, logger
+from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
 class DexterApiGetActionHistoryQuery(Resource):
@@ -17,7 +17,7 @@ class DexterApiGetActionHistoryQuery(Resource):
             structure_id = request.args.get('structureId')
             if structure_id is None:
                 return Response(response='Please provide structure id', status=400, mimetype='application/json')
-            recommendation_repository = RecommendationsRepository(startup.mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config, logger=logger)
             history = recommendation_repository.get_action_history(structure_id)
             response = Response(response=json.dumps(history), status=200, mimetype='application/json')
             return response

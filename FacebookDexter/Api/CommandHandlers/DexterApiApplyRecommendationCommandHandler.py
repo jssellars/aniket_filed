@@ -6,16 +6,16 @@ from flask import Response
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
+from FacebookDexter.Api.Startup import startup, logger
 from FacebookDexter.Infrastructure.Domain.Rules.FacebookRuleEnums import FacebookRuleRedirectEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
-from FacebookDexter.Api.Startup import startup
 
 
 class DexterApiApplyRecommendationCommandHandler:
     def handle(self, command: DexterApiApplyRecommendationCommand):
         try:
             recommendation_id = command.id
-            recommendation_repository = RecommendationsRepository(startup.mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config, logger=logger)
             recommendation = recommendation_repository.get_recommendation_by_id(recommendation_id)
             external_services = startup.external_services
             if not recommendation:

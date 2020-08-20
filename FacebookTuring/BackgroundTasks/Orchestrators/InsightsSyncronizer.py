@@ -11,7 +11,7 @@ from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSyncronizerBreakdownEnum
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields import INSIGHTS_SYNCRONIZER_FIELDS
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.Startup import startup, logger
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -48,11 +48,12 @@ class InsightsSyncronizer:
                 self.__requested_fields = INSIGHTS_SYNCRONIZER_FIELDS + [self.breakdown]
             else:
                 self.__requested_fields = INSIGHTS_SYNCRONIZER_FIELDS
-            response = GraphAPIInsightsHandler.get_reports_insights(permanent_token=self.permanent_token,
-                                                                    ad_account_id=self.__ad_account_id,
-                                                                    fields=self.__get_fields(),
-                                                                    parameters=self.__get_parameters(),
-                                                                    requested_fields=self.__requested_fields)
+            response = GraphAPIInsightsHandler.set_logger(logger).get_reports_insights(
+                permanent_token=self.permanent_token,
+                ad_account_id=self.__ad_account_id,
+                fields=self.__get_fields(),
+                parameters=self.__get_parameters(),
+                requested_fields=self.__requested_fields)
             self.__mongo_repository.set_collection(self.__get_mongo_repository_collection())
             self.__mongo_repository.add_many(response)
         except FacebookRequestError as fb_ex:
@@ -129,11 +130,12 @@ class InsightsSyncronizer:
             }
         }
         try:
-            response = GraphAPIInsightsHandler.get_reports_insights(permanent_token=self.permanent_token,
-                                                                    ad_account_id=self.__ad_account_id,
-                                                                    fields=[FieldsMetadata.impressions.name],
-                                                                    parameters=check_data_parameters,
-                                                                    requested_fields=[FieldsMetadata.impressions])
+            response = GraphAPIInsightsHandler.set_logger(logger).get_reports_insights(
+                permanent_token=self.permanent_token,
+                ad_account_id=self.__ad_account_id,
+                fields=[FieldsMetadata.impressions.name],
+                parameters=check_data_parameters,
+                requested_fields=[FieldsMetadata.impressions])
             return True if response else False
         except Exception as e:
             raise e

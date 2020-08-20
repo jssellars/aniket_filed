@@ -12,8 +12,10 @@ class LoggerAPIRequestMessageBase:
                 'endpoint': api_request.endpoint,
                 'full_path': api_request.full_path,
                 'remote_address': api_request.remote_addr,
-                'payload': api_request.get_data(),
-                'headers': api_request.headers
+                'payload': api_request.get_data()
+                # === WARNING ===
+                # === !! only activate this log if it is really needed !! ===
+                # 'headers': api_request.headers
             }
         }
 

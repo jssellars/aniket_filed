@@ -4,7 +4,7 @@ from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderRequestMapper
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.Startup import startup, logger
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
@@ -42,14 +42,14 @@ class AdsManagerInsightsCommandHandler:
         permanent_token = (BusinessOwnerRepository(startup.session).
                            get_permanent_token(business_owner_id))
         query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.get_insights(permanent_token=permanent_token,
-                                                        level=query.level,
-                                                        ad_account_id=query.facebook_id,
-                                                        fields=query.fields,
-                                                        parameters=query.parameters,
-                                                        structure_fields=query.structure_fields,
-                                                        requested_fields=query.requested_columns,
-                                                        filter_params=query.filtering)
+        response = GraphAPIInsightsHandler.set_logger(logger).get_insights(permanent_token=permanent_token,
+                                                                           level=query.level,
+                                                                           ad_account_id=query.facebook_id,
+                                                                           fields=query.fields,
+                                                                           parameters=query.parameters,
+                                                                           structure_fields=query.structure_fields,
+                                                                           requested_fields=query.requested_columns,
+                                                                           filter_params=query.filtering)
         return response
 
     @classmethod
@@ -58,14 +58,14 @@ class AdsManagerInsightsCommandHandler:
                                  business_owner_id: typing.AnyStr = None) -> typing.Dict:
         permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
         query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.get_insights_with_totals(permanent_token=permanent_token,
-                                                                    level=query.level,
-                                                                    ad_account_id=query.facebook_id,
-                                                                    fields=query.fields,
-                                                                    parameters=query.parameters,
-                                                                    structure_fields=query.structure_fields,
-                                                                    requested_fields=query.requested_columns,
-                                                                    filter_params=query.filtering)
+        response = GraphAPIInsightsHandler.set_logger(logger).get_insights_with_totals(permanent_token=permanent_token,
+                                                                                       level=query.level,
+                                                                                       ad_account_id=query.facebook_id,
+                                                                                       fields=query.fields,
+                                                                                       parameters=query.parameters,
+                                                                                       structure_fields=query.structure_fields,
+                                                                                       requested_fields=query.requested_columns,
+                                                                                       filter_params=query.filtering)
         return response
 
     @classmethod
@@ -74,9 +74,9 @@ class AdsManagerInsightsCommandHandler:
                              business_owner_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
         permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
         query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.get_reports_insights(permanent_token=permanent_token,
-                                                                ad_account_id=query.facebook_id,
-                                                                fields=query.fields,
-                                                                parameters=query.parameters,
-                                                                requested_fields=query.requested_columns)
+        response = GraphAPIInsightsHandler.set_logger(logger).get_reports_insights(permanent_token=permanent_token,
+                                                                                   ad_account_id=query.facebook_id,
+                                                                                   fields=query.fields,
+                                                                                   parameters=query.parameters,
+                                                                                   requested_fields=query.requested_columns)
         return response

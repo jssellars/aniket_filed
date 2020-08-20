@@ -34,12 +34,11 @@ class FileLogger:
 
     def init_logger(self):
         # define logs format
-        formatter = CustomJsonFormatter('(timestamp):(level):(name):(message)')
+        formatter = CustomJsonFormatter('(level):(name)')
 
         # create a file handler to log to file
         handler = TimedRotatingFileHandler(self.file_name,
                                            when='midnight', interval=self.DAY)
-        handler.suffix = '%y-%m-%d.log'
         handler.setLevel(self.level)
         handler.setFormatter(formatter)
 

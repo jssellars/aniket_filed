@@ -10,8 +10,9 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClie
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
-from FacebookTuring.Api.Startup import startup
-from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import GraphAPIRequestSingleStructure
+from FacebookTuring.Api.Startup import startup, logger
+from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
+    GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGraphAPIStructure, \
     LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureMapping, StructureFields
@@ -147,7 +148,8 @@ class AdsManagerDuplicateStructureCommandHandler:
 
         repository = TuringMongoRepository(config=startup.mongo_config,
                                            database_name=startup.mongo_config.structures_database_name,
-                                           collection_name=level)
+                                           collection_name=level,
+                                           logger=logger)
         structure_id = getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
         repository.add_structure(level=Level(level), key_value=structure_id, document=structure)
 

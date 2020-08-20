@@ -10,11 +10,14 @@ def run_daily_sync():
     #  Initialize mongo repositories for accounts journal, insights and structures
     account_journal_repository = TuringAdAccountJournalRepository(config=startup.mongo_config,
                                                                   database_name=startup.mongo_config.accounts_journal_database_name,
-                                                                  collection_name=startup.mongo_config.accounts_journal_collection_name)
+                                                                  collection_name=startup.mongo_config.accounts_journal_collection_name,
+                                                                  logger=logger)
     insights_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                database_name=startup.mongo_config.insights_database_name)
+                                                database_name=startup.mongo_config.insights_database_name,
+                                                logger=logger)
     structures_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                  database_name=startup.mongo_config.structures_database_name)
+                                                  database_name=startup.mongo_config.structures_database_name,
+                                                  logger=logger)
 
     try:
         orchestrator = Orchestrator(). \
@@ -24,8 +27,8 @@ def run_daily_sync():
             set_rabbit_logger(rabbit_logger). \
             set_structures_repository(structures_repository)
         orchestrator.run()
-    except:
+    except Exception as e:
         log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                 name="Facebook Turing Daily Sync Error",
-                                description="Failed to sync data.")
+                                description="Failed to sync data. Reason: %s" % str(e))
         logger.logger.exception(log.to_dict())

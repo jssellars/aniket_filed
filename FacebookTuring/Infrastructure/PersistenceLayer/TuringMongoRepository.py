@@ -4,6 +4,9 @@ from datetime import datetime
 
 from bson import BSON
 
+from Core.Tools.Logger.Helpers import log_operation_mongo
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
+from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
@@ -94,11 +97,35 @@ class TuringMongoRepository(MongoRepositoryBase):
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
         }
 
+        operation_start_time = datetime.now()
         try:
             results = self.collection.find(query, projection)
+            results = list(results)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get active structures ids. Reason %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
             raise e
-        return list(results)
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get active structures ids",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
+
+        return results
 
     def get_structure_ids(self, level: Level = None, account_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         self.set_collection(collection_name=level.value)
@@ -204,11 +231,36 @@ class TuringMongoRepository(MongoRepositoryBase):
             id_key_name: MongoProjectionState.ON.value,
             name_key_name: MongoProjectionState.ON.value,
         }
+
+        operation_start_time = datetime.now()
         try:
             results = self.collection.find(query, projection)
+            results = list(results)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get structures by id and name. Reason %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
             raise e
-        return list(results)
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get structures by id and name",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
+
+        return results
 
     @staticmethod
     def __get_structure_details_query(level: Level = None,
@@ -562,9 +614,11 @@ class TuringMongoRepository(MongoRepositoryBase):
         return results
 
     def new_insights_repository(self):
-        repository = TuringMongoRepository(config=self.config, database_name=self.config.insights_database_name)
+        repository = TuringMongoRepository(config=self.config, database_name=self.config.insights_database_name,
+                                           logger=self._logger)
         return repository
 
     def new_structures_repository(self):
-        repository = TuringMongoRepository(config=self.config, database_name=self.config.structures_database_name)
+        repository = TuringMongoRepository(config=self.config, database_name=self.config.structures_database_name,
+                                           logger=self._logger)
         return repository

@@ -2,6 +2,9 @@ import typing
 from datetime import datetime
 from enum import Enum
 
+from Core.Tools.Logger.Helpers import log_operation_mongo
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
+from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
@@ -13,12 +16,19 @@ class MongoProjectionState(Enum):
 
 
 class MongoRepositoryBase:
+    __REQUEST_ID_LENGTH__ = 20
 
     def __init__(self, client: typing.Any = None, database_name: typing.AnyStr = None,
-                 collection_name: typing.AnyStr = None, config: typing.Any = None):
+                 collection_name: typing.AnyStr = None, config: typing.Any = None, logger=None):
+        self._logger = logger
+
         if client is None and config is None:
-            raise ValueError(
-                "Cannot instantiate a Mongo Repository. Please try again using either a Mongo client or a Mongo config.")
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Cannot instantiate a Mongo Repository. Please try again using "
+                                            "either a Mongo client or a Mongo config.")
+            raise ValueError("Cannot instantiate a Mongo Repository. Please try again using "
+                             "either a Mongo client or a Mongo config.")
 
         if config is None:
             self._client = client
@@ -87,30 +97,94 @@ class MongoRepositoryBase:
         self._collection_name = collection_name
 
     def add_one(self, document: typing.Any = None) -> typing.NoReturn:
+        operation_start_time = datetime.now()
+
         if not document:
             return
+
         try:
             self.collection.insert_one(self._convert_to_dict(document))
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                data=document,
+                                description="Failed to add one document. Reason %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration)
             raise e
 
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=document,
+                                description="Add one document.",
+                                timestamp=operation_end_time,
+                                duration=duration)
+
     def add_many(self, documents: typing.List[typing.Any] = None) -> typing.NoReturn:
+        operation_start_time = datetime.now()
+
         if not documents:
             return
         try:
             documents = [self._convert_to_dict(document) for document in documents]
             self.collection.insert_many(documents)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                data=documents,
+                                description="Failed to add many documents. Reason %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration)
             raise e
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=documents,
+                                description="Add one document.",
+                                timestamp=operation_end_time,
+                                duration=duration)
 
     def get_all(self) -> typing.List[typing.Dict]:
+        operation_start_time = datetime.now()
+
         try:
             results = self.collection.find({}, {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value})
+            results = list(results)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get all documents. Reason %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration)
             raise e
-        return list(results)
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get all documents.",
+                                timestamp=operation_end_time,
+                                duration=duration)
+
+        return results
 
     def get_all_by_key(self, key_name: typing.AnyStr = None, key_value: typing.Any = None) -> typing.List[typing.Dict]:
+        operation_start_time = datetime.now()
+
         query = {
             key_name: {
                 MongoOperator.EQUALS.value: key_value
@@ -118,18 +192,65 @@ class MongoRepositoryBase:
         }
         try:
             results = self.collection.find(query, {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value})
+            results = list(results)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get all documents "
+                                            "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
+                                timestamp=operation_end_time,
+                                duration=duration)
             raise e
-        return list(results)
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get all documents by key: %s with value: %s." % (key_name, key_value),
+                                timestamp=operation_end_time,
+                                duration=duration)
+
+        return results
 
     def get_first_by_key(self, key_name: typing.AnyStr = None, key_value: typing.Any = None) -> typing.Dict:
-        results = self.get_all_by_key(key_name, key_value)
-        if results:
-            return results[0]
-        else:
-            raise NotImplementedError
+        operation_start_time = datetime.now()
+
+        try:
+            results = self.get_all_by_key(key_name, key_value)
+            if results:
+                results = results[0]
+            else:
+                results = {}
+        except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get first document "
+                                            "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
+                                timestamp=operation_end_time,
+                                duration=duration)
+            raise e
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get first document by key: %s with value: %s." % (key_name, key_value),
+                                timestamp=operation_end_time,
+                                duration=duration)
+
+        return results
 
     def get_last_updated(self, key_name: typing.AnyStr = None, key_value: datetime = None) -> typing.List[typing.Dict]:
+        operation_start_time = datetime.now()
+
         query = {
             key_name: {
                 MongoOperator.GREATERTHANEQUAL.value: key_value
@@ -137,41 +258,155 @@ class MongoRepositoryBase:
         }
         try:
             results = self.collection.find(query, {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value})
+            results = list(results)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get last updated documents "
+                                            "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
+                                timestamp=operation_end_time,
+                                duration=duration)
             raise e
-        return list(results)
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get last updated documents by key: %s with value: %s." % (key_name,
+                                                                                                       key_value),
+                                timestamp=operation_end_time,
+                                duration=duration)
+
+        return results
 
     def get(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.List[typing.Dict]:
+        operation_start_time = datetime.now()
+
         try:
             if not projection:
-                results = self.collection.find(query)
+                results = list(self.collection.find(query))
             else:
-                results = self.collection.find(query, projection)
+                results = list(self.collection.find(query, projection))
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get documents. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
             raise e
-        return list(results)
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get documents",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
+
+        return results
 
     def first_or_default(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.Dict:
+        operation_start_time = datetime.now()
+
         try:
             results = self.get(query, projection)
             if results:
-                return results[0]
+                results = results[0]
             else:
-                return {}
+                results = {}
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get first or default document. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
             raise e
 
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get first or default.",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection)
+
+        return results
+
     def update_one(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
+        operation_start_time = datetime.now()
+
         try:
             self.collection.update(query_filter, query)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to update one document. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query_filter=query_filter,
+                                query=query)
             raise e
 
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                description="Update one document",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query_filter=query_filter,
+                                query=query)
+
     def update_many(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
+        operation_start_time = datetime.now()
+
         try:
             self.collection.update_many(query_filter, query)
         except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to update many documents. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query_filter=query_filter,
+                                query=query)
             raise e
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                description="Update one document",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query_filter=query_filter,
+                                query=query)
 
     def close(self):
         self._client.close()

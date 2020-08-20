@@ -6,8 +6,8 @@ from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 from FacebookDexter.Api.Startup import startup, logger
+from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
 class DexterApiGetRecommendationQuery(Resource):
@@ -18,7 +18,7 @@ class DexterApiGetRecommendationQuery(Resource):
             if recommendation_id is None:
                 return Response(response=json.dumps('Please provide a recommendation id'),
                                 status=400, mimetype='application/json')
-            recommendation_repository = RecommendationsRepository(startup.mongo_config)
+            recommendation_repository = RecommendationsRepository(startup.mongo_config, logger=logger)
             recommendation = recommendation_repository.get_recommendation_by_id(recommendation_id)
             response = Response(response=json.dumps(recommendation), status=200, mimetype='application/json')
             return response
