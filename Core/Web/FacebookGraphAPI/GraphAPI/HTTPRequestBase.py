@@ -1,10 +1,13 @@
 import requests
+from retry import retry
 
 
 class HTTPRequestBase:
     _timeout = 10000
+    __RETRY_LIMIT = 3
 
     @classmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def get(cls, url=None, fields=None, pagination=True):
         response = None
         page = None
@@ -98,6 +101,7 @@ class HTTPRequestBase:
         return response
 
     @staticmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def post(url, params=None):
         if params:
             response = requests.post(url, json=params)
@@ -116,6 +120,7 @@ class HTTPRequestBase:
         return response
 
     @staticmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def put(url, params=None):
         if params:
             response = requests.put(url, json=params)
@@ -134,6 +139,7 @@ class HTTPRequestBase:
         return response
 
     @staticmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def delete(url):
         response = requests.delete(url)
         if response.status_code == 200:

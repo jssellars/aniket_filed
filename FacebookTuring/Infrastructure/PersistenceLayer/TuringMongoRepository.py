@@ -3,6 +3,8 @@ from copy import deepcopy
 from datetime import datetime
 
 from bson import BSON
+from pymongo.errors import AutoReconnect
+from retry import retry
 
 from Core.Tools.Logger.Helpers import log_operation_mongo
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
@@ -17,6 +19,7 @@ from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFa
 
 
 class TuringMongoRepository(MongoRepositoryBase):
+    __RETRY_LIMIT = 3
 
     def __init__(self, *args, **kwargs):
         super(TuringMongoRepository, self).__init__(*args, **kwargs)
@@ -76,6 +79,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         return self.__decode_structure_details_from_bson(adsets)
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def get_active_structure_ids(self, key_name: typing.AnyStr = None, key_value: typing.AnyStr = None) -> typing.List[
         typing.Dict]:
         query = {
@@ -205,6 +209,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.get(query, projection)
         return structures
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def get_id_and_name_by_key(self,
                                level: Level = None,
                                key_value: typing.Any = None,

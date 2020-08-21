@@ -2,6 +2,9 @@ import typing
 from datetime import datetime
 from enum import Enum
 
+from pymongo.errors import AutoReconnect
+from retry import retry
+
 from Core.Tools.Logger.Helpers import log_operation_mongo
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
 from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
@@ -16,7 +19,7 @@ class MongoProjectionState(Enum):
 
 
 class MongoRepositoryBase:
-    __REQUEST_ID_LENGTH__ = 20
+    __RETRY_LIMIT__ = 3
 
     def __init__(self, client: typing.Any = None, database_name: typing.AnyStr = None,
                  collection_name: typing.AnyStr = None, config: typing.Any = None, logger=None):
@@ -96,6 +99,7 @@ class MongoRepositoryBase:
         self._collection = collection_name
         self._collection_name = collection_name
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def add_one(self, document: typing.Any = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
 
@@ -125,6 +129,7 @@ class MongoRepositoryBase:
                                 timestamp=operation_end_time,
                                 duration=duration)
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def add_many(self, documents: typing.List[typing.Any] = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
 
@@ -154,6 +159,7 @@ class MongoRepositoryBase:
                                 timestamp=operation_end_time,
                                 duration=duration)
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_all(self) -> typing.List[typing.Dict]:
         operation_start_time = datetime.now()
 
@@ -182,6 +188,7 @@ class MongoRepositoryBase:
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_all_by_key(self, key_name: typing.AnyStr = None, key_value: typing.Any = None) -> typing.List[typing.Dict]:
         operation_start_time = datetime.now()
 
@@ -216,6 +223,7 @@ class MongoRepositoryBase:
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_first_by_key(self, key_name: typing.AnyStr = None, key_value: typing.Any = None) -> typing.Dict:
         operation_start_time = datetime.now()
 
@@ -248,6 +256,7 @@ class MongoRepositoryBase:
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_last_updated(self, key_name: typing.AnyStr = None, key_value: datetime = None) -> typing.List[typing.Dict]:
         operation_start_time = datetime.now()
 
@@ -283,6 +292,7 @@ class MongoRepositoryBase:
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.List[typing.Dict]:
         operation_start_time = datetime.now()
 
@@ -317,6 +327,7 @@ class MongoRepositoryBase:
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def first_or_default(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.Dict:
         operation_start_time = datetime.now()
 
@@ -352,6 +363,7 @@ class MongoRepositoryBase:
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def update_one(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
 
@@ -380,6 +392,7 @@ class MongoRepositoryBase:
                                 query_filter=query_filter,
                                 query=query)
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def update_many(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
 

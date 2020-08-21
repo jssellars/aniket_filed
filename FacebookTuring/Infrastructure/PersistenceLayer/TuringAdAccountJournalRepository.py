@@ -90,7 +90,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
 
     def get_last_updated_accounts(self,
                                   business_owner_id: typing.AnyStr = None,
-                                  last_updated_at: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
+                                  last_updated_at: datetime = None) -> typing.List[typing.AnyStr]:
         query = {
             MongoOperator.AND.value: [
                 {

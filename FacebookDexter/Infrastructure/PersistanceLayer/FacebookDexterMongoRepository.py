@@ -2,6 +2,8 @@ import typing
 from datetime import datetime
 
 from bson import BSON
+from pymongo.errors import AutoReconnect
+from retry import retry
 
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum, LevelNameKeyEnum
@@ -15,6 +17,7 @@ from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnu
 
 
 class FacebookDexterMongoRepository(MongoRepositoryBase):
+    __RETRY_LIMIT = 3
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -86,6 +89,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         else:
             return list()
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def get_metrics_values(self,
                            key_value: typing.AnyStr = None,
                            date_start: typing.AnyStr = None,
@@ -199,6 +203,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def get_min_value(self,
                       key_value: typing.AnyStr = None,
                       metrics: typing.List[typing.AnyStr] = None,
@@ -296,6 +301,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def get_max_value(self,
                       key_value: typing.AnyStr = None,
                       metrics: typing.List[typing.AnyStr] = None,

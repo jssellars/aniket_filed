@@ -33,15 +33,15 @@ class SyncStatusReporter:
 
                 last_updated_campaigns = self.__structures_repository.get_latest_by_account_id(
                     account_id=state[MiscFieldsEnum.account_id],
-                    start_date=state[MiscFieldsEnum.last_synced_on],
+                    start_date=state[MiscFieldsEnum.structures_sync_start_date],
                     collection=Level.CAMPAIGN.value)
                 last_updated_adsets = self.__structures_repository.get_latest_by_account_id(
                     account_id=state[MiscFieldsEnum.account_id],
-                    start_date=state[MiscFieldsEnum.last_synced_on],
+                    start_date=state[MiscFieldsEnum.structures_sync_start_date],
                     collection=Level.ADSET.value)
                 last_updated_ads = self.__structures_repository.get_latest_by_account_id(
                     account_id=state[MiscFieldsEnum.account_id],
-                    start_date=state[MiscFieldsEnum.last_synced_on],
+                    start_date=state[MiscFieldsEnum.structures_sync_start_date],
                     collection=Level.AD.value)
 
                 report = SyncStatusReport(ad_account_id=state[MiscFieldsEnum.account_id],

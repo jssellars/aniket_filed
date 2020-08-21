@@ -63,7 +63,7 @@ class Orchestrator:
         return self
 
     def run(self, business_owner_id: typing.AnyStr = None):
-        start_sync_date = datetime.now().strftime(DEFAULT_DATETIME)
+        start_sync_date = datetime.now()
         # get latest ad account state for all BO
         ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active(
             business_owner_id=business_owner_id)
@@ -126,7 +126,7 @@ class Orchestrator:
 
     def __publish_business_owner_synced_event(self,
                                               business_owner_id: typing.AnyStr = None,
-                                              sync_start_date: typing.AnyStr = None) -> typing.NoReturn:
+                                              sync_start_date: datetime = None) -> typing.NoReturn:
         account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id, sync_start_date)
         business_owner_updated_details = UpdatedBusinessOwnersDetails(business_owner_facebook_id=business_owner_id,
                                                                       ad_account_ids=account_ids)

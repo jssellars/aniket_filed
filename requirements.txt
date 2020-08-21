@@ -67,3 +67,4 @@ dnspython
 forex_python
 cython
 fastnumbers
+retry
