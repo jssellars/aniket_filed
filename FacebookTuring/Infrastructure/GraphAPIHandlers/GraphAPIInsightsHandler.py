@@ -103,8 +103,10 @@ class GraphAPIInsightsHandler:
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
             summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
 
-            insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
-            summary_response = list(map(dict, set(tuple(x.items()) for x in summary_response)))
+            # Warning: These mappings might need to be reactivated after extensive testing
+            # It looks like it messes up the order of the items in the response
+            # insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
+            # summary_response = list(map(dict, set(tuple(x.items()) for x in summary_response)))
 
             return copy.deepcopy({thread: (insights_response, summary_response)})
         except Exception as e:
