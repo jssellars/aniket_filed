@@ -1,5 +1,5 @@
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.Startup import startup, logger
 from GoogleTuring.BackgroundTasks.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import AD_GROUP_CRITERIA_FIELDS
@@ -19,7 +19,8 @@ class AdsManagerUpdateStructureCommandHandler(GoogleTokenGetter):
                 mongo_repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
                                                                          database_name=startup.mongo_config[
                                                                              'google_structures_database_name'],
-                                                                         collection_name=level.value)
+                                                                         collection_name=level.value,
+                                                                         logger=logger)
                 if level in [StructureType.AD, StructureType.AD_GROUP_KEYWORDS]:
                     additional_info = mongo_repository.get_additional_info(level, structure_id)
 

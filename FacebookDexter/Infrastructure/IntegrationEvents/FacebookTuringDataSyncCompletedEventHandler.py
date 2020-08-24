@@ -17,10 +17,16 @@ class FacebookTuringDataSyncCompletedEventHandler:
     __recommendations_repository = None
     __journal_repository = None
     __journal_helper_repository = None
+    __logger = None
 
     @classmethod
     def set_startup(cls, startup):
         cls.__startup = startup
+        return cls
+
+    @classmethod
+    def set_logger(cls, logger):
+        cls.__logger = logger
         return cls
 
     @classmethod
@@ -49,6 +55,7 @@ class FacebookTuringDataSyncCompletedEventHandler:
             fb_mw.start_dexter_for_business_owner(business_owner.business_owner_facebook_id,
                                                   business_owner.ad_account_ids,
                                                   cls.__startup,
+                                                  cls.__logger,
                                                   cls.__recommendations_repository,
                                                   cls.__journal_repository,
                                                   channel=ChannelEnum.FACEBOOK)

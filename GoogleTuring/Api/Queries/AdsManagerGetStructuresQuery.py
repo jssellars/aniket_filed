@@ -1,6 +1,6 @@
 from GoogleTuring.Api.Mappings.AdsManagerStructureMapping import AdsManagerStructureMapping
 from GoogleTuring.Api.Mappings.AdsManagerStructureMinimalMapping import AdsManagerStructureMinimalMapping
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.Startup import startup, logger
 from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
@@ -15,7 +15,8 @@ class AdsManagerGetStructuresQuery:
         try:
             repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
                                                                database_name=startup.mongo_config.google_structures_database_name,
-                                                               collection_name=collection_name)
+                                                               collection_name=collection_name,
+                                                               logger=logger)
             response = repository.get_structure_ids_and_names(level=Level(level),
                                                               account_id=ad_account_id)
             if not response:
@@ -33,7 +34,8 @@ class AdsManagerGetStructuresQuery:
         try:
             repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
                                                                database_name=startup.mongo_config.google_structures_database_name,
-                                                               collection_name=collection_name)
+                                                               collection_name=collection_name,
+                                                               logger=logger)
             structure_details = repository.get_structure_details(Level(level), google_id)
             if not structure_details:
                 return {}

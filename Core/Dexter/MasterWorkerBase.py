@@ -20,6 +20,7 @@ class MasterWorkerBase:
                                          ad_account_ids: typing.List[typing.AnyStr] = None,
                                          business_owner_id: typing.AnyStr = None,
                                          startup: typing.Any = None,
+                                         logger: typing.Any = None,
                                          recommendations_repository: DexterRecommendationsMongoRepository = None,
                                          journal_repository: DexterJournalMongoRepository = None,
                                          channel: ChannelEnum = None):
@@ -29,6 +30,7 @@ class MasterWorkerBase:
                                         business_owner_id: typing.AnyStr = None,
                                         business_owner_account_ids: typing.List = None,
                                         startup: typing.Any = None,
+                                        logger: typing.Any = None,
                                         recommendations_repository: DexterRecommendationsMongoRepository = None,
                                         journal_repository: DexterJournalMongoRepository = None,
                                         channel: ChannelEnum = None) -> typing.NoReturn:
@@ -41,6 +43,7 @@ class MasterWorkerBase:
                                       args=(business_owner_account_ids[start:start + batch_size],
                                             business_owner_id,
                                             startup,
+                                            logger,
                                             recommendations_repository,
                                             journal_repository,
                                             channel))
@@ -52,6 +55,7 @@ class MasterWorkerBase:
                                       args=(business_owner_account_ids[start:],
                                             business_owner_id,
                                             startup,
+                                            logger,
                                             recommendations_repository,
                                             journal_repository,
                                             channel))

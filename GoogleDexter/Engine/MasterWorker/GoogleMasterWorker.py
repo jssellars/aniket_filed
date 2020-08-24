@@ -19,6 +19,7 @@ class GoogleMasterWorker(MasterWorkerBase):
                                          ad_account_ids: typing.List[typing.AnyStr] = None,
                                          business_owner_id: typing.AnyStr = None,
                                          startup: typing.Any = None,
+                                         logger: typing.Any = None,
                                          recommendations_repository: DexterRecommendationsMongoRepository = None,
                                          journal_repository: DexterJournalMongoRepository = None,
                                          channel: ChannelEnum = None):
@@ -30,7 +31,8 @@ class GoogleMasterWorker(MasterWorkerBase):
          set_journal_repository(journal_repository).
          set_data_repository(GoogleDexterMongoRepository(config=startup.mongo_config)).
          set_business_owner_id(business_owner_id).
-         set_startup(startup))
+         set_startup(startup).
+         set_logger(logger))
 
         for time_interval in startup.dexter_config.time_intervals:
             for ad_account_id in ad_account_ids:

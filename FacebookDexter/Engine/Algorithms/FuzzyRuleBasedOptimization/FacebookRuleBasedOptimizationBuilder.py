@@ -93,8 +93,8 @@ class FacebookRuleBasedOptimizationBuilder:
         self._mongo_config = mongo_config
         return self
 
-    def create_mongo_repository(self):
-        self._mongo_repository = FacebookDexterMongoRepository(config=self._mongo_config)
+    def create_mongo_repository(self, logger):
+        self._mongo_repository = FacebookDexterMongoRepository(config=self._mongo_config, logger=logger)
         return self
 
     def close_mongo_repository(self):

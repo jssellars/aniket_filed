@@ -5,6 +5,7 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.OrchestratorBase import OrchestratorBase
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
+from FacebookDexter.BackgroundTasks.Startup import logger
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import FacebookAlgorithmsEnum
 from FacebookDexter.Engine.Algorithms.FacebookAlgorithmsFactory import FacebookAlgorithmsFactory
 from FacebookDexter.Engine.Algorithms.FacebookRuleEvaluatorFactory import FacebookRuleEvaluatorFactory
@@ -48,15 +49,16 @@ class SingleMetricOrchestrator(OrchestratorBase):
                          set_date_stop(date_stop=date_stop).
                          set_time_interval(time_interval=time_interval).
                          set_rule_evaluator(rule_evaluator=rule_evaluator).
-                         set_minimum_number_of_data_points_dict(self.startup.dexter_config.minimum_number_of_data_points).
-                         create_mongo_repository())
+                         set_minimum_number_of_data_points_dict(
+                self.startup.dexter_config.minimum_number_of_data_points).
+                         create_mongo_repository(logger))
         except Exception as e:
             raise e
 
         return algorithm
 
     def run_algorithm(self, search_query, time_interval, mongo_config):
-        self.set_data_repository(FacebookDexterMongoRepository(config=mongo_config))
+        self.set_data_repository(FacebookDexterMongoRepository(config=mongo_config, logger=logger))
 
         try:
             if not self.startup.dexter_config.date_stop:
@@ -90,8 +92,9 @@ class SingleMetricOrchestrator(OrchestratorBase):
                                                   time_interval=time_interval_enum,
                                                   level=LevelEnum.AD)
 
-        except Exception as e:
-            print(e)
+        except Exception:
+            import traceback
+            traceback.print_exc()
 
     def generate_recommendations(self, structure_id, date_stop, last_updated, time_interval, level):
         rule_evaluator = FacebookRuleEvaluatorFactory.get(

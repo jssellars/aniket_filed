@@ -17,10 +17,16 @@ class GoogleTuringDataSyncCompletedEventHandler:
     __recommendations_repository = None
     __journal_repository = None
     __journal_helper_repository = None
+    __logger = None
 
     @classmethod
     def set_startup(cls, startup):
         cls.__startup = startup
+        return cls
+
+    @classmethod
+    def set_logger(cls, logger):
+        cls.__logger = logger
         return cls
 
     @classmethod
@@ -56,6 +62,7 @@ class GoogleTuringDataSyncCompletedEventHandler:
             google_mw.start_dexter_for_business_owner(business_owner.business_owner_google_id,
                                                       business_owner.ad_account_ids,
                                                       cls.__startup,
+                                                      cls.__logger,
                                                       cls.__recommendations_repository,
                                                       cls.__journal_repository,
                                                       ChannelEnum.GOOGLE)

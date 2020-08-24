@@ -46,12 +46,12 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
                              set_debug_mode(self.startup.debug).
                              set_mongo_config(self.startup.mongo_config).
                              set_auth_token(self._auth_token).
-                             create_mongo_repository())
+                             create_mongo_repository(self.logger))
             elif alg_type == FacebookAlgorithmsEnum.FACEBOOK_ENHANCER:
                 algorithm = (algorithm.
                              set_debug_mode(self.startup.debug).
                              set_mongo_config(self.startup.mongo_config).
-                             create_mongo_repository())
+                             create_mongo_repository(self.logger))
         except Exception as e:
             raise e
 

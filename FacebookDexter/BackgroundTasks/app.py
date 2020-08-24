@@ -48,11 +48,11 @@ def callback(ch, method, properties, body):
                                                           collection_name=startup.mongo_config.journal_collection_name,
                                                           logger=logger)
 
-        request_handler. \
-            set_startup(startup). \
-            set_journal_repository(journal_repository). \
-            set_recommendations_repository(recommendations_repository). \
-            handle(body)
+        (request_handler.
+         set_startup(startup).
+         set_journal_repository(journal_repository).
+         set_recommendations_repository(recommendations_repository).
+         handle(body))
     except Exception as e:
         log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
                                 name="Facebook Dexter Integration Error",
