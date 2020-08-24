@@ -22,6 +22,8 @@ from Potter.FacebookCampaignsBuilder.Api.Queries.TargetingSearchLocationsCountry
     TargetingSearchLocationsCountryGroupsQuery
 from Potter.FacebookCampaignsBuilder.Api.Queries.TargetingSearchLocationsSearchQuery import \
     TargetingSearchLocationsSearchQuery
+from Potter.FacebookCampaignsBuilder.Api.Queries.TargetingSearchRegulatedInterestsQuery import \
+    TargetingSearchRegulatedInterestsQuery
 from Potter.FacebookCampaignsBuilder.Api.Startup import startup, logger
 
 
@@ -41,6 +43,30 @@ class TargetingSearchInterestsTreeEndpoint(Resource):
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="TargetingSearchInterestsTreeEndpoint",
+                                    description=str(e),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            response = json.dumps(Tools.create_error(e, code="POTTER_BAD_REQUEST"))
+            return Response(response=response, status=400, mimetype="application/json")
+
+
+class TargetingSearchRegulatedInterestsEndpoint(Resource):
+    @jwt_required
+    def get(self, categories: typing.AnyStr = None) -> typing.List[typing.Dict]:
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+
+        try:
+            business_owner_id = extract_business_owner_facebook_id(get_jwt())
+            query = TargetingSearchRegulatedInterestsQuery(session=startup.session,
+                                                           business_owner_id=business_owner_id,
+                                                           facebook_config=startup.facebook_config)
+            regulated_categories = categories.replace(' ', '').upper().split(",")
+            response = query.get(regulated_categories=regulated_categories)
+            response = json.dumps(humps.camelize(object_to_json(response)))
+            return Response(response=response, status=200, mimetype='application/json')
+        except Exception as e:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="TargetingSearchRegulatedInterestsEndpoint",
                                     description=str(e),
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())

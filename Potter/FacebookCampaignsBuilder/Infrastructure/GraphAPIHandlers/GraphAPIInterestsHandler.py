@@ -1,3 +1,5 @@
+import typing
+
 from facebook_business.adobjects.targetingsearch import TargetingSearch
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -25,6 +27,19 @@ class GraphAPIInterestsHandler:
             self.__interests = self.__get_raw_interests()
             self.__interests = map_interests(self.__interests)
         return self.__interests
+
+    def get_regulated_interests(self,
+                                regulated_categories: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
+        params = {
+            'type': 'adTargetingCategory',
+            'class': 'interests',
+            'regulated_categories': regulated_categories
+        }
+
+        results = TargetingSearch.search(params=params)
+        results = [Tools.convert_to_json(result) for result in results]
+
+        return results
 
     def __get_raw_interests(self, browse_category=None):
         params = {

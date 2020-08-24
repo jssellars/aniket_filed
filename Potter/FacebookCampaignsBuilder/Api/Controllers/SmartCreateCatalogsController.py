@@ -4,9 +4,9 @@ from flask import Response, request
 from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from Potter.FacebookCampaignsBuilder.Api.Queries.SmartCreateCatalogsQuery import SmartCreateCatalogsQuery
 from Potter.FacebookCampaignsBuilder.Api.Startup import logger
 
@@ -14,6 +14,8 @@ from Potter.FacebookCampaignsBuilder.Api.Startup import logger
 class SmartCreateCatalogsEndpoint(Resource):
     @jwt_required
     def get(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+
         try:
             query = SmartCreateCatalogsQuery()
 

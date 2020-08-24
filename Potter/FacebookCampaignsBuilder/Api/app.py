@@ -20,7 +20,7 @@ from Potter.FacebookCampaignsBuilder.Api.Controllers.BudgetValidationController 
 from Potter.FacebookCampaignsBuilder.Api.Controllers.TargetingSearchController import \
     TargetingSearchInterestsTreeEndpoint, TargetingSearchInterestsSearchEndpoint, \
     TargetingSearchInterestsSuggestionsEndpoint, TargetingSearchLocationSearchEndpoint, \
-    TargetingSearchLocationsEndpoint, TargetingSearchLanguagesEndpoint
+    TargetingSearchLocationsEndpoint, TargetingSearchLanguagesEndpoint, TargetingSearchRegulatedInterestsEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.AudienceSizeController import AudienceSizeEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 from Potter.FacebookCampaignsBuilder.Api.Controllers.PublishCampaignController import PublishCampaignEndpoint
@@ -82,6 +82,11 @@ api.add_resource(AdPreviewEndpoint, ad_preview_endpoint)
 targeting_search_interests_tree_endpoint = ("{base_url}/targeting-search/interests/tree".
                                             format(base_url=startup.base_url.lower()))
 api.add_resource(TargetingSearchInterestsTreeEndpoint, targeting_search_interests_tree_endpoint)
+
+targeting_search_regulated_interests_endpoint = ("{base_url}/targeting-search/regulated-interests/"
+                                                 "categories=<string:categories>".
+                                                 format(base_url=startup.base_url.lower()))
+api.add_resource(TargetingSearchRegulatedInterestsEndpoint, targeting_search_regulated_interests_endpoint)
 
 targeting_search_interests_search_endpoint = ("{base_url}/targeting-search/interests/search/<string:query_string>".
                                               format(base_url=startup.base_url.lower()))
