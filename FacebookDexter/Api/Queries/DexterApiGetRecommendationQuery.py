@@ -14,6 +14,7 @@ class DexterApiGetRecommendationQuery(Resource):
     @jwt_required
     def get(self):
         try:
+            logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
             recommendation_id = request.args.get('id')
             if recommendation_id is None:
                 return Response(response=json.dumps('Please provide a recommendation id'),

@@ -33,6 +33,7 @@ from FacebookDexter.Api.Startup import logger
 class DexterApiGetRecommendationsPage(Resource):
     @jwt_required
     def post(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.get_json()
         validator = DexterApiRecommendationsPageCommandValidator()
         valid, parameters_or_errors = validator.validate(data)
@@ -65,6 +66,7 @@ class DexterApiGetRecommendationsPage(Resource):
 class DexterApiGetCountsByCategory(Resource):
     @jwt_required
     def post(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.get_json()
         validator = DexterApiGetCountsByCategoryCommandValidator()
         valid, parameters_or_errors = validator.validate(data)
@@ -94,6 +96,7 @@ class DexterApiGetCountsByCategory(Resource):
 class DexterApiDismissRecommendation(Resource):
     @jwt_required
     def patch(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.args
         validator = DexterApiDismissRecommendationCommandValidator()
         valid, parameters_or_errors = validator.validate(data)
@@ -117,6 +120,7 @@ class DexterApiDismissRecommendation(Resource):
 class DexterApiApplyRecommendation(Resource):
     @jwt_required
     def patch(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.args
         headers = request.headers
         validator = DexterApiApplyRecommendationCommandValidator()

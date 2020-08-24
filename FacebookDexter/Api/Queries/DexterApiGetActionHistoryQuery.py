@@ -14,6 +14,7 @@ class DexterApiGetActionHistoryQuery(Resource):
     @jwt_required
     def get(self):
         try:
+            logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
             structure_id = request.args.get('structureId')
             if structure_id is None:
                 return Response(response='Please provide structure id', status=400, mimetype='application/json')
