@@ -4,6 +4,7 @@ from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.MasterWorkerBase import MasterWorkerBase
 from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
+from Core.Dexter.PersistanceLayer.Helpers.DexterJournalMongoRepositoryHelper import DexterJournalMongoRepositoryHelper
 from Core.Web.Security.Authorization import add_bearer_token, generate_technical_token
 from FacebookDexter.Engine.MasterWorker.FacebookOrchestratorFactory import FacebookOrchestratorFactory
 from FacebookDexter.Engine.MasterWorker.FacebookStrategyEnum import FacebookStrategyEnum
@@ -39,4 +40,20 @@ class FacebookMasterWorker(MasterWorkerBase):
                 search_query = orchestrator.orchestrate(time_interval)
                 if search_query:
                     orchestrator.run_algorithm(search_query, time_interval, startup.mongo_config)
-                orchestrator.update_remaining_null_dates()
+
+        still_running = True
+        algorithm_query = DexterJournalMongoRepositoryHelper.get_existing_pending_jobs_for_account(orchestrator.algorithm_type)
+
+        while still_running:
+            pending_jobs = journal_repository.get_all_by_query(algorithm_query)
+            if not pending_jobs:
+                still_running = False
+            else:
+                for pending_job in pending_jobs:
+                    (orchestrator.
+                     set_business_owner_id(pending_job['business_owner_id']).
+                     set_ad_account_id(pending_job['ad_account_id']))
+                    time_interval = pending_job['time_interval']
+                    search_query = orchestrator.orchestrate(time_interval)
+                    if search_query:
+                        orchestrator.run_algorithm(search_query, time_interval, startup.mongo_config)

@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
-
 
 @dataclass
 class DexterJournalEntryModel:
@@ -12,4 +10,5 @@ class DexterJournalEntryModel:
     start_timestamp: datetime = None
     end_timestamp: datetime = None
     time_interval: int = None
-    channel: ChannelEnum = None
+    channel: str = None
+    algorithm_type: str = None

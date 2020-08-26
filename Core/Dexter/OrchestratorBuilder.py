@@ -11,6 +11,8 @@ class OrchestratorBuilder:
         self.ad_account_id = None
         self.startup = None
         self.logger = None
+        self._channel = None
+        self._algorithm_type = None
         self._data_repository = None
         self._recommendations_repository = None
         self._journal_repository = None
@@ -46,3 +48,7 @@ class OrchestratorBuilder:
     def set_auth_token(self, auth_token: typing.AnyStr = None):
         self._auth_token = auth_token
         return self
+
+    @property
+    def algorithm_type(self):
+        return self._algorithm_type

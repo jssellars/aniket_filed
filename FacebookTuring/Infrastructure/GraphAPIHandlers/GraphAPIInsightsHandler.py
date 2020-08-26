@@ -174,7 +174,6 @@ class GraphAPIInsightsHandler:
                     requested_fields=arg5,
                     thread=arg6)),
                 args=(queue, permanent_token, ad_account_id, fields, parameters, requested_fields, insights_thread))
-            t1.start()
 
             # get structures
             requested_structure_fields = [getattr(FieldsMetadata, entry) for entry in structure_fields]
@@ -188,14 +187,17 @@ class GraphAPIInsightsHandler:
                 thread=arg7)),
                         args=(queue, permanent_token, ad_account_id, level, structure_fields, filter_params,
                               requested_structure_fields, structure_thread))
-            t2.start()
+            threads = [t1, t2]
+
+            for thread in threads:
+                thread.start()
+
+            for thread in threads:
+                thread.join()
 
             #  get responses
             responses = []
-            while not len(queue.queue) == 2:
-                sleep(1)
-            else:
-                responses += [element for element in queue.queue]
+            responses += [element for element in queue.queue]
             return responses
 
         responses = _get_insights(cls=cls,

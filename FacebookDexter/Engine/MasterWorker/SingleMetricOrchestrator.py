@@ -4,6 +4,7 @@ from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.OrchestratorBase import OrchestratorBase
+from Core.Dexter.PersistanceLayer.Helpers.DexterJournalMongoRepositoryHelper import DexterJournalMongoRepositoryHelper
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 from FacebookDexter.BackgroundTasks.Startup import logger
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import FacebookAlgorithmsEnum
@@ -22,17 +23,18 @@ class SingleMetricOrchestrator(OrchestratorBase):
 
     def __init__(self):
         super().__init__()
-        self.channel = ChannelEnum.FACEBOOK
+        self._channel = ChannelEnum.FACEBOOK
+        self._algorithm_type = FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE
 
     def __get_rule_algorithm(self, date_stop, time_interval, level, rule_evaluator):
-        algorithm = FacebookAlgorithmsFactory.get(algorithm_type=FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
-                                                  level=level, channel=self.channel,
+        algorithm = FacebookAlgorithmsFactory.get(algorithm_type=self._algorithm_type,
+                                                  level=level,
+                                                  channel=self._channel,
                                                   strategy=FacebookStrategyEnum.SINGLE_METRIC)
-        rules = FacebookRuleBasedSingleMetricOptimizationRulesFactory.get(
-            algorithm_type=FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=level)
-        fuzzyfier_factory = FacebookRuleBasedSingleMetricFuzzyfierFactory.get(
-            algorithm_type=FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
-            level=level)
+        rules = FacebookRuleBasedSingleMetricOptimizationRulesFactory.get(algorithm_type=self._algorithm_type,
+                                                                          level=level)
+        fuzzyfier_factory = FacebookRuleBasedSingleMetricFuzzyfierFactory.get(algorithm_type=self._algorithm_type,
+                                                                              level=level)
 
         try:
             algorithm = (algorithm.
@@ -49,8 +51,8 @@ class SingleMetricOrchestrator(OrchestratorBase):
                          set_date_stop(date_stop=date_stop).
                          set_time_interval(time_interval=time_interval).
                          set_rule_evaluator(rule_evaluator=rule_evaluator).
-                         set_minimum_number_of_data_points_dict(
-                self.startup.dexter_config.minimum_number_of_data_points).
+                         set_minimum_number_of_data_points_dict(self.startup.dexter_config.
+                                                                minimum_number_of_data_points).
                          create_mongo_repository(logger))
         except Exception as e:
             raise e
@@ -92,13 +94,15 @@ class SingleMetricOrchestrator(OrchestratorBase):
                                                   time_interval=time_interval_enum,
                                                   level=LevelEnum.AD)
 
+            update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
+            self._journal_repository.update_one(search_query, update_query)
         except Exception:
-            import traceback
-            traceback.print_exc()
+            update_query = DexterJournalMongoRepositoryHelper.get_update_query_failed()
+            self._journal_repository.update_one(search_query, update_query)
 
     def generate_recommendations(self, structure_id, date_stop, last_updated, time_interval, level):
         rule_evaluator = FacebookRuleEvaluatorFactory.get(
-            algorithm_type=FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE, level=level)
+            algorithm_type=self._algorithm_type, level=level)
         rule_evaluator.set_time_interval(time_interval)
         algorithm = self.__get_rule_algorithm(level=level,
                                               time_interval=time_interval,

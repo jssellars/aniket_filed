@@ -1,5 +1,4 @@
 import time
-import traceback
 import typing
 from datetime import datetime, timedelta
 
@@ -15,7 +14,6 @@ from FacebookDexter.Engine.Algorithms.FacebookRuleEvaluatorFactory import Facebo
 from FacebookDexter.Engine.Algorithms.FacebookRulesFactory import FacebookRulesFactory
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.FacebookFuzzyfierFactory import \
     FacebookFuzzyfierFactory
-
 from FacebookDexter.Engine.MasterWorker.FacebookStrategyEnum import FacebookStrategyEnum
 from FacebookDexter.Infrastructure.Domain.Rules.FacebookRuleEnums import FacebookRuleTypeSelectionEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.FacebookDexterMongoRepository import FacebookDexterMongoRepository
@@ -25,10 +23,10 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
 
     def __init__(self):
         super().__init__()
-        self.channel = ChannelEnum.FACEBOOK
+        self._channel = ChannelEnum.FACEBOOK
 
     def __init_algorithm(self, alg_type, level) -> typing.Any:
-        algorithm = FacebookAlgorithmsFactory.get(algorithm_type=alg_type, level=level, channel=self.channel,
+        algorithm = FacebookAlgorithmsFactory.get(algorithm_type=alg_type, level=level, channel=self._channel,
                                                   strategy=FacebookStrategyEnum.DEFAULT)
         rules = FacebookRulesFactory.get(algorithm_type=alg_type, level=level)
         fuzzyfier_factory = FacebookFuzzyfierFactory.get(algorithm_type=alg_type, level=level)
@@ -74,8 +72,7 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
             if not self.startup.dexter_config.date_stop:
                 date_stop = datetime.now() - timedelta(days=1)
             else:
-                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - \
-                            timedelta(days=1)
+                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - timedelta(days=1)
 
             time_interval_enum = DaysEnum(time_interval)
             last_updated = self.startup.dexter_config.recommendation_days_last_updated
@@ -97,16 +94,6 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
                                                                   LevelEnum.CAMPAIGN)
 
                 adset_ids = self._data_repository.get_adset_ids_by_campaign_id(campaign_id)
-                # for adset_id in adset_ids:
-                #     thread = Thread(target=self.run_facebook_enhancer,
-                #                     args=(adset_id, date_stop, time_interval_enum, LevelEnum.ADSET))
-                #     thread.start()
-                #
-                #     ad_ids = self._data_repository.get_ads_by_adset_id(adset_id)
-                #     for ad_id in ad_ids:
-                #         thread = Thread(target=self.run_facebook_enhancer,
-                #                         args=(ad_id, date_stop, time_interval_enum, LevelEnum.AD))
-                #         thread.start()
 
                 print(
                     'Started campaign {} [id: {}] out of {} ---> acc_id: {} T{}'.format(c, campaign_id,
@@ -175,9 +162,7 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
             self._journal_repository.update_one(search_query, update_query)
 
-        except Exception as failed_to_run_exception:
-            print(failed_to_run_exception.__traceback__)
-            traceback.print_exc()
+        except Exception:
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_failed()
             self._journal_repository.update_one(search_query, update_query)
 

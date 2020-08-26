@@ -328,6 +328,43 @@ class MongoRepositoryBase:
         return results
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
+    def get_sorted(self, query: typing.Dict = None, projection: typing.Dict = None, sort_query: typing.Dict = None) -> typing.List[typing.Dict]:
+        operation_start_time = datetime.now()
+
+        try:
+            if not projection:
+                results = list(self.collection.find(query).sort(sort_query))
+            else:
+                results = list(self.collection.find(query, projection).sort(sort_query))
+        except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to get sorted documents. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection,
+                                query_filter=sort_query)
+            raise e
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                data=results,
+                                description="Get sorted documents",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query,
+                                projection=projection,
+                                query_filter=sort_query)
+
+        return results
+
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def first_or_default(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.Dict:
         operation_start_time = datetime.now()
 
