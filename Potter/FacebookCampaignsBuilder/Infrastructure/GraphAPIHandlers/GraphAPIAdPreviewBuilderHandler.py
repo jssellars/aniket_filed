@@ -21,7 +21,6 @@ class FiledAdFormatEnum(Enum):
     EXISTING_POST = 6
 
 
-
 class GraphAPIAdPreviewBuilderHandler:
     def __init__(self, facebook_config=None, permanent_token: typing.AnyStr = None):
         self.graph_api_sdk = GraphAPISdkBase(facebook_config=facebook_config,
@@ -62,6 +61,9 @@ class GraphAPIAdPreviewBuilderHandler:
             call_to_action['value']['app_link'] = ad_template['deep_link']
 
         self.ad_creative_link_data[AdCreativeLinkData.Field.call_to_action] = call_to_action
+
+        if 'add_card_with_page_profile' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.multi_share_end_card] = ad_template['add_card_with_page_profile']
 
         # Get image hash and attach to creative
         ad_image = self.__generate_image_hash(account_id, ad_template['media_url'])

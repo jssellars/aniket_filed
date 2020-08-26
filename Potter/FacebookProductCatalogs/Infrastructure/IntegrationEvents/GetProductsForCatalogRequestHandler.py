@@ -5,6 +5,8 @@ from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Potter.FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductsHandler import \
     GraphAPIProductsHandler
+from Potter.FacebookProductCatalogs.Infrastructure.IntegrationEvents.GetAllProductIdsResponse import \
+    GetAllProductIdsResponse
 from Potter.FacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductsForCatalogRequest import \
     GetProductsForCatalogRequest
 from Potter.FacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductsForCatalogRequestMapping import \
@@ -42,6 +44,7 @@ class GetProductsForCatalogRequestHandler:
                                                                     product_catalog_id=message.product_catalog_facebook_id,
                                                                     startup=cls.__startup)
 
+            # Create & publish product batches of message.page_size
             for groups in cls.__get_fields_partitions(product_groups, message.page_size):
                 response = GetProductsForCatalogResponse(
                     business_owner_facebook_id=message.business_owner_facebook_id,
@@ -51,6 +54,19 @@ class GetProductsForCatalogRequestHandler:
                     filed_user_id=message.filed_user_id,
                     errors=errors)
                 cls.__publish(response)
+
+            # Create & publish final product information GetAllProductIdsResponse
+            get_all_product_ids_response = GetAllProductIdsResponse()
+            get_all_product_ids_response.product_catalog_facebook_id = message.product_catalog_facebook_id
+            get_all_product_ids_response.business_facebook_id = message.business_facebook_id
+            get_all_product_ids_response.business_owner_facebook_id = message.business_facebook_id
+            get_all_product_ids_response.filed_user_id = message.filed_user_id
+            get_all_product_ids_response.product_group_ids = [product_group.id for product_group in product_groups]
+            get_all_product_ids_response.product_ids = [product.id
+                                                        for product_group in product_groups
+                                                        for product in product_group.products]
+            cls.__publish(get_all_product_ids_response)
+
         except Exception as e:
             raise e
 

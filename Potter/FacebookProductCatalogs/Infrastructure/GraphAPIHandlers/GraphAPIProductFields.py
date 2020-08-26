@@ -3,6 +3,8 @@ from facebook_business.adobjects.productgroup import ProductGroup as FacebookPro
 from facebook_business.adobjects.productitem import ProductItem as FacebookProductItem
 from facebook_business.adobjects.productset import ProductSet as FacebookProductSet
 
+PRODUCT_SETS_FIELD_BY_PRODUCT = 'product_sets'
+
 PRODUCT_CATALOGS_FIELDS = [FacebookProductCatalog.Field.name,
                            FacebookProductCatalog.Field.vertical,
                            FacebookProductCatalog.Field.id,
@@ -68,4 +70,5 @@ PRODUCT_FIELDS = [FacebookProductItem.Field.id,
                   FacebookProductItem.Field.size,
                   FacebookProductItem.Field.offer_price_amount,
                   FacebookProductItem.Field.offer_price_end_date,
-                  FacebookProductItem.Field.offer_price_start_date]
+                  FacebookProductItem.Field.offer_price_start_date,
+                  PRODUCT_SETS_FIELD_BY_PRODUCT]

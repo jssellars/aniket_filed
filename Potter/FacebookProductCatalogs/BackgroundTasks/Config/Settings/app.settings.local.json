@@ -11,10 +11,10 @@
         "name": "local.direct",
         "type": "direct",
         "queues": {
-          "inbound": "local.productcatalogs.pentrurazvan.inbound",
-          "inbound_routing_key": "local.productcatalogs.pentrurazvan.inbound.key",
-          "outbound": "local.productcatalogs.pentrurazvan.outbound",
-          "outbound_routing_key": "local.productcatalogs.pentrurazvan.outbound.key"
+          "inbound": "local.productcatalogs.inbound",
+          "inbound_routing_key": "local.productcatalogs.inbound.key",
+          "outbound": "local.productcatalogs.outbound",
+          "outbound_routing_key": "local.productcatalogs.outbound.key"
         }
       }
     ],

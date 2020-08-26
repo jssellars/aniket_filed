@@ -12,7 +12,7 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from Potter.FacebookProductCatalogs.Infrastructure.Domain.Product import Product
 from Potter.FacebookProductCatalogs.Infrastructure.Domain.ProductGroup import ProductGroup
 from Potter.FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductFields import PRODUCT_FIELDS, \
-    PRODUCT_GROUPS_FIELDS
+    PRODUCT_GROUPS_FIELDS, PRODUCT_SETS_FIELD_BY_PRODUCT
 from Potter.FacebookProductCatalogs.Infrastructure.GraphAPIRequests.GraphAPIRequestProducts import \
     GraphAPIRequestProduct
 
@@ -23,7 +23,8 @@ class GraphAPIProductsHandler:
     def handle(cls,
                permanent_token: typing.AnyStr = None,
                product_catalog_id: typing.AnyStr = None,
-               startup: typing.Any = None) -> typing.Tuple[typing.List[typing.Any], typing.List[typing.Any]]:
+               startup: typing.Any = None) -> typing.Tuple[typing.List[typing.Any],
+                                                           typing.List[typing.Any]]:
         # initialize GraphAPI SDK
         _ = GraphAPISdkBase(startup.facebook_config, permanent_token)
 
@@ -91,6 +92,7 @@ class GraphAPIProductsHandler:
         product.currency = facebook_product.get(FacebookProductItem.Field.currency)
         product.description = facebook_product.get(FacebookProductItem.Field.description)
         product.url = facebook_product.get(FacebookProductItem.Field.url)
+        product.image_url = facebook_product.get(FacebookProductItem.Field.image_url)
         product.details = facebook_product
         product.availability = facebook_product.get(FacebookProductItem.Field.availability)
         product.name = facebook_product.get(FacebookProductItem.Field.name)
@@ -100,11 +102,30 @@ class GraphAPIProductsHandler:
         product.category = facebook_product.get(FacebookProductItem.Field.category)
         product.type = facebook_product.get(FacebookProductItem.Field.product_type)
         product.short_description = facebook_product.get(FacebookProductItem.Field.short_description)
-        product.custom_data = facebook_product.get(FacebookProductItem.Field.custom_data)
+        product.custom_data = cls.__map_custom_data(facebook_product.get(FacebookProductItem.Field.custom_data))
         product.custom_label_0 = facebook_product.get(FacebookProductItem.Field.custom_label_0)
         product.custom_label_1 = facebook_product.get(FacebookProductItem.Field.custom_label_1)
         product.custom_label_2 = facebook_product.get(FacebookProductItem.Field.custom_label_2)
         product.custom_label_3 = facebook_product.get(FacebookProductItem.Field.custom_label_3)
         product.custom_label_4 = facebook_product.get(FacebookProductItem.Field.custom_label_4)
+        product.facebook_product_set_ids = cls.__get_product_set_ids_from_product(facebook_product.get(PRODUCT_SETS_FIELD_BY_PRODUCT, []))
 
         return product
+
+    @staticmethod
+    def __map_custom_data(raw_custom_data: typing.List[typing.Dict]) -> typing.Dict:
+        mapped_custom_data = {}
+        if raw_custom_data:
+            for entry in raw_custom_data:
+                mapped_custom_data[entry['key']] = entry['value']
+        return mapped_custom_data
+
+    @classmethod
+    def __get_product_set_ids_from_product(cls, product_sets: typing.Dict = None) -> typing.List[typing.AnyStr]:
+        if not product_sets:
+            return []
+        product_sets = product_sets.get('data')
+        product_set_ids = []
+        if product_sets:
+            product_set_ids = [product_set.get('id') for product_set in product_sets]
+        return product_set_ids

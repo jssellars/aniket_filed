@@ -8,11 +8,13 @@ class Product:
     currency: typing.AnyStr = None
     description: typing.AnyStr = None
     url: typing.AnyStr = None
+    image_url: typing.AnyStr = None
     details: typing.Dict = None
     availability: typing.AnyStr = None
     name: typing.AnyStr = None
     price: typing.AnyStr = None
     facebook_product_group_id: typing.AnyStr = None
+    facebook_product_set_ids: typing.List[typing.AnyStr] = None
     category: typing.AnyStr = None
     type: typing.AnyStr = None
     short_description: typing.AnyStr = None
