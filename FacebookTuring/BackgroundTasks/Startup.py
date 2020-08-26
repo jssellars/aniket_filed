@@ -79,5 +79,5 @@ rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_ho
 
 # Log startup details
 startup_log = LoggerMessageStartup(app_config=app_config,
-                                   description="Facebook Turing API - data interface between Filed and Facebook")
+                                   description="Facebook Turing BT - data interface between Filed and Facebook")
 logger.logger.info(startup_log.to_dict())

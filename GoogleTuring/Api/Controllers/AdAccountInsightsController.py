@@ -11,7 +11,7 @@ from GoogleTuring.Api.Commands.AdAccountInsightsCommand import AdAccountInsights
 from GoogleTuring.Api.CommandsHandlers.GoogleAdAccountInsightsHandler import \
     GoogleAdAccountInsightsHandler
 from GoogleTuring.Api.Mappings.AdAccountInsightsCommandMapping import AdAccountInsightsCommandMapping
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.Startup import startup, logger
 
 
 class AdAccountInsightsEndpoint(Resource):
@@ -29,7 +29,8 @@ class AdAccountInsightsEndpoint(Resource):
             return Response(response=response, status=400, mimetype='application/json')
 
         try:
-            response = GoogleAdAccountInsightsHandler.handle(config=startup.google_config, command=command)
+            response = GoogleAdAccountInsightsHandler.handle(config=startup.google_config, command=command,
+                                                             logger=logger)
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')

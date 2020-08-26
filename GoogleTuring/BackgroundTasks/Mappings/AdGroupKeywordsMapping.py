@@ -4,6 +4,8 @@ from bson import BSON
 from googleads import adwords
 from zeep import helpers
 
+from Core.Tools.Logger.Helpers import log_operation_mongo
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
 from GoogleTuring.BackgroundTasks.Mappings.StructureMapping import StructureMapping
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import GOOGLE_STATUS_MAPPING
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID, StructureType
@@ -12,8 +14,8 @@ from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO
 class AdGroupKeywordsMapping(StructureMapping):
     _PAGE_SIZE = 2000
 
-    def __init__(self, business_owner_id, account_id, service, structure_fields, ad_group_details, entries=None):
-        super().__init__(business_owner_id, account_id, service, structure_fields, entries)
+    def __init__(self, business_owner_id, account_id, service, structure_fields, ad_group_details, entries=None, **kwargs):
+        super().__init__(business_owner_id, account_id, service, structure_fields, entries, **kwargs)
         self.__ad_group_details = ad_group_details
 
     def _set_structure_id(self):
@@ -75,7 +77,10 @@ class AdGroupKeywordsMapping(StructureMapping):
                 if 'entries' in page:
                     entries.extend(page['entries'])
         except Exception as e:
-            # TODO: log error
-            print("Exception " + e.__str__() + " has occurred")
+            log_operation_mongo(logger=self.logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                query=query,
+                                description=f'Failed to get Adgroup structure entries. Reason: {e}'
+                                )
 
         return entries

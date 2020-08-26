@@ -5,6 +5,8 @@ from bson import BSON
 from googleads import adwords
 from zeep import helpers
 
+from Core.Tools.Logger.Helpers import log_operation_mongo
+from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
 from GoogleTuring.BackgroundTasks.Mappings.StructureMapping import StructureMapping
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import GOOGLE_STATUS_MAPPING
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID, StructureType
@@ -89,7 +91,11 @@ class AdGroupStructureMapping(StructureMapping):
                         else:
                             entries[ad_group_id] = [entry]
         except Exception as e:
-            # TODO: log error
+            log_operation_mongo(logger=self.logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                query=query,
+                                description=f'Failed to get criteria for AdGroups. Reason: {e}'
+                                )
             print("Exception " + e.__str__() + " has occurred")
 
         return entries

@@ -9,10 +9,11 @@ from Core.Web.GoogleAdWordsAPI.AdWordsAPI.Enums.AdWordsServiceType import AdWord
 class AdWordsBaseClient:
     _CHUNK_SIZE = 16 * 1024
 
-    def __init__(self, config, refresh_token=None):
+    def __init__(self, config, refresh_token=None, logger=None):
         self._config = config
         self._refresh_token = refresh_token
-
+        self.logger = logger
+        
         if refresh_token is None:
             self._client = adwords.AdWordsClient.LoadFromStorage(path=config.client_config_path)
         else:

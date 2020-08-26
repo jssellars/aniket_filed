@@ -2,6 +2,7 @@ import json
 import os
 
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
+from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
 from GoogleTuring.Api.Config.Config import MongoConfig, GoogleConfig
 
 
@@ -50,3 +51,14 @@ logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
                                                 name=startup.api_name,
                                                 level=startup.logger_level,
                                                 index_name=startup.docker_filename)
+
+rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
+                                                              port=startup.es_port,
+                                                              name=startup.api_name,
+                                                              level=startup.logger_level,
+                                                              index_name=startup.docker_filename)
+
+# Log startup details
+startup_log = LoggerMessageStartup(app_config=app_config,
+                                   description="Google Turing BT - data interface between Filed and Google")
+logger.logger.info(startup_log.to_dict())

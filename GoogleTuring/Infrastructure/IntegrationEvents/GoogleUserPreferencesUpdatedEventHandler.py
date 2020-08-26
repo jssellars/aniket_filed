@@ -10,11 +10,11 @@ from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedE
 
 class GoogleUserPreferencesUpdatedEventHandler:
     @classmethod
-    def handle(cls, message: typing.Dict):
+    def handle(cls, message: typing.Dict, logger=None):
         mapping = GoogleUserPreferencesUpdatedEventMapping(GoogleUserPreferencesUpdatedEvent)
         request = mapping.load(message)
 
-        AdWordsAPIDataSyncHandler.handle(request)
+        AdWordsAPIDataSyncHandler.handle(request, logger=logger)
 
     @classmethod
     def publish(cls, response):

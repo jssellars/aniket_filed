@@ -6,6 +6,7 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 from googleads import adwords
 
+from GoogleDexter.BackgroundTasks.Startup import logger
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.BaseSynchronizer import BaseSynchronizer
 from GoogleTuring.Infrastructure.Domain.Enums.ActionBreakdown import ACTION_BREAKDOWN_TO_FIELD
 from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import BreakdownType, BREAKDOWN_TO_FIELD, \
@@ -150,14 +151,15 @@ def extract_compound_and_required_fields(fields):
 
 class InsightsSynchronizer(BaseSynchronizer):
     def __init__(self, business_owner_id, account_id, adwords_client, mongo_config, last_update_time,
-                 mongo_conn_handler):
-        super().__init__(business_owner_id, account_id, adwords_client, mongo_config)
+                 mongo_conn_handler, **kwargs):
+        super().__init__(business_owner_id, account_id, adwords_client, mongo_config, **kwargs)
         self.__last_update_time = last_update_time
         self.__mongo_repository = GoogleTuringInsightsMongoRepository(client=mongo_conn_handler.client,
                                                                       database_name=self._mongo_config[
                                                                           'google_insights_database_name'],
                                                                       location_collection_name=self._mongo_config[
-                                                                          'location_data_collection_name'])
+                                                                          'location_data_collection_name'],
+                                                                      logger=logger)
 
     def synchronize(self):
         self._adwords_client.set_client_customer_id(self._account_id)

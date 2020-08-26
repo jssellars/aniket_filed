@@ -21,7 +21,7 @@ from GoogleTuring.BackgroundTasks.SyncJobs.DailySyncJob import daily_sync_job
 from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
-
+from GoogleTuring.BackgroundTasks.Startup import logger
 
 def sync_callback(ch, method, properties, body):
     try:
@@ -30,7 +30,7 @@ def sync_callback(ch, method, properties, body):
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
         message = json.loads(body)
-        request_handler.handle(message)
+        request_handler.handle(message, logger)
     except:
         traceback.print_exc()
 
@@ -38,7 +38,7 @@ def sync_callback(ch, method, properties, body):
 rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
                                  inbound_queue=startup.direct_inbound_queue.name)
 
-schedule.every().day.at(startup.sync_time).do(daily_sync_job)
+schedule.every().day.at(startup.sync_time).do(daily_sync_job, logger)
 rabbit_thread = Thread(target=rabbitmq_client.register_callback(sync_callback)
                        .register_consumer(consumer_tag="google.turing")
                        .start_consuming)

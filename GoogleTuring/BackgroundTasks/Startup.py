@@ -3,6 +3,8 @@ import os
 
 from kombu import Exchange, Queue
 
+from Core.Tools.Logger.LoggerFactory import LoggerFactory
+from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
 from GoogleTuring.BackgroundTasks.Config.Config import GoogleConfig, MongoConfig, RabbitMqConfig
 
 
@@ -37,6 +39,13 @@ class Startup:
         self.api_version = config['api_version']
         self.base_url = config['base_url']
 
+        self.docker_filename = app_config["docker_filename"]
+        self.logger_type = app_config["logger_type"]
+        self.rabbit_logger_type = app_config["rabbit_logger_type"]
+        self.logger_level = app_config["logger_level"]
+        self.es_host = app_config.get("es_host", None)
+        self.es_port = app_config.get("es_port", None)
+
 
 #  Initialize startup object
 env = os.environ.get("PYTHON_ENV")
@@ -48,3 +57,21 @@ with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)
+
+# Initialize logger
+logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
+                                                port=startup.es_port,
+                                                name=startup.api_name,
+                                                level=startup.logger_level,
+                                                index_name=startup.docker_filename)
+
+rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
+                                                              port=startup.es_port,
+                                                              name=startup.api_name,
+                                                              level=startup.logger_level,
+                                                              index_name=startup.docker_filename)
+
+# Log startup details
+startup_log = LoggerMessageStartup(app_config=app_config,
+                                   description="Google Turing BT - data interface between Filed and Google")
+logger.logger.info(startup_log.to_dict())
