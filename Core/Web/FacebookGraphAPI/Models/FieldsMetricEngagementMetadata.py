@@ -217,11 +217,8 @@ class FieldsMetricEngagementMetadata:
                            mapper=ActionFieldMapper(
                                field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                  field_value=GraphAPIInsightsFields.video_view),
-                                             ActionFieldCondition(field_name=GraphAPIInsightsFields.action_video_type,
-                                                                  operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                  field_value=GraphAPIInsightsFields.video_view_total)]),
-                           action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                                  field_value=GraphAPIInsightsFields.video_view)]),
+                           action_breakdowns=[GraphAPIInsightsFields.action_type],
                            field_type=FieldType.ACTION_INSIGHT)
     thru_plays = Field(name="thru_plays",
                        facebook_fields=[GraphAPIInsightsFields.thru_plays],
@@ -237,44 +234,32 @@ class FieldsMetricEngagementMetadata:
                             mapper=ActionFieldMapper(
                                 field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                                    operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view),
-                                              ActionFieldCondition(field_name=GraphAPIInsightsFields.action_video_type,
-                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view_total)]),
-                            action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                                   field_value=GraphAPIInsightsFields.video_view)]),
+                            action_breakdowns=[GraphAPIInsightsFields.action_type],
                             field_type=FieldType.ACTION_INSIGHT)
     video_plays_50p = Field(name="video_plays_50p",
                             facebook_fields=[GraphAPIInsightsFields.video_p50_watched_actions],
                             mapper=ActionFieldMapper(
                                 field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                                    operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view),
-                                              ActionFieldCondition(field_name=GraphAPIInsightsFields.action_video_type,
-                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view_total)]),
-                            action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                                   field_value=GraphAPIInsightsFields.video_view)]),
+                            action_breakdowns=[GraphAPIInsightsFields.action_type],
                             field_type=FieldType.ACTION_INSIGHT)
     video_plays_75p = Field(name="video_plays_75p",
                             facebook_fields=[GraphAPIInsightsFields.video_p75_watched_actions],
                             mapper=ActionFieldMapper(
                                 field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                                    operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view),
-                                              ActionFieldCondition(field_name=GraphAPIInsightsFields.action_video_type,
-                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view_total)]),
-                            action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                                   field_value=GraphAPIInsightsFields.video_view)]),
+                            action_breakdowns=[GraphAPIInsightsFields.action_type],
                             field_type=FieldType.ACTION_INSIGHT)
     video_plays_95p = Field(name="video_plays_95p",
                             facebook_fields=[GraphAPIInsightsFields.video_p95_watched_actions],
                             mapper=ActionFieldMapper(
                                 field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                                    operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view),
-                                              ActionFieldCondition(field_name=GraphAPIInsightsFields.action_video_type,
-                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                   field_value=GraphAPIInsightsFields.video_view_total)]),
-                            action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                                   field_value=GraphAPIInsightsFields.video_view)]),
+                            action_breakdowns=[GraphAPIInsightsFields.action_type],
                             field_type=FieldType.ACTION_INSIGHT)
 
     video_plays_100p = Field(name="video_plays_100p",
@@ -282,23 +267,16 @@ class FieldsMetricEngagementMetadata:
                              mapper=ActionFieldMapper(
                                  field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                                     operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                                    field_value=GraphAPIInsightsFields.video_view),
-                                               ActionFieldCondition(
-                                                   field_name=GraphAPIInsightsFields.action_video_type,
-                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                   field_value=GraphAPIInsightsFields.video_view_total)]),
-                             action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                                    field_value=GraphAPIInsightsFields.video_view)]),
+                             action_breakdowns=[GraphAPIInsightsFields.action_type],
                              field_type=FieldType.ACTION_INSIGHT)
     video_average_play_time = Field(name="video_average_play_time",
                                     facebook_fields=[GraphAPIInsightsFields.video_avg_time_watched_actions],
                                     mapper=ActionFieldMapper(field_filter=[
                                         ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
                                                              operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                             field_value=GraphAPIInsightsFields.video_view),
-                                        ActionFieldCondition(field_name=GraphAPIInsightsFields.action_video_type,
-                                                             operator=ActionFieldConditionOperatorEnum.EQUALS,
-                                                             field_value=GraphAPIInsightsFields.video_view_total)]),
-                                    action_breakdowns=[GraphAPIInsightsFields.action_video_type],
+                                                             field_value=GraphAPIInsightsFields.video_view)]),
+                                    action_breakdowns=[GraphAPIInsightsFields.action_type],
                                     field_type=FieldType.ACTION_INSIGHT)
     video_plays = Field(name="video_plays",
                         facebook_fields=[GraphAPIInsightsFields.video_play_actions],
