@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
+from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from FacebookTuring.Api.Config.Config import FacebookConfig
 from FacebookTuring.Api.Config.Config import MongoConfig
 from FacebookTuring.Api.Config.Config import RabbitMqConfig
@@ -69,3 +70,9 @@ with open(config_file, 'r') as app_settings_json_file:
     app_config = json.load(app_settings_json_file)
 
 startup = Startup(app_config)
+
+logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
+                                                port=startup.es_port,
+                                                name=startup.api_name,
+                                                level=startup.logger_level,
+                                                index_name=startup.docker_filename)
