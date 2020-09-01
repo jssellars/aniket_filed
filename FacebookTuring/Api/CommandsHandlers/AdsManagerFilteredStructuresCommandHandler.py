@@ -1,7 +1,7 @@
 import typing
 
 from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
-from FacebookTuring.Api.Mappings.AdsManagerStructureMinimalMapping import AdsManagerStructureMinimalMapping
+from FacebookTuring.Api.Mappings.AdsManagerStructureWithStatusMapping import AdsManagerStructuresWithStatusMapping
 from FacebookTuring.Api.Startup import startup, logger
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -19,14 +19,14 @@ class AdsManagerFilteredStructuresCommandHandler:
                                                database_name=startup.mongo_config.structures_database_name,
                                                collection_name=collection_name,
                                                logger=logger)
-            response = repository.get_structure_ids_and_names(level=Level(level),
-                                                              account_id=ad_account_id,
-                                                              campaign_ids=command.campaign_ids,
-                                                              adset_ids=command.adset_ids,
-                                                              statuses=command.statuses)
+            response = repository.get_structure_ids_names_and_statuses(level=Level(level),
+                                                                       account_id=ad_account_id,
+                                                                       campaign_ids=command.campaign_ids,
+                                                                       adset_ids=command.adset_ids,
+                                                                       statuses=command.statuses)
             if not response:
                 return
-            mapping = AdsManagerStructureMinimalMapping(level=collection_name)
+            mapping = AdsManagerStructuresWithStatusMapping(level=collection_name)
             response = mapping.load(response, many=True)
             return response
         except Exception as e:

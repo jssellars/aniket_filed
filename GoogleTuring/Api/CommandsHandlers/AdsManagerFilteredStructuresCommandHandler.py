@@ -1,7 +1,7 @@
 import typing
 
 from GoogleTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
-from GoogleTuring.Api.Mappings.AdsManagerStructureMinimalMapping import AdsManagerStructureMinimalMapping
+from GoogleTuring.Api.Mappings.AdsManagerStructureWithStatusMapping import AdsManagerStructuresWithStatusMapping
 from GoogleTuring.Api.Startup import startup, logger
 from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
@@ -20,13 +20,13 @@ class AdsManagerFilteredStructuresCommandHandler:
                                                                database_name=startup.mongo_config.google_structures_database_name,
                                                                collection_name=collection_name,
                                                                logger=logger)
-            response = repository.get_structure_ids_and_names(level=Level(level),
-                                                              account_id=ad_account_id,
-                                                              campaign_ids=command.campaign_ids,
-                                                              adgroup_ids=command.adset_ids,
-                                                              statuses=command.statuses)
+            response = repository.get_structure_ids_names_and_statuses(level=Level(level),
+                                                                       account_id=ad_account_id,
+                                                                       campaign_ids=command.campaign_ids,
+                                                                       adgroup_ids=command.adset_ids,
+                                                                       statuses=command.statuses)
 
-            mapping = AdsManagerStructureMinimalMapping(level=collection_name)
+            mapping = AdsManagerStructuresWithStatusMapping(level=collection_name)
             response = mapping.load(response, many=True)
             return response
         except Exception as e:

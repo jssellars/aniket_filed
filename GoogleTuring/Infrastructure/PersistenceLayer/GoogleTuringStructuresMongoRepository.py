@@ -128,6 +128,60 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
             LevelToGoogleIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
             LevelToGoogleNameKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value
         }
+
+        structures = self.get(query, projection)
+        return structures
+
+    def get_structure_ids_names_and_statuses(self,
+                                             level: Level = None,
+                                             account_id: typing.AnyStr = None,
+                                             campaign_ids: typing.List[typing.AnyStr] = None,
+                                             adgroup_ids: typing.List[typing.AnyStr] = None,
+                                             statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
+
+        self.set_collection(collection_name=level.value)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelToGoogleIdKeyMapping.get_enum_by_name(Level.ACCOUNT.name).value: {
+                        MongoOperator.EQUALS.value: account_id
+                    }
+                }
+            ]
+        }
+        if campaign_ids:
+            query_by_campaign_ids = {
+                LevelToGoogleIdKeyMapping.get_enum_by_name(Level.CAMPAIGN.name).value: {
+                    MongoOperator.IN.value: campaign_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(deepcopy(query_by_campaign_ids))
+
+        if adgroup_ids:
+            query_by_adgroup_ids = {
+                LevelToGoogleIdKeyMapping.get_enum_by_name(Level.ADGROUP.name).value: {
+                    MongoOperator.IN.value: adgroup_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(deepcopy(query_by_adgroup_ids))
+
+        if statuses is None:
+            statuses = [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
+
+        query_by_status = {
+            MiscFieldsEnum.status: {
+                MongoOperator.IN.value: statuses
+            }
+        }
+        query[MongoOperator.AND.value].append(deepcopy(query_by_status))
+
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
+            LevelToGoogleIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
+            LevelToGoogleNameKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
+            MiscFieldsEnum.status: MongoProjectionState.ON.value
+        }
+
         structures = self.get(query, projection)
         return structures
 

@@ -21,9 +21,9 @@ class AdsManagerGetStructuresQuery:
                                                               account_id=ad_account_id)
             if not response:
                 return []
+
             mapping = AdsManagerStructureMinimalMapping(level=collection_name)
-            response = mapping.load(response,
-                                    many=True)  # [{"facebookId": entry['id'], "name": entry["name"]} for entry in response]
+            response = mapping.load(response, many=True)
             return response
         except Exception as e:
             raise e
