@@ -199,7 +199,12 @@ def sync_insights_base(syncronizer: InsightsSyncronizer = None,
 
     if data_available:
         while date_stop >= date_start:
-            current_date_stop = date_start + timedelta(SYNC_DAYS_INTERVAL)
+            # The data is taken from Facebook in groups of max 3 days in order to avoid failed requests
+            if date_start + timedelta(SYNC_DAYS_INTERVAL) <= date_stop:
+                current_date_stop = date_start + timedelta(SYNC_DAYS_INTERVAL)
+            else:
+                current_date_stop = date_start + (date_stop - date_start)
+
             date_start_sync = date_start.strftime(DEFAULT_DATETIME_FORMAT)
             date_stop_sync = current_date_stop.strftime(DEFAULT_DATETIME_FORMAT)
 
