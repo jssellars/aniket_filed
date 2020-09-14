@@ -458,6 +458,44 @@ class MongoRepositoryBase:
                                 query_filter=query_filter,
                                 query=query)
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
+    def delete_many_older_than_date(self, date: typing.AnyStr = None) -> typing.NoReturn:
+        operation_start_time = datetime.now()
+        query = {}
+
+        try:
+            query = {
+                "date_start": {MongoOperator.LESSTHANEQUAL.value: date}
+            }
+            self.collection.delete_many(query)
+
+        except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to delete many documents. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query)
+            raise e
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                description="Delete many documents",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query=query)
+
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
+    def get_collections(self) -> typing.List[str]:
+        if self._database_name:
+            return self.database.collection_names()
+        return []
+
     def close(self):
         self._client.close()
 

@@ -476,6 +476,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             else:
                 current_structure_details = BSON.decode(structure.details)
             existing_structure_details = self.get_structure_details(level=level, key_value=structure_id)
+
             if existing_structure_details and \
                     current_structure_details != existing_structure_details.get(MiscFieldsEnum.details):
                 self.deprecate_structure(level=level, key_value=structure_id)
@@ -484,6 +485,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                 else:
                     structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 self.add_one(structure)
+
             elif not existing_structure_details:
                 if isinstance(structure, dict):
                     structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)

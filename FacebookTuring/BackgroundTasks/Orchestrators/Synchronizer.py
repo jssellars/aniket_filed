@@ -23,6 +23,7 @@ NEXT_DAY = timedelta(days=1)
 SYNC_DAYS_INTERVAL = 3
 DEFAULT_DATETIME_FORMAT = '%Y-%m-%d'
 DEFAULT_DATETIME_ISO_FORMAT = '%Y-%m-%d %H:%M:%S'
+DAYS_UNTIL_OBSOLETE = 31
 
 
 def sync(structures_repository: TuringMongoRepository = None,
@@ -62,6 +63,7 @@ def sync(structures_repository: TuringMongoRepository = None,
                 # wait for current account sync to finish
                 structure_thread.join()
                 insights_thread.join()
+
             except Exception as e:
                 log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                         name="Facebook Turing Daily Sync Error",
@@ -70,6 +72,8 @@ def sync(structures_repository: TuringMongoRepository = None,
                                                                     entry[MiscFieldsEnum.account_id],
                                                                     str(e)))
                 logger.logger.exception(log.to_dict())
+
+        delete_old_insights(insights_repository)
 
 
 def sync_structures(structures_repository: TuringMongoRepository = None,
@@ -267,3 +271,11 @@ def mark_completed_adset(adsets: typing.List[typing.Dict] = None) -> int:
                 adset[MiscFieldsEnum.status] = StructureStatusEnum.COMPLETED.value
                 completed_adsets += 1
     return completed_adsets
+
+
+def delete_old_insights(insights_repository: TuringMongoRepository) -> typing.NoReturn:
+    insights_collections = insights_repository.get_collections()
+    for insights_collection in insights_collections:
+        insights_repository.set_collection(insights_collection)
+        date = (datetime.now() - timedelta(days=DAYS_UNTIL_OBSOLETE)).strftime('%Y-%m-%d')
+        insights_repository.delete_many_older_than_date(date)
