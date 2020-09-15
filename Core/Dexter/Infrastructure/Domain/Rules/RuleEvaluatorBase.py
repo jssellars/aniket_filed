@@ -12,7 +12,7 @@ class RuleEvaluatorBase(RuleEvaluatorBuilder):
     def __init__(self):
         super().__init__()
 
-    def evaluate(self, rule, metric_calculator) -> typing.List[typing.List[RuleEvaluatorData]]:
+    def evaluate(self, rule, metric_calculator, antecedent_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
         raise NotImplementedError
 
     def _evaluate_rule(self, evaluator_data: typing.Dict, rule) -> typing.List[typing.List[RuleEvaluatorData]]:

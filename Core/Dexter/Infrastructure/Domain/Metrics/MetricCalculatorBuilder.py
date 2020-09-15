@@ -77,3 +77,6 @@ class MetricCalculatorBuilder:
         self._structure_id = structure_id
         return self
 
+    def get_facebook_id(self):
+        return self._facebook_id
+

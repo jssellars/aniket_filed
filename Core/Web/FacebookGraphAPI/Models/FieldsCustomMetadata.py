@@ -10,17 +10,19 @@ class FieldsCustomMetadata:
     conversions = Field(name="conversions",
                         facebook_fields=[GraphAPIInsightsFields.actions],
                         mapper=ActionFieldMapper(
-                            field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
-                                                               operator=ActionFieldConditionOperatorEnum.LIKE,
-                                                               field_value=GraphAPIInsightsFields.conversions)]),
+                            field_filter=[ActionFieldCondition(
+                                field_name=GraphAPIInsightsFields.action_type,
+                                operator=ActionFieldConditionOperatorEnum.LIKE,
+                                field_value=GraphAPIInsightsFields.conversions)]),
                         action_breakdowns=[GraphAPIInsightsFields.action_type],
                         field_type=FieldType.ACTION_INSIGHT)
     cost_per_conversion = Field(name="cost_per_conversion",
                                 facebook_fields=[GraphAPIInsightsFields.actions],
                                 mapper=CostPerActionFieldMapper(
-                                    field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
-                                                                       operator=ActionFieldConditionOperatorEnum.LIKE,
-                                                                       field_value=GraphAPIInsightsFields.conversions)]),
+                                    field_filter=[ActionFieldCondition(
+                                        field_name=GraphAPIInsightsFields.action_type,
+                                        operator=ActionFieldConditionOperatorEnum.LIKE,
+                                        field_value=GraphAPIInsightsFields.conversions)]),
                                 action_breakdowns=[GraphAPIInsightsFields.action_type],
                                 field_type=FieldType.ACTION_INSIGHT)
     messaging_conversation_started_7d = Field(name="messaging_conversation_started_7d",

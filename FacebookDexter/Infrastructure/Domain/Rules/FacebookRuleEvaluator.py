@@ -3,6 +3,7 @@ import typing
 from Core.Dexter.Infrastructure.Domain.Rules.RuleEvaluatorBase import RuleEvaluatorBase
 from Core.Dexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEvaluatorData
 from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricEnums import FacebookMetricTypeEnum
+from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
 
 
 class FacebookRuleEvaluator(RuleEvaluatorBase):
@@ -14,16 +15,26 @@ class FacebookRuleEvaluator(RuleEvaluatorBase):
     def __init__(self):
         super().__init__()
 
-    def evaluate(self, rule, metric_calculator) -> typing.List[typing.List[RuleEvaluatorData]]:
+    def evaluate(self, rule, metric_calculator, antecedent_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
         # evaluate every antecedent for all possible breakdown values
         evaluator_data = {}
         for antecedent in rule.antecedents:
-            if antecedent.metric.type == FacebookMetricTypeEnum.INSIGHT:
-                evaluator_data[antecedent.id] = self._evaluate_insights_antecedent(antecedent, metric_calculator,
-                                                                                   rule)
-            elif antecedent.metric.type in self.OTHER_METRIC_TYPES:
-                evaluator_data[antecedent.id] = self._evaluate_antecedent_base(antecedent, metric_calculator,
-                                                                               rule)
+
+            antecedent_string_key = ""
+            if antecedent.type == AntecedentTypeEnum.FUZZY_TREND:
+                antecedent_string_key = str(antecedent.metric.name) + "_" + str(antecedent.operator.name) + "_" + str(antecedent.expected_value.name)
+
+            if (metric_calculator.get_facebook_id(), antecedent_string_key) in antecedent_cache:
+                evaluator_data[antecedent.id] = antecedent_cache[(metric_calculator.get_facebook_id(), antecedent_string_key)]
+
+            else:
+                if antecedent.metric.type == FacebookMetricTypeEnum.INSIGHT:
+                    evaluator_data[antecedent.id] = self._evaluate_insights_antecedent(antecedent, metric_calculator, rule)
+                elif antecedent.metric.type in self.OTHER_METRIC_TYPES:
+                    evaluator_data[antecedent.id] = self._evaluate_antecedent_base(antecedent, metric_calculator, rule)
+
+                if antecedent.type == AntecedentTypeEnum.FUZZY_TREND:
+                    antecedent_cache[(metric_calculator.get_facebook_id(), antecedent_string_key)] = evaluator_data[antecedent.id]
         # evaluate rule truth value for each combination of breakdown values
         data = self._evaluate_rule(evaluator_data, rule)
         return data

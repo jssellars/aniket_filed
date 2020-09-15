@@ -46,6 +46,8 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
                                                                              level=self._level,
                                                                              time_interval=self._time_interval)
         recommendations = []
+        antecedent_cache = {}
+
         for rule in applicable_rules:
             metric_calculator = (FacebookMetricCalculator().
                 set_business_owner_id(self._business_owner_id).
@@ -61,7 +63,11 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
                 set_debug_mode(self._debug).
                 set_minimum_number_of_data_points(self._minimum_number_of_data_points_dict[str(self._time_interval.value)]))
 
-            rule_data = self._rule_evaluator.evaluate(rule=rule, metric_calculator=metric_calculator)
+            rule_data = self._rule_evaluator.evaluate(
+                rule=rule,
+                metric_calculator=metric_calculator,
+                antecedent_cache=antecedent_cache
+            )
 
             if rule_data:
                 try:
