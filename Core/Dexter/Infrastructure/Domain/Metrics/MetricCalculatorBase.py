@@ -43,8 +43,16 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         raise NotImplementedError
 
     def compute_value(self, atype: AntecedentTypeEnum = None,
-                      time_interval: typing.Union[DaysEnum, int] = DaysEnum.ONE) -> \
-            typing.Tuple[typing.Any, typing.Any]:
+                      time_interval: typing.Union[DaysEnum, int] = DaysEnum.ONE,
+                      metric_cache: typing.Dict = None) -> typing.Tuple[typing.Any, typing.Any]:
+
+        metric_cached_key = ""
+        if metric_cache is not None:
+            metric_cached_key = self._metric.name + "_" + atype.name + "_" + time_interval.name + "_" + "breakdown" + "_" +\
+                                self._breakdown_metadata.breakdown.name + "_" + self._breakdown_metadata.action_breakdown.name
+            if metric_cached_key in metric_cache:
+                return metric_cache[metric_cached_key]
+
         date_stop = self._date_stop
         try:
             date_start = date_stop - timedelta(days=time_interval)
@@ -93,8 +101,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             return None, None
 
         if not isinstance(result, list) and not isinstance(result, tuple):
+            if metric_cache is not None:
+                metric_cache[metric_cached_key] = result, None
             return result, None
         else:
+            if metric_cache is not None:
+                metric_cache[metric_cached_key] = result
             return result
 
     def get_breakdown_metadata(self,

@@ -12,7 +12,7 @@ class RuleEvaluatorBase(RuleEvaluatorBuilder):
     def __init__(self):
         super().__init__()
 
-    def evaluate(self, rule, metric_calculator, antecedent_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
+    def evaluate(self, rule, metric_calculator, antecedent_cache=None, metric_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
         raise NotImplementedError
 
     def _evaluate_rule(self, evaluator_data: typing.Dict, rule) -> typing.List[typing.List[RuleEvaluatorData]]:
@@ -43,10 +43,14 @@ class RuleEvaluatorBase(RuleEvaluatorBuilder):
                 return truth_value
         return truth_value
 
-    def _evaluate_antecedent_base(self, antecedent, metric_calculator, rule) -> typing.List[RuleEvaluatorData]:
+    def _evaluate_antecedent_base(self,
+                                  antecedent,
+                                  metric_calculator,
+                                  rule,
+                                  metric_cache=None) -> typing.List[RuleEvaluatorData]:
         value, _ = (metric_calculator.set_metric(antecedent.metric).
                     set_time_interval(self._time_interval).
-                    compute_value(atype=antecedent.type))
+                    compute_value(atype=antecedent.type, metric_cache=metric_cache))
         antecedent_truth_value = antecedent.evaluate(value)
         data = RuleEvaluatorData(antecedent_id=antecedent.id,
                                  antecedent_truth_value=antecedent_truth_value,
@@ -54,25 +58,37 @@ class RuleEvaluatorBase(RuleEvaluatorBuilder):
                                  breakdown_metadata=rule.breakdown_metadata)
         return [data]
 
-    def _evaluate_insights_antecedent(self, antecedent: Antecedent, metric_calculator, rule) -> typing.List[
-        RuleEvaluatorData]:
+    def _evaluate_insights_antecedent(self,
+                                      antecedent: Antecedent,
+                                      metric_calculator,
+                                      rule,
+                                      metric_cache: typing.Dict = None) -> typing.List[RuleEvaluatorData]:
         evaluator_data = []
         breakdown_metadata_list = self._breakdown_metadata_(metric_calculator, rule)
         for breakdown_metadata in breakdown_metadata_list:
-            data = self._evaluate_insights_antecedent_base(antecedent=antecedent,
-                                                           breakdown_metadata=breakdown_metadata,
-                                                           metric_calculator=metric_calculator)
+            data = self._evaluate_insights_antecedent_base(
+                antecedent=antecedent,
+                breakdown_metadata=breakdown_metadata,
+                metric_calculator=metric_calculator,
+                metric_cache=metric_cache
+            )
             evaluator_data.append(data)
         return evaluator_data
 
     def _evaluate_insights_antecedent_base(self,
                                            antecedent: Antecedent,
                                            breakdown_metadata: BreakdownMetadataBase,
-                                           metric_calculator) -> RuleEvaluatorData:
-        value, confidence = (metric_calculator.
-                             set_metric(antecedent.metric).
-                             set_breakdown_metadata(breakdown_metadata).
-                             compute_value(atype=antecedent.type, time_interval=self._time_interval))
+                                           metric_calculator,
+                                           metric_cache: typing.Dict = None) -> RuleEvaluatorData:
+        value, confidence = (
+            metric_calculator.set_metric(antecedent.metric)
+            .set_breakdown_metadata(breakdown_metadata)
+            .compute_value(
+                atype=antecedent.type,
+                time_interval=self._time_interval,
+                metric_cache=metric_cache
+            )
+        )
         antecedent_truth_value = antecedent.evaluate(value)
         data = RuleEvaluatorData(antecedent_id=antecedent.id,
                                  antecedent_truth_value=antecedent_truth_value,

@@ -47,6 +47,7 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
                                                                              time_interval=self._time_interval)
         recommendations = []
         antecedent_cache = {}
+        metric_cache = {}
 
         for rule in applicable_rules:
             metric_calculator = (FacebookMetricCalculator().
@@ -66,7 +67,8 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
             rule_data = self._rule_evaluator.evaluate(
                 rule=rule,
                 metric_calculator=metric_calculator,
-                antecedent_cache=antecedent_cache
+                antecedent_cache=antecedent_cache,
+                metric_cache=metric_cache
             )
 
             if rule_data:

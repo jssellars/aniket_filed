@@ -15,11 +15,11 @@ class FacebookRuleEvaluator(RuleEvaluatorBase):
     def __init__(self):
         super().__init__()
 
-    def evaluate(self, rule, metric_calculator, antecedent_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
+    def evaluate(self, rule, metric_calculator, antecedent_cache=None, metric_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
         # evaluate every antecedent for all possible breakdown values
         evaluator_data = {}
-        for antecedent in rule.antecedents:
 
+        for antecedent in rule.antecedents:
             antecedent_string_key = ""
             if antecedent.type == AntecedentTypeEnum.FUZZY_TREND:
                 antecedent_string_key = str(antecedent.metric.name) + "_" + str(antecedent.operator.name) + "_" + str(antecedent.expected_value.name)
@@ -29,9 +29,19 @@ class FacebookRuleEvaluator(RuleEvaluatorBase):
 
             else:
                 if antecedent.metric.type == FacebookMetricTypeEnum.INSIGHT:
-                    evaluator_data[antecedent.id] = self._evaluate_insights_antecedent(antecedent, metric_calculator, rule)
+                    evaluator_data[antecedent.id] = self._evaluate_insights_antecedent(
+                        antecedent=antecedent,
+                        metric_calculator=metric_calculator,
+                        rule=rule,
+                        metric_cache=metric_cache
+                    )
                 elif antecedent.metric.type in self.OTHER_METRIC_TYPES:
-                    evaluator_data[antecedent.id] = self._evaluate_antecedent_base(antecedent, metric_calculator, rule)
+                    evaluator_data[antecedent.id] = self._evaluate_antecedent_base(
+                        antecedent=antecedent,
+                        metric_calculator=metric_calculator,
+                        rule=rule,
+                        metric_cache=metric_cache
+                    )
 
                 if antecedent.type == AntecedentTypeEnum.FUZZY_TREND:
                     antecedent_cache[(metric_calculator.get_facebook_id(), antecedent_string_key)] = evaluator_data[antecedent.id]

@@ -8,7 +8,7 @@ from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricEnums import GoogleM
 class GoogleRuleEvaluator(RuleEvaluatorBase):
     OTHER_METRIC_TYPES = [GoogleMetricTypeEnum.INSIGHT_CATEGORICAL, GoogleMetricTypeEnum.STRUCTURE]
 
-    def evaluate(self, rule, metric_calculator, antecedent_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
+    def evaluate(self, rule, metric_calculator, antecedent_cache=None, metric_cache=None) -> typing.List[typing.List[RuleEvaluatorData]]:
         # evaluate every antecedent for all possible breakdown values
         evaluator_data = {}
 
