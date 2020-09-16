@@ -34,11 +34,24 @@ class LevelToFacebookIdKeyMapping(EnumerationBase):
     AD = "ad_id"
 
 
+class LevelToFacebookRequiredIdsKeyMapping(EnumerationBase):
+    ACCOUNT = ["account_id"]
+    CAMPAIGN = ["campaign_id"]
+    ADSET = ["campaign_id", "adset_id"]
+    AD = ["campaign_id", "adset_id", "ad_id"]
+
+
 class LevelToFacebookNameKeyMapping(EnumerationBase):
     ACCOUNT = "account_name"
     CAMPAIGN = "campaign_name"
     ADSET = "adset_name"
     AD = "ad_name"
+
+
+class LevelToFacebookDeleteNamesKeyMapping(EnumerationBase):
+    CAMPAIGN = []
+    ADSET = ["campaign_name"]
+    AD = ["campaign_name", "adset_name"]
 
 
 class LevelToGraphAPIStructure:

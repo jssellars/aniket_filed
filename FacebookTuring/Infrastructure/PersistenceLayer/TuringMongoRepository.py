@@ -158,12 +158,12 @@ class TuringMongoRepository(MongoRepositoryBase):
         return [structure_id.get(LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value) for structure_id in
                 structure_ids]
 
-    def get_structure_ids_names_and_statuses(self,
-                                             level: Level = None,
-                                             account_id: typing.AnyStr = None,
-                                             campaign_ids: typing.List[typing.AnyStr] = None,
-                                             adset_ids: typing.List[typing.AnyStr] = None,
-                                             statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
+    def get_structure_info(self,
+                           level: Level = None,
+                           account_id: typing.AnyStr = None,
+                           campaign_ids: typing.List[typing.AnyStr] = None,
+                           adset_ids: typing.List[typing.AnyStr] = None,
+                           statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
         self.set_collection(collection_name=level.value)
 
         query = {
@@ -203,8 +203,12 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
-            LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
-            LevelToFacebookNameKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
+            LevelToFacebookIdKeyMapping.CAMPAIGN.value: MongoProjectionState.ON.value,
+            LevelToFacebookIdKeyMapping.ADSET.value: MongoProjectionState.ON.value,
+            LevelToFacebookIdKeyMapping.AD.value: MongoProjectionState.ON.value,
+            LevelToFacebookNameKeyMapping.CAMPAIGN.value: MongoProjectionState.ON.value,
+            LevelToFacebookNameKeyMapping.ADSET.value: MongoProjectionState.ON.value,
+            LevelToFacebookNameKeyMapping.AD.value: MongoProjectionState.ON.value,
             MiscFieldsEnum.status: MongoProjectionState.ON.value
         }
         structures = self.get(query, projection)

@@ -145,7 +145,7 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
                 return Response(response=json.dumps({'error_message': 'Structures not found!'}), status=404,
                                 mimetype='application/json')
 
-            response = snake_to_camelcase(response)
+            response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype="application/json")
         except Exception as e:

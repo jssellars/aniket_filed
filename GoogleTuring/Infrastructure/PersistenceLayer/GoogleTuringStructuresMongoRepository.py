@@ -132,12 +132,12 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
         structures = self.get(query, projection)
         return structures
 
-    def get_structure_ids_names_and_statuses(self,
-                                             level: Level = None,
-                                             account_id: typing.AnyStr = None,
-                                             campaign_ids: typing.List[typing.AnyStr] = None,
-                                             adgroup_ids: typing.List[typing.AnyStr] = None,
-                                             statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
+    def get_structure_info(self,
+                           level: Level = None,
+                           account_id: typing.AnyStr = None,
+                           campaign_ids: typing.List[typing.AnyStr] = None,
+                           adgroup_ids: typing.List[typing.AnyStr] = None,
+                           statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
 
         self.set_collection(collection_name=level.value)
         query = {
@@ -177,8 +177,14 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
 
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
-            LevelToGoogleIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
-            LevelToGoogleNameKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
+            LevelToGoogleIdKeyMapping.CAMPAIGN.value: MongoProjectionState.ON.value,
+            LevelToGoogleIdKeyMapping.ADGROUP.value: MongoProjectionState.ON.value,
+            LevelToGoogleIdKeyMapping.AD.value: MongoProjectionState.ON.value,
+            LevelToGoogleIdKeyMapping.KEYWORDS.value: MongoProjectionState.ON.value,
+            LevelToGoogleNameKeyMapping.CAMPAIGN.value: MongoProjectionState.ON.value,
+            LevelToGoogleNameKeyMapping.ADGROUP.value: MongoProjectionState.ON.value,
+            LevelToGoogleNameKeyMapping.AD.value: MongoProjectionState.ON.value,
+            LevelToGoogleNameKeyMapping.KEYWORDS.value: MongoProjectionState.ON.value,
             MiscFieldsEnum.status: MongoProjectionState.ON.value
         }
 

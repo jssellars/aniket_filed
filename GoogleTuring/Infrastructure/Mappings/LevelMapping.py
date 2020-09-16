@@ -33,9 +33,24 @@ class LevelToGoogleIdKeyMapping(EnumerationBase):
     KEYWORDS = "keywords_id"
 
 
+class LevelToGoogleRequiredIdsKeyMapping(EnumerationBase):
+    ACCOUNT = ["ad_account_id"]
+    CAMPAIGN = ["campaign_id"]
+    ADGROUP = ["campaign_id", "adgroup_id"]
+    AD = ["campaign_id", "adgroup_id", "ad_id"]
+    KEYWORDS = ["campaign_id", "adgroup_id", "keywords_id"]
+
+
 class LevelToGoogleNameKeyMapping(EnumerationBase):
     ACCOUNT = "ad_account_name"
     CAMPAIGN = "campaign_name"
     ADGROUP = "adgroup_name"
     AD = "ad_name"
     KEYWORDS = "keywords"
+
+
+class LevelToGoogleDeleteNamesKeyMapping:
+    CAMPAIGN = []
+    ADGROUP = ["campaign_name"]
+    AD = ["campaign_name", "adgroup_name"]
+    KEYWORDS = ["campaign_name", "adgroup_name"]
