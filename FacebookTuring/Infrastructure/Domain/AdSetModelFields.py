@@ -1,5 +1,7 @@
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
+from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 
 
 class AdSetModelFields(StructureModelFieldBase):
@@ -64,4 +66,31 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.account_id,
         FieldsMetadata.account_name,
         FieldsMetadata.adset_id
+    ]
+
+    required_structure_fields = [
+        # base structure fields
+        FieldsMetadata.account_id,
+        FieldsMetadata.campaign_name,
+        FieldsMetadata.campaign_id,
+        FieldsMetadata.adset_name,
+        FieldsMetadata.adset_id,
+        MiscFieldsEnum.last_updated_at,
+        MiscFieldsEnum.actions,
+        FieldsMetadata.status,
+        FieldsMetadata.budget_remaining,
+        FieldsMetadata.daily_budget,
+        FieldsMetadata.lifetime_budget,
+        FieldsMetadata.learning_stage_info,
+        GraphAPIInsightsFields.created_time,
+        FieldsMetadata.start_date,
+        MiscFieldsEnum.end_time,
+        MiscFieldsEnum.date_added,
+        # details structure fields
+        FieldsMetadata.adset_schedule,
+        FieldsMetadata.location,
+        FieldsMetadata.age,
+        FieldsMetadata.gender,
+        FieldsMetadata.bid_strategy,
+        FieldsMetadata.last_significant_edit
     ]

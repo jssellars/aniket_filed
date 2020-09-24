@@ -496,6 +496,35 @@ class MongoRepositoryBase:
             return self.database.collection_names()
         return []
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
+    def delete_many(self, query_filter: typing.Dict = None) -> typing.NoReturn:
+        operation_start_time = datetime.now()
+
+        try:
+            self.collection.delete_many(query_filter)
+
+        except Exception as e:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.ERROR,
+                                description="Failed to delete many documents. Reason: %s" % str(e),
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query_filter=query_filter)
+            raise e
+
+        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+            operation_end_time = datetime.now()
+            duration = (operation_end_time - operation_start_time).total_seconds()
+            log_operation_mongo(logger=self._logger,
+                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                description="Delete many documents",
+                                timestamp=operation_end_time,
+                                duration=duration,
+                                query_filter=query_filter)
+
+
     def close(self):
         self._client.close()
 

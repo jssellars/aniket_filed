@@ -1,6 +1,7 @@
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
-
+from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 
 class CampaignModelFields(StructureModelFieldBase):
     """Lists of fields to sync from Facebook"""
@@ -50,3 +51,21 @@ class CampaignModelFields(StructureModelFieldBase):
         FieldsMetadata.campaign_id,
         FieldsMetadata.campaign_name
     ]
+
+    required_structure_fields = [
+        # base structure fields
+        MiscFieldsEnum.account_id,
+        FieldsMetadata.campaign_name,
+        FieldsMetadata.campaign_id,
+        MiscFieldsEnum.last_updated_at,
+        MiscFieldsEnum.actions,
+        FieldsMetadata.status,
+        FieldsMetadata.objective,
+        FieldsMetadata.daily_budget,
+        FieldsMetadata.lifetime_budget,
+        GraphAPIInsightsFields.created_time,
+        FieldsMetadata.start_date,
+        MiscFieldsEnum.end_time,
+        MiscFieldsEnum.date_added
+    ]
+
