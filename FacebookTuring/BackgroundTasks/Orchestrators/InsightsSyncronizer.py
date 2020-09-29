@@ -5,6 +5,7 @@ from time import sleep
 
 from facebook_business.exceptions import FacebookRequestError
 
+from Core.Tools.MongoRepository.PreprocessUtils import PreprocessUtils
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
@@ -54,6 +55,8 @@ class InsightsSyncronizer:
                 fields=self.__get_fields(),
                 parameters=self.__get_parameters(),
                 requested_fields=self.__requested_fields)
+
+            response = PreprocessUtils.filter_null_values_from_documents(response)
             self.__mongo_repository.set_collection(self.__get_mongo_repository_collection())
             self.__mongo_repository.add_many(response)
         except FacebookRequestError as fb_ex:

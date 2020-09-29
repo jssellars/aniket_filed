@@ -48,7 +48,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         metric_cached_key = ""
         if metric_cache is not None:
-            metric_cached_key = self._metric.name + "_" + atype.name + "_" + time_interval.name + "_" + "breakdown" + "_" +\
+            metric_cached_key = self._metric.name + "_" + atype.name + "_" + time_interval.name + "_" + "breakdown" + "_" + \
                                 self._breakdown_metadata.breakdown.name + "_" + self._breakdown_metadata.action_breakdown.name
             if metric_cached_key in metric_cache:
                 return metric_cache[metric_cached_key]
@@ -457,7 +457,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         standard_deviation_on_time_interval = self.aggregated_value(date_start=date_start,
                                                                     date_stop=_date_stop)
 
-        if mean_on_thirty_days_interval:
+        if mean_on_thirty_days_interval and standard_deviation_on_time_interval is not None:
             variance = self.HUNDRED_MULTIPLIER * (standard_deviation_on_time_interval / mean_on_thirty_days_interval)
 
         return variance
