@@ -4,7 +4,7 @@ from string import Template
 
 class GraphAPIRequestBase:
     _limit = 25
-    _api_version = "v5.0"
+    _api_version = "v7.0"
 
     def __init__(self, facebook_id=None, business_owner_permanent_token=None, fields=None, params=None,
                  filter_params=None, api_version=None, limit=None):

@@ -6,7 +6,7 @@ from forex_python.converter import CurrencyCodes
 
 
 class GraphAPIBudgetValidationHandler:
-    __facebook_budget_validation_url = Template('https://graph.facebook.com/v5.0/$account_id?'
+    __facebook_budget_validation_url = Template('https://graph.facebook.com/v7.0/$account_id?'
                                                 'fields=currency,max_bid,min_daily_budget,minimum_budgets&'
                                                 'access_token=$access_token')
 

@@ -22,11 +22,12 @@ class GraphAPICampaignBuilderHandler(object):
             self._BuildCampaignCoreWithoutBudgetOptimization(campaignTemplate)
 
         # add special ad category to campaign
-        if Campaign.Field.special_ad_category in self.campaignTemplate.keys():
-            self.campaignTemplate[Campaign.Field.special_ad_category] = self.campaignTemplate[
-                Campaign.Field.special_ad_category]
+        if Campaign.Field.special_ad_category in campaignTemplate.keys():
+            self.campaignTemplate[Campaign.Field.special_ad_categories] = [
+                campaignTemplate[Campaign.Field.special_ad_category]
+            ]
         else:
-            self.campaignTemplate[Campaign.Field.special_ad_category] = Campaign.SpecialAdCategory.none
+            self.campaignTemplate[Campaign.Field.special_ad_categories] = []
 
     def _BuildCampaignCoreWithoutBudgetOptimization(self, campaignTemplate):
         self.campaignTemplate[Campaign.Field.name] = campaignTemplate['name']

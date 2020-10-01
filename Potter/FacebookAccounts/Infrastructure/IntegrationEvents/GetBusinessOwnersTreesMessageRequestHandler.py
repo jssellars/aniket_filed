@@ -37,11 +37,13 @@ class GetBusinessOwnersTreesMessageRequestHandler:
         business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
             business_owner.id)
 
-        graph_api_handler = GraphAPIAdAccountHandler(business_owner_permanent_token, startup.facebook_config)
-        businesses = graph_api_handler.get_business_owner_details(business_owner.id)
+        # TODO: what happens when the BO is not found in the db ?
+        if business_owner_permanent_token:
+            graph_api_handler = GraphAPIAdAccountHandler(business_owner_permanent_token, startup.facebook_config)
+            businesses = graph_api_handler.get_business_owner_details(business_owner.id)
 
-        response = GetBusinessOwnersTreesMessageResponse(facebook_id=business_owner.id, businesses=businesses)
-        cls.publish(response)
+            response = GetBusinessOwnersTreesMessageResponse(facebook_id=business_owner.id, businesses=businesses)
+            cls.publish(response)
 
     @classmethod
     def publish(cls, response):
