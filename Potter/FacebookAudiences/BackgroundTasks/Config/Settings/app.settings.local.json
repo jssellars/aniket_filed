@@ -36,9 +36,9 @@
     "name": "Dev.Filed.Facebook.Potter.Accounts"
   },
   "environment": "local",
-  "api_name": "FacebookAudiences",
+  "api_name": "FacebookAudiencesBackgroundTasks",
   "api_version": "1.0.0",
-  "service_name": "FacebookAudiences",
+  "service_name": "FacebookAudiencesBackgroundTasks",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-potter-audiences-background-tasks",

@@ -1,5 +1,5 @@
 {
-  "api_name": "Dexter API",
+  "api_name": "FacebookDexterAPI",
   "environment": "prodback",
   "api_version": "1.0.0",
   "base_url": "",

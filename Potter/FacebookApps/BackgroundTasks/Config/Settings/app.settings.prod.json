@@ -36,9 +36,9 @@
     "name": "Prod.Filed.Facebook.Potter.Accounts"
   },
   "environment": "prod",
-  "api_name": "FacebookApps",
+  "api_name": "FacebookAppsBackgroundTasks",
   "api_version": "1.0.0",
-  "service_name": "FacebookApps",
+  "service_name": "FacebookAppsBackgroundTasks",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-potter-apps-background-tasks",

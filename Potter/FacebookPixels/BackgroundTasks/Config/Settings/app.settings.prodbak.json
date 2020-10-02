@@ -36,9 +36,9 @@
     "name": "Prod.Filed.Facebook.Potter.Accounts"
   },
   "environment": "prodbak",
-  "api_name": "FacebookPixels",
+  "api_name": "FacebookPixelsBackgroundTasks",
   "api_version": "1.0.0",
-  "service_name": "FacebookPixels",
+  "service_name": "FacebookPixelsBackgroundTasks",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-potter-pixels-background-tasks",

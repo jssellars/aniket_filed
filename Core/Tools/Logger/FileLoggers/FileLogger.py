@@ -21,6 +21,7 @@ class FileLogger:
 
             self.name = name
             self.level = LoggingLevelEnum.get_enum_by_name(level).value
+            self.LOGS_FOLDER = os.path.join('Python', self.name, self.LOGS_FOLDER)
             self.file_name = os.path.join(self.LOGS_FOLDER, index_name)
 
             os.makedirs(self.LOGS_FOLDER, exist_ok=True)

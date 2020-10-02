@@ -42,6 +42,9 @@ class RabbitFileLogger:
         if self._instance is None:
             self._instance = super(RabbitFileLogger, self).__new__(self)
 
+            name = kwargs.get('name', '')
+            self.LOGS_FOLDER = os.path.join('Python', name, self.LOGS_FOLDER)
+
             if not os.path.exists(RabbitFileLogger.LOGS_FOLDER):
                 os.makedirs(RabbitFileLogger.LOGS_FOLDER)
             self.logger = RabbitFileLogger.InternalLogger(RabbitFileLogger.LOGS_FOLDER)

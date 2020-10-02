@@ -1,6 +1,6 @@
 {
 
-  "api_name": "Dexter API",
+  "api_name": "FacebookDexterAPI",
   "environment": "dev",
   "api_version": "1.0.0",
   "base_url": "",

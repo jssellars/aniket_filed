@@ -50,9 +50,9 @@
     "structures_database_name": "dev_facebook_turing_structures"
   },
   "environment": "dev",
-  "api_name": "Turing",
+  "api_name": "FacebookTuringAPI",
   "api_version": "1.0.0",
-  "service_name": "Turing",
+  "service_name": "FacebookTuringAPI",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47350,
