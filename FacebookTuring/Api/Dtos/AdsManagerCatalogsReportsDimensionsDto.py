@@ -20,5 +20,5 @@ class AdsManagerCatalogsReportsDimensionsDto:
     }
 
     @classmethod
-    def get(cls, report_type=None):
-        return cls.json_encoder(cls.DIMENSIONS.get(report_type))
+    def get(cls):
+        return cls.json_encoder(cls.DIMENSIONS)

@@ -9,17 +9,12 @@ class AdsManagerCatalogsReportsDto:
     json_encoder = object_to_json
     json_list_encoder = object_to_attribute_values_list
 
-    campaign = [
-        CampaignPerformanceReportModel
-    ]
-
-    adset = [
-        AdSetPerformanceReportModel
-    ]
-    ad = [
-        AdPerformanceReportModel
-    ]
+    catalogs = {
+        "campaign": [CampaignPerformanceReportModel],
+        "adset": [AdSetPerformanceReportModel],
+        "ad": [AdPerformanceReportModel]
+    }
 
     @classmethod
-    def get(cls, level):
-        return cls.json_encoder(getattr(cls, level))
+    def get(cls):
+        return cls.json_encoder(cls.catalogs)
