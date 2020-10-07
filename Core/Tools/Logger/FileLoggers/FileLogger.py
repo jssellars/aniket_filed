@@ -8,6 +8,7 @@ from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 
 
 class FileLogger:
+    PATH_TO_LOGS = ['..', '..', 'logs', 'Python']
     LOGS_FOLDER = 'logs'
     _instance = None
 
@@ -21,7 +22,7 @@ class FileLogger:
 
             self.name = name
             self.level = LoggingLevelEnum.get_enum_by_name(level).value
-            self.LOGS_FOLDER = os.path.join('Python', self.name, self.LOGS_FOLDER)
+            self.LOGS_FOLDER = os.path.join(*self.PATH_TO_LOGS, self.name, self.LOGS_FOLDER)
             self.file_name = os.path.join(self.LOGS_FOLDER, index_name)
 
             os.makedirs(self.LOGS_FOLDER, exist_ok=True)
