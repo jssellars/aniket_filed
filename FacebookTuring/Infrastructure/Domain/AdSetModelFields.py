@@ -86,6 +86,8 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.start_date,
         MiscFieldsEnum.end_time,
         MiscFieldsEnum.date_added,
+        GraphAPIInsightsFields.custom_event_type,
+        GraphAPIInsightsFields.optimization_goal,
         # details structure fields
         FieldsMetadata.adset_schedule,
         FieldsMetadata.location,

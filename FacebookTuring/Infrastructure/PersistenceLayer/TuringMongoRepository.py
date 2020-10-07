@@ -12,6 +12,7 @@ from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping, \
@@ -391,6 +392,38 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.get(query, projection)
         structures = self.__decode_structure_details_from_bson(structures)
         return [structure[MiscFieldsEnum.details] for structure in structures]
+
+    def get_results_fields_from_adsets(self,
+                                       structure_ids: typing.List[typing.AnyStr] = None,
+                                       structure_key: typing.AnyStr = None) -> \
+            typing.List[typing.Dict]:
+        self.set_collection(collection_name=Level.ADSET.value)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    structure_key: {
+                        MongoOperator.IN.value: structure_ids
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
+                                                    StructureStatusEnum.REMOVED.value,
+                                                    StructureStatusEnum.DEPRECATED.value]
+                    }
+                }
+            ]
+        }
+
+        projection = {
+            GraphAPIInsightsFields.custom_event_type: MongoProjectionState.ON.value,
+            GraphAPIInsightsFields.promoted_object: MongoProjectionState.ON.value,
+            structure_key: MongoProjectionState.ON.value,
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        structures = self.get(query, projection)
+        return structures
 
     @staticmethod
     def __decode_structure_details_from_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:

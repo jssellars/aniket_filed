@@ -7,7 +7,6 @@ class HTTPRequestBase:
     __RETRY_LIMIT = 3
 
     @classmethod
-    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def get(cls, url=None, fields=None, pagination=True):
         response = None
         page = None
@@ -30,6 +29,7 @@ class HTTPRequestBase:
                 return e, None
 
     @classmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def __get(cls, url):
         response = requests.get(url=url, timeout=cls._timeout)
         if response.status_code == 200:
@@ -38,9 +38,9 @@ class HTTPRequestBase:
             response = response.json()
 
             if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'])
+                raise Exception(response['error']['error_user_msg'] + " with url:" + url)
             else:
-                raise Exception(response['error']['message'])
+                raise Exception(response['error']['message'] + " with url:" + url)
 
         return response
 
@@ -80,7 +80,9 @@ class HTTPRequestBase:
 
         return data
 
+
     @classmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def __next_page_from_cursor(cls, page, url):
         if 'cursors' in page['paging'].keys():
             next_page_string = page['paging']['cursors']['after']
@@ -113,9 +115,9 @@ class HTTPRequestBase:
         else:
             response = response.json()
             if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'])
+                raise Exception(response['error']['error_user_msg'] + " with url:" + url)
             else:
-                raise Exception(response['error']['message'])
+                raise Exception(response['error']['message'] + " with url:" + url)
 
         return response
 

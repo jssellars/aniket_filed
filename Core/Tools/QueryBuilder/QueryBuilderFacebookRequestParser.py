@@ -2,6 +2,12 @@ import typing
 from enum import Enum
 
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
+    PixelCustomEventTypeToResult,
+    AdSetOptimizationToResult,
+    PixelCustomEventTypeToCostPerResult,
+    AdSetOptimizationToCostPerResult
+)
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
@@ -135,6 +141,18 @@ class QueryBuilderFacebookRequestParser:
                 self.__breakdowns += mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
 
                 self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
+
+        if column_type == self.QueryBuilderColumnName.COLUMN:
+            for result_group in [
+                PixelCustomEventTypeToResult,
+                AdSetOptimizationToResult,
+                PixelCustomEventTypeToCostPerResult,
+                AdSetOptimizationToCostPerResult
+            ]:
+                for result in result_group:
+                    for facebook_field in result.value.facebook_fields:
+                        if facebook_field not in self.__fields:
+                            self.__fields += result.value.facebook_fields
 
     def parse_query_conditions(self, query_conditions):
         for entry in query_conditions:

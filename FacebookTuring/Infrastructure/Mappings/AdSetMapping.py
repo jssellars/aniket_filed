@@ -14,6 +14,8 @@ from FacebookTuring.Infrastructure.Mappings.FacebookToTuringStatusMapping import
 class AdSetMapping(MapperBase):
     """Mappers between Facebook adset object and Domain adset model"""
 
+    __pixel_id = "pixel_id"
+
     class Meta:
         unknown = INCLUDE
 
@@ -38,6 +40,14 @@ class AdSetMapping(MapperBase):
             data[GraphAPIInsightsFields.campaign_name] = (data[GraphAPIInsightsFields.campaign].
                                                           get(GraphAPIInsightsFields.name, None))
         data[MiscFieldsEnum.last_updated_at] = data.get(GraphAPIInsightsFields.updated_time, None)
+
+        # Save the promoted object custom event type if there is a pixel
+        data[GraphAPIInsightsFields.custom_event_type] = None
+        promoted_event = data.get(GraphAPIInsightsFields.promoted_object, None)
+        if promoted_event:
+            if self.__pixel_id in promoted_event:
+                data[GraphAPIInsightsFields.custom_event_type] = promoted_event.get(GraphAPIInsightsFields.custom_event_type, None)
+        data[GraphAPIInsightsFields.optimization_goal] = data.get(GraphAPIInsightsFields.optimization_goal, None)
 
         # encode structure details
         data[MiscFieldsEnum.details] = BSON.encode(copy.deepcopy(data))

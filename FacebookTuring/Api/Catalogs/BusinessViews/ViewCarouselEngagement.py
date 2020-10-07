@@ -3,7 +3,7 @@ from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import 
 
 
 class ViewCarouselEngagementBase(View):
-    name = "App engagement"
+    name = "Carousel engagement"
     type = "Business"
 
 

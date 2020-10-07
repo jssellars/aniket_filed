@@ -13,7 +13,7 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.event_responses,
     FieldsMetadata.app_installs_total,
     FieldsMetadata.conversions,
-    # FieldsMetadata.thru_plays,
+    FieldsMetadata.thru_plays,
     FieldsMetadata.unique_link_clicks,
     # FieldsMetadata.post_likes,
     FieldsMetadata.post_comments,
@@ -50,5 +50,7 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.adds_to_cart_unique,
     FieldsMetadata.checkouts_initiated_unique_total,
     FieldsMetadata.website_purchases_value,
-    FieldsMetadata.photo_views
+    FieldsMetadata.photo_views,
+    FieldsMetadata.other_offline_conversions_total,
+    FieldsMetadata.landing_page_views_total
 ]

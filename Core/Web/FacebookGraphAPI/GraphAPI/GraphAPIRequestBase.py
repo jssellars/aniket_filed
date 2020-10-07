@@ -3,7 +3,7 @@ from string import Template
 
 
 class GraphAPIRequestBase:
-    _limit = 25
+    _limit = 200
     _api_version = "v7.0"
 
     def __init__(self, facebook_id=None, business_owner_permanent_token=None, fields=None, params=None,

@@ -22,3 +22,5 @@ class AdSetModel:
     start_time: str = None
     end_time: str = None
     date_added: str = None
+    custom_event_type: str = None
+    optimization_goal: str = None

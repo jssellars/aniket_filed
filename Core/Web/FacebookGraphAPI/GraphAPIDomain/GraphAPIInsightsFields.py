@@ -205,6 +205,7 @@ class GraphAPIInsightsFields:
     pacing_type = 'pacing_type'
     recommendations = 'recommendations'
     promoted_object = 'promoted_object'
+    custom_event_type = 'custom_event_type'
     source_campaign = 'source_campaign'
     special_ad_category = 'special_ad_category'
     source_campaign_id = 'source_campaign_id'

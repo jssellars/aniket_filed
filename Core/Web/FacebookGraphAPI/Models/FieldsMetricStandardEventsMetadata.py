@@ -665,6 +665,15 @@ class FieldsMetricStandardEventsMetadata:
                                         action_breakdowns=[GraphAPIInsightsFields.action_type,
                                                            GraphAPIInsightsFields.action_device],
                                         field_type=FieldType.ACTION_INSIGHT)
+    content_views = Field(name='content_views',
+                          facebook_fields=[GraphAPIInsightsFields.action_values],
+                          mapper=ActionFieldMapper(field_filter=[
+                              ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
+                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
+                                                   field_value=GraphAPIInsightsFields.content_views)]),
+                          action_breakdowns=[GraphAPIInsightsFields.action_type,
+                                             GraphAPIInsightsFields.action_device],
+                          field_type=FieldType.ACTION_INSIGHT)
     content_views_cost = Field(name='content_views_cost',
                                facebook_fields=[GraphAPIInsightsFields.cost_per_action_type],
                                mapper=ActionFieldMapper(
