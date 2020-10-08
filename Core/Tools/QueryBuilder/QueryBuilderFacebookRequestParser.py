@@ -143,16 +143,26 @@ class QueryBuilderFacebookRequestParser:
                 self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
 
         if column_type == self.QueryBuilderColumnName.COLUMN:
-            for result_group in [
-                PixelCustomEventTypeToResult,
-                AdSetOptimizationToResult,
-                PixelCustomEventTypeToCostPerResult,
-                AdSetOptimizationToCostPerResult
-            ]:
-                for result in result_group:
-                    for facebook_field in result.value.facebook_fields:
-                        if facebook_field not in self.__fields:
-                            self.__fields += result.value.facebook_fields
+            for query_column in query_columns:
+                if FieldsMetadata.results.name == query_column.Name:
+                    self.add_result_fields_to_request(
+                        field_groups=[PixelCustomEventTypeToResult, AdSetOptimizationToResult]
+                    )
+                    break
+
+            for query_column in query_columns:
+                if FieldsMetadata.cost_per_result.name == query_column.Name:
+                    self.add_result_fields_to_request(
+                        field_groups=[PixelCustomEventTypeToCostPerResult, AdSetOptimizationToCostPerResult]
+                    )
+                    break
+
+    def add_result_fields_to_request(self, field_groups):
+        for result_group in field_groups:
+            for result in result_group:
+                for facebook_field in result.value.facebook_fields:
+                    if facebook_field not in self.__fields:
+                        self.__fields += result.value.facebook_fields
 
     def parse_query_conditions(self, query_conditions):
         for entry in query_conditions:

@@ -224,7 +224,7 @@ class GraphAPIInsightsHandler:
         ) -> typing.List[typing.Dict]:
             # get insights
             t1 = Thread(
-                target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6: q.put(
+                target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6, arg7: q.put(
                     cls.get_insights_base(
                         permanent_token=arg1,
                         ad_account_id=arg2,
@@ -232,9 +232,10 @@ class GraphAPIInsightsHandler:
                         parameters=arg4,
                         requested_fields=arg5,
                         thread=arg6,
+                        level=arg7,
                     )
                 ),
-                args=(queue, permanent_token, ad_account_id, fields, parameters, requested_fields, insights_thread),
+                args=(queue, permanent_token, ad_account_id, fields, parameters, requested_fields, insights_thread, level),
             )
 
             # get structures
@@ -394,7 +395,7 @@ class GraphAPIInsightsHandler:
                     field for field in requested_fields if field.field_type != FieldType.BREAKDOWN
                 ]
                 t3 = Thread(
-                    target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6: q.put(
+                    target=lambda q, arg1, arg2, arg3, arg4, arg5, arg6, arg7: q.put(
                         cls.get_insights_base(
                             permanent_token=arg1,
                             ad_account_id=arg2,
@@ -402,6 +403,7 @@ class GraphAPIInsightsHandler:
                             parameters=arg4,
                             requested_fields=arg5,
                             thread=arg6,
+                            level=arg7,
                         )
                     ),
                     args=(
@@ -412,6 +414,7 @@ class GraphAPIInsightsHandler:
                         parameters_without_breakdowns,
                         requested_fields_without_breakdowns,
                         insights_without_breakdowns_thread,
+                        level,
                     ),
                 )
                 t3.start()
