@@ -2,34 +2,40 @@ import logging
 import os
 import typing
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 
 from Core.Tools.Logger.FileLoggers.CustomJsonFormatter import CustomJsonFormatter
 from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 
 
 class FileLogger:
-    PATH_TO_LOGS = ['..', '..', 'logs', 'Python']
-    LOGS_FOLDER = 'logs'
+    DEFAULT_LOG_ROOT = Path('logs')
+    LOCAL_LOG_DIR = 'logs'
+
     _instance = None
 
-    def __new__(self,
-                name: typing.AnyStr = None,
-                level: typing.AnyStr = None,
-                index_name: typing.AnyStr = None,
-                **kwargs):
-        if self._instance is None:
-            self._instance = super(FileLogger, self).__new__(self)
+    def __new__(
+            cls,
+            name: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            index_name: typing.AnyStr = None,
+            **kwargs
+    ):
+        if cls._instance is None:
+            cls._instance = super(FileLogger, cls).__new__(cls)
 
-            self.name = name
-            self.level = LoggingLevelEnum.get_enum_by_name(level).value
-            self.LOGS_FOLDER = os.path.join(*self.PATH_TO_LOGS, self.name, self.LOGS_FOLDER)
-            self.file_name = os.path.join(self.LOGS_FOLDER, index_name)
+            cls.name = name
+            cls.level = LoggingLevelEnum.get_enum_by_name(level).value
 
-            os.makedirs(self.LOGS_FOLDER, exist_ok=True)
+            log_root = os.environ.get('LOG_NETWORK_MOUNT_PATH')
+            log_path = Path(log_root) if log_root else cls.DEFAULT_LOG_ROOT
+            log_path = log_path / "Python" / cls.name / cls.LOCAL_LOG_DIR
 
-            self.logger = FileLogger.init_logger(self)
+            cls.file_name = log_path / index_name
+            log_path.mkdir(parents=True, exist_ok=True)
+            cls.logger = FileLogger.init_logger(cls)
 
-        return self._instance
+        return cls._instance
 
     def init_logger(self):
         # create a file handler to log to file
@@ -42,6 +48,10 @@ class FileLogger:
         # create a logger and add the file handler to it
         logger = logging.getLogger(self.name)
         logger.addHandler(handler)
+
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter("[{asctime}] [{levelname}] {message}", style="{"))
+        logger.addHandler(stream_handler)
 
         logger.setLevel(self.level)
 

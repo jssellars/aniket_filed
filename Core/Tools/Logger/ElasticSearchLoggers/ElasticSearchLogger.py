@@ -9,23 +9,23 @@ from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 class ElasticSearchLogger:
     _instance = None
 
-    def __new__(self,
+    def __new__(cls,
                 host: typing.AnyStr = None,
                 port: int = None,
                 name: typing.AnyStr = None,
                 level: typing.AnyStr = None,
                 index_name: typing.AnyStr = None,
                 **kwargs):
-        if self._instance is None:
-            self._instance = super(ElasticSearchLogger, self).__new__(self)
-            self.host = host
-            self.port = port
-            self.name = name
-            self.level = LoggingLevelEnum.get_enum_by_name(level).value
-            self.es_index = index_name
-            self.logger = ElasticSearchLogger.__init_logger(self)
+        if cls._instance is None:
+            cls._instance = super(ElasticSearchLogger, cls).__new__(cls)
+            cls.host = host
+            cls.port = port
+            cls.name = name
+            cls.level = LoggingLevelEnum.get_enum_by_name(level).value
+            cls.es_index = index_name
+            cls.logger = ElasticSearchLogger.__init_logger(cls)
 
-        return self._instance
+        return cls._instance
 
     def __init_logger(self):
         handler = CMRESHandler(hosts=[{'host': self.host, 'port': self.port}],

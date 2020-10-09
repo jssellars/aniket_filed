@@ -2,6 +2,7 @@ import json
 import os
 import typing
 from datetime import datetime
+from pathlib import Path
 from threading import Thread
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
@@ -11,43 +12,51 @@ RabbitMessageType = typing.Union[typing.AnyStr, typing.Dict]
 
 
 class RabbitFileLogger:
-    PATH_TO_LOGS = ['..', '..', 'logs', 'Python']
-    LOGS_FOLDER = 'rabbit'
+    DEFAULT_LOG_ROOT = Path('logs')
+    LOCAL_LOG_DIR = 'rabbit'
+
     _instance = None
 
     class InternalLogger:
-        def __init__(self, logs_folder: typing.AnyStr = None):
-            self.LOGS_FOLDER = logs_folder
+        def __init__(self, log_dir_path: typing.AnyStr = None):
+            self.log_dir_path = log_dir_path
 
         def info(self, message: typing.Dict = None):
             try:
                 message['type'] = LoggerMessageTypeEnum.INTEGRATION_EVENT.value
-                if isinstance(message['details']['event_body'], str) or \
-                        isinstance(message['details']['event_body'], bytes):
+                if isinstance(message['details']['event_body'], (str, bytes)):
                     message['details']['event_body'] = json.loads(message['details']['event_body'])
-                else:
-                    message['details']['event_body'] = message['details']['event_body']
-                file_name = message['details']['name'] + datetime.now().strftime(FILENAME_DATETIME) + ".json"
-                file_name = os.path.join(self.LOGS_FOLDER, file_name)
-                t = Thread(target=self.save_to_file_async, args=(file_name, message))
+                file_name = f"{message['details']['name']}{datetime.now().strftime(FILENAME_DATETIME)}.json"
+
+                file_path = self.log_dir_path / file_name
+                t = Thread(target=write_json_to_file, args=(file_path, message))
                 t.start()
             except Exception as e:
                 pass
 
-        def save_to_file_async(self, file_name, message):
-            json_file = open(file_name, 'w')
-            json.dump(message, json_file)
-            json_file.close()
+    def __new__(
+            cls,
+            name: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            index_name: typing.AnyStr = None,
+            **kwargs
+    ):
+        if cls._instance is None:
+            cls._instance = super(RabbitFileLogger, cls).__new__(cls)
 
-    def __new__(self, **kwargs):
-        if self._instance is None:
-            self._instance = super(RabbitFileLogger, self).__new__(self)
+            cls.name = name
 
-            name = kwargs.get('name', '')
-            self.LOGS_FOLDER = os.path.join(*self.PATH_TO_LOGS, name, self.LOGS_FOLDER)
+            log_root = os.environ.get('LOG_NETWORK_MOUNT_PATH')
+            log_path = Path(log_root) if log_root else cls.DEFAULT_LOG_ROOT
+            log_path = log_path / "Python" / name / cls.LOCAL_LOG_DIR
 
-            if not os.path.exists(RabbitFileLogger.LOGS_FOLDER):
-                os.makedirs(RabbitFileLogger.LOGS_FOLDER)
-            self.logger = RabbitFileLogger.InternalLogger(RabbitFileLogger.LOGS_FOLDER)
+            log_path.mkdir(parents=True, exist_ok=True)
 
-        return self._instance
+            cls.logger = cls.InternalLogger(cls.LOCAL_LOG_DIR)
+
+        return cls._instance
+
+
+def write_json_to_file(file_path, message):
+    with open(file_path, 'w') as f:
+        json.dump(message, f)
