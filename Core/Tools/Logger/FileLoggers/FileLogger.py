@@ -41,7 +41,7 @@ class FileLogger:
         # create a file handler to log to file
         suffixed_file_name = f"{self.file_name}.log"
         handler = TimedRotatingFileHandler(suffixed_file_name, when="MIDNIGHT")
-        handler.namer = lambda name: f"{name.replace(suffixed_file_name, self.file_name)}.log"
+        handler.namer = lambda name: f"{name.replace(suffixed_file_name, str(self.file_name))}.log"
         handler.setLevel(self.level)
         handler.setFormatter(CustomJsonFormatter('(level):(name)'))
 

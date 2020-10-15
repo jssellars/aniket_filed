@@ -14,9 +14,9 @@
     "logging_collection_name": "logs"
   },
   "environment": "local",
-  "api_name": "Logging",
+  "api_name": "LoggingAPI",
   "api_version": "1.0.0",
-  "service_name": "Logging",
+  "service_name": "LoggingAPI",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 40666,
