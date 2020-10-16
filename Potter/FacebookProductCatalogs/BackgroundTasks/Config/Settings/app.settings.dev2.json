@@ -33,7 +33,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Dev2.Filed.Facebook.Potter.Accounts"
+    "name": "Dev2.Filed.Facebook.Accounts"
   },
   "environment": "dev2",
   "api_name": "FacebookProductCatalogsBackgroundTasks",

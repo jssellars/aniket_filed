@@ -31,7 +31,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Staging.Filed.Facebook.Potter.Accounts"
+    "name": "Staging.Filed.Facebook.Accounts"
   },
   "environment": "staging",
   "api_name": "FacebookCampaignBuilder",

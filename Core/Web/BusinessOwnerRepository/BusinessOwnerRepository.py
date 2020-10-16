@@ -11,9 +11,9 @@ class BusinessOwnerRepository:
 
     def get_permanent_token(self, business_owner_facebook_id: typing.AnyStr = None) -> typing.AnyStr:
         results = self.__session.query(BusinessOwnerModel).filter(
-            BusinessOwnerModel.facebook_id == business_owner_facebook_id).all()
+            BusinessOwnerModel.FacebookId == business_owner_facebook_id).all()
 
-        token = [result.token for result in results]
+        token = [result.Token for result in results]
 
         self.__session.close()
 
@@ -23,12 +23,14 @@ class BusinessOwnerRepository:
     def get_permanent_token_by_page_id(self,
                                        business_owner_facebook_id: typing.AnyStr = None,
                                        page_id: typing.AnyStr = None) -> typing.AnyStr:
-        results = self.__session.query(BusinessOwnerModel). \
-            filter(BusinessOwnerModel.facebook_id == business_owner_facebook_id). \
-            filter(BusinessOwnerModel.page_id == page_id). \
-            all()
+        results = (
+            self.__session.query(BusinessOwnerModel)
+                .filter(BusinessOwnerModel.FacebookId == business_owner_facebook_id)
+                .filter(BusinessOwnerModel.PageId == page_id)
+                .all()
+        )
 
-        token = [result.token for result in results]
+        token = [result.Token for result in results]
 
         self.__session.close()
 
@@ -41,11 +43,11 @@ class BusinessOwnerRepository:
                           page_id: typing.AnyStr = None) -> typing.NoReturn:
         try:
             user_details = self.__session.query(BusinessOwnerModel). \
-                filter(BusinessOwnerModel.facebook_id == business_owner_facebook_id). \
-                filter(BusinessOwnerModel.page_id == page_id). \
+                filter(BusinessOwnerModel.FacebookId == business_owner_facebook_id). \
+                filter(BusinessOwnerModel.PageId == page_id). \
                 one()
-            user_details.token = new_permanent_business_owner_facebook_token
-            user_details.updated_at = datetime.utcnow()
+            user_details.Token = new_permanent_business_owner_facebook_token
+            user_details.UpdatedAt = datetime.utcnow()
             self.__session.commit()
             self.__session.flush()
             self.__session.close()
@@ -59,13 +61,15 @@ class BusinessOwnerRepository:
                           token: typing.AnyStr = None,
                           page_id: typing.AnyStr = None) -> typing.NoReturn:
         now = datetime.utcnow()
-        entry = BusinessOwnerModel(facebook_id=business_owner_facebook_id,
-                                   name=name,
-                                   email=email,
-                                   token=token,
-                                   page_id=page_id,
-                                   created_at=now,
-                                   updated_at=now)
+        entry = BusinessOwnerModel(
+            FacebookId=business_owner_facebook_id,
+            Name=name,
+            Email=email,
+            Token=token,
+            PageId=page_id,
+            CreatedAt=now,
+            UpdatedAt=now
+        )
         try:
             self.__session.add(entry)
             self.__session.commit()
@@ -78,8 +82,8 @@ class BusinessOwnerRepository:
                             business_owner_facebook_id: typing.AnyStr = None,
                             page_id: typing.AnyStr = None) -> bool:
         results = self.__session.query(BusinessOwnerModel). \
-            filter(BusinessOwnerModel.facebook_id == business_owner_facebook_id). \
-            filter(BusinessOwnerModel.page_id == page_id). \
+            filter(BusinessOwnerModel.FacebookId == business_owner_facebook_id). \
+            filter(BusinessOwnerModel.PageId == page_id). \
             all()
         if len(results):
             return True
@@ -99,6 +103,6 @@ class BusinessOwnerRepository:
     def delete_permissions(self, business_owner_facebook_id: typing.AnyStr) -> typing.NoReturn:
         try:
             self.__session.query(BusinessOwnerModel).filter(
-                BusinessOwnerModel.facebook_id == business_owner_facebook_id).delete()
+                BusinessOwnerModel.FacebookId == business_owner_facebook_id).delete()
         except Exception as e:
             raise e

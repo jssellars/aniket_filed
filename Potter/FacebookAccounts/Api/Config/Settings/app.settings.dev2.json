@@ -33,7 +33,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Dev2.Filed.Facebook.Potter.Accounts"
+    "name": "Dev2.Filed.Facebook.Accounts"
   },
   "external_services": {
     "users_signin_endpoint": "https://dev2-api-users.filed.com/api/v1/users/signin",

@@ -33,7 +33,7 @@
     "port": 1433,
     "username": "sa",
     "password": "Parola@20",
-    "name": "Dev.Filed.Facebook.Potter.Accounts"
+    "name": "Dev.Filed.Facebook.Accounts"
   },
   "environment": "dev",
   "api_name": "FacebookPixels",

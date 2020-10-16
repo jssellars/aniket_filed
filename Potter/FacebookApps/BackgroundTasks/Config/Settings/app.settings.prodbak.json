@@ -33,7 +33,7 @@
     "port": 1433,
     "username": "tempsa",
     "password": "KoalaBearSplitsaStair",
-    "name": "Prod.Filed.Facebook.Potter.Accounts"
+    "name": "Prod.Filed.Facebook.Accounts"
   },
   "environment": "prodbak",
   "api_name": "FacebookAppsBackgroundTasks",
