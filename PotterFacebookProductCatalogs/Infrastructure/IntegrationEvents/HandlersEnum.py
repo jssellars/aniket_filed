@@ -1,0 +1,13 @@
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
+from PotterFacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductCatalogsForBusinessRequestHandler import \
+    GetProductCatalogsForBusinessRequestHandler
+from PotterFacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductSetsForCatalogRequestHandler import \
+    GetProductSetsForCatalogRequestHandler
+from PotterFacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductsForCatalogRequestHandler import \
+    GetProductsForCatalogRequestHandler
+
+
+class HandlersEnum(EnumerationBase):
+    GET_PRODUCT_CATALOGS_FOR_BUSINESS = GetProductCatalogsForBusinessRequestHandler
+    GET_PRODUCT_SETS_FOR_CATALOG = GetProductSetsForCatalogRequestHandler
+    GET_PRODUCTS_FOR_CATALOG = GetProductsForCatalogRequestHandler

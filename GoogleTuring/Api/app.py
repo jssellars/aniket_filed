@@ -5,8 +5,6 @@ import sys
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
-else:
-    sys.path.append(r"D:\Filed\Python-Google Turing\Filed.Python")
 # ====== END OF CONFIG SECTION ====== #
 
 from flask import Flask
