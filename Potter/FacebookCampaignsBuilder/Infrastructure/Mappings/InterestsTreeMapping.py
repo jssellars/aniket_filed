@@ -11,7 +11,7 @@ class Node(dict):
         self.children = [] if not children else children
 
     def __search_node(self, name):
-        if (self.name == name):
+        if self.name == name:
             return self
 
         if not hasattr(self, 'children'):

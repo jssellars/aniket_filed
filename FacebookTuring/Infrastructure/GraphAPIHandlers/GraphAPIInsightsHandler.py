@@ -271,7 +271,7 @@ class GraphAPIInsightsHandler:
             for thread in threads:
                 thread.join()
 
-            #  get responses
+            # get responses
             responses = []
             responses += [element for element in queue.queue]
             return responses
@@ -442,7 +442,7 @@ class GraphAPIInsightsHandler:
             filter_params=filter_params,
         )
 
-        #  combine responses
+        # combine responses
         insights_response = next(filter(lambda x: insights_thread in x.keys(), responses), None)
         insights = insights_response[insights_thread][0]
         summary = insights_response[insights_thread][1]

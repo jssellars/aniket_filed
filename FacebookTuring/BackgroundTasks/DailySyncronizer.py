@@ -7,7 +7,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 def run_daily_sync():
-    #  Initialize mongo repositories for accounts journal, insights and structures
+    # Initialize mongo repositories for accounts journal, insights and structures
     account_journal_repository = TuringAdAccountJournalRepository(config=startup.mongo_config,
                                                                   database_name=startup.mongo_config.accounts_journal_database_name,
                                                                   collection_name=startup.mongo_config.accounts_journal_collection_name,

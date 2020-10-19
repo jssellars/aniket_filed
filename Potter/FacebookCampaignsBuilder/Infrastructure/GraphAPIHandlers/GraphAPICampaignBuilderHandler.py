@@ -11,102 +11,105 @@ class CampaignBudgetAllocationType(object):
 class GraphAPICampaignBuilderHandler(object):
 
     def __init__(self):
-        self.campaignTemplate = {}
+        self.campaign_template = {}
         self.campaigns = []
 
-    def _BuildCampaignCore(self, campaignTemplate):
-        if 'campaign_budget_optimization' in campaignTemplate.keys() and \
-                campaignTemplate['campaign_budget_optimization']:
-            self._BuildCampaignCoreWithBudgetOptimization(campaignTemplate)
+    def _build_campaign_core(self, campaign_template):
+        if 'campaign_budget_optimization' in campaign_template.keys() and \
+                campaign_template['campaign_budget_optimization']:
+            self._build_campaign_core_with_budget_optimization(campaign_template)
         else:
-            self._BuildCampaignCoreWithoutBudgetOptimization(campaignTemplate)
+            self._build_campaign_core_without_budget_optimization(campaign_template)
 
         # add special ad category to campaign
-        if Campaign.Field.special_ad_category in campaignTemplate.keys():
-            self.campaignTemplate[Campaign.Field.special_ad_categories] = [
-                campaignTemplate[Campaign.Field.special_ad_category]
+        if Campaign.Field.special_ad_category in campaign_template.keys():
+            self.campaign_template[Campaign.Field.special_ad_categories] = [
+                campaign_template[Campaign.Field.special_ad_category]
             ]
         else:
-            self.campaignTemplate[Campaign.Field.special_ad_categories] = []
+            self.campaign_template[Campaign.Field.special_ad_categories] = []
 
-    def _BuildCampaignCoreWithoutBudgetOptimization(self, campaignTemplate):
-        self.campaignTemplate[Campaign.Field.name] = campaignTemplate['name']
-        self.campaignTemplate[Campaign.Field.objective] = campaignTemplate['objective']
-        if 'spend_cap' in campaignTemplate.keys() and campaignTemplate['spend_cap']:
-            self.campaignTemplate[Campaign.Field.spend_cap] = int(float(campaignTemplate['spend_cap']))
-        self.campaignTemplate[Campaign.Field.buying_type] = campaignTemplate['buying_type']
-        self.campaignTemplate[Campaign.Field.status] = Campaign.Status.paused
-        self.campaignTemplate[Campaign.Field.effective_status] = Campaign.EffectiveStatus.paused
+    def _build_campaign_core_without_budget_optimization(self, campaign_template):
+        self.campaign_template[Campaign.Field.name] = campaign_template['name']
+        self.campaign_template[Campaign.Field.objective] = campaign_template['objective']
+        if 'spend_cap' in campaign_template.keys() and campaign_template['spend_cap']:
+            self.campaign_template[Campaign.Field.spend_cap] = int(float(campaign_template['spend_cap']))
+        self.campaign_template[Campaign.Field.buying_type] = campaign_template['buying_type']
+        self.campaign_template[Campaign.Field.status] = Campaign.Status.paused
+        self.campaign_template[Campaign.Field.effective_status] = Campaign.EffectiveStatus.paused
 
-    def _BuildCampaignCoreWithBudgetOptimization(self, campaignTemplate):
-        self._BuildCampaignCoreWithoutBudgetOptimization(campaignTemplate)
+    def _build_campaign_core_with_budget_optimization(self, campaign_template):
+        self._build_campaign_core_without_budget_optimization(campaign_template)
 
         # Add campaign budget optimization options to campaign core
-        campaignBudgetOptimizationDetails = campaignTemplate['campaign_budget_optimization']
+        campaign_budget_optimization_details = campaign_template['campaign_budget_optimization']
 
         # Set bid strategy
-        self.campaignTemplate[Campaign.Field.bid_strategy] = \
-            campaignBudgetOptimizationDetails['campaign_bid_strategy']['value']
+        self.campaign_template[Campaign.Field.bid_strategy] = \
+            campaign_budget_optimization_details['campaign_bid_strategy']['value']
 
         # Set delivery type
-        self.campaignTemplate[Campaign.Field.pacing_type] = [
-            campaignBudgetOptimizationDetails['delivery_type']['value']]
+        self.campaign_template[Campaign.Field.pacing_type] = [
+            campaign_budget_optimization_details['delivery_type']['value']]
 
         # Set budget
-        if campaignBudgetOptimizationDetails['budget_allocated_type']['name'] == CampaignBudgetAllocationType.lifetime:
-            self.campaignTemplate[Campaign.Field.lifetime_budget] = int(
-                campaignBudgetOptimizationDetails['amount'] * 100)
-        elif campaignBudgetOptimizationDetails['budget_allocated_type']['name'] == CampaignBudgetAllocationType.daily:
-            self.campaignTemplate[Campaign.Field.daily_budget] = int(campaignBudgetOptimizationDetails['amount'] * 100)
+        if campaign_budget_optimization_details['budget_allocated_type']['name'] == CampaignBudgetAllocationType.lifetime:
+            self.campaign_template[Campaign.Field.lifetime_budget] = int(
+                campaign_budget_optimization_details['amount'] * 100)
+        elif campaign_budget_optimization_details['budget_allocated_type']['name'] == CampaignBudgetAllocationType.daily:
+            self.campaign_template[Campaign.Field.daily_budget] = int(campaign_budget_optimization_details['amount'] * 100)
         else:
             raise ValueError(
-                'Invalid budget allocation type: %s' % campaignBudgetOptimizationDetails['budget_allocated_type'][
+                'Invalid budget allocation type: %s' % campaign_budget_optimization_details['budget_allocated_type'][
                     'name'])
 
-    def BuildCampaigns(self, campaignStructure=None, campaignTemplate=None, targetingDevices=None,
-                       targetingLocations=None):
-        self._BuildCampaignCore(campaignTemplate)
+    def build_campaigns(self,
+                        campaign_structure=None,
+                        campaign_template=None,
+                        targeting_devices=None,
+                        targeting_locations=None):
+        self._build_campaign_core(campaign_template)
 
-        # Set targetingDevices and targetingLocations to a list with a None element for the case when they come empty or None
+        # Set targeting_devices and targeting_locations to a list with a None element for the case when they come empty or None
         # This covers the usecase when the user enters no countries and no locations, but they still want to split by them.
-        if not targetingDevices:
-            targetingDevices = [None]
+        if not targeting_devices:
+            targeting_devices = [None]
 
-        if not targetingLocations:
-            targetingLocations = [None]
+        if not targeting_locations:
+            targeting_locations = [None]
 
-        if campaignStructure['split_by_device'] and campaignStructure['split_by_location']:
-            for device in targetingDevices:
-                for location in targetingLocations:
+        if campaign_structure['split_by_device'] and campaign_structure['split_by_location']:
+            for device in targeting_devices:
+                for location in targeting_locations:
                     if device is not None and location is not None:
-                        campaign = deepcopy(self.campaignTemplate)
-                        campaign[Campaign.Field.name] = self.campaignTemplate[
+                        campaign = deepcopy(self.campaign_template)
+                        campaign[Campaign.Field.name] = self.campaign_template[
                                                             Campaign.Field.name] + " - " + device.title() + " - " + location
                     elif device is None and location is not None:
-                        campaign = deepcopy(self.campaignTemplate)
-                        campaign[Campaign.Field.name] = self.campaignTemplate[Campaign.Field.name] + " - " + location
+                        campaign = deepcopy(self.campaign_template)
+                        campaign[Campaign.Field.name] = self.campaign_template[Campaign.Field.name] + " - " + location
                     elif device is not None and location is None:
-                        campaign = deepcopy(self.campaignTemplate)
-                        campaign[Campaign.Field.name] = self.campaignTemplate[Campaign.Field.name] + " - " + device
+                        campaign = deepcopy(self.campaign_template)
+                        campaign[Campaign.Field.name] = self.campaign_template[Campaign.Field.name] + " - " + device
                     else:
                         raise ValueError('Missing device and location split: (%s, %s)' % (device, location))
                     self.campaigns.append(campaign)
-        elif campaignStructure['split_by_device'] and not campaignStructure['split_by_location']:
-            for device in targetingDevices:
+        elif campaign_structure['split_by_device'] and not campaign_structure['split_by_location']:
+            for device in targeting_devices:
                 if device is not None:
-                    campaign = self.campaignTemplate
-                    campaign[Campaign.Field.name] = self.campaignTemplate[Campaign.Field.name] + " - " + device.title()
-                    self.campaigns.append(self.campaignTemplate)
+                    campaign = self.campaign_template
+                    campaign[Campaign.Field.name] = self.campaign_template[Campaign.Field.name] + " - " + device.title()
+                    self.campaigns.append(self.campaign_template)
                 else:
                     raise ValueError('Missing device to split: %s' % device)
-        elif not campaignStructure['split_by_device'] and campaignStructure['split_by_location']:
-            for location in targetingLocations:
+        elif not campaign_structure['split_by_device'] and campaign_structure['split_by_location']:
+            for location in targeting_locations:
                 if location is not None:
-                    campaign = self.campaignTemplate
-                    campaign[Campaign.Field.name] = self.campaignTemplate[
+                    campaign = self.campaign_template
+                    campaign[Campaign.Field.name] = self.campaign_template[
                                                         Campaign.Field.name] + " - " + location.capitalize()
-                    self.campaigns.append(self.campaignTemplate)
+                    self.campaigns.append(self.campaign_template)
                 else:
                     raise ValueError('Missing location to split: %s' % location)
         else:
-            self.campaigns.append(deepcopy(self.campaignTemplate))
+            self.campaigns.append(deepcopy(self.campaign_template))

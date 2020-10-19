@@ -10,7 +10,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 def turing_data_sync_handler(request_handler=None, message_body=None, startup=None, logger=None, rabbit_logger=None):
-    #  Initialize mongo repositories for accounts journal, insights and structures
+    # Initialize mongo repositories for accounts journal, insights and structures
     account_journal_repository = TuringAdAccountJournalRepository(config=startup.mongo_config,
                                                                   database_name=startup.mongo_config.accounts_journal_database_name,
                                                                   collection_name=startup.mongo_config.accounts_journal_collection_name,
@@ -22,7 +22,7 @@ def turing_data_sync_handler(request_handler=None, message_body=None, startup=No
                                                   database_name=startup.mongo_config.structures_database_name,
                                                   logger=logger)
 
-    #  initialize orchestrator
+    # Initialize orchestrator
     orchestrator = (Orchestrator().
                     set_account_journal_repository(account_journal_repository).
                     set_insights_repository(insights_repository).

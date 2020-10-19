@@ -18,225 +18,225 @@ class GraphAPIAdBuilderHandler(object):
 
     def __init__(self):
         self.ad = None
-        self.adCreativeLinkData = None
-        self.adCreativeFacebookId = None
+        self.ad_creative_link_data = None
+        self.ad_creative_facebook_id = None
 
-    def _buildImagedAdCreativeLinkData(self, adTemplate, adAccountId=None):
-        self.adCreativeLinkData = AdCreativeLinkData()
-        if 'primary_text' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.message] = adTemplate['primary_text']
+    def _build_imaged_ad_creative_link_data(self, ad_template, ad_account_id=None):
+        self.ad_creative_link_data = AdCreativeLinkData()
+        if 'primary_text' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.message] = ad_template['primary_text']
 
-        if 'display_link' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.caption] = adTemplate['display_link']
+        if 'display_link' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.caption] = ad_template['display_link']
 
-        if 'website_url' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.link] = adTemplate['website_url']
-        elif 'deep_link' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.link] = adTemplate['deep_link']
+        if 'website_url' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.link] = ad_template['website_url']
+        elif 'deep_link' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.link] = ad_template['deep_link']
 
-        if 'description' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.description] = adTemplate['description']
+        if 'description' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.description] = ad_template['description']
 
-        if 'headline' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.name] = adTemplate['headline']
+        if 'headline' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.name] = ad_template['headline']
 
         call_to_action = {
-            'type': adTemplate['call_to_action']['value'],
+            'type': ad_template['call_to_action']['value'],
             'value': {
-                'link': adTemplate['website_url']
+                'link': ad_template['website_url']
             },
         }
 
-        if 'deep_link' in adTemplate.keys():
-            call_to_action['value']['app_link'] = adTemplate['deep_link']
+        if 'deep_link' in ad_template.keys():
+            call_to_action['value']['app_link'] = ad_template['deep_link']
 
-        self.adCreativeLinkData[AdCreativeLinkData.Field.call_to_action] = call_to_action
+        self.ad_creative_link_data[AdCreativeLinkData.Field.call_to_action] = call_to_action
 
         # Get image hash and attach to creative
-        adImage = self._GenerateImageHash(adAccountId, adTemplate['media_url'])
-        self.adCreativeLinkData[AdCreativeLinkData.Field.image_hash] = adImage[AdImage.Field.hash]
+        ad_image = self._generate_image_hash(ad_account_id, ad_template['media_url'])
+        self.ad_creative_link_data[AdCreativeLinkData.Field.image_hash] = ad_image[AdImage.Field.hash]
 
-    def _buildVideoAdCreativeLinkData(self, adTemplate, adAccountId=None):
-        self._buildImagedAdCreativeLinkData(adTemplate, adAccountId)
+    def _build_video_ad_creative_link_data(self, ad_template, ad_account_id=None):
+        self._build_video_ad_creative_link_data(ad_template, ad_account_id)
 
-    def _buildCarouselAdCreativeLinkData(self, adTemplate, adAccountId=None):
-        self.adCreativeLinkData = AdCreativeLinkData()
-        self.adCreativeLinkData[AdCreativeLinkData.Field.child_attachments] = []
-        self.adCreativeLinkData[AdCreativeLinkData.Field.message] = adTemplate['primary_text']
+    def _build_carousel_ad_creative_link_data(self, ad_template, ad_account_id=None):
+        self.ad_creative_link_data = AdCreativeLinkData()
+        self.ad_creative_link_data[AdCreativeLinkData.Field.child_attachments] = []
+        self.ad_creative_link_data[AdCreativeLinkData.Field.message] = ad_template['primary_text']
 
-        if 'deep_link' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.link] = adTemplate['deep_link']
-        elif 'see_more_url' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.link] = adTemplate['see_more_url']
-        elif 'website_url' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.link] = adTemplate['website_url']
+        if 'deep_link' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.link] = ad_template['deep_link']
+        elif 'see_more_url' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.link] = ad_template['see_more_url']
+        elif 'website_url' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.link] = ad_template['website_url']
 
-        if 'see_more_display_link' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.caption] = adTemplate['see_more_display_link']
+        if 'see_more_display_link' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.caption] = ad_template['see_more_display_link']
 
-        if 'description' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.description] = adTemplate['description']
+        if 'description' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.description] = ad_template['description']
 
-        if 'headline' in adTemplate.keys():
-            self.adCreativeLinkData[AdCreativeLinkData.Field.name] = adTemplate['headline']
+        if 'headline' in ad_template.keys():
+            self.ad_creative_link_data[AdCreativeLinkData.Field.name] = ad_template['headline']
 
         # Create carousel cards
-        for cardNumber, adTemplateCarouselFrame in enumerate(adTemplate['cards']):
-            adCreativeLinkDataChildAttachment = AdCreativeLinkDataChildAttachment()
-            if 'website_url' in adTemplateCarouselFrame.keys():
-                adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.link] = \
-                    adTemplateCarouselFrame['website_url']
-            elif 'deep_link' in adTemplateCarouselFrame.keys():
-                adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.link] = \
-                    adTemplateCarouselFrame['deep_link']
+        for card_number, ad_template_carousel_frame in enumerate(ad_template['cards']):
+            ad_creative_link_data_child_attachment = AdCreativeLinkDataChildAttachment()
+            if 'website_url' in ad_template_carousel_frame.keys():
+                ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.link] = \
+                    ad_template_carousel_frame['website_url']
+            elif 'deep_link' in ad_template_carousel_frame.keys():
+                ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.link] = \
+                    ad_template_carousel_frame['deep_link']
 
-            if 'headline' in adTemplateCarouselFrame.keys():
-                adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.name] = \
-                    adTemplateCarouselFrame['headline']
+            if 'headline' in ad_template_carousel_frame.keys():
+                ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.name] = \
+                    ad_template_carousel_frame['headline']
 
-            if 'description' in adTemplateCarouselFrame.keys():
-                adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.description] = \
-                    adTemplateCarouselFrame['description']
+            if 'description' in ad_template_carousel_frame.keys():
+                ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.description] = \
+                    ad_template_carousel_frame['description']
 
-            if 'video_id' in adTemplateCarouselFrame.keys() and adTemplateCarouselFrame['video_id']:
-                adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.video_id] = \
-                    adTemplateCarouselFrame['video_id']
-            elif 'media_url' in adTemplateCarouselFrame.keys() and adTemplateCarouselFrame['media_url']:
+            if 'video_id' in ad_template_carousel_frame.keys() and ad_template_carousel_frame['video_id']:
+                ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.video_id] = \
+                    ad_template_carousel_frame['video_id']
+            elif 'media_url' in ad_template_carousel_frame.keys() and ad_template_carousel_frame['media_url']:
                 # Get image hash and attach to creative
-                adImage = self._GenerateImageHash(adAccountId, adTemplateCarouselFrame['media_url'])
-                adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.image_hash] = adImage[
+                ad_image = self._generate_image_hash(ad_account_id, ad_template_carousel_frame['media_url'])
+                ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.image_hash] = ad_image[
                     AdImage.Field.hash]
             else:
-                raise ValueError('Missing media from carousel card number %s' % cardNumber)
+                raise ValueError('Missing media from carousel card number %s' % card_number)
 
             call_to_action = {
-                'type': adTemplate['call_to_action']['value'],
+                'type': ad_template['call_to_action']['value'],
                 'value': {
-                    'link': adTemplateCarouselFrame['website_url']
+                    'link': ad_template_carousel_frame['website_url']
                 },
             }
 
-            if 'deep_link' in adTemplateCarouselFrame.keys():
-                call_to_action['value']['app_link'] = adTemplateCarouselFrame['deep_link']
+            if 'deep_link' in ad_template_carousel_frame.keys():
+                call_to_action['value']['app_link'] = ad_template_carousel_frame['deep_link']
 
-            adCreativeLinkDataChildAttachment[AdCreativeLinkDataChildAttachment.Field.call_to_action] = call_to_action
+            ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.call_to_action] = call_to_action
 
-            self.adCreativeLinkData[AdCreativeLinkData.Field.child_attachments].append(
-                adCreativeLinkDataChildAttachment)
+            self.ad_creative_link_data[AdCreativeLinkData.Field.child_attachments].append(
+                ad_creative_link_data_child_attachment)
 
-    def _buildImageAdCreative(self, adAccountId, adTemplate, pageFacebookId, instagramAccountFacebookId):
-        objectStorySpec = AdCreativeObjectStorySpec()
-        objectStorySpec[AdCreativeObjectStorySpec.Field.page_id] = pageFacebookId
-        if instagramAccountFacebookId:
-            objectStorySpec[AdCreativeObjectStorySpec.Field.instagram_actor_id] = instagramAccountFacebookId
+    def _build_image_ad_creative(self, ad_account_id, ad_template, page_facebook_id, instagram_account_facebook_id):
+        object_story_spec = AdCreativeObjectStorySpec()
+        object_story_spec[AdCreativeObjectStorySpec.Field.page_id] = page_facebook_id
+        if instagram_account_facebook_id:
+            object_story_spec[AdCreativeObjectStorySpec.Field.instagram_actor_id] = instagram_account_facebook_id
 
-        objectStorySpec[AdCreativeObjectStorySpec.Field.link_data] = self.adCreativeLinkData
+        object_story_spec[AdCreativeObjectStorySpec.Field.link_data] = self.ad_creative_link_data
 
-        creative = AdCreative(parent_id=adAccountId)
-        creative[AdCreative.Field.name] = adTemplate['headline']
-        creative[AdCreative.Field.object_story_spec] = objectStorySpec
+        creative = AdCreative(parent_id=ad_account_id)
+        creative[AdCreative.Field.name] = ad_template['headline']
+        creative[AdCreative.Field.object_story_spec] = object_story_spec
 
-        if 'display_link' in adTemplate.keys():
-            creative[AdCreative.Field.link_url] = adTemplate['display_link']
-        elif 'deep_link' in adTemplate.keys():
-            creative[AdCreative.Field.link_deep_link_url] = adTemplate['deep_link']
+        if 'display_link' in ad_template.keys():
+            creative[AdCreative.Field.link_url] = ad_template['display_link']
+        elif 'deep_link' in ad_template.keys():
+            creative[AdCreative.Field.link_deep_link_url] = ad_template['deep_link']
 
-        adCreative = creative.remote_create()
+        ad_creative = creative.remote_create()
 
-        self.adCreativeFacebookId = adCreative.get_id()
+        self.ad_creative_facebook_id = ad_creative.get_id()
 
     @staticmethod
-    def _BuildAdVideo(adAccountId, mediaUrl):
-        adAccount = AdAccount(fbid=adAccountId)
-        params = {'file_url': mediaUrl}
-        adVideoFacebookId = adAccount.create_ad_video(params=params)
-        return adVideoFacebookId
+    def _build_ad_video(ad_account_id, media_url):
+        ad_account = AdAccount(fbid=ad_account_id)
+        params = {'file_url': media_url}
+        ad_video_facebook_id = ad_account.create_ad_video(params=params)
+        return ad_video_facebook_id
 
-    def _buildVideoAdCreative(self, adAccountId, adTemplate, pageFacebookId, instagramFacebookId):
-        #  Upload video on FB
-        if not adTemplate['video_id']:
-            adVideoFacebookId = self._BuildAdVideo(adAccountId, adTemplate['media_url'])
+    def _build_video_ad_creative(self, ad_account_id, ad_template, page_facebook_id, instagram_facebook_id):
+        # Upload video on FB
+        if not ad_template['video_id']:
+            ad_video_facebook_id = self._build_ad_video(ad_account_id, ad_template['media_url'])
         else:
-            adVideoFacebookId = adTemplate['video_id']
+            ad_video_facebook_id = ad_template['video_id']
 
-        objectStorySpec = AdCreativeObjectStorySpec()
-        objectStorySpec[AdCreativeObjectStorySpec.Field.page_id] = pageFacebookId
-        if instagramFacebookId:
-            objectStorySpec[AdCreativeObjectStorySpec.Field.instagram_actor_id] = instagramFacebookId
+        object_story_spec = AdCreativeObjectStorySpec()
+        object_story_spec[AdCreativeObjectStorySpec.Field.page_id] = page_facebook_id
+        if instagram_facebook_id:
+            object_story_spec[AdCreativeObjectStorySpec.Field.instagram_actor_id] = instagram_facebook_id
 
-        objectStorySpec[AdCreativeObjectStorySpec.Field.link_data] = self.adCreativeLinkData
+        object_story_spec[AdCreativeObjectStorySpec.Field.link_data] = self.ad_creative_link_data
 
-        creative = AdCreative(parent_id=adAccountId)
-        creative[AdCreative.Field.title] = adTemplate['headline']
-        creative[AdCreative.Field.video_id] = adVideoFacebookId  # TODO: might need to change depending on FB response
-        creative[AdCreative.Field.body] = adTemplate['primary_text']
-        creative[AdCreative.Field.object_story_spec] = objectStorySpec
+        creative = AdCreative(parent_id=ad_account_id)
+        creative[AdCreative.Field.title] = ad_template['headline']
+        creative[AdCreative.Field.video_id] = ad_video_facebook_id  # TODO: might need to change depending on FB response
+        creative[AdCreative.Field.body] = ad_template['primary_text']
+        creative[AdCreative.Field.object_story_spec] = object_story_spec
 
-        if 'display_link' in adTemplate.keys():
-            creative[AdCreative.Field.link_url] = adTemplate['display_link']
-        elif 'deep_link' in adTemplate.keys():
-            creative[AdCreative.Field.link_deep_link_url] = adTemplate['deep_link']
+        if 'display_link' in ad_template.keys():
+            creative[AdCreative.Field.link_url] = ad_template['display_link']
+        elif 'deep_link' in ad_template.keys():
+            creative[AdCreative.Field.link_deep_link_url] = ad_template['deep_link']
 
-        adCreative = creative.remote_create()
+        ad_creative = creative.remote_create()
 
-        self.adCreativeFacebookId = adCreative.get_id()
+        self.ad_creative_facebook_id = ad_creative.get_id()
 
-    def _buildCarouselAdCreative(self, adAccountId, adTemplate, pageFacebookId, instagramFacebookId):
-        objectStorySpec = AdCreativeObjectStorySpec()
-        objectStorySpec[AdCreativeObjectStorySpec.Field.page_id] = pageFacebookId
-        if instagramFacebookId:
-            objectStorySpec[AdCreativeObjectStorySpec.Field.instagram_actor_id] = instagramFacebookId
+    def _build_carousel_ad_creative(self, ad_account_id, ad_template, page_facebook_id, instagram_facebook_id):
+        object_story_spec = AdCreativeObjectStorySpec()
+        object_story_spec[AdCreativeObjectStorySpec.Field.page_id] = page_facebook_id
+        if instagram_facebook_id:
+            object_story_spec[AdCreativeObjectStorySpec.Field.instagram_actor_id] = instagram_facebook_id
 
         # Details for each ad (image, url, etc)
-        objectStorySpec[AdCreativeObjectStorySpec.Field.link_data] = self.adCreativeLinkData
+        object_story_spec[AdCreativeObjectStorySpec.Field.link_data] = self.ad_creative_link_data
 
-        creative = AdCreative(parent_id=adAccountId)
-        creative[AdCreative.Field.body] = adTemplate['primary_text']
-        creative[AdCreative.Field.object_story_spec] = objectStorySpec
+        creative = AdCreative(parent_id=ad_account_id)
+        creative[AdCreative.Field.body] = ad_template['primary_text']
+        creative[AdCreative.Field.object_story_spec] = object_story_spec
 
-        if 'display_link' in adTemplate.keys():
-            creative[AdCreative.Field.link_url] = adTemplate['display_link']
-        elif 'deep_link' in adTemplate.keys():
-            creative[AdCreative.Field.link_deep_link_url] = adTemplate['deep_link']
+        if 'display_link' in ad_template.keys():
+            creative[AdCreative.Field.link_url] = ad_template['display_link']
+        elif 'deep_link' in ad_template.keys():
+            creative[AdCreative.Field.link_deep_link_url] = ad_template['deep_link']
 
-        adCreative = creative.remote_create()
+        ad_creative = creative.remote_create()
 
-        self.adCreativeFacebookId = adCreative.get_id()
+        self.ad_creative_facebook_id = ad_creative.get_id()
 
-    def _buildAdCreative(self, adAccountId, adTemplate, pageFacebookId, instagramFacebookId):
-        if adTemplate['ad_format'] == FiledAdFormat.image:
-            self._buildImagedAdCreativeLinkData(adTemplate, adAccountId)
-            self._buildImageAdCreative(adAccountId, adTemplate, pageFacebookId, instagramFacebookId)
-        elif adTemplate['ad_format'] == FiledAdFormat.video:
-            self._buildVideoAdCreativeLinkData(adTemplate, adAccountId)
-            self._buildVideoAdCreative(adAccountId, adTemplate, pageFacebookId, instagramFacebookId)
-        elif adTemplate['ad_format'] == FiledAdFormat.carousel:
-            self._buildCarouselAdCreativeLinkData(adTemplate, adAccountId)
-            self._buildCarouselAdCreative(adAccountId, adTemplate, pageFacebookId, instagramFacebookId)
+    def _build_ad_creative(self, ad_account_id, ad_template, page_facebook_id, instagram_facebook_id):
+        if ad_template['ad_format'] == FiledAdFormat.image:
+            self._build_imaged_ad_creative_link_data(ad_template, ad_account_id)
+            self._build_image_ad_creative(ad_account_id, ad_template, page_facebook_id, instagram_facebook_id)
+        elif ad_template['ad_format'] == FiledAdFormat.video:
+            self._build_video_ad_creative_link_data(ad_template, ad_account_id)
+            self._build_video_ad_creative(ad_account_id, ad_template, page_facebook_id, instagram_facebook_id)
+        elif ad_template['ad_format'] == FiledAdFormat.carousel:
+            self._build_carousel_ad_creative_link_data(ad_template, ad_account_id)
+            self._build_carousel_ad_creative(ad_account_id, ad_template, page_facebook_id, instagram_facebook_id)
 
-    def buildAd(self, adAccountFacebookId, adSetFacebookId, adTemplate, pageFacebookId, instagramFacebookId):
-        self._buildAdCreative(adAccountFacebookId, adTemplate, pageFacebookId, instagramFacebookId)
+    def build_ad(self, ad_account_facebook_id, ad_set_facebook_id, ad_template, page_facebook_id, instagram_facebook_id):
+        self._build_ad_creative(ad_account_facebook_id, ad_template, page_facebook_id, instagram_facebook_id)
 
         self.ad = {Ad.Field.name: 'Test Ad',
-                   Ad.Field.adset_id: adSetFacebookId,
-                   Ad.Field.creative: {'creative_id': self.adCreativeFacebookId},
-                   Ad.Field.adset: adSetFacebookId,
+                   Ad.Field.adset_id: ad_set_facebook_id,
+                   Ad.Field.creative: {'creative_id': self.ad_creative_facebook_id},
+                   Ad.Field.adset: ad_set_facebook_id,
                    Ad.Field.status: Ad.Status.paused,
                    Ad.Field.effective_status: Ad.EffectiveStatus.paused}
 
-        if 'tracking_spec' in adTemplate.keys() and adTemplate['tracking_spec']:
-            self.ad[Ad.Field.tracking_specs] = adTemplate['tracking_spec']
+        if 'tracking_spec' in ad_template.keys() and ad_template['tracking_spec']:
+            self.ad[Ad.Field.tracking_specs] = ad_template['tracking_spec']
 
     @staticmethod
-    def _GenerateImageHash(adAccountId, imageUrl):
+    def _generate_image_hash(ad_account_id, image_url):
         # Download image from URL
         image_file = open('adCreativeImage.jpg', 'wb')
-        image_file.write(requests.get(imageUrl).content)
+        image_file.write(requests.get(image_url).content)
         image_file.close()
 
         # Create AdImage 
-        adImage = AdImage(parent_id=adAccountId)
-        adImage[AdImage.Field.filename] = 'adCreativeImage.jpg'
-        adImage.remote_create()
+        ad_image = AdImage(parent_id=ad_account_id)
+        ad_image[AdImage.Field.filename] = 'adCreativeImage.jpg'
+        ad_image.remote_create()
 
-        return adImage
+        return ad_image

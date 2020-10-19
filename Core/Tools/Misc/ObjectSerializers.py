@@ -2,7 +2,13 @@ import json
 import typing
 from dataclasses import asdict
 
+import humps
+
 from Core.Tools.Misc.ObjectEncoder import ObjectEncoder
+
+
+def object_to_camelized_dict(data: typing.Any = None) -> typing.Dict:
+    return humps.camelize(object_to_json(data))
 
 
 def object_to_json(data: typing.Any = None) -> typing.Dict:
