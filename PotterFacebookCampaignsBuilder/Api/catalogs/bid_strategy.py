@@ -12,7 +12,7 @@ lowest_cost_with_bid_cap = Node(Campaign.BidStrategy.lowest_cost_with_bid_cap, s
 target_cost = Node(Campaign.BidStrategy.target_cost, standard_delivery)
 
 
-class CampaignBidStrategy(Base):
+class BidStrategy(Base):
     video_views = objectives.video_views.with_children(lowest_cost)
     lead_generation = objectives.lead_generation.with_children(lowest_cost)
     messages = objectives.messages.with_children(lowest_cost)

@@ -13,12 +13,14 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from PotterFacebookCampaignsBuilder.Api.catalogs import (
     special_ad_category,
+    special_ad_categories,
     objectives,
-    campaign_bid_strategy,
+    bid_strategy,
     placement,
     cta,
     ad_format,
     ad_preview_format,
+    device_type,
     app_store,
 )
 from PotterFacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
@@ -130,18 +132,19 @@ class BudgetValidation:
 
 class SmartCreateCatalogs:
     def get(self):
-        data = dict(
-            SpecialAdCategory=special_ad_category.SpecialAdCategory(),
-            Objectives=objectives.Objectives(),
-            BidStrategy=campaign_bid_strategy.CampaignBidStrategy(),
-            Placement=placement.Placement(),
-            CTA=cta.CTA(),
-            AdFormat=ad_format.AdFormat(),
-            AdPreviewFormat=ad_preview_format.AdPreviewFormat(),
-            AppStore=app_store.AppStore(),
-        )
-
-        return {k: v.to_json() for k, v in data.items()}
+        classes = [
+            special_ad_category.SpecialAdCategory,
+            special_ad_categories.SpecialAdCategories,
+            objectives.Objectives,
+            bid_strategy.BidStrategy,
+            placement.Placement,
+            cta.CTA,
+            ad_format.AdFormat,
+            ad_preview_format.AdPreviewFormat,
+            device_type.DeviceType,
+            app_store.AppStore,
+        ]
+        return {class_.__name__: class_().to_json() for class_ in classes}
 
 
 class TargetingSearchBase:
