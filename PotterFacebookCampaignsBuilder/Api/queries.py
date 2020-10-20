@@ -19,6 +19,7 @@ from PotterFacebookCampaignsBuilder.Api.catalogs import (
     cta,
     ad_format,
     ad_preview_format,
+    app_store,
 )
 from PotterFacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
@@ -137,6 +138,7 @@ class SmartCreateCatalogs:
             CTA=cta.CTA(),
             AdFormat=ad_format.AdFormat(),
             AdPreviewFormat=ad_preview_format.AdPreviewFormat(),
+            AppStore=app_store.AppStore(),
         )
 
         return {k: v.to_json() for k, v in data.items()}
