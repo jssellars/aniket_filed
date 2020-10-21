@@ -28,6 +28,7 @@ class BusinessDetails:
 class BusinessOwnerPreferencesChangedEvent:
     user_filed_id: int = None
     id: typing.AnyStr = None
+    user_type: typing.AnyStr = None
     status: BusinessOwnerStatus = field(default_factory=dict)
     ad_accounts: typing.List[AdAccountDetails] = field(default_factory=list)
     businesses: typing.List[BusinessDetails] = field(default_factory=list)

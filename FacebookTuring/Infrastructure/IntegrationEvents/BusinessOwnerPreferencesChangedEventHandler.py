@@ -6,6 +6,7 @@ from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesCha
     BusinessOwnerPreferencesChangedEvent
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEventMapping import \
     BusinessOwnerPreferencesChangedEventMapping
+from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
 
 
 class BusinessOwnerPreferencesChangedEventHandler:
@@ -54,6 +55,9 @@ class BusinessOwnerPreferencesChangedEventHandler:
 
         # start syncing
         try:
-            cls.__orchestrator.run(business_owner_id=message.id)
+            user_type = UserTypeEnum.get_enum_by_name(message.user_type)
+            if not user_type:
+                user_type = UserTypeEnum.PAYED
+            cls.__orchestrator.run(business_owner_id=message.id, user_type=user_type)
         except Exception as e:
             raise e

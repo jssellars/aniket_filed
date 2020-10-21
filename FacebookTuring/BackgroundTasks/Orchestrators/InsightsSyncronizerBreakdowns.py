@@ -3,7 +3,7 @@ from enum import Enum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 
-class InsightsSyncronizerBreakdownEnum(Enum):
+class InsightsSynchronizerBreakdownEnum(Enum):
     NONE = FieldsMetadata.breakdown_none
     # AGE = FieldsMetadata.age_breakdown
     # GENDER = FieldsMetadata.gender_breakdown
@@ -17,7 +17,7 @@ class InsightsSyncronizerBreakdownEnum(Enum):
     # REGION = FieldsMetadata.region
 
 
-class InsightsSyncronizerActionBreakdownEnum(Enum):
+class InsightsSynchronizerActionBreakdownEnum(Enum):
     NONE = FieldsMetadata.action_none
     # Commented as these action breakdowns are not relevant at this stage of the project. Haven't deleted it as they
     # might become relevant in the future.

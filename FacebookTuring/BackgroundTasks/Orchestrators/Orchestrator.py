@@ -6,28 +6,32 @@ from datetime import datetime
 from threading import Thread
 
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.Startup import startup
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
-from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import \
-    UpdatedBusinessOwnersDetails, \
-    FacebookTuringDataSyncCompletedEvent
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
-    TuringAdAccountJournalRepository
+from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
+    UpdatedBusinessOwnersDetails,
+    FacebookTuringDataSyncCompletedEvent,
+)
+from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
+    TuringAdAccountJournalRepository,
+)
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 class Orchestrator:
     ACCOUNTS_PER_THREAD = 0.20
 
-    def __init__(self,
-                 insights_repository: TuringMongoRepository = None,
-                 structures_repository: TuringMongoRepository = None,
-                 account_journal_repository: TuringAdAccountJournalRepository = None):
+    def __init__(
+            self,
+            insights_repository: TuringMongoRepository = None,
+            structures_repository: TuringMongoRepository = None,
+            account_journal_repository: TuringAdAccountJournalRepository = None,
+    ):
 
         self.__insights_repository = insights_repository
         self.__structures_repository = structures_repository
@@ -62,15 +66,17 @@ class Orchestrator:
         self.__reporter = reporter
         return self
 
-    def run(self, business_owner_id: typing.AnyStr = None):
+    def run(self, business_owner_id: typing.AnyStr = None, user_type: UserTypeEnum = None):
         start_sync_date = datetime.now()
         # get latest ad account state for all BO
         ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active(
-            business_owner_id=business_owner_id)
+            business_owner_id=business_owner_id
+        )
 
         # mark ad accounts currently being synced as sync_status = IN_PROGRESS
-        self.__account_journal_repository.change_account_sync_status(ad_accounts_details,
-                                                                     AdAccountSyncStatusEnum.IN_PROGRESS)
+        self.__account_journal_repository.change_account_sync_status(
+            ad_accounts_details, AdAccountSyncStatusEnum.IN_PROGRESS
+        )
 
         # group ad accounts by business owner id
         business_owners = self.__group_by_business_owner_id(ad_accounts_details)
@@ -80,12 +86,19 @@ class Orchestrator:
             tasks = list()
             step = math.ceil(self.ACCOUNTS_PER_THREAD * len(business_owner_details))
             for index in range(0, len(business_owner_details), step):
-                entry = business_owner_details[index:index + step]
-                tasks.append(Thread(target=sync,
-                                    args=(self.__structures_repository.new_structures_repository(),
-                                          self.__insights_repository.new_insights_repository(),
-                                          self.__account_journal_repository.new_ad_account_journal_repository(),
-                                          entry)))
+                entry = business_owner_details[index: index + step]
+                tasks.append(
+                    Thread(
+                        target=sync,
+                        args=(
+                            self.__structures_repository.new_structures_repository(),
+                            self.__insights_repository.new_insights_repository(),
+                            self.__account_journal_repository.new_ad_account_journal_repository(),
+                            entry,
+                            user_type,
+                        ),
+                    )
+                )
             for task in tasks:
                 task.start()
             # publish event with updated ad accounts to Facebook Dexter
@@ -110,9 +123,11 @@ class Orchestrator:
 
         # compile and send sync status report
         if ad_accounts_details:
-            self.__reporter = SyncStatusReporter(account_journal_repository=self.__account_journal_repository,
-                                                 structures_repository=self.__structures_repository,
-                                                 logger=self.__logger)
+            self.__reporter = SyncStatusReporter(
+                account_journal_repository=self.__account_journal_repository,
+                structures_repository=self.__structures_repository,
+                logger=self.__logger,
+            )
 
             sync_report = self.__reporter.compile_report()
             self.__reporter.commit_report(sync_report)
@@ -124,27 +139,29 @@ class Orchestrator:
             business_owner_details[entry[MiscFieldsEnum.business_owner_id]].append(copy.deepcopy(entry))
         return business_owner_details
 
-    def __publish_business_owner_synced_event(self,
-                                              business_owner_id: typing.AnyStr = None,
-                                              sync_start_date: datetime = None) -> typing.NoReturn:
+    def __publish_business_owner_synced_event(
+            self, business_owner_id: typing.AnyStr = None, sync_start_date: datetime = None
+    ) -> None:
         account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id, sync_start_date)
-        business_owner_updated_details = UpdatedBusinessOwnersDetails(business_owner_facebook_id=business_owner_id,
-                                                                      ad_account_ids=account_ids)
+        business_owner_updated_details = UpdatedBusinessOwnersDetails(
+            business_owner_facebook_id=business_owner_id, ad_account_ids=account_ids
+        )
         business_owner_synced_event = FacebookTuringDataSyncCompletedEvent(
-            business_owners=[business_owner_updated_details])
+            business_owners=[business_owner_updated_details]
+        )
         try:
-            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
-                                             startup.exchange_details.name,
-                                             startup.exchange_details.outbound_queue.key)
+            rabbitmq_client = RabbitMqClient(
+                startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
+            )
             rabbitmq_client.publish(business_owner_synced_event)
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-                                    name=business_owner_synced_event.message_type,
-                                    extra_data={
-                                        "event_body": rabbitmq_client.serialize_message(business_owner_synced_event)
-                                    })
+            log = LoggerMessageBase(
+                mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+                name=business_owner_synced_event.message_type,
+                extra_data={"event_body": rabbitmq_client.serialize_message(business_owner_synced_event)},
+            )
             self.__rabbit_logger.logger.info(log.to_dict())
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name=business_owner_synced_event.message_type,
-                                    description=str(e))
+            log = LoggerMessageBase(
+                mtype=LoggerMessageTypeEnum.ERROR, name=business_owner_synced_event.message_type, description=str(e)
+            )
             self.__logger.logger.exception(log.to_dict())

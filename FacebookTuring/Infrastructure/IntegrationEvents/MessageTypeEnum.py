@@ -5,3 +5,8 @@ class RequestTypeEnum(EnumerationBase):
     BUSINESS_OWNER_UPDATE_EVENT = "BusinessOwnerPreferencesUpdatedEvent"
     BUSINESS_OWNER_CREATED_EVENT = "BusinessOwnerCreatedEvent"
     CAMPAIGN_CREATED_EVENT = "CampaignCreatedEvent"
+
+
+class UserTypeEnum(EnumerationBase):
+    FREEMIUM = "FreemiumUser"
+    PAYED = "PayedUser"

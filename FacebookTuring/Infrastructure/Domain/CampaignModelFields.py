@@ -3,6 +3,7 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 
+
 class CampaignModelFields(StructureModelFieldBase):
     """Lists of fields to sync from Facebook"""
 
@@ -68,4 +69,3 @@ class CampaignModelFields(StructureModelFieldBase):
         MiscFieldsEnum.end_time,
         MiscFieldsEnum.date_added
     ]
-

@@ -31,18 +31,14 @@ class HTTPRequestBase:
     @classmethod
     @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def __get(cls, url):
-        response = requests.get(url=url, timeout=cls._timeout)
+        response = requests.get(url, timeout=cls._timeout)
+        response_as_dict = response.json()
         if response.status_code == 200:
-            response = response.json()
-        else:
-            response = response.json()
+            return response_as_dict
 
-            if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'] + " with url:" + url)
-            else:
-                raise Exception(response['error']['message'] + " with url:" + url)
+        error = response_as_dict['error']
 
-        return response
+        raise Exception(error.get('error_user_msg', error.get('message')))
 
     @classmethod
     def loop_pages(cls, page, url, field=None):
@@ -80,7 +76,6 @@ class HTTPRequestBase:
 
         return data
 
-
     @classmethod
     @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def __next_page_from_cursor(cls, page, url):
@@ -91,16 +86,13 @@ class HTTPRequestBase:
             url = page['paging']['next']
 
         response = requests.get(url, timeout=cls._timeout)
+        response_as_dict = response.json()
         if response.status_code == 200:
-            response = response.json()
-        else:
-            response = response.json()
-            if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'])
-            else:
-                raise Exception(response['error']['message'])
+            return response_as_dict
 
-        return response
+        error = response_as_dict['error']
+
+        raise Exception(error.get('error_user_msg', error.get('message')))
 
     @staticmethod
     @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
@@ -110,16 +102,13 @@ class HTTPRequestBase:
         else:
             response = requests.post(url)
 
+        response_as_dict = response.json()
         if response.status_code == 200:
-            response = response.json()
-        else:
-            response = response.json()
-            if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'] + " with url:" + url)
-            else:
-                raise Exception(response['error']['message'] + " with url:" + url)
+            return response_as_dict
 
-        return response
+        error = response_as_dict['error']
+
+        raise Exception(error.get('error_user_msg', error.get('message')))
 
     @staticmethod
     @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
@@ -129,28 +118,22 @@ class HTTPRequestBase:
         else:
             response = requests.put(url)
 
+        response_as_dict = response.json()
         if response.status_code == 200:
-            response = response.json()
-        else:
-            response = response.json()
-            if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'])
-            else:
-                raise Exception(response['error']['message'])
+            return response_as_dict
 
-        return response
+        error = response_as_dict['error']
+
+        raise Exception(error.get('error_user_msg', error.get('message')))
 
     @staticmethod
     @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def delete(url):
         response = requests.delete(url)
+        response_as_dict = response.json()
         if response.status_code == 200:
-            response = response.json()
-        else:
-            response = response.json()
-            if 'error_user_msg' in response['error'].keys():
-                raise Exception(response['error']['error_user_msg'])
-            else:
-                raise Exception(response['error']['message'])
+            return response_as_dict
 
-        return response
+        error = response_as_dict['error']
+
+        raise Exception(error.get('error_user_msg', error.get('message')))

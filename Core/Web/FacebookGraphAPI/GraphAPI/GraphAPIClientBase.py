@@ -3,7 +3,6 @@ from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestTypeEnum import HTTPRequestTy
 
 
 class GraphAPIClientBase(GraphAPIGetHelper):
-
     def __init__(self, business_owner_permanent_token=None, config=None):
         assert business_owner_permanent_token is not None
 
@@ -15,7 +14,7 @@ class GraphAPIClientBase(GraphAPIGetHelper):
     def call_facebook(self):
         if self.config.request.url is None:
             # TODO: Log error
-            raise Exception('Missing Fields API url. Please provide an appropriate FB API url and try again.')
+            raise Exception("Missing Fields API url. Please provide an appropriate FB API url and try again.")
 
         if self.config.verb.lower() == HTTPRequestTypeEnum.GET.value:
             return self._get()
@@ -57,7 +56,7 @@ class GraphAPIClientBase(GraphAPIGetHelper):
     def _delete(self):
         if self.config.request.url is None:
             # TODO: Log error
-            raise Exception('Missing Fields API url. Please provide an appropriate FB API url and try again.')
+            raise Exception("Missing Fields API url. Please provide an appropriate FB API url and try again.")
 
         try:
             response = self.delete(self.config.request.url)

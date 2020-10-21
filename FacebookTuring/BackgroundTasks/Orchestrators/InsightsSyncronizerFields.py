@@ -1,6 +1,6 @@
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
-INSIGHTS_SYNCRONIZER_FIELDS = [
+INSIGHTS_SYNCHRONIZER_FIELDS = [
     FieldsMetadata.results,
     FieldsMetadata.amount_spent,
     FieldsMetadata.reach,
@@ -53,4 +53,13 @@ INSIGHTS_SYNCRONIZER_FIELDS = [
     FieldsMetadata.photo_views,
     FieldsMetadata.other_offline_conversions_total,
     FieldsMetadata.landing_page_views_total
+]
+
+FREEMIUM_USER_INSIGHTS_SYNCHRONIZER_FIELDS = [
+    FieldsMetadata.amount_spent,
+    FieldsMetadata.reach,
+    FieldsMetadata.link_clicks,
+    FieldsMetadata.page_likes,
+    FieldsMetadata.impressions,
+    FieldsMetadata.purchases_total
 ]

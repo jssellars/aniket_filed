@@ -8,6 +8,7 @@ from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesCha
 class BusinessOwnerPreferencesChangedEventMapping(MapperBase):
     user_filed_id = fields.Integer()
     id = fields.String()
+    user_type = fields.String()
     status = MapperNestedField(target=BusinessOwnerStatus)
     ad_accounts = MapperNestedField(target=AdAccountDetails, many=True)
     businesses = MapperNestedField(target=BusinessDetails, many=True)

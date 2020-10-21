@@ -22,10 +22,7 @@ class StructuresSyncronizer:
     RATE_LIMIT_EXCEPTION_STATUS = 80004
     SLEEP_ON_RATE_LIMIT_EXCEPTION = 3600
 
-    def __init__(self,
-                 business_owner_id: typing.AnyStr = None,
-                 account_id: typing.AnyStr = None,
-                 level: Level = None):
+    def __init__(self, business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None, level: Level = None):
         self.business_owner_id = business_owner_id
         self.account_id = account_id
         self.level = level
@@ -44,10 +41,12 @@ class StructuresSyncronizer:
             if not fields:
                 return
 
-            structures_response = self.__sync(permanent_token=self.permanent_token,
-                                              level=self.level,
-                                              account_id=self.__ad_account_id,
-                                              fields=fields.get_structure_fields())
+            structures_response = self.__sync(
+                permanent_token=self.permanent_token,
+                level=self.level,
+                account_id=self.__ad_account_id,
+                fields=fields.get_structure_fields(),
+            )
 
             # set business owner id
             structures = self.__set_business_owner_id(structures_response, self.business_owner_id)
@@ -65,43 +64,50 @@ class StructuresSyncronizer:
 
     def __is_complete_structure(self, structure=None, level=None) -> bool:
         if level == Level.CAMPAIGN:
-            if getattr(structure, GraphAPIInsightsFields.campaign_name) is None or \
-                    getattr(structure, GraphAPIInsightsFields.campaign_id) is None:
+            if (
+                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+            ):
                 return False
 
         if level == Level.ADSET:
-            if getattr(structure, GraphAPIInsightsFields.campaign_name) is None or \
-                    getattr(structure, GraphAPIInsightsFields.campaign_id) is None or \
-                    getattr(structure, GraphAPIInsightsFields.adset_name) is None or \
-                    getattr(structure, GraphAPIInsightsFields.adset_id) is None:
+            if (
+                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_name) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_id) is None
+            ):
                 return False
 
         if level == Level.AD:
-            if getattr(structure, GraphAPIInsightsFields.campaign_name) is None or \
-                    getattr(structure, GraphAPIInsightsFields.campaign_id) is None or \
-                    getattr(structure, GraphAPIInsightsFields.adset_name) is None or \
-                    getattr(structure, GraphAPIInsightsFields.adset_id) is None or \
-                    getattr(structure, GraphAPIInsightsFields.ad_name) is None or \
-                    getattr(structure, GraphAPIInsightsFields.ad_id) is None:
+            if (
+                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_name) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_id) is None
+                or getattr(structure, GraphAPIInsightsFields.ad_name) is None
+                or getattr(structure, GraphAPIInsightsFields.ad_id) is None
+            ):
                 return False
 
         return True
 
-    def __sync(self,
-               level: Level = None,
-               account_id: typing.AnyStr = None,
-               permanent_token: typing.AnyStr = None,
-               fields: typing.List[typing.AnyStr] = None) -> typing.NoReturn:
+    def __sync(
+        self,
+        level: Level = None,
+        account_id: typing.AnyStr = None,
+        permanent_token: typing.AnyStr = None,
+        fields: typing.List[typing.AnyStr] = None,
+    ) -> None:
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        _ = GraphAPISdkBase(self.__facebook_config, permanent_token)
+        GraphAPISdkBase(self.__facebook_config, permanent_token)
 
         try:
             graph_api_client = GraphAPIClientBase(permanent_token)
-            graph_api_client.config = self.build_get_structure_config(permanent_token=permanent_token,
-                                                                      level=level.value,
-                                                                      ad_account_id=account_id,
-                                                                      fields=fields)
+            graph_api_client.config = self.build_get_structure_config(
+                permanent_token=permanent_token, level=level.value, ad_account_id=account_id, fields=fields
+            )
             structures, _ = graph_api_client.call_facebook()
             if isinstance(structures, Exception):
                 raise structures
@@ -114,22 +120,26 @@ class StructuresSyncronizer:
 
         return structures
 
-    def build_get_structure_config(self,
-                                   permanent_token: typing.AnyStr = None,
-                                   level: typing.AnyStr = None,
-                                   ad_account_id: typing.AnyStr = None,
-                                   fields: typing.List[typing.AnyStr] = None,
-                                   filter_params: typing.List[typing.Dict] = None) -> GraphAPIClientBaseConfig:
+    def build_get_structure_config(
+        self,
+        permanent_token: typing.AnyStr = None,
+        level: typing.AnyStr = None,
+        ad_account_id: typing.AnyStr = None,
+        fields: typing.List[typing.AnyStr] = None,
+        filter_params: typing.List[typing.Dict] = None,
+    ) -> GraphAPIClientBaseConfig:
         get_structure_config = GraphAPIClientBaseConfig()
         get_structure_config.try_partial_requests = True
         get_structure_config.fields = fields
-        get_structure_config.required_field = 'id'
+        get_structure_config.required_field = "id"
         level = level + "s"  # todo: find a better way to get the endpoint level for multiple actors by ad account
-        get_structure_config.request = GraphAPIRequestStructures(facebook_id=ad_account_id,
-                                                                 business_owner_permanent_token=permanent_token,
-                                                                 level=level,
-                                                                 fields=fields,
-                                                                 filter_params=filter_params)
+        get_structure_config.request = GraphAPIRequestStructures(
+            facebook_id=ad_account_id,
+            business_owner_permanent_token=permanent_token,
+            level=level,
+            fields=fields,
+            filter_params=filter_params,
+        )
 
         return get_structure_config
 
@@ -145,7 +155,8 @@ class StructuresSyncronizer:
     def permanent_token(self) -> typing.AnyStr:
         if self.__permanent_token is None:
             self.__permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
-                self.business_owner_id)
+                self.business_owner_id
+            )
         return self.__permanent_token
 
     @staticmethod
@@ -155,8 +166,9 @@ class StructuresSyncronizer:
         return fields
 
     @staticmethod
-    def __set_business_owner_id(structures: typing.List[typing.Any] = None, business_owner_id: typing.AnyStr = None) -> \
-            typing.List[typing.Any]:
+    def __set_business_owner_id(
+        structures: typing.List[typing.Any] = None, business_owner_id: typing.AnyStr = None
+    ) -> typing.List[typing.Any]:
         for index in range(len(structures)):
             structures[index].business_owner_facebook_id = business_owner_id
         return structures

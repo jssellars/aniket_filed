@@ -506,6 +506,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                              level: Level = None,
                                              structures: typing.List[typing.Any] = None) -> typing.NoReturn:
         self.set_collection(collection_name=level.value)
+        structures_to_insert = []
         for structure in structures:
             structure_id = self.__get_structure_id(structure, level)
             if isinstance(structure, dict):
@@ -521,14 +522,16 @@ class TuringMongoRepository(MongoRepositoryBase):
                     structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 else:
                     structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
-                self.add_one(structure)
+                structures_to_insert.append(structure)
 
             elif not existing_structure_details:
                 if isinstance(structure, dict):
                     structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 else:
                     structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
-                self.add_one(structure)
+                structures_to_insert.append(structure)
+
+        self.add_many(structures_to_insert)
 
     def deprecate_structure(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
         self.set_collection(collection_name=level.value)
