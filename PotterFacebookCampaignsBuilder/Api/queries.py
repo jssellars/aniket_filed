@@ -22,6 +22,7 @@ from PotterFacebookCampaignsBuilder.Api.catalogs import (
     ad_preview_format,
     device_type,
     app_store,
+    location_types,
 )
 from PotterFacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
@@ -143,6 +144,7 @@ class SmartCreateCatalogs:
             ad_preview_format.AdPreviewFormat,
             device_type.DeviceType,
             app_store.AppStore,
+            location_types.LocationTypes
         ]
         return {class_.__name__: class_().to_json() for class_ in classes}
 
