@@ -24,6 +24,7 @@ from PotterFacebookCampaignsBuilder.Api.catalogs import (
     app_store,
     location_types,
     applink_treatment,
+    action_attribution_windows,
 )
 from PotterFacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
@@ -147,6 +148,7 @@ class SmartCreateCatalogs:
             app_store.AppStore,
             location_types.LocationTypes,
             applink_treatment.ApplinkTreatment,
+            action_attribution_windows.ActionAttributionWindows,
         ]
         return {class_.__name__: class_().to_json() for class_ in classes}
 
