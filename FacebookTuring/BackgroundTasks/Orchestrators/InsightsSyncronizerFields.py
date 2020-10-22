@@ -52,7 +52,7 @@ INSIGHTS_SYNCHRONIZER_FIELDS = [
     FieldsMetadata.website_purchases_value,
     FieldsMetadata.photo_views,
     FieldsMetadata.other_offline_conversions_total,
-    FieldsMetadata.landing_page_views_total
+    FieldsMetadata.landing_page_views_total,
 ]
 
 FREEMIUM_USER_INSIGHTS_SYNCHRONIZER_FIELDS = [

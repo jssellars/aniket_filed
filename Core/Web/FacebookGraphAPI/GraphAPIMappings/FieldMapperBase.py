@@ -17,6 +17,8 @@ class FieldMapperBase:
             is_total = True
         for condition in field_filter:
             try:
+                if not condition.field_value:
+                    return False
                 if not condition.evaluate(data):
                     return False
             except Exception as e:

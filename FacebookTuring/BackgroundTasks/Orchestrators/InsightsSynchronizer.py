@@ -55,6 +55,7 @@ class InsightsSynchronizer:
                 fields=self.__get_fields(),
                 parameters=self.__get_parameters(),
                 requested_fields=self.requested_fields,
+                level=self.level.value,
             )
 
             response = PreprocessUtils.filter_null_values_from_documents(response)

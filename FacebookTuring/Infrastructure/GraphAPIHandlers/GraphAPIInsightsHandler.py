@@ -5,7 +5,6 @@ from operator import getitem
 from queue import Queue
 from threading import Thread
 
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.Models.Field import FieldType
@@ -15,7 +14,7 @@ from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessage
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
@@ -114,9 +113,9 @@ class GraphAPIInsightsHandler:
             if results_requested:
                 structure_key = ""
                 if level == Level.CAMPAIGN.value or level == Level.ADSET.value:
-                    structure_key = LevelIdKeyEnum.get_enum_by_name(level.upper()).value
+                    structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(level.upper()).value
                 elif level == Level.AD.value:
-                    structure_key = LevelIdKeyEnum.get_enum_by_name(Level.ADSET.value.upper()).value
+                    structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(Level.ADSET.value.upper()).value
                 structure_ids = [x[structure_key] for x in response if structure_key in x]
                 structure_repository = TuringMongoRepository(
                     config=startup.mongo_config,
@@ -475,6 +474,7 @@ class GraphAPIInsightsHandler:
         fields: typing.List[typing.AnyStr] = None,
         parameters: typing.Dict = None,
         requested_fields: typing.List[FieldsMetadata] = None,
+        level: typing.AnyStr = None,
     ) -> typing.List[typing.Dict]:
         report_insights_thread = 1
         insights_response = cls.get_insights_base(
@@ -484,6 +484,7 @@ class GraphAPIInsightsHandler:
             parameters=parameters,
             requested_fields=requested_fields,
             thread=report_insights_thread,
+            level=level,
         )
         return insights_response[report_insights_thread][0]
 

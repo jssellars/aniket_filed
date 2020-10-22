@@ -17,7 +17,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
     limit = 100
 
     __report_run_id_key = "report_run_id"
-    __fields_num = 10
+    __fields_num = 8
 
     def _get_graph_api_base(self, config):
         try:
@@ -146,20 +146,18 @@ class GraphAPIGetHelper(HTTPRequestBase):
     def _combine_partial_responses(partial_responses: List[List[Dict]], required_field: str):
         if not partial_responses:
             return partial_responses
-
         if not isinstance(partial_responses[0], list):
             return partial_responses
 
-        result = partial_responses[0]
+        response = partial_responses[0]
+        partial_responses_count = len(partial_responses)
 
-        # TODO this can be later on changed on with itertools.chain on key
-        for partial_response in partial_responses:
-            for reference_record in result:
-                for record in partial_response:
-                    if reference_record[required_field] == record[required_field]:
-                        reference_record.update(record)
+        for index in range(1, partial_responses_count):
+            response = [{**u, **v} for u, v in
+                        GraphAPIGetHelper.sorted_zip_longest(response, partial_responses[index],
+                                                             key=required_field, fillvalue={})]
+        return response
 
-        return result
 
     @staticmethod
     def _get_fields_partitions(fields: list, required_field: str = None):

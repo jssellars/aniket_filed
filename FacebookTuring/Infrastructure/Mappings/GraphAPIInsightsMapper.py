@@ -77,21 +77,25 @@ class GraphAPIInsightsMapper:
         facebook_results_field_value = None
 
         if requested_field.name == FieldsMetadata.results.name:
-            if GraphAPIInsightsFields.custom_event_type in data.keys():
+            if GraphAPIInsightsFields.custom_event_type in data \
+                    and data[GraphAPIInsightsFields.custom_event_type]:
                 custom_event_type = PixelCustomEventTypeToResult.get_enum_by_name(data[GraphAPIInsightsFields.custom_event_type])
                 if custom_event_type:
                     facebook_results_field_value = custom_event_type.value
-            elif GraphAPIInsightsFields.optimization_goal in data.keys():
+            elif GraphAPIInsightsFields.optimization_goal in data \
+                    and data[GraphAPIInsightsFields.optimization_goal]:
                 optimization_goal = AdSetOptimizationToResult.get_enum_by_name(data[GraphAPIInsightsFields.optimization_goal])
                 if optimization_goal:
                     facebook_results_field_value = optimization_goal.value
 
         elif requested_field.name == FieldsMetadata.cost_per_result.name:
-            if GraphAPIInsightsFields.custom_event_type in data.keys():
+            if GraphAPIInsightsFields.custom_event_type in data\
+                    and data[GraphAPIInsightsFields.custom_event_type]:
                 cost_per_custom_event_type = PixelCustomEventTypeToCostPerResult.get_enum_by_name(data[GraphAPIInsightsFields.custom_event_type])
                 if cost_per_custom_event_type:
                     facebook_results_field_value = cost_per_custom_event_type.value
-            elif GraphAPIInsightsFields.optimization_goal in data.keys():
+            elif GraphAPIInsightsFields.optimization_goal in data\
+                    and data[GraphAPIInsightsFields.optimization_goal]:
                 cost_per_optimization_goal = AdSetOptimizationToCostPerResult.get_enum_by_name(data[GraphAPIInsightsFields.optimization_goal])
                 if cost_per_optimization_goal:
                     facebook_results_field_value = cost_per_optimization_goal.value

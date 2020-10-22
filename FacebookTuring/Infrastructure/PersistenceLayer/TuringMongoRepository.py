@@ -417,7 +417,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         projection = {
             GraphAPIInsightsFields.custom_event_type: MongoProjectionState.ON.value,
-            GraphAPIInsightsFields.promoted_object: MongoProjectionState.ON.value,
+            GraphAPIInsightsFields.optimization_goal: MongoProjectionState.ON.value,
             structure_key: MongoProjectionState.ON.value,
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
         }

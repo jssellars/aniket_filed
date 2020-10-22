@@ -2,6 +2,7 @@ import functools
 import operator
 import typing
 from time import sleep
+from typing import List
 
 from facebook_business.exceptions import FacebookRequestError
 
@@ -98,7 +99,7 @@ class StructuresSyncronizer:
         account_id: typing.AnyStr = None,
         permanent_token: typing.AnyStr = None,
         fields: typing.List[typing.AnyStr] = None,
-    ) -> None:
+    ) -> List:
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
         GraphAPISdkBase(self.__facebook_config, permanent_token)

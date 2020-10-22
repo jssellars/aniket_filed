@@ -2,16 +2,15 @@ import typing
 from datetime import datetime
 from enum import Enum
 
+from pymongo.errors import AutoReconnect
+from retry import retry
+
 from Core.Tools.Logger.Helpers import log_operation_mongo
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
 from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
-from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
-from pymongo.errors import AutoReconnect
-from retry import retry
 
 
 class MongoProjectionState(Enum):
@@ -531,14 +530,20 @@ class MongoRepositoryBase:
             )
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
-    def update_structure_status(self, structure_key: typing.Dict = None, structure_ids: typing.List = None) -> None:
+    def update_structure_status(
+            self,
+            structure_key: typing.Dict = None,
+            structure_ids: typing.List = None,
+            status_key: str = None,
+            status_value: int = None,
+    ) -> None:
         query_filter = ""
         query = ""
         operation_start_time = datetime.now()
 
         try:
             query_filter = {structure_key: {MongoOperator.IN.value: structure_ids}}
-            query = {MongoOperator.SET.value: {MiscFieldsEnum.status: StructureStatusEnum.COMPLETED.value}}
+            query = {MongoOperator.SET.value: {status_key: status_value}}
             self.update_many(query_filter, query)
 
         except Exception as e:

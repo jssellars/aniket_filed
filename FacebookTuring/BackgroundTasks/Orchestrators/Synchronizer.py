@@ -36,7 +36,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalReposi
 )
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
-SYNC_DAYS_INTERVAL = 3
+SYNC_DAYS_INTERVAL = 2
 DAYS_UNTIL_OBSOLETE = 31
 USER_CONFIGS_BY_TYPE = {
     UserTypeEnum.FREEMIUM: SynchronizerConfigStatic(
@@ -296,7 +296,12 @@ def update_status_for_completed_structures(
     ]
 
     structures_repository.set_collection(level)
-    structures_repository.update_structure_status(structure_key=structure_key, structure_ids=completed_structure_ids)
+    structures_repository.update_structure_status(
+        structure_key=structure_key,
+        structure_ids=completed_structure_ids,
+        status_key=MiscFieldsEnum.status,
+        status_value=StructureStatusEnum.COMPLETED.value,
+    )
 
 
 def mark_completed_campaigns_and_adsets(
@@ -453,7 +458,15 @@ def update_results_for_insights(
                     )
 
         else:
-            insights_repository.set_collection(level.value)
+            insights_repository.set_collection(
+                "_".join(
+                    [
+                        level.value,
+                        InsightsSynchronizerBreakdownEnum.NONE.value.name,
+                        InsightsSynchronizerActionBreakdownEnum.NONE.value.name
+                    ]
+                )
+            )
 
             structure_key = LevelIdKeyEnum.get_enum_by_name(level.ADSET.name.upper()).value
             update_insight_records_with_result(
@@ -481,13 +494,15 @@ def update_insight_records_with_result(
         for structure in structures:
             if insight[structure_key] == structure[structure_key]:
                 results_field_value = None
-                if GraphAPIInsightsFields.custom_event_type in structure:
+                if GraphAPIInsightsFields.custom_event_type in structure \
+                        and structure[GraphAPIInsightsFields.custom_event_type]:
                     custom_event_type = PixelCustomEventTypeToResult.get_enum_by_name(
                         structure[GraphAPIInsightsFields.custom_event_type]
                     )
                     if custom_event_type:
                         results_field_value = custom_event_type.value.name
-                elif GraphAPIInsightsFields.optimization_goal in structure:
+                elif GraphAPIInsightsFields.optimization_goal in structure\
+                        and structure[GraphAPIInsightsFields.optimization_goal]:
                     optimization_goal = AdSetOptimizationToResult.get_enum_by_name(
                         structure[GraphAPIInsightsFields.optimization_goal]
                     )
