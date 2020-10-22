@@ -19,13 +19,15 @@ from PotterFacebookCampaignsBuilder.Api.catalogs.node import Node
 
 _location_types = AdPlacePageSet.LocationTypes
 
-home = Node(_location_types.home)
-recent = Node(_location_types.recent)
-travel_in = Node("travel_in")
+
+class LocationType(Base):
+    home = Node(_location_types.home)
+    recent = Node(_location_types.recent)
+    travel_in = Node("travel_in")
 
 
-class LocationTypes(Base):
-    living_in_or_recently_in = Node("LIVING_IN_OR_RECENTLY_IN", home, recent)
-    living_in = Node("LIVING_IN", home)
-    recently_in = Node("RECENTLY_IN", recent)
-    traveling_in = Node("TRAVELING_IN", travel_in)
+class LocationTypeGroup(Base):
+    living_in_or_recently_in = Node("LIVING_IN_OR_RECENTLY_IN", LocationType.home, LocationType.recent)
+    living_in = Node("LIVING_IN", LocationType.home)
+    recently_in = Node("RECENTLY_IN", LocationType.recent)
+    traveling_in = Node("TRAVELING_IN", LocationType.travel_in)

@@ -22,9 +22,12 @@ from PotterFacebookCampaignsBuilder.Api.catalogs import (
     ad_preview_format,
     device_type,
     app_store,
-    location_types,
+    location_type,
     applink_treatment,
     action_attribution_windows,
+    buying_type,
+    billing_event,
+    optimization_goal,
 )
 from PotterFacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
@@ -146,9 +149,14 @@ class SmartCreateCatalogs:
             ad_preview_format.AdPreviewFormat,
             device_type.DeviceType,
             app_store.AppStore,
-            location_types.LocationTypes,
+            location_type.LocationType,
+            location_type.LocationTypeGroup,
             applink_treatment.ApplinkTreatment,
             action_attribution_windows.ActionAttributionWindows,
+            buying_type.BuyingType,
+            billing_event.BillingEvent,
+            optimization_goal.OptimizationGoal,
+            optimization_goal.OptimizationGoalWithBillingEvents,
         ]
         return {class_.__name__: class_().to_json() for class_ in classes}
 
