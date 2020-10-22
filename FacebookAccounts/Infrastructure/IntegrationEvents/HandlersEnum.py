@@ -1,0 +1,10 @@
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
+from FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequestHandler import \
+    GetAdAccountsAmountSpentInsightMessageRequestHandler
+from FacebookAccounts.Infrastructure.IntegrationEvents.GetBusinessOwnersTreesMessageRequestHandler import \
+    GetBusinessOwnersTreesMessageRequestHandler
+
+
+class HandlersEnum(EnumerationBase):
+    BUSINESS_OWNER_UPDATE_REQUEST = GetBusinessOwnersTreesMessageRequestHandler
+    BUSINESS_OWNER_ACCOUNT_SPEND_REQUEST = GetAdAccountsAmountSpentInsightMessageRequestHandler

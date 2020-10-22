@@ -1,9 +1,15 @@
 import json
 import os
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
-from Logging.Api.Config.Config import MongoConfig
+from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
+from FacebookAccounts.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig, \
+    ExternalServicesConfig, AdminUserConfig
 
 
 class Startup(object):
@@ -14,7 +20,24 @@ class Startup(object):
         if not isinstance(app_config, dict):
             raise ValueError('Invalid app config JSON.')
 
-        self.mongo_config = MongoConfig(app_config['mongo_database'])
+        self.rabbitmq_config = RabbitMqConfig(app_config['rabbitmq'])
+        self.facebook_config = FacebookConfig(app_config['facebook'])
+        self.database_config = SQLAlchemyConfig(app_config['sql_server_database'])
+        self.external_services = ExternalServicesConfig(app_config["external_services"])
+        self.admin_user = AdminUserConfig(app_config["admin_user"])
+
+        # Initialize connections to DB
+        self.engine = create_engine(self.database_config.connection_string)
+        self.session = sessionmaker(bind=self.engine)
+
+        # Initialize RabbitMQ exchanges and queues
+        direct_exchange_config = self.rabbitmq_config.get_exchange_details_by_type("direct")
+        self.exchange_details = ExchangeDetails(name=direct_exchange_config["name"],
+                                                type=direct_exchange_config["type"])
+        self.exchange_details.inbound_queue = QueueDetails(direct_exchange_config["queues"]["inbound"],
+                                                           direct_exchange_config["queues"]["inbound_routing_key"])
+        self.exchange_details.outbound_queue = QueueDetails(direct_exchange_config["queues"]["outbound"],
+                                                            direct_exchange_config["queues"]["outbound_routing_key"])
 
         self.environment = app_config['environment']
         self.service_name = app_config['service_name']
@@ -31,6 +54,11 @@ class Startup(object):
         self.logger_level = app_config["logger_level"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
+        self.technical_token_manager = TechnicalTokenManager(self.admin_user, self.external_services,
+                                                             self.jwt_secret_key)
+
+    def create_sql_connection(self):
+        return sessionmaker(bind=self.engine)
 
 
 #  Initialize startup object
