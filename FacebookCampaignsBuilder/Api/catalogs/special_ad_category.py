@@ -7,6 +7,6 @@ _category = Campaign.SpecialAdCategory
 
 
 class SpecialAdCategory(Base):
-    A_credit = Node(_category.credit)
-    B_housing = Node(_category.housing)
-    C_employment = Node(_category.employment)
+    credit = Node(_category.credit)
+    housing = Node(_category.housing)
+    employment = Node(_category.employment)

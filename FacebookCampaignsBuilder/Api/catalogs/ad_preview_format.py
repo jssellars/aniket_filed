@@ -47,11 +47,11 @@ existing_post_instagram_formats = Node(_platform.instagram, _format.instagram_st
 
 
 class AdPreviewFormat(Base):
-    A_image = ad_format.image.with_children(all_facebook_formats, all_instagram_formats, all_audience_network_formats)
-    B_video = ad_format.video.with_children(all_facebook_formats, all_instagram_formats, all_audience_network_formats)
-    C_carousel = ad_format.carousel.with_children(
+    image = ad_format.image.with_children(all_facebook_formats, all_instagram_formats, all_audience_network_formats)
+    video = ad_format.video.with_children(all_facebook_formats, all_instagram_formats, all_audience_network_formats)
+    carousel = ad_format.carousel.with_children(
         all_facebook_formats, all_instagram_formats, all_audience_network_formats
     )
-    D_existing_post = ad_format.existing_post.with_children(
+    existing_post = ad_format.existing_post.with_children(
         existing_post_facebook_formats, existing_post_instagram_formats
     )

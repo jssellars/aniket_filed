@@ -15,7 +15,7 @@ class Node:
         self.children = list(children) if children else None
         self.convert_children_to_objects()
 
-    def with_children(self, *children: List[Union[str, "Node"]]) -> "Node":
+    def with_children(self, *children: Union[str, "Node"]) -> "Node":
         result = copy.deepcopy(self)
         result.children = list(children)
         result.convert_children_to_objects()
