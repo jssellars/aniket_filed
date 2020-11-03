@@ -12,4 +12,4 @@ rabbit_worker:
 
 .PHONY: sync_job
 sync_job:
-	python3 sync_job.py
+	python3 sync_job.py &

@@ -3,9 +3,9 @@ from datetime import datetime
 from bson import BSON
 from zeep import helpers
 
-from GoogleTuring.BackgroundTasks.Mappings.StructureMapping import StructureMapping
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import GOOGLE_STATUS_MAPPING
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType, LEVEL_TO_ID
+from GoogleTuring.Infrastructure.Mappings.StructureMapping import StructureMapping
 
 
 class AdGroupAdStructureMapping(StructureMapping):

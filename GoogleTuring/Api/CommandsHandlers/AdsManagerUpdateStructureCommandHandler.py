@@ -1,9 +1,9 @@
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
 from GoogleTuring.Api.Startup import startup, logger
-from GoogleTuring.BackgroundTasks.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import AD_GROUP_CRITERIA_FIELDS
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
+from GoogleTuring.Infrastructure.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
 

@@ -1,4 +1,3 @@
-# TODO: extract this in Core
 class BreakdownsEnumeration:
     def __init__(self, id=None, column_name=None, display_name=None):
         self.id = id

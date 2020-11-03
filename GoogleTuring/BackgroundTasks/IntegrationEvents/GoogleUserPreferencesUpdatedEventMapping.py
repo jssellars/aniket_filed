@@ -1,7 +1,7 @@
 from marshmallow import fields, EXCLUDE
 
 from Core.Tools.Mapper.MapperBase import MapperBase, MapperNestedField
-from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import Customer
+from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import Customer
 
 
 class GoogleUserPreferencesUpdatedEventMapping(MapperBase):

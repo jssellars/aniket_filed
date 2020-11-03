@@ -1,7 +1,7 @@
 {
   "mongo_database": {
     "ssh_tunnel": true,
-    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "connection_string_url": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
     "mongo_user": "root",
     "mongo_pass": "BlokeyWokeySystemChokey",
     "mongo_host": "18.130.129.216",

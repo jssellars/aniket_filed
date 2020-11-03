@@ -1,0 +1,62 @@
+{
+  "rabbitmq": {
+    "consumer_name": "dev3.api.facebook.potter.accounts.consumer",
+    "username": "ntvkpamp",
+    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
+    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "port": 5672,
+    "virtual_host": "ntvkpamp",
+    "exchanges": [
+      {
+        "name": "dev3.direct",
+        "type": "direct",
+        "queues": {
+          "inbound": "dev3.facebook.accounts.inbound",
+          "inbound_routing_key": "dev3.facebook.accounts.inbound.key",
+          "outbound": "dev3.facebook.accounts.outbound",
+          "outbound_routing_key": "dev3.facebook.accounts.outbound.key"
+        }
+      }
+    ],
+    "publish_interval": 1,
+    "heartbeat": 0,
+    "connection_timeout": 300
+  },
+  "facebook": {
+    "description": "Filed Live",
+    "api_version": "v7.0",
+    "app_id": "174014546372191",
+    "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
+  },
+  "sql_server_database": {
+    "host": "ng-dev-sql.filed.com",
+    "port": 1433,
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
+    "name": "Dev3.Filed.Facebook.Accounts"
+  },
+  "external_services": {
+    "users_signin_endpoint": "https://be.dev3.filed.com/cs-users-api/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://be.dev3.filed.com/cs-users-api/api/v1/users/get-technical-jwt",
+    "subscription_update_business_owner_endpoint": "https://be.dev3.filed.com/cs-subscriptions-api/api/v1/contacts/set-businessowner-facebook-id"
+  },
+  "admin_user": {
+    "email": "admin@filed.com",
+    "password": "Adm1n@Fil3ed"
+  },
+  "environment": "dev3",
+  "api_name": "FacebookAccounts",
+  "api_version": "1.0.0",
+  "service_name": "FacebookAccounts",
+  "service_version": "1.0.0",
+  "base_url": "/api/v1",
+  "port": 47200,
+  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
+  "debug_mode": true,
+  "docker_filename": "filed-potter-accounts-api",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
+  "logger_level": "DEBUG",
+  "es_host": "dev3-elasticsearch",
+  "es_port": 9200
+}

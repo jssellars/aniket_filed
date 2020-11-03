@@ -23,8 +23,8 @@
     "connection_timeout": 300
   },
   "mongo": {
-    "ssh_tunnel": true,
-    "connection_string": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "ssh_tunnel": false,
+    "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -44,7 +44,7 @@
     "logs_database": "dev2_google_dexter_logs"
   },
   "external_services": {
-    "targeting_search": "https://dev2-api-facebook-potter-targetingsearch.filed.com/interests/suggestions/"
+    "targeting_search": "https://be.dev2.filed.com/potter-facebook-campaigns-builder-api/interests/suggestions/"
   },
   "dexter_config": {
     "min_results": 1,

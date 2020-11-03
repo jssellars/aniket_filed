@@ -1,10 +1,10 @@
-from GoogleTuring.BackgroundTasks.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.BaseSynchronizer import BaseSynchronizer
 from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import CAMPAIGN_STRUCTURE_FIELDS, \
     AD_STRUCTURE_FIELDS, AD_GROUP_KEYWORDS_STRUCTURE_FIELDS, \
     AD_GROUP_STRUCTURE_FIELDS, \
     AD_GROUP_CRITERIA_FIELDS
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType, LEVELS
+from GoogleTuring.Infrastructure.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
 

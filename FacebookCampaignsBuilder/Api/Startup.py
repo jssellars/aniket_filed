@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
-from FacebookAccounts.Api.Config.Config import FacebookConfig, SQLAlchemyConfig
+from FacebookCampaignsBuilder.Api.Config.Config import FacebookConfig, SQLAlchemyConfig
 from FacebookCampaignsBuilder.Api.Config.Config import RabbitMqConfig
 
 

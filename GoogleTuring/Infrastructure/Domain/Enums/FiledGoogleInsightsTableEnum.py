@@ -1,7 +1,7 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from GoogleTuring.Api.Catalogs.ReportModels.Levels.Ad.AdReportEnum import AdReportEnum
-from GoogleTuring.Api.Catalogs.ReportModels.Levels.AdGroup.AdGroupReportEnum import AdGroupReportEnum
-from GoogleTuring.Api.Catalogs.ReportModels.Levels.Campaign.CampaignReportEnum import CampaignReportEnum
+from GoogleTuring.Infrastructure.Domain.Enums.AdGroupReportEnum import AdGroupReportEnum
+from GoogleTuring.Infrastructure.Domain.Enums.AdReportEnum import AdReportEnum
+from GoogleTuring.Infrastructure.Domain.Enums.CampaignReportEnum import CampaignReportEnum
 from GoogleTuring.Infrastructure.Domain.Enums.Level import Level
 from GoogleTuring.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
 

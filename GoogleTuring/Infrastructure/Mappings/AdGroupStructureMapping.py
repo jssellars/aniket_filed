@@ -7,9 +7,9 @@ from zeep import helpers
 
 from Core.Tools.Logger.Helpers import log_operation_mongo
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
-from GoogleTuring.BackgroundTasks.Mappings.StructureMapping import StructureMapping
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import GOOGLE_STATUS_MAPPING
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID, StructureType
+from GoogleTuring.Infrastructure.Mappings.StructureMapping import StructureMapping
 
 
 class AdGroupStructureMapping(StructureMapping):

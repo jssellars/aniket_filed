@@ -1,9 +1,8 @@
 {
-
   "api_name": "FacebookDexterAPI",
   "environment": "dev",
   "api_version": "1.0.0",
-  "base_url": "",
+  "base_url": "/api/v1",
   "port": 47300,
   "debug_mode": true,
   "docker_filename": "filed-dexter-api",
@@ -12,10 +11,9 @@
   "es_host": "localhost",
   "es_port": 9200,
   "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
-
   "mongo_database": {
     "ssh_tunnel": true,
-    "connection_string": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
+    "connection_string_url": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",

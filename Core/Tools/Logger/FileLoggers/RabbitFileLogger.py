@@ -29,7 +29,7 @@ class RabbitFileLogger:
                 file_name = f"{message['details']['name']}{datetime.now().strftime(FILENAME_DATETIME)}.json"
 
                 file_path = self.log_dir_path / file_name
-                t = Thread(target=write_json_to_file, args=(file_path, message))
+                t = Thread(target=write_json_to_file, args=(str(file_path), message))
                 t.start()
             except Exception as e:
                 pass
@@ -52,7 +52,7 @@ class RabbitFileLogger:
 
             log_path.mkdir(parents=True, exist_ok=True)
 
-            cls.logger = cls.InternalLogger(cls.LOCAL_LOG_DIR)
+            cls.logger = cls.InternalLogger(log_path)
 
         return cls._instance
 

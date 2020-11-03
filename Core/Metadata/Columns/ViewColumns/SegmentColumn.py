@@ -1,4 +1,4 @@
-from GoogleTuring.Api.Catalogs.Breakdowns.BreakdownsEnumeration import BreakdownsEnumeration
+from Core.Metadata.Columns.ViewColumns.BreakdownsEnumeration import BreakdownsEnumeration
 
 
 class SegmentColumn:

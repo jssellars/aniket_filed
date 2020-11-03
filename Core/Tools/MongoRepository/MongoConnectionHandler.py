@@ -34,7 +34,7 @@ class MongoConnectionHandler(object):
                     maxPoolSize=None,
                 )
             else:
-                self.__client = MongoClient(config.connection_string)
+                self.__client = MongoClient(config.connection_string_url)
 
         @property
         def client(self):

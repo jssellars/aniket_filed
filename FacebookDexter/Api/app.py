@@ -50,11 +50,10 @@ api.add_resource(DexterApiGetRecommendationQuery, f'{base_url}/GetRecommendation
 api.add_resource(DexterApiGetCountsByCategory, f'{base_url}/GetCountByCategory')
 api.add_resource(DexterApiDismissRecommendation, f'{base_url}/DismissRecommendation')
 api.add_resource(DexterApiApplyRecommendation, f'{base_url}/ApplyRecommendation')
-api.add_resource(DexterApiHealthCheck, f'{base_url}/HealthCheck')
-api.add_resource(DexterApiVersion, f'{base_url}/Version')
+api.add_resource(DexterApiHealthCheck, f'{base_url}/healthcheck')
+api.add_resource(DexterApiVersion, f'{base_url}/version')
 
 if __name__ == '__main__':
     app.run(debug=startup.debug,
             host='localhost',
             port=startup.port)
-

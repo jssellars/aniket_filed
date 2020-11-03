@@ -1,5 +1,5 @@
-from GoogleTuring.Api.Catalogs.ReportModels.Levels.Campaign.CampaignReportEnum import CampaignReportEnum
 from GoogleTuring.Api.Catalogs.ReportModels.ReportModel import ReportModel
+from GoogleTuring.Infrastructure.Domain.Enums.CampaignReportEnum import CampaignReportEnum
 
 
 class CampaignPerformanceReportModel(ReportModel):

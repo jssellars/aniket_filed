@@ -81,7 +81,7 @@ class BusinessOwnerCreateCommandHandler:
             raise e
 
         try:
-            generate_permanent_token_url = GeneratePermanentTokenGraphAPIRequest.generate_url(command.FacebookId,
+            generate_permanent_token_url = GeneratePermanentTokenGraphAPIRequest.generate_url(command.facebook_id,
                                                                                               temporary_token)
             permanent_token_response, _ = HTTPRequestBase.get(generate_permanent_token_url)
         except Exception as e:
@@ -90,7 +90,7 @@ class BusinessOwnerCreateCommandHandler:
         try:
             for entry in permanent_token_response:
                 BusinessOwnerRepository(startup.session).create_or_update_user(
-                    business_owner_facebook_id=command.FacebookId,
+                    business_owner_facebook_id=command.facebook_id,
                     name=command.name,
                     email=command.email,
                     token=entry["access_token"],
@@ -101,12 +101,12 @@ class BusinessOwnerCreateCommandHandler:
     @classmethod
     def get_businesses(cls, command):
         try:
-            permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(command.FacebookId)
+            permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(command.facebook_id)
 
             businesses = GraphAPIAdAccountHandler(permanent_token, startup.facebook_config).get_business_owner_details(
-                command.FacebookId)
+                command.facebook_id)
 
-            businesses = BusinessOwnerCreatedDto(facebook_id=command.FacebookId,
+            businesses = BusinessOwnerCreatedDto(facebook_id=command.facebook_id,
                                                  name=command.name,
                                                  email=command.email,
                                                  requested_permissions=command.requested_permissions,

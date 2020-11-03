@@ -11,8 +11,8 @@ import traceback
 
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from GoogleTuring.BackgroundTasks.Startup import startup
-from GoogleTuring.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
-from GoogleTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
+from GoogleTuring.BackgroundTasks.IntegrationEvents.HandlersEnum import HandlersEnum
+from GoogleTuring.BackgroundTasks.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 from GoogleTuring.BackgroundTasks.Startup import logger
 
 

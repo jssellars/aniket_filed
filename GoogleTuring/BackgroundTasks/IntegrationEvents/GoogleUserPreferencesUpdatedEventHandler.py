@@ -1,11 +1,11 @@
 import typing
 
-from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIDataSyncHandler import \
-    AdWordsAPIDataSyncHandler
-from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import \
+from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import \
     GoogleUserPreferencesUpdatedEvent
-from GoogleTuring.Infrastructure.IntegrationEvents.GoogleUserPreferencesUpdatedEventMapping import \
+from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdatedEventMapping import \
     GoogleUserPreferencesUpdatedEventMapping
+from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.AdWordsAPIDataSyncHandler import \
+    AdWordsAPIDataSyncHandler
 
 
 class GoogleUserPreferencesUpdatedEventHandler:

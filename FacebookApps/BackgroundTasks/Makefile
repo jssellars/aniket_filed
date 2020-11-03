@@ -1,4 +1,4 @@
-include ../share/Makefile
+include ../../share/Makefile
 
-.PHONY: BackgroundTasks
-BackgroundTasks: rabbit_worker
+.PHONY: start
+start: rabbit_worker

@@ -1,5 +1,5 @@
-from GoogleTuring.Api.Catalogs.ReportModels.Levels.Ad.AdReportEnum import AdReportEnum
 from GoogleTuring.Api.Catalogs.ReportModels.ReportModel import ReportModel
+from GoogleTuring.Infrastructure.Domain.Enums.AdReportEnum import AdReportEnum
 
 
 class AdPerformanceReportModel(ReportModel):
