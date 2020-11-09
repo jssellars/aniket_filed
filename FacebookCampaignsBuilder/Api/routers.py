@@ -242,6 +242,29 @@ class PublishCampaign(Resource):
         return response, 200
 
 
+class SmartCreateCats(Resource):
+    @jwt_required
+    def get(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        try:
+            query = queries.SmartCreateCats()
+            response = query.get()
+
+            return response, 200
+
+        except Exception as e:
+            log = LoggerMessageBase(
+                mtype=LoggerMessageTypeEnum.ERROR,
+                name="GetCatalogsEndpoint",
+                description=str(e),
+                extra_data=LoggerAPIRequestMessageBase(request).request_details,
+            )
+            logger.logger.exception(log.to_dict())
+            response = Tools.create_error(e, code="BAD_REQUEST")
+
+            return response, 400
+
+
 class SmartCreateCatalogs(Resource):
     @jwt_required
     def get(self):
@@ -260,7 +283,7 @@ class SmartCreateCatalogs(Resource):
                 extra_data=LoggerAPIRequestMessageBase(request).request_details,
             )
             logger.logger.exception(log.to_dict())
-            response = Tools.create_error(e, code="POTTER_BAD_REQUEST")
+            response = Tools.create_error(e, code="BAD_REQUEST")
 
             return response, 400
 

@@ -50,6 +50,7 @@ router_route_pairs = (
     (routers.TargetingSearchLocationSearch, "targeting-search/locations/search/<string:query_string>"),
     (routers.TargetingSearchLanguages, "targeting-search/languages"),
     (routers.BudgetValidation, "budget-validation/<string:business_owner_id>/<string:account_id>"),
+    (routers.SmartCreateCats, "smart-create/cats"),
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
 )
 for router, route in router_route_pairs:

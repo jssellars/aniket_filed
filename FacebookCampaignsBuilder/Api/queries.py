@@ -29,6 +29,7 @@ from FacebookCampaignsBuilder.Api.catalogs import (
     billing_event,
     optimization_goal,
 )
+from FacebookCampaignsBuilder.Api.cats import catalogs
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
 )
@@ -136,6 +137,11 @@ class BudgetValidation:
         )
 
 
+class SmartCreateCats:
+    def get(self):
+        return {c.__name__: c.as_dict() for c in catalogs}
+
+
 class SmartCreateCatalogs:
     def get(self):
         classes = [
@@ -158,6 +164,7 @@ class SmartCreateCatalogs:
             optimization_goal.OptimizationGoal,
             optimization_goal.OptimizationGoalWithBillingEvents,
         ]
+
         return {class_.__name__: class_().to_json() for class_ in classes}
 
 
