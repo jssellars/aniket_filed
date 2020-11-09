@@ -6,7 +6,7 @@ from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumnTypeEnum import V
 
 
 class ViewVideos:
-    video_views = ViewColumn(id=Autoincrement.hex_string("video_vies"), display_name="Video views",
+    thru_plays = ViewColumn(id=Autoincrement.hex_string("video_views"), display_name="Video views",
                              primary_value=FieldsMetadata.thru_plays, type_id=ViewColumnTypeEnum.NUMBER.value,
                              group_display_name=ViewColumnGroupEnum.VIDEOS.value)
     average_duration_video_view = ViewColumn(id=Autoincrement.hex_string('avg_duration_video_viewed'),

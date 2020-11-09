@@ -34,7 +34,6 @@ class ViewAdSetBiddingAndOptimization(ViewBiddingAndOptimizationBase):
         ViewColumnsMaster.last_significant_edit,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.adset_schedule
     ]
 
 

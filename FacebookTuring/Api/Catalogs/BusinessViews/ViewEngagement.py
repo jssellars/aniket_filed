@@ -37,7 +37,6 @@ class ViewAdSetEngagement(ViewEngagementBase):
         ViewColumnsMaster.link_clicks,
         ViewColumnsMaster.page_likes,
         ViewColumnsMaster.cost_per_unique_link_click
-        # ViewColumnsMaster.effectShare
     ]
 
 
@@ -54,5 +53,4 @@ class ViewAdEngagement(ViewEngagementBase):
         ViewColumnsMaster.link_clicks,
         ViewColumnsMaster.page_likes,
         ViewColumnsMaster.cost_per_unique_link_click
-        # ViewColumnsMaster.effectShare
     ]

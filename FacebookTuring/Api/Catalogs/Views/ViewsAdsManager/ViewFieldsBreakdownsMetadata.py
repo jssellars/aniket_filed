@@ -43,6 +43,6 @@ class ViewFieldsBreakdownsMetadata:
                                  type_id=ViewColumnTypeEnum.TEXT.value,
                                  category_id=ViewColumnCategoryEnum.COMMON.value, is_fixed=False)
     action_destination = ViewColumn(Autoincrement.hex_string('device_platform'), display_name="Destination",
-                                    primary_value=FieldsMetadata.destination_breakdown,
+                                    primary_value=FieldsMetadata.action_destination,
                                     type_id=ViewColumnTypeEnum.TEXT.value,
                                     category_id=ViewColumnCategoryEnum.COMMON.value, is_fixed=False)

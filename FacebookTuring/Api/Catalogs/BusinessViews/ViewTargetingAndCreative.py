@@ -3,7 +3,7 @@ from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import 
 
 
 class ViewTargetingAndCreativeBase(View):
-    name = "Bidding and optimization"
+    name = "Targeting and creative"
     type = "Business"
 
 
@@ -16,7 +16,7 @@ class ViewCampaignTargetingAndCreative(ViewTargetingAndCreativeBase):
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.end_date,
+        ViewColumnsMaster.stop_time,
         ViewColumnsMaster.reach,
         ViewColumnsMaster.cost_per_1000_people_reached,
         ViewColumnsMaster.link_clicks,
@@ -40,7 +40,7 @@ class ViewAdSetTargetingAndCreative(ViewTargetingAndCreativeBase):
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.end_date,
+        ViewColumnsMaster.stop_time,
         ViewColumnsMaster.adset_schedule,
         ViewColumnsMaster.location,
         ViewColumnsMaster.age,
@@ -68,7 +68,7 @@ class ViewAdTargetingAndCreative(ViewTargetingAndCreativeBase):
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.end_date,
+        ViewColumnsMaster.stop_time,
         # TODO: get ad schedule
         ViewColumnsMaster.quality_ranking,
         ViewColumnsMaster.engagement_rate_ranking,

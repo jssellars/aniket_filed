@@ -1,7 +1,7 @@
-from enum import Enum
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
 
 
-class FieldDataTypeEnum(Enum):
+class FieldDataTypeEnum(EnumerationBase):
     TEXT = 1
     NUMBER = 2
     DATE = 3

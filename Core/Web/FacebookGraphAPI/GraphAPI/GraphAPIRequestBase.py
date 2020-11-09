@@ -3,17 +3,17 @@ from string import Template
 
 
 class GraphAPIRequestBase:
-    _limit = 200
     _api_version = "v7.0"
 
     def __init__(self, facebook_id=None, business_owner_permanent_token=None, fields=None, params=None,
-                 filter_params=None, api_version=None, limit=None):
+                 filter_params=None, api_version=None, limit=None, next_page_cursor=None):
         self._facebook_id = facebook_id
         self.business_owner_permanent_token = business_owner_permanent_token
         self._fields = fields
         self._params = params
         self._filter = filter_params
-
+        self._next_page_cursor = next_page_cursor
+        self._limit = 200
         self._graph_api_base_url = ""
 
         if api_version is not None:
@@ -23,6 +23,14 @@ class GraphAPIRequestBase:
             self._limit = limit
 
         self._url = None
+
+    @property
+    def limit(self):
+        return self._limit
+
+    @limit.setter
+    def limit(self, value):
+        self._limit = value
 
     @property
     def url(self):
@@ -65,9 +73,14 @@ class GraphAPIRequestBase:
         graph_api_request = Template(graph_api_request)
         graph_api_request_url = graph_api_request.safe_substitute(facebook_id=self._facebook_id)
 
+        if self._next_page_cursor:
+            graph_api_request_url += f"&after={self._next_page_cursor}"
+
         return graph_api_request_url
 
-    def modify_fields_and_params(self, fields=None, params=None):
+    def modify_fields_and_params(self, fields=None, params=None, limit=None):
         self._fields = fields
         self._params = params
+        if limit:
+            self._limit = limit
         self._url = self._build_graph_api_request_url()

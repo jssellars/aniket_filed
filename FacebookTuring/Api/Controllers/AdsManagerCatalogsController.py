@@ -12,6 +12,7 @@ from FacebookTuring.Api.Dtos.AdsManagerCatalogsBreakdownsCombinationsDto import 
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsBreakdownsDto import AdsManagerCatalogsBreakdownsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsMetacolumnsDto import AdsManagerCatalogsMetacolumnsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsByLevelDto import AdsManagerCatalogsViewsByLevelDto
+from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsAgGridDto import AdsManagerCatalogsViewsAgGridDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsDto import AdsManagerCatalogsViewsDto
 from FacebookTuring.Api.Startup import logger
 
@@ -53,6 +54,26 @@ class AdsManagerCatalogsViewsByLevelEndpoint(Resource):
                                     extra_data=LoggerAPIRequestMessageBase(request).request_details)
             logger.logger.exception(log.to_dict())
             return Response(response=json.dumps({"message": "Failed to retrieve views by level."}), status=400,
+                            mimetype='application/json')
+
+
+class AdsManagerCatalogsViewsAgGrid(Resource):
+
+    @jwt_required
+    def get(self, level):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        try:
+            response = AdsManagerCatalogsViewsAgGridDto.get(level)
+            response = humps.camelize(response)
+            response = json.dumps(response)
+            return Response(response=response, status=200, mimetype='application/json')
+        except Exception as e:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="AdsManagerCatalogsViewsAgGridEndpoint",
+                                    description=str(e),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            return Response(response=json.dumps({"message": "Failed to retrieve ag grid views by level."}), status=400,
                             mimetype='application/json')
 
 

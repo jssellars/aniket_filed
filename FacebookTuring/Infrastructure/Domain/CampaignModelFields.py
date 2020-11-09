@@ -38,7 +38,7 @@ class CampaignModelFields(StructureModelFieldBase):
         FieldsMetadata.spend_cap,
         FieldsMetadata.start_date,
         FieldsMetadata.status,
-        FieldsMetadata.end_date,
+        FieldsMetadata.stop_time,
         FieldsMetadata.top_line_id,
         FieldsMetadata.updated_time,
         # FieldsMetadata.ad_rules_governed,

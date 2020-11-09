@@ -6,6 +6,7 @@ from bson import BSON
 from pymongo.errors import AutoReconnect
 from retry import retry
 
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Tools.Logger.Helpers import log_operation_mongo
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
 from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
@@ -16,7 +17,7 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import Grap
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping, \
-    LevelToFacebookNameKeyMapping
+    LevelToFacebookNameKeyMapping, Level
 
 
 class TuringMongoRepository(MongoRepositoryBase):
@@ -424,6 +425,39 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         structures = self.get(query, projection)
         return structures
+
+    def get_all_structures_by_id_list(self,
+                                      level: Level = None,
+                                      structure_ids: typing.List[typing.AnyStr] = None,
+                                      structure_key: typing.AnyStr = None) -> \
+            typing.List[typing.Dict]:
+        self.set_collection(collection_name=level.value)
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    structure_key: {
+                        MongoOperator.IN.value: structure_ids
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
+                                                    StructureStatusEnum.REMOVED.value,
+                                                    StructureStatusEnum.DEPRECATED.value]
+                    }
+                }
+            ]
+        }
+
+        projection = {
+            MiscFieldsEnum.details: MongoProjectionState.ON.value,
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        structures = self.get(query, projection)
+        structures = self.__decode_structure_details_from_bson(structures)
+        return [structure[MiscFieldsEnum.details] for structure in structures if MiscFieldsEnum.details in structure]
+
 
     @staticmethod
     def __decode_structure_details_from_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:

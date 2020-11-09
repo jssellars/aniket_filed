@@ -141,3 +141,62 @@ class QueryBuilderRequestMapper:
 
         find_all_conditions(entry)
         return leaves
+
+
+class QueryBuilderAgGridRequest:
+
+    __structure_columns = []
+
+    def __init__(self, query_builder_request: typing.Dict = None, table_name: typing.AnyStr = None):
+        self.ag_columns = query_builder_request['agColumns'].split(", ")
+        self.next_page_cursor = query_builder_request['nextPageCursor']
+        self.filter_model = query_builder_request['filterModel']
+        self.sort_model = query_builder_request['sortModel']
+        self.time_range = query_builder_request['timeRange']
+        self.facebook_account_id = query_builder_request['facebookAccountId']
+        self.page_size = query_builder_request['pageSize']
+        self.table_name = table_name.value
+
+    def set_structure_columns(self, structure_columns: typing.List[typing.AnyStr] = None):
+        self.__structure_columns = structure_columns
+        return self
+
+    @staticmethod
+    def is_list(x: typing.Any = None) -> bool:
+        return isinstance(x, list)
+
+    @staticmethod
+    def is_dict(x: typing.Any = None) -> bool:
+        return isinstance(x, dict)
+
+    @staticmethod
+    def is_leaf(x: typing.Any = None) -> bool:
+        return QueryBuilderCondition.has_same_parameters(x)
+
+    # todo: map condition operator to QueryBuilderLogicalOperator
+    @classmethod
+    def find_all_where_conditions(cls, entry):
+        leaves = []
+
+        def find_all_conditions(entry):
+            if cls.is_leaf(entry):
+                leaves.append(QueryBuilderCondition(**entry))
+            elif cls.is_dict(entry):
+                for key, value in entry.items():
+                    if (cls.is_list(value) or cls.is_dict(value)) and not cls.is_leaf(value):
+                        find_all_conditions(value)
+                    elif cls.is_leaf(value):
+                        leaves.append(QueryBuilderCondition(**value))
+                    else:
+                        continue
+            elif cls.is_list(entry):
+                for element in entry:
+                    if (cls.is_list(element) or cls.is_dict(element)) and not cls.is_leaf(element):
+                        find_all_conditions(element)
+                    elif cls.is_leaf(element):
+                        leaves.append(QueryBuilderCondition(**element))
+                    else:
+                        continue
+
+        find_all_conditions(entry)
+        return leaves

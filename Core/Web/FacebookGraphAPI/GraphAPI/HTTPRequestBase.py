@@ -30,6 +30,33 @@ class HTTPRequestBase:
 
     @classmethod
     @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
+    def get_page(cls, url=None):
+        response = None
+        next_page_cursor = None
+
+        try:
+            page = cls.__get(url)
+            raw_response = cls.__extract_data_from_page(page)
+            response = raw_response.get('data') if 'data' in raw_response.keys() else None
+            # TODO send summary only on the first page
+            summary = raw_response.get('summary') if 'summary' in raw_response.keys() else None
+            pagination = raw_response.get('paging') if 'paging' in raw_response.keys() else None
+            if pagination:
+                next_link = pagination.get('next') if 'cursors' in pagination.keys() else None
+                if next_link:
+                    cursors = pagination.get('cursors') if 'cursors' in pagination.keys() else None
+                    if cursors:
+                        next_page_cursor = cursors.get('after') if 'after' in cursors.keys() else None
+            return response, next_page_cursor, summary
+        except Exception as e:
+            # Log exception
+            if response or next_page_cursor:
+                return response, next_page_cursor
+            else:
+                return e, None
+
+    @classmethod
+    @retry(exceptions=Exception, tries=__RETRY_LIMIT, delay=1)
     def __get(cls, url):
         response = requests.get(url, timeout=cls._timeout)
         response_as_dict = response.json()

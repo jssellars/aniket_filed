@@ -67,12 +67,12 @@ class FieldsStructureMetadata:
                        field_type=FieldType.STRUCTURE,
                        data_type_id=FieldDataTypeEnum.DATE.value,
                        aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
-    end_date = Field(name="stop_time",
-                     facebook_fields=[GraphAPIInsightsFields.stop_time],
-                     mapper=OneToOneFieldMapper(),
-                     field_type=FieldType.STRUCTURE,
-                     data_type_id=FieldDataTypeEnum.DATE.value,
-                     aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    stop_time = Field(name="stop_time",
+                      facebook_fields=[GraphAPIInsightsFields.stop_time],
+                      mapper=OneToOneFieldMapper(),
+                      field_type=FieldType.STRUCTURE,
+                      data_type_id=FieldDataTypeEnum.DATE.value,
+                      aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
     bid_strategy = Field(name="bid_strategy",
                          facebook_fields=[GraphAPIInsightsFields.bid_strategy],
                          mapper=OneToOneFieldMapper(),

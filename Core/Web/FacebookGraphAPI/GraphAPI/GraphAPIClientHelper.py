@@ -1,4 +1,5 @@
 import asyncio
+from collections import ChainMap
 from copy import deepcopy
 from queue import Queue
 from threading import Thread
@@ -13,8 +14,7 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 class GraphAPIGetHelper(HTTPRequestBase):
     _sleep_before_getting_data = 1
     _async_job_completed_percentage = 100
-    _async_job_failed_status = "Job Failed"
-    limit = 100
+    _async_job_failed_status = 'Job Failed'
 
     __report_run_id_key = "report_run_id"
     __fields_num = 8
@@ -85,6 +85,51 @@ class GraphAPIGetHelper(HTTPRequestBase):
             raise e
 
         return response, summary
+
+    def _get_insights_page(self, config, cursor_link=None):
+        if config.request is None:
+            raise Exception('Missing Fields API request. Please provide an appropriate FB API request and try again.')
+
+        next_page_cursor = None
+        summary = []
+
+        try:
+            partial_responses = []
+            summary_responses = []
+            workers = []
+            queue = Queue()
+
+            # TODO: remove partial fields logic after confirming calls go through
+            for partial_fields in self._get_fields_partitions(config.fields, config.required_field):
+                config.request.modify_fields_and_params(partial_fields, config.params, config.page_size)
+
+                worker_thread = Thread(target=lambda q, arg1: q.put(self.get_page(arg1)),
+                                       args=(queue, deepcopy(config.request.url)))
+                workers.append(worker_thread)
+
+            # Combine partial responses for different groups of fields into one response
+            for thread in workers:
+                thread.start()
+
+            for thread in workers:
+                thread.join()
+
+            while not queue.empty():
+                partial_response, next_page_cursor, summary_response = queue.get()
+                if not isinstance(partial_response, Exception) and partial_response:
+                    partial_responses.append(deepcopy(partial_response))
+                elif isinstance(partial_response, Exception):
+                    raise partial_response
+
+                if not isinstance(summary_response, Exception) and summary_response:
+                    summary_responses.append(deepcopy(summary_response))
+
+            response = self._combine_partial_responses(partial_responses, config.required_field)
+            summary = dict(ChainMap(*summary_responses))
+        except Exception as e:
+            raise e
+
+        return response, next_page_cursor, summary
 
     #  ====== Helper methods ====== #
     async def _loop_graph_api_for_async_response(self, response, async_trials: int = None):

@@ -25,6 +25,16 @@ class GraphAPIClientBase(GraphAPIGetHelper):
         elif self.config.verb.lower() == HTTPRequestTypeEnum.DELETE.value:
             return self._delete()
 
+    def get_page_from_facebook(self, cursor_link=None):
+        if self.config.request.url is None:
+            # TODO: Log error
+            raise Exception('Missing Fields API url. Please provide an appropriate FB API url and try again.')
+
+        if self.config.verb.lower() != HTTPRequestTypeEnum.GET.value:
+            raise Exception('Unexpected request verb.')
+
+        return self._get_insights_page(self.config, cursor_link)
+
     def _get(self):
         if not self.config.async_trials and not self.config.try_partial_requests:
             return self._get_graph_api_base(self.config)

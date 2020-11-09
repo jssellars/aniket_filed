@@ -13,3 +13,4 @@ class GraphAPIClientBaseConfig:
     required_field: str = None
     async_trials: int = None
     try_partial_requests: bool = False
+    page_size: int = 200
