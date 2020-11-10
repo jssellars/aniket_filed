@@ -29,15 +29,15 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "dev2.filed.com",
+    "host": "ng-dev-sql.filed.com",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
     "name": "Staging.Filed.Facebook.Accounts"
   },
   "mongo_database": {
-    "ssh_tunnel": true,
-    "connection_string_url": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "ssh_tunnel": false,
+    "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -61,8 +61,8 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-facebook-turing-background-tasks",
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "staging-elasticsearch",
   "es_port": 9200

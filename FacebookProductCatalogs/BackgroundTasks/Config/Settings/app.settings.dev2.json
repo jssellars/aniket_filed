@@ -1,6 +1,6 @@
 {
   "rabbitmq": {
-    "consumer_name": "dev2.bt.facebook.potter.productcatalogs.consumer",
+    "consumer_name": "dev2.bt.productcatalogs.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -11,10 +11,10 @@
         "name": "dev2.direct",
         "type": "direct",
         "queues": {
-          "inbound": "dev2.facebook.productcatalogs.inbound",
-          "inbound_routing_key": "dev2.facebook.productcatalogs.inbound.key",
-          "outbound": "dev2.facebook.productcatalogs.outbound",
-          "outbound_routing_key": "dev2.facebook.productcatalogs.outbound.key"
+          "inbound": "dev2.productcatalogs.inbound",
+          "inbound_routing_key": "dev2.productcatalogs.inbound.key",
+          "outbound": "dev2.productcatalogs.outbound",
+          "outbound_routing_key": "dev2.productcatalogs.outbound.key"
         }
       }
     ],

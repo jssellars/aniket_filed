@@ -6,14 +6,14 @@
   "port": 47300,
   "debug_mode": true,
   "docker_filename": "filed-dexter-api",
-  "logger_type": "elasticsearch_logger",
+  "logger_type": "file_logger",
   "logger_level": "DEBUG",
   "es_host": "staging-elasticsearch",
   "es_port": 9200,
   "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "mongo_database": {
-    "ssh_tunnel": true,
-    "connection_string_url": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "ssh_tunnel": false,
+    "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -25,8 +25,8 @@
     "recommendations_database_name": "staging_dexter_fuzzy_inference_recommendations",
     "recommendations_collection_name": "recommendations"
   },
-   "external_services": {
-    "facebook_auto_apply" : "https://staging-api-facebook-turing.filed.com/api/v1/{level}/{structureId}",
+  "external_services": {
+    "facebook_auto_apply": "https://be.staging.filed.com/py-facebook-turing-api/api/v1/{level}/{structureId}",
     "google_auto_apply": ""
   }
 }

@@ -29,15 +29,15 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "dev.filed.com",
+    "host": "ng-dev-sql.filed.com",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
     "name": "Dev.Filed.Facebook.Accounts"
   },
   "mongo_database": {
-    "ssh_tunnel": true,
-    "connection_string_url": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
+    "ssh_tunnel": false,
+    "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",

@@ -1,10 +1,10 @@
 {
   "rabbitmq": {
-    "username": "ntvkpamp",
-    "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
-    "hostname": "juicy-mosquito.rmq.cloudamqp.com",
+    "username": "ecsubdgh",
+    "password": "ieNetipc0tqrtZvzRkSrqaW6ADyASym0",
+    "hostname": "spotted-starfish.rmq.cloudamqp.com",
     "port": 5672,
-    "virtual_host": "ntvkpamp",
+    "virtual_host": "ecsubdgh",
     "exchanges": [
       {
         "name": "staging.google.accounts.fanout",
@@ -20,8 +20,8 @@
     "connection_timeout": 300
   },
   "mongo_database": {
-    "ssh_tunnel": true,
-    "connection_string_url": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+    "ssh_tunnel": false,
+    "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -30,9 +30,9 @@
     "retry_writes": false,
     "remote_ip": "192.168.2.91",
     "remote_port": 27017,
-    "google_insights_database_name": "prod_google_turing_insights",
-    "google_accounts_database_name": "prod_google_turing_accounts",
-    "google_structures_database_name": "prod_google_turing_structures",
+    "google_insights_database_name": "staging_google_turing_insights",
+    "google_accounts_database_name": "staging_google_turing_accounts",
+    "google_structures_database_name": "staging_google_turing_structures",
     "location_data_collection_name": "location_data",
     "accounts_collection_name": "google_accounts"
   },
@@ -50,8 +50,8 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-google-turing-background-tasks",
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "staging-elasticsearch",
   "es_port": 9200

@@ -29,15 +29,15 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "dev.filed.com",
+    "host": "ng-dev-sql.filed.com",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
     "name": "Dev.Filed.Facebook.Accounts"
   },
   "mongo": {
-    "ssh_tunnel": true,
-    "connection_string_url": "mongodb+srv://admin:aB%241004--@stresstest-rg4rp.mongodb.net/test?authSource=admin&replicaSet=StressTest-shard-0&w=majority&readPreference=primary&appname=MongoDB%20Compass&retryWrites=true&ssl=true",
+    "ssh_tunnel": false,
+    "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
     "mongo_user": "mongo-admin",
     "mongo_pass": "7YPbhiYTEtM=",
     "mongo_host": "18.130.129.216",
@@ -55,9 +55,9 @@
     "logs_database": "local_facebook_dexter_logs"
   },
   "external_services": {
-    "targeting_search": "https://dev-api-facebook-potter-campaignsbuilder.filed.com/api/v1/targeting-search/interests/suggestions/",
-    "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://dev.filed.com:41000/api/v1/users/get-technical-jwt"
+    "targeting_search": "https://be.dev.filed.com/py-facebook-campaigns-builder-api/interests/suggestions/",
+    "users_signin_endpoint": "https://be.dev.filed.com/cs-users-api/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://be.dev.filed.com/cs-users-api/api/v1/users/get-technical-jwt"
   },
   "admin_user": {
     "email": "admin@filed.com",

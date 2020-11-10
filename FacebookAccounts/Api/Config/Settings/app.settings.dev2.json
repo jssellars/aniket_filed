@@ -36,9 +36,9 @@
     "name": "Dev2.Filed.Facebook.Accounts"
   },
   "external_services": {
-    "users_signin_endpoint": "https://be.dev2.filed.com/users-api/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://be.dev2.filed.com/users-api/api/v1/users/get-technical-jwt",
-    "subscription_update_business_owner_endpoint": "https://be.dev2.filed.com/subscriptions-api/api/v1/contacts/set-businessowner-facebook-id"
+    "users_signin_endpoint": "https://be.dev2.filed.com/cs-users-api/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://be.dev2.filed.com/cs-users-api/api/v1/users/get-technical-jwt",
+    "subscription_update_business_owner_endpoint": "https://be.dev2.filed.com/cs-subscriptions-api/api/v1/contacts/set-businessowner-facebook-id"
   },
   "admin_user": {
     "email": "admin@filed.com",

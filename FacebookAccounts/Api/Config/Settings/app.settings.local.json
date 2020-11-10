@@ -29,16 +29,16 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "dev.filed.com",
+    "host": "ng-dev-sql.filed.com",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
     "name": "Dev.Filed.Facebook.Accounts"
   },
   "external_services": {
-    "users_signin_endpoint": "https://dev.filed.com:41000/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://dev.filed.com:41000/api/v1/users/get-technical-jwt",
-    "subscription_update_business_owner_endpoint": "https://dev.filed.com:41010/api/v1/contacts/set-businessowner-facebook-id"
+    "users_signin_endpoint": "https://be.dev.filed.com/cs-users-api/api/v1/users/signin",
+    "users_technical_token_endpoint": "https://be.dev.filed.com/cs-users-api/api/v1/users/get-technical-jwt",
+    "subscription_update_business_owner_endpoint": "https://be.dev.filed.com/cs-subscriptions-api/api/v1/contacts/set-businessowner-facebook-id"
   },
   "admin_user": {
     "email": "admin@filed.com",

@@ -1,6 +1,6 @@
 {
   "rabbitmq": {
-    "consumer_name": "staging.bt.facebook.potter.productcatalogs.consumer",
+    "consumer_name": "staging.bt.productcatalogs.consumer",
     "username": "ecsubdgh",
     "password": "ieNetipc0tqrtZvzRkSrqaW6ADyASym0",
     "hostname": "spotted-starfish.rmq.cloudamqp.com",
@@ -11,10 +11,10 @@
         "name": "staging.direct",
         "type": "direct",
         "queues": {
-          "inbound": "staging.facebook.productcatalogs.inbound",
-          "inbound_routing_key": "staging.facebook.productcatalogs.inbound.key",
-          "outbound": "staging.facebook.productcatalogs.outbound",
-          "outbound_routing_key": "staging.facebook.productcatalogs.outbound.key"
+          "inbound": "staging.productcatalogs.inbound",
+          "inbound_routing_key": "staging.productcatalogs.inbound.key",
+          "outbound": "staging.productcatalogs.outbound",
+          "outbound_routing_key": "staging.productcatalogs.outbound.key"
         }
       }
     ],
@@ -29,10 +29,10 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "staging.filed.com",
+    "host": "ng-dev-sql.filed.com",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
     "name": "Staging.Filed.Facebook.Accounts"
   },
   "environment": "staging",
@@ -42,8 +42,8 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "docker_filename": "filed-potter-productcatalogs-background-tasks",
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
+  "logger_type": "file_logger",
+  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "staging-elasticsearch",
   "es_port": 9200

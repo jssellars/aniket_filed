@@ -1,6 +1,6 @@
 {
   "rabbitmq": {
-    "consumer_name": "local.bt.facebook.potter.productcatalogs.consumer",
+    "consumer_name": "local.bt.productcatalogs.consumer",
     "username": "ntvkpamp",
     "password": "k5TYym9Z7sp18wNPd4U6VAyH2C99-HPH",
     "hostname": "juicy-mosquito.rmq.cloudamqp.com",
@@ -29,10 +29,10 @@
     "app_secret": "718ab2ca9cc128cf4b1b7793ecc116cb"
   },
   "sql_server_database": {
-    "host": "dev.filed.com",
+    "host": "ng-dev-sql.filed.com",
     "port": 1433,
-    "username": "sa",
-    "password": "Parola@20",
+    "username": "dev_sa",
+    "password": "StartingGunFlounderFun",
     "name": "Dev.Filed.Facebook.Accounts"
   },
   "environment": "local",
