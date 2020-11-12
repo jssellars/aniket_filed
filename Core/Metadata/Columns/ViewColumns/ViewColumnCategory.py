@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ViewColumnCategoryEnum(Enum):
+class ViewColumnCategory(Enum):
     COMMON = 0
     SETTINGS = 1
     PERFORMANCE = 2

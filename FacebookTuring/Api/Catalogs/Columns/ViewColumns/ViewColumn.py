@@ -22,7 +22,7 @@ class ViewColumn:
                  is_filterable: bool = False,
                  is_editable: bool = False,
                  is_sortable: bool = False,
-                 no_of_decimals: int = 0,
+                 no_of_digits: int = 0,
                  pinned: Optional[PinnedDirection] = None):
         self.id = id
         self.display_name = display_name
@@ -38,5 +38,5 @@ class ViewColumn:
         self.is_filterable = is_filterable
         self.is_editable = is_editable
         self.is_sortable = is_sortable
-        self.no_of_decimals = no_of_decimals
+        self.no_of_digits = no_of_digits
         self.pinned = pinned

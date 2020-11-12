@@ -13,7 +13,7 @@ from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
 from FacebookAccounts.Api.Controllers.AdAccountController import AdAccountInsightsEndpoint, \
-    AdAccountPagesEndpoint, AdAccountInstagramEndpoint, AdAccountPageInstagramEndpoint
+    AdAccountPagesEndpoint, AdAccountInstagramEndpoint, AdAccountPageInstagramEndpoint, AdAccountsAgGridViewEndpoint
 from FacebookAccounts.Api.Controllers.BusinessOwnerController import BusinessOwnerEndpoint, \
     BusinessOwnerDeletePermissionsEndpoint
 from FacebookAccounts.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
@@ -69,6 +69,10 @@ api.add_resource(AdAccountInstagramEndpoint, ad_account_instagram_controller)
 ad_account_page_instagram_controller = "{base_url}/instagram-business-account/<string:page_id>".format(
     base_url=startup.base_url.lower())
 api.add_resource(AdAccountPageInstagramEndpoint, ad_account_page_instagram_controller)
+
+ag_grid_view = "{base_url}/accounts-ag-grid-view/".format(base_url=startup.base_url.lower())
+api.add_resource(AdAccountsAgGridViewEndpoint, ag_grid_view)
+
 
 if __name__ == "__main__":
     app.run(debug=startup.debug_mode, host="localhost", port=startup.port)

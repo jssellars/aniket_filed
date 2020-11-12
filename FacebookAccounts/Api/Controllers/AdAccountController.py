@@ -10,6 +10,7 @@ from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessage
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from FacebookAccounts.Api.Commands.AdAccountInsightsCommand import AdAccountInsightsCommand
+from FacebookAccounts.Api.Dtos import AccountAgGridViewsDto
 from FacebookAccounts.Api.Mappings.AdAccountInsightsCommandMapping import AdAccountInsightsCommandMapping
 from FacebookAccounts.Api.Queries.AdAccountInstagramQuery import AdAccountInstagramQuery
 from FacebookAccounts.Api.Queries.AdAccountPageInstagramQuery import AdAccountPageInstagramQuery
@@ -125,3 +126,23 @@ class AdAccountInsightsEndpoint(Resource):
             response = Tools.create_error(e, 'POTTER_FACEBOOK_ACCOUNTS_BAD_REQUEST')
             response = json.dumps(response)
             return Response(response=response, status=400, mimetype='application/json')
+
+
+class AdAccountsAgGridViewEndpoint(Resource):
+
+    @jwt_required
+    def get(self):
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        try:
+            response = AccountAgGridViewsDto.get_view()
+            response = humps.camelize(response)
+            response = json.dumps(response)
+            return Response(response=response, status=200, mimetype='application/json')
+        except Exception as e:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="AdsManagerCatalogsViewsAgGridEndpoint",
+                                    description=str(e),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            return Response(response=json.dumps({"message": "Failed to retrieve ag grid views on Accounts."}), status=400,
+                            mimetype='application/json')

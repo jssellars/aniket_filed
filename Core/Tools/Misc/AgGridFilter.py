@@ -1,8 +1,9 @@
-from Core.Tools.Misc.EnumerationBase import EnumerationBase
+from enum import Enum
 
 
-class AgGridFilterEnum(EnumerationBase):
+class AgGridFilter(Enum):
     TEXT = "agTextColumnFilter"
     NUMBER = "agNumberColumnFilter"
     DATE = "agDateColumnFilter"
     CATEGORICAL = ""
+

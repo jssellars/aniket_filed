@@ -1,7 +1,7 @@
-from Core.Metadata.Views.ViewBase import View
+from Core.Metadata.Views.ViewBase import BaseView
 
 
-class GoogleView(View):
+class GoogleView(BaseView):
     data_source_name = None
     breakdowns = {
         "segments": []

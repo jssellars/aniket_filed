@@ -48,7 +48,7 @@ api.add_resource(AdsManagerInsightsController.AdsManagerInsightsEndpoint, insigh
 insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsController.AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
 
-ag_grid_insights_controller = '{base_url}/ag_grid_insights/<string:level>'.format(base_url=startup.base_url.lower())
+ag_grid_insights_controller = '{base_url}/ag-grid-insights/<string:level>'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsController.AdsManagerAgGridInsightsEndpoint, ag_grid_insights_controller)
 
 insights_controller = '{base_url}/reports'.format(base_url=startup.base_url.lower())
@@ -60,7 +60,7 @@ api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsEndpoint, v
 views_by_level_controller = "{base_url}/views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsByLevelEndpoint, views_by_level_controller)
 
-ag_grid_views = "{base_url}/ag_grid_views/<string:level>".format(base_url=startup.base_url.lower())
+ag_grid_views = "{base_url}/ag-grid-views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsAgGrid, ag_grid_views)
 
 metacolumns_controller = "{base_url}/metacolumns".format(base_url=startup.base_url.lower())

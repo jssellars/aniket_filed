@@ -1,4 +1,6 @@
+from Core.Metadata.Views.ViewBase import AgGridView
 from Core.Tools.Misc import AgGridConstants
+from Core.Tools.Misc.AgGridFilter import AgGridFilter
 from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list, object_to_json
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
@@ -43,9 +45,8 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewVideoEngagement import (
     ViewCampaignVideoEngagement,
 )
 from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumn import ViewColumn
-from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import AgGridView, View
+from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import View
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
-from FacebookTuring.Infrastructure.Domain.AgGridFilterEnum import AgGridFilterEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 
 
@@ -144,11 +145,11 @@ class AdsManagerCatalogsViewsAgGridDto:
         column_mapping[AgGridConstants.header_name] = column.display_name
         column_mapping[AgGridConstants.sortable] = column.is_sortable
 
-        if column.no_of_decimals:
-            column_mapping[AgGridConstants.number_of_decimals] = column.no_of_decimals
+        if column.no_of_digits:
+            column_mapping[AgGridConstants.number_of_decimals] = column.no_of_digits
 
         if column.is_filterable:
-            filter_property = AgGridFilterEnum.get_enum_by_name(FieldDataTypeEnum.get_by_value(field_value.type_id))
+            filter_property = AgGridFilter[FieldDataTypeEnum.get_by_value(field_value.type_id)]
             if filter_property:
                 column_mapping[AgGridConstants.filter] = filter_property.value
 

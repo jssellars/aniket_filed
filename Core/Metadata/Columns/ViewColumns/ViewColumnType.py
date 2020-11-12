@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ViewColumnTypeEnum(Enum):
+class ViewColumnType(Enum):
     MASTER_CHECKBOX = 0
     TEXT = 1
     NUMBER = 2

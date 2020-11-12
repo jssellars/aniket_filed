@@ -160,7 +160,7 @@ class QueryBuilderFacebookRequestParser:
                 )
                 break
 
-    def parse_query_columns_ag_grid(self, ag_query_columns=None, parse_breakdowns=True, column_type=None):
+    def parse_query_columns_ag_grid(self, ag_query_columns=None, parse_breakdowns=True):
         if ag_query_columns is None:
             ag_query_columns = []
         non_fields_types = [FieldType.BREAKDOWN,

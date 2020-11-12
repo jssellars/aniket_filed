@@ -72,3 +72,19 @@ class FieldsMetricStructureMetadata:
                       field_type=FieldType.INSIGHT,
                       data_type_id=FieldDataTypeEnum.TEXT.value,
                       aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    account_status = Field(name="account_status",
+                           facebook_fields=[GraphAPIInsightsFields.account_status],
+                           mapper=OneToOneFieldMapper(),
+                           field_type=FieldType.STRUCTURE,
+                           data_type_id=FieldDataTypeEnum.NUMBER.value,
+                           aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    business_id = Field(name="business",
+                        facebook_fields=[GraphAPIInsightsFields.business_id],
+                        field_type=FieldType.STRUCTURE,
+                        data_type_id=FieldDataTypeEnum.TEXT.value,
+                        aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    currency = Field(name="currency",
+                     facebook_fields=[GraphAPIInsightsFields.currency],
+                     field_type=FieldType.STRUCTURE,
+                     data_type_id=FieldDataTypeEnum.TEXT.value,
+                     aggregation_type_id=FieldAggregationTypeEnum.NULL.value)

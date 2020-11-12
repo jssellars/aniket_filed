@@ -16,7 +16,9 @@ class ViewColumn:
                  width: int = 50,
                  is_fixed: bool = False,
                  group_display_name: typing.AnyStr = None,  # ViewColumnGroupEnum
-                 hidden: bool = False):
+                 hidden: bool = False,
+                 no_of_digits: int = 0,
+                 ):
         self.id = id
         self.display_name = display_name  # string
         self.primary_value = primary_value  # ColumnMetadata
@@ -28,3 +30,4 @@ class ViewColumn:
         self.is_fixed = is_fixed
         self.group_display_name = group_display_name
         self.hidden = hidden
+        self.no_of_digits = no_of_digits
