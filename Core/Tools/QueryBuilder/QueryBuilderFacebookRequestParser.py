@@ -275,7 +275,6 @@ class QueryBuilderFacebookRequestParser:
         self.parse_query_columns_ag_grid(
             parse_breakdowns=parse_breakdowns,
             ag_query_columns=request.ag_columns,
-            column_type=self.QueryBuilderColumnName.COLUMN
         )
 
         self.parse_filter_model(request.filter_model)

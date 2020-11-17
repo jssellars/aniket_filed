@@ -18,6 +18,7 @@ from FacebookAccounts.Api.Queries.AdAccountPagesQuery import AdAccountPagesQuery
 from FacebookAccounts.Api.Startup import startup, logger
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountInsightsHandler import \
     GraphAPIAdAccountInsightsHandler
+from FacebookAccounts.Infrastructure.GraphAPIHandlers import GraphAPIAdAccountInsightsHandler
 
 
 class AdAccountPagesEndpoint(Resource):
@@ -146,3 +147,31 @@ class AdAccountsAgGridViewEndpoint(Resource):
             logger.logger.exception(log.to_dict())
             return Response(response=json.dumps({"message": "Failed to retrieve ag grid views on Accounts."}), status=400,
                             mimetype='application/json')
+
+class AdAccountAgGridInsights(Resource):
+
+    @jwt_required
+    def post(self):
+        #  log request information
+        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+
+        try:
+            business_owner_facebook_id = extract_business_owner_facebook_id(get_jwt())
+            raw_request = humps.decamelize(request.get_json(force=True))
+            mapping = AdAccountInsightsCommandMapping(AdAccountInsightsCommand)
+            command = mapping.load(raw_request)
+            command.business_owner_facebook_id = business_owner_facebook_id
+
+            response = GraphAPIAdAccountInsightsHandler.handle_accounts_insights(command, startup)
+            response = json.dumps(response)
+            return Response(response=response, status=200, mimetype='application/json')
+
+        except Exception as e:
+            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
+                                    name="AdAccountInsightsEndpoint",
+                                    description=str(e),
+                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
+            logger.logger.exception(log.to_dict())
+            response = json.dumps({"message": f"Failed to process request. Error {str(e)}"})
+            return Response(response=response, status=400, mimetype='application/json')
+

@@ -13,7 +13,7 @@ from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
 from FacebookAccounts.Api.Controllers.AdAccountController import AdAccountInsightsEndpoint, \
-    AdAccountPagesEndpoint, AdAccountInstagramEndpoint, AdAccountPageInstagramEndpoint, AdAccountsAgGridViewEndpoint
+    AdAccountPagesEndpoint, AdAccountInstagramEndpoint, AdAccountPageInstagramEndpoint, AdAccountsAgGridViewEndpoint, AdAccountAgGridInsights
 from FacebookAccounts.Api.Controllers.BusinessOwnerController import BusinessOwnerEndpoint, \
     BusinessOwnerDeletePermissionsEndpoint
 from FacebookAccounts.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
@@ -53,6 +53,7 @@ api.add_resource(BusinessOwnerDeletePermissionsEndpoint, business_owner_delete_p
 ad_account_controller = "{base_url}/facebook-accounts".format(base_url=startup.base_url.lower())
 
 # Insights controller
+# TODO: Once V1 is fully implemented and deployed, this can be deleted along with the related controllers and handlers
 ad_account_insights_controller = "{base_url}/facebook-accounts-insights".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountInsightsEndpoint, ad_account_insights_controller)
 
@@ -70,8 +71,13 @@ ad_account_page_instagram_controller = "{base_url}/instagram-business-account/<s
     base_url=startup.base_url.lower())
 api.add_resource(AdAccountPageInstagramEndpoint, ad_account_page_instagram_controller)
 
+# Accounts tab view for AgGrid
 ag_grid_view = "{base_url}/accounts-ag-grid-view/".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountsAgGridViewEndpoint, ag_grid_view)
+
+# Accounts insights for V1
+ag_grid_insights = "{base_url}/accounts-ag-grid-insights/".format(base_url=startup.base_url.lower())
+api.add_resource(AdAccountAgGridInsights, ag_grid_insights)
 
 
 if __name__ == "__main__":

@@ -78,13 +78,15 @@ class FieldsMetricStructureMetadata:
                            field_type=FieldType.STRUCTURE,
                            data_type_id=FieldDataTypeEnum.NUMBER.value,
                            aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
-    business_id = Field(name="business",
+    business_id = Field(name="business_id",
                         facebook_fields=[GraphAPIInsightsFields.business_id],
+                        mapper=OneToOneFieldMapper(),
                         field_type=FieldType.STRUCTURE,
                         data_type_id=FieldDataTypeEnum.TEXT.value,
                         aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
     currency = Field(name="currency",
                      facebook_fields=[GraphAPIInsightsFields.currency],
+                     mapper=OneToOneFieldMapper(),
                      field_type=FieldType.STRUCTURE,
                      data_type_id=FieldDataTypeEnum.TEXT.value,
                      aggregation_type_id=FieldAggregationTypeEnum.NULL.value)

@@ -54,7 +54,7 @@ def get_view_columns():
 
         column_type = FieldDataTypeEnum.get_by_value(column.primary_value.type_id)
         if column_type in AgGridFilter.__members__:
-            filter_property = AgGridFilter[FieldDataTypeEnum.get_by_value(column_type)]
+            filter_property = AgGridFilter[column_type]
             column_property[AgGridConstants.filter] = filter_property.value
 
         result.append(column_property)
