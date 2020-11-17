@@ -16,9 +16,9 @@ from FacebookAccounts.Api.Queries.AdAccountInstagramQuery import AdAccountInstag
 from FacebookAccounts.Api.Queries.AdAccountPageInstagramQuery import AdAccountPageInstagramQuery
 from FacebookAccounts.Api.Queries.AdAccountPagesQuery import AdAccountPagesQuery
 from FacebookAccounts.Api.Startup import startup, logger
-from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountInsightsHandler import \
-    GraphAPIAdAccountInsightsHandler
 from FacebookAccounts.Infrastructure.GraphAPIHandlers import GraphAPIAdAccountInsightsHandler
+from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountInsightsHandler import \
+    GraphAPIAdAccountInsightsHandlerClass
 
 
 class AdAccountPagesEndpoint(Resource):
@@ -114,7 +114,7 @@ class AdAccountInsightsEndpoint(Resource):
             return Response(response=response, status=400, mimetype='application/json')
 
         try:
-            response = GraphAPIAdAccountInsightsHandler.handle(command, startup)
+            response = GraphAPIAdAccountInsightsHandlerClass.handle(command, startup)
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
@@ -148,6 +148,7 @@ class AdAccountsAgGridViewEndpoint(Resource):
             return Response(response=json.dumps({"message": "Failed to retrieve ag grid views on Accounts."}), status=400,
                             mimetype='application/json')
 
+
 class AdAccountAgGridInsights(Resource):
 
     @jwt_required
@@ -174,4 +175,3 @@ class AdAccountAgGridInsights(Resource):
             logger.logger.exception(log.to_dict())
             response = json.dumps({"message": f"Failed to process request. Error {str(e)}"})
             return Response(response=response, status=400, mimetype='application/json')
-

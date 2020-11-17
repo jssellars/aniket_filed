@@ -23,7 +23,7 @@ INSIGHTS_KEY = "insights"
 DATA_KEY = "data"
 
 
-class GraphAPIAdAccountInsightsHandler:
+class GraphAPIAdAccountInsightsHandlerClass:
     @classmethod
     def handle(cls, request: typing.Any, startup: typing.Any) -> typing.List[typing.Dict]:
         # get permanent token
