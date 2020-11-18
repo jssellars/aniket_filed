@@ -1,6 +1,8 @@
 import typing
 from enum import Enum
+from typing import Optional
 
+from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldMapper import ActionFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.BreakdownValueFieldMapper import BreakdownValueFieldMapper
@@ -41,7 +43,8 @@ class Field:
                  mapper: MapperType = None,
                  field_type: FieldType = FieldType.INSIGHT,
                  aggregation_type_id: int = FieldAggregationTypeEnum.SUM.value,
-                 data_type_id: int = FieldDataTypeEnum.NUMBER.value):
+                 data_type_id: int = FieldDataTypeEnum.NUMBER.value,
+                 positive_effect_trend_direction: Optional[PositiveEffectTrendDirection] = None):
         self.name = name
         self.facebook_fields = facebook_fields if facebook_fields else []
         self.facebook_value = facebook_value
@@ -54,6 +57,7 @@ class Field:
         # todo: find a better way to provide these FE properties on a Field
         self.aggregation_id = aggregation_type_id
         self.type_id = data_type_id
+        self.positive_effect_trend_direction = positive_effect_trend_direction
 
         self.__init_mapper()
 

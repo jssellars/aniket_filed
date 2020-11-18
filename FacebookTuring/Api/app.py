@@ -51,6 +51,14 @@ api.add_resource(AdsManagerInsightsController.AdsManagerInsightsWithTotalsEndpoi
 ag_grid_insights_controller = '{base_url}/ag-grid-insights/<string:level>'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsController.AdsManagerAgGridInsightsEndpoint, ag_grid_insights_controller)
 
+ads_manager_ag_grid_period_trend_controller = '{base_url}/ads-manager/ag-grid-insights-trend/<string:level>'.\
+    format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerInsightsController.AdsManagerAgGridTrendEndpoint, ads_manager_ag_grid_period_trend_controller)
+
+accounts_ag_grid_period_trend_controller = '{base_url}/accounts/ag-grid-insights-trend/<string:level>'.\
+    format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerInsightsController.AccountsAgGridTrendEndpoint, accounts_ag_grid_period_trend_controller)
+
 insights_controller = '{base_url}/reports'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsController.AdsManagerReportInsightsEndpoint, insights_controller)
 

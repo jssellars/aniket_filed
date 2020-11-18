@@ -159,4 +159,7 @@ class AdsManagerCatalogsViewsAgGridDto:
         if column.is_editable:
             column_mapping[AgGridConstants.editable] = column.is_editable
 
+        if column.is_toggle:
+            column_mapping[AgGridConstants.is_toggle] = column.is_toggle
+
         return column_mapping

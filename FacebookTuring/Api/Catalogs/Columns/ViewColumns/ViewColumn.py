@@ -23,7 +23,8 @@ class ViewColumn:
                  is_editable: bool = False,
                  is_sortable: bool = False,
                  no_of_digits: int = 0,
-                 pinned: Optional[PinnedDirection] = None):
+                 pinned: Optional[PinnedDirection] = None,
+                 is_toggle: Optional[bool] = False):
         self.id = id
         self.display_name = display_name
         self.primary_value = primary_value
@@ -40,3 +41,4 @@ class ViewColumn:
         self.is_sortable = is_sortable
         self.no_of_digits = no_of_digits
         self.pinned = pinned
+        self.is_toggle = is_toggle

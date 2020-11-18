@@ -1,3 +1,4 @@
+from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
@@ -29,19 +30,23 @@ class FieldsMetricPerformanceMetadata:
     reach = Field(name="reach",
                   facebook_fields=[GraphAPIInsightsFields.reach],
                   mapper=OneToOneFieldMapper(),
-                  field_type=FieldType.INSIGHT)
+                  field_type=FieldType.INSIGHT,
+                  positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)
     frequency = Field(name="frequency",
                       facebook_fields=[GraphAPIInsightsFields.frequency],
                       mapper=OneToOneFieldMapper(),
-                      field_type=FieldType.INSIGHT)
+                      field_type=FieldType.INSIGHT,
+                      positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     impressions = Field(name="impressions",
                         facebook_fields=[GraphAPIInsightsFields.impressions],
                         mapper=OneToOneFieldMapper(),
-                        field_type=FieldType.INSIGHT)
+                        field_type=FieldType.INSIGHT,
+                        positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)
     amount_spent = Field(name="amount_spent",
                          facebook_fields=[GraphAPIInsightsFields.spend],
                          mapper=OneToOneFieldMapper(),
-                         field_type=FieldType.INSIGHT)
+                         field_type=FieldType.INSIGHT,
+                         positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     clicks_all = Field(name="clicks_all",
                        facebook_fields=[GraphAPIInsightsFields.clicks],
                        mapper=OneToOneFieldMapper(),
@@ -79,7 +84,8 @@ class FieldsMetricPerformanceMetadata:
     cpm = Field(name="cpm",
                 facebook_fields=[GraphAPIInsightsFields.cpm],
                 mapper=OneToOneFieldMapper(),
-                field_type=FieldType.INSIGHT)
+                field_type=FieldType.INSIGHT,
+                positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     results = Field(name="results",
                     facebook_fields=[GraphAPIInsightsFields.actions,
                                      GraphAPIInsightsFields.objective],

@@ -233,7 +233,6 @@ class QueryBuilderFacebookRequestParser:
 
                 self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
 
-
     def parse_query_conditions(self, query_conditions):
         for entry in query_conditions:
             mapped_condition = self.map(entry.ColumnName)
@@ -268,21 +267,31 @@ class QueryBuilderFacebookRequestParser:
         self.parse_query_conditions(request.Conditions)
         self.sort_insights_by_time()
 
-    def parse_ag_grid(self, request, level=None, parse_breakdowns=True):
+    def parse_ag_grid_insights_query(self, request, level=None, parse_breakdowns=True):
         self.level = level
         self.next_page_cursor = request.next_page_cursor
+        self.facebook_id = request.facebook_account_id
+        self.time_range = request.time_range
+        self.page_size = request.page_size
 
         self.parse_query_columns_ag_grid(
             parse_breakdowns=parse_breakdowns,
             ag_query_columns=request.ag_columns,
         )
-
         self.parse_filter_model(request.filter_model)
+        self.parse_sort_condition(request.sort_model)
+
+    def parse_ag_grid_trend_query(self, request, level=None, parse_breakdowns=True):
+        self.level = level
         self.facebook_id = request.facebook_account_id
         self.time_range = request.time_range
-        self.page_size = request.page_size
 
-        self.parse_sort_condition(request.sort_model)
+        self.parse_query_columns_ag_grid(
+            parse_breakdowns=parse_breakdowns,
+            ag_query_columns=request.ag_columns,
+        )
+        self.parse_filter_model(request.filter_model)
+        self.parse_sort_condition()
 
     def parse_filter_model(self, filter_model=None):
         if filter_model is None:
@@ -304,21 +313,22 @@ class QueryBuilderFacebookRequestParser:
 
         self.filtering = json.dumps(filter_objects)
 
-    def parse_sort_condition(self, sort_model):
+    def parse_sort_condition(self, sort_model=None) -> None:
 
         if not sort_model:
             self.__sort = ['date_start']
-        else:
-            required_sort = sort_model[0]
-            column_name = required_sort['colId']
-            facebook_filter_name = self.retrieve_filter_property_name(column_name)
+            return
 
-            if required_sort['sort'] == "asc":
-                self.__sort = facebook_filter_name + "_ascending"
-            elif required_sort['sort'] == "desc":
-                self.__sort = facebook_filter_name + "_descending"
-            else:
-                self.__sort = ""
+        required_sort = sort_model[0]
+        column_name = required_sort['colId']
+        facebook_filter_name = self.retrieve_filter_property_name(column_name)
+
+        if required_sort['sort'] == "asc":
+            self.__sort = facebook_filter_name + "_ascending"
+        elif required_sort['sort'] == "desc":
+            self.__sort = facebook_filter_name + "_descending"
+
+        self.__sort = ""
 
     def remove_structure_fields(self):
         self.__structure_fields = []
@@ -328,8 +338,9 @@ class QueryBuilderFacebookRequestParser:
         return getattr(FieldsMetadata, name, None)
 
     def retrieve_filter_property_name(self, column_name):
-        if column_name in [FieldsMetadata.results.name,FieldsMetadata.cost_per_result.name]:
+        if column_name in [FieldsMetadata.results.name, FieldsMetadata.cost_per_result.name]:
             return column_name
+
         # Facebook Graph API requires campaign.id instead of campaign_id
         if column_name in [
             FieldsMetadata.campaign_id.name,

@@ -1,8 +1,8 @@
+from Core.Metadata.Columns.ViewColumns.ViewColumnCategory import ViewColumnCategory
+from Core.Metadata.Columns.ViewColumns.ViewColumnType import ViewColumnType
 from Core.Tools.Misc.Autoincrement import Autoincrement
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumn import ViewColumn
-from Core.Metadata.Columns.ViewColumns.ViewColumnCategory import ViewColumnCategory
-from Core.Metadata.Columns.ViewColumns.ViewColumnType import ViewColumnType
 
 
 class ViewFieldsMetricPerformanceMetadata:

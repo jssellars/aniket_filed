@@ -1,3 +1,4 @@
+from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
@@ -856,7 +857,8 @@ class FieldsMetricStandardEventsMetadata:
                                                               operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                               field_value=GraphAPIInsightsFields.landing_page_views)]),
                                      action_breakdowns=[GraphAPIInsightsFields.action_type],
-                                     field_type=FieldType.ACTION_INSIGHT)
+                                     field_type=FieldType.ACTION_INSIGHT,
+                                     positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)
     landing_page_views_unique = Field(name='landing_page_views_unique',
                                       facebook_fields=[GraphAPIInsightsFields.unique_actions],
                                       mapper=ActionFieldMapper(field_filter=[
@@ -872,7 +874,8 @@ class FieldsMetricStandardEventsMetadata:
                                                              operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                              field_value=GraphAPIInsightsFields.landing_page_views)]),
                                     action_breakdowns=[GraphAPIInsightsFields.action_type],
-                                    field_type=FieldType.ACTION_INSIGHT)
+                                    field_type=FieldType.ACTION_INSIGHT,
+                                    positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     landing_page_views_unique_cost = Field(name='landing_page_views_unique_cost',
                                            facebook_fields=[GraphAPIInsightsFields.cost_per_unique_action_type],
                                            mapper=ActionFieldMapper(field_filter=[
@@ -889,7 +892,8 @@ class FieldsMetricStandardEventsMetadata:
                                                                operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                                field_value=GraphAPIInsightsFields.leads)]),
                         action_breakdowns=[GraphAPIInsightsFields.action_type],
-                        field_type=FieldType.ACTION_INSIGHT)
+                        field_type=FieldType.ACTION_INSIGHT,
+                        positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)
     website_leads_total = Field(name='website_leads_total',
                                 facebook_fields=[GraphAPIInsightsFields.actions],
                                 mapper=ActionFieldMapper(
@@ -961,7 +965,8 @@ class FieldsMetricStandardEventsMetadata:
                                                               operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                               field_value=GraphAPIInsightsFields.leads)]),
                        action_breakdowns=[GraphAPIInsightsFields.action_type],
-                       field_type=FieldType.ACTION_INSIGHT)
+                       field_type=FieldType.ACTION_INSIGHT,
+                       positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     # on-facebook workflow completions
     on_facebook_workflow_completions_total = Field(name='on_facebook_workflow_completions_total',
                                                    facebook_fields=[GraphAPIInsightsFields.actions],
@@ -1029,7 +1034,8 @@ class FieldsMetricStandardEventsMetadata:
                                                                    operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                                    field_value=GraphAPIInsightsFields.purchases)]),
                             action_breakdowns=[GraphAPIInsightsFields.action_type],
-                            field_type=FieldType.ACTION_INSIGHT)
+                            field_type=FieldType.ACTION_INSIGHT,
+                            positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)
     mobile_app_purchases_total = Field(name='mobile_app_purchases_total',
                                        facebook_fields=[GraphAPIInsightsFields.actions],
                                        mapper=ActionFieldMapper(field_filter=[
@@ -1111,7 +1117,8 @@ class FieldsMetricStandardEventsMetadata:
                                                                   operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                                   field_value=GraphAPIInsightsFields.purchases)]),
                            action_breakdowns=[GraphAPIInsightsFields.action_type],
-                           field_type=FieldType.ACTION_INSIGHT)
+                           field_type=FieldType.ACTION_INSIGHT,
+                           positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     purchases_unique_cost = Field(name='purchases_unique_cost',
                                   facebook_fields=[GraphAPIInsightsFields.cost_per_unique_action_type],
                                   mapper=ActionFieldMapper(

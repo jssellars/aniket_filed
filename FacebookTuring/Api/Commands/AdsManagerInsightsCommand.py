@@ -1,8 +1,9 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class AdsManagerInsightsCommandEnum(Enum):
-    INSIGHTS = 1
-    INSIGHTS_WITH_TOTALS = 2
-    REPORTS = 3
-    AG_GRID_INSIGHTS = 4
+    INSIGHTS = auto()
+    INSIGHTS_WITH_TOTALS = auto()
+    REPORTS = auto()
+    AG_GRID_INSIGHTS = auto()
+    AG_GRID_INSIGHTS_TREND = auto()

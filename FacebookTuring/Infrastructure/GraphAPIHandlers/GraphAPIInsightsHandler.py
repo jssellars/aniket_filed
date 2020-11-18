@@ -424,7 +424,7 @@ class GraphAPIInsightsHandler:
     def get_ag_grid_insights(
         cls,
         permanent_token: typing.AnyStr = None,
-        level: typing.AnyStr = None,
+        level: str = None,
         ad_account_id: typing.AnyStr = None,
         fields: typing.List[typing.AnyStr] = None,
         parameters: typing.Dict = None,

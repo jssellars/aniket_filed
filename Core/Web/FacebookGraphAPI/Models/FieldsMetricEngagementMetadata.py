@@ -1,3 +1,4 @@
+from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
@@ -419,7 +420,8 @@ class FieldsMetricEngagementMetadata:
     unique_ctr_all = Field(name="unique_ctr_all",
                            facebook_fields=[GraphAPIInsightsFields.unique_ctr],
                            mapper=OneToOneFieldMapper(),
-                           field_type=FieldType.INSIGHT)
+                           field_type=FieldType.INSIGHT,
+                           positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)
     instant_experience_clicks_to_open = Field(name="instant_experience_clicks_to_open",
                                               facebook_fields=[
                                                   GraphAPIInsightsFields.instant_experience_clicks_to_open],
@@ -443,7 +445,8 @@ class FieldsMetricEngagementMetadata:
                                                                        operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                                        field_value=GraphAPIInsightsFields.link_click)]),
                                 action_breakdowns=[GraphAPIInsightsFields.action_type],
-                                field_type=FieldType.ACTION_INSIGHT)
+                                field_type=FieldType.ACTION_INSIGHT,
+                                positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
 
     cost_per_unique_link_click = Field(name="cost_per_unique_link_click",
                                        facebook_fields=[GraphAPIInsightsFields.cost_per_unique_action_type],

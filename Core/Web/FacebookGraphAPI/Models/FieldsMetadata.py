@@ -1,3 +1,4 @@
+from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
@@ -38,4 +39,5 @@ class FieldsMetadata(FieldsStructureMetadata,
                                                                  operator=ActionFieldConditionOperatorEnum.EQUALS,
                                                                  field_value=GraphAPIInsightsFields.omni_purchase)]),
                           action_breakdowns=[GraphAPIInsightsFields.action_type],
-                          field_type=FieldType.ACTION_INSIGHT)
+                          field_type=FieldType.ACTION_INSIGHT,
+                          positive_effect_trend_direction=PositiveEffectTrendDirection.INCREASING)

@@ -23,6 +23,7 @@ class ViewFieldsStructureMetadata:
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=True,
         pinned=PinnedDirection.LEFT,
+        is_toggle=True,
     )
     account_status = ViewColumn(
         Autoincrement.hex_string("status"),
