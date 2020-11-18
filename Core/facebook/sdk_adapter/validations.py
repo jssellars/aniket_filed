@@ -2,164 +2,233 @@ from enum import Enum
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
 from Core.facebook.sdk_adapter.ad_objects.ad_creative import CallToActionType
+from Core.facebook.sdk_adapter.ad_objects.ad_insights import (
+    ActionAttributionWindowClick,
+    ActionAttributionWindowView,
+)
 from Core.facebook.sdk_adapter.ad_objects.ad_preview import AdFormat
 from Core.facebook.sdk_adapter.ad_objects.ad_set import BillingEvent, PacingType
-from Core.facebook.sdk_adapter.ad_objects.campaign import BidStrategy, Objective
+from Core.facebook.sdk_adapter.ad_objects.campaign import (
+    BidStrategy,
+    Objective,
+    ObjectiveWithDestination,
+)
 from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement
 from Core.facebook.sdk_adapter.ad_objects.reach_frequency_prediction import BuyingType
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum
 
 
+# https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group#objective_creative
+# https://www.facebook.com/business/ads-guide/
+# https://www.facebook.com/business/ads-guide/image/facebook-feed
+# https://www.facebook.com/business/ads-guide/video/audience-network-native/app-installs
+# https://www.facebook.com/business/ads-guide/carousel/facebook-feed/traffic
+# https://www.facebook.com/business/ads-guide/collection/facebook-feed/website-conversions
+# https://www.facebook.com/business/help/410873986524407
+
+# TODO: include data from OBJECTIVE_X_PLACEMENT_X_CTA
+from Core.facebook.sdk_adapter.validation_models import JointCat
+
 OBJECTIVE_X_CALL_TO_ACTION_TYPE = {
     Objective.APP_INSTALLS: [
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.INSTALL_APP,  # Install Now
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.LISTEN_NOW,  # Listen Now
         CallToActionType.NO_BUTTON,
-        CallToActionType.PLAY_GAME,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.LISTEN_NOW,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
-        CallToActionType.WATCH_MORE,
-        CallToActionType.INSTALL_APP,
-        CallToActionType.USE_APP,
+        CallToActionType.PLAY_GAME,  # Play Game
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+        CallToActionType.USE_APP,  # Use App
+        CallToActionType.WATCH_MORE,  # Watch More
     ],
     Objective.BRAND_AWARENESS: [
+        CallToActionType.APPLY_NOW,  # Apply Now
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.CONTACT_US,  # Contact Us
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.GET_SHOWTIMES,  # Get Showtimes
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.LISTEN_NOW,  # Listen Now
+        CallToActionType.MESSAGE_PAGE,  # Send Message
         CallToActionType.NO_BUTTON,
-        CallToActionType.MESSAGE_PAGE,
-        CallToActionType.APPLY_NOW,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.CONTACT_US,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.GET_QUOTE,
-        CallToActionType.GET_SHOWTIMES,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.LISTEN_NOW,
-        CallToActionType.SEE_MORE,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
-        CallToActionType.WATCH_MORE,
-        CallToActionType.WHATSAPP_MESSAGE,
+        CallToActionType.REQUEST_TIME,  # Request Time
+        CallToActionType.SEE_MORE,  # See Menu
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+        CallToActionType.WATCH_MORE,  # Watch More
+        CallToActionType.WHATSAPP_MESSAGE,  # Send WhatsApp Message
     ],
     Objective.CONVERSIONS: [
+        # Donate Now  # TODO: find matching value in enum
+        CallToActionType.APPLY_NOW,  # Apply Now
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.CONTACT_US,  # Contact Us
+        # CallToActionType.DOWNLOAD,  # TODO: see if we still need old catalog value
+        CallToActionType.GET_OFFER,  # Get Offer
+        CallToActionType.GET_QUOTE,  # Get Quote
+        # CallToActionType.GET_SHOWTIMES,  # TODO: see if we still need old catalog value
+        CallToActionType.LEARN_MORE,  # Learn More
+        # CallToActionType.LISTEN_NOW,  # TODO: see if we still need old catalog value
+        CallToActionType.MESSAGE_PAGE,  # Send Message
         CallToActionType.NO_BUTTON,
-        CallToActionType.PLAY_GAME,
-        CallToActionType.APPLY_NOW,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.CONTACT_US,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.GET_QUOTE,
-        CallToActionType.GET_SHOWTIMES,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.LISTEN_NOW,
-        CallToActionType.SEE_MORE,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
-        CallToActionType.WATCH_MORE,
-        CallToActionType.WHATSAPP_MESSAGE,
-        CallToActionType.GET_OFFER,
+        CallToActionType.PLAY_GAME,  # Play Game
+        # CallToActionType.SEE_MORE,  # TODO: see if we still need old catalog value
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+        # CallToActionType.WATCH_MORE,  # TODO: see if we still need old catalog value
+        # CallToActionType.WHATSAPP_MESSAGE,  # TODO: see if we still need old catalog value
     ],
     Objective.LEAD_GENERATION: [
-        CallToActionType.APPLY_NOW,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.GET_OFFER,
-        CallToActionType.GET_QUOTE,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
+        CallToActionType.APPLY_NOW,  # Apply Now
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.GET_OFFER,  # Get Offer
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
     ],
-    # TODO: name X name
+    Objective.EVENT_RESPONSES: [
+        # View Event  # TODO: find matching value in enum
+    ],
+    Objective.LINK_CLICKS: [
+        # Donate Now  # TODO: find matching value in enum
+        CallToActionType.APPLY_NOW,  # Apply Now
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.BUY_TICKETS,  # Buy Tickets
+        CallToActionType.CALL,  # Call Now
+        CallToActionType.CONTACT_US,  # Contact Us
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.GET_OFFER,  # Get Offer
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.GET_SHOWTIMES,  # Get Showtimes
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.LISTEN_NOW,  # Listen Now
+        CallToActionType.REQUEST_TIME,  # Request Time
+        CallToActionType.SEE_MORE,  # See Menu
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+        CallToActionType.WATCH_MORE,  # Watch More
+    ],
+    # TODO: see how to use info below, in old catalogs definition style,
+    #  not found in current API docs
     # Objective.LINK_CLICKS_X_APP: [
-    #     CallToActionType.NO_BUTTON,
-    #     CallToActionType.OPEN_LINK,
-    #     CallToActionType.PLAY_GAME,
-    #     CallToActionType.USE_APP,
     #     CallToActionType.BOOK_TRAVEL,
     #     CallToActionType.LEARN_MORE,
     #     CallToActionType.LISTEN_NOW,
+    #     CallToActionType.NO_BUTTON,
+    #     CallToActionType.OPEN_LINK,
+    #     CallToActionType.PLAY_GAME,
     #     CallToActionType.SHOP_NOW,
     #     CallToActionType.SUBSCRIBE,
+    #     CallToActionType.USE_APP,
     #     CallToActionType.WATCH_MORE,
     # ],
-    # TODO: name X name
     # Objective.LINK_CLICKS_X_WEBSITE: [
-    #     CallToActionType.NO_BUTTON,
     #     CallToActionType.APPLY_NOW,
     #     CallToActionType.BOOK_TRAVEL,
     #     CallToActionType.CONTACT_US,
     #     CallToActionType.DOWNLOAD,
+    #     CallToActionType.GET_OFFER,
     #     CallToActionType.GET_QUOTE,
     #     CallToActionType.GET_SHOWTIMES,
     #     CallToActionType.LEARN_MORE,
     #     CallToActionType.LISTEN_NOW,
+    #     CallToActionType.NO_BUTTON,
     #     CallToActionType.SEE_MORE,
     #     CallToActionType.SHOP_NOW,
     #     CallToActionType.SIGN_UP,
     #     CallToActionType.SUBSCRIBE,
     #     CallToActionType.WATCH_MORE,
     #     CallToActionType.WHATSAPP_MESSAGE,
-    #     CallToActionType.GET_OFFER,
     # ],
-    Objective.PAGE_LIKES: [CallToActionType.LIKE_PAGE],
+    Objective.MESSAGES: [
+        # Donate Now  # TODO: find matching value in enum
+        CallToActionType.APPLY_NOW,  # Apply Now
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.CONTACT_US,  # Contact Us
+        CallToActionType.GET_OFFER,  # Get Offer
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.MESSAGE_PAGE,  # Send Message
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+    ],
+    Objective.PAGE_LIKES: [CallToActionType.LIKE_PAGE,],  # Like Page
     Objective.POST_ENGAGEMENT: [
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.MESSAGE_PAGE,  # Send Message
         CallToActionType.NO_BUTTON,
-        CallToActionType.GET_QUOTE,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.MESSAGE_PAGE,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.WHATSAPP_MESSAGE,
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.WHATSAPP_MESSAGE,  # Send WhatsApp Message
     ],
     Objective.PRODUCT_CATALOG_SALES: [
+        # Donate Now  # TODO: find matching value in enum
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.GET_SHOWTIMES,  # Get Showtimes
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.LISTEN_NOW,  # Listen Now
+        # CallToActionType.MESSAGE_PAGE,  # TODO: see if we still need old catalog value
         CallToActionType.NO_BUTTON,
-        CallToActionType.OPEN_LINK,
-        CallToActionType.MESSAGE_PAGE,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.GET_SHOWTIMES,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.LISTEN_NOW,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
+        CallToActionType.OPEN_LINK,  # Open Link
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
     ],
     Objective.REACH: [
+        CallToActionType.APPLY_NOW,  # Apply Now
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        # CallToActionType.CALL,  # TODO: see if we still need old catalog value
+        CallToActionType.CONTACT_US,  # Contact Us
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.GET_DIRECTIONS,  # Get Directions
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.GET_SHOWTIMES,  # Get Showtimes
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.LISTEN_NOW,  # Listen Now
+        CallToActionType.MESSAGE_PAGE,  # Send Message
         CallToActionType.NO_BUTTON,
-        CallToActionType.MESSAGE_PAGE,
-        CallToActionType.APPLY_NOW,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.CONTACT_US,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.GET_QUOTE,
-        CallToActionType.GET_SHOWTIMES,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.LISTEN_NOW,
-        CallToActionType.SEE_MORE,
-        CallToActionType.CALL,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.GET_DIRECTIONS,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
-        CallToActionType.WATCH_MORE,
-        CallToActionType.WHATSAPP_MESSAGE,
+        CallToActionType.REQUEST_TIME,  # Request Time
+        # Save  # TODO: find matching value in enum
+        CallToActionType.SEE_MORE,  # See Menu
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+        CallToActionType.WATCH_MORE,  # Watch More
+        CallToActionType.WHATSAPP_MESSAGE,  # Send WhatsApp Message
+    ],
+    Objective.LOCAL_AWARENESS: [
+        CallToActionType.CALL,  # Call Now
+        CallToActionType.GET_DIRECTIONS,  # Get Directions
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.MESSAGE_PAGE,  # Send Message
+        CallToActionType.ORDER_NOW,  # Order Now
+        CallToActionType.SHOP_NOW,  # Shop Now
     ],
     Objective.VIDEO_VIEWS: [
-        CallToActionType.MESSAGE_PAGE,
-        CallToActionType.BOOK_TRAVEL,
-        CallToActionType.DOWNLOAD,
-        CallToActionType.GET_QUOTE,
-        CallToActionType.GET_SHOWTIMES,
-        CallToActionType.LEARN_MORE,
-        CallToActionType.LISTEN_NOW,
-        CallToActionType.SHOP_NOW,
-        CallToActionType.SIGN_UP,
-        CallToActionType.SUBSCRIBE,
-        CallToActionType.WATCH_MORE,
-        CallToActionType.WHATSAPP_MESSAGE,
+        CallToActionType.BOOK_TRAVEL,  # Book Now
+        CallToActionType.DOWNLOAD,  # Download
+        CallToActionType.GET_QUOTE,  # Get Quote
+        CallToActionType.GET_SHOWTIMES,  # Get Showtimes
+        CallToActionType.LEARN_MORE,  # Learn More
+        CallToActionType.LISTEN_NOW,  # Listen Now
+        CallToActionType.MESSAGE_PAGE,  # Send Message
+        CallToActionType.SHOP_NOW,  # Shop Now
+        CallToActionType.SIGN_UP,  # Sign Up
+        CallToActionType.SUBSCRIBE,  # Subscribe
+        CallToActionType.WATCH_MORE,  # Watch More
+        CallToActionType.WHATSAPP_MESSAGE,  # Send WhatsApp Message
     ],
 }
 
@@ -201,243 +270,6 @@ PLACEMENT_X_AD_FORMAT = PLATFORM_X_POSITION_X_AD_FORMAT = {
 }
 
 
-# TODO: see if this structure is useful, i.e. if OBJECTIVE_X_DEVICE_PLATFORM is selected somewhere before placement
-# TODO: add Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__
-# OBJECTIVE_X_DEVICE_PLATFORM_X_PLACEMENT = OBJECTIVE_X_DEVICE_PLATFORM_X_PLATFORM_X_POSITION = {
-#     Objective.APP_INSTALLS: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#         DevicePlatform.DESKTOP: [Placement.FACEBOOK_FEED, Placement.FACEBOOK_VIDEO_FEEDS],
-#     },
-#     Objective.BRAND_AWARENESS: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_STORIES,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#         ],
-#     },
-#     Objective.CONVERSIONS: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_RIGHT_COLUMN,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.FACEBOOK_RIGHT_COLUMN,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#     },
-#     Objective.LEAD_GENERATION: {
-#         DevicePlatform.MOBILE: [Placement.FACEBOOK_FEED, Placement.FACEBOOK_STORIES, Placement.INSTAGRAM_FEED],
-#         DevicePlatform.DESKTOP: [Placement.FACEBOOK_FEED],
-#     },
-#     Objective.LINK_CLICKS: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_RIGHT_COLUMN,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_RIGHT_COLUMN,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#     },
-#     Objective.LOCAL_AWARENESS: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#         ],
-#     },
-#     Objective.PAGE_LIKES: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#         ],
-#     },
-#     Objective.POST_ENGAGEMENT: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#         ],
-#     },
-#     Objective.PRODUCT_CATALOG_SALES: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_RIGHT_COLUMN,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_RIGHT_COLUMN,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#     },
-#     Objective.REACH: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#     },
-#     Objective.VIDEO_VIEWS: {
-#         DevicePlatform.MOBILE: [
-#             Placement.FACEBOOK_STORIES,
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_INSTANT_ARTICLES,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.INSTAGRAM_FEED,
-#             Placement.INSTAGRAM_EXPLORE,
-#             Placement.INSTAGRAM_STORIES,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#         DevicePlatform.DESKTOP: [
-#             Placement.FACEBOOK_FEED,
-#             Placement.FACEBOOK_IN_STREAM_VIDEO,
-#             Placement.FACEBOOK_MARKETPLACE,
-#             Placement.FACEBOOK_SEARCH_RESULTS,
-#             Placement.FACEBOOK_VIDEO_FEEDS,
-#             Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
-#             Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__,
-#             Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
-#         ],
-#     },
-# }
-
 # TODO: add Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__
 OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVICE_PLATFORM = {
     Objective.APP_INSTALLS: {
@@ -459,7 +291,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.FACEBOOK_STORIES: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_FEED: [DevicePlatform.MOBILE],
         Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
-        Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
+        # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
     Objective.CONVERSIONS: {
         Placement.FACEBOOK_FEED: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
@@ -474,7 +306,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.INSTAGRAM_EXPLORE: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
         Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.DESKTOP],
-        Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.DESKTOP],
+        # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.DESKTOP],
         Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [DevicePlatform.DESKTOP],
     },
     Objective.LEAD_GENERATION: {
@@ -495,7 +327,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.INSTAGRAM_EXPLORE: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
         Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
-        Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
+        # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
     Objective.LOCAL_AWARENESS: {
@@ -541,7 +373,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.INSTAGRAM_EXPLORE: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
         Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
-        Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
+        # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
     Objective.REACH: {
@@ -556,7 +388,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.INSTAGRAM_EXPLORE: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
         Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
-        Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
+        # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
     Objective.VIDEO_VIEWS: {
@@ -571,7 +403,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.INSTAGRAM_EXPLORE: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
         Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
-        Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
+        # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
 }
@@ -579,34 +411,6 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
 
 # https://www.facebook.com/business/help/279271845888065
 
-# TODO: see if following data from old catalogs are relevant
-
-# image = (str(FiledAdFormatEnum.IMAGE.value))
-# video = (str(FiledAdFormatEnum.VIDEO.value))
-# carousel = (str(FiledAdFormatEnum.CAROUSEL.value))
-# existing_post = (str(FiledAdFormatEnum.EXISTING_POST.value))
-#
-# class AdFormat(Base):
-#     brand_awareness = objectives.brand_awareness.with_children(image, video, carousel)
-#     reach = objectives.reach.with_children(image, video, carousel)
-#     website_traffic = objectives.website_traffic.with_children(image, video, carousel)
-#     page_likes = objectives.page_likes.with_children(image, video, existing_post)
-#     post_likes = objectives.post_likes.with_children(image, video)
-#     event_responses = objectives.event_responses.with_children(image, video)
-#     app_installs = objectives.app_installs.with_children(image, video, carousel)
-#     traffic_for_apps = objectives.app_traffic.with_children(image, video, carousel)
-#     # Existing post only works with a video post. This should be validated on FE when the post is selected I think
-#     video_views = objectives.video_views.with_children(video, existing_post)
-#     lead_generation = objectives.lead_generation.with_children(image, video, carousel)
-#     conversions = objectives.conversions_leaf.with_children(image, video, carousel)
-#     catalog_sales = objectives.catalog_sales.with_children(image, carousel)
-
-# _media_format = GraphAPIAdPreviewBuilderHandler.FiledAdFormatEnum
-#
-# _mf_img = _media_format.IMAGE.name
-# _mf_vid = _media_format.VIDEO.name
-# _mf_car = _media_format.CAROUSEL.name
-# _mf_col = _media_format.COLLECTION.name
 
 @cat_enum
 class MediaFormat(Enum):
@@ -626,42 +430,7 @@ _mf_col = MediaFormat.COLLECTION
 
 
 OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
-    Objective.STORE_TRAFFIC: {
-        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
-        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_STORIES: [_mf_img, _mf_vid, _mf_car],
-        Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
-        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
-    },
-    Objective.CONVERSIONS: {
-        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
-        Placement.FACEBOOK_RIGHT_COLUMN: [_mf_img, _mf_car],
-        Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_IN_STREAM_VIDEO: [_mf_vid],
-        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_STORIES: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_VIDEO_FEEDS: [_mf_vid],
-        Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
-        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
-        Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
-        Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [_mf_vid],
-        Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
-        Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
-    },
-    Objective.CATALOG_SALES: {
-        Placement.FACEBOOK_FEED: [_mf_img, _mf_car, _mf_col],
-        Placement.FACEBOOK_RIGHT_COLUMN: [_mf_img, _mf_car],
-        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_STORIES: [_mf_car],
-        Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
-        Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
-        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car],
-        Placement.INSTAGRAM_EXPLORE: [_mf_img],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_INTERSTITIAL: [_mf_img, _mf_car],
-        Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
-    },
+    # old catalogs: image, video, carousel
     Objective.BRAND_AWARENESS: {
         Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car],
         Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
@@ -675,6 +444,7 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
         Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
         Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
     },
+    # old catalogs: image, video, carousel
     Objective.REACH: {
         Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car],
         Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
@@ -686,10 +456,11 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
         Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
         Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car],
         Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
         Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
     },
-    Objective.APP_TRAFFIC: {
+    # old catalogs: image, video, carousel
+    Objective.LINK_CLICKS: {
         Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
         Placement.FACEBOOK_RIGHT_COLUMN: [_mf_img, _mf_car],
         Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
@@ -700,10 +471,28 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
         Placement.FACEBOOK_VIDEO_FEEDS: [_mf_vid],
         Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
         Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
         Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
         Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
     },
+    # old catalogs: image, video
+    Objective.POST_ENGAGEMENT: {
+        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid],
+        Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid],
+        Placement.FACEBOOK_IN_STREAM_VIDEO: [_mf_vid],
+        Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_VIDEO_FEEDS: [_mf_vid],
+        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid],
+        Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
+    },
+    # old catalogs: image, video, existing_post
+    Objective.PAGE_LIKES: {Placement.FACEBOOK_FEED: [_mf_img, _mf_vid]},
+    # old catalogs: image, video
+    Objective.EVENT_RESPONSES: {
+        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid],
+        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
+    },
+    # old catalogs: image, video, carousel
     Objective.APP_INSTALLS: {
         Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car],
         Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
@@ -714,28 +503,12 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
         Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
         Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car],
         Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
         Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [_mf_vid],
         Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
         Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
     },
-    Objective.PAGE_LIKES: {Placement.FACEBOOK_FEED: [_mf_img, _mf_vid]},
-    Objective.EVENT_RESPONSES: {
-        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid],
-        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
-    },
-    # TODO: Objective.ENGAGEMENT doesn't exist, use components
-    Objective.ENGAGEMENT: {
-        # post_likes,
-        # page_likes,
-        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid],
-        Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid],
-        Placement.FACEBOOK_IN_STREAM_VIDEO: [_mf_vid],
-        Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
-        Placement.FACEBOOK_VIDEO_FEEDS: [_mf_vid],
-        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid],
-        Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
-    },
+    # old catalogs: video, existing_post
     Objective.VIDEO_VIEWS: {
         Placement.FACEBOOK_FEED: [_mf_vid],
         Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_vid],
@@ -747,9 +520,10 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
         Placement.INSTAGRAM_STORIES: [_mf_vid, _mf_car],
         Placement.INSTAGRAM_FEED: [_mf_vid],
         Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_INTERSTITIAL: [_mf_vid],
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_vid],
         Placement.MESSENGER_STORIES: [_mf_vid],
     },
+    # old catalogs: image, video, carousel
     Objective.LEAD_GENERATION: {
         Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car],
         Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
@@ -773,6 +547,44 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
         Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
         Placement.SPONSORED_MESSAGE: [_mf_img],
         Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
+    },
+    # old catalogs: image, video, carousel
+    Objective.CONVERSIONS: {
+        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
+        Placement.FACEBOOK_RIGHT_COLUMN: [_mf_img, _mf_car],
+        Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_IN_STREAM_VIDEO: [_mf_vid],
+        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_STORIES: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_VIDEO_FEEDS: [_mf_vid],
+        Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
+        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
+        Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
+        Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [_mf_vid],
+        Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
+        Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
+    },
+    # old catalogs: image, carousel
+    Objective.PRODUCT_CATALOG_SALES: {
+        Placement.FACEBOOK_FEED: [_mf_img, _mf_car, _mf_col],
+        Placement.FACEBOOK_RIGHT_COLUMN: [_mf_img, _mf_car],
+        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_STORIES: [_mf_car],
+        Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
+        Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
+        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car],
+        Placement.INSTAGRAM_EXPLORE: [_mf_img],
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_img, _mf_car],
+        Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
+    },
+    Objective.LOCAL_AWARENESS: {
+        Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
+        Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
+        Placement.FACEBOOK_STORIES: [_mf_img, _mf_vid, _mf_car],
+        Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
+        Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car, _mf_col],
     },
 }
 
@@ -833,17 +645,6 @@ BID_STRATEGY_X_OBJECTIVE = {
 }
 
 
-class BidStrategyXPacingType(Enum):
-    COST_CAP_X_STANDARD = Cat(None, BidStrategy.COST_CAP, PacingType.STANDARD)
-    LOWEST_COST_WITHOUT_CAP_X_STANDARD = Cat(None, BidStrategy.LOWEST_COST_WITHOUT_CAP, PacingType.STANDARD)
-    LOWEST_COST_WITH_BID_CAP_X_STANDARD = Cat(None, BidStrategy.LOWEST_COST_WITH_BID_CAP, PacingType.STANDARD)
-    TARGET_COST_X_STANDARD = Cat(None, BidStrategy.TARGET_COST, PacingType.STANDARD)
-    LOWEST_COST_WITH_MIN_ROAS_X_STANDARD = Cat(None, BidStrategy.LOWEST_COST_WITH_MIN_ROAS, PacingType.STANDARD)
-
-    _ignore_ = ["joint_fields"]
-    joint_fields = [BidStrategy, PacingType]
-
-
 BID_STRATEGY_X_PACING_TYPE = {
     BidStrategy.COST_CAP: [PacingType.STANDARD],
     BidStrategy.LOWEST_COST_WITHOUT_CAP: [PacingType.STANDARD],
@@ -853,23 +654,9 @@ BID_STRATEGY_X_PACING_TYPE = {
 }
 
 
-class BillingEventXBuyingType(Enum):
-    APP_INSTALLS_X_RESERVED = Cat(None, BillingEvent.APP_INSTALLS, BuyingType.RESERVED)
-    APP_INSTALLS_X_FIXED_CPM = Cat(None, BillingEvent.APP_INSTALLS, BuyingType.FIXED_CPM)
-    APP_INSTALLS_X_AUCTION = Cat(None, BillingEvent.APP_INSTALLS, BuyingType.AUCTION)
-    IMPRESSIONS_X_AUCTION = Cat(None, BillingEvent.IMPRESSIONS, BuyingType.AUCTION)
-    LINK_CLICKS_X_AUCTION = Cat(None, BillingEvent.LINK_CLICKS, BuyingType.AUCTION)
-    PAGE_LIKES_X_AUCTION = Cat(None, BillingEvent.PAGE_LIKES, BuyingType.AUCTION)
-    POST_ENGAGEMENT_X_AUCTION = Cat(None, BillingEvent.POST_ENGAGEMENT, BuyingType.AUCTION)
-    THRUPLAY_X_AUCTION = Cat(None, BillingEvent.THRUPLAY, BuyingType.AUCTION)
-
-    _ignore_ = ["joint_fields"]
-    joint_fields = [BillingEvent, BuyingType]
-
-
 BUYING_TYPE_X_BILLING_EVENT = {
-    BuyingType.RESERVED: BillingEvent.APP_INSTALLS,
-    BuyingType.FIXED_CPM: BillingEvent.APP_INSTALLS,
+    BuyingType.RESERVED: [BillingEvent.APP_INSTALLS],
+    BuyingType.FIXED_CPM: [BillingEvent.APP_INSTALLS],
     BuyingType.AUCTION: [
         BillingEvent.APP_INSTALLS,
         BillingEvent.IMPRESSIONS,
@@ -882,46 +669,64 @@ BUYING_TYPE_X_BILLING_EVENT = {
 
 
 OPTIMIZATION_GOAL_X_BILLING_EVENT = {
-    OptimizationGoal.AD_RECALL_LIFT: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.APP_INSTALLS: [
-        BillingEventXBuyingType.IMPRESSIONS_X_AUCTION,
-        BillingEventXBuyingType.APP_INSTALLS_X_AUCTION,
-    ],
-    OptimizationGoal.ENGAGED_USERS: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.EVENT_RESPONSES: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.IMPRESSIONS: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.LANDING_PAGE_VIEWS: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.LEAD_GENERATION: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.LINK_CLICKS: [
-        BillingEventXBuyingType.LINK_CLICKS_X_AUCTION,
-        BillingEventXBuyingType.IMPRESSIONS_X_AUCTION,
-    ],
-    OptimizationGoal.OFFSITE_CONVERSIONS: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.PAGE_LIKES: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.POST_ENGAGEMENT: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.REACH: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.REPLIES: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.SOCIAL_IMPRESSIONS: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.THRUPLAY: [
-        BillingEventXBuyingType.IMPRESSIONS_X_AUCTION,
-        BillingEventXBuyingType.THRUPLAY_X_AUCTION,
-    ],
-    OptimizationGoal.TWO_SECOND_CONTINUOUS_VIDEO_VIEWS: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
-    OptimizationGoal.VALUE: [BillingEventXBuyingType.IMPRESSIONS_X_AUCTION],
+    OptimizationGoal.AD_RECALL_LIFT: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.APP_INSTALLS: {
+        BillingEvent.IMPRESSIONS: [BuyingType.AUCTION],
+        BillingEvent.APP_INSTALLS: [BuyingType.AUCTION],
+    },
+    OptimizationGoal.ENGAGED_USERS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.EVENT_RESPONSES: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.IMPRESSIONS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.LANDING_PAGE_VIEWS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.LEAD_GENERATION: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.LINK_CLICKS: {
+        BillingEvent.LINK_CLICKS: [BuyingType.AUCTION],
+        BillingEvent.IMPRESSIONS: [BuyingType.AUCTION],
+    },
+    OptimizationGoal.OFFSITE_CONVERSIONS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.PAGE_LIKES: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.POST_ENGAGEMENT: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.REACH: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.REPLIES: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.SOCIAL_IMPRESSIONS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.THRUPLAY: {
+        BillingEvent.IMPRESSIONS: [BuyingType.AUCTION],
+        BillingEvent.THRUPLAY: [BuyingType.AUCTION],
+    },
+    OptimizationGoal.TWO_SECOND_CONTINUOUS_VIDEO_VIEWS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
+    OptimizationGoal.VALUE: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
 }
 
 
 # https://developers.facebook.com/docs/marketing-api/bidding/overview#opt
 
-goals = "OPTIMIZATON_GOALS_FOR_ALL"
-goals_instant_experiences_app = "OPTIMIZATON_GOALS_FOR_INSTANT_EXPERIENCES_APP"
-goals_mobile_app = "OPTIMIZATON_GOALS_FOR_MOBILE_APP"
-goals_event = "OPTIMIZATON_GOALS_FOR_EVENT"
-goals_page_post = "OPTIMIZATON_GOALS_FOR_PAGE_POST"
 
-OBJECTIVE_X_OPTIMIZATION_GOAL = {
-    Objective.CONVERSIONS: (
-        goals,
+# TODO: find a more readable way of defining default values
+# the default is the first value, and the order is as is
+OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL = {
+    # TODO: no good value for DestinationType
+    # ObjectivePromotionTarget.INSTANT_EXPERIENCES_APP
+    # ObjectiveWithDestination.APP_INSTALLS_X_UNDEFINED: [
+    #     # first is default
+    #     OptimizationGoal.APP_INSTALLS,
+    #     OptimizationGoal.IMPRESSIONS,
+    #     OptimizationGoal.POST_ENGAGEMENT,
+    # ],
+    # ObjectivePromotionTarget.MOBILE_APP
+    ObjectiveWithDestination.APP_INSTALLS_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.APP_INSTALLS,
+        OptimizationGoal.OFFSITE_CONVERSIONS,
+        OptimizationGoal.LINK_CLICKS,
+        OptimizationGoal.REACH,
+        OptimizationGoal.VALUE,
+    ],
+    ObjectiveWithDestination.BRAND_AWARENESS_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.AD_RECALL_LIFT,
+    ],
+    ObjectiveWithDestination.CONVERSIONS_X_UNDEFINED: [
+        # first is default
         OptimizationGoal.OFFSITE_CONVERSIONS,
         OptimizationGoal.IMPRESSIONS,
         OptimizationGoal.POST_ENGAGEMENT,
@@ -930,84 +735,173 @@ OBJECTIVE_X_OPTIMIZATION_GOAL = {
         OptimizationGoal.VALUE,
         OptimizationGoal.LANDING_PAGE_VIEWS,
         OptimizationGoal.LINK_CLICKS,
-    ),
-    Objective.CATALOG_SALES: (
-        goals,
-        OptimizationGoal.OFFSITE_CONVERSIONS,
-        OptimizationGoal.IMPRESSIONS,
-        OptimizationGoal.POST_ENGAGEMENT,
-        OptimizationGoal.OFFSITE_CONVERSIONS,
-        OptimizationGoal.REACH,
-        OptimizationGoal.LINK_CLICKS,
-    ),
-    Objective.BRAND_AWARENESS: (goals, OptimizationGoal.AD_RECALL_LIFT,),
-    Objective.REACH: (goals, OptimizationGoal.REACH, OptimizationGoal.IMPRESSIONS),
-    Objective.APP_TRAFFIC: (
-        (
-            goals,
-            OptimizationGoal.LINK_CLICKS,
-            OptimizationGoal.IMPRESSIONS,
-            OptimizationGoal.POST_ENGAGEMENT,
-            OptimizationGoal.REACH,
-            OptimizationGoal.LANDING_PAGE_VIEWS,
-        ),
-        (
-            goals_instant_experiences_app,
-            OptimizationGoal.ENGAGED_USERS,
-            OptimizationGoal.APP_INSTALLS,
-            OptimizationGoal.IMPRESSIONS,
-            OptimizationGoal.POST_ENGAGEMENT,
-            OptimizationGoal.REACH,
-        ),
-        (
-            goals_mobile_app,
-            OptimizationGoal.LINK_CLICKS,
-            OptimizationGoal.IMPRESSIONS,
-            OptimizationGoal.REACH,
-            OptimizationGoal.OFFSITE_CONVERSIONS,
-        ),
-    ),
-    Objective.POST_ENGAGEMENT: (
-        goals,
-        OptimizationGoal.POST_ENGAGEMENT,
+    ],
+    # ObjectivePromotionTarget.EVENT
+    ObjectiveWithDestination.EVENT_RESPONSES_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.EVENT_RESPONSES,
         OptimizationGoal.IMPRESSIONS,
         OptimizationGoal.REACH,
+    ],
+    # ObjectivePromotionTarget.PAGE_POST
+    # TODO: no good value for DestinationType
+    # ObjectiveWithDestination.EVENT_RESPONSES_X_UNDEFINED: [
+    #     # first is default
+    #     OptimizationGoal.EVENT_RESPONSES,
+    #     OptimizationGoal.IMPRESSIONS,
+    #     OptimizationGoal.POST_ENGAGEMENT,
+    #     OptimizationGoal.REACH,
+    # ],
+    ObjectiveWithDestination.LEAD_GENERATION_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.LEAD_GENERATION,
+    ],
+    # ObjectivePromotionTarget.UNDEFINED
+    ObjectiveWithDestination.LINK_CLICKS_X_WEBSITE: [
+        # first is default
         OptimizationGoal.LINK_CLICKS,
-    ),
-    Objective.PAGE_LIKES: (
-        goals,
+        OptimizationGoal.IMPRESSIONS,
+        OptimizationGoal.POST_ENGAGEMENT,
+        OptimizationGoal.REACH,
+        OptimizationGoal.LANDING_PAGE_VIEWS,
+    ],
+    # ObjectivePromotionTarget.INSTANT_EXPERIENCES_APP
+    # TODO: no good value for DestinationType
+    # ObjectiveWithDestination.LINK_CLICKS_X_UNDEFINED: [
+    #     # first is default
+    #     OptimizationGoal.ENGAGED_USERS,
+    #     OptimizationGoal.APP_INSTALLS,
+    #     OptimizationGoal.IMPRESSIONS,
+    #     OptimizationGoal.POST_ENGAGEMENT,
+    #     OptimizationGoal.REACH,
+    # ],
+    # ObjectivePromotionTarget.MOBILE_APP
+    ObjectiveWithDestination.LINK_CLICKS_X_APP: [
+        # first is default
+        OptimizationGoal.LINK_CLICKS,
+        OptimizationGoal.IMPRESSIONS,
+        OptimizationGoal.REACH,
+        OptimizationGoal.OFFSITE_CONVERSIONS,
+    ],
+    ObjectiveWithDestination.MESSAGES_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.REPLIES,
+        OptimizationGoal.IMPRESSIONS,
+    ],
+    ObjectiveWithDestination.PAGE_LIKES_X_UNDEFINED: [
+        # first is default
         OptimizationGoal.PAGE_LIKES,
         OptimizationGoal.IMPRESSIONS,
         OptimizationGoal.POST_ENGAGEMENT,
         OptimizationGoal.REACH,
-    ),
-    Objective.EVENT_RESPONSES: (
-        (goals_event, OptimizationGoal.EVENT_RESPONSES, OptimizationGoal.IMPRESSIONS, OptimizationGoal.REACH),
-        (
-            goals_page_post,
-            OptimizationGoal.EVENT_RESPONSES,
-            OptimizationGoal.IMPRESSIONS,
-            OptimizationGoal.POST_ENGAGEMENT,
-            OptimizationGoal.REACH,
-        ),
-    ),
-    Objective.APP_INSTALLS: (
-        (
-            goals_instant_experiences_app,
-            OptimizationGoal.APP_INSTALLS,
-            OptimizationGoal.IMPRESSIONS,
-            OptimizationGoal.POST_ENGAGEMENT,
-        ),
-        (
-            goals_mobile_app,
-            OptimizationGoal.APP_INSTALLS,
-            OptimizationGoal.OFFSITE_CONVERSIONS,
-            OptimizationGoal.LINK_CLICKS,
-            OptimizationGoal.REACH,
-            OptimizationGoal.VALUE,
-        ),
-    ),
-    Objective.VIDEO_VIEWS: (goals, OptimizationGoal.THRUPLAY, OptimizationGoal.TWO_SECOND_CONTINUOUS_VIDEO_VIEWS),
-    Objective.LEAD_GENERATION: (goals, OptimizationGoal.LEAD_GENERATION),
-    Objective.MESSAGES: (goals, OptimizationGoal.REPLIES, OptimizationGoal.IMPRESSIONS),
+    ],
+    ObjectiveWithDestination.POST_ENGAGEMENT_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.POST_ENGAGEMENT,
+        OptimizationGoal.IMPRESSIONS,
+        OptimizationGoal.REACH,
+        OptimizationGoal.LINK_CLICKS,
+    ],
+    ObjectiveWithDestination.PRODUCT_CATALOG_SALES_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.OFFSITE_CONVERSIONS,
+        OptimizationGoal.IMPRESSIONS,
+        OptimizationGoal.POST_ENGAGEMENT,
+        OptimizationGoal.OFFSITE_CONVERSIONS,
+        OptimizationGoal.REACH,
+        OptimizationGoal.LINK_CLICKS,
+    ],
+    ObjectiveWithDestination.REACH_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.REACH,
+        OptimizationGoal.IMPRESSIONS,
+    ],
+    ObjectiveWithDestination.VIDEO_VIEWS_X_UNDEFINED: [
+        # first is default
+        OptimizationGoal.THRUPLAY,
+        OptimizationGoal.TWO_SECOND_CONTINUOUS_VIDEO_VIEWS,
+    ],
 }
+
+
+# https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group#attribution_spec
+
+# TODO: see how to include this rule, adding all the combinations to the rule seems excessive
+# For all other optimization_goal and objective combinations,
+# you can only use 1-day click for attribution_spec.
+
+
+OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBUTION_WINDOW_VIEW = {
+    Objective.CONVERSIONS: {
+        OptimizationGoal.OFFSITE_CONVERSIONS: {
+            ActionAttributionWindowClick.VALUE_1D: [
+                ActionAttributionWindowView.NONE,
+                ActionAttributionWindowView.VALUE_1D,
+            ],
+            ActionAttributionWindowClick.VALUE_7D: [
+                ActionAttributionWindowView.NONE,
+                ActionAttributionWindowView.VALUE_7D,
+            ],
+        },
+        # TODO: see hwo to use this, the optimization goal doesn't exist in the SDK
+        # OptimizationGoal.INCREMENTAL_OFFSITE_CONVERSIONS: {
+        #     ActionAttributionWindowClick.NONE: [
+        #         ActionAttributionWindowView.NONE,
+        #     ],
+        # },
+    },
+    Objective.PRODUCT_CATALOG_SALES: {
+        OptimizationGoal.OFFSITE_CONVERSIONS: {
+            ActionAttributionWindowClick.VALUE_1D: [
+                ActionAttributionWindowView.NONE,
+                ActionAttributionWindowView.VALUE_1D,
+            ],
+            ActionAttributionWindowClick.VALUE_7D: [
+                ActionAttributionWindowView.NONE,
+                ActionAttributionWindowView.VALUE_7D,
+            ],
+        },
+    },
+    Objective.APP_INSTALLS: {
+        OptimizationGoal.OFFSITE_CONVERSIONS: {
+            ActionAttributionWindowClick.VALUE_1D: [ActionAttributionWindowView.NONE]
+        },
+        OptimizationGoal.APP_INSTALLS: {
+            ActionAttributionWindowClick.VALUE_1D: [
+                ActionAttributionWindowView.NONE,
+                ActionAttributionWindowView.VALUE_1D,
+            ],
+        },
+    },
+    Objective.LINK_CLICKS: {
+        OptimizationGoal.OFFSITE_CONVERSIONS: {
+            ActionAttributionWindowClick.VALUE_1D: [ActionAttributionWindowView.NONE],
+            ActionAttributionWindowClick.VALUE_7D: [ActionAttributionWindowView.NONE],
+        },
+    },
+}
+
+
+JOINT_CATS = dict(
+    OBJECTIVE_X_CALL_TO_ACTION_TYPE=JointCat.from_dict(OBJECTIVE_X_CALL_TO_ACTION_TYPE, Objective, CallToActionType),
+    PLACEMENT_X_AD_FORMAT=JointCat.from_dict(PLACEMENT_X_AD_FORMAT, Placement, AdFormat),
+    OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM=JointCat.from_dict(
+        OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM, Objective, Placement, DevicePlatform
+    ),
+    BID_STRATEGY_X_OBJECTIVE=JointCat.from_dict(BID_STRATEGY_X_OBJECTIVE, BidStrategy, Objective),
+    BID_STRATEGY_X_PACING_TYPE=JointCat.from_dict(BID_STRATEGY_X_PACING_TYPE, BidStrategy, PacingType),
+    BUYING_TYPE_X_BILLING_EVENT=JointCat.from_dict(BUYING_TYPE_X_BILLING_EVENT, BuyingType, BillingEvent),
+    OPTIMIZATION_GOAL_X_BILLING_EVENT=JointCat.from_dict(
+        OPTIMIZATION_GOAL_X_BILLING_EVENT, OptimizationGoal, BillingEvent
+    ),
+    OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL=JointCat.from_dict(
+        OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL, ObjectiveWithDestination, OptimizationGoal
+    ),
+    OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBUTION_WINDOW_VIEW=JointCat.from_dict(
+        OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBUTION_WINDOW_VIEW,
+        Objective,
+        OptimizationGoal,
+        ActionAttributionWindowClick,
+        ActionAttributionWindowView,
+    ),
+)

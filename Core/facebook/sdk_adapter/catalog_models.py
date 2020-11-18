@@ -21,9 +21,7 @@ def enrich_flag(cls: Type[Flag]) -> Type[Flag]:
 
     # TODO: components should output [] for _NONE_
     setattr(
-        cls,
-        "components",
-        property(lambda self: [self] if self in cls else _decompose(cls, self.value)[0]),
+        cls, "components", property(lambda self: [self] if self in cls else _decompose(cls, self.value)[0]),
     )
     setattr(cls, "names", property(lambda self: [i.name for i in self.components]))
     setattr(cls, "names_repr", property(lambda self: "|".join(self.names)))
@@ -137,7 +135,10 @@ class Contexts(Flag):
         return result
 
     @classmethod
-    def all_with_items(cls, *items: Enum, default_item: Enum) -> Dict["Contexts", Cat]:
+    def all_with_items(cls, *items: Enum, default_item: Optional[Enum] = None) -> Dict["Contexts", Cat]:
+        if default_item is None and items:
+            default_item = items[0]
+
         return {i: i.as_cat_with_items(*items, default_item=default_item) for i in cls}
 
 
@@ -174,9 +175,7 @@ def cat_enum(cls: Type[Enum]) -> Type[Enum]:
         }
 
     setattr(
-        cls,
-        "contexts_as_dict",
-        classmethod(contexts_as_dict),
+        cls, "contexts_as_dict", classmethod(contexts_as_dict),
     )
 
     def as_dict(cls_) -> Dict:

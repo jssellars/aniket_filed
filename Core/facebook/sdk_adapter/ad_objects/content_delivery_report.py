@@ -52,6 +52,9 @@ class Position(Enum):
     VIDEO_FEEDS = Cat(_position.video_feeds)
 
 
+# https://developers.facebook.com/docs/marketing-api/audiences/reference/placement-targeting#newplacement
+
+
 @cat_enum
 class Placement(Enum):
     FACEBOOK_FEED = Cat(None, Platform.FACEBOOK, Position.FEED)

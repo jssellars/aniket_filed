@@ -2,7 +2,7 @@ from enum import Enum
 
 from facebook_business.adobjects.adset import AdSet
 
-from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum
+from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum, Contexts
 
 # https://developers.facebook.com/docs/marketing-api/bidding/overview/billing-events/#buying-type-validation
 
@@ -39,6 +39,8 @@ class PacingType(Enum):
     DAY_PARTING = Cat("day_parting")
     NO_PACING = Cat("no_pacing")
     DISABLED = Cat("disabled")
+
+    contexts = Contexts.all_with_items(STANDARD)
 
 
 # https://developers.facebook.com/docs/marketing-api/adset/destination_type

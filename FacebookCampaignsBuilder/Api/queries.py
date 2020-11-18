@@ -1,5 +1,6 @@
 import typing
 import urllib.parse
+from dataclasses import asdict
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adimage import AdImage
@@ -11,6 +12,7 @@ from Core.Tools.Misc.ObjectManipulators import extract_class_attributes_values
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from Core.facebook.sdk_adapter.validations import JOINT_CATS
 from FacebookCampaignsBuilder.Api.catalogs import (
     special_ad_category,
     special_ad_categories,
@@ -29,7 +31,7 @@ from FacebookCampaignsBuilder.Api.catalogs import (
     billing_event,
     optimization_goal,
 )
-from FacebookCampaignsBuilder.Api.cats import catalogs
+from FacebookCampaignsBuilder.Api.cats import CATS
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
 )
@@ -139,7 +141,10 @@ class BudgetValidation:
 
 class SmartCreateCats:
     def get(self):
-        return {c.__name__: c.as_dict() for c in catalogs}
+        result = {c.__name__: c.as_dict() for c in CATS}
+        result.update(validations={k: asdict(v) for k, v in JOINT_CATS.items()})
+
+        return result
 
 
 class SmartCreateCatalogs:
