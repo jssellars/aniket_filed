@@ -442,7 +442,6 @@ class TuringMongoRepository(MongoRepositoryBase):
                 {
                     MiscFieldsEnum.status: {
                         MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
-                                                    StructureStatusEnum.REMOVED.value,
                                                     StructureStatusEnum.DEPRECATED.value]
                     }
                 }
@@ -652,10 +651,16 @@ class TuringMongoRepository(MongoRepositoryBase):
                 },
                 {
                     MiscFieldsEnum.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
+                        MongoOperator.IN.value: [
+                            StructureStatusEnum.ACTIVE.value,
+                            StructureStatusEnum.PAUSED.value,
+                            StructureStatusEnum.REMOVED.value,
+                        ]
                     }
                 }
             ]
+
+
         }
         query = {
             MongoOperator.SET.value: {
