@@ -263,7 +263,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     adds_to_cart_unique_cost = ViewColumn(
         Autoincrement.hex_string("adds_to_cart_unique_cost"),
@@ -344,7 +344,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     mobile_checkouts_initiated_total = ViewColumn(
         Autoincrement.hex_string("mobile_checkouts_initiated_total"),
@@ -409,7 +409,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     checkouts_initiated_unique_cost = ViewColumn(
         Autoincrement.hex_string("checkouts_initiated_unique_cost"),
@@ -420,7 +420,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     checkouts_initiated_unique_total = ViewColumn(
         Autoincrement.hex_string("checkouts_initiated_unique_total"),
@@ -493,7 +493,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     content_views_unique_cost = ViewColumn(
         Autoincrement.hex_string("content_views_unique_cost"),
@@ -658,6 +658,8 @@ class ViewFieldsMetricStandardEventsMetadata:
         type_id=ViewColumnType.NUMBER.value,
         category_id=ViewColumnCategory.CONVERSION.value,
         is_fixed=False,
+        description="The number of times that a person clicked on an ad link and successfully loaded the destination"
+                    " web page.",
     )
     landing_page_views_unique = ViewColumn(
         Autoincrement.hex_string("landing_page_views_unique"),
@@ -676,7 +678,8 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The average cost for each landing page view.",
     )
     landing_page_views_unique_cost = ViewColumn(
         Autoincrement.hex_string("landing_page_views_unique_cost"),
@@ -687,7 +690,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     leads_total = ViewColumn(
         Autoincrement.hex_string("leads_total"),
@@ -698,6 +701,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
+        description="The number of Lead events attributed to your ads.",
     )
     website_leads_total = ViewColumn(
         Autoincrement.hex_string("website_leads_total"),
@@ -764,6 +768,8 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
+        no_of_decimals=2,
+        description="The average cost of each Lead.",
     )
     on_facebook_workflow_completions_total = ViewColumn(
         Autoincrement.hex_string("on_facebook_workflow_completions_total"),
@@ -828,6 +834,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         type_id=ViewColumnType.NUMBER.value,
         category_id=ViewColumnCategory.CONVERSION.value,
         is_fixed=False,
+        description="The number of Purchase events attributed to your ads.",
     )
     mobile_app_purchases_total = ViewColumn(
         Autoincrement.hex_string("mobile_app_purchases_total"),
@@ -901,7 +908,8 @@ class ViewFieldsMetricStandardEventsMetadata:
         category_id=ViewColumnCategory.CONVERSION.value,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The average cost of each purchase.",
     )
     purchases_unique_cost = ViewColumn(
         Autoincrement.hex_string("purchases_unique_cost"),
@@ -912,7 +920,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_fixed=False,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     registrations_completed_total = ViewColumn(
         Autoincrement.hex_string("registrations_completed_total"),

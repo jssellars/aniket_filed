@@ -4,6 +4,7 @@ from Core.Tools.Misc.AgGridFilter import AgGridFilter
 from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list, object_to_json
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewBiddingAndOptimization import (
     ViewAdBiddingAndOptimization,
     ViewAdSetBiddingAndOptimization,
@@ -135,31 +136,37 @@ class AdsManagerCatalogsViewsAgGridDto:
 
     @classmethod
     def map_column_data(cls, column: ViewColumn = None, field_value: Field = None, is_secondary_value: bool = False):
-        column_mapping = {AgGridConstants.column_id: field_value.name, AgGridConstants.field: field_value.name}
+        column_mapping = {AgGridConstants.COLUMN_ID: field_value.name, AgGridConstants.FIELD: field_value.name}
 
         if is_secondary_value:
-            column_mapping[AgGridConstants.header_name] = ""
-            column_mapping[AgGridConstants.suppress_columns_tool_panel] = True
+            column_mapping[AgGridConstants.HEADER_NAME] = ""
+            column_mapping[AgGridConstants.SUPPRESS_COLUMNS_TOOL_PANEL] = True
             return column_mapping
 
-        column_mapping[AgGridConstants.header_name] = column.display_name
-        column_mapping[AgGridConstants.sortable] = column.is_sortable
+        column_mapping[AgGridConstants.HEADER_NAME] = column.display_name
+        column_mapping[AgGridConstants.SORTABLE] = column.is_sortable
 
-        if column.no_of_digits:
-            column_mapping[AgGridConstants.number_of_decimals] = column.no_of_digits
+        if column.no_of_decimals:
+            column_mapping[AgGridConstants.NUMBER_OF_DECIMALS] = column.no_of_decimals
 
         if column.is_filterable:
             filter_property = AgGridFilter[FieldDataTypeEnum.get_by_value(field_value.type_id)]
             if filter_property:
-                column_mapping[AgGridConstants.filter] = filter_property.value
+                column_mapping[AgGridConstants.FILTER] = filter_property.value
 
         if column.pinned:
-            column_mapping[AgGridConstants.pinned] = column.pinned.value
+            column_mapping[AgGridConstants.PINNED] = column.pinned.value
 
         if column.is_editable:
-            column_mapping[AgGridConstants.editable] = column.is_editable
+            column_mapping[AgGridConstants.EDITABLE] = column.is_editable
 
         if column.is_toggle:
-            column_mapping[AgGridConstants.is_toggle] = column.is_toggle
+            column_mapping[AgGridConstants.IS_TOGGLE] = column.is_toggle
+
+        if column.primary_value.name in [
+            FieldsMetadata.campaign_name.name,
+            FieldsMetadata.adset_name.name,
+        ]:
+            column_mapping[AgGridConstants.IS_NAME_CLICKABLE] = True
 
         return column_mapping

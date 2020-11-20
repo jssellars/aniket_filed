@@ -168,7 +168,7 @@ class ViewCostPerAction:
         group_display_name=ViewColumnGroupEnum.COST_PER_ACTION.value,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     cost_per_add_to_cart = ViewColumn(
         id=Autoincrement.hex_string("cost_per_add_to_cart"),
@@ -178,7 +178,7 @@ class ViewCostPerAction:
         group_display_name=ViewColumnGroupEnum.COST_PER_ACTION.value,
         is_sortable=True,
         is_filterable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     cost_per_total_leads = ViewColumn(
         id=Autoincrement.hex_string("cost_per_total_leads"),

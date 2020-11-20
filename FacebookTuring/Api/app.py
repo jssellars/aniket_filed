@@ -71,6 +71,12 @@ api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsByLevelEndp
 ag_grid_views = "{base_url}/ag-grid-views/<string:level>".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsAgGrid, ag_grid_views)
 
+accounts_element_cards_views = "{base_url}/accounts/elements-cards-views".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerCatalogsController.AccountsElementsViews, accounts_element_cards_views)
+
+ads_manager_element_cards_views = "{base_url}/ads-manager/elements-cards-views".format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerCatalogsController.AdsManagerElementsViews, ads_manager_element_cards_views)
+
 metacolumns_controller = "{base_url}/metacolumns".format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsMetacolumnsEndpoint, metacolumns_controller)
 

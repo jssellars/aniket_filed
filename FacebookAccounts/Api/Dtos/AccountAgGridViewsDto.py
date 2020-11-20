@@ -44,18 +44,18 @@ def get_view_columns():
     result = []
     for column in accounts_ag_grid_view.account_structure_columns + accounts_ag_grid_view.account_insight_columns:
         column_property = {
-            AgGridConstants.field: column.primary_value.name,
-            AgGridConstants.editable: True,
-            AgGridConstants.filter: True,
-            AgGridConstants.header_name: column.display_name,
+            AgGridConstants.FIELD: column.primary_value.name,
+            AgGridConstants.EDITABLE: True,
+            AgGridConstants.FILTER: True,
+            AgGridConstants.HEADER_NAME: column.display_name,
         }
-        if column.no_of_digits:
-            column_property[AgGridConstants.number_of_decimals] = column.no_of_digits
+        if column.no_of_decimals:
+            column_property[AgGridConstants.NUMBER_OF_DECIMALS] = column.no_of_decimals
 
         column_type = FieldDataTypeEnum.get_by_value(column.primary_value.type_id)
         if column_type in AgGridFilter.__members__:
             filter_property = AgGridFilter[column_type]
-            column_property[AgGridConstants.filter] = filter_property.value
+            column_property[AgGridConstants.FILTER] = filter_property.value
 
         result.append(column_property)
 

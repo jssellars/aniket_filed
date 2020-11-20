@@ -17,7 +17,7 @@ class ViewColumn:
                  is_fixed: bool = False,
                  group_display_name: typing.AnyStr = None,  # ViewColumnGroupEnum
                  hidden: bool = False,
-                 no_of_digits: int = 0,
+                 no_of_decimals: int = 0,
                  ):
         self.id = id
         self.display_name = display_name  # string
@@ -30,4 +30,4 @@ class ViewColumn:
         self.is_fixed = is_fixed
         self.group_display_name = group_display_name
         self.hidden = hidden
-        self.no_of_digits = no_of_digits
+        self.no_of_decimals = no_of_decimals

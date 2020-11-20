@@ -1,16 +1,19 @@
 from enum import Enum, auto
 
-column_id = "col_id"
-field = "field"
-number_of_decimals = "number_of_decimals"
-header_name = "header_name"
-filter = "filter"
-editable = "editable"
-sortable = "sortable"
-suppress_columns_tool_panel = "suppress_columns_tool_panel"
-pinned = "pinned"
-lock_position = "lock_position"
-is_toggle = "is_toggle"
+COLUMN_ID = "col_id"
+FIELD = "field"
+NUMBER_OF_DECIMALS = "number_of_decimals"
+HEADER_NAME = "header_name"
+FILTER = "filter"
+EDITABLE = "editable"
+SORTABLE = "sortable"
+SUPPRESS_COLUMNS_TOOL_PANEL = "suppress_columns_tool_panel"
+PINNED = "pinned"
+LOCK_POSITION = "lock_position"
+DESCRIPTION = "description"
+COLUMN_TYPE = "column_type"
+IS_TOGGLE = "is_toggle"
+IS_NAME_CLICKABLE = "is_name_clickable"
 
 
 class PinnedDirection(Enum):

@@ -103,7 +103,7 @@ class ViewFieldsStructureMetadata:
         type_id=ViewColumnType.NUMBER.value,
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=False,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     daily_min_adset_budget = ViewColumn(
         Autoincrement.hex_string("daily_min_adset_budget"),

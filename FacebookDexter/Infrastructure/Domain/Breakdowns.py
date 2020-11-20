@@ -10,5 +10,6 @@ class FacebookBreakdownEnum(BreakdownBaseEnum):
     PLATFORM = BreakdownBase(name="platform_position", display_name="Publisher platform")
     HOUR = BreakdownBase(name="hourly_stats_aggregated_by_advertiser_time_zone", display_name="Time of day")
 
+
 class FacebookActionBreakdownEnum(ActionBreakdownBaseEnum):
     NONE = BreakdownBase(name="none", display_name="")

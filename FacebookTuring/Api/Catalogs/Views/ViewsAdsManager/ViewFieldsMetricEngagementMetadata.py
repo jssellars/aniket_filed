@@ -343,7 +343,7 @@ class ViewFieldsMetricEngagementMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     unique_link_click_through_rate = ViewColumn(
         Autoincrement.hex_string("unique_link_click_through_rate"),
@@ -354,7 +354,7 @@ class ViewFieldsMetricEngagementMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     outbound_link_click_through_rate = ViewColumn(
         Autoincrement.hex_string("outbound_link_click_through_rate"),
@@ -391,7 +391,8 @@ class ViewFieldsMetricEngagementMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The percentage of people who saw your ad and performed a link click.",
     )
     instant_experience_clicks_to_open = ViewColumn(
         Autoincrement.hex_string("instant_experience_clicks_to_open"),

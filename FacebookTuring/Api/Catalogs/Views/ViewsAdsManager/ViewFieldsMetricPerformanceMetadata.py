@@ -23,6 +23,8 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
+        description="The number of people who saw your ads at least once. Reach is different to impressions, which may"
+                    " include multiple views of your ads by the same people.",
     )
     frequency = ViewColumn(
         Autoincrement.hex_string("frequency"),
@@ -33,7 +35,8 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The average number of times that each person saw your ad.",
     )
     impressions = ViewColumn(
         Autoincrement.hex_string("impressions"),
@@ -44,6 +47,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
+        description="The number of times that your adverts were on-screen.",
     )
     amount_spent = ViewColumn(
         Autoincrement.hex_string("amount_spent"),
@@ -54,7 +58,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     clicks_all = ViewColumn(
         Autoincrement.hex_string("clicks_all"),
@@ -75,7 +79,8 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The average cost for each link click.",
     )
     ctr_all = ViewColumn(
         Autoincrement.hex_string("ctr_all"),
@@ -86,7 +91,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     quality_ranking = ViewColumn(
         Autoincrement.hex_string("quality_ranking"),
@@ -127,7 +132,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     cpm = ViewColumn(
         Autoincrement.hex_string("cpm"),
@@ -138,7 +143,8 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The average cost for 1,000 impressions.",
     )
     results = ViewColumn(
         Autoincrement.hex_string("results"),
@@ -159,7 +165,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
     )
     purchase_roas = ViewColumn(
         Autoincrement.hex_string("purchase_roas"),
@@ -170,6 +176,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        no_of_digits=2,
+        no_of_decimals=2,
+        description="The total return on ad spend (ROAS) from purchases.",
     )
 
