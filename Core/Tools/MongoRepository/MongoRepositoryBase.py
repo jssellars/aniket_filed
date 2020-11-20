@@ -7,7 +7,6 @@ from retry import retry
 
 from Core.Tools.Logger.Helpers import log_operation_mongo
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
-from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
@@ -131,18 +130,6 @@ class MongoRepositoryBase:
             )
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=document,
-                description="Add one document.",
-                timestamp=operation_end_time,
-                duration=duration,
-            )
-
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def add_many(self, documents: typing.List[typing.Any] = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
@@ -156,25 +143,31 @@ class MongoRepositoryBase:
 
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
-            description_message = "All documents were successfully inserted."
-            log_level = LoggerMessageTypeEnum.INFO
 
             if len(inserted_ids) == 0:
                 description_message = "Failed to insert any document."
                 log_level = LoggerMessageTypeEnum.ERROR
+                log_operation_mongo(
+                    logger=self._logger,
+                    log_level=log_level,
+                    data=documents,
+                    description=description_message,
+                    timestamp=operation_end_time,
+                    duration=duration,
+                )
 
             if len(inserted_ids) < len(documents):
-                description_message = "Failed to insert all documents. No of documents inserted %d out of %d" % (len(inserted_ids), len(documents))
+                description_message = "Failed to insert all documents. No of documents inserted %d out of %d" % \
+                                      (len(inserted_ids), len(documents))
                 log_level = LoggerMessageTypeEnum.WARNING
-
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=log_level,
-                data=documents,
-                description=description_message,
-                timestamp=operation_end_time,
-                duration=duration,
-            )
+                log_operation_mongo(
+                    logger=self._logger,
+                    log_level=log_level,
+                    data=documents,
+                    description=description_message,
+                    timestamp=operation_end_time,
+                    duration=duration,
+                )
 
         except Exception as e:
             operation_end_time = datetime.now()
@@ -188,18 +181,6 @@ class MongoRepositoryBase:
                 duration=duration,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=documents,
-                description="Add one document.",
-                timestamp=operation_end_time,
-                duration=duration,
-            )
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_all(self) -> typing.List[typing.Dict]:
@@ -219,18 +200,6 @@ class MongoRepositoryBase:
                 duration=duration,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get all documents.",
-                timestamp=operation_end_time,
-                duration=duration,
-            )
 
         return results
 
@@ -254,18 +223,6 @@ class MongoRepositoryBase:
                 duration=duration,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get all documents by key: %s with value: %s." % (key_name, key_value),
-                timestamp=operation_end_time,
-                duration=duration,
-            )
 
         return results
 
@@ -292,18 +249,6 @@ class MongoRepositoryBase:
             )
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get first document by key: %s with value: %s." % (key_name, key_value),
-                timestamp=operation_end_time,
-                duration=duration,
-            )
-
         return results
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
@@ -326,18 +271,6 @@ class MongoRepositoryBase:
                 duration=duration,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get last updated documents by key: %s with value: %s." % (key_name, key_value),
-                timestamp=operation_end_time,
-                duration=duration,
-            )
 
         return results
 
@@ -363,20 +296,6 @@ class MongoRepositoryBase:
                 projection=projection,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get documents",
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-                projection=projection,
-            )
 
         return results
 
@@ -406,21 +325,6 @@ class MongoRepositoryBase:
             )
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get sorted documents",
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-                projection=projection,
-                query_filter=sort_query,
-            )
-
         return results
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
@@ -447,20 +351,6 @@ class MongoRepositoryBase:
             )
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                data=results,
-                description="Get first or default.",
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-                projection=projection,
-            )
-
         return results
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
@@ -483,19 +373,6 @@ class MongoRepositoryBase:
             )
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                description="Update one document",
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-                query=query,
-            )
-
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def update_many(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
@@ -515,19 +392,6 @@ class MongoRepositoryBase:
                 query=query,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                description="Update one document",
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-                query=query,
-            )
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def update_structure_status(
@@ -560,19 +424,6 @@ class MongoRepositoryBase:
             )
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                description="Update one document",
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-                query=query,
-            )
-
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def delete_many_older_than_date(self, date: typing.AnyStr = None) -> typing.NoReturn:
         operation_start_time = datetime.now()
@@ -594,18 +445,6 @@ class MongoRepositoryBase:
                 query=query,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                description="Delete many documents",
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-            )
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_collections(self) -> typing.List[str]:
@@ -632,18 +471,6 @@ class MongoRepositoryBase:
                 query_filter=query_filter,
             )
             raise e
-
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
-                description="Delete many documents",
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-            )
 
     def close(self):
         self._client.close()

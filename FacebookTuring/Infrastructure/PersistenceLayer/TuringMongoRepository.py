@@ -1,6 +1,7 @@
 import typing
 from copy import deepcopy
 from datetime import datetime
+from typing import List, Dict
 
 from bson import BSON
 from pymongo.errors import AutoReconnect
@@ -457,6 +458,55 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.__decode_structure_details_from_bson(structures)
         return [structure[MiscFieldsEnum.details] for structure in structures if MiscFieldsEnum.details in structure]
 
+    def get_structures_by_parent_id(self, level: Level, parent_id) -> List[Dict]:
+
+        child_results = []
+        if level == Level.CAMPAIGN:
+            child_results = self.get_children_from_parent_key(
+                LevelToFacebookIdKeyMapping.CAMPAIGN.value, parent_id, Level.ADSET
+            )
+            child_results += self.get_children_from_parent_key(
+                LevelToFacebookIdKeyMapping.CAMPAIGN.value, parent_id, Level.AD
+            )
+        elif level == Level.ADSET:
+            child_results = self.get_children_from_parent_key(
+                LevelToFacebookIdKeyMapping.ADSET.value, parent_id, Level.AD
+            )
+
+        return child_results
+
+    def get_children_from_parent_key(self, parent_key: str, parent_id: str, level: Level) -> List[Dict]:
+        self.set_collection(collection_name=level.value)
+        query = {
+            MongoOperator.AND.value: [
+                {parent_key: {MongoOperator.EQUALS.value: parent_id}},
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.NOTIN.value: [
+                            StructureStatusEnum.ARCHIVED.value,
+                            StructureStatusEnum.DEPRECATED.value,
+                            StructureStatusEnum.REMOVED.value,
+                        ]
+                    }
+                },
+            ]
+        }
+
+        projection = {
+            "_id": MongoProjectionState.OFF.value,
+        }
+
+        result = self.get(query, projection)
+        for entry in result:
+            entry.update(
+                {
+                    MiscFieldsEnum.level: level.value,
+                    MiscFieldsEnum.structure_id: entry[LevelToFacebookIdKeyMapping[level.name].value],
+                    MiscFieldsEnum.details: BSON.decode(entry[MiscFieldsEnum.details])
+                }
+            )
+
+        return result
 
     @staticmethod
     def __decode_structure_details_from_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:
@@ -468,6 +518,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                 structures[index][MiscFieldsEnum.details] = {}
         return structures
 
+    # TODO: This function can be removed once the delete functionality is properly working
     def change_status(self,
                       level: Level = None,
                       key_value: typing.Any = None,
@@ -476,7 +527,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         self.set_collection(collection_name=level.value)
         if current_status is None:
             current_status = [StructureStatusEnum.ACTIVE.value,
-                              StructureStatusEnum.REMOVED.value]
+                              StructureStatusEnum.REMOVED.value,
+                              StructureStatusEnum.PAUSED.value]
         else:
             current_status = [current_status]
         query_filter = {

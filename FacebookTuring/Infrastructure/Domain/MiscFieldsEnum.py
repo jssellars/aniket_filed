@@ -27,3 +27,5 @@ class MiscFieldsEnum:
     created_at = 'created_at'
     report = 'sync_report'
     date_added = 'date_added'
+    level = 'level'
+    structure_id = 'structure_id'
