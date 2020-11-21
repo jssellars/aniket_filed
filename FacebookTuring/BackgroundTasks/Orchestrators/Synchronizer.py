@@ -61,7 +61,7 @@ def sync(
     business_owner_details: typing.List[typing.Dict] = None,
     user_type: UserTypeEnum = None,
 ) -> None:
-    user_config_static = USER_CONFIGS_BY_TYPE.get(user_type)
+    user_config_static = USER_CONFIGS_BY_TYPE.get(user_type, USER_CONFIGS_BY_TYPE[UserTypeEnum.PAYED])
 
     for entry in business_owner_details:
         last_synced_on = entry[MiscFieldsEnum.last_synced_on]
