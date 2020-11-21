@@ -328,8 +328,6 @@ class QueryBuilderFacebookRequestParser:
         elif required_sort['sort'] == "desc":
             self.__sort = facebook_filter_name + "_descending"
 
-        self.__sort = ""
-
     def remove_structure_fields(self):
         self.__structure_fields = []
         self.__remove_structure_fields = True

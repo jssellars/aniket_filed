@@ -91,7 +91,6 @@ class GraphAPIGetHelper(HTTPRequestBase):
             raise Exception('Missing Fields API request. Please provide an appropriate FB API request and try again.')
 
         next_page_cursor = None
-        summary = []
 
         try:
             partial_responses = []
@@ -164,8 +163,8 @@ class GraphAPIGetHelper(HTTPRequestBase):
     def sorted_zip_longest(l1, l2, key, fillvalue=None):
         if fillvalue is None:
             fillvalue = {}
-        l1 = iter(sorted(l1, key=lambda x: x.get(key)))
-        l2 = iter(sorted(l2, key=lambda x: x.get(key)))
+        l1 = iter(l1)
+        l2 = iter(l2)
         u = next(l1, None)
         v = next(l2, None)
 
