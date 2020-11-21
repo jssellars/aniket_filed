@@ -10,7 +10,6 @@
   "logger_level": "DEBUG",
   "es_host": "staging-elasticsearch",
   "es_port": 9200,
-  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "mongo_database": {
     "ssh_tunnel": false,
     "connection_string_url": "mongodb://root:BlokeyWokeySystemChokey@ng-dev-mongo.filed.com:27017/?authSource=admin",
@@ -27,6 +26,7 @@
   },
   "external_services": {
     "facebook_auto_apply": "https://be.staging.filed.com/py-facebook-turing-api/api/v1/{level}/{structureId}",
-    "google_auto_apply": ""
+    "google_auto_apply": "",
+    "authorize_permission_endpoint": "https://be.staging.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
   }
 }

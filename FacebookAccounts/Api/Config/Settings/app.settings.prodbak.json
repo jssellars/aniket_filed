@@ -37,11 +37,10 @@
   },
   "external_services": {
     "users_signin_endpoint": "https://prod-api-users.filed.com/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://prod-api-users.filed.com/api/v1/users/get-technical-jwt",
     "subscription_update_business_owner_endpoint": "https://prod-api-subscriptions.filed.com/api/v1/contacts/set-businessowner-facebook-id"
   },
-  "admin_user": {
-    "email": "admin@filed.com",
+  "technical_user": {
+    "email": "technical_account@filed.com",
     "password": "Adm1n@Fil3ed"
   },
   "environment": "prodbak",
@@ -51,7 +50,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47200,
-  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
   "debug_mode": false,
   "docker_filename": "filed-potter-accounts-api",
   "logger_type": "file_logger",

@@ -26,7 +26,7 @@ class Startup(object):
         self.database_config = SQLAlchemyConfig(app_config['sql_server_database'])
         self.external_services = ExternalServicesConfig(app_config["external_services"])
         self.dexter_config = DexterConfig(app_config["dexter_config"])
-        self.admin_user = AdminUserconfig(app_config["admin_user"])
+        self.technical_user = AdminUserconfig(app_config["technical_user"])
 
         # Initialize connections to DB
         self.engine = create_engine(self.database_config.connection_string)
@@ -48,15 +48,13 @@ class Startup(object):
         self.api_name = app_config["api_name"]
         self.api_version = app_config["api_version"]
         self.base_url = app_config["base_url"]
-        self.jwt_secret_key = app_config.get("jwt_secret_key")
         self.docker_filename = app_config["docker_filename"]
         self.logger_type = app_config["logger_type"]
         self.rabbit_logger_type = app_config["rabbit_logger_type"]
         self.logger_level = app_config["logger_level"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
-        self.technical_token_manager = TechnicalTokenManager(self.admin_user, self.external_services,
-                                                             self.jwt_secret_key)
+        self.technical_token_manager = TechnicalTokenManager(self.technical_user, self.external_services)
 
     def create_sql_session(self):
         return sessionmaker(bind=self.engine)

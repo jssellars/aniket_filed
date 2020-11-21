@@ -35,6 +35,9 @@
     "password": "StartingGunFlounderFun",
     "name": "Staging.Filed.Facebook.Accounts"
   },
+  "external_services": {
+    "authorize_permission_endpoint": "https://be.staging.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
+  },
   "environment": "staging",
   "api_name": "FacebookPixels",
   "api_version": "1.0.0",
@@ -42,7 +45,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47250,
-  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "debug_mode": true,
   "docker_filename": "filed-potter-pixels-api",
   "logger_type": "file_logger",

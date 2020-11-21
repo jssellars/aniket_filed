@@ -1,8 +1,9 @@
-import os
 import json
+import os
 
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from FacebookDexter.Api.Config.Config import MongoConfig, ExternalServicesConfig
 
 
@@ -17,6 +18,8 @@ class Startup(object):
         self.mongo_config = MongoConfig(app_config['mongo_database'])
         self.external_services = ExternalServicesConfig(app_config['external_services'])
 
+        self.__auth_permission_endpoint = app_config['external_services']['authorize_permission_endpoint']
+
         self.api_name = app_config['api_name']
         self.api_version = app_config['api_version']
         self.environment = app_config['environment']
@@ -26,9 +29,16 @@ class Startup(object):
         self.logger_type = app_config["logger_type"]
         self.es_host = app_config["es_host"]
         self.es_port = app_config["es_port"]
-        self.logger_level= app_config["logger_level"]
+        self.logger_level = app_config["logger_level"]
         self.docker_filename = app_config["docker_filename"]
-        self.jwt_secret_key = app_config["jwt_secret_key"]
+
+    @property
+    def authorize_permission(self):
+        return authorize_permission(self.__auth_permission_endpoint)
+
+    @property
+    def authorize_jwt(self):
+        return authorize_jwt(self.__auth_permission_endpoint)
 
 
 # initialize startup object

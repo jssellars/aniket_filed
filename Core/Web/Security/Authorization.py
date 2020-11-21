@@ -1,6 +1,63 @@
-import os
+from functools import wraps
 
-import jwt
+import flask_restful
+import requests
+from flask import request
+
+
+def authorize_jwt(permission_endpoint):
+    def authorize_wrapper(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            authorized = _authorize_jwt(permission_endpoint=permission_endpoint)
+
+            if authorized:
+                return func(*args, **kwargs)
+
+            flask_restful.abort(403)
+
+        return wrapper
+
+    return authorize_wrapper
+
+
+def authorize_permission(permission_endpoint):
+    def inner_authorize_permission(permission):
+        def authorize_wrapper(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                authorized = _authorize_permission(
+                    permission_endpoint=permission_endpoint,
+                    module=permission.module.value,
+                    permission=permission.value
+                )
+
+                if authorized:
+                    return func(*args, **kwargs)
+
+                flask_restful.abort(403)
+
+            return wrapper
+
+        return authorize_wrapper
+
+    return inner_authorize_permission
+
+
+def _authorize_jwt(permission_endpoint):
+    headers = {'Authorization': request.headers.get('Authorization')}
+
+    # TODO: remove verify parameter after the testing is done
+    response = requests.get(permission_endpoint, headers=headers, verify=False)
+    return response.status_code == 204
+
+
+def _authorize_permission(permission_endpoint, **kwargs):
+    headers = {'Authorization': request.headers.get('Authorization')}
+
+    # TODO: remove verify parameter after the testing is done
+    response = requests.get(permission_endpoint, params=kwargs, headers=headers, verify=False)
+    return response.status_code == 204
 
 
 def add_bearer_token(token, headers=None):
@@ -14,15 +71,3 @@ def add_bearer_token(token, headers=None):
 def generate_technical_token(technical_token_manager):
     token = technical_token_manager.get_token()
     return token
-
-
-def auth_jwt_base(token):
-    try:
-        jwt_secret_key = os.environ[
-            "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else "79f4b7c8ff6c919a5c0efc23c7b5f47975ec0d11cef5016a42422521cb62929d32690d8c3b8751dca49c61c0623763c5e5fb98382cf96b85d788fe2638ffbf12"
-        payload = jwt.decode(token, jwt_secret_key)
-        return payload["BusinessOwnerFacebookId"]
-    except jwt.ExpiredSignatureError:
-        raise ConnectionRefusedError('Signature expired. Please log in again.')
-    except jwt.InvalidTokenError:
-        return ConnectionRefusedError('Invalid token. Please log in again.')

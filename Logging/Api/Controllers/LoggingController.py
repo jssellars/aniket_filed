@@ -3,7 +3,6 @@ from datetime import datetime
 
 import humps
 from flask import request, Response
-from flask_jwt_simple import jwt_required, get_jwt
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
@@ -16,13 +15,12 @@ from Logging.Infrastructure.PersistenceLayer.LoggingMongoRepository import Loggi
 
 
 class LoggingEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_jwt
     def post(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             # get business owner
-            user_id = extract_field_user_id(get_jwt())
+            user_id = extract_field_user_id()
 
             # get request
             request_json = request.get_json(force=True)

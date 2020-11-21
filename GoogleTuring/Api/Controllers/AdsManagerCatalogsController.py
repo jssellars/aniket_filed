@@ -1,12 +1,13 @@
 import humps
 from flask import request
-from flask_jwt_simple import jwt_required
 from flask_restful import Resource, abort
 
+from Core.Web.Security.Permissions import ReportsPermissions
 from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogReportsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsBreakdownsDto import AdsManagerCatalogsBreakdownsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsDimensionsDto import AdsManagerCatalogsDimensionsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsMetricsDto import AdsManagerCatalogsMetricsDto
+from GoogleTuring.Api.Startup import startup
 
 LEVEL_KEY = 'level'
 REPORT_KEY = 'report'
@@ -15,7 +16,7 @@ METRICS_KEY = 'metrics'
 
 
 class AdsManagerReportsEndpoint(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args
@@ -34,7 +35,7 @@ class AdsManagerReportsEndpoint(Resource):
 
 
 class AdsManagerDimensionsEndpoint(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args
@@ -51,7 +52,7 @@ class AdsManagerDimensionsEndpoint(Resource):
 
 
 class AdsManagerMetricsEndpoint(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args
@@ -70,7 +71,7 @@ class AdsManagerMetricsEndpoint(Resource):
 
 
 class AdsManagerBreakdownsEndpoint(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args

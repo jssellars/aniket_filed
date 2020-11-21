@@ -8,6 +8,7 @@ from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
 from FacebookPixels.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig
+from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 
 
 class Startup(object):
@@ -35,6 +36,8 @@ class Startup(object):
         self.exchange_details.outbound_queue = QueueDetails(direct_exchange_config["queues"]["outbound"],
                                                             direct_exchange_config["queues"]["outbound_routing_key"])
 
+        self.__auth_permission_endpoint = app_config['external_services']['authorize_permission_endpoint']
+
         self.environment = app_config["environment"]
         self.service_name = app_config["service_name"]
         self.service_version = app_config["service_version"]
@@ -42,7 +45,6 @@ class Startup(object):
         self.api_version = app_config["api_version"]
         self.base_url = app_config["base_url"]
         self.port = app_config["port"]
-        self.jwt_secret_key = app_config["jwt_secret_key"]
         self.debug_mode = app_config["debug_mode"]
         self.docker_filename = app_config["docker_filename"]
         self.logger_type = app_config["logger_type"]
@@ -51,11 +53,19 @@ class Startup(object):
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
 
+    @property
+    def authorize_permission(self):
+        return authorize_permission(self.__auth_permission_endpoint)
+
+    @property
+    def authorize_jwt(self):
+        return authorize_jwt(self.__auth_permission_endpoint)
+
     def create_sql_connection(self):
         return sessionmaker(bind=self.engine)
 
 
-#  Initialize startup object
+# Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
     env = "local"

@@ -8,7 +8,7 @@ from FacebookDexter.Api.Startup import startup, logger
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
-class DexterApiDismissRecommendationCommandHandler():
+class DexterApiDismissRecommendationCommandHandler:
     def handle(self, command: DexterApiDismissRecommendationCommand):
         try:
             recommendation_id = command.id
@@ -30,5 +30,4 @@ class DexterApiDismissRecommendationCommandHandler():
                 return Response(response=json.dumps(message), status=500, mimetype='application/json')
 
         except Exception as e:
-            raise(e)
-
+            raise e

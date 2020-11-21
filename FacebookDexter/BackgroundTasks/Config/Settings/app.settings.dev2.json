@@ -56,11 +56,10 @@
   },
   "external_services": {
     "targeting_search": "https://be.dev2.filed.com/py-facebook-campaigns-builder-api/interests/suggestions/",
-    "users_signin_endpoint": "https://be.dev2.filed.com/cs-users-api/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://be.dev2.filed.com/cs-users-api/api/v1/users/get-technical-jwt"
+    "users_signin_endpoint": "https://be.dev2.filed.com/cs-users-api/api/v1/users/signin"
   },
-  "admin_user": {
-    "email": "admin@filed.com",
+  "technical_user": {
+    "email": "technical_account@filed.com",
     "password": "Adm1n@Fil3ed"
   },
   "dexter_config": {
@@ -88,7 +87,6 @@
   "service_name": "FacebookDexterBackgroundTasks",
   "service_version": "1.0.0",
   "base_url": "/api/v1",
-  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "docker_filename": "filed-facebook-dexter-background-tasks",
   "logger_type": "file_logger",
   "rabbit_logger_type": "rabbit_file_logger",

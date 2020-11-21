@@ -28,7 +28,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47550,
-  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
   "debug_mode": false,
   "docker_filename": "filed-google-turing-api",
   "logger_type": "file_logger",

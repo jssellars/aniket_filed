@@ -1,17 +1,17 @@
 import json
 
 from flask import request, Response
-from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Web.Security.Permissions import OptimizePermissions
 from FacebookDexter.Api.Startup import startup, logger
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
 class DexterApiGetRecommendationQuery(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self):
         try:
             logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())

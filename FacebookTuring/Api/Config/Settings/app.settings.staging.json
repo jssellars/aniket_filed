@@ -49,6 +49,9 @@
     "insights_database_name": "staging_facebook_turing_insights",
     "structures_database_name": "staging_facebook_turing_structures"
   },
+  "external_services": {
+    "authorize_permission_endpoint": "https://be.staging.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
+  },
   "environment": "staging",
   "api_name": "FacebookTuringAPI",
   "api_version": "1.0.0",
@@ -56,8 +59,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47350,
-  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
-  "jwt_secret_key_reports": "sDpdWYr+xtj85NfoDn+GQPSXLhES+GoMIiEUBpblEXX9X040usDeZSLKqAupO4ncgsi7Ks+2pm8WJBrfwu84U1boiiyKQKzItxG7Dc8NhRYigoHnbZkmWkPPz6gq+6EU",
   "debug_mode": true,
   "docker_filename": "filed-facebook-turing-api",
   "logger_type": "file_logger",

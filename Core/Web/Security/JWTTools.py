@@ -1,22 +1,24 @@
-import json
+import jwt
+from flask import request
 
 
-def extract_business_owner_facebook_id(jwt_data):
-    user_details = jwt_data["UserDetailsKey"]
-    if isinstance(user_details, str):
-        user_details = json.loads(user_details)
-    return user_details.get("FacebookBusinessOwnerId")
+def extract_business_owner_facebook_id():
+    jwt_data = decode_jwt_from_headers()
+    return jwt_data.get("user_facebook_businessowner_id")
 
 
-def extract_business_owner_google_id(jwt_data):
-    user_details = jwt_data["UserDetailsKey"]
-    if isinstance(user_details, str):
-        user_details = json.loads(user_details)
-    return user_details.get("GoogleBusinessOwnerId")
+def extract_business_owner_google_id():
+    jwt_data = decode_jwt_from_headers()
+    return jwt_data.get("user_google_businessowner_id")
 
 
-def extract_field_user_id(jwt_data):
-    user_details = jwt_data["UserDetailsKey"]
-    if isinstance(user_details, str):
-        user_details = json.loads(user_details)
-    return user_details.get('FiledId')
+def extract_field_user_id():
+    jwt_data = decode_jwt_from_headers()
+    return jwt_data.get('user_filed_id')
+
+
+def decode_jwt_from_headers():
+    bearer_token = request.headers.get('Authorization')
+    token = bearer_token.replace('Bearer ', '')
+    jwt_data = jwt.decode(token, verify=False)
+    return jwt_data

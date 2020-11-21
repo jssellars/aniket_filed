@@ -1,9 +1,8 @@
 import json
 import typing
-import humps
 
+import humps
 from flask import request, Response
-from flask_jwt_simple import jwt_required, get_jwt
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
@@ -11,19 +10,19 @@ from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMes
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
+from Core.Web.Security.Permissions import PixelPermissions
 from FacebookPixels.Api.Commands.PixelsInsightsCommand import PixelsInsightsCommand
 from FacebookPixels.Api.CommandsHandlers.PixelsInsightsCommandHandlers import PixelsInsightsCommandHandler
 from FacebookPixels.Api.Mappings.PixelsInsightsCommandMapping import PixelsInsightsCommandMapping
-from FacebookPixels.Api.Startup import logger
+from FacebookPixels.Api.Startup import logger, startup
 
 
 class PixelsInsightsEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def post(self, level: typing.AnyStr = None) -> typing.Union[typing.List[typing.NoReturn], typing.Dict]:
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
-            business_owner_facebook_id = extract_business_owner_facebook_id(get_jwt())
+            business_owner_facebook_id = extract_business_owner_facebook_id()
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = PixelsInsightsCommandMapping(target=PixelsInsightsCommand)
             command = mapping.load(raw_request)

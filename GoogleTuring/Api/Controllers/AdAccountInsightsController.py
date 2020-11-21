@@ -2,11 +2,11 @@ import json
 
 import humps
 from flask import request, Response
-from flask_jwt_simple import jwt_required, get_jwt
 from flask_restful import Resource
 
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
+from Core.Web.Security.Permissions import AccountsPermissions
 from GoogleTuring.Api.Commands.AdAccountInsightsCommand import AdAccountInsightsCommand
 from GoogleTuring.Api.CommandsHandlers.GoogleAdAccountInsightsHandler import \
     GoogleAdAccountInsightsHandler
@@ -15,11 +15,10 @@ from GoogleTuring.Api.Startup import startup, logger
 
 
 class AdAccountInsightsEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
     def post(self):
         try:
-            business_owner_google_id = extract_business_owner_google_id(get_jwt())
+            business_owner_google_id = extract_business_owner_google_id()
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = AdAccountInsightsCommandMapping(AdAccountInsightsCommand)
             command = mapping.load(raw_request)

@@ -56,8 +56,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47350,
-  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
-  "jwt_secret_key_reports": "ko2VGB20fbBmKlN8UzIOAbp5wXEUIsw2vWsIm7LhICU5TdN8eDcVVWmNv5x67i+M3eWX8wfrgcf1dD9EoG8EMxWq5wPrlnIUh/X9aTAFuroyCfgyHobGuYYl2DtqWZe1",
   "debug_mode": false,
   "docker_filename": "filed-facebook-turing-api",
   "logger_type": "elasticsearch_logger",

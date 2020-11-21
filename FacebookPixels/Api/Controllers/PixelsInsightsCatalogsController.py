@@ -1,18 +1,17 @@
 import json
 
 from flask import request, Response
-from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.Web.Security.Permissions import PixelPermissions
 from FacebookPixels.Api.Dtos.PixelsInsightsCatalogsDto import PixelsInsightsCatalogsDto
-from FacebookPixels.Api.Startup import logger
+from FacebookPixels.Api.Startup import logger, startup
 
 
 class PixelsInsightsCatalogsEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -30,8 +29,7 @@ class PixelsInsightsCatalogsEndpoint(Resource):
 
 
 class CustomConversionsInsightsCatalogsEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:

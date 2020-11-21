@@ -130,7 +130,8 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
 
 
 class BudgetValidation:
-    def get(self, session=None, business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
+    @staticmethod
+    def get(session=None, business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
         return GraphAPIBudgetValidationHandler.handle(
             account_id=account_id,
             access_token=(

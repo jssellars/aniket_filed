@@ -3,25 +3,24 @@ import typing
 
 import humps
 from flask import request, Response
-from flask_jwt_simple import jwt_required, get_jwt
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
+from Core.Web.Security.Permissions import MiscellaneousPermissions, SettingsPermissions
 from FacebookAccounts.Api.Commands.BusinessOwnerCommands import BusinessOwnerCreateCommand
 from FacebookAccounts.Api.CommandsHandlers.BusinessOwnerCommandHandler import BusinessOwnerCreateCommandHandler
 from FacebookAccounts.Api.CommandsHandlers.BusinessOwnerDeletePermissionsCommandHandler import \
     BusinessOwnerDeletePermissionsCommandHandler
 from FacebookAccounts.Api.Mappings import BusinessOwnerCommandsMappings
-from FacebookAccounts.Api.Startup import logger
+from FacebookAccounts.Api.Startup import logger, startup
 
 
 class BusinessOwnerEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_permission(permission=MiscellaneousPermissions.MISCELLANEOUS_FACEBOOK_ACCESS)
     def post(self):
-        #  log request information
+        # log request information
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
@@ -51,14 +50,13 @@ class BusinessOwnerEndpoint(Resource):
 
 
 class BusinessOwnerDeletePermissionsEndpoint(Resource):
-
-    @jwt_required
+    @startup.authorize_permission(permission=SettingsPermissions.SETTINGS_MANAGE_PERMISSIONS_EDIT)
     def delete(self, permissions: typing.List[typing.AnyStr] = None):
-        #  log request information
+        # log request information
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
 
         try:
-            business_owner_facebook_id = extract_business_owner_facebook_id(get_jwt())
+            business_owner_facebook_id = extract_business_owner_facebook_id()
 
             response = BusinessOwnerDeletePermissionsCommandHandler.handle(business_owner_facebook_id, permissions)
             response = humps.camelize(response)

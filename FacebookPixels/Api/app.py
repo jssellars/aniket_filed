@@ -9,7 +9,6 @@ if path:
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
 from FacebookPixels.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
@@ -19,15 +18,7 @@ from FacebookPixels.Api.Controllers.PixelsInsightsCatalogsController import \
 from FacebookPixels.Api.Controllers.PixelsInsightsController import PixelsInsightsEndpoint
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ[
-    "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
-app.config["JWT_TOKEN_LOCATION"] = "headers"
-app.config["JWT_HEADER_NAME"] = "Authorization"
-app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_DECODE_AUDIENCE"] = "Filed-Client-Apps"
 app.url_map.strict_slashes = False
-
-jwt = JWTManager(app)
 
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 

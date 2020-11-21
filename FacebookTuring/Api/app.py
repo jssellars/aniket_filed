@@ -9,26 +9,28 @@ if path:
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_simple import JWTManager
 from flask_restful import Api
+from FacebookTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsWithTotalsEndpoint, \
+    AdsManagerReportInsightsEndpoint, AccountsReportInsightsEndpoint, OptimizeReportInsightsEndpoint, \
+    ReportsReportInsightsEndpoint, AdsManagerAgGridInsightsEndpoint, AdsManagerAgGridTrendEndpoint, \
+    AccountsAgGridTrendEndpoint
+from FacebookTuring.Api.Controllers.AdsManagerController import AdsManagerGetStructuresEndpoint, \
+    AdsManagerFilteredStructuresEndpoint, AdsManagerCampaignTreeStructureEndpoint, \
+    AdsManagerEndpoint, \
+    AdsManagerDuplicateStructureEndpoint, AdsManagerUpdateStructureDraftEndpoint, OptimizeGetStructuresEndpoint
+from FacebookTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerCatalogsViewsEndpoint, \
+    AdsManagerCatalogsViewsByLevelEndpoint, AdsManagerCatalogsMetacolumnsEndpoint, \
+    AdsManagerCatalogsBreakdownsEndpoint, \
+    AdsManagerCatalogsBreakdownsCombinationsEndpoint, AdsManagerCatalogsViewsAgGrid, AccountsElementsViews, \
+    AdsManagerElementsViews
 
-from FacebookTuring.Api.Controllers import AdsManagerCatalogsController, AdsManagerInsightsController, \
-    AdsManagerController
 from FacebookTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Api.Controllers.AdsManagerCatalogsReportsController import AdsManagerReportsEndpoint, \
     AdsManagerReportsDimensionsEndpoint, AdsManagerReportsMetricsEndpoint, AdsManagerReportsBreakdownsEndpoint
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ[
-    "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
-app.config["JWT_TOKEN_LOCATION"] = "headers"
-app.config["JWT_HEADER_NAME"] = "Authorization"
-app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_DECODE_AUDIENCE"] = "Filed-Client-Apps"
 app.url_map.strict_slashes = False
-
-jwt = JWTManager(app)
 
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -41,85 +43,93 @@ api.add_resource(HealthCheckEndpoint, healthcheck_controller)
 version_controller = "{base_url}/version".format(base_url=startup.base_url.lower())
 api.add_resource(VersionEndpoint, version_controller)
 
-# Insights 
-insights_controller = '{base_url}/insights'.format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsController.AdsManagerInsightsEndpoint, insights_controller)
-
 insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsController.AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
+api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
 
-ag_grid_insights_controller = '{base_url}/ag-grid-insights/<string:level>'.format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsController.AdsManagerAgGridInsightsEndpoint, ag_grid_insights_controller)
+# Accounts Insights
+insights_controller = '{base_url}/accounts/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(AccountsReportInsightsEndpoint, insights_controller)
+
+# Optimize Insights
+insights_controller = '{base_url}/optimize/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(OptimizeReportInsightsEndpoint, insights_controller)
 
 ads_manager_ag_grid_period_trend_controller = '{base_url}/ads-manager/ag-grid-insights-trend/<string:level>'.\
     format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsController.AdsManagerAgGridTrendEndpoint, ads_manager_ag_grid_period_trend_controller)
+api.add_resource(AdsManagerAgGridTrendEndpoint, ads_manager_ag_grid_period_trend_controller)
 
 accounts_ag_grid_period_trend_controller = '{base_url}/accounts/ag-grid-insights-trend/<string:level>'.\
     format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsController.AccountsAgGridTrendEndpoint, accounts_ag_grid_period_trend_controller)
+api.add_resource(AccountsAgGridTrendEndpoint, accounts_ag_grid_period_trend_controller)
 
-insights_controller = '{base_url}/reports'.format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerInsightsController.AdsManagerReportInsightsEndpoint, insights_controller)
+# AdsManager Insights
+insights_controller = '{base_url}/ads-manager/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerReportInsightsEndpoint, insights_controller)
+
+# Reports Insights
+insights_controller = '{base_url}/reports/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(ReportsReportInsightsEndpoint, insights_controller)
+ag_grid_insights_controller = '{base_url}/ag-grid-insights/<string:level>'.format(base_url=startup.base_url.lower())
+api.add_resource(AdsManagerAgGridInsightsEndpoint, ag_grid_insights_controller)
 
 views_controller = "{base_url}/views".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsEndpoint, views_controller)
+api.add_resource(AdsManagerCatalogsViewsEndpoint, views_controller)
 
 views_by_level_controller = "{base_url}/views/<string:level>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsByLevelEndpoint, views_by_level_controller)
+api.add_resource(AdsManagerCatalogsViewsByLevelEndpoint, views_by_level_controller)
 
 ag_grid_views = "{base_url}/ag-grid-views/<string:level>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsViewsAgGrid, ag_grid_views)
+api.add_resource(AdsManagerCatalogsViewsAgGrid, ag_grid_views)
 
 accounts_element_cards_views = "{base_url}/accounts/elements-cards-views".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AccountsElementsViews, accounts_element_cards_views)
+api.add_resource(AccountsElementsViews, accounts_element_cards_views)
 
 ads_manager_element_cards_views = "{base_url}/ads-manager/elements-cards-views".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerElementsViews, ads_manager_element_cards_views)
+api.add_resource(AdsManagerElementsViews, ads_manager_element_cards_views)
 
 metacolumns_controller = "{base_url}/metacolumns".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsMetacolumnsEndpoint, metacolumns_controller)
+api.add_resource(AdsManagerCatalogsMetacolumnsEndpoint, metacolumns_controller)
 
 breakdowns_controller = "{base_url}/breakdowns".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsBreakdownsEndpoint, breakdowns_controller)
+api.add_resource(AdsManagerCatalogsBreakdownsEndpoint, breakdowns_controller)
 
 breakdowns_combinations_controller = "{base_url}/breakdowns-combinations".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerCatalogsController.AdsManagerCatalogsBreakdownsCombinationsEndpoint,
+api.add_resource(AdsManagerCatalogsBreakdownsCombinationsEndpoint,
                  breakdowns_combinations_controller)
 
-# Structures
-structures_controller = "{base_url}/campaigns/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerGetCampaignsEndpoint, structures_controller)
+# AdsManager Structures
+structures_controller = "{base_url}/ads-manager/<string:level>s/<string:account_id>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(AdsManagerGetStructuresEndpoint, structures_controller)
 
-structures_controller = "{base_url}/adsets/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerGetAdSetsEndpoint, structures_controller)
-
-structures_controller = "{base_url}/ads/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerGetAdsEndpoint, structures_controller)
+# Optimize Structures
+structures_controller = "{base_url}/optimize/<string:level>s/<string:account_id>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(OptimizeGetStructuresEndpoint, structures_controller)
 
 filtered_structures_controller = "{base_url}/filtered-structures/<string:level>".format(
     base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerFilteredStructuresEndpoint, filtered_structures_controller)
+api.add_resource(AdsManagerFilteredStructuresEndpoint, filtered_structures_controller)
 
 # Campaign Tree
 campaign_tree_structure_controller = "{base_url}/campaign-structure-tree/<string:level>/<string:facebook_id>".format(
     base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerCampaignTreeStructureEndpoint, campaign_tree_structure_controller)
+api.add_resource(AdsManagerCampaignTreeStructureEndpoint, campaign_tree_structure_controller)
 
 # Structure details + updates
 structure_details_controller = "{base_url}/<string:level>/<string:facebook_id>".format(
     base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerEndpoint, structure_details_controller)
+api.add_resource(AdsManagerEndpoint, structure_details_controller)
 
 # Duplicate
 duplicate_structure_controller = "{base_url}/<string:level>/<string:facebook_id>/duplicate".format(
     base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerDuplicateStructureEndpoint, duplicate_structure_controller)
+api.add_resource(AdsManagerDuplicateStructureEndpoint, duplicate_structure_controller)
 
 # Drafts
 update_draft_controller = "{base_url}/<string:level>/<string:facebook_id>/draft".format(
     base_url=startup.base_url.lower())
-api.add_resource(AdsManagerController.AdsManagerUpdateStructureDraftEndpoint, update_draft_controller)
+api.add_resource(AdsManagerUpdateStructureDraftEndpoint, update_draft_controller)
 
 # Report catalogs
 reports_controller = "{base_url}/get-reports".format(base_url=startup.base_url.lower())

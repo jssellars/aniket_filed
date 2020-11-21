@@ -33,6 +33,9 @@
     "password": "StartingGunFlounderFun",
     "name": "Dev3.Filed.Facebook.Accounts"
   },
+  "external_services": {
+    "authorize_permission_endpoint": "https://be.dev3.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
+  },
   "environment": "dev3",
   "api_name": "FacebookCampaignBuilder",
   "api_version": "1.0.0",
@@ -40,7 +43,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47220,
-  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "debug_mode": true,
   "docker_filename": "filed-potter-campaign-builder-api",
   "logger_type": "file_logger",

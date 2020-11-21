@@ -2,7 +2,6 @@ import typing
 
 import humps
 from flask import request
-from flask_jwt_simple import get_jwt, jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
@@ -11,12 +10,13 @@ from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
+from Core.Web.Security.Permissions import CampaignBuilderPermissions
 from FacebookCampaignsBuilder.Api import command_handlers, commands, dtos, mappings, queries
 from FacebookCampaignsBuilder.Api.Startup import logger, startup
 
 
 class AdCreativeAssetsImages(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, business_owner_facebook_id: typing.AnyStr = None, ad_account_id: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -43,7 +43,7 @@ class AdCreativeAssetsImages(Resource):
 
 
 class AdCreativeAssetsVideos(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, business_owner_facebook_id: typing.AnyStr = None, ad_account_id: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -70,7 +70,7 @@ class AdCreativeAssetsVideos(Resource):
 
 
 class AdCreativeAssetsPagePosts(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, business_owner_facebook_id: typing.AnyStr = None, page_facebook_id: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -97,7 +97,7 @@ class AdCreativeAssetsPagePosts(Resource):
 
 
 class AdPreview(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def post(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -105,7 +105,7 @@ class AdPreview(Resource):
             mapper = mappings.AdPreviewCommand(commands.AdPreview)
             command = mapper.load(request_json)
             if not command.business_owner_id:
-                command.business_owner_id = extract_business_owner_facebook_id(get_jwt())
+                command.business_owner_id = extract_business_owner_facebook_id()
             permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(command.business_owner_id)
             ad_preview_iframe = command_handlers.AdPreview.handle(
                 command=command, facebook_config=startup.facebook_config, permanent_token=permanent_token
@@ -128,12 +128,12 @@ class AdPreview(Resource):
 
 
 class AudienceSize(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def post(self, account_id: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             request_json = humps.depascalize(request.get_json(force=True))
-            business_owner_id = extract_business_owner_facebook_id(get_jwt())
+            business_owner_id = extract_business_owner_facebook_id()
             permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
             audience_size = command_handlers.AudienceSize.handle(
                 permanent_token=permanent_token, account_id=account_id, audience_details=request_json
@@ -156,11 +156,11 @@ class AudienceSize(Resource):
 
 
 class BudgetValidation(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
-            business_owner_id = extract_business_owner_facebook_id(get_jwt())
+            business_owner_id = extract_business_owner_facebook_id()
         except Exception as e:
             pass
         try:
@@ -207,12 +207,12 @@ class HealthCheck(Resource):
 
 
 class PublishCampaign(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def post(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
-            request_json = humps.depascalize(request.get_json(force=True))
-            business_owner_id = extract_business_owner_facebook_id(get_jwt())
+            request_json = humps.decamelize(request.get_json(force=True))
+            business_owner_id = extract_business_owner_facebook_id()
             permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
             campaigns = command_handlers.PublishCampaign.handle(
                 request=request_json,
@@ -243,7 +243,7 @@ class PublishCampaign(Resource):
 
 
 class SmartCreateCats(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -266,7 +266,7 @@ class SmartCreateCats(Resource):
 
 
 class SmartCreateCatalogs(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
@@ -289,13 +289,13 @@ class SmartCreateCatalogs(Resource):
 
 
 class TargetingSearchInterestsTree(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchInterestsTree(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = object_to_camelized_dict(query.get())
@@ -316,13 +316,13 @@ class TargetingSearchInterestsTree(Resource):
 
 
 class TargetingSearchRegulatedInterests(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, categories: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchRegulatedInterests(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = query.get(regulated_categories=(categories.replace(" ", "").upper().split(",")))
@@ -344,13 +344,13 @@ class TargetingSearchRegulatedInterests(Resource):
 
 
 class TargetingSearchInterestsSearch(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, query_string: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchInterestsSearch(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = object_to_camelized_dict(query.search(query_string=query_string))
@@ -371,13 +371,13 @@ class TargetingSearchInterestsSearch(Resource):
 
 
 class TargetingSearchInterestsSuggestions(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, query_string: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchInterestsSuggestions(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = object_to_camelized_dict(query.search(query_string=query_string))
@@ -398,13 +398,13 @@ class TargetingSearchInterestsSuggestions(Resource):
 
 
 class TargetingSearchLocations(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchLocationsCountryGroups(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = object_to_camelized_dict(query.get())
@@ -425,13 +425,13 @@ class TargetingSearchLocations(Resource):
 
 
 class TargetingSearchLocationSearch(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, query_string: typing.AnyStr = None):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchLocationsSearch(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = object_to_camelized_dict(query.search(query_string=query_string))
@@ -452,13 +452,13 @@ class TargetingSearchLocationSearch(Resource):
 
 
 class TargetingSearchLanguages(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         try:
             query = queries.TargetingSearchLanguages(
                 session=startup.session,
-                business_owner_id=extract_business_owner_facebook_id(get_jwt()),
+                business_owner_id=extract_business_owner_facebook_id(),
                 facebook_config=startup.facebook_config,
             )
             response = object_to_camelized_dict(query.get())

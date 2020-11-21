@@ -9,7 +9,6 @@ if path:
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
 from Logging.Api.Controllers.HealthcheckController import HealthCheckEndpoint, VersionEndpoint
@@ -17,14 +16,6 @@ from Logging.Api.Controllers.LoggingController import LoggingEndpoint
 from Logging.Api.Startup import startup
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ[
-    "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
-app.config["JWT_TOKEN_LOCATION"] = "headers"
-app.config["JWT_HEADER_NAME"] = "Authorization"
-app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_DECODE_AUDIENCE"] = "Filed-Client-Apps"
-
-jwt = JWTManager(app)
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 

@@ -10,22 +10,13 @@ if path:
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
 from FacebookCampaignsBuilder.Api import routers
 from FacebookCampaignsBuilder.Api.Startup import startup
 
 app = Flask(__name__)
-app.config.update(
-    JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", startup.jwt_secret_key),
-    JWT_TOKEN_LOCATION="headers",
-    JWT_HEADER_NAME="Authorization",
-    JWT_HEADER_TYPE="Bearer",
-    JWT_DECODE_AUDIENCE="Filed-Client-Apps",
-)
 app.url_map.strict_slashes = False
-jwt = JWTManager(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 

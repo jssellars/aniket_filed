@@ -9,7 +9,6 @@ if path:
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_simple import JWTManager
 from flask_restful import Api
 
 from FacebookAccounts.Api.Controllers.AdAccountController import AdAccountInsightsEndpoint, \
@@ -20,15 +19,7 @@ from FacebookAccounts.Api.Controllers.HealthCheckController import HealthCheckEn
 from FacebookAccounts.Api.Startup import startup
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ[
-    "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
-app.config["JWT_TOKEN_LOCATION"] = "headers"
-app.config["JWT_HEADER_NAME"] = "Authorization"
-app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_DECODE_AUDIENCE"] = "Filed-Client-Apps"
 app.url_map.strict_slashes = False
-
-jwt = JWTManager(app)
 
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -49,15 +40,12 @@ business_owner_delete_permissions_controller = "{base_url}/business-owner/<strin
     base_url=startup.base_url.lower())
 api.add_resource(BusinessOwnerDeletePermissionsEndpoint, business_owner_delete_permissions_controller)
 
-# Ad account controller
-ad_account_controller = "{base_url}/facebook-accounts".format(base_url=startup.base_url.lower())
-
 # Insights controller
 # TODO: Once V1 is fully implemented and deployed, this can be deleted along with the related controllers and handlers
 ad_account_insights_controller = "{base_url}/facebook-accounts-insights".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountInsightsEndpoint, ad_account_insights_controller)
 
-#  Pages controller
+# Pages controller
 ad_account_pages_controller = "{base_url}/pages/<string:account_id>".format(base_url=startup.base_url.lower())
 api.add_resource(AdAccountPagesEndpoint, ad_account_pages_controller)
 

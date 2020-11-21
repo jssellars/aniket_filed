@@ -17,7 +17,6 @@ django-cors-headers==3.2.1
 facebook-business==7.0
 Flask==1.1.1
 Flask-Cors==3.0.8
-Flask-JWT-Simple==0.0.3
 Flask-RESTful==0.3.8
 idna==2.9
 importlib-metadata==1.6.0

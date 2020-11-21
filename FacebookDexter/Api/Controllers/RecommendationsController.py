@@ -1,11 +1,11 @@
 import json
 
 from flask import request, Response
-from flask_jwt_simple import jwt_required
 from flask_restful import Resource
 
 from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
 from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMessageBase
+from Core.Web.Security.Permissions import OptimizePermissions, AdsManagerPermissions
 from FacebookDexter.Api.CommandHandlers.DexterApiApplyRecommendationCommandHandler import (
     DexterApiApplyRecommendationCommandHandler)
 from FacebookDexter.Api.CommandHandlers.DexterApiDismissRecommendationCommandHandler import (
@@ -25,13 +25,12 @@ from FacebookDexter.Api.CommandValidators.DexterApiGetRecommendationsPageCommand
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
-
 from FacebookDexter.Api.Commands.DexterApiGetRecommendationsPageCommand import DexterApiGetRecommendationsPageCommand
-from FacebookDexter.Api.Startup import logger
+from FacebookDexter.Api.Startup import logger, startup
 
 
 class DexterApiGetRecommendationsPage(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.get_json()
@@ -64,7 +63,7 @@ class DexterApiGetRecommendationsPage(Resource):
 
 
 class DexterApiGetCountsByCategory(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.get_json()
@@ -94,7 +93,7 @@ class DexterApiGetCountsByCategory(Resource):
 
 
 class DexterApiDismissRecommendation(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=OptimizePermissions.OPTIMIZE_DELETE)
     def patch(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.args
@@ -118,7 +117,7 @@ class DexterApiDismissRecommendation(Resource):
 
 
 class DexterApiApplyRecommendation(Resource):
-    @jwt_required
+    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def patch(self):
         logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
         data = request.args

@@ -3,6 +3,7 @@ import os
 
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from GoogleTuring.Api.Config.Config import MongoConfig, GoogleConfig
 
 
@@ -15,8 +16,9 @@ class Startup(object):
         self.mongo_config = MongoConfig(app_config['mongo_database'])
         self.google_config = GoogleConfig(app_config['google'])
 
+        self.__auth_permission_endpoint = app_config['external_services']['authorize_permission_endpoint']
+
         # Generic msrv configuration
-        self.jwt_secret_key = app_config["jwt_secret_key"]
         self.port = app_config["port"]
         self.debug_mode = app_config["debug_mode"]
         self.environment = app_config['environment']
@@ -33,8 +35,16 @@ class Startup(object):
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
 
+    @property
+    def authorize_permission(self):
+        return authorize_permission(self.__auth_permission_endpoint)
 
-#  Initialize startup object
+    @property
+    def authorize_jwt(self):
+        return authorize_jwt(self.__auth_permission_endpoint)
+
+
+# Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
     env = "local"

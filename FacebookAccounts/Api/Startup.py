@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 from FacebookAccounts.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig, \
     ExternalServicesConfig, AdminUserConfig
@@ -24,7 +25,9 @@ class Startup(object):
         self.facebook_config = FacebookConfig(app_config['facebook'])
         self.database_config = SQLAlchemyConfig(app_config['sql_server_database'])
         self.external_services = ExternalServicesConfig(app_config["external_services"])
-        self.admin_user = AdminUserConfig(app_config["admin_user"])
+        self.technical_user = AdminUserConfig(app_config["technical_user"])
+
+        self.__auth_permission_endpoint = app_config['external_services']['authorize_permission_endpoint']
 
         # Initialize connections to DB
         self.engine = create_engine(self.database_config.connection_string)
@@ -46,7 +49,6 @@ class Startup(object):
         self.api_version = app_config['api_version']
         self.base_url = app_config['base_url']
         self.port = app_config["port"]
-        self.jwt_secret_key = app_config["jwt_secret_key"]
         self.debug_mode = app_config["debug_mode"]
         self.docker_filename = app_config["docker_filename"]
         self.logger_type = app_config["logger_type"]
@@ -54,14 +56,21 @@ class Startup(object):
         self.logger_level = app_config["logger_level"]
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
-        self.technical_token_manager = TechnicalTokenManager(self.admin_user, self.external_services,
-                                                             self.jwt_secret_key)
+        self.technical_token_manager = TechnicalTokenManager(self.technical_user, self.external_services)
+
+    @property
+    def authorize_permission(self):
+        return authorize_permission(self.__auth_permission_endpoint)
+
+    @property
+    def authorize_jwt(self):
+        return authorize_jwt(self.__auth_permission_endpoint)
 
     def create_sql_connection(self):
         return sessionmaker(bind=self.engine)
 
 
-#  Initialize startup object
+# Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
     env = "local"

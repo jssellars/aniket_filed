@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
 from Core.Tools.Logger.LoggerFactory import LoggerFactory
 from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from FacebookTuring.Api.Config.Config import FacebookConfig
 from FacebookTuring.Api.Config.Config import MongoConfig
 from FacebookTuring.Api.Config.Config import RabbitMqConfig
@@ -26,11 +27,12 @@ class Startup(object):
         self.database_config = SQLAlchemyConfig(app_config['sql_server_database'])
         self.mongo_config = MongoConfig(app_config['mongo_database'])
 
+        self.__auth_permission_endpoint = app_config.get('external_services', {}).get('authorize_permission_endpoint')
+
         # Initialize connections to DB
         self.engine = create_engine(self.database_config.connection_string)
         self.session = sessionmaker(bind=self.engine)
 
-        # Initialize RabbitMQ exchanges and queues
         # Initialize RabbitMQ exchanges and queues
         direct_exchange_config = self.rabbitmq_config.get_exchange_details_by_type("direct")
         self.exchange_details = ExchangeDetails(name=direct_exchange_config["name"],
@@ -48,7 +50,6 @@ class Startup(object):
         self.api_version = app_config['api_version']
         self.base_url = app_config['base_url']
         self.port = app_config.get("port")
-        self.jwt_secret_key = app_config.get("jwt_secret_key")
         self.debug_mode = app_config.get("debug_mode")
         self.docker_filename = app_config["docker_filename"]
         self.logger_type = app_config["logger_type"]
@@ -57,11 +58,19 @@ class Startup(object):
         self.es_host = app_config.get("es_host", None)
         self.es_port = app_config.get("es_port", None)
 
+    @property
+    def authorize_permission(self):
+        return authorize_permission(self.__auth_permission_endpoint)
+
+    @property
+    def authorize_jwt(self):
+        return authorize_jwt(self.__auth_permission_endpoint)
+
     def create_sql_session(self):
         return sessionmaker(bind=self.engine)
 
 
-#  Initialize startup object
+# Initialize startup object
 env = os.environ.get("PYTHON_ENV")
 if not env:
     env = "local"

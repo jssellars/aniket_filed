@@ -37,11 +37,11 @@
   },
   "external_services": {
     "users_signin_endpoint": "https://be.staging.filed.com/cs-users-api/api/v1/users/signin",
-    "users_technical_token_endpoint": "https://be.staging.filed.com/cs-users-api/api/v1/users/get-technical-jwt",
-    "subscription_update_business_owner_endpoint": "https://be.staging.filed.com/cs-subscriptions-api/api/v1/contacts/set-businessowner-facebook-id"
+    "subscription_update_business_owner_endpoint": "https://be.staging.filed.com/cs-subscriptions-api/api/v1/contacts/set-businessowner-facebook-id",
+    "authorize_permission_endpoint": "https://be.staging.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
   },
-  "admin_user": {
-    "email": "admin@filed.com",
+  "technical_user": {
+    "email": "technical_account@filed.com",
     "password": "Adm1n@Fil3ed"
   },
   "environment": "staging",
@@ -51,7 +51,6 @@
   "service_version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47200,
-  "jwt_secret_key": "GS1QBzuZDQA1tkyLwimOI7ITOj5RNCjkV2PGFR49LgyNZoIzo19Vdh+1IBrmWdEAL6uB6qjiVuhW/x7YSExDBiI+zSJksfbRsSHc4W9XTlOA3akXCNv7cAoyPvwwHFuw",
   "debug_mode": true,
   "docker_filename": "filed-potter-accounts-api",
   "logger_type": "file_logger",

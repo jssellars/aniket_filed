@@ -10,29 +10,21 @@ if path:
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
-from flask_jwt_simple import JWTManager
 from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Api.Controllers.AdAccountInsightsController import AdAccountInsightsEndpoint
 from GoogleTuring.Api.Controllers.AdsManagerCatalogsController import AdsManagerReportsEndpoint, \
     AdsManagerDimensionsEndpoint, \
     AdsManagerMetricsEndpoint, AdsManagerBreakdownsEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetAdsEndpoint, \
-    AdsManagerGetAdGroupsEndpoint, \
-    AdsManagerGetCampaignsEndpoint, AdsManagerGetKeywordsEndpoint, AdsManagerFilteredStructuresEndpoint
-from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerReportInsightsEndpoint, \
-    AdsManagerInsightsWithTotalsEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerController import AdsManagerEndpoint, AdsManagerGetStructuresEndpoint, \
+    AdsManagerFilteredStructuresEndpoint, OptimizeGetStructuresEndpoint
+from GoogleTuring.Api.Controllers.AdsManagerInsightsController import AdsManagerInsightsWithTotalsEndpoint, \
+    AccountsReportInsightsEndpoint, OptimizeReportInsightsEndpoint, \
+    AdsManagerReportInsightsEndpoint, ReportsReportInsightsEndpoint
 from GoogleTuring.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = os.environ[
-    "JWT_SECRET_KEY"] if "JWT_SECRET_KEY" in os.environ.keys() else startup.jwt_secret_key
-app.config["JWT_TOKEN_LOCATION"] = "headers"
-app.config["JWT_HEADER_NAME"] = "Authorization"
-app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_DECODE_AUDIENCE"] = "Filed-Client-Apps"
 app.url_map.strict_slashes = False
 
-jwt = JWTManager(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 api = Api(app)
@@ -52,24 +44,33 @@ ad_account_insights_controller = "{base_url}/google-accounts-insights".format(ba
 api.add_resource(AdAccountInsightsEndpoint, ad_account_insights_controller)
 
 # Insights
-insights_controller = '{base_url}/reports'.format(base_url=startup.base_url.lower())
+insights_controller = '{base_url}/accounts/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(AccountsReportInsightsEndpoint, insights_controller)
+
+# Insights
+insights_controller = '{base_url}/optimize/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(OptimizeReportInsightsEndpoint, insights_controller)
+
+# Insights
+insights_controller = '{base_url}/ads-manager/reports'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerReportInsightsEndpoint, insights_controller)
+
+# Insights
+insights_controller = '{base_url}/reports/reports'.format(base_url=startup.base_url.lower())
+api.add_resource(ReportsReportInsightsEndpoint, insights_controller)
 
 insights_with_totals_controller = '{base_url}/insights-with-totals'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerInsightsWithTotalsEndpoint, insights_with_totals_controller)
 
-# Structures
-structures_controller = "{base_url}/campaigns/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerGetCampaignsEndpoint, structures_controller)
+# AdsManager Structures
+structures_controller = "{base_url}/ads-manager/<string:level>s/<string:account_id>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(AdsManagerGetStructuresEndpoint, structures_controller)
 
-structures_controller = "{base_url}/adsets/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerGetAdGroupsEndpoint, structures_controller)
-
-structures_controller = "{base_url}/ads/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerGetAdsEndpoint, structures_controller)
-
-structures_controller = "{base_url}/keywords/<string:account_id>".format(base_url=startup.base_url.lower())
-api.add_resource(AdsManagerGetKeywordsEndpoint, structures_controller)
+# Optimize Structures
+structures_controller = "{base_url}/optimize/<string:level>s/<string:account_id>".format(
+    base_url=startup.base_url.lower())
+api.add_resource(OptimizeGetStructuresEndpoint, structures_controller)
 
 filtered_structures_controller = "{base_url}/filtered-structures/<string:level>".format(
     base_url=startup.base_url.lower())

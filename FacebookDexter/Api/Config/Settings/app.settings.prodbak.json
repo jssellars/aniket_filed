@@ -10,7 +10,6 @@
   "logger_level": "DEBUG",
   "es_host": null,
   "es_port": null,
-  "jwt_secret_key": "QD2XeKEcMdMs1bFzHDdwqBSfQi4S5nTgpDa6XuG3M5izF51KhuYoBwHMO9gf84ddSUXvuMJx+yiYIdPzW4NZMO0dKB313+peyBaHDkFAQ9+nsFV3qokQ4Sj6bNk+XSGe",
   "mongo_database": {
     "ssh_tunnel": true,
     "connection_string_url": "mongodb://mongo-admin:7YPbhiYTEtM%3D@127.0.0.1:29804/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
@@ -25,8 +24,8 @@
     "recommendations_database_name": "prod_dexter_fuzzy_inference_recommendations",
     "recommendations_collection_name": "recommendations"
   },
-    "external_services": {
-    "facebook_auto_apply" : "https://prodbak-api-facebook-turing.filed.com/api/v1/api/v1/{level}/{structureId}",
+  "external_services": {
+    "facebook_auto_apply": "https://prodbak-api-facebook-turing.filed.com/api/v1/api/v1/{level}/{structureId}",
     "google_auto_apply": ""
   }
 }
