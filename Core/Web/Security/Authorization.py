@@ -46,17 +46,13 @@ def authorize_permission(permission_endpoint):
 
 def _authorize_jwt(permission_endpoint):
     headers = {'Authorization': request.headers.get('Authorization')}
-
-    # TODO: remove verify parameter after the testing is done
-    response = requests.get(permission_endpoint, headers=headers, verify=False)
+    response = requests.get(permission_endpoint, headers=headers)
     return response.status_code == 204
 
 
 def _authorize_permission(permission_endpoint, **kwargs):
     headers = {'Authorization': request.headers.get('Authorization')}
-
-    # TODO: remove verify parameter after the testing is done
-    response = requests.get(permission_endpoint, params=kwargs, headers=headers, verify=False)
+    response = requests.get(permission_endpoint, params=kwargs, headers=headers)
     return response.status_code == 204
 
 
