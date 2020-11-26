@@ -13,7 +13,7 @@ class Level(EnumerationBase):
     AD = "ad"
 
 
-class LevelManyToMongoCollectionEnum(EnumerationBase):
+class FacebookLevelPlural(EnumerationBase):
     ACCOUNT = "accounts"
     CAMPAIGN = "campaigns"
     ADSET = "adsets"

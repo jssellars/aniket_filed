@@ -11,3 +11,4 @@ class ViewColumnType(Enum):
     PERCENTAGE = 6
     BUTTON = 7
     DATE = 8
+    BUDGET = 9

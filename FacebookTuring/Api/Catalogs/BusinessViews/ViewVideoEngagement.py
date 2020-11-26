@@ -13,12 +13,20 @@ class ViewCampaignVideoEngagement(ViewVideoEngagementBase):
         ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.delivery,
+        ViewColumnsMaster.impressions,
+        ViewColumnsMaster.continuous_video_plays_2s,
+        ViewColumnsMaster.cost_per_continuous_video_play_2s,
+        ViewColumnsMaster.video_plays_3s,
         ViewColumnsMaster.thru_plays,
         ViewColumnsMaster.cost_per_thru_play,
+        ViewColumnsMaster.reach,
         ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.video_plays_25p,
         ViewColumnsMaster.video_plays_50p,
-        ViewColumnsMaster.video_plays_100p
+        ViewColumnsMaster.video_plays_75p,
+        ViewColumnsMaster.video_plays_95p,
+        ViewColumnsMaster.video_plays_100p,
+        ViewColumnsMaster.video_plays,
     ]
 
 
@@ -28,12 +36,20 @@ class ViewAdSetVideoEngagement(ViewVideoEngagementBase):
         ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
+        ViewColumnsMaster.impressions,
+        ViewColumnsMaster.continuous_video_plays_2s,
+        ViewColumnsMaster.cost_per_continuous_video_play_2s,
+        ViewColumnsMaster.video_plays_3s,
         ViewColumnsMaster.thru_plays,
         ViewColumnsMaster.cost_per_thru_play,
+        ViewColumnsMaster.reach,
         ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.video_plays_25p,
         ViewColumnsMaster.video_plays_50p,
-        ViewColumnsMaster.video_plays_100p
+        ViewColumnsMaster.video_plays_75p,
+        ViewColumnsMaster.video_plays_95p,
+        ViewColumnsMaster.video_plays_100p,
+        ViewColumnsMaster.video_plays,
     ]
 
 
@@ -43,10 +59,18 @@ class ViewAdVideoEngagement(ViewVideoEngagementBase):
         ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
+        ViewColumnsMaster.impressions,
+        ViewColumnsMaster.continuous_video_plays_2s,
+        ViewColumnsMaster.cost_per_continuous_video_play_2s,
+        ViewColumnsMaster.video_plays_3s,
         ViewColumnsMaster.thru_plays,
         ViewColumnsMaster.cost_per_thru_play,
+        ViewColumnsMaster.reach,
         ViewColumnsMaster.amount_spent,
         ViewColumnsMaster.video_plays_25p,
         ViewColumnsMaster.video_plays_50p,
-        ViewColumnsMaster.video_plays_100p
+        ViewColumnsMaster.video_plays_75p,
+        ViewColumnsMaster.video_plays_95p,
+        ViewColumnsMaster.video_plays_100p,
+        ViewColumnsMaster.video_plays,
     ]

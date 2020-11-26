@@ -23,7 +23,7 @@ class ViewCampaignCrossDevice(ViewCrossDeviceBase):
         ViewColumnsMaster.unique_link_click_through_rate,
         # TODO: get desktop link click ctr
         # TODO: get mobile link click ctr
-        ViewColumnsMaster.results
+        ViewColumnsMaster.results,
         # TODO: get desktop results
         # TODO: get mobile results
     ]

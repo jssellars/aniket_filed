@@ -1,3 +1,4 @@
+from Core.Metadata.Columns.ViewColumns.ViewColumnType import ViewColumnType
 from Core.Metadata.Views.ViewBase import AgGridView
 from Core.Tools.Misc import AgGridConstants
 from Core.Tools.Misc.AgGridFilter import AgGridFilter
@@ -5,11 +6,13 @@ from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list, o
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Api.Catalogs.BusinessViews import ViewCarouselEngagement
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewBiddingAndOptimization import (
     ViewAdBiddingAndOptimization,
     ViewAdSetBiddingAndOptimization,
     ViewCampaignBiddingAndOptimization,
 )
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewCarouselEngagement import ViewCampaignCarouselEngagement, ViewAdSetCarouselEngagement, ViewAdCarouselEngagement
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewCrossDevice import (
     ViewAdCrossDevice,
     ViewAdSetCrossDevice,
@@ -25,6 +28,7 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewEngagement import (
     ViewAdSetEngagement,
     ViewCampaignEngagement,
 )
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewOfflineConversions import ViewAdOfflineConversions, ViewAdSetOfflineConversions, ViewCampaignOfflineConversions
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewPerformance import (
     ViewAdPerformance,
     ViewAdSetPerformance,
@@ -35,6 +39,9 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewPerformanceAndClicks import (
     ViewAdSetPerformanceAndClicks,
     ViewCampaignPerformanceAndClicks,
 )
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewQuickScan import ViewCampaignQuickScan, ViewAdSetQuickScan, ViewAdQuickScan
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewResults import ViewCampaignResults, ViewAdsetResults, ViewAdResults
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewSetup import ViewCampaignSetup, ViewAdSetup, ViewAdsetSetup
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewTargetingAndCreative import (
     ViewAdSetTargetingAndCreative,
     ViewAdTargetingAndCreative,
@@ -56,40 +63,46 @@ class AdsManagerCatalogsViewsAgGridDto:
 
     campaign = {
         "views": [
-            ViewCampaignBiddingAndOptimization(),
-            ViewCampaignCrossDevice(),
+            ViewCampaignPerformance(),
+            ViewCampaignResults(),
             ViewCampaignDelivery(),
             ViewCampaignEngagement(),
-            ViewCampaignPerformance(),
-            ViewCampaignPerformanceAndClicks(),
-            ViewCampaignTargetingAndCreative(),
             ViewCampaignVideoEngagement(),
+            ViewCampaignPerformanceAndClicks(),
+            ViewCampaignOfflineConversions(),
+            ViewCampaignTargetingAndCreative(),
+            ViewCampaignBiddingAndOptimization(),
+            ViewCampaignQuickScan(),
         ]
     }
 
     adset = {
         "views": [
-            ViewAdSetBiddingAndOptimization(),
-            ViewAdSetCrossDevice(),
+            ViewAdSetPerformance(),
+            ViewAdsetResults(),
             ViewAdSetDelivery(),
             ViewAdSetEngagement(),
-            ViewAdSetPerformance(),
-            ViewAdSetPerformanceAndClicks(),
-            ViewAdSetTargetingAndCreative(),
             ViewAdSetVideoEngagement(),
+            ViewAdSetPerformanceAndClicks(),
+            ViewAdSetOfflineConversions(),
+            ViewAdSetTargetingAndCreative(),
+            ViewAdSetBiddingAndOptimization(),
+            ViewAdSetQuickScan(),
         ]
     }
 
     ad = {
         "views": [
-            ViewAdBiddingAndOptimization(),
-            ViewAdCrossDevice(),
+            ViewAdPerformance(),
+            ViewAdResults(),
             ViewAdDelivery(),
             ViewAdEngagement(),
-            ViewAdPerformance(),
-            ViewAdPerformanceAndClicks(),
-            ViewAdTargetingAndCreative(),
             ViewAdVideoEngagement(),
+            ViewAdPerformanceAndClicks(),
+            ViewAdOfflineConversions(),
+            ViewAdTargetingAndCreative(),
+            ViewAdBiddingAndOptimization(),
+            ViewAdQuickScan(),
         ]
     }
 
@@ -136,7 +149,11 @@ class AdsManagerCatalogsViewsAgGridDto:
 
     @classmethod
     def map_column_data(cls, column: ViewColumn = None, field_value: Field = None, is_secondary_value: bool = False):
-        column_mapping = {AgGridConstants.COLUMN_ID: field_value.name, AgGridConstants.FIELD: field_value.name}
+        column_mapping = {
+            AgGridConstants.COLUMN_ID: field_value.name,
+            AgGridConstants.FIELD: field_value.name,
+            AgGridConstants.COLUMN_TYPE: ViewColumnType(column.type_id).name,
+        }
 
         if is_secondary_value:
             column_mapping[AgGridConstants.HEADER_NAME] = ""

@@ -47,6 +47,7 @@ class HTTPRequestBase:
                     cursors = pagination.get('cursors') if 'cursors' in pagination.keys() else None
                     if cursors:
                         next_page_cursor = cursors.get('after') if 'after' in cursors.keys() else None
+
             return response, next_page_cursor, summary
         except Exception as e:
             # Log exception

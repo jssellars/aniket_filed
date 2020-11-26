@@ -13,7 +13,7 @@ from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessage
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping, FacebookLevelPlural
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
@@ -639,13 +639,18 @@ class GraphAPIInsightsHandler:
         insight_ids = [x[structure_key] for x in insight_response if structure_key in x]
 
         # get structures
-        requested_structure_fields = [getattr(FieldsMetadata, entry) for entry in structure_fields]
+        requested_structure_fields = [
+            getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
+        ]
         structures_response = cls.get_structure_page(
             structure_key=structure_key,
             level=level,
             insight_ids=insight_ids,
             structure_fields=requested_structure_fields,
         )
+
+        if summary and f"{level}_name" in summary[0]:
+            summary[0][f"{level}_name"] = FacebookLevelPlural[level.upper()].value.capitalize()
 
         return insight_response, structures_response, next_page_cursor, summary
 
@@ -765,7 +770,7 @@ class GraphAPIInsightsHandler:
                             value = sorted_response.pop(key)
                             if structure_key == FieldsMetadata.budget.name:
                                 value = value / 100
-                            answer = f"{value}({key.split(underscore)[0]})"
+                            answer = f"{value} {key.split(underscore)[0]}"
                             sorted_response[structure_key] = answer
                             found = True
                             break

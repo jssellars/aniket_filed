@@ -437,6 +437,7 @@ class ViewFieldsMetricEngagementMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
+        no_of_decimals=2,
     )
     cost_per_outbound_click = ViewColumn(
         Autoincrement.hex_string("cost_per_outbound_click"),
@@ -463,6 +464,7 @@ class ViewFieldsMetricEngagementMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
+        no_of_decimals=2,
     )
     estimated_ad_recall_lift = ViewColumn(
         Autoincrement.hex_string("estimated_ad_recall_lift"),

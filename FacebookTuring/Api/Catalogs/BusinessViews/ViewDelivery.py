@@ -14,10 +14,10 @@ class ViewCampaignDelivery(ViewDeliveryBase):
         ViewColumnsMaster.campaign_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.reach,
+        ViewColumnsMaster.frequency,
         ViewColumnsMaster.cost_per_1000_people_reached,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.frequency
     ]
 
 
@@ -28,10 +28,10 @@ class ViewAdSetDelivery(ViewDeliveryBase):
         ViewColumnsMaster.adset_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.reach,
+        ViewColumnsMaster.frequency,
         ViewColumnsMaster.cost_per_1000_people_reached,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.frequency
     ]
 
 
@@ -42,8 +42,8 @@ class ViewAdDelivery(ViewDeliveryBase):
         ViewColumnsMaster.ad_name,
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.reach,
+        ViewColumnsMaster.frequency,
         ViewColumnsMaster.cost_per_1000_people_reached,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.frequency
     ]

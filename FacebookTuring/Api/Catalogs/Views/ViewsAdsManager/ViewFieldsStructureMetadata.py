@@ -100,7 +100,7 @@ class ViewFieldsStructureMetadata:
         Autoincrement.hex_string("budget"),
         display_name="Budget",
         primary_value=FieldsMetadata.budget,
-        type_id=ViewColumnType.NUMBER.value,
+        type_id=ViewColumnType.BUDGET.value,
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=False,
         no_of_decimals=2,

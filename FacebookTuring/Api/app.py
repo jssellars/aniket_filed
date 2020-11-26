@@ -69,6 +69,7 @@ api.add_resource(AdsManagerReportInsightsEndpoint, insights_controller)
 # Reports Insights
 insights_controller = '{base_url}/reports/reports'.format(base_url=startup.base_url.lower())
 api.add_resource(ReportsReportInsightsEndpoint, insights_controller)
+
 ag_grid_insights_controller = '{base_url}/ag-grid-insights/<string:level>'.format(base_url=startup.base_url.lower())
 api.add_resource(AdsManagerAgGridInsightsEndpoint, ag_grid_insights_controller)
 

@@ -4,6 +4,7 @@ from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwn
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Startup import startup, logger
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
@@ -38,6 +39,8 @@ class AdsManagerUpdateStructureCommandHandler:
             if isinstance(updated_structure, Exception):
                 raise updated_structure
 
+            new_effective_status = updated_structure[FieldsMetadata.effective_status.name]
+
             # Map Facebook structure to domain model
             mapping = StructureMapping.get(level)
             updated_structure = mapping.load(updated_structure)
@@ -54,6 +57,9 @@ class AdsManagerUpdateStructureCommandHandler:
             structure_id = getattr(updated_structure,
                                    LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
             repository.add_structure(level=Level(level), key_value=structure_id, document=updated_structure)
+
+            return {FieldsMetadata.effective_status.name: new_effective_status.replace("_", " ").capitalize()}
+
         except Exception as e:
             raise e
 

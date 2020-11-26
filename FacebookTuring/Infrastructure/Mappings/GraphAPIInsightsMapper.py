@@ -1,6 +1,7 @@
 import itertools
 import typing
 from collections import ChainMap, namedtuple
+from typing import List
 
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.FieldMapperResult import FieldMapperResult
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -41,7 +42,18 @@ class GraphAPIInsightsMapper:
             if mapped_fields:
                 mapped_fields = [field for field in mapped_fields if field is not None]
                 mapped_data = [dict(ChainMap(*entry)) for entry in itertools.product(*mapped_fields)]
+
+                required_fields_to_change = [
+                    FieldsMetadata.effective_status.name,
+                    FieldsMetadata.objective.name,
+                    FieldsMetadata.buying_type.name,
+                    FieldsMetadata.result_rate.name,
+                ]
+                change_fields_from_upper_case(mapped_data, required_fields_to_change)
+
+
                 mapped_response.extend(mapped_data)
+
         return mapped_response
 
     @classmethod
@@ -89,12 +101,12 @@ class GraphAPIInsightsMapper:
                     facebook_results_field_value = optimization_goal.value
 
         elif requested_field.name == FieldsMetadata.cost_per_result.name:
-            if GraphAPIInsightsFields.custom_event_type in data\
+            if GraphAPIInsightsFields.custom_event_type in data \
                     and data[GraphAPIInsightsFields.custom_event_type]:
                 cost_per_custom_event_type = PixelCustomEventTypeToCostPerResult.get_enum_by_name(data[GraphAPIInsightsFields.custom_event_type])
                 if cost_per_custom_event_type:
                     facebook_results_field_value = cost_per_custom_event_type.value
-            elif GraphAPIInsightsFields.optimization_goal in data\
+            elif GraphAPIInsightsFields.optimization_goal in data \
                     and data[GraphAPIInsightsFields.optimization_goal]:
                 cost_per_optimization_goal = AdSetOptimizationToCostPerResult.get_enum_by_name(data[GraphAPIInsightsFields.optimization_goal])
                 if cost_per_optimization_goal:
@@ -104,3 +116,13 @@ class GraphAPIInsightsMapper:
             result_value = facebook_results_field_value.mapper.map(data, facebook_results_field_value)
             mapped_fields.append([{requested_field.name: result_value[0].get(facebook_results_field_value.name)}])
 
+
+def change_fields_from_upper_case(mapped_data: List, required_fields_to_change: List):
+
+    for entry in mapped_data:
+        for field in required_fields_to_change:
+            if field in entry and entry[field]:
+                if entry[field] == "UNKNOWN":
+                    entry[field] = None
+                    continue
+                entry[field] = entry[field].replace("_", " ").capitalize()

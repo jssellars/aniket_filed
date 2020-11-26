@@ -19,7 +19,7 @@ class ViewCampaignEngagement(ViewEngagementBase):
         ViewColumnsMaster.post_shares,
         ViewColumnsMaster.link_clicks,
         ViewColumnsMaster.page_likes,
-        ViewColumnsMaster.cost_per_unique_link_click
+        ViewColumnsMaster.cost_per_link_click
         # todo: effects share
     ]
 
@@ -36,7 +36,7 @@ class ViewAdSetEngagement(ViewEngagementBase):
         ViewColumnsMaster.post_shares,
         ViewColumnsMaster.link_clicks,
         ViewColumnsMaster.page_likes,
-        ViewColumnsMaster.cost_per_unique_link_click
+        ViewColumnsMaster.cost_per_link_click
     ]
 
 
@@ -52,5 +52,5 @@ class ViewAdEngagement(ViewEngagementBase):
         ViewColumnsMaster.post_shares,
         ViewColumnsMaster.link_clicks,
         ViewColumnsMaster.page_likes,
-        ViewColumnsMaster.cost_per_unique_link_click
+        ViewColumnsMaster.cost_per_link_click
     ]

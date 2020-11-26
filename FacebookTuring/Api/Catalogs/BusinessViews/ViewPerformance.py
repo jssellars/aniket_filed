@@ -9,16 +9,22 @@ class ViewCampaignPerformance(View):
     columns = [
         ViewColumnsMaster.status,
         ViewColumnsMaster.campaign_name,
+        ViewColumnsMaster.delivery,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.reach,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.unique_link_clicks,
+        ViewColumnsMaster.unique_clicks_all,
+        ViewColumnsMaster.cost_per_unique_click_all,
+        ViewColumnsMaster.unique_ctr_all,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
-        ViewColumnsMaster.conversions,
-        ViewColumnsMaster.cost_per_conversion
+        ViewColumnsMaster.result_rate,
+        ViewColumnsMaster.landing_page_views_total,
+        ViewColumnsMaster.landing_page_views_unique,
+        ViewColumnsMaster.purchases_value,
+        ViewColumnsMaster.purchase_roas,
+        ViewColumnsMaster.stop_time,
     ]
 
 
@@ -27,16 +33,23 @@ class ViewAdSetPerformance(ViewCampaignPerformance):
     columns = [
         ViewColumnsMaster.status,
         ViewColumnsMaster.adset_name,
+        ViewColumnsMaster.delivery,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.reach,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
-        ViewColumnsMaster.unique_link_clicks,
+        ViewColumnsMaster.frequency,
+        ViewColumnsMaster.unique_clicks_all,
+        ViewColumnsMaster.cost_per_unique_click_all,
+        ViewColumnsMaster.unique_ctr_all,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
-        ViewColumnsMaster.conversions,
-        ViewColumnsMaster.cost_per_conversion
+        ViewColumnsMaster.result_rate,
+        ViewColumnsMaster.landing_page_views_total,
+        ViewColumnsMaster.landing_page_views_unique,
+        ViewColumnsMaster.purchases_value,
+        ViewColumnsMaster.purchase_roas,
+        ViewColumnsMaster.stop_time,
     ]
 
 
@@ -47,14 +60,26 @@ class ViewAdPerformance(View):
     columns = [
         ViewColumnsMaster.status,
         ViewColumnsMaster.ad_name,
+        ViewColumnsMaster.delivery,
+        ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.reach,
         ViewColumnsMaster.impressions,
+        ViewColumnsMaster.cpm,
+        ViewColumnsMaster.frequency,
+        ViewColumnsMaster.unique_clicks_all,
+        ViewColumnsMaster.cost_per_unique_click_all,
+        ViewColumnsMaster.unique_ctr_all,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
+        ViewColumnsMaster.result_rate,
+        ViewColumnsMaster.landing_page_views_total,
+        ViewColumnsMaster.landing_page_views_unique,
+        ViewColumnsMaster.purchases_value,
+        ViewColumnsMaster.purchase_roas,
         ViewColumnsMaster.quality_ranking,
-        ViewColumnsMaster.conversions,
-        ViewColumnsMaster.cost_per_conversion
+        ViewColumnsMaster.engagement_rate_ranking,
+        ViewColumnsMaster.conversion_rate_ranking,
+        ViewColumnsMaster.stop_time,
     ]
 
 

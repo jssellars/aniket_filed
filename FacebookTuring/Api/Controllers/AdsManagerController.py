@@ -158,11 +158,16 @@ class AdsManagerEndpoint(Resource):
                             mimetype='application/json')
 
         try:
-            AdsManagerUpdateStructureCommandHandler.handle(command=command,
-                                                           level=level,
-                                                           facebook_id=facebook_id,
-                                                           business_owner_facebook_id=business_owner_facebook_id)
+            response = AdsManagerUpdateStructureCommandHandler.handle(
+                command=command,
+                level=level,
+                facebook_id=facebook_id,
+                business_owner_facebook_id=business_owner_facebook_id
+            )
+            # TODO: this will be returned once FE finishes their side as well to avoid crashes
+            response = json.dumps(response)
             return Response(status=200, mimetype="application/json")
+
         except Exception as e:
             log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
                                     name="AdsManagerEndpoint",

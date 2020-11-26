@@ -15,6 +15,7 @@ class ViewCampaignBiddingAndOptimization(ViewBiddingAndOptimizationBase):
         ViewColumnsMaster.delivery,
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
+        ViewColumnsMaster.bid_strategy,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent
     ]
@@ -34,6 +35,7 @@ class ViewAdSetBiddingAndOptimization(ViewBiddingAndOptimizationBase):
         ViewColumnsMaster.last_significant_edit,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
+        ViewColumnsMaster.adset_schedule,
     ]
 
 
@@ -46,7 +48,6 @@ class ViewAdBiddingAndOptimization(ViewBiddingAndOptimizationBase):
         ViewColumnsMaster.results,
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.bid_strategy,
-        ViewColumnsMaster.last_significant_edit,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent
     ]
