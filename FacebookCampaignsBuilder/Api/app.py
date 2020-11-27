@@ -20,7 +20,6 @@ app.url_map.strict_slashes = False
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
-base_url = startup.base_url.lower()
 router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
     (routers.Version, "version"),
@@ -45,7 +44,7 @@ router_route_pairs = (
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
 )
 for router, route in router_route_pairs:
-    api.add_resource(router, f"{base_url}/{route}")
+    api.add_resource(router, f"{startup.base_url.lower()}/{route}")
 
 
 if __name__ == "__main__":

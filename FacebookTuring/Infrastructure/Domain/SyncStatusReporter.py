@@ -1,13 +1,18 @@
 import typing
 from datetime import datetime
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
     TuringAdAccountJournalRepository
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class SyncStatusReporter:
@@ -54,14 +59,13 @@ class SyncStatusReporter:
                                           details=state)
                 reports.append(report)
             except Exception as e:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="Facebook Turing Daily Sync Error",
-                                        description="Failed to generate sync report for "
+                self.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                          name="Facebook Turing Daily Sync Error",
+                                          description="Failed to generate sync report for "
                                                     "business owner {}, ad account {}. "
                                                     "Reason: {}".format(state[MiscFieldsEnum.business_owner_id],
                                                                         state[MiscFieldsEnum.account_id],
-                                                                        str(e)))
-                self.__logger.logger.exception(log.to_dict())
+                                                                        str(e))))
 
         return reports
 

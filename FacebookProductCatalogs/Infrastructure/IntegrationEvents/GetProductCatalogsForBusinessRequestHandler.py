@@ -1,6 +1,6 @@
 import typing
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductCatalogsHandler import \
@@ -11,6 +11,11 @@ from FacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductCatalogs
     GetProductCatalogsForBusinessRequestMapping
 from FacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductCatalogsForBusinessResponse import \
     GetProductCatalogsForBusinessResponse
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class GetProductCatalogsForBusinessRequestHandler:
@@ -60,9 +65,8 @@ class GetProductCatalogsForBusinessRequestHandler:
                                              cls.__startup.exchange_details.name,
                                              cls.__startup.exchange_details.outbound_queue.key)
             rabbitmq_client.publish(product_catalogs)
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-                                    name=product_catalogs.message_type,
-                                    extra_data={"event_body": rabbitmq_client.serialize_message(product_catalogs)})
-            cls.__rabbit_logger.logger.info(log.to_dict())
+            cls.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
+                                      name=product_catalogs.message_type,
+                                      extra_data={"event_body": rabbitmq_client.serialize_message(product_catalogs)}))
         except Exception as e:
             raise e

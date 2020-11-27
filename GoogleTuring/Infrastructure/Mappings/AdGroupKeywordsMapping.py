@@ -4,11 +4,15 @@ from bson import BSON
 from googleads import adwords
 from zeep import helpers
 
-from Core.Tools.Logger.Helpers import log_operation_mongo
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
+from Core.logging_legacy import log_operation_mongo
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import GOOGLE_STATUS_MAPPING
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID, StructureType
 from GoogleTuring.Infrastructure.Mappings.StructureMapping import StructureMapping
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class AdGroupKeywordsMapping(StructureMapping):
@@ -78,7 +82,7 @@ class AdGroupKeywordsMapping(StructureMapping):
                     entries.extend(page['entries'])
         except Exception as e:
             log_operation_mongo(logger=self.logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 query=query,
                                 description=f'Failed to get Adgroup structure entries. Reason: {e}'
                                 )

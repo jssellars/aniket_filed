@@ -10,13 +10,18 @@ from time import sleep
 
 import schedule
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from FacebookTuring.BackgroundTasks.Startup import startup, logger, rabbit_logger
 from FacebookTuring.BackgroundTasks.Orchestrators.Orchestrator import Orchestrator
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
     TuringAdAccountJournalRepository,
 )
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 def sync():
@@ -43,12 +48,10 @@ def sync():
             .run()
         )
     except Exception as e:
-        log = LoggerMessageBase(
-            mtype=LoggerMessageTypeEnum.ERROR,
+        logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
             name="Facebook Turing Daily Sync Error",
             description="Failed to sync data. Reason: %s" % str(e),
-        )
-        logger.logger.exception(log.to_dict())
+        ))
 
 
 def main():

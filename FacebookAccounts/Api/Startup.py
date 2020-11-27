@@ -1,12 +1,8 @@
-import json
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
-from Core.Tools.Logger.LoggerFactory import LoggerFactory
-from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.logging_legacy import app_config_as_log_dict
 from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 from FacebookAccounts.Api.Config.Config import RabbitMqConfig, FacebookConfig, SQLAlchemyConfig, \
@@ -14,7 +10,6 @@ from FacebookAccounts.Api.Config.Config import RabbitMqConfig, FacebookConfig, S
 
 
 class Startup(object):
-
     def __init__(self, app_config=None):
         assert app_config is not None
 
@@ -70,29 +65,15 @@ class Startup(object):
         return sessionmaker(bind=self.engine)
 
 
-# Initialize startup object
-env = os.environ.get("PYTHON_ENV")
-if not env:
-    env = "local"
-config_file = f"Config/Settings/app.settings.{env}.json"
+from Core import settings
 
-with open(config_file, 'r') as app_settings_json_file:
-    app_config = json.load(app_settings_json_file)
+startup = Startup(settings.config_as_dict)
 
-startup = Startup(app_config)
+from Core import logging_config
 
-# Initialize logger
-logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
-                                                port=startup.es_port,
-                                                name=startup.api_name,
-                                                level=startup.logger_level,
-                                                index_name=startup.docker_filename)
-rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
-                                                              port=startup.es_port,
-                                                              name=startup.api_name,
-                                                              level=startup.logger_level,
-                                                              index_name=startup.docker_filename)
+logging_config.init(
+    "FacebookAccount.Api", startup.logger_level, enable_es=False, es_host=startup.es_host, es_port=startup.es_port
+)
+logger = logging_config.get_logger(__name__)
 
-# Log startup details
-startup_log = LoggerMessageStartup(app_config=app_config, description="Facebook Accounts API")
-logger.logger.info(startup_log.to_dict())
+logger.info("Configuration details", extra=app_config_as_log_dict(config=settings.config_as_dict)["details"])

@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
@@ -12,6 +12,11 @@ from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEvent import
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class CampaignCreatedEventHandler:
@@ -50,10 +55,9 @@ class CampaignCreatedEventHandler:
                            business_owner_id=message.business_owner_id,
                            permanent_token=permanent_token)
             except Exception as e:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="Facebook Turing Integration Error",
-                                        description=f"Failed to get campaign {campaign.facebook_id}. {str(e)}")
-                cls.__logger.logger.exception(log.to_dict())
+                cls.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                          name="Facebook Turing Integration Error",
+                                          description=f"Failed to get campaign {campaign.facebook_id}. {str(e)}"))
 
             for adset in campaign.ad_sets:
                 try:
@@ -63,10 +67,9 @@ class CampaignCreatedEventHandler:
                                business_owner_id=message.business_owner_id,
                                permanent_token=permanent_token)
                 except Exception as e:
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                            name="Facebook Turing Integration Error",
-                                            description=f"Failed to get campaign {adset.facebook_id}. {str(e)}")
-                    cls.__logger.logger.exception(log.to_dict())
+                    cls.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                              name="Facebook Turing Integration Error",
+                                              description=f"Failed to get campaign {adset.facebook_id}. {str(e)}"))
 
                 for ad in adset.get("ads", []):
                     try:
@@ -76,10 +79,9 @@ class CampaignCreatedEventHandler:
                                    business_owner_id=message.business_owner_id,
                                    permanent_token=permanent_token)
                     except Exception as e:
-                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                                name="Facebook Turing Integration Error",
-                                                description=f"Failed to get campaign {ad}. {str(e)}")
-                        cls.__logger.logger.exception(log.to_dict())
+                        cls.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                                  name="Facebook Turing Integration Error",
+                                                  description=f"Failed to get campaign {ad}. {str(e)}"))
 
     @classmethod
     def __sync(cls,

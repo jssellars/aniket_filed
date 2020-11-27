@@ -3,8 +3,7 @@ import json
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMessageBase
+from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
 from Core.Web.Security.Permissions import OptimizePermissions, AdsManagerPermissions
 from FacebookDexter.Api.CommandHandlers.DexterApiApplyRecommendationCommandHandler import (
     DexterApiApplyRecommendationCommandHandler)
@@ -29,10 +28,15 @@ from FacebookDexter.Api.Commands.DexterApiGetRecommendationsPageCommand import D
 from FacebookDexter.Api.Startup import logger, startup
 
 
+import logging
+
+logger_native = logging.getLogger(__name__)
+
+
 class DexterApiGetRecommendationsPage(Resource):
     @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         data = request.get_json()
         validator = DexterApiRecommendationsPageCommandValidator()
         valid, parameters_or_errors = validator.validate(data)
@@ -54,18 +58,17 @@ class DexterApiGetRecommendationsPage(Resource):
             return response
 
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="DexterApiGetRecommendationsPageEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="DexterApiGetRecommendationsPageEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps('An error occurred'), status=500, mimetype='application/json')
 
 
 class DexterApiGetCountsByCategory(Resource):
     @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         data = request.get_json()
         validator = DexterApiGetCountsByCategoryCommandValidator()
         valid, parameters_or_errors = validator.validate(data)
@@ -84,18 +87,17 @@ class DexterApiGetCountsByCategory(Resource):
             response = Response(response=json.dumps(counts), status=200, mimetype='application/json')
             return response
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="DexterApiGetCountsByCategoryEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="DexterApiGetCountsByCategoryEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps('An error occurred'), status=500, mimetype='application/json')
 
 
 class DexterApiDismissRecommendation(Resource):
     @startup.authorize_permission(permission=OptimizePermissions.OPTIMIZE_DELETE)
     def patch(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         data = request.args
         validator = DexterApiDismissRecommendationCommandValidator()
         valid, parameters_or_errors = validator.validate(data)
@@ -108,18 +110,17 @@ class DexterApiDismissRecommendation(Resource):
             response = handler.handle(dismiss_recommendation_command)
             return response
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="DexterApplyRecommendationEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="DexterApplyRecommendationEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps('An error occurred'), status=500, mimetype='application/json')
 
 
 class DexterApiApplyRecommendation(Resource):
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def patch(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         data = request.args
         headers = request.headers
         validator = DexterApiApplyRecommendationCommandValidator()
@@ -133,10 +134,9 @@ class DexterApiApplyRecommendation(Resource):
             handler = DexterApiApplyRecommendationCommandHandler()
             return handler.handle(apply_recommendation_command)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="DexterApplyRecommendationEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="DexterApplyRecommendationEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps('An error occurred'), status=500, mimetype='application/json')
 

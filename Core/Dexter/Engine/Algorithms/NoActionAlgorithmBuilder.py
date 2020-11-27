@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from Core.logging_legacy import MongoLogger
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.Rules import Rules
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 

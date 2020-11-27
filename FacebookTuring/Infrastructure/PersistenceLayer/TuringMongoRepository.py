@@ -7,18 +7,20 @@ from bson import BSON
 from pymongo.errors import AutoReconnect
 from retry import retry
 
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
-from Core.Tools.Logger.Helpers import log_operation_mongo
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
-from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
+from Core.logging_legacy import log_operation_mongo
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping, \
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookIdKeyMapping, \
     LevelToFacebookNameKeyMapping, Level
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class TuringMongoRepository(MongoRepositoryBase):
@@ -112,7 +114,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description="Failed to get active structures ids. Reason %s" % str(e),
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -120,11 +122,11 @@ class TuringMongoRepository(MongoRepositoryBase):
                                 projection=projection)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=results,
                                 description="Get active structures ids",
                                 timestamp=operation_end_time,
@@ -304,7 +306,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description="Failed to get structures by id and name. Reason %s" % str(e),
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -312,11 +314,11 @@ class TuringMongoRepository(MongoRepositoryBase):
                                 projection=projection)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=results,
                                 description="Get structures by id and name",
                                 timestamp=operation_end_time,

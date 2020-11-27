@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.GoogleRuleBasedOptimizationBase import \
     GoogleRuleBasedOptimizationBase
@@ -12,6 +12,11 @@ from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAva
     GoogleAvailableMetricEnum
 from GoogleDexter.Infrastructure.Domain.Breakdowns import GoogleActionBreakdownEnum, GoogleBreakdownEnum
 from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricCalculator import GoogleMetricCalculator
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class GoogleRuleBasedOptimizationCampaignLevel(GoogleRuleBasedOptimizationBase):
@@ -52,15 +57,14 @@ class GoogleRuleBasedOptimizationCampaignLevel(GoogleRuleBasedOptimizationBase):
                       compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval))
 
         if results < self._dexter_config.min_results:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="RuleBasedOptimizationCampaignLevel",
-                                    description=f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
-                                    extra_data={
+            self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                      name="RuleBasedOptimizationCampaignLevel",
+                                      description=f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
+                                      extra_data={
                                         "values": results,
                                         "structure_id": campaign_id,
                                         "config": self._dexter_config
-                                    })
-            self.get_logger().logger.info(log)
+                                    }))
             return False
         else:
             return True
@@ -87,25 +91,23 @@ class GoogleRuleBasedOptimizationCampaignLevel(GoogleRuleBasedOptimizationBase):
             if results > self._dexter_config.min_results:
                 return True
             else:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="RuleBasedOptimizationCampaignLevel",
-                                        description=f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
-                                        extra_data={
+                self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="RuleBasedOptimizationCampaignLevel",
+                                          description=f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
+                                          extra_data={
                                             "values": results,
                                             "structure_id": campaign_id,
                                             "config": self._dexter_config
-                                        })
-                self.get_logger().logger.info(log)
+                                        }))
 
         else:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                    name="RuleBasedOptimizationCampaignLevel",
-                                    description=f"A more recent change was not made for {campaign_id} in the last"
+            self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                      name="RuleBasedOptimizationCampaignLevel",
+                                      description=f"A more recent change was not made for {campaign_id} in the last"
                                                 f" {self._dexter_config.days_since_last_change} days",
-                                    extra_data={
+                                      extra_data={
                                         "structure_id": campaign_id,
                                         "config": self._dexter_config
-                                    })
-            self.get_logger().logger.info(log)
+                                    }))
 
         return False

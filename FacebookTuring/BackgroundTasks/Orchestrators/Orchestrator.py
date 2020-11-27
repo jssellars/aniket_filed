@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from threading import Thread
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.Startup import startup
@@ -21,6 +21,11 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalReposi
     TuringAdAccountJournalRepository,
 )
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class Orchestrator:
@@ -154,14 +159,10 @@ class Orchestrator:
                 startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
             )
             rabbitmq_client.publish(business_owner_synced_event)
-            log = LoggerMessageBase(
-                mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+            self.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
                 name=business_owner_synced_event.message_type,
                 extra_data={"event_body": rabbitmq_client.serialize_message(business_owner_synced_event)},
-            )
-            self.__rabbit_logger.logger.info(log.to_dict())
+            ))
         except Exception as e:
-            log = LoggerMessageBase(
-                mtype=LoggerMessageTypeEnum.ERROR, name=business_owner_synced_event.message_type, description=str(e)
-            )
-            self.__logger.logger.exception(log.to_dict())
+            self.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR, name=business_owner_synced_event.message_type, description=str(e)
+            ))

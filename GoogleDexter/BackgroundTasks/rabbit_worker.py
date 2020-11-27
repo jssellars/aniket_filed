@@ -8,32 +8,33 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from GoogleDexter.BackgroundTasks.Startup import startup, rabbit_logger, logger
 from GoogleDexter.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
 
+import logging
+
+logger_native = logging.getLogger(__name__)
+
+
 def callback(ch, method, properties, body):
-    log = LoggerMessageBase(
-        mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+    rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
         name=getattr(properties, "type", None),
         extra_data={"event_body": body},
-    )
-    rabbit_logger.logger.info(log.to_dict())
+    ))
     try:
         ch.basic_ack(delivery_tag=method.delivery_tag)
         message_type = getattr(properties, "type", None)
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
     except:
-        log = LoggerMessageBase(
-            mtype=LoggerMessageTypeEnum.ERROR,
+        logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
             name="Google Dexter Integration Error",
             description="Failed to initialise processing",
-        )
-        logger.logger.exception(log.to_dict())
+        ))
 
         return
 
@@ -57,13 +58,11 @@ def callback(ch, method, properties, body):
             .handle(body)
         )
     except Exception as e:
-        log = LoggerMessageBase(
-            mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+        logger.logger.exception(log_message_as_dict(mtype=logging.INFO,
             name="Google Dexter Integration Error",
             description=str(e),
             extra_data={"message_type": message_type, "integration_event_body": body},
-        )
-        logger.logger.exception(log.to_dict())
+        ))
 
 
 def main():

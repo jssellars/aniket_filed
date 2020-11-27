@@ -3,7 +3,7 @@ from datetime import datetime
 
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from Core.logging_legacy import MongoLogger
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Fuzzifiers.GoogleRuleBasedOptimizationFuzzyfierFactory import \
     GoogleRuleBasedOptimizationFuzzyfierFactory
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules import Rules

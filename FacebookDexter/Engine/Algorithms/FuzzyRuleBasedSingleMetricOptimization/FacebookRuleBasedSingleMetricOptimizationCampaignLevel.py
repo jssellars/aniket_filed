@@ -8,13 +8,18 @@ from dateutil.parser import parse
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedSingleMetricOptimization.FacebookRuleBasedSingleMetricOptimizationBase import \
     FacebookRuleBasedSingleMetricOptimizationBase
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedSingleMetricOptimization.Metrics.FacebookAvailableSingleMetricEnum import \
     FacebookAvailableSingleMetricEnum
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnum, FacebookActionBreakdownEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricCalculator import FacebookMetricCalculator
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class FacebookRuleBasedSingleMetricOptimizationCampaignLevel(FacebookRuleBasedSingleMetricOptimizationBase):
@@ -73,16 +78,15 @@ class FacebookRuleBasedSingleMetricOptimizationCampaignLevel(FacebookRuleBasedSi
             return True
         else:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="RuleBasedOptimizationCampaignLevel",
-                                        description=f"Campaign {campaign_id} has less than "
+                self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="RuleBasedOptimizationCampaignLevel",
+                                          description=f"Campaign {campaign_id} has less than "
                                                     f"{self._dexter_config.min_results} results",
-                                        extra_data={
+                                          extra_data={
                                             "values": results,
                                             "facebook_id": campaign_id,
                                             "config": self._dexter_config
-                                        })
-                self.get_logger().logger.info(log)
+                                        }))
             return False
 
     def __check_last_x_days_since_update(self, campaign_id):
@@ -95,15 +99,14 @@ class FacebookRuleBasedSingleMetricOptimizationCampaignLevel(FacebookRuleBasedSi
                 updated_time = parse(structure_details.get('created_time')).date()
             except:
                 if self._debug:
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                            name="RuleBasedOptimizationCampaignLevel",
-                                            description=f"Campaign {campaign_id} does not have updated time"
+                    self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                              name="RuleBasedOptimizationCampaignLevel",
+                                              description=f"Campaign {campaign_id} does not have updated time"
                                                         f" nor created time",
-                                            extra_data={
+                                              extra_data={
                                                 "facebook_id": campaign_id,
                                                 "config": self._dexter_config
-                                            })
-                    self.get_logger().logger.info(log)
+                                            }))
                 return False
         date_stop = self._date_stop.date()
 
@@ -125,27 +128,25 @@ class FacebookRuleBasedSingleMetricOptimizationCampaignLevel(FacebookRuleBasedSi
                 return True
             else:
                 if self._debug:
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                            name="RuleBasedOptimizationCampaignLevel",
-                                            description=f"Campaign {campaign_id} has less "
+                    self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                              name="RuleBasedOptimizationCampaignLevel",
+                                              description=f"Campaign {campaign_id} has less "
                                                         f"than {self._dexter_config.min_results} results",
-                                            extra_data={
+                                              extra_data={
                                                 "values": results,
                                                 "facebook_id": campaign_id,
                                                 "config": self._dexter_config
-                                            })
-                    self.get_logger().logger.info(log)
+                                            }))
 
         else:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="RuleBasedOptimizationCampaignLevel",
-                                        description=f"A more recent change was not made for {campaign_id} in the last"
+                self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="RuleBasedOptimizationCampaignLevel",
+                                          description=f"A more recent change was not made for {campaign_id} in the last"
                                                     f" {self._dexter_config.days_since_last_change} days",
-                                        extra_data={
+                                          extra_data={
                                             "facebook_id": campaign_id,
                                             "config": self._dexter_config
-                                        })
-                self.get_logger().logger.info(log)
+                                        }))
 
         return False

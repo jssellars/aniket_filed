@@ -10,7 +10,7 @@ from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.FacebookAvailableMetricEnum import \
     FacebookAvailableMetricEnum
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnum, FacebookActionBreakdownEnum
@@ -20,6 +20,11 @@ from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricEnums import Fac
 from FacebookDexter.Infrastructure.Domain.Recommendations.FacebookRecommendationTemplateBuilderBase import \
     FacebookRecommendationTemplateBuilderBase
 from FacebookDexter.Infrastructure.Domain.RuleTemplateKeyword import RuleTemplateKeyword
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilderBase):
@@ -68,13 +73,12 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
                 template = template.replace("__" + keyword + "__", value)
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="RecommendationTemplateBuilder",
-                                        description=f"Failed to compute keyword value for template {template}",
-                                        extra_data={
+                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="RecommendationTemplateBuilder",
+                                          description=f"Failed to compute keyword value for template {template}",
+                                          extra_data={
                                             "error": traceback.format_exc()
-                                        })
-                self.logger.logger.info(log)
+                                        }))
             raise e
         return template
 
@@ -108,21 +112,20 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
                 else:
                     value = ''
                     if self._debug:
-                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                                name="RecommendationTemplateBuilder",
-                                                description=f"Failed to compute keyword value for "
-                                                            f"metric {keyword.metric_name.value.name}")
-                        self.logger.logger.info(log)
+                        self.logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                                  name="RecommendationTemplateBuilder",
+                                                  description=f"Failed to compute keyword value for "
+                                                            f"metric {keyword.metric_name.value.name}"))
+
             except Exception as e:
                 if self._debug:
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                            name="RecommendationTemplateBuilder",
-                                            description=f"Failed to compute keyword value for "
+                    self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                              name="RecommendationTemplateBuilder",
+                                              description=f"Failed to compute keyword value for "
                                                         f"metric {keyword.metric_name.value.name}",
-                                            extra_data={
+                                              extra_data={
                                                 "error": traceback.format_exc()
-                                            })
-                    self.logger.logger.info(log)
+                                            }))
                 raise e
 
         keyword.value = str(value) if value else ''
@@ -201,13 +204,12 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
         response = requests.get(url=endpoint, headers=headers)
         if response.status_code != 200:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="RecommendationTemplateBuilder",
-                                        description="Failed to get interests from structure targeting.",
-                                        extra_data={
+                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="RecommendationTemplateBuilder",
+                                          description="Failed to get interests from structure targeting.",
+                                          extra_data={
                                             "error": response.json()
-                                        })
-                self.logger.logger.info(log)
+                                        }))
             return ''
 
         results_root = response.json()
@@ -240,13 +242,12 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
                 return ''
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="RecommendationTemplateBuilder",
-                                        description="Failed to get interests from structure targeting.",
-                                        extra_data={
+                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="RecommendationTemplateBuilder",
+                                          description="Failed to get interests from structure targeting.",
+                                          extra_data={
                                             "error": traceback.format_exc()
-                                        })
-                self.logger.logger.info(log)
+                                        }))
             raise e
 
         combinations_of_interests = sum(

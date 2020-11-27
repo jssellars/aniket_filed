@@ -8,20 +8,23 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 import json
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookProductCatalogs.BackgroundTasks.Startup import rabbit_logger, logger, startup
 from FacebookProductCatalogs.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookProductCatalogs.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
 
+import logging
+
+logger_native = logging.getLogger(__name__)
+
+
 def callback(ch, method, properties, body):
-    log = LoggerMessageBase(
-        mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+    rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
         name=getattr(properties, "type", None),
         extra_data={"event_body": body},
-    )
-    rabbit_logger.logger.info(log.to_dict())
+    ))
 
     try:
         ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -31,13 +34,11 @@ def callback(ch, method, properties, body):
         body = json.loads(body)
         request_handler.set_rabbit_logger(rabbit_logger).set_startup(startup).handle(body)
     except Exception as e:
-        log = LoggerMessageBase(
-            mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
+        logger.logger.exception(log_message_as_dict(mtype=logging.INFO,
             name="Facebook Product Catalogs Integration Error",
             description=str(e),
             extra_data={"message_type": getattr(properties, "type", None), "event_body": body},
-        )
-        logger.logger.exception(log.to_dict())
+        ))
 
 
 def main():

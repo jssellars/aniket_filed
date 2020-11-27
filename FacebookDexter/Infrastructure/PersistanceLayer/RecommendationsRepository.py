@@ -9,14 +9,17 @@ from retry import retry
 from Core.Dexter.Infrastructure.Domain.Recommendations.Recommendation import Recommendation
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
-from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from Core.Tools.Logger.Helpers import log_operation_mongo
+from Core.logging_legacy import log_operation_mongo
 from FacebookDexter.Api.Config.Config import MongoConfig
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class RecommendationsRepository(MongoRepositoryBase):
@@ -62,18 +65,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to get campaigns with recommendations. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=aggregation)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=distinct_campaigns,
                                 description='Get campaigns with recommendations',
                                 timestamp=operation_end_time,
@@ -97,18 +100,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to get campaigns with recommendations. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=recommendation,
                                 description='Get campaigns with recommendations',
                                 timestamp=operation_end_time,
@@ -147,18 +150,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to get recommendations page. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=recommendation_filter)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=response_dict,
                                 description='Get campaigns with recommendations page',
                                 timestamp=operation_end_time,
@@ -184,7 +187,7 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to get recommendations page. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -192,11 +195,11 @@ class RecommendationsRepository(MongoRepositoryBase):
                                 query_filter=query_filter)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Get campaigns with recommendations page',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -219,18 +222,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to set recommendation status. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query,
                                 query_filter=query_filter)
             raise e
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Set recommendation status',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -254,18 +257,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to set recommendation status. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query,
                                 projection=projection)
             raise e
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Set recommendation status',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -303,18 +306,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to get recommendations. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query_filter,
                                 projection=projection)
             raise e
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Get recommendations',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -351,18 +354,18 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to counts by type. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=aggregation)
             raise e
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Get recommendations',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -401,17 +404,17 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to counts by category. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=aggregation)
             raise e
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Get counts by category',
                                 timestamp=operation_end_time,
                                 duration=duration,
@@ -437,17 +440,17 @@ class RecommendationsRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description=f'Failed to counts by filter. Reason: {str(e)}',
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=count_filter)
             raise e
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 description='Get counts by filter',
                                 timestamp=operation_end_time,
                                 duration=duration,

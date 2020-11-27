@@ -1,7 +1,6 @@
 import json
 import typing
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookAccounts.BackgroundTasks.Startup import startup
@@ -12,20 +11,17 @@ from FacebookAccounts.Infrastructure.IntegrationEvents.GetBusinessOwnersTreesMes
     GetBusinessOwnersTreesMessageResponse
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class GetBusinessOwnersTreesMessageRequestHandler:
-    __rabbit_logger = None
-
-    @classmethod
-    def set_rabbit_logger(cls, logger: typing.Any):
-        cls.__rabbit_logger = logger
-        return cls
-
     @classmethod
     def handle(cls, message_body: typing.Dict):
         if isinstance(message_body, str) or isinstance(message_body, bytes):
             message_body = json.loads(message_body)
         try:
-            #  get business owner permanent token
             for entry in message_body["business_owners"]:
                 business_owner = BusinessOwner(**entry)
                 cls.__get_business_owner_permanent_token(business_owner)
@@ -51,9 +47,6 @@ class GetBusinessOwnersTreesMessageRequestHandler:
             rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name,
                                              startup.exchange_details.outbound_queue.key)
             rabbitmq_client.publish(response)
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-                                    name=response.message_type,
-                                    extra_data={"event_body": rabbitmq_client.serialize_message(response)})
-            cls.__rabbit_logger.logger.info(log.to_dict())
+            logger.info(response.message_type, extra=dict(rabbitmq=rabbitmq_client.serialize_message(response)))
         except Exception as e:
             raise e

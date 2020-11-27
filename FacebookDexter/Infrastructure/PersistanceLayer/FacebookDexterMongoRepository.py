@@ -7,13 +7,16 @@ from retry import retry
 
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum, LevelNameKeyEnum
-from Core.Tools.Logger.Helpers import log_operation_mongo
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
-from Core.Tools.Logger.LoggingLevelEnum import LoggingLevelEnum
+from Core.logging_legacy import log_operation_mongo
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
 from Core.Tools.MongoRepository.MongoRepositoryStatusBase import MongoRepositoryStatusBase
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnum, FacebookActionBreakdownEnum
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class FacebookDexterMongoRepository(MongoRepositoryBase):
@@ -183,18 +186,18 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description="Failed to get metric values. Reason %s" % str(e),
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query)
             raise Exception(str(e))
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=results,
                                 description="Failed to get metric values.",
                                 timestamp=operation_end_time,
@@ -281,18 +284,18 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description="Failed to get minimum metric value. Reason %s" % str(e),
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query)
             raise Exception(str(e))
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=results,
                                 description="Get minimum metric value.",
                                 timestamp=operation_end_time,
@@ -380,18 +383,18 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 description="Failed to get maximum metric value. Reason %s" % str(e),
                                 timestamp=operation_end_time,
                                 duration=duration,
                                 query=query)
             raise Exception(str(e))
 
-        if self._logger.level == LoggingLevelEnum.DEBUG.value:
+        if self._logger.level == logging.DEBUG:
             operation_end_time = datetime.now()
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(logger=self._logger,
-                                log_level=LoggerMessageTypeEnum.EXEC_DETAILS,
+                                log_level=logging.INFO,
                                 data=results,
                                 description="Get maximum metric value.",
                                 timestamp=operation_end_time,

@@ -6,35 +6,28 @@ path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from FacebookAccounts.BackgroundTasks.Startup import startup, rabbit_logger, logger
+from FacebookAccounts.BackgroundTasks.Startup import startup
 from FacebookAccounts.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookAccounts.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def callback(ch, method, properties, body):
-    log = LoggerMessageBase(
-        mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-        name=getattr(properties, "type", None),
-        extra_data={"event_body": body},
-    )
-    rabbit_logger.logger.info(log.to_dict())
+    logger.info(getattr(properties, "type", None), extra=dict(rabbitmq=body))
 
     try:
         ch.basic_ack(delivery_tag=method.delivery_tag)
         message_type = getattr(properties, "type", None)
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
-        request_handler.set_rabbit_logger(rabbit_logger).handle(body)
+        request_handler.handle(body)
     except Exception as e:
-        log = LoggerMessageBase(
-            mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-            name="Facebook Accounts Integration Error",
-            description=str(e),
-            extra_data={"message_type": getattr(properties, "type", None), "event_body": body},
-        )
-        logger.logger.exception(log.to_dict())
+        logger.exception(repr(e), extra={"message_type": getattr(properties, "type", None), "event_body": body})
 
 
 def main():

@@ -1,7 +1,11 @@
 from googleads import adwords
 
-from Core.Tools.Logger.Helpers import log_operation_mongo
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
+from Core.logging_legacy import log_operation_mongo
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class StructureMapping:
@@ -44,7 +48,7 @@ class StructureMapping:
                     entries.extend(page['entries'])
         except Exception as e:
             log_operation_mongo(logger=self.logger,
-                                log_level=LoggerMessageTypeEnum.ERROR,
+                                log_level=logging.ERROR,
                                 query=query,
                                 description=f'Failed to get structure entries. Reason: {e}')
 

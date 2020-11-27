@@ -12,12 +12,16 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBase import MetricCalculatorBase
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from Core.logging_legacy import MongoLogger, log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME, DEFAULT_DATETIME_ISO
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import \
     GoogleAvailableMetricEnum
 from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricEnums import GoogleMetricTypeEnum
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class GoogleMetricCalculator(MetricCalculatorBase):
@@ -128,13 +132,12 @@ class GoogleMetricCalculator(MetricCalculatorBase):
                         slopes.append(slope)
                     else:
                         slopes.append(None)
-                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                                name="MetricCalculator",
-                                                description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                extra_data={
+                        self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                                  name="MetricCalculator",
+                                                  description=f"Time bucket for interval {time_bucket.value} is None.",
+                                                  extra_data={
                                                     "state": self.__current_state()
-                                                })
-                        self._logger.logger.info(log)
+                                                }))
 
         trend = self._compute_resultant_slope(slopes)
 

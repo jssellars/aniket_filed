@@ -1,12 +1,11 @@
 import requests
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from Core.Web.Security.Authorization import add_bearer_token, generate_technical_token
 from FacebookAccounts.Api.Dtos.BusinessOwnerCreatedDto import BusinessOwnerCreatedDto
-from FacebookAccounts.Api.Startup import startup, rabbit_logger
+from FacebookAccounts.Api.Startup import startup
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountHandler import GraphAPIAdAccountHandler
 from FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
     ExchangeTemporaryTokenGraphAPIRequest
@@ -14,6 +13,11 @@ from FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequ
     GeneratePermanentTokenGraphAPIRequest
 from FacebookAccounts.Infrastructure.IntegrationEvents.BusinessOwnerCreatedEvent import \
     BusinessOwnerCreatedEvent
+
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BusinessOwnerCreateCommandHandler:
@@ -62,12 +66,7 @@ class BusinessOwnerCreateCommandHandler:
                                              startup.exchange_details.outbound_queue.key)
             response.requested_permissions = ",".join(response.requested_permissions)
             rabbitmq_client.publish(response)
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-                                    name=response.message_type,
-                                    extra_data={
-                                        "event_body": rabbitmq_client.serialize_message(response)
-                                    })
-            rabbit_logger.logger.info(log.to_dict())
+            logger.info(response.message_type, extra=dict(rabbitmq=rabbitmq_client.serialize_message(response)))
         except Exception as e:
             raise e
 

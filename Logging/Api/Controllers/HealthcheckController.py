@@ -3,13 +3,13 @@ import json
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
+from Core.logging_legacy import request_as_log_dict_nested
 from Logging.Api.Startup import logger, startup
 
 
 class VersionEndpoint(Resource):
     def get(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         response = {"api_name": startup.api_name,
                     "api_version": startup.api_version,
                     "service_name": startup.service_name,
@@ -20,5 +20,5 @@ class VersionEndpoint(Resource):
 
 class HealthCheckEndpoint(Resource):
     def get(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         return Response(status=200, mimetype='application/json')

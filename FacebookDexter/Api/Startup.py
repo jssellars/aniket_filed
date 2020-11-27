@@ -1,8 +1,7 @@
 import json
 import os
 
-from Core.Tools.Logger.LoggerFactory import LoggerFactory
-from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.logging_legacy import LOGGERS_BY_NAME, app_config_as_log_dict
 from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from FacebookDexter.Api.Config.Config import MongoConfig, ExternalServicesConfig
 
@@ -53,12 +52,12 @@ with open(config_file, 'r') as app_settings_json_file:
 startup = Startup(app_config)
 
 # initialize logger
-logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
-                                                port=startup.es_port,
-                                                name=startup.api_name,
-                                                level=startup.logger_level,
-                                                index_name=startup.docker_filename)
+logger = LOGGERS_BY_NAME.get(startup.logger_type)(host=startup.es_host,
+                                                  port=startup.es_port,
+                                                  name=startup.api_name,
+                                                  level=startup.logger_level,
+                                                  index_name=startup.docker_filename)
 
 # Log startup details
-startup_log = LoggerMessageStartup(app_config=app_config, description="Dexter Recommendations API")
-logger.logger.info(startup_log.to_dict())
+logger.logger.info(app_config_as_log_dict(app_config))
+

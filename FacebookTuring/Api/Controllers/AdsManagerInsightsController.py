@@ -3,8 +3,7 @@ import json
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMessageBase
+from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.Web.Security.Permissions import AccountsPermissions, AdsManagerPermissions, OptimizePermissions, \
     ReportsPermissions
@@ -13,10 +12,15 @@ from FacebookTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import
 from FacebookTuring.Api.Startup import logger, startup
 
 
+import logging
+
+logger_native = logging.getLogger(__name__)
+
+
 class AdsManagerInsightsWithTotalsEndpoint(Resource):
     @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         try:
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
@@ -27,11 +31,10 @@ class AdsManagerInsightsWithTotalsEndpoint(Resource):
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerInsightsWithTotalsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerInsightsWithTotalsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
 
@@ -40,7 +43,7 @@ class AdsManagerAgGridInsightsEndpoint(Resource):
 
     @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self, level):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
 
         try:
             request_json = request.get_json(force=True)
@@ -56,11 +59,10 @@ class AdsManagerAgGridInsightsEndpoint(Resource):
         except Exception as e:
             import traceback
             traceback.print_exc()
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerInsightsWithTotalsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerInsightsWithTotalsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
 
@@ -80,7 +82,7 @@ class AccountsAgGridTrendEndpoint(Resource):
 class AgGridTrendHandler:
     @staticmethod
     def post(level):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
 
         try:
             request_json = request.get_json(force=True)
@@ -96,11 +98,10 @@ class AgGridTrendHandler:
         except Exception as e:
             import traceback
             traceback.print_exc()
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerInsightsWithTotalsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerInsightsWithTotalsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
 
@@ -108,7 +109,7 @@ class AgGridTrendHandler:
 class GetInsightsHandler:
     @staticmethod
     def handle():
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         try:
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
@@ -118,11 +119,10 @@ class GetInsightsHandler:
                                business_owner_id=business_owner_id))
             return response
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerReportInsightsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerReportInsightsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
 

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
-from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from Core.logging_legacy import MongoLogger
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookActionBreakdownEnum, FacebookBreakdownEnum
 

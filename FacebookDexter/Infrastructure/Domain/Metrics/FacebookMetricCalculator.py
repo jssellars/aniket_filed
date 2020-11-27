@@ -17,8 +17,7 @@ from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBase import MetricCalculatorBase
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
-from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from Core.logging_legacy import MongoLogger, log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO, DEFAULT_DATETIME
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -26,6 +25,11 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.FacebookAvailableMetricEnum import \
     FacebookAvailableMetricEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricEnums import FacebookMetricTypeEnum
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class FacebookMetricCalculator(MetricCalculatorBase):
@@ -110,14 +114,13 @@ class FacebookMetricCalculator(MetricCalculatorBase):
         except Exception as e:
             audience_size_estimate = None
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Failed to get audience size.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Failed to get audience size.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return audience_size_estimate
 
@@ -134,14 +137,13 @@ class FacebookMetricCalculator(MetricCalculatorBase):
         except Exception as e:
             pixels = []
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Failed to get pixels.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Failed to get pixels.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return len(pixels) > 0
 
@@ -197,14 +199,13 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                 return False
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to get interests from structure targeting.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Failed to get interests from structure targeting.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             return False
 
     def number_of_ads_per_adset(self, *args, **kwargs):
@@ -280,13 +281,12 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                     else:
                         slopes.append(None)
                         if self._debug:
-                            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                                    name="MetricCalculator",
-                                                    description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                    extra_data={
+                            self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                                      name="MetricCalculator",
+                                                      description=f"Time bucket for interval {time_bucket.value} is None.",
+                                                      extra_data={
                                                         "state": self._current_state()
-                                                    })
-                            self._logger.logger.info(log)
+                                                    }))
 
         trend = self._compute_resultant_slope(slopes)
 

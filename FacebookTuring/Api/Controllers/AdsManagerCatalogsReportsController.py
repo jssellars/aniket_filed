@@ -5,14 +5,18 @@ import humps
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
 from Core.Web.Security.Permissions import ReportsPermissions
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsBreakdownsDto import AdsManagerCatalogsReportsBreakdownsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsDimensionsDto import AdsManagerCatalogsReportsDimensionsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsDto import AdsManagerCatalogsReportsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsMetricsDto import AdsManagerCatalogsReportsMetricsDto
 from FacebookTuring.Api.Startup import logger, startup
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class QueryParamsEnum(Enum):
@@ -25,7 +29,7 @@ class QueryParamsEnum(Enum):
 class AdsManagerReportsEndpoint(Resource):
     @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         try:
             response = AdsManagerCatalogsReportsDto.get()
             response = humps.camelize(response)
@@ -33,11 +37,10 @@ class AdsManagerReportsEndpoint(Resource):
             return Response(response=response, status=200, mimetype='application/json')
 
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerReportsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerReportsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": f"Invalid request. Error {str(e)}"}),
                             status=400,
                             mimetype='application/json')
@@ -46,18 +49,17 @@ class AdsManagerReportsEndpoint(Resource):
 class AdsManagerReportsDimensionsEndpoint(Resource):
     @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         try:
             response = AdsManagerCatalogsReportsDimensionsDto.get()
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerReportsDimensionsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerReportsDimensionsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": f"Invalid request. Error {str(e)}"}),
                             status=400,
                             mimetype='application/json')
@@ -66,18 +68,17 @@ class AdsManagerReportsDimensionsEndpoint(Resource):
 class AdsManagerReportsMetricsEndpoint(Resource):
     @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         try:
             response = AdsManagerCatalogsReportsMetricsDto.get()
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerReportsMetricsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerReportsMetricsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": f"Invalid request. Error {str(e)}"}),
                             status=400,
                             mimetype='application/json')
@@ -86,18 +87,17 @@ class AdsManagerReportsMetricsEndpoint(Resource):
 class AdsManagerReportsBreakdownsEndpoint(Resource):
     @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.logger.info(request_as_log_dict_nested(request))
         try:
             response = AdsManagerCatalogsReportsBreakdownsDto.get()
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="AdsManagerReportsMetricsEndpoint",
-                                    description=str(e),
-                                    extra_data=LoggerAPIRequestMessageBase(request).request_details)
-            logger.logger.exception(log.to_dict())
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="AdsManagerReportsMetricsEndpoint",
+                                      description=str(e),
+                                      extra_data=request_as_log_dict(request)))
             return Response(response=json.dumps({"message": f"Invalid request. Error {str(e)}"}),
                             status=400,
                             mimetype='application/json')

@@ -3,14 +3,18 @@ import json
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.Tools.Logger.LoggerAPIRequestMessageBase import LoggerAPIRequestMessageBase
-from FacebookAccounts.Api.Startup import startup, logger
+from Core.logging_legacy import request_as_log_dict_nested
+from FacebookAccounts.Api.Startup import startup
+
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class VersionEndpoint(Resource):
     def get(self):
-        #  log request information
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.info(request_as_log_dict_nested(request))
 
         response = {"api_name": startup.api_name,
                     "api_version": startup.api_version,
@@ -23,6 +27,5 @@ class VersionEndpoint(Resource):
 
 class HealthCheckEndpoint(Resource):
     def get(self):
-        #  log request information
-        logger.logger.info(LoggerAPIRequestMessageBase(request).to_dict())
+        logger.info(request_as_log_dict_nested(request))
         return Response(status=200, mimetype='application/json')

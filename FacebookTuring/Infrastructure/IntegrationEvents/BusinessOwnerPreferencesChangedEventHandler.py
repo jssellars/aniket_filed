@@ -1,12 +1,17 @@
 import json
 import typing
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEvent import \
     BusinessOwnerPreferencesChangedEvent
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEventMapping import \
     BusinessOwnerPreferencesChangedEventMapping
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class BusinessOwnerPreferencesChangedEventHandler:
@@ -48,10 +53,9 @@ class BusinessOwnerPreferencesChangedEventHandler:
         try:
             cls.__mongo_repository.update_business_owner(message.id, message.ad_accounts, days_to_sync)
         except Exception as e:
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                    name="Failed to update business owners journal",
-                                    description=str(e))
-            cls.__logger.logger.exception(log.to_dict())
+            cls.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
+                                      name="Failed to update business owners journal",
+                                      description=str(e)))
 
         # start syncing
         try:

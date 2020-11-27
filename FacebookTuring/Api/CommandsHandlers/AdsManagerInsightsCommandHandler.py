@@ -2,7 +2,7 @@ import typing
 from datetime import datetime, timedelta
 from typing import Dict
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderRequestMapper, AgGridInsightsRequest, AgGridTrendRequest
@@ -13,6 +13,11 @@ from FacebookTuring.Api.Startup import startup, logger
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
+
+import logging
+
+logger_native = logging.getLogger(__name__)
+
 
 PERCENTAGE_DIFFERENCE_KEY = "percentage_difference"
 TREND_KEY = "trend"
@@ -132,11 +137,9 @@ class AdsManagerInsightsCommandHandler:
 
         requested_columns = query.requested_columns
         if len(requested_columns) > 1:
-            log = LoggerMessageBase(
-                mtype=LoggerMessageTypeEnum.ERROR,
+            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
                 description="The ag grid trend endpoint should receive only one column.",
-            )
-            logger.logger.exception(log.to_dict())
+            ))
             raise Exception("The ag grid trend endpoint should receive only one column.")
 
         _, _, result = GraphAPIInsightsHandler.set_logger(logger).get_insights_page(

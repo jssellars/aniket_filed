@@ -5,11 +5,15 @@ from enum import Enum
 from pymongo.errors import AutoReconnect
 from retry import retry
 
-from Core.Tools.Logger.Helpers import log_operation_mongo
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum
+from Core.logging_legacy import log_operation_mongo
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class MongoProjectionState(Enum):
@@ -33,7 +37,7 @@ class MongoRepositoryBase:
         if client is None and config is None:
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Cannot instantiate a Mongo Repository. Please try again using "
                             "either a Mongo client or a Mongo config.",
             )
@@ -122,7 +126,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 data=document,
                 description="Failed to add one document. Reason %s" % str(e),
                 timestamp=operation_end_time,
@@ -146,7 +150,7 @@ class MongoRepositoryBase:
 
             if len(inserted_ids) == 0:
                 description_message = "Failed to insert any document."
-                log_level = LoggerMessageTypeEnum.ERROR
+                log_level = logging.ERROR
                 log_operation_mongo(
                     logger=self._logger,
                     log_level=log_level,
@@ -159,7 +163,7 @@ class MongoRepositoryBase:
             if len(inserted_ids) < len(documents):
                 description_message = "Failed to insert all documents. No of documents inserted %d out of %d" % \
                                       (len(inserted_ids), len(documents))
-                log_level = LoggerMessageTypeEnum.WARNING
+                log_level = logging.WARNING
                 log_operation_mongo(
                     logger=self._logger,
                     log_level=log_level,
@@ -174,7 +178,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 data=documents,
                 description="Failed to add many documents. Reason %s" % str(e),
                 timestamp=operation_end_time,
@@ -194,7 +198,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get all documents. Reason %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -216,7 +220,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get all documents "
                             "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
                 timestamp=operation_end_time,
@@ -241,7 +245,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get first document "
                             "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
                 timestamp=operation_end_time,
@@ -264,7 +268,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get last updated documents "
                             "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
                 timestamp=operation_end_time,
@@ -288,7 +292,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get documents. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -315,7 +319,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get sorted documents. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -342,7 +346,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to get first or default document. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -364,7 +368,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to update one document. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -384,7 +388,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to update many documents. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -415,7 +419,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to update many documents. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -438,7 +442,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to delete many documents. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,
@@ -464,7 +468,7 @@ class MongoRepositoryBase:
             duration = (operation_end_time - operation_start_time).total_seconds()
             log_operation_mongo(
                 logger=self._logger,
-                log_level=LoggerMessageTypeEnum.ERROR,
+                log_level=logging.ERROR,
                 description="Failed to delete many documents. Reason: %s" % str(e),
                 timestamp=operation_end_time,
                 duration=duration,

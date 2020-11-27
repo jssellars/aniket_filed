@@ -3,7 +3,7 @@ import json
 import typing
 from datetime import datetime
 
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
+from Core.logging_legacy import log_message_as_dict
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
@@ -18,6 +18,11 @@ from FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequest impo
 from FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageRequestMapping import \
     GetAllAppsMessageRequestMapping
 from FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageResponse import GetAllAppsMessageResponse
+
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class GetAllAppsMessageRequestHandler:
@@ -98,9 +103,8 @@ class GetAllAppsMessageRequestHandler:
                                              startup.exchange_details.name,
                                              startup.exchange_details.outbound_queue.key)
             rabbitmq_client.publish(response)
-            log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.INTEGRATION_EVENT,
-                                    name=response.message_type,
-                                    extra_data={"event_body": rabbitmq_client.serialize_message(response)})
-            cls.__rabbit_logger.logger.info(log.to_dict())
+            cls.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
+                                      name=response.message_type,
+                                      extra_data={"event_body": rabbitmq_client.serialize_message(response)}))
         except Exception as e:
             raise e

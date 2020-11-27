@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from Core.Metadata.Columns.ViewColumns.ViewColumn import ViewColumn
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageBase, LoggerMessageTypeEnum
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
@@ -13,11 +12,15 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import Grap
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookAccounts.Api.Dtos.AccountAgGridViewsDto import accounts_ag_grid_view
-from FacebookAccounts.Api.Startup import logger
 from FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import (
     GraphAPIAccountInsights,
     GraphAPIRequestInsights,
 )
+
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 INSIGHTS_KEY = "insights"
 DATA_KEY = "data"
@@ -276,12 +279,7 @@ def map_response(response: List[Any] = None) -> typing.List[Dict]:
 
                 entry_result.update(mapped_entry)
             except Exception as e:
-                log = LoggerMessageBase(
-                    mtype=LoggerMessageTypeEnum.ERROR,
-                    name="FieldMappingException",
-                    description=f"Failed to map the {column.primary_value.name} field",
-                )
-                logger.logger.exception(log.to_dict())
+                logger.exception(f"Failed to map the {column.primary_value.name} field")
 
         if INSIGHTS_KEY not in entry and entry_result:
             result.append(entry_result)
@@ -294,12 +292,7 @@ def map_response(response: List[Any] = None) -> typing.List[Dict]:
             try:
                 entry_result.update(column.primary_value.mapper.map(insights, column.primary_value)[0])
             except Exception as e:
-                log = LoggerMessageBase(
-                    mtype=LoggerMessageTypeEnum.ERROR,
-                    name="FieldMappingException",
-                    description=f"Failed to map the {column.primary_value.name} field",
-                )
-                logger.logger.exception(log.to_dict())
+                logger.exception(f"Failed to map the {column.primary_value.name} field")
 
         if entry_result:
             result.append(entry_result)

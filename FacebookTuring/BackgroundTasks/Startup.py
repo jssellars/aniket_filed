@@ -5,8 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Core.Tools.Config.BaseConfig import ExchangeDetails, QueueDetails
-from Core.Tools.Logger.LoggerFactory import LoggerFactory
-from Core.Tools.Logger.LoggerMessageStartup import LoggerMessageStartup
+from Core.logging_legacy import LOGGERS_BY_NAME, app_config_as_log_dict
 from FacebookTuring.BackgroundTasks.Config.Config import MongoConfig, SQLAlchemyConfig, RabbitMqConfig, FacebookConfig
 
 
@@ -66,18 +65,17 @@ with open(config_file, 'r') as app_settings_json_file:
 startup = Startup(app_config)
 
 # Initialize logger
-logger = LoggerFactory.get(startup.logger_type)(host=startup.es_host,
-                                                port=startup.es_port,
-                                                name=startup.api_name,
-                                                level=startup.logger_level,
-                                                index_name=startup.docker_filename)
-rabbit_logger = LoggerFactory.get(startup.rabbit_logger_type)(host=startup.es_host,
-                                                              port=startup.es_port,
-                                                              name=startup.api_name,
-                                                              level=startup.logger_level,
-                                                              index_name=startup.docker_filename)
+logger = LOGGERS_BY_NAME.get(startup.logger_type)(host=startup.es_host,
+                                                  port=startup.es_port,
+                                                  name=startup.api_name,
+                                                  level=startup.logger_level,
+                                                  index_name=startup.docker_filename)
+rabbit_logger = LOGGERS_BY_NAME.get(startup.rabbit_logger_type)(host=startup.es_host,
+                                                                port=startup.es_port,
+                                                                name=startup.api_name,
+                                                                level=startup.logger_level,
+                                                                index_name=startup.docker_filename)
 
 # Log startup details
-startup_log = LoggerMessageStartup(app_config=app_config,
-                                   description="Facebook Turing BT - data interface between Filed and Facebook")
-logger.logger.info(startup_log.to_dict())
+logger.logger.info(app_config_as_log_dict(app_config))
+

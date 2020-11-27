@@ -10,9 +10,12 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBuilder import MetricCalculatorBuilder
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import AggregatorEnum, MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Logger.LoggerMessageBase import LoggerMessageTypeEnum, LoggerMessageBase
-from Core.Tools.Logger.MongoLoggers.MongoLogger import MongoLogger
+from Core.logging_legacy import MongoLogger, log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
+
+import logging
+
+logger_native = logging.getLogger(__name__)
 
 
 class MetricCalculatorBase(MetricCalculatorBuilder):
@@ -60,15 +63,14 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             date_start = date_stop - timedelta(days=time_interval.value)
         except Exception:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description=f"Failed to process date start and date stop for "
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description=f"Failed to process date start and date stop for "
                                                     f"time interval {time_interval}.",
-                                        extra_data={
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             date_start = date_stop
 
         date_start += timedelta(days=1)
@@ -76,11 +78,10 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         if calculator is None:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Invalid antecedent and metric type combination.",
-                                        extra_data={"state": self._current_state()})
-                self._logger.logger.info(log)
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Invalid antecedent and metric type combination.",
+                                          extra_data={"state": self._current_state()}))
             return None, None
 
         try:
@@ -90,14 +91,13 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                 facebook_id=self._facebook_id)
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Other calculator exception.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Other calculator exception.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             return None, None
 
         if not isinstance(result, list) and not isinstance(result, tuple):
@@ -125,14 +125,13 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                                      action_breakdown=action_breakdown)
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to get breakdown values.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Failed to get breakdown values.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             raise e
 
         if breakdown_values:
@@ -164,13 +163,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         if len(numerator) != len(denominator):
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Numerator and denominator data mismatch.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Numerator and denominator data mismatch.",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
             raise ValueError("Numerator and denominator data mismatch.")
 
@@ -209,14 +207,13 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 return self._metric.multiplier * aggregated_numerator
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to compute aggregated metric value",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Failed to compute aggregated metric value",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
     def aggregated_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         data = self._get_metrics_values(date_start=date_start, date_stop=date_stop)
@@ -232,14 +229,13 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         if value is None:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Categorical value is none",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Categorical value is none",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "values": data
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return value
 
@@ -288,13 +284,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 else:
                     slopes.append(None)
                     if self._debug:
-                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                                name="MetricCalculator",
-                                                description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                extra_data={
+                        self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                                  name="MetricCalculator",
+                                                  description=f"Time bucket for interval {time_bucket.value} is None.",
+                                                  extra_data={
                                                     "state": self._current_state()
-                                                })
-                        self._logger.logger.info(log)
+                                                }))
 
         trend = self._compute_resultant_slope(slopes)
 
@@ -311,14 +306,13 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 resultant_slope = np.arctan2(mean_unit_vector[1], mean_unit_vector[0])
             except Exception:
                 if self._debug:
-                    log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                            name="MetricCalculator",
-                                            description="Failed to compute resultant slope.",
-                                            extra_data={
+                    self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                              name="MetricCalculator",
+                                              description="Failed to compute resultant slope.",
+                                              extra_data={
                                                 "state": self._current_state(),
                                                 "error": traceback.format_exc()
-                                            })
-                    self._logger.logger.info(log)
+                                            }))
 
         return resultant_slope
 
@@ -337,14 +331,13 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         else:
             scaled_value = None
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description=f"Couldn't compute the min-max normalized value "
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description=f"Couldn't compute the min-max normalized value "
                                                     f"for {value}, {min_value}, {max_value}.",
-                                        extra_data={
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return scaled_value
 
@@ -386,16 +379,15 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                     fuzzy_membership_value = current_fuzzy_membership_value
         except Exception:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description=f"Couldn't compute fuzzy value for {value} and "
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description=f"Couldn't compute fuzzy value for {value} and "
                                                     f"fuzzyfier {fuzzyfier_type.value}.",
-                                        extra_data={
+                                          extra_data={
                                             "state": self._current_state(),
                                             "fuzzyfier": fuzzyfier,
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return fuzzy_class, fuzzy_membership_value
 
@@ -410,33 +402,30 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         elif initial_metric_value is None and current_metric_value is not None:
             difference = current_metric_value
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Ill-defined difference. Initial metric value is none.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Ill-defined difference. Initial metric value is none.",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
         elif initial_metric_value is not None and current_metric_value is None:
             difference = initial_metric_value
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Ill-defined difference. Current metric value is none.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Ill-defined difference. Current metric value is none.",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
         else:
             difference = None
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Ill-defined difference. Both initial and current metrics are none",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Ill-defined difference. Both initial and current metrics are none",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
         return difference
 
     def variance(self,
@@ -479,46 +468,42 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 if current_metric_value == 0.0:
                     difference = None
                     if self._debug:
-                        log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                                name="MetricCalculator",
-                                                description="Ill-defined percentage difference. Initial metric value and current metric value are none.",
-                                                extra_data={
+                        self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                                  name="MetricCalculator",
+                                                  description="Ill-defined percentage difference. Initial metric value and current metric value are none.",
+                                                  extra_data={
                                                     "state": self._current_state()
-                                                })
-                        self._logger.logger.info(log)
+                                                }))
                 else:
                     difference = self.HUNDRED_MULTIPLIER * current_metric_value
         elif mean_on_time_interval is None and current_metric_value is not None:
             difference = None
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Ill-defined percentage difference. Initial metric value is none.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Ill-defined percentage difference. Initial metric value is none.",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
         elif mean_on_time_interval is not None and current_metric_value is None:
             difference = None
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Ill-defined percentage difference. Current metric value is none.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Ill-defined percentage difference. Current metric value is none.",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
         else:
             difference = None
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Ill-defined percentage difference. Both initial and "
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Ill-defined percentage difference. Both initial and "
                                                     "current metrics are none",
-                                        extra_data={
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
         return difference
 
     def raw_value(self, date_start: typing.AnyStr = None, *args, **kwargs) -> typing.Union[int, float]:
@@ -526,13 +511,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
 
         if result is None:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="Metric evaluated to none",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="Metric evaluated to none",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return result
 
@@ -554,25 +538,23 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                                  breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to get metric values.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Failed to get metric values.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             raise e
 
         if not metrics_values:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="No metric values returned from DB",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="No metric values returned from DB",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         if hasattr(self, "minimum_number_of_data_points") \
                 and getattr(self, "minimum_number_of_data_points") is not None \
@@ -589,25 +571,23 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                         breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to get min metric values.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Failed to get min metric values.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             raise e
 
         if not min_values:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="No min metric values returned from DB",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="No min metric values returned from DB",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return min_values
 
@@ -619,24 +599,22 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                         breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.ERROR,
-                                        name="MetricCalculator",
-                                        description="Failed to get max metric values.",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
+                                          name="MetricCalculator",
+                                          description="Failed to get max metric values.",
+                                          extra_data={
                                             "state": self._current_state(),
                                             "error": traceback.format_exc()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
             raise e
 
         if not max_values:
             if self._debug:
-                log = LoggerMessageBase(mtype=LoggerMessageTypeEnum.WARNING,
-                                        name="MetricCalculator",
-                                        description="No max metric values returned from DB",
-                                        extra_data={
+                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
+                                          name="MetricCalculator",
+                                          description="No max metric values returned from DB",
+                                          extra_data={
                                             "state": self._current_state()
-                                        })
-                self._logger.logger.info(log)
+                                        }))
 
         return max_values
