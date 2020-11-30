@@ -1,3 +1,4 @@
+.PHONY: .all
 all:
 	# prevent running make without arguments from running the first target
 
@@ -13,3 +14,7 @@ rabbit_worker:
 .PHONY: sync_job
 sync_job:
 	python3 sync_job.py &
+
+.PHONY: test
+test:
+	pytest --capture=no --disable-warnings -v tests

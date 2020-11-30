@@ -8,36 +8,28 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 import json
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from FacebookPixels.BackgroundTasks.Startup import startup, rabbit_logger, logger
+from FacebookPixels.BackgroundTasks.Startup import startup
 from FacebookPixels.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookPixels.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body):
-    rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
-        name=getattr(properties, "type", None),
-        extra_data={"event_body": body},
-    ))
+    logger.info(getattr(properties, "type", None), extra={"rabbitmq": body})
     try:
         ch.basic_ack(delivery_tag=method.delivery_tag)
         message_type = getattr(properties, "type", None)
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
         body = json.loads(body)
-        request_handler.set_rabbit_logger(rabbit_logger).handle(body)
+        request_handler.handle(body)
     except Exception as e:
-        logger.logger.exception(log_message_as_dict(mtype=logging.INFO,
-            name="Facebook Pixels Integration Error",
-            description=str(e),
-            extra_data={"message_type": getattr(properties, "type", None), "event_body": body},
-        ))
+        logger.exception(repr(e), extra={"message_type": getattr(properties, "type", None), "event_body": body})
 
 
 def main():

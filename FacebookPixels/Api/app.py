@@ -44,4 +44,4 @@ pixel_insights_controller = "{base_url}/<string:level>/insights".format(base_url
 api.add_resource(PixelsInsightsEndpoint, pixel_insights_controller)
 
 if __name__ == "__main__":
-    app.run(debug=startup.debug_mode, host="localhost", port=startup.port)
+    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)

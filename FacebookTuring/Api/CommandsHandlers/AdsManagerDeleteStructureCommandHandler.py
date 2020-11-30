@@ -5,7 +5,7 @@ from bson import BSON
 
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from FacebookTuring.Api.Startup import startup, logger
+from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import (
@@ -23,7 +23,6 @@ class AdsManagerDeleteStructureCommandHandler:
             config=startup.mongo_config,
             database_name=startup.mongo_config["structures_database_name"],
             collection_name=level,
-            logger=logger,
         )
 
         deleted_structure = repository.get_structure_details(level=Level(level), key_value=facebook_id)

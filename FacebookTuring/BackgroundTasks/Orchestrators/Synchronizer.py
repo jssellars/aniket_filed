@@ -5,7 +5,6 @@ from threading import Thread
 
 from bson import BSON
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
@@ -23,7 +22,7 @@ from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields impo
     INSIGHTS_SYNCHRONIZER_FIELDS,
 )
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
-from FacebookTuring.BackgroundTasks.Startup import logger, startup
+from FacebookTuring.BackgroundTasks.Startup import startup
 from FacebookTuring.BackgroundTasks.SynchronizerConfig import SynchronizerConfigRuntime, SynchronizerConfigStatic
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
@@ -38,7 +37,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 SYNC_DAYS_INTERVAL = 2
@@ -103,11 +102,10 @@ def sync(
                 insights_thread.join()
 
             except Exception as e:
-                logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                    name="Facebook Turing Daily Sync Error",
-                    description="Failed sync data for business owner: %s and ad account: %s. "
-                    "Reason: %s" % (entry[MiscFieldsEnum.business_owner_id], entry[MiscFieldsEnum.account_id], str(e)),
-                ))
+                logger.exception(
+                    f"Failed sync data for business owner: {entry[MiscFieldsEnum.business_owner_id]}"
+                    f" and ad account: {entry[MiscFieldsEnum.account_id]} || {repr(e)}"
+                )
 
         levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
         update_results_for_insights(
@@ -173,11 +171,8 @@ def sync_insights_base(
     has_errors = False
     try:
         available_data = synchronizer.check_data(date_start.date().isoformat(), date_stop.date().isoformat())
-    except:
-        logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-            name="Facebook Turing Daily Sync Error",
-            description="There was no data for dates {} and {}".format(date_start, date_stop),
-        ))
+    except Exception as e:
+        logger.exception(f"There was no data for dates {date_start} and {date_stop} || {repr(e)}")
         available_data = []
         has_errors = True
 
@@ -196,11 +191,10 @@ def sync_insights_base(
         try:
             synchronizer.run()
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                name="Facebook Turing Daily Sync Error",
-                description=f"Failed to sync data for dates {synchronizer.date_start} and {synchronizer.date_stop}. "
-                f"Reason: {e}",
-            ))
+            logger.exception(
+                f"Failed to sync data for dates {synchronizer.date_start}"
+                f" and {synchronizer.date_stop} || {repr(e)}"
+            )
             has_errors = True
         date_start = current_date_stop + timedelta(days=1)
 
@@ -228,11 +222,9 @@ def sync_structures(
                 .run()
             )
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                name="Facebook Turing Daily Sync Error",
-                description="Failed sync structures for business owner: %s and ad account: %s. "
-                "Reason: %s" % (user_config_runtime.business_owner_id, user_config_runtime.account_id, str(e)),
-            ))
+            logger.exception(
+                f"Failed sync structures for business owner: {user_config_runtime.business_owner_id}"
+                f" and ad account: {user_config_runtime.account_id} || {repr(e)}")
             has_errors = True
 
     # mark campaigns and adsets as completed based on the end time value
@@ -241,11 +233,10 @@ def sync_structures(
             account_id=user_config_runtime.account_id, structures_repository=user_config_runtime.structure_repository
         )
     except Exception as e:
-        logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-            name="Facebook Turing Daily Sync Error",
-            description="Failed updating completed structure ids for business owner: %s and ad "
-            "account: %s. Reason: %s" % (user_config_runtime.business_owner_id, user_config_runtime.account_id, str(e)),
-        ))
+        logger.exception(
+            f"Failed updating completed structure ids for business owner: {user_config_runtime.business_owner_id}"
+            f" and ad account: {user_config_runtime.account_id} || {repr(e)}"
+        )
         has_errors = True
 
     sync_status = AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS if has_errors else AdAccountSyncStatusEnum.COMPLETED
@@ -404,10 +395,7 @@ def get_structures_to_modify(
                             required_field=required_field,
                         )
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                name="Facebook Turing Daily Sync Error",
-                description="Failed to get modified structure. Reason: {}".format(str(e)),
-            ))
+            logger.exception(f"Failed to get modified structure || {repr(e)}")
 
         minimum_structure[MiscFieldsEnum.business_owner_id] = business_owner_id
         minimum_structure[MiscFieldsEnum.details] = BSON.encode(details)

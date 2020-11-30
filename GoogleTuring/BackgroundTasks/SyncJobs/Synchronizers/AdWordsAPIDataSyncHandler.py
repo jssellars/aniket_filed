@@ -16,7 +16,7 @@ from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRep
 class AdWordsAPIDataSyncHandler:
 
     @classmethod
-    def handle(cls, request, logger):
+    def handle(cls, request):
         refresh_token = request.refresh_token
         client = AdWordsBaseClient(config=startup.google_config, refresh_token=refresh_token)
         mongo_conn_handler = MongoConnectionHandler(startup.mongo_config)
@@ -24,8 +24,7 @@ class AdWordsAPIDataSyncHandler:
                                                               database_name=startup.mongo_config[
                                                                   'google_accounts_database_name'],
                                                               collection_name=startup.mongo_config[
-                                                                  'accounts_collection_name'],
-                                                              logger=logger)
+                                                                  'accounts_collection_name'])
 
         account_info = list(set([(str(customer.google_id), customer.name) for customer in request.customers]))
         bo_google_id = request.google_id
@@ -64,8 +63,7 @@ class AdWordsAPIDataSyncHandler:
         for i, account_id in enumerate(account_ids):
             structures_synchronizer = StructuresSynchronizer(business_owner_id=bo_google_id, account_id=account_id,
                                                              adwords_client=client, mongo_config=startup.mongo_config,
-                                                             mongo_conn_handler=mongo_conn_handler,
-                                                             logger=logger)
+                                                             mongo_conn_handler=mongo_conn_handler)
             structures_synchronizer.synchronize()
             last_update_time = google_id_to_last_update_time.get(account_id, None)
             insights_synchronizer = InsightsSynchronizer(business_owner_id=bo_google_id, account_id=account_id,

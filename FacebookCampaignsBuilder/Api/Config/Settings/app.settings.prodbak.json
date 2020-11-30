@@ -34,16 +34,10 @@
     "name": "Prod.Filed.Facebook.Accounts"
   },
   "environment": "prodbak",
-  "api_name": "FacebookCampaignBuilder",
-  "api_version": "1.0.0",
-  "service_name": "FacebookCampaignBuilder",
-  "service_version": "1.0.0",
+  "name": "FacebookCampaignsBuilderApi",
+  "version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47220,
-  "debug_mode": false,
-  "docker_filename": "filed-potter-campaign-builder-api",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": null,
   "es_port": null

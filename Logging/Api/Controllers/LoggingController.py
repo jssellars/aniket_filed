@@ -5,23 +5,23 @@ import humps
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
+from Core.logging_config import request_as_log_dict
 from Core.Web.Security.JWTTools import extract_field_user_id
 from Logging.Api.Commands.LoggingCommand import LoggingCommand
 from Logging.Api.Mappings.LoggingCommandMapping import LoggingCommandMapping
-from Logging.Api.Startup import logger, startup
+from Logging.Api.Startup import startup
 from Logging.Infrastructure.PersistenceLayer.LoggingMongoRepository import LoggingMongoRepository
 
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class LoggingEndpoint(Resource):
     @startup.authorize_jwt
     def post(self):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             # get business owner
             user_id = extract_field_user_id()
@@ -48,15 +48,11 @@ class LoggingEndpoint(Resource):
             # save request
             repository = LoggingMongoRepository(config=startup.mongo_config,
                                                 database_name=startup.mongo_config.logging_database_name,
-                                                collection_name=startup.mongo_config.logging_collection_name,
-                                                logger=logger)
+                                                collection_name=startup.mongo_config.logging_collection_name)
             repository.add_one(command)
 
             return Response(status=200, mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="LoggingEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')

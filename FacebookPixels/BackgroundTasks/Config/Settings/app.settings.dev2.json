@@ -38,14 +38,9 @@
     "name": "Dev2.Filed.Facebook.Accounts"
   },
   "environment": "dev2",
-  "api_name": "FacebookPixelsBackgroundTasks",
-  "api_version": "1.0.0",
-  "service_name": "FacebookPixelsBackgroundTasks",
-  "service_version": "1.0.0",
+  "name": "FacebookPixelsBt",
+  "version": "1.0.0",
   "base_url": "/api/v1",
-  "docker_filename": "filed-potter-pixels-background-tasks",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "dev2-elasticsearch",
   "es_port": 9200

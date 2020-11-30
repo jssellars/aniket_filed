@@ -1,14 +1,20 @@
 import logging
+from datetime import datetime
 from logging import handlers
 import os
 from pathlib import Path
-from typing import Any, Optional, Mapping
+from typing import Any, Optional, Mapping, TYPE_CHECKING, Dict
 
 from cmreslogging.handlers import CMRESHandler
+from flask import request
+from pythonjsonlogger import jsonlogger
 
 import requests
+import pika
 
 logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("pika").setLevel(logging.WARNING)
 
 
 LOG_FORMAT = "{asctime} {levelname} {name}:{lineno} || {message}"
@@ -85,10 +91,6 @@ class RabbitFilter(logging.Filter):
         self.hide_rabbits = hide_rabbits
 
     def filter(self, record: logging.LogRecord) -> bool:
-        # TODO: see if this is needed
-        # if isinstance(message["details"]["event_body"], (str, bytes)):
-        #     message["details"]["event_body"] = json.loads(message["details"]["event_body"])
-
         # to qualify as rabbit data, a dict with a rabbitmq key must be supplied as message or extra
         rabbit_data = getattr(record, "rabbitmq", record.msg.get("rabbitmq") if isinstance(record.msg, dict) else None)
 
@@ -102,7 +104,36 @@ class RabbitFilter(logging.Filter):
         return False
 
 
-def init(service_name: str, level_name: str, enable_es: bool = False, es_host: str = "localhost", es_port: int = 9200):
+if TYPE_CHECKING:
+    from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
+
+
+# TODO: make this work when inheriting logging.Logger or logging.Handler
+class MongoLogger:
+    COLLECTION_NAME = "logs"
+
+    def __init__(self, repository: "MongoRepositoryBase", database_name: str):
+        self._repository = repository.new_repository()
+        self._repository.set_database(database_name)
+        self._repository.set_collection(MongoLogger.COLLECTION_NAME)
+
+    def info(self, message: Dict = None):
+        self._repository.add_one(message)
+
+
+class CustomJsonFormatter(jsonlogger.JsonFormatter):
+    mimetype = "application/json"
+
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+
+        if not log_record.get("timestamp"):
+            # this doesn't use record.created, so it is slightly off
+            log_record["@timestamp"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+# TODO: !!! use UTC time instead of local as in the previously used CustomJsonFormatter !!!
+def init(app_name: str, level_name: str, enable_es: bool = False, es_host: str = "localhost", es_port: int = 9200):
     """
     Examples:
         Regular:
@@ -123,7 +154,7 @@ def init(service_name: str, level_name: str, enable_es: bool = False, es_host: s
     root_logger.addHandler(stream_handler)
 
     root_dir = os.environ.get("LOG_NETWORK_MOUNT_PATH")
-    service_path = Path(root_dir if root_dir else "logs") / "py" / service_name
+    service_path = Path(root_dir if root_dir else "logs") / "py" / app_name
     service_path.mkdir(parents=True, exist_ok=True)
 
     app_handler = get_timed_rotating_file_handler(str(service_path / "app"))
@@ -139,7 +170,7 @@ def init(service_name: str, level_name: str, enable_es: bool = False, es_host: s
             hosts=[dict(host=es_host, port=es_port)],
             auth_type=CMRESHandler.AuthType.NO_AUTH,
             index_name_frequency=CMRESHandler.IndexNameFrequency.DAILY,
-            es_index_name=f"py-{service_name.replace('.', '-')}",
+            es_index_name=f"py-{app_name.replace('.', '-')}",
             es_doc_type="_doc",
             raise_on_indexing_exceptions=True,
             flush_frequency_in_sec=5,
@@ -159,3 +190,39 @@ def get_timed_rotating_file_handler(file_path: str) -> handlers.TimedRotatingFil
 
 def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
+
+
+RABBIT_KEYS = ["username", "hostname", "port", "virtual_host", "exchanges"]
+MONGO_KEYS = ["mongo_host", "remote_ip", "remote_port"]
+SQL_KEYS = ["host", "port", "database"]
+FACEBOOK_KEYS = ["description", "api_version"]
+
+
+def app_config_as_log_dict(config: Dict):
+    mongo_config = config.get("mongo_database", {})
+    all_mongo_keys = MONGO_KEYS + [i for i in mongo_config if "database" in i or "collection" in i]
+
+    return {
+        "environment": config.get("environment"),
+        "app_name": config.get("name"),
+        "app_version": config.get("service_version"),
+        "port": config.get("port"),
+        "rabbit": {k: config.get("rabbitmq", {}).get(k) for k in RABBIT_KEYS},
+        "mongo": {k: mongo_config.get(k) for k in all_mongo_keys},
+        "tokens_database": {k: config.get("sql_server_database", {}).get(k) for k in SQL_KEYS},
+        "facebook": {k: config.get("facebook", {}).get(k) for k in FACEBOOK_KEYS},
+        "external_services": config.get("external_services", {}),
+    }
+
+
+def request_as_log_dict(r: request) -> Dict:
+    return dict(
+        method=r.method,
+        base_url=r.base_url,
+        endpoint=r.endpoint,
+        full_path=r.full_path,
+        remote_address=r.remote_addr,
+        payload=r.get_data(),
+        # === WARNING === only activate this log if it is really needed ===
+        # headers=r.headers,
+    )

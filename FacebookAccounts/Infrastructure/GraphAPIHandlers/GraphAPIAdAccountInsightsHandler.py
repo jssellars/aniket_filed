@@ -153,7 +153,7 @@ class GraphAPIAdAccountInsightsHandlerClass:
     def __map_cost_per_conversion(cls, response: typing.Dict) -> typing.Dict:
         try:
             response["cost_per_conversion"] = float(response["amount_spent"]) / response["conversions"]
-        except Exception as e:
+        except:
             response["cost_per_conversion"] = None
 
         return response
@@ -196,7 +196,7 @@ class GraphAPIAdAccountInsightsHandlerClass:
             except ValueError:
                 date = datetime.strptime(date, __ISO_DATETIME_FORMAT__)
             except Exception as e:
-                raise Exception(f"Invalid datetime format: {input_date}. Error: {str(e)}")
+                raise Exception(f"Invalid datetime format: {input_date} || {repr(e)}")
         elif isinstance(input_date, str):
             return input_date
 
@@ -279,7 +279,7 @@ def map_response(response: List[Any] = None) -> typing.List[Dict]:
 
                 entry_result.update(mapped_entry)
             except Exception as e:
-                logger.exception(f"Failed to map the {column.primary_value.name} field")
+                logger.exception(f"Failed to map the {column.primary_value.name} field || {repr(e)}")
 
         if INSIGHTS_KEY not in entry and entry_result:
             result.append(entry_result)
@@ -292,7 +292,7 @@ def map_response(response: List[Any] = None) -> typing.List[Dict]:
             try:
                 entry_result.update(column.primary_value.mapper.map(insights, column.primary_value)[0])
             except Exception as e:
-                logger.exception(f"Failed to map the {column.primary_value.name} field")
+                logger.exception(f"Failed to map the {column.primary_value.name} field || {repr(e)}")
 
         if entry_result:
             result.append(entry_result)

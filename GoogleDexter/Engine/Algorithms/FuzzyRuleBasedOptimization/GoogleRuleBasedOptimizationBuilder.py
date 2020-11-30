@@ -3,7 +3,6 @@ from datetime import datetime
 
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from Core.logging_legacy import MongoLogger
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Fuzzifiers.GoogleRuleBasedOptimizationFuzzyfierFactory import \
     GoogleRuleBasedOptimizationFuzzyfierFactory
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules import Rules
@@ -22,16 +21,9 @@ class GoogleRuleBasedOptimizationBuilder:
         self._fuzzyfier_factory = None
         self._level = None
         self._dexter_config = None
-        self.__logger = None
         self._date_stop = None
         self._mongo_config = None
         self._time_interval = None
-
-    def get_logger(self):
-        if self._mongo_repository is not None:
-            self.__logger = MongoLogger(repository=self._mongo_repository,
-                                        database_name=self._mongo_repository.config.logs_database)
-        return self.__logger
 
     def set_business_owner_id(self, business_owner_id: typing.Any = None):
         self._business_owner_id = business_owner_id

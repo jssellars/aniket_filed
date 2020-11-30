@@ -1,11 +1,15 @@
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
-from GoogleTuring.Api.Startup import startup, logger
+from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import AD_GROUP_CRITERIA_FIELDS
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
 from GoogleTuring.Infrastructure.Mappings.StructureMappingFactory import StructureMappingFactory
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AdsManagerUpdateStructureCommandHandler(GoogleTokenGetter):
@@ -19,8 +23,7 @@ class AdsManagerUpdateStructureCommandHandler(GoogleTokenGetter):
                 mongo_repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
                                                                          database_name=startup.mongo_config[
                                                                              'google_structures_database_name'],
-                                                                         collection_name=level.value,
-                                                                         logger=logger)
+                                                                         collection_name=level.value)
                 if level in [StructureType.AD, StructureType.AD_GROUP_KEYWORDS]:
                     additional_info = mongo_repository.get_additional_info(level, structure_id)
 
@@ -34,8 +37,7 @@ class AdsManagerUpdateStructureCommandHandler(GoogleTokenGetter):
                     data_source_name=command.dataSourceName,
                     additional_info=additional_info)
             except Exception as e:
-                import traceback
-                traceback.print_exc()
+                logger.exception(repr(e))
                 raise e
 
         else:

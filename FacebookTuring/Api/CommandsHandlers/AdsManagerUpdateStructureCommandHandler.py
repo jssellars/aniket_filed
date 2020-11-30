@@ -5,7 +5,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Api.Startup import startup, logger
+from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToGraphAPIStructure, \
@@ -52,8 +52,7 @@ class AdsManagerUpdateStructureCommandHandler:
         try:
             repository = TuringMongoRepository(config=startup.mongo_config,
                                                database_name=startup.mongo_config['structures_database_name'],
-                                               collection_name=level,
-                                               logger=logger)
+                                               collection_name=level)
             structure_id = getattr(updated_structure,
                                    LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
             repository.add_structure(level=Level(level), key_value=structure_id, document=updated_structure)

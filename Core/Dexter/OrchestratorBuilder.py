@@ -10,16 +10,12 @@ class OrchestratorBuilder:
         self.business_owner_id = None
         self.ad_account_id = None
         self.startup = None
-        self.logger = None
         self._channel = None
         self._algorithm_type = None
         self._data_repository = None
         self._recommendations_repository = None
         self._journal_repository = None
         self._auth_token = None
-
-    def set_logger(self, logger: typing.Any = None):
-        self.logger = logger
 
     def set_business_owner_id(self, business_owner_id: typing.AnyStr = None):
         self.business_owner_id = business_owner_id

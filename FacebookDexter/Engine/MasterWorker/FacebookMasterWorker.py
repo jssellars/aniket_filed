@@ -30,8 +30,7 @@ class FacebookMasterWorker(MasterWorkerBase):
          set_journal_repository(journal_repository).
          set_auth_token(auth_token=auth_token).
          set_business_owner_id(business_owner_id).
-         set_startup(startup).
-         set_logger(logger))
+         set_startup(startup))
 
         for time_interval in startup.dexter_config.time_intervals:
             for ad_account_id in ad_account_ids:

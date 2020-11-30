@@ -5,7 +5,7 @@ import humps
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
+from Core.logging_config import request_as_log_dict
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Misc import snake_to_camelcase
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
@@ -33,28 +33,25 @@ from FacebookTuring.Api.Mappings.AdsManagerSaveDraftCommandMapping import AdsMan
 from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from FacebookTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
-from FacebookTuring.Api.Startup import logger, startup
+from FacebookTuring.Api.Startup import startup
 
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class AdsManagerCampaignTreeStructureEndpoint(Resource):
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def get(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             response = AdsManagerCampaignTreeStructureQuery.get(level, facebook_id)
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerCampaignTreeStructureEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Could not retrieve tree for {facebook_id}"}), status=400,
                             mimetype='application/json')
 
@@ -62,17 +59,14 @@ class AdsManagerCampaignTreeStructureEndpoint(Resource):
 class GetStructuresHandler:
     @staticmethod
     def handle(level, account_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             response = AdsManagerGetStructuresQuery.get_structures(level, account_id)
             response = snake_to_camelcase(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerGetCampaignsEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Could not retrieve {level} for {account_id}"}),
                             status=400, mimetype='application/json')
 
@@ -92,16 +86,13 @@ class OptimizeGetStructuresEndpoint(Resource):
 class AdsManagerFilteredStructuresEndpoint(Resource):
     @startup.authorize_permission(permission=ReportsPermissions.FILTERED_STRUCTURES_PERMISSION)
     def post(self, level: typing.AnyStr = None):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = AdsManagerFilteredStructuresCommandMapping(target=AdsManagerFilteredStructuresCommand)
             command = mapping.load(raw_request)
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerFilteredStructuresEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": str(e)}), status=400, mimetype='application/json')
 
         try:
@@ -114,10 +105,7 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype="application/json")
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerFilteredStructuresEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             error = Tools.create_error(e)
             return Response(response=json.dumps(error), status=400, mimetype='application/json')
 
@@ -125,33 +113,27 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
 class AdsManagerEndpoint(Resource):
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def get(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             response = AdsManagerGetStructuresQuery.get_structure_details(level, facebook_id)
             response = snake_to_camelcase(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Could not retrieve {level} for {facebook_id}"}),
                             status=400, mimetype='application/json')
 
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def put(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = AdsManagerUpdateStructureCommandMapping(target=AdsManagerUpdateStructureCommand)
             command = mapping.load(raw_request)
             business_owner_facebook_id = extract_business_owner_facebook_id()
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
 
@@ -167,17 +149,14 @@ class AdsManagerEndpoint(Resource):
             return Response(status=200, mimetype="application/json")
 
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             error = Tools.create_error(e)
             return Response(response=json.dumps(error), status=400,
                             mimetype='application/json')
 
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_DELETE)
     def delete(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         business_owner_facebook_id = extract_business_owner_facebook_id()
         try:
             response = AdsManagerDeleteStructureCommandHandler.handle(level, facebook_id, business_owner_facebook_id)
@@ -187,10 +166,7 @@ class AdsManagerEndpoint(Resource):
                 return Response(response=json.dumps({"message": f"Missing structure {facebook_id}."}), status=404,
                                 mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Failed to delete structure {facebook_id}."}), status=400,
                             mimetype='application/json')
 
@@ -198,16 +174,13 @@ class AdsManagerEndpoint(Resource):
 class AdsManagerUpdateStructureDraftEndpoint(Resource):
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def put(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = AdsManagerSaveDraftCommandMapping(target=AdsManagerSaveDraftCommand)
             command = mapping.load(raw_request)
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerUpdateStructureDraftEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
 
@@ -215,24 +188,18 @@ class AdsManagerUpdateStructureDraftEndpoint(Resource):
             AdsManagerSaveDraftCommandHandler.handle(command, level, facebook_id)
             return Response(status=204, mimetype="application/json")
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerUpdateStructureDraftEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Failed to save draft for {facebook_id}."}), status=400,
                             mimetype='application/json')
 
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def delete(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             AdsManagerDiscardDraftCommandHandler.handle(level, facebook_id)
             return Response(status=204, mimetype="application/json")
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerUpdateStructureDraftEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Failed to delete draft for {facebook_id}."}), status=400,
                             mimetype='application/json')
 
@@ -240,34 +207,25 @@ class AdsManagerUpdateStructureDraftEndpoint(Resource):
 class AdsManagerDuplicateStructureEndpoint(Resource):
     @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def post(self, level, facebook_id):
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = AdsManagerDuplicateStructureCommandMapping(target=AdsManagerDuplicateStructureCommand)
             command = mapping.load(raw_request)
             business_owner_facebook_id = extract_business_owner_facebook_id()
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerDuplicateStructureEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": "Failed to process request."}), status=400,
                             mimetype='application/json')
         try:
             command_handler = AdsManagerDuplicateStructureCommandHandler()
             command_handler.handle(command, level, facebook_id, business_owner_facebook_id)
             return Response(status=204, mimetype="application/json")
-        except AdsManagerDuplicateStructureCommandHandlerException as ex:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerUpdateStructureDraftEndpoint",
-                                      description=str(ex),
-                                      extra_data=request_as_log_dict(request)))
+        except AdsManagerDuplicateStructureCommandHandlerException as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Could not find structure {facebook_id} tree."}),
                             status=404, mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerUpdateStructureDraftEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Failed to duplicate structure {facebook_id}."}),
                             status=400, mimetype='application/json')

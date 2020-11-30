@@ -23,7 +23,6 @@ class MetricCalculatorBuilder:
         self._date_stop = datetime.now()
         self._time_interval = None
         self._structure_id = None
-        self._debug = None
 
     def set_fuzzyfier_factory(self, fuzzyfier_factory: typing.Any) -> typing.Any:
         self._fuzzyfier_factory = fuzzyfier_factory
@@ -67,10 +66,6 @@ class MetricCalculatorBuilder:
 
     def set_time_interval(self, time_interval: DaysEnum = None) -> typing.Any:
         self._time_interval = time_interval
-        return self
-
-    def set_debug_mode(self, debug):
-        self._debug = debug
         return self
 
     def set_structure_id(self, structure_id):

@@ -3,7 +3,6 @@ import json
 import typing
 from datetime import datetime
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
@@ -22,17 +21,10 @@ from FacebookApps.Infrastructure.IntegrationEvents.GetAllAppsMessageResponse imp
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GetAllAppsMessageRequestHandler:
-    __rabbit_logger = None
-
-    @classmethod
-    def set_rabbit_logger(cls, logger: typing.Any):
-        cls.__rabbit_logger = logger
-        return cls
-
     @classmethod
     def handle(cls, message_body: typing.AnyStr) -> typing.NoReturn:
         # get apps
@@ -103,8 +95,6 @@ class GetAllAppsMessageRequestHandler:
                                              startup.exchange_details.name,
                                              startup.exchange_details.outbound_queue.key)
             rabbitmq_client.publish(response)
-            cls.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
-                                      name=response.message_type,
-                                      extra_data={"event_body": rabbitmq_client.serialize_message(response)}))
+            logger.info({"rabbitmq": rabbitmq_client.serialize_message(response)})
         except Exception as e:
             raise e

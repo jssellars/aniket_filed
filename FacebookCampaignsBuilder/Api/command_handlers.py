@@ -6,12 +6,11 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from FacebookCampaignsBuilder.Api import commands
-from FacebookCampaignsBuilder.Api.Startup import rabbit_logger, startup
+from FacebookCampaignsBuilder.Api.Startup import startup
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderHandler import (
     GraphAPIAdBuilderHandler,
 )
@@ -35,7 +34,7 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEv
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class AdPreview:
@@ -258,9 +257,6 @@ class PublishCampaign:
                 startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
             )
             rabbitmq_client.publish(response)
-            rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
-                name=response.message_type,
-                extra_data={"event_body": rabbitmq_client.serialize_message(response)},
-            ))
+            logger.info({"rabbitmq": rabbitmq_client.serialize_message(response)})
         except Exception as e:
             raise e

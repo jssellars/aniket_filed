@@ -1,4 +1,3 @@
-import traceback
 import typing
 from queue import Queue
 from threading import Thread
@@ -9,7 +8,6 @@ from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import log_message_as_dict
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.FacebookRuleBasedOptimizationBase import \
     FacebookRuleBasedOptimizationBase
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.FacebookAvailableMetricEnum import \
@@ -20,7 +18,7 @@ from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricCalculator impor
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FacebookRuleBasedOptimizationAdLevel(FacebookRuleBasedOptimizationBase):
@@ -76,7 +74,6 @@ class FacebookRuleBasedOptimizationAdLevel(FacebookRuleBasedOptimizationBase):
                       set_repository(self._mongo_repository).
                       set_date_stop(self._date_stop).
                       set_time_interval(self._time_interval).
-                      set_debug_mode(self._debug).
                       set_breakdown_metadata(BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
                                                                    action_breakdown=FacebookActionBreakdownEnum.NONE)))
 
@@ -88,27 +85,19 @@ class FacebookRuleBasedOptimizationAdLevel(FacebookRuleBasedOptimizationBase):
             lowest_25p_slice = slice(0, int(np.ceil(len(average_metric_values) / 4)))
             sorted_values = sorted(average_metric_values, key=lambda x: x[1][0])
             lowest_25p_ad_ids = [value[0] for value in sorted_values][lowest_25p_slice]
-        except TypeError as type_error:
-            if self._debug:
-                self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="RuleBasedOptimizationCampaignLevel",
-                                          description=f"Cannot find lowest performing ads for {self.__adset_id}",
-                                          extra_data={
-                                            "facebook_id": self.__adset_id,
-                                            "config": self._dexter_config,
-                                            "error": traceback.format_exc()
-                                        }))
+        except TypeError as e:
+            logger.debug(
+                f"Cannot find lowest performing ads for {self.__adset_id} || {repr(e)}",
+                extra={"facebook_id": self.__adset_id, "config": self._dexter_config},
+                exc_info=True,
+            )
             lowest_25p_ad_ids = []
         except Exception as e:
-            if self._debug:
-                self.get_logger().logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="RuleBasedOptimizationCampaignLevel",
-                                          description=f"Error finding lowest performing ads for {self.__adset_id}",
-                                          extra_data={
-                                            "facebook_id": self.__adset_id,
-                                            "config": self._dexter_config,
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Error finding lowest performing ads for {self.__adset_id} || {repr(e)}",
+                extra={"facebook_id": self.__adset_id, "config": self._dexter_config},
+                exc_info=True,
+            )
             raise e
 
         return lowest_25p_ad_ids

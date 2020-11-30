@@ -1,3 +1,4 @@
+import sys
 import typing
 from copy import deepcopy
 from datetime import datetime
@@ -7,7 +8,6 @@ from bson import BSON
 from pymongo.errors import AutoReconnect
 from retry import retry
 
-from Core.logging_legacy import log_operation_mongo
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
@@ -20,7 +20,7 @@ from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookI
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TuringMongoRepository(MongoRepositoryBase):
@@ -106,33 +106,25 @@ class TuringMongoRepository(MongoRepositoryBase):
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
         }
 
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             results = self.collection.find(query, projection)
             results = list(results)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description="Failed to get active structures ids. Reason %s" % str(e),
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                projection=projection)
+            logger.error(
+                f"Failed to get active structures ids || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                data=results,
-                                description="Get active structures ids",
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                projection=projection)
+        logger.debug(
+            "Get active structures ids",
+            extra=dict(
+                data_size=sys.getsizeof(results),
+                duration=(datetime.now() - start).total_seconds(),
+                query=query,
+                projection=projection),
+        )
 
         return results
 
@@ -298,33 +290,26 @@ class TuringMongoRepository(MongoRepositoryBase):
             name_key_name: MongoProjectionState.ON.value,
         }
 
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             results = self.collection.find(query, projection)
             results = list(results)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description="Failed to get structures by id and name. Reason %s" % str(e),
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                projection=projection)
+            logger.error(
+                f"Failed to get structures by id and name || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                data=results,
-                                description="Get structures by id and name",
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                projection=projection)
+        logger.debug(
+            "Get structures by id and name",
+            extra=dict(
+                data_size=sys.getsizeof(results),
+                duration=(datetime.now() - start).total_seconds(),
+                query=query,
+                projection=projection,
+            ),
+        )
 
         return results
 
@@ -806,11 +791,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return results
 
     def new_insights_repository(self):
-        repository = TuringMongoRepository(config=self.config, database_name=self.config.insights_database_name,
-                                           logger=self._logger)
-        return repository
+        return TuringMongoRepository(config=self.config, database_name=self.config.insights_database_name)
 
     def new_structures_repository(self):
-        repository = TuringMongoRepository(config=self.config, database_name=self.config.structures_database_name,
-                                           logger=self._logger)
-        return repository
+        return TuringMongoRepository(config=self.config, database_name=self.config.structures_database_name)

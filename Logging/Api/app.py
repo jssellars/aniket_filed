@@ -33,4 +33,4 @@ logging_endpoint = "{base_url}/log".format(base_url=startup.base_url.lower())
 api.add_resource(LoggingEndpoint, logging_endpoint)
 
 if __name__ == "__main__":
-    app.run(debug=startup.debug_mode, host="localhost", port=startup.port)
+    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)

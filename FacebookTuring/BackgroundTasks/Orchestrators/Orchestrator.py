@@ -5,7 +5,6 @@ from collections import defaultdict
 from datetime import datetime
 from threading import Thread
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.Startup import startup
@@ -25,7 +24,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Orchestrator:
@@ -43,8 +42,6 @@ class Orchestrator:
         self.__account_journal_repository = account_journal_repository
         self.__structures_syncronizer = None
         self.__insights_syncronizer = None
-        self.__logger = None
-        self.__rabbit_logger = None
         self.__reporter = None
 
     def set_insights_repository(self, insights_repository: TuringMongoRepository = None):
@@ -57,14 +54,6 @@ class Orchestrator:
 
     def set_account_journal_repository(self, account_journal_repository: TuringAdAccountJournalRepository = None):
         self.__account_journal_repository = account_journal_repository
-        return self
-
-    def set_logger(self, logger: typing.Any = None):
-        self.__logger = logger
-        return self
-
-    def set_rabbit_logger(self, logger: typing.Any = None):
-        self.__rabbit_logger = logger
         return self
 
     def set_reporter(self, reporter: typing.Any = None):
@@ -131,7 +120,6 @@ class Orchestrator:
             self.__reporter = SyncStatusReporter(
                 account_journal_repository=self.__account_journal_repository,
                 structures_repository=self.__structures_repository,
-                logger=self.__logger,
             )
 
             sync_report = self.__reporter.compile_report()
@@ -159,10 +147,6 @@ class Orchestrator:
                 startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
             )
             rabbitmq_client.publish(business_owner_synced_event)
-            self.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
-                name=business_owner_synced_event.message_type,
-                extra_data={"event_body": rabbitmq_client.serialize_message(business_owner_synced_event)},
-            ))
+            logger.info({"rabbitmq": rabbitmq_client.serialize_message(business_owner_synced_event)})
         except Exception as e:
-            self.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR, name=business_owner_synced_event.message_type, description=str(e)
-            ))
+            logger.exception(f"{business_owner_synced_event.message_type} || {repr(e)}")

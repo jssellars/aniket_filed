@@ -8,7 +8,6 @@ from dateutil.parser import parse
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import log_message_as_dict
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.FacebookRuleBasedOptimizationBase import \
     FacebookRuleBasedOptimizationBase
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.FacebookAvailableMetricEnum import \
@@ -19,7 +18,7 @@ from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricCalculator impor
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FacebookRuleBasedOptimizationCampaignLevel(FacebookRuleBasedOptimizationBase):
@@ -71,22 +70,15 @@ class FacebookRuleBasedOptimizationCampaignLevel(FacebookRuleBasedOptimizationBa
                       set_repository(self._mongo_repository).
                       set_level(self._level).
                       set_date_stop(self._date_stop).
-                      set_debug_mode(self._debug).
                       compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval))
 
         if results >= self._dexter_config.min_results:
             return True
         else:
-            if self._debug:
-                self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="RuleBasedOptimizationCampaignLevel",
-                                          description=f"Campaign {campaign_id} has less than "
-                                                    f"{self._dexter_config.min_results} results",
-                                          extra_data={
-                                            "values": results,
-                                            "facebook_id": campaign_id,
-                                            "config": self._dexter_config
-                                        }))
+            logger.debug(
+                f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
+                extra={"values": results, "facebook_id": campaign_id, "config": self._dexter_config},
+            )
             return False
 
     def __check_last_x_days_since_update(self, campaign_id):
@@ -97,16 +89,11 @@ class FacebookRuleBasedOptimizationCampaignLevel(FacebookRuleBasedOptimizationBa
         except:
             try:
                 updated_time = parse(structure_details.get('created_time')).date()
-            except:
-                if self._debug:
-                    self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                              name="RuleBasedOptimizationCampaignLevel",
-                                              description=f"Campaign {campaign_id} does not have updated time"
-                                                        f" nor created time",
-                                              extra_data={
-                                                "facebook_id": campaign_id,
-                                                "config": self._dexter_config
-                                            }))
+            except Exception as e:
+                logger.debug(
+                    f"Campaign {campaign_id} does not have updated time nor created time || {repr(e)}",
+                    extra={"facebook_id": campaign_id, "config": self._dexter_config},
+                )
                 return False
         date_stop = self._date_stop.date()
 
@@ -120,33 +107,21 @@ class FacebookRuleBasedOptimizationCampaignLevel(FacebookRuleBasedOptimizationBa
                     set_facebook_id(campaign_id).
                     set_repository(self._mongo_repository).
                     set_level(self._level).
-                    set_date_stop(self._date_stop).
-                    set_debug_mode(self._debug))
+                    set_date_stop(self._date_stop))
             results, _ = (fbmc.compute_value(atype=AntecedentTypeEnum.VALUE, time_interval=time_interval_days))
 
             if results >= self._dexter_config.min_results:
                 return True
             else:
-                if self._debug:
-                    self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                              name="RuleBasedOptimizationCampaignLevel",
-                                              description=f"Campaign {campaign_id} has less "
-                                                        f"than {self._dexter_config.min_results} results",
-                                              extra_data={
-                                                "values": results,
-                                                "facebook_id": campaign_id,
-                                                "config": self._dexter_config
-                                            }))
-
+                logger.debug(
+                    f"Campaign {campaign_id} has less than {self._dexter_config.min_results} results",
+                    extra={"values": results, "facebook_id": campaign_id, "config": self._dexter_config}
+                )
         else:
-            if self._debug:
-                self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="RuleBasedOptimizationCampaignLevel",
-                                          description=f"A more recent change was not made for {campaign_id} in the last"
-                                                    f" {self._dexter_config.days_since_last_change} days",
-                                          extra_data={
-                                            "facebook_id": campaign_id,
-                                            "config": self._dexter_config
-                                        }))
+            logger.debug(
+                f"A more recent change was not made for {campaign_id}"
+                f" in the last {self._dexter_config.days_since_last_change} days",
+                extra={"facebook_id": campaign_id, "config": self._dexter_config}
+            )
 
         return False

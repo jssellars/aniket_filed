@@ -36,14 +36,9 @@
     "name": "Prod.Filed.Facebook.Accounts"
   },
   "environment": "prod",
-  "api_name": "FacebookProductCatalogsBackgroundTasks",
-  "api_version": "1.0.0",
-  "service_name": "FacebookProductCatalogsBackgroundTasks",
-  "service_version": "1.0.0",
+  "name": "FacebookProductCatalogsBt",
+  "version": "1.0.0",
   "base_url": "/api/v1",
-  "docker_filename": "filed-potter-productcatalogs-background-tasks",
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
   "logger_level": "DEBUG",
   "es_host": "prod-elasticsearch",
   "es_port": 9200

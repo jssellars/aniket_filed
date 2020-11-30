@@ -36,14 +36,9 @@
     "name": "Dev.Filed.Facebook.Accounts"
   },
   "environment": "local",
-  "api_name": "FacebookAppsBackgroundTasks",
-  "api_version": "1.0.0",
-  "service_name": "FacebookAppsBackgroundTasks",
-  "service_version": "1.0.0",
+  "name": "FacebookAppsBt",
+  "version": "1.0.0",
   "base_url": "/api/v1",
-  "docker_filename": "filed-potter-apps-background-tasks",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "localhost",
   "es_port": 9200

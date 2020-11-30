@@ -38,7 +38,6 @@ class FacebookRecommendationBuilder:
                  business_owner_id: typing.Any = None,
                  date_stop: typing.AnyStr = None,
                  time_interval: DaysEnum = DaysEnum.MONTH,
-                 debug_mode=None,
                  headers: typing.AnyStr = None):
         self.__mongo_repository = mongo_repository
         self.__business_owner_repo_session = business_owner_repo_session
@@ -46,7 +45,6 @@ class FacebookRecommendationBuilder:
         self.__business_owner_id = business_owner_id
         self.__use_alternative_template = False
         self._date_stop = date_stop
-        self._debug = debug_mode
         self._headers = headers
 
         self.time_interval = time_interval
@@ -191,7 +189,6 @@ class FacebookRecommendationBuilder:
                          set_date_stop(self._date_stop).
                          set_time_interval(self.time_interval).
                          set_headers(self._headers).
-                         set_debug_mode(self._debug).
                          set_rule(rule))
 
         if self.__use_alternative_template:
@@ -208,7 +205,6 @@ class FacebookRecommendationBuilder:
         action_details_builder = FacebookActionDetailsBuilder(facebook_id=facebook_id,
                                                               repository=self.__mongo_repository,
                                                               time_interval=self.time_interval,
-                                                              debug=self._debug,
                                                               date_stop=self._date_stop)
         value = self.__build_action_details_value(rule_data)
         self.application_details, self.__use_alternative_template = \

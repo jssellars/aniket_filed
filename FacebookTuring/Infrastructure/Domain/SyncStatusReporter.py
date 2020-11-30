@@ -1,7 +1,6 @@
 import typing
 from datetime import datetime
 
-from Core.logging_legacy import log_message_as_dict
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
@@ -12,18 +11,16 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SyncStatusReporter:
 
     def __init__(self,
                  account_journal_repository: TuringAdAccountJournalRepository = None,
-                 structures_repository: TuringMongoRepository = None,
-                 logger: typing.Any = None):
+                 structures_repository: TuringMongoRepository = None):
         self.__account_journal_repository = account_journal_repository
         self.__structures_repository = structures_repository
-        self.__logger = logger
 
     def compile_report(self):
         # get latest accounts journal state
@@ -59,13 +56,10 @@ class SyncStatusReporter:
                                           details=state)
                 reports.append(report)
             except Exception as e:
-                self.__logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                          name="Facebook Turing Daily Sync Error",
-                                          description="Failed to generate sync report for "
-                                                    "business owner {}, ad account {}. "
-                                                    "Reason: {}".format(state[MiscFieldsEnum.business_owner_id],
-                                                                        state[MiscFieldsEnum.account_id],
-                                                                        str(e))))
+                logger.exception(
+                    f"Failed to generate sync report for business owner {state[MiscFieldsEnum.business_owner_id]},"
+                    f" ad account {state[MiscFieldsEnum.account_id]} || {repr(e)}"
+                )
 
         return reports
 

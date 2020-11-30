@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body):
-    logger.info(getattr(properties, "type", None), extra=dict(rabbitmq=body))
+    logger.info(getattr(properties, "type", None), extra={'rabbitmq': body})
 
     try:
         ch.basic_ack(delivery_tag=method.delivery_tag)

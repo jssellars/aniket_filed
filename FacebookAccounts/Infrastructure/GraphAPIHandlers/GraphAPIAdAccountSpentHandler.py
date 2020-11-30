@@ -74,7 +74,7 @@ class GraphAPIAdAccountSpentHandler:
             except ValueError:
                 date = datetime.strptime(date, __ISO_DATETIME_FORMAT__)
             except Exception as e:
-                raise Exception(f"Invalid datetime format: {input_date}. Error: {str(e)}")
+                raise Exception(f"Invalid datetime format: {input_date} || {repr(e)}")
         elif isinstance(input_date, str):
             return input_date
 

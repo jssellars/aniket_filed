@@ -55,4 +55,4 @@ for router, route in router_route_pairs:
 
 
 if __name__ == "__main__":
-    app.run(debug=startup.debug_mode, host="localhost", port=startup.port)
+    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)

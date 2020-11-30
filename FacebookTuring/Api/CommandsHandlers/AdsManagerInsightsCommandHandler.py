@@ -2,21 +2,20 @@ import typing
 from datetime import datetime, timedelta
 from typing import Dict
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderRequestMapper, AgGridInsightsRequest, AgGridTrendRequest
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
-from FacebookTuring.Api.Startup import startup, logger
+from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 PERCENTAGE_DIFFERENCE_KEY = "percentage_difference"
@@ -77,7 +76,7 @@ class AdsManagerInsightsCommandHandler:
         permanent_token = (BusinessOwnerRepository(startup.session).
                            get_permanent_token(business_owner_id))
         query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.set_logger(logger).get_insights(permanent_token=permanent_token,
+        response = GraphAPIInsightsHandler.get_insights(permanent_token=permanent_token,
                                                                            level=query.level,
                                                                            ad_account_id=query.facebook_id,
                                                                            fields=query.fields,
@@ -94,7 +93,7 @@ class AdsManagerInsightsCommandHandler:
                                  level: typing.AnyStr = None) -> typing.Dict:
         permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
         query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.set_logger(logger).get_insights_with_totals(
+        response = GraphAPIInsightsHandler.get_insights_with_totals(
             permanent_token=permanent_token,
             level=query.level,
             ad_account_id=query.facebook_id,
@@ -114,7 +113,7 @@ class AdsManagerInsightsCommandHandler:
         permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
         query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
 
-        return GraphAPIInsightsHandler.set_logger(logger).get_ag_grid_insights(
+        return GraphAPIInsightsHandler.get_ag_grid_insights(
             permanent_token=permanent_token,
             level=level,
             ad_account_id=query.facebook_id,
@@ -137,12 +136,10 @@ class AdsManagerInsightsCommandHandler:
 
         requested_columns = query.requested_columns
         if len(requested_columns) > 1:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                description="The ag grid trend endpoint should receive only one column.",
-            ))
+            logger.exception("The ag grid trend endpoint should receive only one column.")
             raise Exception("The ag grid trend endpoint should receive only one column.")
 
-        _, _, result = GraphAPIInsightsHandler.set_logger(logger).get_insights_page(
+        _, _, result = GraphAPIInsightsHandler.get_insights_page(
             permanent_token=permanent_token,
             level=level,
             ad_account_id=query.facebook_id,
@@ -161,7 +158,7 @@ class AdsManagerInsightsCommandHandler:
         query.time_range["since"] = (since_date - timedelta(days=time_interval_in_days)).date().isoformat()
         query.time_range["until"] = (until_date - timedelta(days=time_interval_in_days)).date().isoformat()
 
-        _, _, past_period_result = GraphAPIInsightsHandler.set_logger(logger).get_insights_page(
+        _, _, past_period_result = GraphAPIInsightsHandler.get_insights_page(
             permanent_token=permanent_token,
             level=level,
             ad_account_id=query.facebook_id,
@@ -203,7 +200,7 @@ class AdsManagerInsightsCommandHandler:
                              level: typing.AnyStr = None) -> typing.List[typing.Dict]:
         permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
         query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.set_logger(logger).get_reports_insights(permanent_token=permanent_token,
+        response = GraphAPIInsightsHandler.get_reports_insights(permanent_token=permanent_token,
                                                                                    ad_account_id=query.facebook_id,
                                                                                    fields=query.fields,
                                                                                    parameters=query.parameters,

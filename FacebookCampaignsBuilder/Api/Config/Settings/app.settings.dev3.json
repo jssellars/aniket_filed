@@ -37,16 +37,10 @@
     "authorize_permission_endpoint": "https://be.dev3.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
   },
   "environment": "dev3",
-  "api_name": "FacebookCampaignBuilder",
-  "api_version": "1.0.0",
-  "service_name": "FacebookCampaignBuilder",
-  "service_version": "1.0.0",
+  "name": "FacebookCampaignsBuilderApi",
+  "version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47220,
-  "debug_mode": true,
-  "docker_filename": "filed-potter-campaign-builder-api",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "dev3-elasticsearch",
   "es_port": 9200

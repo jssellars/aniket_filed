@@ -6,7 +6,6 @@ from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.OrchestratorBase import OrchestratorBase
 from Core.Dexter.PersistanceLayer.Helpers.DexterJournalMongoRepositoryHelper import DexterJournalMongoRepositoryHelper
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
-from FacebookDexter.BackgroundTasks.Startup import logger
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import FacebookAlgorithmsEnum
 from FacebookDexter.Engine.Algorithms.FacebookAlgorithmsFactory import FacebookAlgorithmsFactory
 from FacebookDexter.Engine.Algorithms.FacebookRuleEvaluatorFactory import FacebookRuleEvaluatorFactory
@@ -45,7 +44,6 @@ class SingleMetricOrchestrator(OrchestratorBase):
                          set_dexter_config(self.startup.dexter_config).
                          set_fuzzyfier_factory(fuzzyfier_factory).
                          set_rules(rules).
-                         set_debug_mode(self.startup.debug).
                          set_mongo_config(self.startup.mongo_config).
                          set_auth_token(self._auth_token).
                          set_date_stop(date_stop=date_stop).
@@ -53,14 +51,14 @@ class SingleMetricOrchestrator(OrchestratorBase):
                          set_rule_evaluator(rule_evaluator=rule_evaluator).
                          set_minimum_number_of_data_points_dict(self.startup.dexter_config.
                                                                 minimum_number_of_data_points).
-                         create_mongo_repository(logger))
+                         create_mongo_repository())
         except Exception as e:
             raise e
 
         return algorithm
 
     def run_algorithm(self, search_query, time_interval, mongo_config):
-        self.set_data_repository(FacebookDexterMongoRepository(config=mongo_config, logger=logger))
+        self.set_data_repository(FacebookDexterMongoRepository(config=mongo_config))
 
         try:
             if not self.startup.dexter_config.date_stop:
@@ -96,7 +94,7 @@ class SingleMetricOrchestrator(OrchestratorBase):
 
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
             self._journal_repository.update_one(search_query, update_query)
-        except Exception:
+        except:
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_failed()
             self._journal_repository.update_one(search_query, update_query)
 

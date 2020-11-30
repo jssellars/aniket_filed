@@ -6,7 +6,6 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 from googleads import adwords
 
-from GoogleTuring.BackgroundTasks.Startup import logger
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.BaseSynchronizer import BaseSynchronizer
 from GoogleTuring.Infrastructure.Domain.Enums.ActionBreakdown import ACTION_BREAKDOWN_TO_FIELD
 from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import BreakdownType, BREAKDOWN_TO_FIELD, \
@@ -158,8 +157,7 @@ class InsightsSynchronizer(BaseSynchronizer):
                                                                       database_name=self._mongo_config[
                                                                           'google_insights_database_name'],
                                                                       location_collection_name=self._mongo_config[
-                                                                          'location_data_collection_name'],
-                                                                      logger=logger)
+                                                                          'location_data_collection_name'])
 
     def synchronize(self):
         self._adwords_client.set_client_customer_id(self._account_id)

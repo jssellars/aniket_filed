@@ -11,6 +11,10 @@ from FacebookDexter.Infrastructure.Domain.Recommendations.FacebookRecommendation
     FacebookRecommendationBuilder
 from FacebookDexter.Infrastructure.Domain.Rules.FacebookRuleEnums import FacebookRuleTypeSelectionEnum
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetricOptimizationBuilder):
 
@@ -61,7 +65,6 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
                 set_date_stop(self._date_stop).
                 set_time_interval(self._time_interval).
                 set_breakdown_metadata(rule.breakdown_metadata).
-                set_debug_mode(self._debug).
                 set_minimum_number_of_data_points(self._minimum_number_of_data_points_dict[str(self._time_interval.value)]))
 
             rule_data = self._rule_evaluator.evaluate(
@@ -76,9 +79,8 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
                     current_recommendation = self.__create_recommendation(facebook_id, rule, rule_data)
                     if current_recommendation.template:
                         recommendations.append(copy.deepcopy(current_recommendation.to_dict()))
-                except Exception:
-                    import traceback
-                    traceback.print_exc()
+                except Exception as e:
+                    logger.exception(repr(e))
 
         return recommendations
 
@@ -93,7 +95,6 @@ class FacebookRuleBasedSingleMetricOptimizationBase(FacebookRuleBasedSingleMetri
                                                        business_owner_id=self._business_owner_id,
                                                        date_stop=self._date_stop,
                                                        time_interval=self._time_interval,
-                                                       debug_mode=self._debug,
                                                        headers=self._auth_token)
         return recommendation.create(facebook_id, rule, rule_data, external_services=self._external_services)
 

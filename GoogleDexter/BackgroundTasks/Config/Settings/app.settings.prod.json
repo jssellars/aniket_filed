@@ -59,14 +59,9 @@
     "date_stop": null
   },
   "environment": "prod",
-  "api_name": "GoogleDexterBackgroundTasks",
-  "api_version": "1.0.0",
-  "service_name": "GoogleDexterBackgroundTasks",
-  "service_version": "1.0.0",
+  "name": "GoogleDexterBt",
+  "version": "1.0.0",
   "base_url": "/api/v1",
-  "docker_filename": "filed-google-dexter-background-tasks",
-  "logger_type": "elasticsearch_logger",
-  "rabbit_logger_type": "rabbit_elasticsearch_logger",
   "logger_level": "DEBUG",
   "es_host": "prod-elasticsearch",
   "es_port": 9200

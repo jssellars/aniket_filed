@@ -1,5 +1,4 @@
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
-from Core.logging_legacy import MongoLogger
 
 
 class RecommendationTemplateBuilderBase:
@@ -16,16 +15,8 @@ class RecommendationTemplateBuilderBase:
         self._ad_account_id = None
         self._business_owner_repo_session = None
         self._business_owner_id = None
-        self.__logger = None
         self._date_stop = None
         self._time_interval = None
-
-    @property
-    def logger(self):
-        if self._repository is not None and self.__logger is None:
-            self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
-        return self.__logger
 
     def set_repository(self, repository):
         self._repository = repository

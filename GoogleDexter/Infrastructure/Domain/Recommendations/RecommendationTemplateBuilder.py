@@ -1,5 +1,4 @@
 import re
-import traceback
 import typing
 from collections import defaultdict
 
@@ -9,7 +8,6 @@ from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import log_message_as_dict
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import \
     GoogleAvailableMetricEnum
 from GoogleDexter.Infrastructure.Domain.Breakdowns import GoogleBreakdownEnum, GoogleActionBreakdownEnum
@@ -23,7 +21,7 @@ from GoogleDexter.Infrastructure.FuzzyEngine.GoogleFuzzySets import GoogleLingui
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
@@ -69,12 +67,7 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                     return None
                 template = template.replace("<" + keyword + ">", value)
         except Exception as e:
-            self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                      name="RecommendationTemplateBuilder",
-                                      description=f"Failed to compute keyword value for template {template}",
-                                      extra_data={
-                                        "error": traceback.format_exc()
-                                    }))
+            logger.exception(f"Failed to compute keyword value for template {template} || {repr(e)}")
             raise e
         return template
 
@@ -105,17 +98,12 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
                     value = self.__find_audience_size(keyword)
                 else:
                     value = ''
-                    self.logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                              name="RecommendationTemplateBuilder",
-                                              description=f"Failed to compute keyword value for metric {keyword.metric_name.value.name}"))
+                    logger.warning(f"Failed to compute keyword value for metric {keyword.metric_name.value.name}")
 
             except Exception as e:
-                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="RecommendationTemplateBuilder",
-                                          description=f"Failed to compute keyword value for metric {keyword.metric_name.value.name}",
-                                          extra_data={
-                                            "error": traceback.format_exc()
-                                        }))
+                logger.exception(
+                    f"Failed to compute keyword value for metric {keyword.metric_name.value.name} || {repr(e)}"
+                )
                 raise e
 
         keyword.value = str(value) if value is not None else ''
@@ -205,24 +193,14 @@ class RecommendationTemplateBuilder(RecommendationTemplateBuilderBase):
             else:
                 return ''
         except Exception as e:
-            self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                      name="RecommendationTemplateBuilder",
-                                      description="Failed to get interests from structure targeting.",
-                                      extra_data={
-                                        "error": traceback.format_exc()
-                                    }))
+            logger.exception(f"Failed to get interests from structure targeting || {repr(e)}")
             raise e
 
         self._external_services.targeting_search += ','.join(interests)
 
         response = requests.get(url=self._external_services.targeting_search)
         if response.status_code != 200:
-            self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                      name="RecommendationTemplateBuilder",
-                                      description="Failed to get interests from structure targeting.",
-                                      extra_data={
-                                        "error": response.json()
-                                    }))
+            logger.warning("Failed to get interests from structure targeting.", extra={"error": response.json()})
             return ''
 
         response = response.json()

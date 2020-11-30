@@ -1,6 +1,5 @@
 import typing
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookPixels.BackgroundTasks.Startup import startup
@@ -15,17 +14,10 @@ from FacebookPixels.Infrastructure.IntegrationEvents.GetAllPixelsMessageResponse
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GetAllPixelsMessageRequestHandler:
-    __rabbit_logger = None
-
-    @classmethod
-    def set_rabbit_logger(cls, logger: typing.Any):
-        cls.__rabbit_logger = logger
-        return cls
-
     @classmethod
     def handle(cls, message_body: typing.Dict) -> typing.NoReturn:
         try:
@@ -55,8 +47,6 @@ class GetAllPixelsMessageRequestHandler:
                                              startup.exchange_details.name,
                                              startup.exchange_details.outbound_queue.key)
             rabbitmq_client.publish(pixels)
-            cls.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
-                                      name=pixels.message_type,
-                                      extra_data={"event_body": rabbitmq_client.serialize_message(pixels)}))
+            logger.info({"rabbitmq": rabbitmq_client.serialize_message(pixels)})
         except Exception as e:
             raise e

@@ -1,4 +1,3 @@
-import traceback
 import typing
 from datetime import timedelta, datetime
 
@@ -10,12 +9,11 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBuilder import MetricCalculatorBuilder
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import AggregatorEnum, MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import MongoLogger, log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MetricCalculatorBase(MetricCalculatorBuilder):
@@ -26,14 +24,6 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         super().__init__()
         self._calculator_id = ''
         self._calculator = None
-        self.__logger = None
-
-    @property
-    def _logger(self):
-        if self.__logger is None or self._repository is not None:
-            self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
-        return self.__logger
 
     @property
     def calculator(self):
@@ -61,27 +51,19 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             date_start = date_stop - timedelta(days=time_interval)
         except TypeError:
             date_start = date_stop - timedelta(days=time_interval.value)
-        except Exception:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description=f"Failed to process date start and date stop for "
-                                                    f"time interval {time_interval}.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+        except Exception as e:
+            logger.debug(
+                f"Failed to process date start and date stop for time interval {time_interval} || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             date_start = date_stop
 
         date_start += timedelta(days=1)
         calculator = self.calculator.get((atype, self._metric.type), None)
 
         if calculator is None:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Invalid antecedent and metric type combination.",
-                                          extra_data={"state": self._current_state()}))
+            logger.debug("Invalid antecedent and metric type combination.", extra={"state": self._current_state()})
             return None, None
 
         try:
@@ -90,14 +72,11 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                 metric=self._metric,
                                 facebook_id=self._facebook_id)
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Other calculator exception.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Other calculator exception || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             return None, None
 
         if not isinstance(result, list) and not isinstance(result, tuple):
@@ -124,14 +103,11 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                                      breakdown=breakdown,
                                                                      action_breakdown=action_breakdown)
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Failed to get breakdown values.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to get breakdown values || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             raise e
 
         if breakdown_values:
@@ -162,13 +138,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         denominator = self._compute_denominator_values(data=data)
 
         if len(numerator) != len(denominator):
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Numerator and denominator data mismatch.",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug("Numerator and denominator data mismatch.", extra={"state": self._current_state()})
 
             raise ValueError("Numerator and denominator data mismatch.")
 
@@ -206,14 +176,10 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             else:
                 return self._metric.multiplier * aggregated_numerator
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Failed to compute aggregated metric value",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to compute aggregated metric value || repr{e}",
+                extra={"state": self._current_state()},
+            )
 
     def aggregated_value(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None, **kwargs) -> float:
         data = self._get_metrics_values(date_start=date_start, date_stop=date_stop)
@@ -228,14 +194,7 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         value = data[-1].get(self._metric.name, None) if data else None
 
         if value is None:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Categorical value is none",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "values": data
-                                        }))
+            logger.debug("Categorical value is none", extra={"state": self._current_state(), "values": data})
 
         return value
 
@@ -283,13 +242,10 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                     slopes.append(np.arctan2(dy, dt))
                 else:
                     slopes.append(None)
-                    if self._debug:
-                        self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                                  name="MetricCalculator",
-                                                  description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                  extra_data={
-                                                    "state": self._current_state()
-                                                }))
+                    logger.debug(
+                        f"Time bucket for interval {time_bucket.value} is None.",
+                        extra={"state": self._current_state()},
+                    )
 
         trend = self._compute_resultant_slope(slopes)
 
@@ -304,15 +260,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
         if mean_unit_vector.size > 1:
             try:
                 resultant_slope = np.arctan2(mean_unit_vector[1], mean_unit_vector[0])
-            except Exception:
-                if self._debug:
-                    self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                              name="MetricCalculator",
-                                              description="Failed to compute resultant slope.",
-                                              extra_data={
-                                                "state": self._current_state(),
-                                                "error": traceback.format_exc()
-                                            }))
+            except Exception as e:
+                logger.debug(
+                    f"Failed to compute resultant slope || {repr(e)}",
+                    extra={"state": self._current_state()},
+                    exc_info=True,
+                )
 
         return resultant_slope
 
@@ -330,14 +283,10 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                 return None
         else:
             scaled_value = None
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description=f"Couldn't compute the min-max normalized value "
-                                                    f"for {value}, {min_value}, {max_value}.",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                f"Couldn't compute the min-max normalized value for {value}, {min_value}, {max_value}.",
+                extra={"state": self._current_state()},
+            )
 
         return scaled_value
 
@@ -377,17 +326,12 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                         current_fuzzy_membership_value > fuzzy_membership_value:
                     fuzzy_class = current_fuzzy_class
                     fuzzy_membership_value = current_fuzzy_membership_value
-        except Exception:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description=f"Couldn't compute fuzzy value for {value} and "
-                                                    f"fuzzyfier {fuzzyfier_type.value}.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "fuzzyfier": fuzzyfier,
-                                            "error": traceback.format_exc()
-                                        }))
+        except Exception as e:
+            logger.debug(
+                f"Couldn't compute fuzzy value for {value} and fuzzyfier {fuzzyfier_type.value} || {repr(e)}",
+                extra={"state": self._current_state(), "fuzzyfier": fuzzyfier},
+                exc_info=True,
+            )
 
         return fuzzy_class, fuzzy_membership_value
 
@@ -401,31 +345,22 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             difference = current_metric_value - initial_metric_value
         elif initial_metric_value is None and current_metric_value is not None:
             difference = current_metric_value
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Ill-defined difference. Initial metric value is none.",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                "Ill-defined difference. Initial metric value is none.",
+                extra={"state": self._current_state()},
+            )
         elif initial_metric_value is not None and current_metric_value is None:
             difference = initial_metric_value
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Ill-defined difference. Current metric value is none.",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                "Ill-defined difference. Current metric value is none.",
+                extra={"state": self._current_state()},
+            )
         else:
             difference = None
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Ill-defined difference. Both initial and current metrics are none",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                "Ill-defined difference. Both initial and current metrics are none",
+                extra={"state": self._current_state()},
+            )
         return difference
 
     def variance(self,
@@ -467,56 +402,37 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
             except ZeroDivisionError:
                 if current_metric_value == 0.0:
                     difference = None
-                    if self._debug:
-                        self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                                  name="MetricCalculator",
-                                                  description="Ill-defined percentage difference. Initial metric value and current metric value are none.",
-                                                  extra_data={
-                                                    "state": self._current_state()
-                                                }))
+                    logger.debug(
+                        "Ill-defined percentage difference. Initial metric value and current metric value are none.",
+                        extra={"state": self._current_state()},
+                    )
                 else:
                     difference = self.HUNDRED_MULTIPLIER * current_metric_value
         elif mean_on_time_interval is None and current_metric_value is not None:
             difference = None
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Ill-defined percentage difference. Initial metric value is none.",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                "Ill-defined percentage difference. Initial metric value is none.",
+                extra={"state": self._current_state()},
+            )
         elif mean_on_time_interval is not None and current_metric_value is None:
             difference = None
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Ill-defined percentage difference. Current metric value is none.",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                "Ill-defined percentage difference. Current metric value is none.",
+                extra={"state": self._current_state()},
+            )
         else:
             difference = None
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Ill-defined percentage difference. Both initial and "
-                                                    "current metrics are none",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug(
+                "Ill-defined percentage difference. Both initial and current metrics are none",
+                extra={"state": self._current_state()},
+            )
         return difference
 
     def raw_value(self, date_start: typing.AnyStr = None, *args, **kwargs) -> typing.Union[int, float]:
         result = self.aggregated_value(date_start=date_start, date_stop=date_start)
 
         if result is None:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Metric evaluated to none",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug("Metric evaluated to none", extra={"state": self._current_state()})
 
         return result
 
@@ -537,24 +453,15 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                                  level=self._level,
                                                                  breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Failed to get metric values.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to get metric values || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             raise e
 
         if not metrics_values:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="No metric values returned from DB",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug("No metric values returned from DB", extra={"state": self._current_state()})
 
         if hasattr(self, "minimum_number_of_data_points") \
                 and getattr(self, "minimum_number_of_data_points") is not None \
@@ -570,24 +477,15 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                         level=self._level,
                                                         breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Failed to get min metric values.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to get min metric values || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             raise e
 
         if not min_values:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="No min metric values returned from DB",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug("No min metric values returned from DB", extra={"state": self._current_state()})
 
         return min_values
 
@@ -598,23 +496,14 @@ class MetricCalculatorBase(MetricCalculatorBuilder):
                                                         level=self._level,
                                                         breakdown_metadata=self._breakdown_metadata)
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Failed to get max metric values.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to get max metric values || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             raise e
 
         if not max_values:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="No max metric values returned from DB",
-                                          extra_data={
-                                            "state": self._current_state()
-                                        }))
+            logger.debug("No max metric values returned from DB", extra={"state": self._current_state()})
 
         return max_values

@@ -1,4 +1,3 @@
-import traceback
 import typing
 from datetime import datetime
 
@@ -13,6 +12,10 @@ from GoogleDexter.Engine.Algorithms.GoogleAlgorithmsEnum import GoogleAlgorithms
 from GoogleDexter.Engine.Algorithms.GoogleAlgorithmsFactory import GoogleAlgorithmsFactory
 from GoogleDexter.Engine.Algorithms.GoogleRuleEvaluatorFactory import GoogleRuleEvaluatorFactory
 from GoogleDexter.Engine.Algorithms.GoogleRulesFactory import GoogleRulesFactory
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DefaultGoogleOrchestrator(OrchestratorBase):
@@ -101,8 +104,7 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
 
                 self._journal_repository.update_one(search_query, update_query)
 
-        except Exception as failed_to_run_exception:
-            print(failed_to_run_exception.__traceback__)
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception(repr(e))
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_failed()
             self._journal_repository.update_one(search_query, update_query)

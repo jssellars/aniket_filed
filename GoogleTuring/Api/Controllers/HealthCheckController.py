@@ -8,11 +8,7 @@ from GoogleTuring.Api.Startup import startup
 
 class VersionEndpoint(Resource):
     def get(self):
-        response = {"api_name": startup.api_name,
-                    "api_version": startup.api_version,
-                    "service_name": startup.service_name,
-                    "service_version": startup.service_version,
-                    "environment": startup.environment}
+        response = {"app_name": startup.name, "app_version": startup.version, "environment": startup.environment}
         return Response(response=json.dumps(response), status=200, mimetype='application/json')
 
 

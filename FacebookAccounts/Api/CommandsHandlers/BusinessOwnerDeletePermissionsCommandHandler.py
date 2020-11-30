@@ -31,7 +31,7 @@ class BusinessOwnerDeletePermissionsCommandHandler:
                 fb_response = user.delete_permissions(params={"permission": permission})
                 if fb_response:
                     response['successful'].append(permission)
-            except Exception as e:
+            except:
                 response['failed'].append(permission)
 
         return response

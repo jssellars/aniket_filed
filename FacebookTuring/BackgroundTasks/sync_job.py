@@ -10,8 +10,7 @@ from time import sleep
 
 import schedule
 
-from Core.logging_legacy import log_message_as_dict
-from FacebookTuring.BackgroundTasks.Startup import startup, logger, rabbit_logger
+from FacebookTuring.BackgroundTasks.Startup import startup
 from FacebookTuring.BackgroundTasks.Orchestrators.Orchestrator import Orchestrator
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
     TuringAdAccountJournalRepository,
@@ -21,7 +20,7 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def sync():
@@ -29,29 +28,23 @@ def sync():
         config=startup.mongo_config,
         database_name=startup.mongo_config.accounts_journal_database_name,
         collection_name=startup.mongo_config.accounts_journal_collection_name,
-        logger=logger,
     )
     insights_repository = TuringMongoRepository(
-        config=startup.mongo_config, database_name=startup.mongo_config.insights_database_name, logger=logger
+        config=startup.mongo_config, database_name=startup.mongo_config.insights_database_name
     )
     structures_repository = TuringMongoRepository(
-        config=startup.mongo_config, database_name=startup.mongo_config.structures_database_name, logger=logger
+        config=startup.mongo_config, database_name=startup.mongo_config.structures_database_name
     )
     try:
         (
             Orchestrator()
             .set_account_journal_repository(account_journal_repository)
             .set_insights_repository(insights_repository)
-            .set_logger(logger)
-            .set_rabbit_logger(rabbit_logger)
             .set_structures_repository(structures_repository)
             .run()
         )
     except Exception as e:
-        logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-            name="Facebook Turing Daily Sync Error",
-            description="Failed to sync data. Reason: %s" % str(e),
-        ))
+        logger.exception(f"Failed to sync data || {repr(e)}")
 
 
 def main():

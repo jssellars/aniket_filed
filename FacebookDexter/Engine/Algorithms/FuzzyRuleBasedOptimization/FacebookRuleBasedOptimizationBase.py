@@ -11,6 +11,10 @@ from FacebookDexter.Infrastructure.Domain.Recommendations.FacebookRecommendation
     FacebookRecommendationBuilder
 from FacebookDexter.Infrastructure.Domain.Rules.FacebookRuleEnums import FacebookRuleTypeSelectionEnum
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class FacebookRuleBasedOptimizationBase(FacebookRuleBasedOptimizationBuilder):
     def __init__(self):
@@ -55,8 +59,7 @@ class FacebookRuleBasedOptimizationBase(FacebookRuleBasedOptimizationBuilder):
                                  set_repository(self._mongo_repository).
                                  set_date_stop(self._date_stop).
                                  set_time_interval(self._time_interval).
-                                 set_breakdown_metadata(rule.breakdown_metadata).
-                                 set_debug_mode(self._debug))
+                                 set_breakdown_metadata(rule.breakdown_metadata))
 
             rule_data = self._rule_evaluator.evaluate(rule=rule, metric_calculator=metric_calculator)
 
@@ -65,9 +68,8 @@ class FacebookRuleBasedOptimizationBase(FacebookRuleBasedOptimizationBuilder):
                     current_recommendation = self.__create_recommendation(facebook_id, rule, rule_data)
                     if current_recommendation.template:
                         recommendations.append(copy.deepcopy(current_recommendation.to_dict()))
-                except Exception:
-                    import traceback
-                    traceback.print_exc()
+                except Exception as e:
+                    logger.exception(repr(e))
 
         return recommendations
 
@@ -82,7 +84,6 @@ class FacebookRuleBasedOptimizationBase(FacebookRuleBasedOptimizationBuilder):
                                                        business_owner_id=self._business_owner_id,
                                                        date_stop=self._date_stop,
                                                        time_interval=self._time_interval,
-                                                       debug_mode=self._debug,
                                                        headers=self._auth_token)
         return recommendation.create(facebook_id, rule, rule_data, external_services=self._external_services)
 

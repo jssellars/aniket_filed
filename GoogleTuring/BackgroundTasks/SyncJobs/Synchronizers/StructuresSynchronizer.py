@@ -10,12 +10,11 @@ from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRep
 
 
 class StructuresSynchronizer(BaseSynchronizer):
-    def __init__(self, business_owner_id, account_id, adwords_client, mongo_config, mongo_conn_handler, logger):
+    def __init__(self, business_owner_id, account_id, adwords_client, mongo_config, mongo_conn_handler):
         super().__init__(business_owner_id, account_id, adwords_client, mongo_config)
         self.__mongo_repository = GoogleTuringStructuresMongoRepository(client=mongo_conn_handler.client,
                                                                         database_name=self._mongo_config[
-                                                                            'google_structures_database_name'],
-                                                                        logger=logger)
+                                                                            'google_structures_database_name'])
 
     def synchronize(self):
         level_to_dependencies = {

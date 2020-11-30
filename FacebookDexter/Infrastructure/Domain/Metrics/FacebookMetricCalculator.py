@@ -1,6 +1,5 @@
 import hashlib
 import random
-import traceback
 import typing
 from datetime import timedelta, datetime
 
@@ -17,7 +16,6 @@ from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBase import MetricCalculatorBase
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import MongoLogger, log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO, DEFAULT_DATETIME
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -29,7 +27,7 @@ from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricEnums import Fac
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FacebookMetricCalculator(MetricCalculatorBase):
@@ -40,12 +38,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
         self._calculator = None
         value = str(random.randint(0, int(1e20))) + self._date_stop.strftime(DEFAULT_DATETIME_ISO)
         self._calculator_id = hashlib.sha1(value.encode('utf-8')).hexdigest()
-
-        if self._repository is not None:
-            self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
-        else:
-            self.__logger = None
 
     def set_minimum_number_of_data_points(self, minimum_number_of_data_points: int = None):
         self.minimum_number_of_data_points = minimum_number_of_data_points
@@ -113,14 +105,11 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                 audience_size_estimate = None
         except Exception as e:
             audience_size_estimate = None
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Failed to get audience size.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to get audience size || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
 
         return audience_size_estimate
 
@@ -136,14 +125,7 @@ class FacebookMetricCalculator(MetricCalculatorBase):
             pixels = ad_account.get_ads_pixels()
         except Exception as e:
             pixels = []
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                          name="MetricCalculator",
-                                          description="Failed to get pixels.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(f"Failed to get pixels || {repr(e)}", extra={"state": self._current_state()}, exc_info=True)
 
         return len(pixels) > 0
 
@@ -198,14 +180,11 @@ class FacebookMetricCalculator(MetricCalculatorBase):
             else:
                 return False
         except Exception as e:
-            if self._debug:
-                self._logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="MetricCalculator",
-                                          description="Failed to get interests from structure targeting.",
-                                          extra_data={
-                                            "state": self._current_state(),
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(
+                f"Failed to get interests from structure targeting || {repr(e)}",
+                extra={"state": self._current_state()},
+                exc_info=True,
+            )
             return False
 
     def number_of_ads_per_adset(self, *args, **kwargs):
@@ -221,7 +200,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                       set_repository(self._repository).
                       set_date_stop(self._date_stop).
                       set_time_interval(self._time_interval).
-                      set_debug_mode(self._debug).
                       set_breakdown_metadata(BreakdownMetadataBase(breakdown=BreakdownBaseEnum.NONE,
                                                                    action_breakdown=ActionBreakdownBaseEnum.NONE)))
 
@@ -236,9 +214,8 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                 best_performing_ad_id = sorted_values[0][0]
             else:
                 return None, None
-        except TypeError:
-            import traceback
-            traceback.print_exc()
+        except TypeError as e:
+            logger.exception(repr(e))
             return None
 
         best_performing_ad_name = self._repository.get_ad_name_by_ad_id(best_performing_ad_id)
@@ -256,7 +233,6 @@ class FacebookMetricCalculator(MetricCalculatorBase):
               set_repository(self._repository).
               set_date_stop(self._date_stop).
               set_time_interval(self._time_interval).
-              set_debug_mode(self._debug).
               set_breakdown_metadata(self._breakdown_metadata))
 
         max_spend, _ = mc.compute_value(AntecedentTypeEnum.VALUE, self._time_interval)
@@ -280,13 +256,10 @@ class FacebookMetricCalculator(MetricCalculatorBase):
                         slopes.append(slope)
                     else:
                         slopes.append(None)
-                        if self._debug:
-                            self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                                      name="MetricCalculator",
-                                                      description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                      extra_data={
-                                                        "state": self._current_state()
-                                                    }))
+                        logger.debug(
+                            f"Time bucket for interval {time_bucket.value} is None.",
+                            extra={"state": self._current_state()}
+                        )
 
         trend = self._compute_resultant_slope(slopes)
 

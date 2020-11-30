@@ -1,6 +1,5 @@
 import typing
 
-from Core.logging_legacy import log_message_as_dict
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductSetsHandler import \
@@ -15,17 +14,11 @@ from FacebookProductCatalogs.Infrastructure.IntegrationEvents.GetProductSetsForC
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GetProductSetsForCatalogRequestHandler:
-    __rabbit_logger = None
     __startup = None
-
-    @classmethod
-    def set_rabbit_logger(cls, logger: typing.Any = None):
-        cls.__rabbit_logger = logger
-        return cls
 
     @classmethod
     def set_startup(cls, startup: typing.Any = None):
@@ -66,8 +59,6 @@ class GetProductSetsForCatalogRequestHandler:
                                              cls.__startup.exchange_details.name,
                                              cls.__startup.exchange_details.outbound_queue.key)
             rabbitmq_client.publish(product_sets)
-            cls.__rabbit_logger.logger.info(log_message_as_dict(mtype=logging.INFO,
-                                      name=product_sets.message_type,
-                                      extra_data={"event_body": rabbitmq_client.serialize_message(product_sets)}))
+            logger.info({"rabbitmq": rabbitmq_client.serialize_message(product_sets)})
         except Exception as e:
             raise e

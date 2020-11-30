@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from Core.logging_legacy import log_operation_mongo
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoProjectionState
 from GoogleTuring.Infrastructure.Domain.Enums.GoogleAccountStatus import GoogleAccountStatus
@@ -9,7 +8,7 @@ from GoogleTuring.Infrastructure.PersistenceLayer.StatusChangerMongoRepository i
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GoogleBusinessOwnerMongoRepository(StatusChangerMongoRepository):
@@ -33,17 +32,11 @@ class GoogleBusinessOwnerMongoRepository(StatusChangerMongoRepository):
                 MongoOperator.EQUALS.value: GoogleAccountStatus.ACTIVE.value
             }
         }
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             active_google_accounts = self.collection.find(query, {"_id": MongoProjectionState.OFF.value})
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                timestamp=datetime.now(),
-                                duration=duration,
-                                query=query)
+            logger.error(dict(duration=(datetime.now() - start).total_seconds(), query=query))
             raise e
         return list(active_google_accounts)
 
@@ -53,17 +46,11 @@ class GoogleBusinessOwnerMongoRepository(StatusChangerMongoRepository):
                 MongoOperator.EQUALS.value: GoogleAccountStatus.ACTIVE.value
             }
         }
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             active_google_accounts = self.collection.find(query, {"_id": MongoProjectionState.OFF.value})
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                timestamp=datetime.now(),
-                                duration=duration,
-                                query=query)
+            logger.error(dict(duration=(datetime.now() - start).total_seconds(), query=query))
             raise e
         return active_google_accounts

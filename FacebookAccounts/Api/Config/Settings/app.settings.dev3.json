@@ -45,16 +45,10 @@
     "password": "Adm1n@Fil3ed"
   },
   "environment": "dev3",
-  "api_name": "FacebookAccounts",
-  "api_version": "1.0.0",
-  "service_name": "FacebookAccounts",
-  "service_version": "1.0.0",
+  "name": "FacebookAccountsApi",
+  "version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47200,
-  "debug_mode": true,
-  "docker_filename": "filed-potter-accounts-api",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "dev3-elasticsearch",
   "es_port": 9200

@@ -10,11 +10,11 @@ from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.AdWordsAPIDataSyncHandl
 
 class GoogleUserPreferencesUpdatedEventHandler:
     @classmethod
-    def handle(cls, message: typing.Dict, logger=None):
+    def handle(cls, message: typing.Dict):
         mapping = GoogleUserPreferencesUpdatedEventMapping(GoogleUserPreferencesUpdatedEvent)
         request = mapping.load(message)
 
-        AdWordsAPIDataSyncHandler.handle(request, logger=logger)
+        AdWordsAPIDataSyncHandler.handle(request)
 
     @classmethod
     def publish(cls, response):

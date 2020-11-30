@@ -18,23 +18,22 @@ class GoogleAdAccountInsightsHandler(GoogleTokenGetter):
     __BATCH_SIZE_PERCENT = 0.2
 
     @classmethod
-    def __get_all_client_ids_for_business_owner(cls, business_owner_google_id, logger):
+    def __get_all_client_ids_for_business_owner(cls, business_owner_google_id):
         mongo_conn_handler = MongoConnectionHandler(startup.mongo_config)
         mongo_repository = GoogleBusinessOwnerMongoRepository(client=mongo_conn_handler.client,
                                                               database_name=startup.mongo_config[
                                                                   'google_accounts_database_name'],
                                                               collection_name=startup.mongo_config[
-                                                                  'accounts_collection_name'],
-                                                              logger=logger)
+                                                                  'accounts_collection_name'])
         google_accounts = mongo_repository.get_active_google_accounts(business_owner_google_id)
         client_customer_ids = [google_account['client_customer_id']['google_id'] for google_account in google_accounts]
         return client_customer_ids
 
     @classmethod
-    def handle(cls, config=None, command=None, logger=None):
+    def handle(cls, config=None, command=None):
         business_owner_permanent_token = cls._get_permanent_token(command.business_owner_google_id)
         if business_owner_permanent_token:
-            client_customer_ids = cls.__get_all_client_ids_for_business_owner(command.business_owner_google_id, logger)
+            client_customer_ids = cls.__get_all_client_ids_for_business_owner(command.business_owner_google_id)
             start_date = datetime.strptime(command.from_date, '%Y-%m-%d')
             end_date = datetime.strptime(command.to_date, '%Y-%m-%d')
 

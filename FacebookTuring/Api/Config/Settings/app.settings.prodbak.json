@@ -50,16 +50,10 @@
     "structures_database_name": "prod_facebook_turing_structures"
   },
   "environment": "prodbak",
-  "api_name": "FacebookTuringAPI",
-  "api_version": "1.0.0",
-  "service_name": "FacebookTuringAPI",
-  "service_version": "1.0.0",
+  "name": "FacebookTuringApi",
+  "version": "1.0.0",
   "base_url": "/api/v1",
   "port": 47350,
-  "debug_mode": false,
-  "docker_filename": "filed-facebook-turing-api",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": null,
   "es_port": null

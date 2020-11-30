@@ -5,7 +5,7 @@ import humps
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested
+from Core.logging_config import request_as_log_dict
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.Web.Security.Permissions import MiscellaneousPermissions, SettingsPermissions
 from FacebookAccounts.Api.Commands.BusinessOwnerCommands import BusinessOwnerCreateCommand
@@ -25,7 +25,7 @@ class BusinessOwnerEndpoint(Resource):
     @startup.authorize_permission(permission=MiscellaneousPermissions.MISCELLANEOUS_FACEBOOK_ACCESS)
     def post(self):
         # log request information
-        logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = BusinessOwnerCommandsMappings.BusinessOwnerCreateCommandMapping(BusinessOwnerCreateCommand)
@@ -49,7 +49,7 @@ class BusinessOwnerDeletePermissionsEndpoint(Resource):
     @startup.authorize_permission(permission=SettingsPermissions.SETTINGS_MANAGE_PERMISSIONS_EDIT)
     def delete(self, permissions: typing.List[typing.AnyStr] = None):
         # log request information
-        logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
 
         try:
             business_owner_facebook_id = extract_business_owner_facebook_id()

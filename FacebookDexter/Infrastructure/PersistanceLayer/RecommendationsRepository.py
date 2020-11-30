@@ -1,4 +1,5 @@
 import copy
+import sys
 from datetime import datetime
 
 import pymongo
@@ -11,7 +12,6 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums impor
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from Core.logging_legacy import log_operation_mongo
 from FacebookDexter.Api.Config.Config import MongoConfig
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
@@ -19,7 +19,7 @@ from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType imp
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RecommendationsRepository(MongoRepositoryBase):
@@ -53,7 +53,7 @@ class RecommendationsRepository(MongoRepositoryBase):
             }
         ]
 
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             cursor = self.collection.aggregate(aggregation)
@@ -62,26 +62,20 @@ class RecommendationsRepository(MongoRepositoryBase):
                                    'name': campaign[MongoOperator.GROUP_KEY.value][RecommendationField.CAMPAIGN_NAME.value]}
                                   for campaign in campaigns]
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to get campaigns with recommendations. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=aggregation)
+            logger.error(
+                f'Failed to get campaigns with recommendations || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=aggregation),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                data=distinct_campaigns,
-                                description='Get campaigns with recommendations',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=aggregation)
+        logger.debug(
+            'Get campaigns with recommendations',
+            extra=dict(
+                data_size=sys.getsizeof(distinct_campaigns),
+                duration=(datetime.now() - start).total_seconds(),
+                query=aggregation,
+            )
+        )
 
         return distinct_campaigns
 
@@ -90,33 +84,27 @@ class RecommendationsRepository(MongoRepositoryBase):
         query = {RecommendationField.OBJECT_ID.value: ObjectId(recommendation_id),
                  RecommendationField.STATUS.value: RecommendationStatusEnum.ACTIVE.value
                  }
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             recommendation = self.collection.find_one(query)
 
         # The id string may not be a valid string for ObjectId. In this case,  ObjectId(id) will raise an exception.
         # Return None in this just as if the recommendation does not exist
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to get campaigns with recommendations. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query)
+            logger.error(
+                f'Failed to get campaigns with recommendations. Reason: {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                data=recommendation,
-                                description='Get campaigns with recommendations',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query)
+        logger.debug(
+            'Get campaigns with recommendations',
+            extra=dict(
+                data_size=sys.getsizeof(recommendation),
+                duration=(datetime.now() - start).total_seconds(),
+                query=query
+            ),
+        )
 
         if recommendation is not None:
             return Recommendation(recommendation).__dict__
@@ -132,7 +120,7 @@ class RecommendationsRepository(MongoRepositoryBase):
         if excluded_ids is None:
             excluded_ids = []
 
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             cursor, count = self.get_recommendations(recommendation_filter, excluded_ids)
             recommendations = list(cursor.sort(query_sort).skip(skipped).limit(page_size))
@@ -147,33 +135,27 @@ class RecommendationsRepository(MongoRepositoryBase):
             counts_by_type = self.get_counts_by_type(counts_filter)
             response_dict['countsByType'] = counts_by_type
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to get recommendations page. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=recommendation_filter)
+            logger.error(
+                f'Failed to get recommendations page || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=recommendation_filter),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                data=response_dict,
-                                description='Get campaigns with recommendations page',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=recommendation_filter)
+        logger.debug(
+            'Get campaigns with recommendations page',
+            extra=dict(
+                data_size=sys.getsizeof(response_dict),
+                duration=(datetime.now() - start).total_seconds(),
+                query=recommendation_filter
+            ),
+        )
 
         return response_dict
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def set_recommendation_statuses_by_structure_id(self, structure_id, status):
         now = datetime.now()
-        operation_start_time = datetime.now()
+        start = datetime.now()
         query_filter = {RecommendationField.STRUCTURE_ID.value: structure_id,
                         RecommendationField.STATUS.value: RecommendationStatusEnum.ACTIVE.value}
 
@@ -184,32 +166,22 @@ class RecommendationsRepository(MongoRepositoryBase):
         try:
             self.collection.update_many(query_filter, query)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to get recommendations page. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                query_filter=query_filter)
+            logger.error(
+                f'Failed to get recommendations page || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, query_filter=query_filter),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Get campaigns with recommendations page',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query)
+        logger.debug(
+            'Get campaigns with recommendations page',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=query),
+        )
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def set_recommendation_status(self, recommendation_id: str, status: str):
         recommendation_object_id = ObjectId(recommendation_id)
         now = datetime.now()
-        operation_start_time = datetime.now()
+        start = datetime.now()
         query_filter = {RecommendationField.OBJECT_ID.value: recommendation_object_id}
         query = {MongoOperator.SET.value: { RecommendationField.STATUS.value: status,
                                             RecommendationField.APPLICATION_DATE.value: now,
@@ -219,26 +191,16 @@ class RecommendationsRepository(MongoRepositoryBase):
 
             recommendation = (self.collection.find_one({RecommendationField.OBJECT_ID.value: recommendation_object_id})).__dict__
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to set recommendation status. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                query_filter=query_filter)
+            logger.error(
+                f'Failed to set recommendation status || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, query_filter=query_filter),
+            )
             raise e
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Set recommendation status',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                query_filter=query_filter)
+
+        logger.debug(
+            'Set recommendation status',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, query_filter=query_filter),
+        )
 
         return recommendation
 
@@ -248,32 +210,21 @@ class RecommendationsRepository(MongoRepositoryBase):
                  RecommendationField.STATUS.value: {MongoOperator.IN.value: [RecommendationStatusEnum.APPLIED.value,
                                                     RecommendationStatusEnum.DISMISSED.value]}}
         projection = {RecommendationField.APPLICATION_DETAILS.value: False}
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             cursor = self.collection.find(query, projection).sort(RecommendationField.APPLICATION_DATE.value, pymongo.DESCENDING)
             action_histories_as_dict_list = [Recommendation(retrievedRecommendation).__dict__ for retrievedRecommendation in
                                              list(cursor)]
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to set recommendation status. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                projection=projection)
+            logger.error(
+                f'Failed to set recommendation status || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
+            )
             raise e
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Set recommendation status',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query,
-                                projection=projection)
+        logger.debug(
+            'Set recommendation status',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
+        )
         return action_histories_as_dict_list
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
@@ -298,31 +249,27 @@ class RecommendationsRepository(MongoRepositoryBase):
         projection = {RecommendationField.APPLIED_BY.value: False,
                       RecommendationField.APPLICATION_DATE.value: False,
                       RecommendationField.STATUS.value: False}
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             count = self.get_count_by_filter(query_filter)
             response = self.collection.find(query_filter, projection)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to get recommendations. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query_filter,
-                                projection=projection)
+            logger.error(
+                f'Failed to get recommendations || {repr(e)}',
+                extra=dict(
+                    duration=(datetime.now() - start).total_seconds(),
+                    query=query_filter,
+                    projection=projection,
+                ),
+            )
+
             raise e
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Get recommendations',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=query_filter,
-                                projection=projection)
+
+        logger.debug(
+            'Get recommendations',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=query_filter, projection=projection),
+        )
+
         return response, count
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
@@ -338,7 +285,7 @@ class RecommendationsRepository(MongoRepositoryBase):
         }}
 
         aggregation = [match_aggregation, count_aggregation]
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             cursor = self.collection.aggregate(aggregation)
             counts = list(cursor)
@@ -351,25 +298,16 @@ class RecommendationsRepository(MongoRepositoryBase):
 
                 counts_by_type[reco_type.value] = type_count
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to counts by type. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=aggregation)
+            logger.error(
+                f'Failed to counts by type || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=aggregation),
+            )
             raise e
 
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Get recommendations',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=aggregation)
+        logger.info(
+            'Get recommendations',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=aggregation),
+        )
 
         return counts_by_type
 
@@ -387,7 +325,7 @@ class RecommendationsRepository(MongoRepositoryBase):
 
         aggregation = [match_aggregation, count_aggregation]
 
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             cursor = self.collection.aggregate(aggregation)
             counts = list(cursor)
@@ -401,24 +339,16 @@ class RecommendationsRepository(MongoRepositoryBase):
                 counts_by_category[metric.value] = metric_count
 
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to counts by category. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=aggregation)
+            logger.error(
+                f'Failed to counts by category || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=aggregation),
+            )
             raise e
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Get counts by category',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=aggregation)
+        logger.debug(
+            'Get counts by category',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=aggregation),
+        )
+
         return counts_by_category
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
@@ -433,26 +363,19 @@ class RecommendationsRepository(MongoRepositoryBase):
         count_filter = {}
         if recommendation_filter is not None:
             count_filter = recommendation_filter
-        operation_start_time = datetime.now()
+        start = datetime.now()
         try:
             count = self.collection.count_documents(count_filter)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.ERROR,
-                                description=f'Failed to counts by filter. Reason: {str(e)}',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=count_filter)
+            logger.error(
+                f'Failed to counts by filter || {repr(e)}',
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=count_filter),
+            )
+
             raise e
-        if self._logger.level == logging.DEBUG:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(logger=self._logger,
-                                log_level=logging.INFO,
-                                description='Get counts by filter',
-                                timestamp=operation_end_time,
-                                duration=duration,
-                                query=count_filter)
+        logger.debug(
+            'Get counts by filter',
+            extra=dict(duration=(datetime.now() - start).total_seconds(), query=count_filter),
+        )
+
         return count

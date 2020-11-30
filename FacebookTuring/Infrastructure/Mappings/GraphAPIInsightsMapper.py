@@ -14,6 +14,10 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import 
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 ActionBreakdownMinimal = namedtuple('ActionBreakdownMinimal', ['name', 'facebook_fields'])
 
 
@@ -35,8 +39,7 @@ class GraphAPIInsightsMapper:
             try:
                 mapped_fields = cls.map_field_all(requested_fields, data)
             except Exception as e:
-                import traceback
-                traceback.print_exc()
+                logger.exception(repr(e))
                 pass
 
             if mapped_fields:

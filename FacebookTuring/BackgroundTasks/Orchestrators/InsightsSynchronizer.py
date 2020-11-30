@@ -11,7 +11,7 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import Grap
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSynchronizerBreakdownEnum
-from FacebookTuring.BackgroundTasks.Startup import startup, logger
+from FacebookTuring.BackgroundTasks.Startup import startup
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -49,7 +49,7 @@ class InsightsSynchronizer:
         try:
             if self.breakdown is not None and self.breakdown != InsightsSynchronizerBreakdownEnum.NONE.value:
                 self.requested_fields += [self.breakdown]
-            response = GraphAPIInsightsHandler.set_logger(logger).get_reports_insights(
+            response = GraphAPIInsightsHandler.get_reports_insights(
                 permanent_token=self.permanent_token,
                 ad_account_id=self.__ad_account_id,
                 fields=self.__get_fields(),
@@ -133,7 +133,7 @@ class InsightsSynchronizer:
             "time_range": {GraphAPIInsightsFields.since: date_start, GraphAPIInsightsFields.until: date_stop},
         }
         try:
-            response = GraphAPIInsightsHandler.set_logger(logger).get_reports_insights(
+            response = GraphAPIInsightsHandler.get_reports_insights(
                 permanent_token=self.permanent_token,
                 ad_account_id=self.__ad_account_id,
                 fields=[FieldsMetadata.impressions.name],

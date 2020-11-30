@@ -1,37 +1,21 @@
-import json
-import os
-
-from Core.logging_legacy import LOGGERS_BY_NAME, app_config_as_log_dict
 from Core.Web.Security.Authorization import authorize_permission, authorize_jwt
 from Logging.Api.Config.Config import MongoConfig
 
 
-class Startup(object):
+class Startup:
+    def __init__(self, app_config):
+        self.mongo_config = MongoConfig(app_config["mongo_database"])
 
-    def __init__(self, app_config=None):
-        assert app_config is not None
+        self.__auth_permission_endpoint = app_config["external_services"]["authorize_permission_endpoint"]
 
-        if not isinstance(app_config, dict):
-            raise ValueError('Invalid app config JSON.')
-
-        self.mongo_config = MongoConfig(app_config['mongo_database'])
-
-        self.__auth_permission_endpoint = app_config['external_services']['authorize_permission_endpoint']
-
-        self.environment = app_config['environment']
-        self.service_name = app_config['service_name']
-        self.service_version = app_config['service_version']
-        self.api_name = app_config['api_name']
-        self.api_version = app_config['api_version']
-        self.base_url = app_config['base_url']
-        self.port = app_config["port"]
-        self.debug_mode = app_config["debug_mode"]
-        self.docker_filename = app_config["docker_filename"]
-        self.logger_type = app_config["logger_type"]
-        self.rabbit_logger_type = app_config["rabbit_logger_type"]
+        self.base_url = app_config["base_url"]
+        self.environment = app_config["environment"]
+        self.es_host = app_config.get("es_host")
+        self.es_port = app_config.get("es_port")
         self.logger_level = app_config["logger_level"]
-        self.es_host = app_config.get("es_host", None)
-        self.es_port = app_config.get("es_port", None)
+        self.name = app_config["name"]
+        self.port = app_config["port"]
+        self.version = app_config["version"]
 
     @property
     def authorize_permission(self):
@@ -42,29 +26,14 @@ class Startup(object):
         return authorize_jwt(self.__auth_permission_endpoint)
 
 
-# Initialize startup object
-env = os.environ.get("PYTHON_ENV")
-if not env:
-    env = "local"
-config_file = f"Config/Settings/app.settings.{env}.json"
+from Core import settings
+from Core import logging_config
 
-with open(config_file, 'r') as app_settings_json_file:
-    app_config = json.load(app_settings_json_file)
+startup = Startup(settings.config_as_dict)
 
-startup = Startup(app_config)
+logging_config.init(
+    startup.name, startup.logger_level, enable_es=False, es_host=startup.es_host, es_port=startup.es_port
+)
+logger = logging_config.get_logger(__name__)
 
-# Initialize logger
-logger = LOGGERS_BY_NAME.get(startup.logger_type)(host=startup.es_host,
-                                                  port=startup.es_port,
-                                                  name=startup.api_name,
-                                                  level=startup.logger_level,
-                                                  index_name=startup.docker_filename)
-rabbit_logger = LOGGERS_BY_NAME.get(startup.rabbit_logger_type)(host=startup.es_host,
-                                                                port=startup.es_port,
-                                                                name=startup.api_name,
-                                                                level=startup.logger_level,
-                                                                index_name=startup.docker_filename)
-
-# Log startup details
-logger.logger.info(app_config_as_log_dict(app_config))
-
+logger.info("Configuration details", extra=logging_config.app_config_as_log_dict(config=settings.config_as_dict))

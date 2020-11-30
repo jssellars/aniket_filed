@@ -36,14 +36,9 @@
     "name": "Prod.Filed.Facebook.Accounts"
   },
   "environment": "prodbak",
-  "api_name": "FacebookAccountsBackgroundTasks",
-  "api_version": "1.0.0",
-  "service_name": "FacebookAccountsBackgroundTasks",
-  "service_version": "1.0.0",
+  "name": "FacebookAccountsBt",
+  "version": "1.0.0",
   "base_url": "/api/v1",
-  "docker_filename": "filed-potter-accounts-background-tasks",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": null,
   "es_port": null

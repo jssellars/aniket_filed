@@ -1,3 +1,4 @@
+import sys
 import typing
 from datetime import datetime
 from enum import Enum
@@ -5,7 +6,6 @@ from enum import Enum
 from pymongo.errors import AutoReconnect
 from retry import retry
 
-from Core.logging_legacy import log_operation_mongo
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from Core.Tools.MongoRepository.MongoOperator import MongoOperator
@@ -13,7 +13,7 @@ from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MongoProjectionState(Enum):
@@ -30,21 +30,14 @@ class MongoRepositoryBase:
             database_name: typing.AnyStr = None,
             collection_name: typing.AnyStr = None,
             config: typing.Any = None,
-            logger=None,
     ):
-        self._logger = logger
-
         if client is None and config is None:
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Cannot instantiate a Mongo Repository. Please try again using "
-                            "either a Mongo client or a Mongo config.",
+            message = (
+                "Cannot instantiate a Mongo Repository."
+                " Please try again using either a Mongo client or a Mongo config."
             )
-            raise ValueError(
-                "Cannot instantiate a Mongo Repository. Please try again using "
-                "either a Mongo client or a Mongo config."
-            )
+            logger.error(message)
+            raise ValueError(message)
 
         if config is None:
             self._client = client
@@ -114,7 +107,7 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def add_one(self, document: typing.Any = None) -> typing.NoReturn:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         if not document:
             return
@@ -122,21 +115,15 @@ class MongoRepositoryBase:
         try:
             self.collection.insert_one(self._convert_to_dict(document))
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                data=document,
-                description="Failed to add one document. Reason %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
+            logger.error(
+                f"Failed to add one document || {repr(e)}",
+                extra=dict(data_size=sys.getsizeof(document), duration=(datetime.now() - start).total_seconds()),
             )
             raise e
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def add_many(self, documents: typing.List[typing.Any] = None) -> typing.NoReturn:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         if not documents:
             return
@@ -145,63 +132,37 @@ class MongoRepositoryBase:
             result = self.collection.insert_many(documents)
             inserted_ids = result.inserted_ids
 
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-
             if len(inserted_ids) == 0:
-                description_message = "Failed to insert any document."
-                log_level = logging.ERROR
-                log_operation_mongo(
-                    logger=self._logger,
-                    log_level=log_level,
-                    data=documents,
-                    description=description_message,
-                    timestamp=operation_end_time,
-                    duration=duration,
+                logger.error(
+                    "Failed to insert any document.",
+                    extra=dict(data_size=sys.getsizeof(documents), duration=(datetime.now() - start).total_seconds()),
                 )
 
             if len(inserted_ids) < len(documents):
-                description_message = "Failed to insert all documents. No of documents inserted %d out of %d" % \
-                                      (len(inserted_ids), len(documents))
-                log_level = logging.WARNING
-                log_operation_mongo(
-                    logger=self._logger,
-                    log_level=log_level,
-                    data=documents,
-                    description=description_message,
-                    timestamp=operation_end_time,
-                    duration=duration,
+                logger.warning(
+                    f"Failed to insert all documents."
+                    f" No of documents inserted {len(inserted_ids)} out of {len(documents)}",
+                    extra=dict(data_size=sys.getsizeof(documents), duration=(datetime.now() - start).total_seconds()),
                 )
 
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                data=documents,
-                description="Failed to add many documents. Reason %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
+            logger.error(
+                f"Failed to add many documents || {repr(e)}",
+                extra=dict(data_size=sys.getsizeof(documents), duration=(datetime.now() - start).total_seconds()),
             )
             raise e
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_all(self) -> typing.List[typing.Dict]:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             results = self.collection.find({}, {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value})
             results = list(results)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get all documents. Reason %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
+            logger.error(
+                f"Failed to get all documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds()),
             )
             raise e
 
@@ -209,22 +170,16 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_all_by_key(self, key_name: typing.AnyStr = None, key_value: typing.Any = None) -> typing.List[typing.Dict]:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         query = {key_name: {MongoOperator.EQUALS.value: key_value}}
         try:
             results = self.collection.find(query, {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value})
             results = list(results)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get all documents "
-                            "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
-                timestamp=operation_end_time,
-                duration=duration,
+            logger.error(
+                f"Failed to get all documents by key: {key_name} with value: {key_value} || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds()),
             )
             raise e
 
@@ -232,7 +187,7 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_first_by_key(self, key_name: typing.AnyStr = None, key_value: typing.Any = None) -> typing.Dict:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             results = self.get_all_by_key(key_name, key_value)
@@ -241,15 +196,9 @@ class MongoRepositoryBase:
             else:
                 results = {}
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get first document "
-                            "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
-                timestamp=operation_end_time,
-                duration=duration,
+            logger.error(
+                f"Failed to get first document by key: {key_name} with value: {key_value} || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds()),
             )
             raise e
 
@@ -257,22 +206,16 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get_last_updated(self, key_name: typing.AnyStr = None, key_value: datetime = None) -> typing.List[typing.Dict]:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         query = {key_name: {MongoOperator.GREATERTHANEQUAL.value: key_value}}
         try:
             results = self.collection.find(query, {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value})
             results = list(results)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get last updated documents "
-                            "by key: %s with value: %s. Reason: %s" % (key_name, key_value, str(e)),
-                timestamp=operation_end_time,
-                duration=duration,
+            logger.error(
+                f"Failed to get last updated documents by key: {key_name} with value: {key_value} || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds()),
             )
             raise e
 
@@ -280,7 +223,7 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def get(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.List[typing.Dict]:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             if not projection:
@@ -288,16 +231,9 @@ class MongoRepositoryBase:
             else:
                 results = list(self.collection.find(query, projection))
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get documents. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-                projection=projection,
+            logger.error(
+                f"Failed to get documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
             )
             raise e
 
@@ -307,7 +243,7 @@ class MongoRepositoryBase:
     def get_sorted(
             self, query: typing.Dict = None, projection: typing.Dict = None, sort_query: typing.Dict = None
     ) -> typing.List[typing.Dict]:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             if not projection:
@@ -315,17 +251,14 @@ class MongoRepositoryBase:
             else:
                 results = list(self.collection.find(query, projection).sort(sort_query))
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get sorted documents. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-                projection=projection,
-                query_filter=sort_query,
+            logger.error(
+                f"Failed to get sorted documents || {repr(e)}",
+                extra=dict(
+                    duration=(datetime.now() - start).total_seconds(),
+                    query=query,
+                    projection=projection,
+                    query_filter=sort_query,
+                ),
             )
             raise e
 
@@ -333,7 +266,7 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def first_or_default(self, query: typing.Dict = None, projection: typing.Dict = None) -> typing.Dict:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             results = self.get(query, projection)
@@ -342,16 +275,9 @@ class MongoRepositoryBase:
             else:
                 results = {}
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to get first or default document. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
-                projection=projection,
+            logger.error(
+                f"Failed to get first or default document || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
             )
             raise e
 
@@ -359,41 +285,27 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def update_one(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             self.collection.update(query_filter, query)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to update one document. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-                query=query,
+            logger.error(
+                f"Failed to update one document || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query_filter=query_filter, query=query),
             )
             raise e
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def update_many(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             self.collection.update_many(query_filter, query)
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to update many documents. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-                query=query,
+            logger.error(
+                f"Failed to update many documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query_filter=query_filter, query=query),
             )
             raise e
 
@@ -407,7 +319,7 @@ class MongoRepositoryBase:
     ) -> None:
         query_filter = ""
         query = ""
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             query_filter = {structure_key: {MongoOperator.IN.value: structure_ids}}
@@ -415,22 +327,15 @@ class MongoRepositoryBase:
             self.update_many(query_filter, query)
 
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to update many documents. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
-                query=query,
+            logger.error(
+                f"Failed to update many documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query_filter=query_filter, query=query),
             )
             raise e
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def delete_many_older_than_date(self, date: typing.AnyStr = None) -> typing.NoReturn:
-        operation_start_time = datetime.now()
+        start = datetime.now()
         query = {}
 
         try:
@@ -438,15 +343,9 @@ class MongoRepositoryBase:
             self.collection.delete_many(query)
 
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to delete many documents. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query=query,
+            logger.error(
+                f"Failed to delete many documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query),
             )
             raise e
 
@@ -458,21 +357,15 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT__, delay=1)
     def delete_many(self, query_filter: typing.Dict = None) -> typing.NoReturn:
-        operation_start_time = datetime.now()
+        start = datetime.now()
 
         try:
             self.collection.delete_many(query_filter)
 
         except Exception as e:
-            operation_end_time = datetime.now()
-            duration = (operation_end_time - operation_start_time).total_seconds()
-            log_operation_mongo(
-                logger=self._logger,
-                log_level=logging.ERROR,
-                description="Failed to delete many documents. Reason: %s" % str(e),
-                timestamp=operation_end_time,
-                duration=duration,
-                query_filter=query_filter,
+            logger.error(
+                f"Failed to delete many documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query_filter=query_filter),
             )
             raise e
 

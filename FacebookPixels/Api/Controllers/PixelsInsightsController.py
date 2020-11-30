@@ -5,7 +5,7 @@ import humps
 from flask import request, Response
 from flask_restful import Resource
 
-from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
+from Core.logging_config import request_as_log_dict
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
@@ -13,18 +13,18 @@ from Core.Web.Security.Permissions import PixelPermissions
 from FacebookPixels.Api.Commands.PixelsInsightsCommand import PixelsInsightsCommand
 from FacebookPixels.Api.CommandsHandlers.PixelsInsightsCommandHandlers import PixelsInsightsCommandHandler
 from FacebookPixels.Api.Mappings.PixelsInsightsCommandMapping import PixelsInsightsCommandMapping
-from FacebookPixels.Api.Startup import logger, startup
+from FacebookPixels.Api.Startup import startup
 
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PixelsInsightsEndpoint(Resource):
     @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def post(self, level: typing.AnyStr = None) -> typing.Union[typing.List[typing.NoReturn], typing.Dict]:
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             business_owner_facebook_id = extract_business_owner_facebook_id()
             raw_request = humps.decamelize(request.get_json(force=True))
@@ -33,10 +33,7 @@ class PixelsInsightsEndpoint(Resource):
             command.level = level
             command.business_owner_facebook_id = business_owner_facebook_id
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="PixelsInsightsEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             response = json.dumps({"message": "Failed to process request."})
             return Response(response=response, status=400, mimetype='application/json')
 
@@ -46,10 +43,7 @@ class PixelsInsightsEndpoint(Resource):
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype="application/json")
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="PixelsInsightsEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             response = Tools.create_error(e, code='POTTER_BAD_REQUEST')
             response = json.dumps(response)
             return Response(response=response, status=400, mimetype='application/json')

@@ -12,7 +12,6 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBase import MetricCalculatorBase
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import MongoLogger, log_message_as_dict
 from Core.Tools.Misc.Constants import DEFAULT_DATETIME, DEFAULT_DATETIME_ISO
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import \
     GoogleAvailableMetricEnum
@@ -21,7 +20,7 @@ from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricEnums import GoogleM
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GoogleMetricCalculator(MetricCalculatorBase):
@@ -31,12 +30,6 @@ class GoogleMetricCalculator(MetricCalculatorBase):
         self._calculator = None
         value = str(random.randint(0, 1e20)) + self._date_stop.strftime(DEFAULT_DATETIME_ISO)
         self._calculator_id = hashlib.sha1(value.encode('utf-8')).hexdigest()
-
-        if self._repository is not None:
-            self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
-        else:
-            self.__logger = None
 
     def __current_state(self):
         current_state = {
@@ -49,13 +42,6 @@ class GoogleMetricCalculator(MetricCalculatorBase):
             "business_owner_id": self._business_owner_id,
         }
         return current_state
-
-    @property
-    def _logger(self):
-        if self.__logger is None and self._repository is not None:
-            self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
-        return self.__logger
 
     @property
     def calculator(self):
@@ -132,12 +118,10 @@ class GoogleMetricCalculator(MetricCalculatorBase):
                         slopes.append(slope)
                     else:
                         slopes.append(None)
-                        self._logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                                  name="MetricCalculator",
-                                                  description=f"Time bucket for interval {time_bucket.value} is None.",
-                                                  extra_data={
-                                                    "state": self.__current_state()
-                                                }))
+                        logger.warning(
+                            f"Time bucket for interval {time_bucket.value} is None.",
+                            extra={"state": self.__current_state()},
+                        )
 
         trend = self._compute_resultant_slope(slopes)
 

@@ -15,7 +15,7 @@ class GraphAPIBusinessMapping(MapperBase):
         if not isinstance(data, typing.MutableMapping):
             try:
                 return [Tools.convert_to_json(entry) for entry in data]
-            except Exception as e:
+            except:
                 return Tools.convert_to_json(data)
         else:
             return data

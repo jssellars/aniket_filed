@@ -3,7 +3,6 @@ from datetime import datetime
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
-from Core.logging_legacy import MongoLogger
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookActionBreakdownEnum, FacebookBreakdownEnum
 
@@ -23,19 +22,10 @@ class FacebookRecommendationTemplateBuilderBase:
         self._business_owner_repo_session = None
         self._facebook_config = None
         self._business_owner_id = None
-        self.__logger = None
         self._date_stop = None
         self._time_interval = None
-        self._debug = None
         self._headers = None
         self._rule = None
-
-    @property
-    def logger(self):
-        if self._repository is not None and self.__logger is None:
-            self.__logger = MongoLogger(repository=self._repository,
-                                        database_name=self._repository.config.logs_database)
-        return self.__logger
 
     def set_repository(self, repository: typing.Any = None):
         self._repository = repository
@@ -83,10 +73,6 @@ class FacebookRecommendationTemplateBuilderBase:
 
     def set_time_interval(self, time_interval: DaysEnum = None):
         self._time_interval = time_interval
-        return self
-
-    def set_debug_mode(self, debug: bool = None):
-        self._debug = debug
         return self
 
     def set_headers(self, headers: typing.AnyStr = None):

@@ -5,7 +5,7 @@ import humps
 from flask import request, Response
 from flask_restful import Resource, abort
 
-from Core.logging_legacy import request_as_log_dict, request_as_log_dict_nested, log_message_as_dict
+from Core.logging_config import request_as_log_dict
 from Core.Web.Misc import snake_to_camelcase
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, OptimizePermissions, ReportsPermissions
@@ -21,13 +21,13 @@ from GoogleTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import
     AdsManagerFilteredStructuresCommandMapping
 from GoogleTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from GoogleTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
-from GoogleTuring.Api.Startup import logger, startup
+from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
 
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class AdsManagerEndpoint(Resource):
@@ -71,17 +71,14 @@ class GetStructuresHandler:
         if level == 'adset':
             level = 'adgroup'
 
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             response = AdsManagerGetStructuresQuery.get_structures(level, account_id)
             response = snake_to_camelcase(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerGetCampaignsEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Could not retrieve {level} for {account_id}"}),
                             status=400, mimetype='application/json')
 
@@ -104,16 +101,13 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
     def post(self, level: typing.AnyStr = None):
         if level == 'adset':
             level = 'adgroup'
-        logger.logger.info(request_as_log_dict_nested(request))
+        logger.info(request_as_log_dict(request))
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             mapping = AdsManagerFilteredStructuresCommandMapping(target=AdsManagerFilteredStructuresCommand)
             command = mapping.load(raw_request)
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerFilteredStructuresEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": str(e)}), status=400,
                             mimetype='application/json')
 
@@ -127,9 +121,6 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype="application/json")
         except Exception as e:
-            logger.logger.exception(log_message_as_dict(mtype=logging.ERROR,
-                                      name="AdsManagerFilteredStructuresEndpoint",
-                                      description=str(e),
-                                      extra_data=request_as_log_dict(request)))
+            logger.exception(repr(e), extra=request_as_log_dict(request))
             error = str(e)
             return Response(response=json.dumps(error), status=400, mimetype='application/json')

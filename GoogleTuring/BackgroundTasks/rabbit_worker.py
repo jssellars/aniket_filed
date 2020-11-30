@@ -7,13 +7,15 @@ if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
 import json
-import traceback
 
 from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from GoogleTuring.BackgroundTasks.Startup import startup
 from GoogleTuring.BackgroundTasks.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleTuring.BackgroundTasks.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
-from GoogleTuring.BackgroundTasks.Startup import logger
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body):
@@ -23,9 +25,9 @@ def callback(ch, method, properties, body):
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
         message = json.loads(body)
-        request_handler.handle(message, logger)
-    except:
-        traceback.print_exc()
+        request_handler.handle(message)
+    except Exception as e:
+        logger.exception(repr(e))
 
 
 def main():

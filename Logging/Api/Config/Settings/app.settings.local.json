@@ -17,16 +17,10 @@
     "authorize_permission_endpoint": "https://be.dev.filed.com/cs-users-authorization-api/api/v1/Permissions/authorize-permission"
   },
   "environment": "local",
-  "api_name": "LoggingAPI",
-  "api_version": "1.0.0",
-  "service_name": "LoggingAPI",
-  "service_version": "1.0.0",
+  "name": "LoggingApi",
+  "version": "1.0.0",
   "base_url": "/api/v1",
   "port": 40666,
-  "debug_mode": true,
-  "docker_filename": "filed-logging-api",
-  "logger_type": "file_logger",
-  "rabbit_logger_type": "rabbit_file_logger",
   "logger_level": "DEBUG",
   "es_host": "localhost",
   "es_port": 9200

@@ -3,7 +3,6 @@ from datetime import datetime
 
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from Core.logging_legacy import MongoLogger
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Rules.Rules import Rules
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 
@@ -21,17 +20,9 @@ class NoActionAlgorithmBuilder:
         self._fuzzyfier_factory = None
         self._level = None
         self._dexter_config = None
-        self.__logger = None
         self._date_stop = None
         self._time_interval = None
-        self._debug = None
         self._mongo_config = None
-
-    def get_logger(self):
-        if self._mongo_repository is not None:
-            self.__logger = MongoLogger(repository=self._mongo_repository,
-                                        database_name=self._mongo_repository.config.logs_database)
-        return self.__logger
 
     def set_business_owner_id(self, business_owner_id: typing.Any = None):
         self._business_owner_id = business_owner_id
@@ -79,10 +70,6 @@ class NoActionAlgorithmBuilder:
 
     def set_time_interval(self, time_interval: DaysEnum = None):
         self._time_interval = time_interval
-        return self
-
-    def set_debug_mode(self, debug):
-        self._debug = debug
         return self
 
     def set_mongo_config(self, mongo_config: typing.Any = None):

@@ -1,6 +1,10 @@
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIBaseHandler import AdWordsAPIBaseHandler
 from GoogleTuring.Infrastructure.GoogleAdWordsAPI.AdWordsAccountInsightsClient import AdWordsAccountInsightsClient
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AdWordsAPIAdAccountInsightsHandler(AdWordsAPIBaseHandler):
     @classmethod
@@ -17,8 +21,7 @@ class AdWordsAPIAdAccountInsightsHandler(AdWordsAPIBaseHandler):
             try:
                 insights = adwords_client.get_account_insights(start_date=start_date, end_date=end_date)
                 ad_account_insights.extend(insights)
-            except Exception:
-                import traceback
-                traceback.print_exc()
+            except Exception as e:
+                logger.exception(repr(e))
 
         return ad_account_insights

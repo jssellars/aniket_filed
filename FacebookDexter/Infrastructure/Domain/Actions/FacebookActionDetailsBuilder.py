@@ -11,6 +11,10 @@ from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import FacebookAct
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnum, FacebookActionBreakdownEnum
 from FacebookDexter.Infrastructure.Domain.Metrics.FacebookMetricCalculator import FacebookMetricCalculator
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 DEFAULT_BUDGET_CHANGE = 0.25
 
 
@@ -343,7 +347,6 @@ class FacebookActionDetailsBuilder:
                       set_repository(self.__repository).
                       set_date_stop(self.__date_stop).
                       set_time_interval(self.__time_interval).
-                      set_debug_mode(self.__debug).
                       set_breakdown_metadata(BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
                                                                    action_breakdown=FacebookActionBreakdownEnum.NONE)))
 
@@ -358,9 +361,8 @@ class FacebookActionDetailsBuilder:
                 best_performing_ad_id = sorted_values[0][0]
             else:
                 return None, None
-        except TypeError:
-            import traceback
-            traceback.print_exc()
+        except TypeError as e:
+            logger.exception(repr(e))
             return None
 
         action_details = {

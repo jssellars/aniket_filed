@@ -1,4 +1,3 @@
-import traceback
 import typing
 
 import numpy as np
@@ -7,7 +6,6 @@ from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import log_message_as_dict
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.GoogleRuleBasedOptimizationBase import \
     GoogleRuleBasedOptimizationBase
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import \
@@ -18,7 +16,7 @@ from GoogleDexter.Infrastructure.Domain.Metrics.GoogleMetricCalculator import Go
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GoogleRuleBasedOptimizationAdLevel(GoogleRuleBasedOptimizationBase):
@@ -80,25 +78,17 @@ class GoogleRuleBasedOptimizationAdLevel(GoogleRuleBasedOptimizationBase):
             lowest_25p_slice = slice(0, int(np.ceil(len(average_metric_values) / 4)))
             sorted_values = sorted(average_metric_values, key=lambda x: x[1][0])
             lowest_25p_ad_ids = [value[0] for value in sorted_values][lowest_25p_slice]
-        except TypeError as type_error:
-            self.get_logger().logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                      name="RuleBasedOptimizationCampaignLevel",
-                                      description=f"Cannot find lowest performing ads for {self.__adgroup_id}",
-                                      extra_data={
-                                        "structure_id": self.__adgroup_id,
-                                        "config": self._dexter_config,
-                                        "error": traceback.format_exc()
-                                    }))
+        except TypeError as e:
+            logger.exception(
+                f"Cannot find lowest performing ads for {self.__adgroup_id} || {repr(e)}",
+                extra={"structure_id": self.__adgroup_id, "config": self._dexter_config}
+            )
             lowest_25p_ad_ids = []
         except Exception as e:
-            self.get_logger().logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                      name="RuleBasedOptimizationCampaignLevel",
-                                      description=f"Error finding lowest performing ads for {self.__adgroup_id}",
-                                      extra_data={
-                                        "structure_id": self.__adgroup_id,
-                                        "config": self._dexter_config,
-                                        "error": traceback.format_exc()
-                                    }))
+            logger.exception(
+                f"Error finding lowest performing ads for {self.__adgroup_id} || {repr(e)}",
+                extra={"structure_id": self.__adgroup_id, "config": self._dexter_config}
+            )
             raise e
 
         return lowest_25p_ad_ids

@@ -1,6 +1,5 @@
 import itertools
 import re
-import traceback
 import typing
 from collections import defaultdict
 
@@ -10,7 +9,6 @@ from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.logging_legacy import log_message_as_dict
 from FacebookDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.FacebookAvailableMetricEnum import \
     FacebookAvailableMetricEnum
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnum, FacebookActionBreakdownEnum
@@ -24,7 +22,7 @@ from FacebookDexter.Infrastructure.Domain.RuleTemplateKeyword import RuleTemplat
 
 import logging
 
-logger_native = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilderBase):
@@ -72,13 +70,7 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
                     return value
                 template = template.replace("__" + keyword + "__", value)
         except Exception as e:
-            if self._debug:
-                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="RecommendationTemplateBuilder",
-                                          description=f"Failed to compute keyword value for template {template}",
-                                          extra_data={
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(f"Failed to compute keyword value for template {template} || {repr(e)}", exc_info=True)
             raise e
         return template
 
@@ -111,21 +103,13 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
                     value = self.__find_best_performing_ad_name(keyword)
                 else:
                     value = ''
-                    if self._debug:
-                        self.logger.logger.info(log_message_as_dict(mtype=logging.WARNING,
-                                                  name="RecommendationTemplateBuilder",
-                                                  description=f"Failed to compute keyword value for "
-                                                            f"metric {keyword.metric_name.value.name}"))
+                    logger.debug(f"Failed to compute keyword value for metric {keyword.metric_name.value.name}")
 
             except Exception as e:
-                if self._debug:
-                    self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                              name="RecommendationTemplateBuilder",
-                                              description=f"Failed to compute keyword value for "
-                                                        f"metric {keyword.metric_name.value.name}",
-                                              extra_data={
-                                                "error": traceback.format_exc()
-                                            }))
+                logger.exception(
+                    f"Failed to compute keyword value for metric {keyword.metric_name.value.name} || {repr(e)}",
+                    exc_info=True,
+                )
                 raise e
 
         keyword.value = str(value) if value else ''
@@ -189,7 +173,6 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
             set_repository(self._repository).
             set_date_stop(self._date_stop).
             set_time_interval(self._time_interval).
-            set_debug_mode(self._debug).
             set_breakdown_metadata(
             BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
                                   action_breakdown=FacebookActionBreakdownEnum.NONE)))
@@ -203,13 +186,7 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
     def _get_top_interests(self, top_number, endpoint, headers):
         response = requests.get(url=endpoint, headers=headers)
         if response.status_code != 200:
-            if self._debug:
-                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="RecommendationTemplateBuilder",
-                                          description="Failed to get interests from structure targeting.",
-                                          extra_data={
-                                            "error": response.json()
-                                        }))
+            logger.debug("Failed to get interests from structure targeting.", extra={"error": response.json()})
             return ''
 
         results_root = response.json()
@@ -241,13 +218,7 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
             else:
                 return ''
         except Exception as e:
-            if self._debug:
-                self.logger.logger.info(log_message_as_dict(mtype=logging.ERROR,
-                                          name="RecommendationTemplateBuilder",
-                                          description="Failed to get interests from structure targeting.",
-                                          extra_data={
-                                            "error": traceback.format_exc()
-                                        }))
+            logger.debug(f"Failed to get interests from structure targeting || {repr(e)}", exc_info=True)
             raise e
 
         combinations_of_interests = sum(
@@ -274,7 +245,6 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
               set_facebook_config(self._facebook_config).
               set_business_owner_id(self._business_owner_id).
               set_date_stop(self._date_stop).
-              set_debug_mode(self._debug).
               set_breakdown_metadata(BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
                                                            action_breakdown=FacebookActionBreakdownEnum.NONE)))
         value, _ = mc.compute_value(atype=keyword.antecedent_type)
@@ -291,7 +261,6 @@ class FacebookRecommendationTemplateBuilder(FacebookRecommendationTemplateBuilde
               set_facebook_config(self._facebook_config).
               set_business_owner_id(self._business_owner_id).
               set_date_stop(self._date_stop).
-              set_debug_mode(self._debug).
               set_time_interval(self._time_interval).
               set_breakdown_metadata(BreakdownMetadataBase(breakdown=FacebookBreakdownEnum.NONE,
                                                            action_breakdown=FacebookActionBreakdownEnum.NONE)))

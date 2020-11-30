@@ -303,6 +303,5 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def new_ad_account_journal_repository(self):
         repository = TuringAdAccountJournalRepository(config=self.config,
                                                       database_name=self.config.accounts_journal_database_name,
-                                                      collection_name=self.config.accounts_journal_collection_name,
-                                                      logger=self._logger)
+                                                      collection_name=self.config.accounts_journal_collection_name)
         return repository

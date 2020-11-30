@@ -18,8 +18,6 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 
 class GraphAPIInsightsHandler:
-    __logger = None
-
     __ids_keymap = {
         Level.ACCOUNT.value: {"structure": FieldsMetadata.id.name, "insight": FieldsMetadata.account_name.name},
         Level.CAMPAIGN.value: {"structure": FieldsMetadata.id.name, "insight": FieldsMetadata.campaign_id.name},
@@ -62,11 +60,6 @@ class GraphAPIInsightsHandler:
         Level.ADSET.value: "adsets",
         Level.AD.value: "ads",
     }
-
-    @classmethod
-    def set_logger(cls, logger):
-        cls.__logger = logger
-        return cls
 
     @classmethod
     def get_insights_base(
@@ -171,7 +164,6 @@ class GraphAPIInsightsHandler:
             repository = TuringMongoRepository(
                 config=startup.mongo_config,
                 database_name=startup.mongo_config.structures_database_name,
-                logger=cls.__logger,
             )
             structures = repository.get_all_structures_by_id_list(
                 level=Level(level), structure_ids=insight_ids, structure_key=structure_key
@@ -220,7 +212,6 @@ class GraphAPIInsightsHandler:
             repository = TuringMongoRepository(
                 config=startup.mongo_config,
                 database_name=startup.mongo_config.structures_database_name,
-                logger=cls.__logger,
             )
             summary = []
             account_id = ad_account_id.split("_")[1]
@@ -411,7 +402,6 @@ class GraphAPIInsightsHandler:
         structure_repository = TuringMongoRepository(
             config=startup.mongo_config,
             database_name=startup.mongo_config.structures_database_name,
-            logger=cls.__logger,
         )
         structure_results = structure_repository.get_results_fields_from_adsets(
             structure_ids=structure_ids, structure_key=structure_key

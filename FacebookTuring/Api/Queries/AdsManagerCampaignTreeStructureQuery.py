@@ -1,6 +1,6 @@
 from operator import itemgetter
 
-from FacebookTuring.Api.Startup import startup, logger
+from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
@@ -28,8 +28,7 @@ class AdsManagerCampaignTreeStructureQuery:
     def get(cls, level, facebook_id):
         repository = TuringMongoRepository(config=startup.mongo_config,
                                            database_name=startup.mongo_config['structures_database_name'],
-                                           collection_name=level,
-                                           logger=logger)
+                                           collection_name=level)
         try:
             structure = repository.get_active_structure_ids(cls.keymap[level].id, facebook_id)
             campaign_id = list(map(itemgetter(cls.keymap[Level.CAMPAIGN.value].id), structure))

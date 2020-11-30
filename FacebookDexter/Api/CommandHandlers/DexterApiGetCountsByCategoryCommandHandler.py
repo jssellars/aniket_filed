@@ -1,11 +1,11 @@
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
-from FacebookDexter.Api.Startup import startup, logger
+from FacebookDexter.Api.Startup import startup
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
 class DexterApiGetCountsByCategoryCommandHandler:
     def handle(self, command: DexterApiGetCountsByCategoryCommand):
-        recommendation_repository = RecommendationsRepository(startup.mongo_config, logger=logger)
+        recommendation_repository = RecommendationsRepository(startup.mongo_config)
 
         count_filter = {}
 

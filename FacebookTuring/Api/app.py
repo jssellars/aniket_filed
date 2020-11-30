@@ -146,4 +146,4 @@ reporting_breakdowns_controller = "{base_url}/get-breakdowns".format(base_url=st
 api.add_resource(AdsManagerReportsBreakdownsEndpoint, reporting_breakdowns_controller)
 
 if __name__ == "__main__":
-    app.run(debug=startup.debug_mode, host="localhost", port=startup.port)
+    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)

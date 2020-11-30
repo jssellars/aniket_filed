@@ -41,15 +41,13 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
                              set_dexter_config(self.startup.dexter_config).
                              set_fuzzyfier_factory(fuzzyfier_factory).
                              set_rules(rules).
-                             set_debug_mode(self.startup.debug).
                              set_mongo_config(self.startup.mongo_config).
                              set_auth_token(self._auth_token).
-                             create_mongo_repository(self.logger))
+                             create_mongo_repository())
             elif alg_type == FacebookAlgorithmsEnum.FACEBOOK_ENHANCER:
                 algorithm = (algorithm.
-                             set_debug_mode(self.startup.debug).
                              set_mongo_config(self.startup.mongo_config).
-                             create_mongo_repository(self.logger))
+                             create_mongo_repository())
         except Exception as e:
             raise e
 
@@ -162,7 +160,7 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
             self._journal_repository.update_one(search_query, update_query)
 
-        except Exception:
+        except:
             update_query = DexterJournalMongoRepositoryHelper.get_update_query_failed()
             self._journal_repository.update_one(search_query, update_query)
 
