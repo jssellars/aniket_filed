@@ -144,6 +144,14 @@ class AdsManagerEndpoint(Resource):
                 facebook_id=facebook_id,
                 business_owner_facebook_id=business_owner_facebook_id
             )
+
+            if response is None:
+                return Response(response=json.dumps({
+                    "message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}),
+                    status=400,
+                    mimetype='application/json'
+                )
+
             # TODO: this will be returned once FE finishes their side as well to avoid crashes
             response = json.dumps(response)
             return Response(status=200, mimetype="application/json")
@@ -162,9 +170,16 @@ class AdsManagerEndpoint(Resource):
             response = AdsManagerDeleteStructureCommandHandler.handle(level, facebook_id, business_owner_facebook_id)
             if response:
                 return Response(status=204, mimetype="application/json")
-            else:
-                return Response(response=json.dumps({"message": f"Missing structure {facebook_id}."}), status=404,
-                                mimetype='application/json')
+
+            elif response is None:
+                return Response(response=json.dumps({
+                    "message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}),
+                    status=400,
+                    mimetype='application/json'
+                )
+
+            return Response(response=json.dumps({"message": f"Missing structure {facebook_id}."}), status=400,
+                            mimetype='application/json')
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
             return Response(response=json.dumps({"message": f"Failed to delete structure {facebook_id}."}), status=400,

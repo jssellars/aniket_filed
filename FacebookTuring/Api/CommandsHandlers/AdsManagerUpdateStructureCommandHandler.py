@@ -5,6 +5,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
 from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
@@ -24,6 +25,19 @@ class AdsManagerUpdateStructureCommandHandler:
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
         _ = GraphAPISdkBase(startup.facebook_config, business_owner_permanent_token)
         try:
+
+            graph_api_client = GraphAPIClientBase(business_owner_permanent_token)
+            structure_fields = StructureFields.get(level)
+            graph_api_client.config = cls.build_facebook_api_client_get_details_config(facebook_id=facebook_id,
+                                                                                       business_owner_permanent_token=business_owner_permanent_token,
+                                                                                       fields=structure_fields.get_structure_fields())
+            updated_structure, _ = graph_api_client.call_facebook()
+            if isinstance(updated_structure, Exception):
+                raise updated_structure
+
+            if not allow_structure_changes(updated_structure, startup):
+                return None
+
             structure = LevelToGraphAPIStructure.get(level, facebook_id)
             structure.api_update(params=command.details)
         except Exception as e:
@@ -71,3 +85,5 @@ class AdsManagerUpdateStructureCommandHandler:
                                                         business_owner_permanent_token=business_owner_permanent_token,
                                                         fields=fields)
         return config
+
+

@@ -5,6 +5,7 @@ from bson import BSON
 
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
 from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
@@ -14,6 +15,8 @@ from FacebookTuring.Infrastructure.Mappings.LevelMapping import (
     LevelToFacebookIdKeyMapping,
 )
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+
+ALLOWED_AD_ACCOUNTS = ["756882231399117", "389109158588065"]
 
 
 class AdsManagerDeleteStructureCommandHandler:
@@ -28,6 +31,9 @@ class AdsManagerDeleteStructureCommandHandler:
         deleted_structure = repository.get_structure_details(level=Level(level), key_value=facebook_id)
         if not deleted_structure:
             return False
+
+        if not allow_structure_changes(deleted_structure, startup):
+            return None
 
         deleted_structure[MiscFieldsEnum.level] = level
         deleted_structure[MiscFieldsEnum.structure_id] = deleted_structure.get(
