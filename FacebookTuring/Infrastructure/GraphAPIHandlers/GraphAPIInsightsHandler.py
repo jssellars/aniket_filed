@@ -63,15 +63,15 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_insights_base(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        add_totals: bool = False,
-        thread: typing.Union[typing.AnyStr, int] = None,
-        level: typing.AnyStr = None,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            add_totals: bool = False,
+            thread: typing.Union[typing.AnyStr, int] = None,
+            level: typing.AnyStr = None,
     ) -> typing.Dict:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_insights_config(
@@ -108,16 +108,16 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_insights_page(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        add_totals: bool = False,
-        next_page_cursor: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        page_size: int = 200,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            add_totals: bool = False,
+            next_page_cursor: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            page_size: int = 200,
     ) -> typing.Tuple:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_insights_config(
@@ -154,11 +154,11 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_structure_page(
-        cls,
-        structure_key: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        insight_ids: typing.List[typing.AnyStr] = None,
-        structure_fields: typing.List[FieldsMetadata] = None,
+            cls,
+            structure_key: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            insight_ids: typing.List[typing.AnyStr] = None,
+            structure_fields: typing.List[FieldsMetadata] = None,
     ) -> typing.List:
         try:
             repository = TuringMongoRepository(
@@ -176,10 +176,10 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def __join_insights_and_structure_results(
-        cls,
-        structure_key: typing.AnyStr = None,
-        insight_response: typing.List = None,
-        structure_results: typing.List = None,
+            cls,
+            structure_key: typing.AnyStr = None,
+            insight_response: typing.List = None,
+            structure_results: typing.List = None,
     ) -> typing.List:
         for insight in insight_response:
             for structure in structure_results:
@@ -190,14 +190,14 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_structures_base(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        filter_params: typing.List[typing.Dict] = None,
-        structure_fields: typing.List[FieldsMetadata] = None,
-        thread: typing.Union[typing.AnyStr, int] = None,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            filter_params: typing.List[typing.Dict] = None,
+            structure_fields: typing.List[FieldsMetadata] = None,
+            thread: typing.Union[typing.AnyStr, int] = None,
     ) -> typing.Dict:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_structure_config(
@@ -224,21 +224,6 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_insights(
-        cls,
-        permanent_token: str = None,
-        level: str = None,
-        ad_account_id: str = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        structure_fields: typing.List[typing.AnyStr] = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        filter_params: typing.List[typing.Dict] = None,
-    ) -> typing.List[typing.Dict]:
-        insights_thread = 0
-        structure_thread = 1
-        queue = Queue()
-
-        def _get_insights(
             cls,
             permanent_token: str = None,
             level: str = None,
@@ -248,6 +233,21 @@ class GraphAPIInsightsHandler:
             structure_fields: typing.List[typing.AnyStr] = None,
             requested_fields: typing.List[FieldsMetadata] = None,
             filter_params: typing.List[typing.Dict] = None,
+    ) -> typing.List[typing.Dict]:
+        insights_thread = 0
+        structure_thread = 1
+        queue = Queue()
+
+        def _get_insights(
+                cls,
+                permanent_token: str = None,
+                level: str = None,
+                ad_account_id: str = None,
+                fields: typing.List[typing.AnyStr] = None,
+                parameters: typing.Dict = None,
+                structure_fields: typing.List[typing.AnyStr] = None,
+                requested_fields: typing.List[FieldsMetadata] = None,
+                filter_params: typing.List[typing.Dict] = None,
         ) -> typing.List[typing.Dict]:
             # get insights
             t1 = Thread(
@@ -338,15 +338,15 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_insights_with_totals(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        structure_fields: typing.List[typing.AnyStr] = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        filter_params: typing.List[typing.Dict] = None,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            structure_fields: typing.List[typing.AnyStr] = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            filter_params: typing.List[typing.Dict] = None,
     ) -> typing.Dict:
         insights_thread = 0
         insights_without_breakdowns_thread = 1
@@ -412,16 +412,16 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_ag_grid_insights(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        level: str = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        structure_fields: typing.List[typing.AnyStr] = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        next_page_cursor: typing.AnyStr = None,
-        page_size: int = 200,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            level: str = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            structure_fields: typing.List[typing.AnyStr] = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            next_page_cursor: typing.AnyStr = None,
+            page_size: int = 200,
     ) -> typing.Dict:
 
         insights, structures, next_page_cursor, summary = cls._get_insights_and_structure_data(
@@ -448,18 +448,18 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def _get_insights(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        structure_fields: typing.List[typing.AnyStr] = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        filter_params: typing.List[typing.Dict] = None,
-        insights_thread: int = None,
-        insights_without_breakdowns_thread: int = None,
-        structure_thread: int = None,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            structure_fields: typing.List[typing.AnyStr] = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            filter_params: typing.List[typing.Dict] = None,
+            insights_thread: int = None,
+            insights_without_breakdowns_thread: int = None,
+            structure_thread: int = None,
     ) -> typing.List[typing.Dict]:
         queue = Queue()
 
@@ -601,16 +601,16 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def _get_insights_and_structure_data(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        structure_fields: typing.List[typing.AnyStr] = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        next_page_cursor: typing.AnyStr = None,
-        page_size: int = 200,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            structure_fields: typing.List[typing.AnyStr] = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            next_page_cursor: typing.AnyStr = None,
+            page_size: int = 200,
     ) -> typing.Tuple:
 
         insight_response, next_page_cursor, summary = cls.get_insights_page(
@@ -646,13 +646,13 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_reports_insights(
-        cls,
-        permanent_token: str = None,
-        ad_account_id: str = None,
-        fields: typing.List[typing.AnyStr] = None,
-        parameters: typing.Dict = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        level: typing.AnyStr = None,
+            cls,
+            permanent_token: str = None,
+            ad_account_id: str = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            level: typing.AnyStr = None,
     ) -> typing.List[typing.Dict]:
         report_insights_thread = 1
         insights_response = cls.get_insights_base(
@@ -668,11 +668,11 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def right_join_insights_and_structures(
-        cls,
-        level: typing.AnyStr = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        insights: typing.List[typing.Dict] = None,
-        structures: typing.List[typing.Dict] = None,
+            cls,
+            level: typing.AnyStr = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            insights: typing.List[typing.Dict] = None,
+            structures: typing.List[typing.Dict] = None,
     ) -> typing.List[typing.Dict]:
         requested_fields_names = [field.name for field in requested_fields]
         structure_id_key = cls.__ids_keymap[level]["structure"]
@@ -702,12 +702,12 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def left_join_insights_and_structures(
-        cls,
-        level: typing.AnyStr = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        structure_fields: typing.List[typing.AnyStr] = None,
-        insights: typing.List[typing.Dict] = None,
-        structures: typing.List[typing.Dict] = None,
+            cls,
+            level: typing.AnyStr = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            structure_fields: typing.List[typing.AnyStr] = None,
+            insights: typing.List[typing.Dict] = None,
+            structures: typing.List[typing.Dict] = None,
     ) -> typing.List[typing.Dict]:
         structure_id_key = cls.__ids_keymap[level]["structure"]
         insight_id_key = cls.__ids_keymap[level]["insight"]
@@ -721,31 +721,26 @@ class GraphAPIInsightsHandler:
             return insights
 
         insights_only_ids = insights_ids - structure_ids
-
-        active_insights = [
-            {**insight, **structure}
-            for insight in insights
-            for structure in structures
-            if str(structure[structure_id_key]) == insight[insight_id_key]
-        ]
-
+        result = []
         empty_structure_dict = dict.fromkeys(requested_fields_names)
-        inactive_insights = [
-            {**empty_structure_dict, **insight}
-            for insight in insights
-            if insight[insight_id_key] in insights_only_ids
-        ]
 
-        response = active_insights + inactive_insights
+        for insight in insights:
+            if insight[insight_id_key] in insights_only_ids:
+                result.append({**empty_structure_dict, **insight})
+                continue
 
-        return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=response)
+            for structure in structures:
+                if str(structure[structure_id_key]) == insight[insight_id_key]:
+                    result.append({**insight, **structure})
+
+        return cls.map_to_requested_fields(level=level, requested_fields=requested_fields, response=result)
 
     @classmethod
     def map_to_requested_fields(
-        cls,
-        level: typing.AnyStr = None,
-        requested_fields: typing.List[FieldsMetadata] = None,
-        response: typing.List[typing.Dict] = None,
+            cls,
+            level: typing.AnyStr = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            response: typing.List[typing.Dict] = None,
     ) -> typing.List[typing.Dict]:
         sorted_fields = sorted([field.name for field in requested_fields])
 
@@ -776,12 +771,12 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def build_get_structure_config(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        filter_params: typing.List[typing.Dict] = None,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            filter_params: typing.List[typing.Dict] = None,
     ) -> GraphAPIClientBaseConfig:
         get_structure_config = GraphAPIClientBaseConfig()
         get_structure_config.try_partial_requests = True
@@ -799,14 +794,14 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def build_get_insights_config(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        params: typing.Dict = None,
-        add_totals: bool = False,
-        next_page_cursor: typing.AnyStr = None,
-        page_size: int = 200,
+            cls,
+            permanent_token: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            params: typing.Dict = None,
+            add_totals: bool = False,
+            next_page_cursor: typing.AnyStr = None,
+            page_size: int = 200,
     ) -> GraphAPIClientBaseConfig:
         params["default_summary"] = add_totals
 
