@@ -57,7 +57,7 @@ class GraphAPIAdBuilderHandler(object):
         self.ad_creative_link_data[AdCreativeLinkData.Field.image_hash] = ad_image[AdImage.Field.hash]
 
     def _build_video_ad_creative_link_data(self, ad_template, ad_account_id=None):
-        self._build_video_ad_creative_link_data(ad_template, ad_account_id)
+        self._build_imaged_ad_creative_link_data(ad_template, ad_account_id)
 
     def _build_carousel_ad_creative_link_data(self, ad_template, ad_account_id=None):
         self.ad_creative_link_data = AdCreativeLinkData()

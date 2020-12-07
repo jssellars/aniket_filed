@@ -42,6 +42,7 @@ router_route_pairs = (
     (routers.BudgetValidation, "budget-validation/<string:business_owner_id>/<string:account_id>"),
     (routers.SmartCreateCats, "smart-create/cats"),
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
+    (routers.SmartCreatePublish, "smart-create/publish"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{startup.base_url.lower()}/{route}")

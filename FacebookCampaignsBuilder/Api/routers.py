@@ -176,7 +176,7 @@ class PublishCampaign(Resource):
             request_json = humps.decamelize(request.get_json(force=True))
             business_owner_id = extract_business_owner_facebook_id()
             permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
-            campaigns = command_handlers.PublishCampaign.handle(
+            campaigns = command_handlers.CampaignBuilderPublish.handle(
                 request=request_json,
                 permanent_token=permanent_token,
                 business_owner_id=business_owner_id,
@@ -186,6 +186,36 @@ class PublishCampaign(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
             response = Tools.create_error(e, code="BadRequest_PublishCampaignEndpoint")
 
+            return response, 400
+
+        mapper = mappings.PublishCampaignResponseDto(target=dtos.PublishCampaignResponse)
+        response = mapper.load(request_json)
+        response.business_owner_facebook_id = business_owner_id
+        response.campaigns = campaigns
+
+        response = object_to_camelized_dict(response)
+
+        return response, 200
+
+
+class SmartCreatePublish(Resource):
+    @startup.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
+    def post(self):
+        logger.info(request_as_log_dict(request))
+
+        try:
+            request_json = humps.decamelize(request.get_json(force=True))
+            business_owner_id = extract_business_owner_facebook_id()
+            permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
+            campaigns = command_handlers.SmartCreatePublish.handle(
+                request=request_json,
+                permanent_token=permanent_token,
+                business_owner_id=business_owner_id,
+                facebook_config=startup.facebook_config,
+            )
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            response = Tools.create_error(e, code="BadRequest_PublishSmartCreateEndpoint")
             return response, 400
 
         mapper = mappings.PublishCampaignResponseDto(target=dtos.PublishCampaignResponse)

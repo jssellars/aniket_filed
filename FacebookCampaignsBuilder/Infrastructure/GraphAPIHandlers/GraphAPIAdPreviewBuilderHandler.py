@@ -66,7 +66,8 @@ class GraphAPIAdPreviewBuilderHandler:
             self.ad_creative_link_data[AdCreativeLinkData.Field.multi_share_end_card] = ad_template['add_card_with_page_profile']
 
         # Get image hash and attach to creative
-        ad_image = self.__generate_image_hash(account_id, ad_template['media_url'])
+        picture = ad_template.get("picture", ad_template.get("media_url", None))
+        ad_image = self.__generate_image_hash(account_id, picture)
         self.ad_creative_link_data[AdCreativeLinkData.Field.image_hash] = ad_image[AdImage.Field.hash]
 
     @staticmethod
@@ -130,7 +131,8 @@ class GraphAPIAdPreviewBuilderHandler:
                     ad_template_carousel_frame['video_id']
             elif 'media_url' in ad_template_carousel_frame.keys() and ad_template_carousel_frame['media_url']:
                 # Get image hash and attach to creative
-                ad_image = self.__generate_image_hash(account_id, ad_template_carousel_frame['media_url'])
+                picture = ad_template_carousel_frame.get("picture", ad_template_carousel_frame.get("media_url", None))
+                ad_image = self.__generate_image_hash(account_id, picture)
                 ad_creative_link_data_child_attachment[AdCreativeLinkDataChildAttachment.Field.image_hash] = \
                     ad_image[AdImage.Field.hash]
             else:
@@ -184,7 +186,7 @@ class GraphAPIAdPreviewBuilderHandler:
 
     def __build_video_ad_creative(self, account_id, ad_template, page_facebook_id, instagram_facebook_id):
         # Upload video on FB
-        if not ad_template['video_id']:
+        if not ad_template.get('video_id', None):
             ad_video_facebook_id = self.__build_ad_video(account_id, ad_template['media_url'])
         else:
             ad_video_facebook_id = ad_template['video_id']

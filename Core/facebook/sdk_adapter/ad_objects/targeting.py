@@ -2,7 +2,7 @@ from enum import Enum
 
 from facebook_business.adobjects.targeting import Targeting
 
-from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum
+from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum, Contexts
 
 # TODO: add documentation link(s)
 
@@ -14,3 +14,5 @@ class DevicePlatform(Enum):
     CONNECTED_TV = Cat(_device_platforms.connected_tv)
     DESKTOP = Cat(_device_platforms.desktop)
     MOBILE = Cat(_device_platforms.mobile)
+
+    contexts = Contexts.all_with_items(DESKTOP, MOBILE)

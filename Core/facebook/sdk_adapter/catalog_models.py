@@ -120,6 +120,11 @@ class Cat:
         self.description_autogen = self.name.replace("_", " ").casefold().capitalize() + "."
         self.image_name_autogen = f"{decamelize(self.kind)}__{self.name}".replace("_", "-").casefold()
 
+    def get_item_by_type(self, item_type: Type) -> Any:
+        for item in self.items:
+            if item.kind == item_type.__name__:
+                return item
+
 
 @enrich_flag
 class Contexts(Flag):
