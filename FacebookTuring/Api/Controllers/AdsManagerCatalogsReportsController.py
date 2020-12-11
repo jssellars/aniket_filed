@@ -11,7 +11,7 @@ from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsBreakdownsDto import AdsMa
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsDimensionsDto import AdsManagerCatalogsReportsDimensionsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsDto import AdsManagerCatalogsReportsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsReportsMetricsDto import AdsManagerCatalogsReportsMetricsDto
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.startup import config, fixtures
 
 
 import logging
@@ -27,7 +27,7 @@ class QueryParamsEnum(Enum):
 
 
 class AdsManagerReportsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -44,7 +44,7 @@ class AdsManagerReportsEndpoint(Resource):
 
 
 class AdsManagerReportsDimensionsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -60,7 +60,7 @@ class AdsManagerReportsDimensionsEndpoint(Resource):
 
 
 class AdsManagerReportsMetricsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -76,7 +76,7 @@ class AdsManagerReportsMetricsEndpoint(Resource):
 
 
 class AdsManagerReportsBreakdownsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:

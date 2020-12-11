@@ -4,7 +4,7 @@ from flask import request, Response
 from flask_restful import Resource
 
 from Core.logging_config import request_as_log_dict
-from FacebookAccounts.Api.Startup import startup
+from FacebookAccounts.Api.startup import config, fixtures
 
 
 import logging
@@ -16,7 +16,7 @@ class VersionEndpoint(Resource):
     def get(self):
         logger.info(request_as_log_dict(request))
 
-        response = {"app_name": startup.name, "app_version": startup.version, "environment": startup.environment}
+        response = {"app_name": config.name, "app_version": config.version, "environment": config.environment}
         response = json.dumps(response)
         return Response(response=response, status=200, mimetype='application/json')
 

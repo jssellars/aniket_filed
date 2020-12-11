@@ -6,7 +6,6 @@ from facebook_business.adobjects.application import Application
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookApps.BackgroundTasks import Startup
 from FacebookApps.Infrastructure.GraphAPIDtos.GraphAPIAppDto import GraphAPIAppDto
 from FacebookApps.Infrastructure.GraphAPIDtos.GraphAPIAppEventTypeDto import GraphAPIAppEventTypeDto
 from FacebookApps.Infrastructure.GraphAPIDtos.GraphAPIAppFields import GraphAPIAppFields
@@ -22,9 +21,9 @@ class GraphAPIAppsHandler:
     def get_apps(cls,
                  permanent_token: typing.AnyStr = None,
                  account_id: typing.AnyStr = None,
-                 startup: Startup = None) -> typing.Tuple[typing.List[GraphAPIAppDto], typing.List[typing.Dict]]:
+                 config=None) -> typing.Tuple[typing.List[GraphAPIAppDto], typing.List[typing.Dict]]:
         # initialize GraphAPI SDK
-        _ = GraphAPISdkBase(startup.facebook_config, permanent_token)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         # get apps
         errors = []

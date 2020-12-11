@@ -14,7 +14,7 @@ from FacebookAccounts.Api.Mappings.AdAccountInsightsCommandMapping import AdAcco
 from FacebookAccounts.Api.Queries.AdAccountInstagramQuery import AdAccountInstagramQuery
 from FacebookAccounts.Api.Queries.AdAccountPageInstagramQuery import AdAccountPageInstagramQuery
 from FacebookAccounts.Api.Queries.AdAccountPagesQuery import AdAccountPagesQuery
-from FacebookAccounts.Api.Startup import startup
+from FacebookAccounts.Api.startup import config, fixtures
 from FacebookAccounts.Infrastructure.GraphAPIHandlers import GraphAPIAdAccountInsightsHandler
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountInsightsHandler import \
     GraphAPIAdAccountInsightsHandlerClass
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class AdAccountPagesEndpoint(Resource):
-    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, account_id):
         # log request information
         logger.info(request_as_log_dict(request))
@@ -44,7 +44,7 @@ class AdAccountPagesEndpoint(Resource):
 
 
 class AdAccountInstagramEndpoint(Resource):
-    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, account_id):
         # log request information
         logger.info(request_as_log_dict(request))
@@ -63,7 +63,7 @@ class AdAccountInstagramEndpoint(Resource):
 
 
 class AdAccountPageInstagramEndpoint(Resource):
-    @startup.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, page_id):
         # log request information
         logger.info(request_as_log_dict(request))
@@ -81,7 +81,7 @@ class AdAccountPageInstagramEndpoint(Resource):
 
 
 class AdAccountInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
+    @fixtures.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
     def post(self):
         # log request information
         logger.info(request_as_log_dict(request))
@@ -98,7 +98,7 @@ class AdAccountInsightsEndpoint(Resource):
             return Response(response=response, status=400, mimetype='application/json')
 
         try:
-            response = GraphAPIAdAccountInsightsHandlerClass.handle(command, startup)
+            response = GraphAPIAdAccountInsightsHandlerClass.handle(command, config, fixtures)
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
@@ -110,7 +110,7 @@ class AdAccountInsightsEndpoint(Resource):
 
 
 class AdAccountsAgGridViewEndpoint(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
+    @fixtures.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -125,9 +125,9 @@ class AdAccountsAgGridViewEndpoint(Resource):
 
 
 class AdAccountAgGridInsights(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
+    @fixtures.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
     def post(self):
-        #  log request information
+        # log request information
         logger.info(request_as_log_dict(request))
 
         try:
@@ -137,7 +137,7 @@ class AdAccountAgGridInsights(Resource):
             command = mapping.load(raw_request)
             command.business_owner_facebook_id = business_owner_facebook_id
 
-            response = GraphAPIAdAccountInsightsHandler.handle_accounts_insights(command, startup)
+            response = GraphAPIAdAccountInsightsHandler.handle_accounts_insights(command, config, fixtures)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')
 

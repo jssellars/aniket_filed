@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from Core.Metadata.Columns.ViewColumns.ViewColumn import ViewColumn
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.AccountStatus import AccountStatus
@@ -28,11 +27,8 @@ DATA_KEY = "data"
 
 class GraphAPIAdAccountInsightsHandlerClass:
     @classmethod
-    def handle(cls, request: typing.Any, startup: typing.Any) -> typing.List[typing.Dict]:
-        # get permanent token
-        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
-            request.business_owner_facebook_id
-        )
+    def handle(cls, request: typing.Any, config: typing.Any, fixtures: typing.Any) -> typing.List[typing.Dict]:
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(request.business_owner_facebook_id)
 
         from_date = cls.__convert_datetime(request.from_date)
         to_date = cls.__convert_datetime(request.to_date)
@@ -42,7 +38,7 @@ class GraphAPIAdAccountInsightsHandlerClass:
             business_owner_facebook_id=request.business_owner_facebook_id,
             from_date=from_date,
             to_date=to_date,
-            startup=startup,
+            config=config,
         )
 
         return response
@@ -54,18 +50,18 @@ class GraphAPIAdAccountInsightsHandlerClass:
         business_owner_facebook_id: typing.AnyStr = None,
         from_date: typing.AnyStr = None,
         to_date: typing.AnyStr = None,
-        startup: typing.Any = None,
+        config: typing.Any = None,
     ) -> typing.List[typing.Dict]:
-        config = GraphAPIClientBaseConfig()
-        config.request = GraphAPIRequestInsights(
-            api_version=startup.facebook_config.api_version,
+        api_config = GraphAPIClientBaseConfig()
+        api_config.request = GraphAPIRequestInsights(
+            api_version=config.facebook.api_version,
             access_token=permanent_token,
             business_owner_facebook_id=business_owner_facebook_id,
             since=from_date,
             until=to_date,
         )
 
-        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=config)
+        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
         response, _ = graph_api_client.call_facebook()
         if isinstance(response, Exception):
             raise response
@@ -203,35 +199,34 @@ class GraphAPIAdAccountInsightsHandlerClass:
         return date.strftime(__DEFAULT_DATETIME_FORMAT__)
 
 
-def handle_accounts_insights(request: Any, startup: Any) -> List[Dict]:
-    # get permanent token
-    permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(request.business_owner_facebook_id)
+def handle_accounts_insights(request: Any, config: Any, fixtures: Any, ) -> List[Dict]:
+    permanent_token = fixtures.business_owner_repository.get_permanent_token(request.business_owner_facebook_id)
 
     response = get_account_insights_base(
         permanent_token=permanent_token,
         business_owner_facebook_id=request.business_owner_facebook_id,
         from_date=request.from_date,
         to_date=request.to_date,
-        startup=startup,
+        config=config,
     )
 
     return response
 
 
 def get_account_insights_base(
-    permanent_token: typing.AnyStr = None,
-    business_owner_facebook_id: typing.AnyStr = None,
-    from_date: typing.AnyStr = None,
-    to_date: typing.AnyStr = None,
-    startup: typing.Any = None,
+    permanent_token: typing.AnyStr,
+    business_owner_facebook_id: typing.AnyStr,
+    from_date: typing.AnyStr,
+    to_date: typing.AnyStr,
+    config: Any,
 ) -> typing.List[typing.Dict]:
 
-    config = GraphAPIClientBaseConfig()
+    api_config = GraphAPIClientBaseConfig()
     account_fields = get_facebook_fields(accounts_ag_grid_view.account_structure_columns)
     insights_fields = get_facebook_fields(accounts_ag_grid_view.account_insight_columns)
 
-    config.request = GraphAPIAccountInsights(
-        api_version=startup.facebook_config.api_version,
+    api_config.request = GraphAPIAccountInsights(
+        api_version=config.facebook.api_version,
         access_token=permanent_token,
         business_owner_facebook_id=business_owner_facebook_id,
         since=from_date,
@@ -240,7 +235,7 @@ def get_account_insights_base(
         insights_fields=",".join(insights_fields),
     )
 
-    graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=config)
+    graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
     response, _ = graph_api_client.call_facebook()
     if isinstance(response, Exception):
         raise response

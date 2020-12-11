@@ -5,8 +5,8 @@ from GoogleTuring.Infrastructure.Domain.GoogleAttributeFieldsMetadata import Goo
 
 
 class GoogleAttributeMetadataColumnsPool:
-    #  Structure fields and parameters
-    #  Object names, IDs, statuses, and dates
+    # Structure fields and parameters
+    # Object names, IDs, statuses, and dates
     accent_color = ColumnMetadata(GoogleAttributeFieldsMetadata.accent_color.name, ColumnType.text)
 
     account_currency_code = ColumnMetadata(GoogleAttributeFieldsMetadata.account_currency_code.name,

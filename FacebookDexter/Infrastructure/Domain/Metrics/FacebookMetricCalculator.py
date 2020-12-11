@@ -16,7 +16,7 @@ from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricCalculatorBase import MetricCalculatorBase
 from Core.Dexter.Infrastructure.Domain.Metrics.MetricEnums import MetricTrendTimeBucketEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO, DEFAULT_DATETIME
+from Core.constants import DEFAULT_DATETIME_ISO, DEFAULT_DATETIME
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools

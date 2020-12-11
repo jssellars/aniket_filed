@@ -2,7 +2,7 @@ import typing
 
 from GoogleTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from GoogleTuring.Api.Mappings.ReportsStructureMinimalMapping import ReportsStructureMinimalMapping
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleTuringStructuresMongoRepository import \
     GoogleTuringStructuresMongoRepository
@@ -16,8 +16,8 @@ class AdsManagerFilteredStructuresCommandHandler:
         ad_account_id = str(command.ad_account_id)
 
         try:
-            repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
-                                                               database_name=startup.mongo_config.google_structures_database_name,
+            repository = GoogleTuringStructuresMongoRepository(config=config.mongo,
+                                                               database_name=config.mongo.google_structures_database_name,
                                                                collection_name=collection_name)
             response = repository.get_structure_info(level=Level(level),
                                                      account_id=ad_account_id,

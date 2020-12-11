@@ -9,8 +9,10 @@ from cmreslogging.handlers import CMRESHandler
 from flask import request
 from pythonjsonlogger import jsonlogger
 
-import requests
-import pika
+from Core.settings import Model
+
+if TYPE_CHECKING:
+    from Core import settings
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -104,21 +106,16 @@ class RabbitFilter(logging.Filter):
         return False
 
 
-if TYPE_CHECKING:
-    from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
+class MongoHandler(logging.Handler):
+    def __init__(self, config: "settings.Mongo"):
+        super().__init__()
 
+        from Core.mongo_adapter import MongoRepositoryBase
 
-# TODO: make this work when inheriting logging.Logger or logging.Handler
-class MongoLogger:
-    COLLECTION_NAME = "logs"
+        self._repository = MongoRepositoryBase.new_logs_repository(config)
 
-    def __init__(self, repository: "MongoRepositoryBase", database_name: str):
-        self._repository = repository.new_repository()
-        self._repository.set_database(database_name)
-        self._repository.set_collection(MongoLogger.COLLECTION_NAME)
-
-    def info(self, message: Dict = None):
-        self._repository.add_one(message)
+    def emit(self, record):
+        self._repository.add_one(record.msg)
 
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
@@ -133,7 +130,7 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
 
 
 # TODO: !!! use UTC time instead of local as in the previously used CustomJsonFormatter !!!
-def init(app_name: str, level_name: str, enable_es: bool = False, es_host: str = "localhost", es_port: int = 9200):
+def init(config: Model):
     """
     Examples:
         Regular:
@@ -144,7 +141,7 @@ def init(app_name: str, level_name: str, enable_es: bool = False, es_host: str =
     """
     # root_logger = logging.RootLogger(logging.DEBUG)
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.getLevelName(level_name))
+    root_logger.setLevel(logging.getLevelName(config.logger_level))
     # disabled because filters re not inherited
     # root_logger.addFilter(ExtraDataFilter())
 
@@ -154,7 +151,7 @@ def init(app_name: str, level_name: str, enable_es: bool = False, es_host: str =
     root_logger.addHandler(stream_handler)
 
     root_dir = os.environ.get("LOG_NETWORK_MOUNT_PATH")
-    service_path = Path(root_dir if root_dir else "logs") / "py" / app_name
+    service_path = Path(root_dir if root_dir else "logs") / "py" / config.name.full
     service_path.mkdir(parents=True, exist_ok=True)
 
     app_handler = get_timed_rotating_file_handler(str(service_path / "app"))
@@ -165,12 +162,12 @@ def init(app_name: str, level_name: str, enable_es: bool = False, es_host: str =
     rabbitmq_handler.addFilter(RabbitFilter())
     root_logger.addHandler(rabbitmq_handler)
 
-    if enable_es:
+    if config.es_enabled:
         es_handler = CMRESHandler(
-            hosts=[dict(host=es_host, port=es_port)],
+            hosts=[dict(host=config.es_host, port=config.es_port)],
             auth_type=CMRESHandler.AuthType.NO_AUTH,
             index_name_frequency=CMRESHandler.IndexNameFrequency.DAILY,
-            es_index_name=f"py-{app_name.replace('.', '-')}",
+            es_index_name=f"py-{config.name.full.replace('.', '-')}",
             es_doc_type="_doc",
             raise_on_indexing_exceptions=True,
             flush_frequency_in_sec=5,
@@ -193,25 +190,25 @@ def get_logger(name: str) -> logging.Logger:
 
 
 RABBIT_KEYS = ["username", "hostname", "port", "virtual_host", "exchanges"]
-MONGO_KEYS = ["mongo_host", "remote_ip", "remote_port"]
+MONGO_KEYS = ["ssh_host", "mongo_host_internal", "mongo_port"]
 SQL_KEYS = ["host", "port", "database"]
 FACEBOOK_KEYS = ["description", "api_version"]
 
 
-def app_config_as_log_dict(config: Dict):
-    mongo_config = config.get("mongo_database", {})
+def app_config_as_log_dict(config: Model):
+    mongo_config = config.mongo.dict()
     all_mongo_keys = MONGO_KEYS + [i for i in mongo_config if "database" in i or "collection" in i]
 
     return {
-        "environment": config.get("environment"),
-        "app_name": config.get("name"),
-        "app_version": config.get("service_version"),
-        "port": config.get("port"),
-        "rabbit": {k: config.get("rabbitmq", {}).get(k) for k in RABBIT_KEYS},
+        "environment": config.environment,
+        "app_name": config.name.full,
+        "app_version": config.version,
+        "port": config.port,
+        "rabbit": {k: config.rabbitmq.dict().get(k) for k in RABBIT_KEYS},
         "mongo": {k: mongo_config.get(k) for k in all_mongo_keys},
-        "tokens_database": {k: config.get("sql_server_database", {}).get(k) for k in SQL_KEYS},
-        "facebook": {k: config.get("facebook", {}).get(k) for k in FACEBOOK_KEYS},
-        "external_services": config.get("external_services", {}),
+        "tokens_database": {k: config.sql_server.dict().get(k) for k in SQL_KEYS},
+        "facebook": {k: config.facebook.dict().get(k) for k in FACEBOOK_KEYS},
+        "external_services": config.external_services,
     }
 
 

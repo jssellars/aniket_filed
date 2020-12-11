@@ -7,7 +7,7 @@ from Core.logging_config import request_as_log_dict
 from Core.Web.Security.Permissions import OptimizePermissions
 from FacebookDexter.Api.QueryParamsValidators.DexterApiGetCampaignsQueryValidator import \
     DexterApiGetCampaignsQueryValidator
-from FacebookDexter.Api.Startup import startup
+from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class GetCampaignsQuery(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self):
         try:
             logger.info(request_as_log_dict(request))
@@ -27,7 +27,7 @@ class GetCampaignsQuery(Resource):
             if isinstance(error_response_or_paramaters, Response):
                 return error_response_or_paramaters
 
-            recommendation_repository = RecommendationsRepository(startup.mongo_config)
+            recommendation_repository = RecommendationsRepository(config.mongo)
             campaigns = recommendation_repository.get_campaigns(error_response_or_paramaters['ad_account_id'],
                                                                 error_response_or_paramaters['channel'])
             response = Response(response=json.dumps(campaigns), status=200, mimetype='application/json')

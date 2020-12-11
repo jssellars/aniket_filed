@@ -23,7 +23,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_fixed=False,
         is_filterable=True,
         is_sortable=True,
-        description="The number of people who saw your ads at least once. Reach is different to impressions, which may"
+        description="The number of people who saw your ads at least once. Reach is different to impressions, which may"
                     " include multiple views of your ads by the same people.",
     )
     frequency = ViewColumn(
@@ -80,7 +80,7 @@ class ViewFieldsMetricPerformanceMetadata:
         is_filterable=True,
         is_sortable=True,
         no_of_decimals=2,
-        description="The average cost for each link click.",
+        description="The average cost for each link click.",
     )
     ctr_all = ViewColumn(
         Autoincrement.hex_string("ctr_all"),

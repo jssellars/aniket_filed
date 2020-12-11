@@ -7,7 +7,7 @@ from flask_restful import Resource
 
 from Core.logging_config import request_as_log_dict
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from Core.Web.Misc import snake_to_camelcase
+from Core.utils import snake_to_camelcase
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, OptimizePermissions, ReportsPermissions
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
@@ -33,7 +33,7 @@ from FacebookTuring.Api.Mappings.AdsManagerSaveDraftCommandMapping import AdsMan
 from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from FacebookTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.startup import config, fixtures
 
 
 import logging
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class AdsManagerCampaignTreeStructureEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def get(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         try:
@@ -72,19 +72,19 @@ class GetStructuresHandler:
 
 
 class AdsManagerGetStructuresEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def get(self, level, account_id):
         return GetStructuresHandler.handle(level, account_id)
 
 
 class OptimizeGetStructuresEndpoint(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self, level, account_id):
         return GetStructuresHandler.handle(level, account_id)
 
 
 class AdsManagerFilteredStructuresEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.FILTERED_STRUCTURES_PERMISSION)
+    @fixtures.authorize_permission(permission=ReportsPermissions.FILTERED_STRUCTURES_PERMISSION)
     def post(self, level: typing.AnyStr = None):
         logger.info(request_as_log_dict(request))
         try:
@@ -111,7 +111,7 @@ class AdsManagerFilteredStructuresEndpoint(Resource):
 
 
 class AdsManagerEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def get(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         try:
@@ -124,7 +124,7 @@ class AdsManagerEndpoint(Resource):
             return Response(response=json.dumps({"message": f"Could not retrieve {level} for {facebook_id}"}),
                             status=400, mimetype='application/json')
 
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def put(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         try:
@@ -162,7 +162,7 @@ class AdsManagerEndpoint(Resource):
             return Response(response=json.dumps(error), status=400,
                             mimetype='application/json')
 
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_DELETE)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_DELETE)
     def delete(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         business_owner_facebook_id = extract_business_owner_facebook_id()
@@ -187,7 +187,7 @@ class AdsManagerEndpoint(Resource):
 
 
 class AdsManagerUpdateStructureDraftEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def put(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         try:
@@ -207,7 +207,7 @@ class AdsManagerUpdateStructureDraftEndpoint(Resource):
             return Response(response=json.dumps({"message": f"Failed to save draft for {facebook_id}."}), status=400,
                             mimetype='application/json')
 
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def delete(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         try:
@@ -220,7 +220,7 @@ class AdsManagerUpdateStructureDraftEndpoint(Resource):
 
 
 class AdsManagerDuplicateStructureEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def post(self, level, facebook_id):
         logger.info(request_as_log_dict(request))
         try:

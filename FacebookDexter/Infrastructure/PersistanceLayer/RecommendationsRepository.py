@@ -10,9 +10,8 @@ from retry import retry
 from Core.Dexter.Infrastructure.Domain.Recommendations.Recommendation import Recommendation
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
-from FacebookDexter.Api.Config.Config import MongoConfig
+from Core.mongo_adapter import MongoRepositoryBase, MongoOperator
+from Core.settings_models import Mongo
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
 
@@ -26,10 +25,10 @@ class RecommendationsRepository(MongoRepositoryBase):
 
     __RETRY_LIMIT = 3
 
-    def __init__(self, config: MongoConfig, **kwargs):
+    def __init__(self, config: Mongo, **kwargs):
         super().__init__(config=config, **kwargs)
-        self.database = config['recommendations_database_name']
-        self.collection = config['recommendations_collection_name']
+        self.database = config.recommendations_database_name
+        self.collection = config.recommendations_collection_name
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def get_campaigns(self, ad_account_id, channel):

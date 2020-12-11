@@ -1,10 +1,8 @@
 import typing
 from datetime import datetime
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
-from FacebookAccounts.BackgroundTasks.Startup import startup
 from FacebookAccounts.Infrastructure.Domain.AdAccountAmountSpentModel import AdAccountAmountSpentModel
 from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountSpentMapping import \
     GraphAPIAdAccountSpentMapping
@@ -13,11 +11,9 @@ from FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestAdAccountSp
 
 
 class GraphAPIAdAccountSpentHandler:
-
     @classmethod
-    def handle(cls, request):
-        # get permanent token
-        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(request.user_id)
+    def handle(cls, request, config, fixtures):
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(request.user_id)
 
         ad_accounts_amount_spent = []
 
@@ -26,7 +22,8 @@ class GraphAPIAdAccountSpentHandler:
         for account_detail in request.ad_accounts_details:
             from_date = cls.__convert_datetime(account_detail.from_date)
             to_date = cls.__convert_datetime(account_detail.to_date)
-            response = cls.get_account_spent_base(permanent_token=permanent_token,
+            response = cls.get_account_spent_base(config,
+                                                  permanent_token=permanent_token,
                                                   business_owner_facebook_id=request.user_id,
                                                   account_id=account_detail.facebook_id,
                                                   from_date=from_date,
@@ -41,21 +38,22 @@ class GraphAPIAdAccountSpentHandler:
 
     @classmethod
     def get_account_spent_base(cls,
+                               config,
                                permanent_token: typing.AnyStr = None,
                                business_owner_facebook_id: typing.AnyStr = None,
                                account_id: typing.AnyStr = None,
                                from_date: typing.AnyStr = None,
                                to_date: typing.AnyStr = None):
         account_id = account_id.split("_")[1]
-        config = GraphAPIClientBaseConfig()
-        config.request = GraphAPIRequestAdAccountSpent(api_version=startup.facebook_config.api_version,
+        api_config = GraphAPIClientBaseConfig()
+        api_config.request = GraphAPIRequestAdAccountSpent(api_version=config.facebook.api_version,
                                                        access_token=permanent_token,
                                                        business_owner_facebook_id=business_owner_facebook_id,
                                                        account_id=account_id,
                                                        since=from_date,
                                                        until=to_date)
 
-        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=config)
+        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
         response, _ = graph_api_client.call_facebook()
 
         return response

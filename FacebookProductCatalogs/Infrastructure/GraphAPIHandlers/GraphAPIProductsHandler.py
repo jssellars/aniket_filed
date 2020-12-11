@@ -23,10 +23,10 @@ class GraphAPIProductsHandler:
     def handle(cls,
                permanent_token: typing.AnyStr = None,
                product_catalog_id: typing.AnyStr = None,
-               startup: typing.Any = None) -> typing.Tuple[typing.List[typing.Any],
+               config: typing.Any = None) -> typing.Tuple[typing.List[typing.Any],
                                                            typing.List[typing.Any]]:
         # initialize GraphAPI SDK
-        _ = GraphAPISdkBase(startup.facebook_config, permanent_token)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         errors = []
 
@@ -42,12 +42,12 @@ class GraphAPIProductsHandler:
         # get products
         products = []
         try:
-            config = GraphAPIClientBaseConfig()
-            config.request = GraphAPIRequestProduct(api_version=startup.facebook_config.api_version,
+            api_config = GraphAPIClientBaseConfig()
+            api_config.request = GraphAPIRequestProduct(api_version=config.facebook.api_version,
                                                     access_token=permanent_token,
                                                     product_catalog_id=product_catalog_id,
                                                     fields=PRODUCT_FIELDS)
-            graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=config)
+            graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
             response, _ = graph_api_client.call_facebook()
             if isinstance(products, Exception):
                 errors.append(deepcopy(Tools.create_error(response, code="FB_GRAPH_API")))

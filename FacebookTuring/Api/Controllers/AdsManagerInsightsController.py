@@ -9,7 +9,7 @@ from Core.Web.Security.Permissions import AccountsPermissions, AdsManagerPermiss
     ReportsPermissions
 from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
 from FacebookTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import AdsManagerInsightsCommandHandler
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.startup import config, fixtures
 
 
 import logging
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class AdsManagerInsightsWithTotalsEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -38,7 +38,7 @@ class AdsManagerInsightsWithTotalsEndpoint(Resource):
 
 class AdsManagerAgGridInsightsEndpoint(Resource):
 
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self, level):
         logger.info(request_as_log_dict(request))
 
@@ -60,13 +60,13 @@ class AdsManagerAgGridInsightsEndpoint(Resource):
 
 
 class AdsManagerAgGridTrendEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self, level):
         return AgGridTrendHandler.post(level)
 
 
 class AccountsAgGridTrendEndpoint(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
     def post(self, level):
         return AgGridTrendHandler.post(level)
 
@@ -112,24 +112,24 @@ class GetInsightsHandler:
 
 
 class AccountsReportInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
     def post(self):
         return GetInsightsHandler.handle()
 
 
 class OptimizeReportInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         return GetInsightsHandler.handle()
 
 
 class AdsManagerReportInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def post(self):
         return GetInsightsHandler.handle()
 
 
 class ReportsReportInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CAN_ACCESS_REPORTS_DATA)
     def post(self):
         return GetInsightsHandler.handle()

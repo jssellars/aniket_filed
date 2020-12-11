@@ -17,9 +17,10 @@ class GraphAPIPixelsInsightsHandler:
                breakdown: typing.AnyStr = None,
                start_time: typing.AnyStr = None,
                end_time: typing.AnyStr = None,
-               startup: typing.Any = None,
+               config: typing.Any = None,
+               fixtures: typing.Any = None,
                **kwargs) -> typing.List[GraphAPIPixelStatsDto]:
-        _ = connect_to_graph_api_sdk(business_owner_facebook_id, startup)
+        connect_to_graph_api_sdk(business_owner_facebook_id, config, fixtures)
         return cls.get_insights(pixel_id=facebook_id, aggregation=breakdown, start_time=start_time, end_time=end_time)
 
     @classmethod

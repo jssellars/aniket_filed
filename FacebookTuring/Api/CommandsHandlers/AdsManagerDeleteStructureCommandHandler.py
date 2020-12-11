@@ -3,10 +3,9 @@ from typing import Dict
 
 from bson import BSON
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
-from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import (
@@ -23,8 +22,8 @@ class AdsManagerDeleteStructureCommandHandler:
     @classmethod
     def handle(cls, level, facebook_id, business_owner_facebook_id):
         repository = TuringMongoRepository(
-            config=startup.mongo_config,
-            database_name=startup.mongo_config["structures_database_name"],
+            config=config.mongo,
+            database_name=config.mongo.structures_database_name,
             collection_name=level,
         )
 
@@ -32,7 +31,7 @@ class AdsManagerDeleteStructureCommandHandler:
         if not deleted_structure:
             return False
 
-        if not allow_structure_changes(deleted_structure, startup):
+        if not allow_structure_changes(deleted_structure):
             return None
 
         deleted_structure[MiscFieldsEnum.level] = level
@@ -47,12 +46,12 @@ class AdsManagerDeleteStructureCommandHandler:
         to_be_deleted_structures.append(deleted_structure)
 
         # get business owner permanent Facebook token
-        business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+        business_owner_permanent_token = fixtures.business_owner_repository.get_permanent_token(
             business_owner_facebook_id
         )
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        _ = GraphAPISdkBase(startup.facebook_config, business_owner_permanent_token)
+        _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
         try:
             structure = LevelToGraphAPIStructure.get(level, facebook_id)
             structure.api_delete()

@@ -8,7 +8,7 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 
 # WARNING: this must be imported first
-from FacebookAccounts.Api.Startup import startup
+from FacebookAccounts.Api.startup import config, fixtures
 
 import flask
 import flask_cors
@@ -51,8 +51,8 @@ router_route_pairs = (
 )
 
 for router, route in router_route_pairs:
-    api.add_resource(router, f"{startup.base_url.lower()}/{route}")
+    api.add_resource(router, f"{config.base_url.lower()}/{route}")
 
 
 if __name__ == "__main__":
-    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)
+    app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

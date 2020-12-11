@@ -6,7 +6,7 @@ from flask import Response
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
-from FacebookDexter.Api.Startup import startup
+from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.Domain.Rules.FacebookRuleEnums import FacebookRuleRedirectEnum
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
 
@@ -15,9 +15,9 @@ class DexterApiApplyRecommendationCommandHandler:
     def handle(self, command: DexterApiApplyRecommendationCommand):
         try:
             recommendation_id = command.id
-            recommendation_repository = RecommendationsRepository(startup.mongo_config)
+            recommendation_repository = RecommendationsRepository(config.mongo)
             recommendation = recommendation_repository.get_recommendation_by_id(recommendation_id)
-            external_services = startup.external_services
+            external_services = config.external_services
             if not recommendation:
                 error_message = (f'Recommendation with id {recommendation_id} does not exist or was'
                                  ' already dismissed, applied or deprecated')

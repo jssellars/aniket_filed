@@ -1,6 +1,5 @@
 import typing
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductSetsHandler import \
     GraphAPIProductSetsHandler
@@ -18,27 +17,25 @@ logger = logging.getLogger(__name__)
 
 
 class GetProductSetsForCatalogRequestHandler:
-    __startup = None
+    _config = None
 
     @classmethod
-    def set_startup(cls, startup: typing.Any = None):
-        cls.__startup = startup
+    def set_config(cls, config: typing.Any = None):
+        cls._config = config
         return cls
 
     @classmethod
     def handle(cls, message_body: typing.Dict) -> typing.NoReturn:
         try:
-            #  load message
             message_mapper = GetProductSetsForCatalogRequestMapping(target=GetProductSetsForCatalogRequest)
             message = message_mapper.load(message_body)
 
-            #  get permanent token
-            permanent_token = (BusinessOwnerRepository(cls.__startup.session).
+            permanent_token = (BusinessOwnerRepository(cls._config.sql_db_session).
                                get_permanent_token(message.business_owner_facebook_id))
 
             product_sets, errors = GraphAPIProductSetsHandler.handle(permanent_token=permanent_token,
                                                                      product_catalog_id=message.product_catalog_facebook_id,
-                                                                     startup=cls.__startup)
+                                                                     config=cls._config)
 
             response = GetProductSetsForCatalogResponse(
                 business_owner_facebook_id=message.business_owner_facebook_id,
@@ -55,10 +52,8 @@ class GetProductSetsForCatalogRequestHandler:
     @classmethod
     def __publish(cls, product_sets):
         try:
-            rabbitmq_client = RabbitMqClient(cls.__startup.rabbitmq_config,
-                                             cls.__startup.exchange_details.name,
-                                             cls.__startup.exchange_details.outbound_queue.key)
-            rabbitmq_client.publish(product_sets)
-            logger.info({"rabbitmq": rabbitmq_client.serialize_message(product_sets)})
+            rabbitmq_adapter = cls._config.rabbitmq_adapter
+            rabbitmq_adapter.publish(product_sets)
+            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(product_sets)})
         except Exception as e:
             raise e

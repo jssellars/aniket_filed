@@ -15,7 +15,7 @@ class GraphAPICustomConversionsInsightsHandler(GraphAPIPixelsInsightsHandler):
 
     @classmethod
     def handle(cls, **kwargs) -> typing.List[GraphAPIPixelStatsDto]:
-        _ = connect_to_graph_api_sdk(kwargs["business_owner_facebook_id"], kwargs["startup"])
+        connect_to_graph_api_sdk(kwargs["business_owner_facebook_id"], kwargs["config"], kwargs["fixtures"])
         insights = cls.get_insights(custom_conversion_id=kwargs["facebook_id"],
                                     aggregation=kwargs["breakdown"],
                                     start_time=kwargs["start_time"],

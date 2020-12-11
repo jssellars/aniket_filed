@@ -6,7 +6,7 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.OrchestratorBase import OrchestratorBase
 from Core.Dexter.PersistanceLayer.Helpers.DexterJournalMongoRepositoryHelper import DexterJournalMongoRepositoryHelper
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME
+from Core.constants import DEFAULT_DATETIME
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.GoogleFuzzyfierFactory import GoogleFuzzyfierFactory
 from GoogleDexter.Engine.Algorithms.GoogleAlgorithmsEnum import GoogleAlgorithmsEnum
 from GoogleDexter.Engine.Algorithms.GoogleAlgorithmsFactory import GoogleAlgorithmsFactory
@@ -33,11 +33,11 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
             if alg_type == GoogleAlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
                 algorithm = (algorithm.
                              set_business_owner_id(self.business_owner_id).
-                             set_dexter_config(self.startup.dexter_config).
+                             set_dexter_config(self.config.dexter).
                              set_fuzzyfier_factory(fuzzyfier_factory).
                              set_repository(self._data_repository).
                              set_rules(rules).
-                             set_mongo_config(self.startup.mongo_config))
+                             set_mongo_config(self.config.mongo))
         except Exception as e:
             raise e
 
@@ -45,10 +45,10 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
 
     def run_algorithm(self, search_query, time_interval, mongo_config):
         try:
-            if not self.startup.dexter_config.date_stop:
+            if not self.config.dexter.date_stop:
                 date_stop = datetime.now()
             else:
-                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME)
+                date_stop = datetime.strptime(self.config.dexter.date_stop, DEFAULT_DATETIME)
 
             time_interval_enum = DaysEnum(time_interval)
             campaigns_ids = self._data_repository.get_campaigns_by_account_id(key_value=self.ad_account_id)
@@ -61,7 +61,7 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
                     level=LevelEnum.CAMPAIGN)
                 rule_evaluator.set_time_interval(time_interval_enum)
                 (algorithm.
-                 set_dexter_config(self.startup.dexter_config).
+                 set_dexter_config(self.config.dexter).
                  set_repository(self._data_repository).
                  set_date_stop(date_stop).
                  set_time_interval(time_interval_enum).
@@ -70,7 +70,7 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
 
                 recommendations = algorithm.run(campaign_id)
                 self._recommendations_repository.save_recommendations(recommendations,
-                                                                      self.startup.dexter_config.recommendation_days_last_updated)
+                                                                      self.config.dexter.recommendation_days_last_updated)
                 adgroup_ids = self._data_repository.get_adgroups_by_campaign_id(key_value=campaign_id)
                 for adgroup_id in adgroup_ids:
                     algorithm = self.__init_algorithm(GoogleAlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
@@ -85,7 +85,7 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
 
                     recommendations = algorithm.run(adgroup_id)
                     self._recommendations_repository.save_recommendations(recommendations,
-                                                                          self.startup.dexter_config.recommendation_days_last_updated)
+                                                                          self.config.dexter.recommendation_days_last_updated)
 
                     algorithm = self.__init_algorithm(GoogleAlgorithmsEnum.DEXTER_FUZZY_INFERENCE,
                                                       level=LevelEnum.AD)
@@ -98,7 +98,7 @@ class DefaultGoogleOrchestrator(OrchestratorBase):
                         set_date_stop(date_stop)
                     recommendations = algorithm.run(adgroup_id)
                     self._recommendations_repository.save_recommendations(recommendations,
-                                                                          self.startup.dexter_config.recommendation_days_last_updated)
+                                                                          self.config.dexter.recommendation_days_last_updated)
 
                 update_query = DexterJournalMongoRepositoryHelper.get_update_query_completed()
 

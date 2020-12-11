@@ -1,47 +1,22 @@
-from dataclasses import dataclass
-from string import Template
-
-from FacebookAccounts.Api.Startup import startup
-
-
-@dataclass
-class PermanentTokenGraphAPIRequestBase:
-    _api_version = startup.facebook_config.api_version
-    _app_id = startup.facebook_config.app_id
-    _app_secret = startup.facebook_config.app_secret
+def get_exchange_temporary_token_url(temporary_token, config):
+    return (
+        f"https://graph.facebook.com/{config.facebook.api_version}/oauth/access_token"
+        f"?grant_type=fb_exchange_token"
+        f"&client_id={config.facebook.app_id}"
+        f"&client_secret={config.facebook.app_secret}"
+        f"&fb_exchange_token={temporary_token}"
+    )
 
 
-class ExchangeTemporaryTokenGraphAPIRequest(PermanentTokenGraphAPIRequestBase):
-
-    @classmethod
-    def generate_url(cls, temporary_token):
-        url = Template(
-            "https://graph.facebook.com/$api_version/oauth/access_token?grant_type=fb_exchange_token&client_id=$app_id&client_secret=$app_secret&fb_exchange_token=$temporary_token")
-        url = url.substitute(api_version=cls._api_version, app_id=cls._app_id, app_secret=cls._app_secret,
-                             temporary_token=temporary_token)
-
-        return url
+def get_generate_permanent_token_url(business_owner_facebook_id, exchanged_token, config):
+    return (
+        f"https://graph.facebook.com/{config.facebook.api_version}/{business_owner_facebook_id}/accounts"
+        f"?access_token={exchanged_token}"
+    )
 
 
-class GeneratePermanentTokenGraphAPIRequest(PermanentTokenGraphAPIRequestBase):
-
-    @classmethod
-    def generate_url(cls, business_owner_facebook_id, exchangedToken):
-        url = Template(
-            "https://graph.facebook.com/$api_version/$business_owner_facebook_id/accounts?access_token=$exchangedToken")
-        url = url.substitute(api_version=cls._api_version, business_owner_facebook_id=business_owner_facebook_id,
-                             exchangedToken=exchangedToken)
-
-        return url
-
-
-class DeletePermissionsGraphAPIRequest(PermanentTokenGraphAPIRequestBase):
-
-    @classmethod
-    def generate_url(cls, business_owner_facebook_id, business_owner_permanent_token):
-        url = Template(
-            "https://graph.facebook.com/$api_version/$business_owner_facebook_id/permissions&access_tokne=$business_owner_permanent_token")
-        url = url.substitute(api_version=cls._api_version, business_owner_facebook_id=business_owner_facebook_id,
-                             business_owner_permanent_token=business_owner_permanent_token)
-
-        return url
+def get_delete_permissions_url(business_owner_facebook_id, business_owner_permanent_token, config):
+    return (
+        f"https://graph.facebook.com/{config.facebook.api_version}/{business_owner_facebook_id}/permissions"
+        f"&access_token={business_owner_permanent_token}"
+    )

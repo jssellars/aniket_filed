@@ -9,7 +9,7 @@ class OrchestratorBuilder:
     def __init__(self):
         self.business_owner_id = None
         self.ad_account_id = None
-        self.startup = None
+        self.config = None
         self._channel = None
         self._algorithm_type = None
         self._data_repository = None
@@ -25,8 +25,8 @@ class OrchestratorBuilder:
         self.ad_account_id = ad_account_id
         return self
 
-    def set_startup(self, startup: typing.Any = None):
-        self.startup = startup
+    def set_config(self, config: typing.Any = None):
+        self.config = config
         return self
 
     def set_data_repository(self, repository):

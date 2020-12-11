@@ -12,7 +12,7 @@ from flask_cors import CORS
 from flask_restful import Api
 
 from FacebookPixels.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
-from FacebookPixels.Api.Startup import startup
+from FacebookPixels.Api.startup import config, fixtures
 from FacebookPixels.Api.Controllers.PixelsInsightsCatalogsController import \
     CustomConversionsInsightsCatalogsEndpoint, PixelsInsightsCatalogsEndpoint
 from FacebookPixels.Api.Controllers.PixelsInsightsController import PixelsInsightsEndpoint
@@ -25,23 +25,23 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
 # Version / Healthcheck
-healthcheck_controller = "{base_url}/healthcheck".format(base_url=startup.base_url.lower())
+healthcheck_controller = "{base_url}/healthcheck".format(base_url=config.base_url.lower())
 api.add_resource(HealthCheckEndpoint, healthcheck_controller)
 
-version_controller = "{base_url}/version".format(base_url=startup.base_url.lower())
+version_controller = "{base_url}/version".format(base_url=config.base_url.lower())
 api.add_resource(VersionEndpoint, version_controller)
 
 # Pixel insights catalogs controller
-pixel_insights_catalogs_controller = "{base_url}/pixels/catalogs".format(base_url=startup.base_url.lower())
+pixel_insights_catalogs_controller = "{base_url}/pixels/catalogs".format(base_url=config.base_url.lower())
 api.add_resource(PixelsInsightsCatalogsEndpoint, pixel_insights_catalogs_controller)
 
 custom_conversions_insights_catalogs_controller = "{base_url}/customconversions/catalogs".format(
-    base_url=startup.base_url.lower())
+    base_url=config.base_url.lower())
 api.add_resource(CustomConversionsInsightsCatalogsEndpoint, custom_conversions_insights_catalogs_controller)
 
 # Pixel insights controller
-pixel_insights_controller = "{base_url}/<string:level>/insights".format(base_url=startup.base_url.lower())
+pixel_insights_controller = "{base_url}/<string:level>/insights".format(base_url=config.base_url.lower())
 api.add_resource(PixelsInsightsEndpoint, pixel_insights_controller)
 
 if __name__ == "__main__":
-    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)
+    app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

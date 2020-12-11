@@ -1,12 +1,11 @@
 from datetime import datetime
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
-from FacebookTuring.Api.Startup import startup
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToGraphAPIStructure, \
@@ -19,11 +18,11 @@ class AdsManagerUpdateStructureCommandHandler:
 
     @classmethod
     def handle(cls, command=None, level=None, facebook_id=None, business_owner_facebook_id=None):
-        business_owner_permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+        business_owner_permanent_token = fixtures.business_owner_repository.get_permanent_token(
             business_owner_facebook_id)
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        _ = GraphAPISdkBase(startup.facebook_config, business_owner_permanent_token)
+        _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
         try:
 
             graph_api_client = GraphAPIClientBase(business_owner_permanent_token)
@@ -35,7 +34,7 @@ class AdsManagerUpdateStructureCommandHandler:
             if isinstance(updated_structure, Exception):
                 raise updated_structure
 
-            if not allow_structure_changes(updated_structure, startup):
+            if not allow_structure_changes(updated_structure):
                 return None
 
             structure = LevelToGraphAPIStructure.get(level, facebook_id)
@@ -64,8 +63,8 @@ class AdsManagerUpdateStructureCommandHandler:
             raise e
 
         try:
-            repository = TuringMongoRepository(config=startup.mongo_config,
-                                               database_name=startup.mongo_config['structures_database_name'],
+            repository = TuringMongoRepository(config=config.mongo,
+                                               database_name=config.mongo.structures_database_name,
                                                collection_name=level)
             structure_id = getattr(updated_structure,
                                    LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)

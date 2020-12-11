@@ -5,8 +5,8 @@ from GoogleTuring.Infrastructure.Domain.GoogleSegmentFieldsMetadata import Googl
 
 
 class GoogleSegmentMetadataColumnsPool:
-    #  Structure fields and parameters
-    #  Object names, IDs, statuses, and dates
+    # Structure fields and parameters
+    # Object names, IDs, statuses, and dates
     ad_network_type_1 = ColumnMetadata(GoogleSegmentFieldsMetadata.ad_network_type_1.name, ColumnType.text)
 
     ad_network_type_2 = ColumnMetadata(GoogleSegmentFieldsMetadata.ad_network_type_2.name, ColumnType.text)

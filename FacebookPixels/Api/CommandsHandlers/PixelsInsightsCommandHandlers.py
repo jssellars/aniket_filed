@@ -7,7 +7,7 @@ from FacebookPixels.Api.Mappings.LevelToGraphAPIPixelsInsightsHandler import \
     LevelToGraphAPIPixelsInsightsHandler
 from FacebookPixels.Api.Mappings.PixelsInsightsLevel import PixelsInsightsLevel
 from FacebookPixels.Api.Mappings.PixelsInsightsResponseDtoMapping import PixelsInsightsResponseDtoMapping
-from FacebookPixels.Api.Startup import startup
+from FacebookPixels.Api.startup import config, fixtures
 from FacebookPixels.Infrastructure.Tools.Misc import flatten_pixel_stats
 
 
@@ -19,7 +19,7 @@ class PixelsInsightsCommandHandler:
         graph_api_handler = LevelToGraphAPIPixelsInsightsHandler.get_enum_by_name(pixels_insights_level).value
 
         params = object_to_json(command)
-        insights = graph_api_handler.handle(startup=startup, **params)
+        insights = graph_api_handler.handle(config=config, fixtures=fixtures, **params)
         insights = flatten_pixel_stats(insights)
         response_mapper = PixelsInsightsResponseDtoMapping(target=PixelsInsightsResponseDto)
 

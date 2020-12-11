@@ -1,4 +1,4 @@
-from Core.Tools.Mapper.MapperBase import MappingBase
+from Core.mapper import MappingBase
 
 
 class AdsManagerDuplicateStructureCommandMapping(MappingBase):

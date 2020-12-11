@@ -21,6 +21,17 @@ def authorize_jwt(permission_endpoint):
     return authorize_wrapper
 
 
+def fake_authorize_jwt(permission_endpoint):
+    def authorize_wrapper(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return authorize_wrapper
+
+
 def authorize_permission(permission_endpoint):
     def inner_authorize_permission(permission):
         def authorize_wrapper(func):
@@ -36,6 +47,20 @@ def authorize_permission(permission_endpoint):
                     return func(*args, **kwargs)
 
                 flask_restful.abort(403)
+
+            return wrapper
+
+        return authorize_wrapper
+
+    return inner_authorize_permission
+
+
+def fake_authorize_permission(permission_endpoint):
+    def inner_authorize_permission(permission):
+        def authorize_wrapper(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
 
             return wrapper
 

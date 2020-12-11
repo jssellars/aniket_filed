@@ -5,9 +5,8 @@ from threading import Thread
 
 from flask import make_response, jsonify
 
-from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIAdAccountInsightsHandler import \
     AdWordsAPIAdAccountInsightsHandler
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoRepository import \
@@ -19,12 +18,10 @@ class GoogleAdAccountInsightsHandler(GoogleTokenGetter):
 
     @classmethod
     def __get_all_client_ids_for_business_owner(cls, business_owner_google_id):
-        mongo_conn_handler = MongoConnectionHandler(startup.mongo_config)
-        mongo_repository = GoogleBusinessOwnerMongoRepository(client=mongo_conn_handler.client,
-                                                              database_name=startup.mongo_config[
-                                                                  'google_accounts_database_name'],
-                                                              collection_name=startup.mongo_config[
-                                                                  'accounts_collection_name'])
+        mongo_adapter = fixtures.mongo_adapter
+        mongo_repository = GoogleBusinessOwnerMongoRepository(client=mongo_adapter.client,
+                                                              database_name=config.mongo.google_accounts_database_name,
+                                                              collection_name=config.mongo.accounts_collection_name)
         google_accounts = mongo_repository.get_active_google_accounts(business_owner_google_id)
         client_customer_ids = [google_account['client_customer_id']['google_id'] for google_account in google_accounts]
         return client_customer_ids

@@ -3,8 +3,7 @@ import typing
 from datetime import datetime, timedelta
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
+from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
@@ -191,7 +190,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def change_account_sync_status(self,
                                    accounts_details: typing.List[typing.Dict] = None,
                                    sync_status: AdAccountSyncStatusEnum = None) -> typing.NoReturn:
-        self.set_collection(self.config.accounts_journal_collection_name)
+        self.collection = self.config.accounts_journal_collection_name
 
         for entry in accounts_details:
             # create query to filter entries by business owner and ad account id and status
@@ -225,7 +224,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             self.update_one(query_filter=query_filter, query=query)
 
     def change_account_sync_start_date(self, account_id: typing.AnyStr = None) -> typing.NoReturn:
-        self.set_collection(self.config.accounts_journal_collection_name)
+        self.collection = self.config.accounts_journal_collection_name
         query_filter = {
             MiscFieldsEnum.account_id: {
                 MongoOperator.EQUALS.value: account_id
@@ -247,7 +246,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                                               new_status: AdAccountSyncStatusEnum = None,
                                               start_date: datetime = None,
                                               end_date: datetime = None) -> typing.NoReturn:
-        self.set_collection(self.config.accounts_journal_collection_name)
+        self.collection = self.config.accounts_journal_collection_name
         query_filter = {
             MiscFieldsEnum.account_id: {
                 MongoOperator.EQUALS.value: account_id
@@ -272,7 +271,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                                             new_status: AdAccountSyncStatusEnum = None,
                                             start_date: datetime = None,
                                             end_date: datetime = None) -> typing.NoReturn:
-        self.set_collection(self.config.accounts_journal_collection_name)
+        self.collection = self.config.accounts_journal_collection_name
         query_filter = {
             MiscFieldsEnum.account_id: {
                 MongoOperator.EQUALS.value: account_id
@@ -293,7 +292,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def save_sync_report(self,
                          report: typing.List[SyncStatusReport] = None,
                          created_at: datetime = None) -> typing.NoReturn:
-        self.set_collection(self.config.accounts_journal_sync_reports_collection_name)
+        self.collection = self.config.accounts_journal_sync_reports_collection_name
         document = {
             MiscFieldsEnum.created_at: created_at,
             MiscFieldsEnum.report: [object_to_json(entry) for entry in report]

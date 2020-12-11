@@ -8,8 +8,7 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 import json
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from FacebookPixels.BackgroundTasks.Startup import startup
+from FacebookPixels.BackgroundTasks.startup import config, fixtures
 from FacebookPixels.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookPixels.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
@@ -27,18 +26,13 @@ def callback(ch, method, properties, body):
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
         body = json.loads(body)
-        request_handler.handle(body)
+        request_handler.handle(body, config, fixtures)
     except Exception as e:
         logger.exception(repr(e), extra={"message_type": getattr(properties, "type", None), "event_body": body})
 
 
 def main():
-    RabbitMqClient(
-        startup.rabbitmq_config,
-        startup.exchange_details.name,
-        startup.exchange_details.outbound_queue.key,
-        startup.exchange_details.inbound_queue.name,
-    ).register_callback(callback).register_consumer(startup.rabbitmq_config.consumer_name).start_consuming()
+    fixtures.rabbitmq_adapter.register_callback(callback).register_consumer(config.rabbitmq.consumer_name).start_consuming()
 
 
 if __name__ == "__main__":

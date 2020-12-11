@@ -22,7 +22,7 @@ class RuleEvaluatorBase(RuleEvaluatorBuilder):
     def _split_evaluator_data_by_metric_type(evaluator_data: typing.Dict, rule) -> typing.Dict:
         data = defaultdict(list)
         for key, value in evaluator_data.items():
-            #  We need to use key-1 because antecedents is a list, index starts at ZERO and ids start at ONE
+            # We need to use key-1 because antecedents is a list, index starts at ZERO and ids start at ONE
             metric_type = rule.antecedents[key - 1].metric.type
             data[metric_type] += value
         return data

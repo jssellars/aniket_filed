@@ -8,8 +8,7 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 import json
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from GoogleTuring.BackgroundTasks.Startup import startup
+from GoogleTuring.BackgroundTasks.startup import config, fixtures
 from GoogleTuring.BackgroundTasks.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleTuring.BackgroundTasks.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
@@ -31,11 +30,7 @@ def callback(ch, method, properties, body):
 
 
 def main():
-    # TODO: normalize by adding the same config parsing as in the other projects
-    RabbitMqClient(
-        startup.rabbitmq_config,
-        inbound_queue=startup.direct_inbound_queue.name,
-    ).register_callback(callback).register_consumer("google.turing").start_consuming()
+    fixtures.rabbitmq_adapter.register_callback(callback).register_consumer(config.rabbitmq.consumer_name).start_consuming()
 
 
 if __name__ == "__main__":

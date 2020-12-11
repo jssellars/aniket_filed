@@ -10,7 +10,7 @@ from time import sleep
 
 import schedule
 
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.BackgroundTasks.Orchestrators.Orchestrator import Orchestrator
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
     TuringAdAccountJournalRepository,
@@ -25,15 +25,15 @@ logger = logging.getLogger(__name__)
 
 def sync():
     account_journal_repository = TuringAdAccountJournalRepository(
-        config=startup.mongo_config,
-        database_name=startup.mongo_config.accounts_journal_database_name,
-        collection_name=startup.mongo_config.accounts_journal_collection_name,
+        config=config.mongo,
+        database_name=config.mongo.accounts_journal_database_name,
+        collection_name=config.mongo.accounts_journal_collection_name,
     )
     insights_repository = TuringMongoRepository(
-        config=startup.mongo_config, database_name=startup.mongo_config.insights_database_name
+        config=config.mongo, database_name=config.mongo.insights_database_name
     )
     structures_repository = TuringMongoRepository(
-        config=startup.mongo_config, database_name=startup.mongo_config.structures_database_name
+        config=config.mongo, database_name=config.mongo.structures_database_name
     )
     try:
         (
@@ -48,7 +48,7 @@ def sync():
 
 
 def main():
-    schedule.every().day.at(startup.sync_time).do(sync)
+    schedule.every().day.at(config.sync_time).do(sync)
 
     while True:
         schedule.run_pending()

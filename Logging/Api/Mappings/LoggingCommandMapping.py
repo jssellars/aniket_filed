@@ -2,7 +2,7 @@ import typing
 
 from marshmallow import INCLUDE, post_load
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 
 
 class LoggingCommandMapping(MapperBase):

@@ -33,7 +33,7 @@ class FacebookAvailableMetricEnum(EnumerationBase):
                                numerator=FacebookAvailableMetricsEnum.SPEND.value,
                                denominator=FacebookAvailableMetricsEnum.PURCHASES.value,
                                mtype=FacebookMetricTypeEnum.INSIGHT)
-    #  total_spent / total_thruplay
+    # total_spent / total_thruplay
     COST_PER_THRUPLAY = Metric(name=FieldsMetadata.cost_per_thru_play.name, display_name="Cost per thru play",
                                numerator=FacebookAvailableMetricsEnum.SPEND.value,
                                denominator=FacebookAvailableMetricsEnum.THRUPLAYS.value,
@@ -47,12 +47,12 @@ class FacebookAvailableMetricEnum(EnumerationBase):
                 numerator=FacebookAvailableMetricsEnum.CONVERSIONS.value,
                 denominator=FacebookAvailableMetricsEnum.UNIQUE_CLICKS.value, mtype=FacebookMetricTypeEnum.INSIGHT,
                 multiplier=1000)
-    #  engagement_rate = ( likes + comments + shares + clicks + views) / reach. FB provides this metric
+    # engagement_rate = ( likes + comments + shares + clicks + views) / reach. FB provides this metric
     ENGAGEMENT_RATE = Metric(name=FieldsMetadata.post_engagement.name, display_name="Engagement rate",
                              numerator=[FacebookAvailableMetricsEnum.POST_ENGAGEMENT.value],
                              denominator=FacebookAvailableMetricsEnum.REACH.value,
                              mtype=FacebookMetricTypeEnum.INSIGHT)
-    #  roas = purchase_value / spend
+    # roas = purchase_value / spend
     ROAS = Metric(name=FieldsMetadata.purchase_roas.name, display_name="ROAS",
                   numerator=FacebookAvailableMetricsEnum.PURCHASES_VALUE.value,
                   denominator=FacebookAvailableMetricsEnum.SPEND.value, mtype=FacebookMetricTypeEnum.INSIGHT)

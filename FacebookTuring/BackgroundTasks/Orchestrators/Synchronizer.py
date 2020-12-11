@@ -5,7 +5,7 @@ from threading import Thread
 
 from bson import BSON
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
+from Core.mongo_adapter import MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     AdSetOptimizationToResult,
@@ -22,7 +22,7 @@ from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields impo
     INSIGHTS_SYNCHRONIZER_FIELDS,
 )
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.BackgroundTasks.SynchronizerConfig import SynchronizerConfigRuntime, SynchronizerConfigStatic
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
@@ -87,19 +87,19 @@ def sync(
                     date_start=last_synced_on,
                 )
 
-                # start a new thread for synchronizing structures
-                structure_thread = Thread(target=sync_structures, args=[user_config_static, user_config_runtime])
+                # Structures needs to be synced first in order to get the result type for insights (AdSet level needed)
+                # Careful if doing multithreading about this, there are some problems with the SQL connections if
+                # initiated multiple times at the same time
+                user_config_runtime.account_journal_repository.change_account_structures_sync_status(
+                    user_config_runtime.account_id, AdAccountSyncStatusEnum.PENDING, start_date=datetime.now()
+                )
+                user_config_runtime.account_journal_repository.change_account_insights_sync_status(
+                    user_config_runtime.account_id, AdAccountSyncStatusEnum.PENDING, start_date=datetime.now()
+                )
 
-                # start a new thread for synchronizing all insights
-                insights_thread = Thread(target=sync_insights, args=[user_config_static, user_config_runtime])
+                sync_structures(user_config_static=user_config_static, user_config_runtime=user_config_runtime)
+                sync_insights(user_config_static=user_config_static, user_config_runtime=user_config_runtime)
 
-                # run synchronizer threads
-                structure_thread.start()
-                insights_thread.start()
-
-                # wait for current account sync to finish
-                structure_thread.join()
-                insights_thread.join()
 
             except Exception as e:
                 logger.exception(
@@ -108,9 +108,6 @@ def sync(
                 )
 
         levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
-        update_results_for_insights(
-            insights_repository=insights_repository, structures_repository=structures_repository, levels=levels
-        )
 
         delete_old_insights(insights_repository=insights_repository)
 
@@ -218,7 +215,7 @@ def sync_structures(
         try:
             (
                 synchronizer.set_mongo_repository(user_config_runtime.structure_repository)
-                .set_facebook_config(startup.facebook_config)
+                .set_facebook_config(config.facebook)
                 .run()
             )
         except Exception as e:
@@ -281,7 +278,7 @@ def update_status_for_completed_structures(
         if structure[MiscFieldsEnum.status] == StructureStatusEnum.COMPLETED.value
     ]
 
-    structures_repository.set_collection(level)
+    structures_repository.collection = level
     structures_repository.update_structure_status(
         structure_key=structure_key,
         structure_ids=completed_structure_ids,
@@ -327,7 +324,7 @@ def mark_completed_adset(adsets: typing.List[typing.Dict] = None) -> int:
 def delete_old_insights(insights_repository: TuringMongoRepository) -> typing.NoReturn:
     insights_collections = insights_repository.get_collections()
     for insights_collection in insights_collections:
-        insights_repository.set_collection(insights_collection)
+        insights_repository.collection = insights_collection
         date = (datetime.now() - timedelta(days=DAYS_UNTIL_OBSOLETE)).date().isoformat()
         insights_repository.delete_many_older_than_date(date)
 
@@ -338,7 +335,7 @@ def delete_old_structures(
     business_owner_id: typing.AnyStr = None,
 ) -> typing.NoReturn:
     for level in levels:
-        structure_repository.set_collection(level.value)
+        structure_repository.collection = level.value
 
         query = {
             MongoOperator.AND.value: [
@@ -427,9 +424,7 @@ def update_results_for_insights(
         if level in [Level.CAMPAIGN, Level.ADSET]:
             for breakdown in InsightsSynchronizerBreakdownEnum:
                 for action_breakdown in InsightsSynchronizerActionBreakdownEnum:
-                    insights_repository.set_collection(
-                        level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
-                    )
+                    insights_repository.collection = level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
                     structure_key = LevelIdKeyEnum.get_enum_by_name(level.value.upper()).value
                     update_insight_records_with_result(
                         level=level.value,
@@ -439,14 +434,12 @@ def update_results_for_insights(
                     )
 
         else:
-            insights_repository.set_collection(
-                "_".join(
-                    [
-                        level.value,
-                        InsightsSynchronizerBreakdownEnum.NONE.value.name,
-                        InsightsSynchronizerActionBreakdownEnum.NONE.value.name
-                    ]
-                )
+            insights_repository.collection = "_".join(
+                [
+                    level.value,
+                    InsightsSynchronizerBreakdownEnum.NONE.value.name,
+                    InsightsSynchronizerActionBreakdownEnum.NONE.value.name
+                ]
             )
 
             structure_key = LevelIdKeyEnum.get_enum_by_name(level.ADSET.name.upper()).value

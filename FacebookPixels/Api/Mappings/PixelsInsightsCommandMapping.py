@@ -1,6 +1,6 @@
 from marshmallow import INCLUDE
 
-from Core.Tools.Mapper.MapperBase import MappingBase
+from Core.mapper import MappingBase
 
 
 class PixelsInsightsCommandMapping(MappingBase):

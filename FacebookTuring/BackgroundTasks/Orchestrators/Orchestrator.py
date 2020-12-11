@@ -5,9 +5,8 @@ from collections import defaultdict
 from datetime import datetime
 from threading import Thread
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
@@ -77,30 +76,13 @@ class Orchestrator:
 
         # for each BO for each ad account, start a structures sync thread and an insights sync thread
         for business_owner_id, business_owner_details in business_owners.items():
-            tasks = list()
-            step = math.ceil(self.ACCOUNTS_PER_THREAD * len(business_owner_details))
-            for index in range(0, len(business_owner_details), step):
-                entry = business_owner_details[index: index + step]
-                tasks.append(
-                    Thread(
-                        target=sync,
-                        args=(
-                            self.__structures_repository.new_structures_repository(),
-                            self.__insights_repository.new_insights_repository(),
-                            self.__account_journal_repository.new_ad_account_journal_repository(),
-                            entry,
-                            user_type,
-                        ),
-                    )
-                )
-            for task in tasks:
-                task.start()
-            # publish event with updated ad accounts to Facebook Dexter
-            # this publish event can be modified to publish one update for all BOs available. It makes more sense to
-            # publish as they come to minimise the
-            # waiting time for Dexter to run and the computation volume.
-            for task in tasks:
-                task.join()
+            sync(
+                self.__structures_repository.new_structures_repository(),
+                self.__insights_repository.new_insights_repository(),
+                self.__account_journal_repository.new_ad_account_journal_repository(),
+                business_owner_details,
+                user_type,
+            )
 
             # # uncomment to test in sync
             # sync(self.__structures_repository.new_structures_repository(),
@@ -143,10 +125,8 @@ class Orchestrator:
             business_owners=[business_owner_updated_details]
         )
         try:
-            rabbitmq_client = RabbitMqClient(
-                startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
-            )
-            rabbitmq_client.publish(business_owner_synced_event)
-            logger.info({"rabbitmq": rabbitmq_client.serialize_message(business_owner_synced_event)})
+            rabbitmq_adapter = fixtures.rabbitmq_adapter
+            rabbitmq_adapter.publish(business_owner_synced_event)
+            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(business_owner_synced_event)})
         except Exception as e:
             logger.exception(f"{business_owner_synced_event.message_type} || {repr(e)}")

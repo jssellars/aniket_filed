@@ -25,7 +25,7 @@ from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import Dext
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
 from FacebookDexter.Api.Commands.DexterApiGetRecommendationsPageCommand import DexterApiGetRecommendationsPageCommand
-from FacebookDexter.Api.Startup import startup
+from FacebookDexter.Api.startup import config, fixtures
 
 
 import logging
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 class GetRecommendationsPage(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         logger.info(request_as_log_dict(request))
         data = request.get_json()
@@ -63,7 +63,7 @@ class GetRecommendationsPage(Resource):
 
 
 class GetCountsByCategory(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         logger.info(request_as_log_dict(request))
         data = request.get_json()
@@ -89,7 +89,7 @@ class GetCountsByCategory(Resource):
 
 
 class DismissRecommendation(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.OPTIMIZE_DELETE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.OPTIMIZE_DELETE)
     def patch(self):
         logger.info(request_as_log_dict(request))
         data = request.args
@@ -109,7 +109,7 @@ class DismissRecommendation(Resource):
 
 
 class ApplyRecommendation(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def patch(self):
         logger.info(request_as_log_dict(request))
         data = request.args

@@ -433,7 +433,7 @@ class FieldsMetricStandardEventsMetadata:
                                                               field_value=GraphAPIInsightsFields.adds_to_cart)]),
                                      action_breakdowns=[GraphAPIInsightsFields.action_type],
                                      field_type=FieldType.ACTION_INSIGHT)
-    #  app activations
+    # app activations
     app_activations_total = Field(name='app_activations_total',
                                   facebook_fields=[GraphAPIInsightsFields.actions],
                                   mapper=ActionFieldMapper(
@@ -1026,7 +1026,7 @@ class FieldsMetricStandardEventsMetadata:
                                                               field_value=GraphAPIInsightsFields.mobile_app_purchase_roas)]),
                                      action_breakdowns=[GraphAPIInsightsFields.action_type],
                                      field_type=FieldType.ACTION_INSIGHT)
-    #  purchases
+    # purchases
     purchases_total = Field(name='purchases_total',
                             facebook_fields=[GraphAPIInsightsFields.actions],
                             mapper=ActionFieldMapper(
@@ -1323,7 +1323,7 @@ class FieldsMetricStandardEventsMetadata:
                                                                         field_value=GraphAPIInsightsFields.searches)]),
                                  action_breakdowns=[GraphAPIInsightsFields.action_type],
                                  field_type=FieldType.ACTION_INSIGHT)
-    #  subscriptions
+    # subscriptions
     subscriptions_total = Field(name='subscriptions_total',
                                 facebook_fields=[GraphAPIInsightsFields.actions],
                                 mapper=ActionFieldMapper(

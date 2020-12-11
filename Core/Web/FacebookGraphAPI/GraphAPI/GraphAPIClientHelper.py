@@ -130,7 +130,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
 
         return response, next_page_cursor, summary
 
-    #  ====== Helper methods ====== #
+    #  ====== Helper methods ====== #
     async def _loop_graph_api_for_async_response(self, response, async_trials: int = None):
         """Helper method to continually probe FB async job report until completed or failure"""
         retry_num = 1

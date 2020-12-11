@@ -1,6 +1,6 @@
 from marshmallow import fields, EXCLUDE
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 
 
 class GetAllAppsMessageRequestMapping(MapperBase):

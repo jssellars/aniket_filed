@@ -13,7 +13,7 @@ from FacebookAccounts.Api.CommandsHandlers.BusinessOwnerCommandHandler import Bu
 from FacebookAccounts.Api.CommandsHandlers.BusinessOwnerDeletePermissionsCommandHandler import \
     BusinessOwnerDeletePermissionsCommandHandler
 from FacebookAccounts.Api.Mappings import BusinessOwnerCommandsMappings
-from FacebookAccounts.Api.Startup import startup
+from FacebookAccounts.Api.startup import config, fixtures
 
 
 import logging
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class BusinessOwnerEndpoint(Resource):
-    @startup.authorize_permission(permission=MiscellaneousPermissions.MISCELLANEOUS_FACEBOOK_ACCESS)
+    @fixtures.authorize_permission(permission=MiscellaneousPermissions.MISCELLANEOUS_FACEBOOK_ACCESS)
     def post(self):
         # log request information
         logger.info(request_as_log_dict(request))
@@ -46,7 +46,7 @@ class BusinessOwnerEndpoint(Resource):
 
 
 class BusinessOwnerDeletePermissionsEndpoint(Resource):
-    @startup.authorize_permission(permission=SettingsPermissions.SETTINGS_MANAGE_PERMISSIONS_EDIT)
+    @fixtures.authorize_permission(permission=SettingsPermissions.SETTINGS_MANAGE_PERMISSIONS_EDIT)
     def delete(self, permissions: typing.List[typing.AnyStr] = None):
         # log request information
         logger.info(request_as_log_dict(request))

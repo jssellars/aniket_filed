@@ -5,13 +5,12 @@ from time import sleep
 
 from facebook_business.exceptions import FacebookRequestError
 
-from Core.Tools.MongoRepository.PreprocessUtils import PreprocessUtils
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
+from Core import mongo_adapter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSynchronizerBreakdownEnum
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -50,6 +49,7 @@ class InsightsSynchronizer:
             if self.breakdown is not None and self.breakdown != InsightsSynchronizerBreakdownEnum.NONE.value:
                 self.requested_fields += [self.breakdown]
             response = GraphAPIInsightsHandler.get_reports_insights(
+                config,
                 permanent_token=self.permanent_token,
                 ad_account_id=self.__ad_account_id,
                 fields=self.__get_fields(),
@@ -58,8 +58,8 @@ class InsightsSynchronizer:
                 level=self.level.value,
             )
 
-            response = PreprocessUtils.filter_null_values_from_documents(response)
-            self.__mongo_repository.set_collection(self.__get_mongo_repository_collection())
+            response = mongo_adapter.filter_null_values_from_documents(response)
+            self.__mongo_repository.collection = self.__get_mongo_repository_collection()
             self.__mongo_repository.add_many(response)
         except FacebookRequestError as fb_ex:
             if fb_ex.http_status() == self.RATE_LIMIT_EXCEPTION_STATUS:
@@ -78,7 +78,7 @@ class InsightsSynchronizer:
             retries = 0
             while self.__permanent_token is None and retries < self.__permanent_token_retries:
                 try:
-                    self.__permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
+                    self.__permanent_token = fixtures.business_owner_repository.get_permanent_token(
                         self.business_owner_id
                     )
                 except Exception as e:
@@ -134,6 +134,7 @@ class InsightsSynchronizer:
         }
         try:
             response = GraphAPIInsightsHandler.get_reports_insights(
+                config,
                 permanent_token=self.permanent_token,
                 ad_account_id=self.__ad_account_id,
                 fields=[FieldsMetadata.impressions.name],

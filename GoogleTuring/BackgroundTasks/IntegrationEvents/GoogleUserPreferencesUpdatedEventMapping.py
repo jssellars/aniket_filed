@@ -1,6 +1,6 @@
 from marshmallow import fields, EXCLUDE
 
-from Core.Tools.Mapper.MapperBase import MapperBase, MapperNestedField
+from Core.mapper import MapperBase, MapperNestedField
 from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdatedEvent import Customer
 
 

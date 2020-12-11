@@ -4,7 +4,7 @@ from FacebookTuring.Infrastructure.Domain.QueryBuilder.InsightsQuery import Insi
     InsightsQuery, InsightsQueryDimension, InsightsQueryColumn, InsightsQueryCondition
 from marshmallow import EXCLUDE, fields, post_load
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
 

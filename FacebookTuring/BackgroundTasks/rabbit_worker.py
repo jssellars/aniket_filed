@@ -6,8 +6,7 @@ path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.BackgroundTasks.FacebookTuringHandlers import FACEBOOK_TURING_HANDLERS
 from FacebookTuring.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
@@ -32,18 +31,13 @@ def callback(ch, method, properties, body):
 
     try:
         handler = FACEBOOK_TURING_HANDLERS.get(message_type, None)
-        handler(request_handler, body, startup)
+        handler(request_handler, body, config)
     except Exception as e:
         logger.exception(repr(e), extra={"message_type": message_type, "integration_event_body": body})
 
 
 def main():
-    RabbitMqClient(
-        startup.rabbitmq_config,
-        startup.exchange_details.name,
-        startup.exchange_details.outbound_queue.key,
-        startup.exchange_details.inbound_queue.name,
-    ).register_callback(callback).register_consumer(startup.rabbitmq_config.consumer_name).start_consuming()
+    fixtures.rabbitmq_adapter.register_callback(callback).register_consumer(config.rabbitmq.consumer_name).start_consuming()
 
 
 if __name__ == "__main__":

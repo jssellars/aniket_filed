@@ -8,8 +8,7 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 from Core.Dexter.PersistanceLayer.DexterJournalMongoRepository import DexterJournalMongoRepository
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from GoogleDexter.BackgroundTasks.Startup import startup
+from GoogleDexter.BackgroundTasks.startup import config, fixtures
 from GoogleDexter.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
 from GoogleDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
 
@@ -32,19 +31,19 @@ def callback(ch, method, properties, body):
         return
 
     try:
-        # data_repository = GoogleDexterMongoRepository(config=startup.mongo_config)
+        # data_repository = GoogleDexterMongoRepository(config=config.mongo)
         recommendations_repository = DexterRecommendationsMongoRepository(
-            config=startup.mongo_config,
-            database_name=startup.mongo_config.recommendations_database_name,
-            collection_name=startup.mongo_config.recommendations_collection_name,
+            config=config.mongo,
+            database_name=config.mongo.recommendations_database_name,
+            collection_name=config.mongo.recommendations_collection_name,
         )
         journal_repository = DexterJournalMongoRepository(
-            config=startup.mongo_config,
-            database_name=startup.mongo_config.journal_database_name,
-            collection_name=startup.mongo_config.journal_collection_name,
+            config=config.mongo,
+            database_name=config.mongo.journal_database_name,
+            collection_name=config.mongo.journal_collection_name,
         )
         (
-            request_handler.set_startup(startup)
+            request_handler.set_config(config)
             # .set_data_repository(data_repository)
             .set_journal_repository(journal_repository)
             .set_recommendations_repository(recommendations_repository)
@@ -55,12 +54,7 @@ def callback(ch, method, properties, body):
 
 
 def main():
-    RabbitMqClient(
-        startup.rabbitmq_config,
-        startup.exchange_details.name,
-        startup.exchange_details.outbound_queue.key,
-        startup.exchange_details.inbound_queue.name,
-    ).register_callback(callback).register_consumer(startup.rabbitmq_config.consumer_name).start_consuming()
+    fixtures.rabbitmq_adapter.register_callback(callback).register_consumer(config.rabbitmq.consumer_name).start_consuming()
 
 
 if __name__ == "__main__":

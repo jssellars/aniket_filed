@@ -4,9 +4,8 @@ from bson import BSON
 
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
-from Core.Tools.MongoRepository.MongoRepositoryStatusBase import MongoRepositoryStatusBase
+from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, \
+    MongoRepositoryStatus, MongoOperator
 from GoogleDexter.Infrastructure.Domain.Breakdowns import GoogleActionBreakdownEnum, GoogleBreakdownEnum
 from GoogleDexter.Infrastructure.Domain.LevelEnums import GoogleLevelIdKeyEnum, GoogleLevelNameKeyEnum
 
@@ -19,7 +18,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
     def is_available(self, level: LevelEnum = None, key_value: typing.AnyStr = None) -> bool:
         self._database = self._client[self._config.insights_database]
         collection_name = level.value + "_" + GoogleBreakdownEnum.NONE.value.name + "_" + GoogleActionBreakdownEnum.NONE.value.name
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             GoogleLevelIdKeyEnum.get_enum_by_name(level.name).value: {
@@ -40,7 +39,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         typing.Tuple[typing.AnyStr, typing.AnyStr]]:
         self._database = self._client[self._config.insights_database]
         collection_name = level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             MongoOperator.AND.value: [
@@ -94,7 +93,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         collection_name = (level.value + "_" +
                            breakdown_metadata.breakdown.value.name + "_" +
                            breakdown_metadata.action_breakdown.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         # build mongo query
         query = [
@@ -133,7 +132,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
             }
         ]
 
-        #  add breakdown to group by
+        # add breakdown to group by
         if breakdown_metadata.breakdown != GoogleBreakdownEnum.NONE:
             query[0][MongoOperator.GROUP.value][MongoOperator.GROUP_KEY.value][
                 breakdown_metadata.breakdown.value.name] = \
@@ -178,7 +177,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         collection_name = (level.value + "_" +
                            breakdown_metadata.breakdown.value.name + "_" +
                            breakdown_metadata.action_breakdown.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         # build mongo query
         query = [
@@ -208,7 +207,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
             }
         ]
 
-        #  add breakdown to group by
+        # add breakdown to group by
         if breakdown_metadata.breakdown != GoogleBreakdownEnum.NONE:
             query[0][MongoOperator.GROUP.value][MongoOperator.GROUP_KEY.value][
                 breakdown_metadata.breakdown.value.name] = \
@@ -253,7 +252,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         collection_name = (level.value + "_" +
                            breakdown_metadata.breakdown.value.name + "_" +
                            breakdown_metadata.action_breakdown.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         # build mongo query
         query = [
@@ -284,7 +283,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
             }
         ]
 
-        #  add breakdown to group by
+        # add breakdown to group by
         if breakdown_metadata.breakdown != GoogleBreakdownEnum.NONE:
             query[0][MongoOperator.GROUP.value][MongoOperator.GROUP_KEY.value][
                 breakdown_metadata.breakdown.value.name] = \
@@ -324,7 +323,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                                             key_value: typing.AnyStr = None,
                                             level: LevelEnum = None) -> typing.Union[typing.Dict, typing.NoReturn]:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(level.value)
+        self.collection = level.value
 
         # build mongo query
         query = {
@@ -336,7 +335,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                 },
                 {
                     "status": {
-                        MongoRepositoryStatusBase.ACTIVE.value
+                        MongoRepositoryStatus.ACTIVE.value
                     }
                 }
             ]
@@ -358,7 +357,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
 
     def get_ad_account_id(self, key_value: typing.AnyStr = None, level: LevelEnum = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(level.value)
+        self.collection = level.value
 
         # build mongo query
         query = {
@@ -369,7 +368,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    "status": MongoRepositoryStatusBase.ACTIVE.value
+                    "status": MongoRepositoryStatus.ACTIVE.value
                 }
             ]
         }
@@ -392,7 +391,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                               key_value: typing.AnyStr = None,
                               level: LevelEnum = None) -> typing.Union[typing.Dict, typing.NoReturn]:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(level.value)
+        self.collection = level.value
 
         # build mongo query
         query = {
@@ -404,7 +403,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                 },
                 {
                     "status": {
-                        MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value
+                        MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value
                     }
                 }
             ]
@@ -426,7 +425,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         collection_name = (LevelEnum.AD.value + "_" +
                            GoogleBreakdownEnum.NONE.value.name + "_" +
                            GoogleActionBreakdownEnum.NONE.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             GoogleLevelIdKeyEnum.ADGROUP.value: {MongoOperator.EQUALS.value: key_value},
@@ -444,7 +443,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         collection_name = (LevelEnum.ADGROUP.value + "_" +
                            GoogleBreakdownEnum.NONE.value.name + "_" +
                            GoogleActionBreakdownEnum.NONE.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             GoogleLevelIdKeyEnum.CAMPAIGN.value: {MongoOperator.EQUALS.value: key_value},
@@ -461,7 +460,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
         collection_name = (LevelEnum.CAMPAIGN.value + "_" +
                            GoogleBreakdownEnum.NONE.value.name + "_" +
                            GoogleActionBreakdownEnum.NONE.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             GoogleLevelIdKeyEnum.ACCOUNT.value: {MongoOperator.EQUALS.value: key_value}
@@ -475,7 +474,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
 
     def get_adgroup_id_by_campaign_id(self, key_value: typing.AnyStr = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(LevelEnum.ADGROUP.value)
+        self.collection = LevelEnum.ADGROUP.value
 
         query = {
             MongoOperator.AND.value: [
@@ -483,7 +482,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                     GoogleLevelIdKeyEnum.CAMPAIGN.value: {MongoOperator.EQUALS.value: key_value},
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }
@@ -497,7 +496,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
 
     def get_adgroup_id_by_ad_id(self, key_value: typing.AnyStr = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(LevelEnum.AD.value)
+        self.collection = LevelEnum.AD.value
 
         query = {
             MongoOperator.AND.value: [
@@ -505,7 +504,7 @@ class GoogleDexterMongoRepository(MongoRepositoryBase):
                     GoogleLevelIdKeyEnum.ADGROUP.value: {MongoOperator.EQUALS.value: key_value},
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }

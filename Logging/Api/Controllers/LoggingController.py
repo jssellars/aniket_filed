@@ -9,7 +9,7 @@ from Core.logging_config import request_as_log_dict
 from Core.Web.Security.JWTTools import extract_field_user_id
 from Logging.Api.Commands.LoggingCommand import LoggingCommand
 from Logging.Api.Mappings.LoggingCommandMapping import LoggingCommandMapping
-from Logging.Api.Startup import startup
+from Logging.Api.startup import config, fixtures
 from Logging.Infrastructure.PersistenceLayer.LoggingMongoRepository import LoggingMongoRepository
 
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class LoggingEndpoint(Resource):
-    @startup.authorize_jwt
+    @fixtures.authorize_jwt
     def post(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -46,9 +46,9 @@ class LoggingEndpoint(Resource):
             command.timestamp = datetime.isoformat(datetime.now())
 
             # save request
-            repository = LoggingMongoRepository(config=startup.mongo_config,
-                                                database_name=startup.mongo_config.logging_database_name,
-                                                collection_name=startup.mongo_config.logging_collection_name)
+            repository = LoggingMongoRepository(config=config.mongo,
+                                                database_name=config.mongo.logging_database_name,
+                                                collection_name=config.mongo.logging_collection_name)
             repository.add_one(command)
 
             return Response(status=200, mimetype='application/json')

@@ -4,7 +4,7 @@ import typing
 from bson import BSON
 from marshmallow import pre_load, INCLUDE
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum

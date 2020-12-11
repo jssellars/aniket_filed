@@ -574,7 +574,7 @@ RULES_ADSET_GENERAL = [
                             expected_value=FacebookLinguisticVariableEnum.DECREASING)
              ]),
 
-    #  page likes
+    # page likes
     RuleBase(rtype=FacebookRuleTypeEnum.AUDIENCE,
              channel=ChannelEnum.FACEBOOK,
              category=FacebookRuleCategoryEnum.IMPROVE_CPR,

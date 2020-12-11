@@ -6,7 +6,7 @@ from flask_restful import Resource
 from Core.logging_config import request_as_log_dict
 from Core.Web.Security.Permissions import PixelPermissions
 from FacebookPixels.Api.Dtos.PixelsInsightsCatalogsDto import PixelsInsightsCatalogsDto
-from FacebookPixels.Api.Startup import startup
+from FacebookPixels.Api.startup import config, fixtures
 
 
 import logging
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class PixelsInsightsCatalogsEndpoint(Resource):
-    @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
+    @fixtures.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -29,7 +29,7 @@ class PixelsInsightsCatalogsEndpoint(Resource):
 
 
 class CustomConversionsInsightsCatalogsEndpoint(Resource):
-    @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
+    @fixtures.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:

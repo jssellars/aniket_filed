@@ -2,7 +2,7 @@ import typing
 
 from marshmallow import fields, pre_load, EXCLUDE
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from GoogleTuring.Infrastructure.Mappings.LevelMapping import LevelToGoogleIdKeyMapping, \
     LevelToGoogleNameKeyMapping

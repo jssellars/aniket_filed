@@ -2,7 +2,7 @@ import typing
 
 from marshmallow import EXCLUDE, fields, pre_load
 
-from Core.Tools.Mapper.MapperBase import MapperNestedField, MapperBase
+from Core.mapper import MapperNestedField, MapperBase
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignTree
 
 

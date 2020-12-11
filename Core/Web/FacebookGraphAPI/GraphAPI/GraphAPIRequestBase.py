@@ -63,7 +63,7 @@ class GraphAPIRequestBase:
         if self._filter:
             graph_api_request += "&filtering={value}".format(value=self._filter)
 
-        #  Combine request components
+        # Combine request components
         graph_api_request_other_params = Template(
             "&access_token=$business_owner_permanent_facebook_token&limit=$limit").safe_substitute(limit=self._limit,
                                                                                                    business_owner_permanent_facebook_token=self.business_owner_permanent_token)

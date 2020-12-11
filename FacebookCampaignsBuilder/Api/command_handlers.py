@@ -9,11 +9,10 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from FacebookCampaignsBuilder.Api import commands
-from FacebookCampaignsBuilder.Api.Startup import startup
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderHandler import (
     GraphAPIAdBuilderHandler,
 )
@@ -379,11 +378,9 @@ class SmartCreatePublish:
     @classmethod
     def publish_response(cls, response):
         try:
-            rabbitmq_client = RabbitMqClient(
-                startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
-            )
-            rabbitmq_client.publish(response)
-            logger.info({"rabbitmq": rabbitmq_client.serialize_message(response)})
+            rabbitmq_adapter = fixtures.rabbitmq_adapter
+            rabbitmq_adapter.publish(response)
+            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(response)})
         except Exception as e:
             raise e
 

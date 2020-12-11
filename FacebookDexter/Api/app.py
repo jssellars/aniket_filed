@@ -20,7 +20,7 @@ from FacebookDexter.Api.Controllers.RecommendationsController import (
 from FacebookDexter.Api.Queries.DexterApiGetActionHistoryQuery import GetActionHistoryQuery
 from FacebookDexter.Api.Queries.DexterApiGetCampaignsQuery import GetCampaignsQuery
 from FacebookDexter.Api.Queries.DexterApiGetRecommendationQuery import GetRecommendationQuery
-from FacebookDexter.Api.Startup import startup
+from FacebookDexter.Api.startup import config, fixtures
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -43,8 +43,8 @@ router_route_pairs = (
 )
 
 for router, route in router_route_pairs:
-    api.add_resource(router, f"{startup.base_url.lower()}/{route}")
+    api.add_resource(router, f"{config.base_url.lower()}/{route}")
 
 
 if __name__ == '__main__':
-    app.run(debug=startup.logger_level == "DEBUG", host='localhost', port=startup.port)
+    app.run(debug=config.logger_level == "DEBUG", host='localhost', port=config.port)

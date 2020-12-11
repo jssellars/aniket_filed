@@ -324,7 +324,7 @@ class FacebookActionDetailsBuilder:
                   structure_details: typing.Dict = None,
                   value: typing.List[typing.AnyStr] = None, *args, **kwargs) -> \
             typing.Tuple[typing.Union[typing.Dict, typing.NoReturn], bool]:
-        #  todo: find out how to implement an age group split ( i.e. remove age 25-30 )
+        # todo: find out how to implement an age group split ( i.e. remove age 25-30 )
         age_range = [int(age_group.replace("+", ""))
                      for entry in value
                      for age_group in entry.split("-")]

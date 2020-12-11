@@ -1,7 +1,5 @@
 import json
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from FacebookAccounts.BackgroundTasks.Startup import startup
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountSpentHandler import \
     GraphAPIAdAccountSpentHandler
 from FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequest import \
@@ -19,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class GetAdAccountsAmountSpentInsightMessageRequestHandler:
     @classmethod
-    def handle(cls, message_body):
+    def handle(cls, message_body, config, fixtures):
         try:
             if isinstance(message_body, str) or isinstance(message_body, bytes):
                 message_body = json.loads(message_body)
@@ -27,7 +25,7 @@ class GetAdAccountsAmountSpentInsightMessageRequestHandler:
                 GetAdAccountsAmountSpentInsightMessageRequest)
             request = request_mapper.load(message_body)
 
-            ad_accounts_amount_spent, _ = GraphAPIAdAccountSpentHandler.handle(request)
+            ad_accounts_amount_spent, _ = GraphAPIAdAccountSpentHandler.handle(request, config, fixtures)
 
             response = GetAdAccountsAmountSpentInsightMessageResponse(filed_user_id=request.filed_user_id,
                                                                       user_id=request.user_id,
@@ -37,14 +35,13 @@ class GetAdAccountsAmountSpentInsightMessageRequestHandler:
         except Exception as e:
             raise e
 
-        cls.publish(response)
+        cls.publish(response, fixtures)
 
     @classmethod
-    def publish(cls, response):
+    def publish(cls, response, fixtures):
         try:
-            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name,
-                                             startup.exchange_details.outbound_queue.key)
-            rabbitmq_client.publish(response)
-            logger.info(response.message_type, extra=dict(rabbitmq=rabbitmq_client.serialize_message(response)))
+            rabbitmq_adapter = fixtures.rabbitmq_adapter
+            rabbitmq_adapter.publish(response)
+            logger.info(response.message_type, extra=dict(rabbitmq=rabbitmq_adapter.serialize_message(response)))
         except Exception as e:
             raise e

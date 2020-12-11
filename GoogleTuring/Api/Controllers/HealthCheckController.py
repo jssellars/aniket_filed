@@ -3,12 +3,12 @@ import json
 from flask import Response
 from flask_restful import Resource
 
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 
 
 class VersionEndpoint(Resource):
     def get(self):
-        response = {"app_name": startup.name, "app_version": startup.version, "environment": startup.environment}
+        response = {"app_name": config.name, "app_version": config.version, "environment": config.environment}
         return Response(response=json.dumps(response), status=200, mimetype='application/json')
 
 

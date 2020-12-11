@@ -13,7 +13,7 @@ from flask_cors import CORS
 from flask_restful import Api
 
 from FacebookCampaignsBuilder.Api import routers
-from FacebookCampaignsBuilder.Api.Startup import startup
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -45,8 +45,8 @@ router_route_pairs = (
     (routers.SmartCreatePublish, "smart-create/publish"),
 )
 for router, route in router_route_pairs:
-    api.add_resource(router, f"{startup.base_url.lower()}/{route}")
+    api.add_resource(router, f"{config.base_url.lower()}/{route}")
 
 
 if __name__ == "__main__":
-    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)
+    app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

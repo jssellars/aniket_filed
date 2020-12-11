@@ -2,7 +2,7 @@ import typing
 
 from marshmallow import INCLUDE, pre_load
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import BusinessDto
 from FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelDto import CreatorDto, AdAccountDto

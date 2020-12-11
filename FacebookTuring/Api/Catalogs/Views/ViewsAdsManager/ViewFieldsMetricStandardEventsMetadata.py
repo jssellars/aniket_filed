@@ -679,7 +679,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_sortable=True,
         is_filterable=True,
         no_of_decimals=2,
-        description="The average cost for each landing page view.",
+        description="The average cost for each landing page view.",
     )
     landing_page_views_unique_cost = ViewColumn(
         Autoincrement.hex_string("landing_page_views_unique_cost"),
@@ -909,7 +909,7 @@ class ViewFieldsMetricStandardEventsMetadata:
         is_sortable=True,
         is_filterable=True,
         no_of_decimals=2,
-        description="The average cost of each purchase.",
+        description="The average cost of each purchase.",
     )
     purchases_unique_cost = ViewColumn(
         Autoincrement.hex_string("purchases_unique_cost"),

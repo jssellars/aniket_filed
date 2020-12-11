@@ -4,13 +4,12 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGraphAPIStructure, \
@@ -28,11 +27,12 @@ class AdsManagerDuplicateStructureCommandHandler:
 
     def handle(self, command, level, facebook_id, business_owner_facebook_id):
         # get business owner permanent Facebook token
-        business_owner_permanent_token = (BusinessOwnerRepository(startup.session).
-                                          get_permanent_token(business_owner_facebook_id))
+        business_owner_permanent_token = (
+            fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
+        )
 
         # Create a Facebook API client
-        _ = GraphAPISdkBase(startup.facebook_config, business_owner_permanent_token)
+        _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
         self.graph_api_client = GraphAPIClientBase(business_owner_permanent_token)
 
         if command.parent_ids:
@@ -146,22 +146,22 @@ class AdsManagerDuplicateStructureCommandHandler:
         structure.business_owner_facebook_id = business_owner_facebook_id
         structure.last_updated_at = datetime.now()
 
-        repository = TuringMongoRepository(config=startup.mongo_config,
-                                           database_name=startup.mongo_config.structures_database_name,
+        repository = TuringMongoRepository(config=config.mongo,
+                                           database_name=config.mongo.structures_database_name,
                                            collection_name=level)
         structure_id = getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
         repository.add_structure(level=Level(level), key_value=structure_id, document=structure)
 
     @staticmethod
     def __build_facebook_api_client_get_details_config(business_owner_permanent_token, facebook_id, fields):
-        config = GraphAPIClientBaseConfig()
-        config.try_partial_requests = False
-        config.request = GraphAPIRequestSingleStructure(facebook_id=facebook_id,
+        api_config = GraphAPIClientBaseConfig()
+        api_config.try_partial_requests = False
+        api_config.request = GraphAPIRequestSingleStructure(facebook_id=facebook_id,
                                                         business_owner_permanent_token=business_owner_permanent_token,
                                                         fields=fields)
-        config.fields = fields
+        api_config.fields = fields
 
-        return config
+        return api_config
 
     def __create_duplicate_parameters(self, level, parent_id=None):
         if level == Level.CAMPAIGN.value:

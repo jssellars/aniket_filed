@@ -12,15 +12,15 @@ from FacebookDexter.Infrastructure.PersistanceLayer.FacebookDexterMongoRepositor
 
 
 class FacebookTuringDataSyncCompletedEventHandler:
-    __startup = None
+    _config = None
     __data_repository = None
     __recommendations_repository = None
     __journal_repository = None
     __journal_helper_repository = None
 
     @classmethod
-    def set_startup(cls, startup):
-        cls.__startup = startup
+    def set_config(cls, config):
+        cls._config = config
         return cls
 
     @classmethod
@@ -48,8 +48,7 @@ class FacebookTuringDataSyncCompletedEventHandler:
         for business_owner in business_owners:
             fb_mw.start_dexter_for_business_owner(business_owner.business_owner_facebook_id,
                                                   business_owner.ad_account_ids,
-                                                  cls.__startup,
-                                                  cls.__logger,
+                                                  cls._config,
                                                   cls.__recommendations_repository,
                                                   cls.__journal_repository,
                                                   channel=ChannelEnum.FACEBOOK)

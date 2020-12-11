@@ -10,7 +10,7 @@ class GraphAPIClientBase(GraphAPIGetHelper):
 
         self.config = config
 
-    #  ====== FB API requests using HTTP calls ====== #
+    #  ====== FB API requests using HTTP calls ====== #
     def call_facebook(self):
         if self.config.request.url is None:
             # TODO: Log error

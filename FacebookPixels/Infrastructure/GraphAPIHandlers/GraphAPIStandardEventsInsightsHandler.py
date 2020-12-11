@@ -16,7 +16,7 @@ class GraphAPIStandardEventsInsightsHandler(GraphAPIPixelsInsightsHandler):
         if kwargs["breakdown"] != AdsPixelStatsResult.Aggregation.event:
             raise ValueError("Invalid breakdown. For standard events, use 'event' breakdown value")
 
-        _ = connect_to_graph_api_sdk(kwargs["business_owner_facebook_id"], kwargs["startup"])
+        connect_to_graph_api_sdk(kwargs["business_owner_facebook_id"], kwargs["config"], kwargs["fixtures"])
         insights = cls.get_insights(pixel_id=kwargs["facebook_id"],
                                     aggregation=kwargs["breakdown"],
                                     start_time=kwargs["start_time"],

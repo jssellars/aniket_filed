@@ -28,12 +28,12 @@ class GraphAPIAudiencesHandler:
     def get_audiences(cls,
                       permanent_token: typing.AnyStr = None,
                       account_id: typing.AnyStr = None,
-                      startup: typing.Any = None) -> typing.Tuple[typing.List[Audience], typing.Any]:
+                      config: typing.Any = None) -> typing.Tuple[typing.List[Audience], typing.Any]:
 
         # initialize GraphAPI SDK
-        _ = GraphAPISdkBase(startup.facebook_config, permanent_token)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
-        #  get audiences
+        # get audiences
         audiences = []
         errors = []
         try:

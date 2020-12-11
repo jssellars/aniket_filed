@@ -170,7 +170,7 @@ RULES_AD_GENERAL = [
              level=LevelEnum.AD,
              action=FacebookActionEnum.NONE,
              redirect=FacebookRuleRedirectEnum.EDIT_STRUCTURE,
-             template="Dexter noticed that your reach has decreased and your relevancy score is low. "
+             template="Dexter noticed that your reach has decreased and your relevancy score is low. "
                       "It's possible your ads are being penalized and your ad delivery could be affected "
                       "because of this. Dexter suggests creating new ads with new targeting "
                       "to improve your performance.",

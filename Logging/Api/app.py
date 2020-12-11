@@ -13,7 +13,7 @@ from flask_restful import Api
 
 from Logging.Api.Controllers.HealthcheckController import HealthCheckEndpoint, VersionEndpoint
 from Logging.Api.Controllers.LoggingController import LoggingEndpoint
-from Logging.Api.Startup import startup
+from Logging.Api.startup import config, fixtures
 
 app = Flask(__name__)
 
@@ -22,15 +22,15 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 api = Api(app)
 
 # Version / Healthcheck 
-healthcheck_controller = "{base_url}/healthcheck".format(base_url=startup.base_url.lower())
+healthcheck_controller = "{base_url}/healthcheck".format(base_url=config.base_url.lower())
 api.add_resource(HealthCheckEndpoint, healthcheck_controller)
 
-version_controller = "{base_url}/version".format(base_url=startup.base_url.lower())
+version_controller = "{base_url}/version".format(base_url=config.base_url.lower())
 api.add_resource(VersionEndpoint, version_controller)
 
 # Logging controller
-logging_endpoint = "{base_url}/log".format(base_url=startup.base_url.lower())
+logging_endpoint = "{base_url}/log".format(base_url=config.base_url.lower())
 api.add_resource(LoggingEndpoint, logging_endpoint)
 
 if __name__ == "__main__":
-    app.run(debug=startup.logger_level == "DEBUG", host="localhost", port=startup.port)
+    app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

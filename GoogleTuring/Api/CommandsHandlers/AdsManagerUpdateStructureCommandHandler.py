@@ -1,5 +1,5 @@
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import AD_GROUP_CRITERIA_FIELDS
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
@@ -20,9 +20,8 @@ class AdsManagerUpdateStructureCommandHandler(GoogleTokenGetter):
         if business_owner_permanent_token:
             try:
                 level = StructureType.get_enum_by_value(level)
-                mongo_repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
-                                                                         database_name=startup.mongo_config[
-                                                                             'google_structures_database_name'],
+                mongo_repository = GoogleTuringStructuresMongoRepository(config=config.mongo,
+                                                                         database_name=config.mongo.google_structures_database_name,
                                                                          collection_name=level.value)
                 if level in [StructureType.AD, StructureType.AD_GROUP_KEYWORDS]:
                     additional_info = mongo_repository.get_additional_info(level, structure_id)

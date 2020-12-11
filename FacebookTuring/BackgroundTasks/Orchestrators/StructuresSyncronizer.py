@@ -6,13 +6,12 @@ from typing import List
 
 from facebook_business.exceptions import FacebookRequestError
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.Field import Field
-from FacebookTuring.BackgroundTasks.Startup import startup
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
@@ -129,12 +128,12 @@ class StructuresSyncronizer:
         fields: typing.List[typing.AnyStr] = None,
         filter_params: typing.List[typing.Dict] = None,
     ) -> GraphAPIClientBaseConfig:
-        get_structure_config = GraphAPIClientBaseConfig()
-        get_structure_config.try_partial_requests = True
-        get_structure_config.fields = fields
-        get_structure_config.required_field = "id"
+        api_config = GraphAPIClientBaseConfig()
+        api_config.try_partial_requests = True
+        api_config.fields = fields
+        api_config.required_field = "id"
         level = level + "s"  # todo: find a better way to get the endpoint level for multiple actors by ad account
-        get_structure_config.request = GraphAPIRequestStructures(
+        api_config.request = GraphAPIRequestStructures(
             facebook_id=ad_account_id,
             business_owner_permanent_token=permanent_token,
             level=level,
@@ -142,7 +141,7 @@ class StructuresSyncronizer:
             filter_params=filter_params,
         )
 
-        return get_structure_config
+        return api_config
 
     def set_mongo_repository(self, mongo_repository: TuringMongoRepository = None) -> typing.Any:
         self.__mongo_repository = mongo_repository
@@ -155,9 +154,7 @@ class StructuresSyncronizer:
     @property
     def permanent_token(self) -> typing.AnyStr:
         if self.__permanent_token is None:
-            self.__permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
-                self.business_owner_id
-            )
+            self.__permanent_token = fixtures.business_owner_repository.get_permanent_token(self.business_owner_id)
         return self.__permanent_token
 
     @staticmethod

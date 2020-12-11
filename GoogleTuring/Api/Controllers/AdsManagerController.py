@@ -6,7 +6,7 @@ from flask import request, Response
 from flask_restful import Resource, abort
 
 from Core.logging_config import request_as_log_dict
-from Core.Web.Misc import snake_to_camelcase
+from Core.utils import snake_to_camelcase
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, OptimizePermissions, ReportsPermissions
 from GoogleTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
@@ -21,7 +21,7 @@ from GoogleTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import
     AdsManagerFilteredStructuresCommandMapping
 from GoogleTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from GoogleTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
 
 
@@ -31,14 +31,14 @@ logger = logging.getLogger(__name__)
 
 
 class AdsManagerEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def put(self, account_id, level, structure_id):
         try:
             business_owner_google_id = extract_business_owner_google_id()
             raw_request = request.get_json(force=True)
             mapping = AdsManagerUpdateStructureCommandMapping(target=AdsManagerUpdateStructureCommand)
             command = mapping.load(raw_request)
-            AdsManagerUpdateStructureCommandHandler.handle(config=startup.google_config,
+            AdsManagerUpdateStructureCommandHandler.handle(config=config.google,
                                                            command=command,
                                                            account_id=account_id,
                                                            level=level,
@@ -49,12 +49,12 @@ class AdsManagerEndpoint(Resource):
 
         return 204
 
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_DELETE)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_DELETE)
     def delete(self, account_id, level, structure_id):
         try:
             level = StructureType.get_enum_by_value(level)
             business_owner_google_id = extract_business_owner_google_id()
-            AdsManagerDeleteStructureCommandHandler.handle(config=startup.google_config,
+            AdsManagerDeleteStructureCommandHandler.handle(config=config.google,
                                                            account_id=account_id,
                                                            level=level,
                                                            structure_id=structure_id,
@@ -85,19 +85,19 @@ class GetStructuresHandler:
 
 # TODO: keywords level should be renamed to keyword
 class AdsManagerGetStructuresEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def get(self, level, account_id):
         return GetStructuresHandler.handle(level, account_id)
 
 
 class OptimizeGetStructuresEndpoint(Resource):
-    @startup.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self, level, account_id):
         return GetStructuresHandler.handle(level, account_id)
 
 
 class AdsManagerFilteredStructuresEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.FILTERED_STRUCTURES_PERMISSION)
+    @fixtures.authorize_permission(permission=ReportsPermissions.FILTERED_STRUCTURES_PERMISSION)
     def post(self, level: typing.AnyStr = None):
         if level == 'adset':
             level = 'adgroup'

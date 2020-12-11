@@ -1,16 +1,12 @@
 import requests
 
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from Core.Web.Security.Authorization import add_bearer_token, generate_technical_token
 from FacebookAccounts.Api.Dtos.BusinessOwnerCreatedDto import BusinessOwnerCreatedDto
-from FacebookAccounts.Api.Startup import startup
+from FacebookAccounts.Api.startup import config, fixtures
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountHandler import GraphAPIAdAccountHandler
 from FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
-    ExchangeTemporaryTokenGraphAPIRequest
-from FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
-    GeneratePermanentTokenGraphAPIRequest
+    get_exchange_temporary_token_url, get_generate_permanent_token_url
 from FacebookAccounts.Infrastructure.IntegrationEvents.BusinessOwnerCreatedEvent import \
     BusinessOwnerCreatedEvent
 
@@ -27,7 +23,7 @@ class BusinessOwnerCreateCommandHandler:
         cls.generate_permanent_token(command)
 
         # call subscription that new user has been successfully added to the system
-        cls.activate_new_user(command, startup)
+        cls.activate_new_user(command, config)
 
         # get businesses and publish ad accounts response to Facebook Accounts queue
         business = cls.get_businesses(command)
@@ -43,9 +39,9 @@ class BusinessOwnerCreateCommandHandler:
         cls.publish_response(response)
 
     @classmethod
-    def activate_new_user(cls, command, startup):
+    def activate_new_user(cls, command, config):
         try:
-            technical_token = generate_technical_token(startup.technical_token_manager)
+            technical_token = generate_technical_token(fixtures.technical_token_manager)
 
             headers = add_bearer_token(technical_token)
 
@@ -54,7 +50,7 @@ class BusinessOwnerCreateCommandHandler:
                 "BusinessOwnerFacebookId": command.facebook_id
             }
 
-            _ = requests.put(startup.external_services.subscription_update_business_owner_endpoint, json=body,
+            _ = requests.put(config.external_services.subscription_update_business_owner_endpoint, json=body,
                              headers=headers)
         except Exception as e:
             raise e
@@ -62,33 +58,31 @@ class BusinessOwnerCreateCommandHandler:
     @classmethod
     def publish_response(cls, response):
         try:
-            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config, startup.exchange_details.name,
-                                             startup.exchange_details.outbound_queue.key)
+            rabbitmq_adapter = fixtures.rabbitmq_adapter
             response.requested_permissions = ",".join(response.requested_permissions)
-            rabbitmq_client.publish(response)
-            logger.info(response.message_type, extra=dict(rabbitmq=rabbitmq_client.serialize_message(response)))
+            rabbitmq_adapter.publish(response)
+            logger.info(response.message_type, extra=dict(rabbitmq=rabbitmq_adapter.serialize_message(response)))
         except Exception as e:
             raise e
 
     @classmethod
     def generate_permanent_token(cls, command):
         try:
-            exchange_token_url = ExchangeTemporaryTokenGraphAPIRequest.generate_url(command.temporary_token)
-            temporary_token, _ = HTTPRequestBase.get(exchange_token_url)
+            temporary_token, _ = HTTPRequestBase.get(get_exchange_temporary_token_url(command.temporary_token, config))
             temporary_token = temporary_token.get("access_token")
         except Exception as e:
             raise e
 
         try:
-            generate_permanent_token_url = GeneratePermanentTokenGraphAPIRequest.generate_url(command.facebook_id,
-                                                                                              temporary_token)
-            permanent_token_response, _ = HTTPRequestBase.get(generate_permanent_token_url)
+            permanent_token_response, _ = HTTPRequestBase.get(
+                get_generate_permanent_token_url(command.facebook_id, temporary_token, config)
+            )
         except Exception as e:
             raise e
 
         try:
             for entry in permanent_token_response:
-                BusinessOwnerRepository(startup.session).create_or_update_user(
+                fixtures.business_owner_repository.create_or_update_user(
                     business_owner_facebook_id=command.facebook_id,
                     name=command.name,
                     email=command.email,
@@ -100,9 +94,9 @@ class BusinessOwnerCreateCommandHandler:
     @classmethod
     def get_businesses(cls, command):
         try:
-            permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(command.facebook_id)
+            permanent_token = fixtures.business_owner_repository.get_permanent_token(command.facebook_id)
 
-            businesses = GraphAPIAdAccountHandler(permanent_token, startup.facebook_config).get_business_owner_details(
+            businesses = GraphAPIAdAccountHandler(permanent_token, config.facebook).get_business_owner_details(
                 command.facebook_id)
 
             businesses = BusinessOwnerCreatedDto(facebook_id=command.facebook_id,

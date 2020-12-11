@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
+from Core.mongo_adapter import MongoRepositoryBase, MongoOperator
 
 
 class StatusChangerMongoRepository(MongoRepositoryBase):

@@ -2,7 +2,7 @@ import typing
 
 from marshmallow import INCLUDE, pre_load
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelStatsDto import GraphAPIPixelStatsDataDto
 

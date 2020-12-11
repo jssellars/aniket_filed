@@ -9,15 +9,15 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalReposi
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
-def turing_data_sync_handler(request_handler=None, message_body=None, startup=None):
+def turing_data_sync_handler(request_handler=None, message_body=None, config=None):
     # Initialize mongo repositories for accounts journal, insights and structures
-    account_journal_repository = TuringAdAccountJournalRepository(config=startup.mongo_config,
-                                                                  database_name=startup.mongo_config.accounts_journal_database_name,
-                                                                  collection_name=startup.mongo_config.accounts_journal_collection_name)
-    insights_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                database_name=startup.mongo_config.insights_database_name)
-    structures_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                  database_name=startup.mongo_config.structures_database_name)
+    account_journal_repository = TuringAdAccountJournalRepository(config=config.mongo,
+                                                                  database_name=config.mongo.accounts_journal_database_name,
+                                                                  collection_name=config.mongo.accounts_journal_collection_name)
+    insights_repository = TuringMongoRepository(config=config.mongo,
+                                                database_name=config.mongo.insights_database_name)
+    structures_repository = TuringMongoRepository(config=config.mongo,
+                                                  database_name=config.mongo.structures_database_name)
 
     # Initialize orchestrator
     orchestrator = (Orchestrator().
@@ -29,12 +29,12 @@ def turing_data_sync_handler(request_handler=None, message_body=None, startup=No
     (request_handler.
      set_mongo_repository(account_journal_repository).
      set_orchestrator(orchestrator).
-     handle(message_body, startup.days_to_sync))
+     handle(message_body, config.days_to_sync))
 
 
-def campaign_created_handler(request_handler=None, message_body=None, startup=None):
-    structures_repository = TuringMongoRepository(config=startup.mongo_config,
-                                                  database_name=startup.mongo_config.structures_database_name)
+def campaign_created_handler(request_handler=None, message_body=None, config=None):
+    structures_repository = TuringMongoRepository(config=config.mongo,
+                                                  database_name=config.mongo.structures_database_name)
 
     body = json.loads(message_body)
     mapper = CampaignCreatedEventMapping(target=CampaignCreatedEvent)
@@ -43,7 +43,7 @@ def campaign_created_handler(request_handler=None, message_body=None, startup=No
     # handle message
     (request_handler.
      set_repository(structures_repository).
-     set_startup(startup).
+     set_config(config).
      handle(message))
 
 

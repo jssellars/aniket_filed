@@ -1,6 +1,6 @@
 from marshmallow import fields
 
-from Core.Tools.Mapper.MapperBase import MapperBase, MapperNestedField
+from Core.mapper import MapperBase, MapperNestedField
 from FacebookAccounts.Infrastructure.Domain.AdAccountAmountSpentModel import AdAccountAmountSpentModel
 
 

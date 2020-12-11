@@ -3,7 +3,7 @@ import typing
 
 from marshmallow import fields, EXCLUDE, pre_load
 
-from Core.Tools.Mapper.MapperBase import MapperBase
+from Core.mapper import MapperBase
 from Core.Tools.Misc.FiledEntityStatus import FiledEntityStatus
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 

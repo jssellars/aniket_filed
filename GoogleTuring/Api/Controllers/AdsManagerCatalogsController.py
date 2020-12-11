@@ -7,7 +7,7 @@ from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogR
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsBreakdownsDto import AdsManagerCatalogsBreakdownsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsDimensionsDto import AdsManagerCatalogsDimensionsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsMetricsDto import AdsManagerCatalogsMetricsDto
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 
 LEVEL_KEY = 'level'
 REPORT_KEY = 'report'
@@ -16,7 +16,7 @@ METRICS_KEY = 'metrics'
 
 
 class AdsManagerReportsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args
@@ -35,7 +35,7 @@ class AdsManagerReportsEndpoint(Resource):
 
 
 class AdsManagerDimensionsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args
@@ -52,7 +52,7 @@ class AdsManagerDimensionsEndpoint(Resource):
 
 
 class AdsManagerMetricsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args
@@ -71,7 +71,7 @@ class AdsManagerMetricsEndpoint(Resource):
 
 
 class AdsManagerBreakdownsEndpoint(Resource):
-    @startup.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
+    @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CHART_TEMPLATES_CREATE)
     def get(self):
         try:
             args = request.args

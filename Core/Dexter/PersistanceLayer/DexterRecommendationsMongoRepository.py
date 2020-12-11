@@ -2,9 +2,8 @@ import typing
 from datetime import datetime, timedelta
 
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
+from Core.constants import DEFAULT_DATETIME_ISO
+from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 
 
@@ -108,7 +107,7 @@ class DexterRecommendationsMongoRepository(MongoRepositoryBase):
     def save_recommendations(self, recommendations: typing.List[typing.Any],
                              time_interval: int = None) -> typing.NoReturn:
         self._database = self._client[self._config.recommendations_database_name]
-        self.set_collection(self._config.recommendations_collection_name)
+        self.collection = self._config.recommendations_collection_name
 
         date = (datetime.now() - timedelta(days=time_interval)).strftime(DEFAULT_DATETIME_ISO)
 

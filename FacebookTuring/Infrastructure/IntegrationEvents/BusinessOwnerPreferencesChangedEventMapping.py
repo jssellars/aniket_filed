@@ -1,6 +1,6 @@
 from marshmallow import EXCLUDE, fields
 
-from Core.Tools.Mapper.MapperBase import MapperBase, MapperNestedField
+from Core.mapper import MapperBase, MapperNestedField
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEvent import BusinessOwnerStatus, \
     AdAccountDetails, BusinessDetails
 

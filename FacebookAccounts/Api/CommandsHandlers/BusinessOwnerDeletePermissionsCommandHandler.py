@@ -2,9 +2,8 @@ import typing
 
 from facebook_business.adobjects.user import User
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from FacebookAccounts.Api.Startup import startup
+from FacebookAccounts.Api.startup import config, fixtures
 
 
 class BusinessOwnerDeletePermissionsCommandHandler:
@@ -14,11 +13,10 @@ class BusinessOwnerDeletePermissionsCommandHandler:
                business_owner_id: typing.AnyStr = None,
                permissions: typing.AnyStr = None) -> typing.Dict:
 
-        # get permanent token
-        permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(business_owner_id)
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
         # initialize GraphAPI SDK
-        _ = GraphAPISdkBase(startup.facebook_config, permanent_token)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         user = User(fbid=business_owner_id)
         response = {

@@ -8,9 +8,8 @@ from bson import BSON
 from pymongo.errors import AutoReconnect
 from retry import retry
 
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
+from Core.constants import DEFAULT_DATETIME_ISO
+from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
@@ -30,7 +29,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         super(TuringMongoRepository, self).__init__(*args, **kwargs)
 
     def get_campaigns_by_ad_account(self, account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        self.set_collection(Level.CAMPAIGN.value)
+        self.collection = Level.CAMPAIGN.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -57,7 +56,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return self.__decode_structure_details_from_bson(campaigns)
 
     def get_adsets_by_campaign_id(self, campaign_ids: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
-        self.set_collection(Level.ADSET.value)
+        self.collection = Level.ADSET.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -129,7 +128,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return results
 
     def get_structure_ids(self, level: Level = None, account_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -161,7 +160,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                            campaign_ids: typing.List[typing.AnyStr] = None,
                            adset_ids: typing.List[typing.AnyStr] = None,
                            statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
 
         query = {
             MongoOperator.AND.value: [
@@ -217,7 +216,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                     campaign_ids: typing.List[typing.AnyStr] = None,
                                     adset_ids: typing.List[typing.AnyStr] = None,
                                     statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
 
         query = {
             MongoOperator.AND.value: [
@@ -268,8 +267,8 @@ class TuringMongoRepository(MongoRepositoryBase):
                                key_value: typing.Any = None,
                                id_key_name: typing.AnyStr = None,
                                name_key_name: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        self.set_collection(collection_name=level.value)
-        #  only get active data
+        self.collection = collection_name=level.value
+        # only get active data
         query = {
             MongoOperator.AND.value: [
                 {
@@ -338,7 +337,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return query, projection
 
     def get_structure_details(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.Dict:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structure = self.first_or_default(query, projection)
         if MiscFieldsEnum.details in structure.keys():
@@ -348,14 +347,14 @@ class TuringMongoRepository(MongoRepositoryBase):
     def get_structure_details_many(self,
                                    level: Level = None,
                                    key_value: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structures = self.get(query, projection)
         return self.__decode_structure_details_from_bson(structures)
 
     def get_all_structures_by_ad_account_id(self, level: Level = None, account_id: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -386,7 +385,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                        structure_ids: typing.List[typing.AnyStr] = None,
                                        structure_key: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
-        self.set_collection(collection_name=Level.ADSET.value)
+        self.collection = collection_name=Level.ADSET.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -419,7 +418,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                       structure_ids: typing.List[typing.AnyStr] = None,
                                       structure_key: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -463,7 +462,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return child_results
 
     def get_children_from_parent_key(self, parent_key: str, parent_id: str, level: Level) -> List[Dict]:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query = {
             MongoOperator.AND.value: [
                 {parent_key: {MongoOperator.EQUALS.value: parent_id}},
@@ -511,7 +510,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                       key_value: typing.Any = None,
                       current_status: int = None,
                       new_status: int = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         if current_status is None:
             current_status = [StructureStatusEnum.ACTIVE.value,
                               StructureStatusEnum.REMOVED.value,
@@ -545,7 +544,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                            key_value: typing.Any = None,
                            current_status: int = None,
                            new_status: int = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -577,7 +576,7 @@ class TuringMongoRepository(MongoRepositoryBase):
     def add_structures_many_with_deprecation(self,
                                              level: Level = None,
                                              structures: typing.List[typing.Any] = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         structures_to_insert = []
         for structure in structures:
             structure_id = self.__get_structure_id(structure, level)
@@ -606,7 +605,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         self.add_many(structures_to_insert)
 
     def deprecate_structure(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query_filter = {
             LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
                 MongoOperator.EQUALS.value: key_value
@@ -622,7 +621,7 @@ class TuringMongoRepository(MongoRepositoryBase):
     def deprecate_structures_by_account_id(self,
                                            account_id: typing.AnyStr = None,
                                            level: Level = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query_filter = {
             MiscFieldsEnum.account_id: {
                 MongoOperator.EQUALS.value: account_id
@@ -637,7 +636,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
     def add_structure_many(self, account_id: typing.AnyStr = None, level: Level = None,
                            structures: typing.List[typing.Any] = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         # get existing active or removed structures ids
         existing_structures_ids = self.get_structure_ids(level, account_id)
         existing_structures_ids = set(existing_structures_ids)
@@ -680,7 +679,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
     def add_structure(self, level: Level = None, key_value: typing.Any = None,
                       document: typing.Dict = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -714,7 +713,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             raise e
 
     def discard_structure_draft(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -741,7 +740,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                              level: Level = None,
                              key_value: typing.AnyStr = None,
                              details: typing.Dict = None) -> typing.NoReturn:
-        self.set_collection(collection_name=level.value)
+        self.collection = collection_name=level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -768,8 +767,8 @@ class TuringMongoRepository(MongoRepositoryBase):
                                  collection: typing.AnyStr = None,
                                  start_date: typing.Union[datetime, typing.AnyStr] = None,
                                  account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        self.set_database(self.config.structures_database_name)
-        self.set_collection(collection)
+        self.database = self.config.structures_database_name
+        self.collection = collection
         query = {
             MongoOperator.AND.value: [
                 {

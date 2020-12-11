@@ -11,7 +11,7 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums impor
 from Core.Dexter.Infrastructure.Domain.Rules.Antecedent import Antecedent
 from Core.Dexter.Infrastructure.Domain.Rules.RuleBase import RuleBase
 from Core.Dexter.Infrastructure.Domain.Rules.RuleEvaluatorData import RuleEvaluatorData
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
+from Core.constants import DEFAULT_DATETIME_ISO
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from FacebookDexter.Engine.Algorithms.FacebookRecommendationEnhancer.FacebookRecommendationEnum import \
     FacebookRecommendationImportanceEnum

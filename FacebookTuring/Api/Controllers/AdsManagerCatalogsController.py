@@ -15,7 +15,7 @@ from FacebookTuring.Api.Dtos.AdsManagerCatalogsMetacolumnsDto import AdsManagerC
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsAgGridDto import AdsManagerCatalogsViewsAgGridDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsByLevelDto import AdsManagerCatalogsViewsByLevelDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsDto import AdsManagerCatalogsViewsDto
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.startup import config, fixtures
 
 
 import logging
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class AdsManagerCatalogsViewsEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -40,7 +40,7 @@ class AdsManagerCatalogsViewsEndpoint(Resource):
 
 
 class AdsManagerCatalogsViewsByLevelEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def get(self, level):
         logger.info(request_as_log_dict(request))
         try:
@@ -58,7 +58,7 @@ class AdsManagerCatalogsViewsByLevelEndpoint(Resource):
 
 
 class AdsManagerCatalogsViewsAgGrid(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def get(self, level):
         logger.info(request_as_log_dict(request))
         try:
@@ -94,19 +94,19 @@ class ElementsViewsHandler:
 
 
 class AdsManagerElementsViews(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def get(self):
         return ElementsViewsHandler.get()
 
 
 class AccountsElementsViews(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
+    @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
     def get(self):
         return ElementsViewsHandler.get()
 
 
 class AdsManagerCatalogsMetacolumnsEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -124,7 +124,7 @@ class AdsManagerCatalogsMetacolumnsEndpoint(Resource):
 
 
 class AdsManagerCatalogsBreakdownsEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:
@@ -142,7 +142,7 @@ class AdsManagerCatalogsBreakdownsEndpoint(Resource):
 
 
 class AdsManagerCatalogsBreakdownsCombinationsEndpoint(Resource):
-    @startup.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def get(self):
         logger.info(request_as_log_dict(request))
         try:

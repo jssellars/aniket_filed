@@ -5,7 +5,7 @@ class GraphAPIInsightsFields:
     since = 'since'
     until = 'until'
 
-    #  ====== BREAKDOWNS ====== #
+    #  ====== BREAKDOWNS ====== #
     age = 'age'
     gender = 'gender'
     country = 'country'

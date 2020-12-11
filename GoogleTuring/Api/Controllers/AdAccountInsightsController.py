@@ -11,11 +11,11 @@ from GoogleTuring.Api.Commands.AdAccountInsightsCommand import AdAccountInsights
 from GoogleTuring.Api.CommandsHandlers.GoogleAdAccountInsightsHandler import \
     GoogleAdAccountInsightsHandler
 from GoogleTuring.Api.Mappings.AdAccountInsightsCommandMapping import AdAccountInsightsCommandMapping
-from GoogleTuring.Api.Startup import startup
+from GoogleTuring.Api.startup import config, fixtures
 
 
 class AdAccountInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
+    @fixtures.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
     def post(self):
         try:
             business_owner_google_id = extract_business_owner_google_id()
@@ -28,7 +28,7 @@ class AdAccountInsightsEndpoint(Resource):
             return Response(response=response, status=400, mimetype='application/json')
 
         try:
-            response = GoogleAdAccountInsightsHandler.handle(config=startup.google_config, command=command)
+            response = GoogleAdAccountInsightsHandler.handle(config=config.google, command=command)
             response = humps.camelize(response)
             response = json.dumps(response)
             return Response(response=response, status=200, mimetype='application/json')

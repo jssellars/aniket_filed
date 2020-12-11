@@ -2,7 +2,7 @@ import typing
 
 from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from FacebookTuring.Api.Mappings.ReportsStructureMinimalMapping import ReportsStructureMinimalMapping
-from FacebookTuring.Api.Startup import startup
+from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
@@ -15,8 +15,8 @@ class AdsManagerFilteredStructuresCommandHandler:
         ad_account_id = command.ad_account_id.split("_")[1]
 
         try:
-            repository = TuringMongoRepository(config=startup.mongo_config,
-                                               database_name=startup.mongo_config.structures_database_name,
+            repository = TuringMongoRepository(config=config.mongo,
+                                               database_name=config.mongo.structures_database_name,
                                                collection_name=collection_name)
             response = repository.get_structure_info(level=Level(level),
                                                      account_id=ad_account_id,

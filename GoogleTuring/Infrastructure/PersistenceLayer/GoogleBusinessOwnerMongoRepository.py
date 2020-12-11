@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoProjectionState
+from Core.mongo_adapter import MongoProjectionState, MongoOperator
 from GoogleTuring.Infrastructure.Domain.Enums.GoogleAccountStatus import GoogleAccountStatus
 from GoogleTuring.Infrastructure.PersistenceLayer.StatusChangerMongoRepository import StatusChangerMongoRepository
 

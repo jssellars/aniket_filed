@@ -12,15 +12,15 @@ from GoogleDexter.Infrastructure.PersistanceLayer.GoogleDexterMongoRepository im
 
 
 class GoogleTuringDataSyncCompletedEventHandler:
-    __startup = None
+    _config = None
     __data_repository = None
     __recommendations_repository = None
     __journal_repository = None
     __journal_helper_repository = None
 
     @classmethod
-    def set_startup(cls, startup):
-        cls.__startup = startup
+    def set_config(cls, config):
+        cls._config = config
         return cls
 
     @classmethod
@@ -48,14 +48,14 @@ class GoogleTuringDataSyncCompletedEventHandler:
         for business_owner in business_owners:
             # business_owner_thread = threading.Thread(target=MasterWorker.start_dexter_for_business_owner,
             #                                          args=(business_owner,
-            #                                                cls.__startup,
+            #                                                cls._config,
             #                                                cls.__data_repository,
             #                                                cls.__recommendations_repository,
             #                                                cls.__journal_repository))
             # business_owner_thread.start()
             google_mw.start_dexter_for_business_owner(business_owner.business_owner_google_id,
                                                       business_owner.ad_account_ids,
-                                                      cls.__startup,
+                                                      cls._config,
                                                       cls.__recommendations_repository,
                                                       cls.__journal_repository,
                                                       ChannelEnum.GOOGLE)

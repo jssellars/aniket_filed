@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Rules.AntecedentEnums import AntecedentTypeEnum
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME_ISO
+from Core.constants import DEFAULT_DATETIME_ISO
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.GoogleRuleBasedOptimizationBase import \
     GoogleRuleBasedOptimizationBase
 from GoogleDexter.Engine.Algorithms.FuzzyRuleBasedOptimization.Metrics.GoogleAvailableMetricEnum import \

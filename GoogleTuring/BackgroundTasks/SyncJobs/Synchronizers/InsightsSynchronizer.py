@@ -150,10 +150,10 @@ def extract_compound_and_required_fields(fields):
 
 class InsightsSynchronizer(BaseSynchronizer):
     def __init__(self, business_owner_id, account_id, adwords_client, mongo_config, last_update_time,
-                 mongo_conn_handler, **kwargs):
+                 mongo_adapter, **kwargs):
         super().__init__(business_owner_id, account_id, adwords_client, mongo_config, **kwargs)
         self.__last_update_time = last_update_time
-        self.__mongo_repository = GoogleTuringInsightsMongoRepository(client=mongo_conn_handler.client,
+        self.__mongo_repository = GoogleTuringInsightsMongoRepository(client=mongo_adapter.client,
                                                                       database_name=self._mongo_config[
                                                                           'google_insights_database_name'],
                                                                       location_collection_name=self._mongo_config[

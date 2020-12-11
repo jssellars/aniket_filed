@@ -840,7 +840,7 @@ OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBU
             ],
             ActionAttributionWindowClick.VALUE_7D: [
                 ActionAttributionWindowView.NONE,
-                ActionAttributionWindowView.VALUE_7D,
+                ActionAttributionWindowView.VALUE_1D,
             ],
         },
         # TODO: see hwo to use this, the optimization goal doesn't exist in the SDK
@@ -858,7 +858,7 @@ OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBU
             ],
             ActionAttributionWindowClick.VALUE_7D: [
                 ActionAttributionWindowView.NONE,
-                ActionAttributionWindowView.VALUE_7D,
+                ActionAttributionWindowView.VALUE_1D,
             ],
         },
     },

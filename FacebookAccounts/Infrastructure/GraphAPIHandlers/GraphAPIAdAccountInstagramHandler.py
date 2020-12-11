@@ -2,7 +2,6 @@ import typing
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
-from FacebookAccounts.Api.Startup import startup
 from FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import GraphAPIBusinessDto
 from FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIInstagramDto import GraphAPIInstagramDto
 from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import \
@@ -19,24 +18,26 @@ class GraphAPIAdAccountInstagramHandler:
 
     @classmethod
     def handle(cls,
-               permanent_token: typing.AnyStr,
-               account_id: typing.AnyStr) -> typing.List[typing.Dict]:
-        #  get business_id for ad account
+        permanent_token: typing.AnyStr,
+        account_id: typing.AnyStr,
+        config,
+    ) -> typing.List[typing.Dict]:
+        # get business_id for ad account
         business_mapping = GraphAPIAdAccountBusinessMapping(GraphAPIBusinessDto)
-        config = GraphAPIClientBaseConfig()
-        config.request = GraphAPIRequestBusiness(api_version=startup.facebook_config.api_version,
+        api_config = GraphAPIClientBaseConfig()
+        api_config.request = GraphAPIRequestBusiness(api_version=config.facebook.api_version,
                                                  access_token=permanent_token,
                                                  account_id=account_id)
-        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=config)
+        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
         response, _ = graph_api_client.call_facebook()
         business = business_mapping.load(response)
 
         # get business instagram accounts
         instagram_mapping = GraphAPIAdAccountInstagramMapping(GraphAPIInstagramDto)
-        config.request = GraphAPIRequestInstagram(api_version=startup.facebook_config.api_version,
+        api_config.request = GraphAPIRequestInstagram(api_version=config.facebook.api_version,
                                                   access_token=permanent_token,
                                                   business_id=business.id)
-        graph_api_client.config = config
+        graph_api_client.config = api_config
 
         business_instagram_accounts = GraphAPIInstagramDto()
         try:
@@ -47,10 +48,10 @@ class GraphAPIAdAccountInstagramHandler:
 
         # get ad account instagram accounts
         instagram_mapping = GraphAPIAdAccountInstagramMapping(GraphAPIInstagramDto)
-        config.request = GraphAPIRequestInstagramByAccountId(api_version=startup.facebook_config.api_version,
+        api_config.request = GraphAPIRequestInstagramByAccountId(api_version=config.facebook.api_version,
                                                              access_token=permanent_token,
                                                              account_id=account_id)
-        graph_api_client.config = config
+        graph_api_client.config = api_config
 
         ad_account_instagram_accounts = GraphAPIInstagramDto()
         try:

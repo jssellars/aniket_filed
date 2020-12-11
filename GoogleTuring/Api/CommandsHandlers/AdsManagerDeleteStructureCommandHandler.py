@@ -1,5 +1,4 @@
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
-from GoogleTuring.Api.Startup import startup
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIStructuresHandler import AdWordsAPIStructuresHandler
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
@@ -27,9 +26,8 @@ class AdsManagerDeleteStructureCommandHandler(GoogleTokenGetter):
 
         # Update structure to REMOVED in our DB
         try:
-            mongo_repository = GoogleTuringStructuresMongoRepository(config=startup.mongo_config,
-                                                                     database_name=startup.mongo_config[
-                                                                         'google_structures_database_name'],
+            mongo_repository = GoogleTuringStructuresMongoRepository(config=config.mongo,
+                                                                     database_name=config.mongo.google_structures_database_name,
                                                                      collection_name=level)
             id_key = LEVEL_TO_ID[level]
             mongo_repository.change_status_many(ids=[structure_id], new_status=StructureStatusEnum.REMOVED.value,

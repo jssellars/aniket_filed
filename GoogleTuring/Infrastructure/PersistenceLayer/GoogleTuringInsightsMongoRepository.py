@@ -3,7 +3,7 @@ from functools import reduce
 
 import pandas as pd
 
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
+from Core.mongo_adapter import MongoRepositoryBase
 from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import BREAKDOWN_TO_FIELD, DEFAULT_GEO_BREAKDOWN, \
     DEFAULT_TIME_BREAKDOWN_FIELD
 from GoogleTuring.Infrastructure.PersistenceLayer.MongoIdToNameCache import MongoIdToNameCache

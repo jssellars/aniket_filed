@@ -4,8 +4,7 @@ from copy import deepcopy
 
 from bson import BSON
 
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoProjectionState
+from Core.mongo_adapter import MongoProjectionState, MongoOperator
 from GoogleTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
@@ -87,7 +86,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                                     adgroup_ids: typing.List[typing.AnyStr] = None,
                                     statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
 
-        self.set_collection(collection_name=level.value)
+        self.collection = level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -139,7 +138,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
                            adgroup_ids: typing.List[typing.AnyStr] = None,
                            statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
 
-        self.set_collection(collection_name=level.value)
+        self.collection = level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -192,7 +191,7 @@ class GoogleTuringStructuresMongoRepository(StatusChangerMongoRepository):
         return structures
 
     def get_structure_details(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.Dict:
-        self.set_collection(collection_name=level.value)
+        self.collection = level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structure = self.first_or_default(query, projection)
         if MiscFieldsEnum.details in structure.keys():

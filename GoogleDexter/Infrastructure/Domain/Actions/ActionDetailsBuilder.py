@@ -69,7 +69,7 @@ class ActionDetailsBuilder:
         for entry in value:
             publisher_platform_value, placement_position_value, device_platform_value = entry.split(",")
             # remove publisher platform
-            #  publisher platform breakdowns give data for {publisher_platform}_app and
+            # publisher platform breakdowns give data for {publisher_platform}_app and
             # {publisher_platform}_web, but targeting only accepts {publisher_platform}
             publisher_platform_value = publisher_platform_value.split("_")[0]
             if publisher_platform_value in targeting["flexible_spec"][GooglePlacementEnum.PUBLISHER_PLATFORMS.value]:
@@ -124,7 +124,7 @@ class ActionDetailsBuilder:
 
         for entry in value:
             # remove publisher platform
-            #  publisher platform breakdowns give data for {publisher_platform}_app and
+            # publisher platform breakdowns give data for {publisher_platform}_app and
             # {publisher_platform}_web, but targeting only accepts {publisher_platform}
             publisher_platform_value = entry.split("_")[0]
             if publisher_platform_value in targeting["flexible_spec"][GooglePlacementEnum.PUBLISHER_PLATFORMS.value]:
@@ -205,5 +205,5 @@ class ActionDetailsBuilder:
 
     @staticmethod
     def split_age(*args, **kwargs) -> typing.Union[typing.Dict, typing.NoReturn]:
-        #  todo: find out how to implement an age group split ( i.e. remove age 25-30 )
+        #  todo: find out how to implement an age group split ( i.e. remove age 25-30 )
         return {}

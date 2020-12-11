@@ -392,7 +392,7 @@ class ViewFieldsMetricEngagementMetadata:
         is_filterable=True,
         is_sortable=True,
         no_of_decimals=2,
-        description="The percentage of people who saw your ad and performed a link click.",
+        description="The percentage of people who saw your ad and performed a link click.",
     )
     instant_experience_clicks_to_open = ViewColumn(
         Autoincrement.hex_string("instant_experience_clicks_to_open"),

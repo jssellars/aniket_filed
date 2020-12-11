@@ -9,10 +9,10 @@ from facebook_business.adobjects.page import Page
 from facebook_business.adobjects.pagepost import PagePost
 
 from Core.Tools.Misc.ObjectManipulators import extract_class_attributes_values
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.facebook.sdk_adapter.validations import JOINT_CATS
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Api.catalogs import (
     special_ad_category,
     special_ad_categories,
@@ -47,12 +47,12 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPILocationsH
 
 
 class AdCreativeAssetsBase:
-    def __init__(self, session=None, business_owner_id: typing.AnyStr = None, facebook_config=None):
-        self._permanent_token = BusinessOwnerRepository(session).get_permanent_token(
+    def __init__(self, business_owner_id: typing.AnyStr = None):
+        self._permanent_token = fixtures.business_owner_repository.get_permanent_token(
             business_owner_facebook_id=business_owner_id
         )
         self._graph_api_sdk = GraphAPISdkBase(
-            facebook_config=facebook_config, business_owner_permanent_token=self._permanent_token
+            facebook_config=config.facebook, business_owner_permanent_token=self._permanent_token
         )
 
 
@@ -131,11 +131,11 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
 
 class BudgetValidation:
     @staticmethod
-    def get(session=None, business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
+    def get(business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
         return GraphAPIBudgetValidationHandler.handle(
             account_id=account_id,
             access_token=(
-                BusinessOwnerRepository(session).get_permanent_token(business_owner_facebook_id=business_owner_id)
+                fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id=business_owner_id)
             ),
         )
 
@@ -175,12 +175,12 @@ class SmartCreateCatalogs:
 
 
 class TargetingSearchBase:
-    def __init__(self, session=None, business_owner_id: typing.AnyStr = None, facebook_config=None):
-        self._permanent_token = BusinessOwnerRepository(session).get_permanent_token(
+    def __init__(self, business_owner_id: typing.AnyStr = None):
+        self._permanent_token = fixtures.business_owner_repository.get_permanent_token(
             business_owner_facebook_id=business_owner_id
         )
         self._graph_api_sdk = GraphAPISdkBase(
-            facebook_config=facebook_config, business_owner_permanent_token=self._permanent_token
+            facebook_config=config.facebook, business_owner_permanent_token=self._permanent_token
         )
 
 

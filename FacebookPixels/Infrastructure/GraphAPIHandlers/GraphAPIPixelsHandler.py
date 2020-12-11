@@ -44,11 +44,11 @@ class GraphAPIPixelHandler:
     def get_pixels(cls,
                    permanent_token: typing.AnyStr = None,
                    account_id: typing.AnyStr = None,
-                   startup: typing.Any = None) -> typing.Tuple[typing.List[Pixel], typing.Any]:
+                   config: typing.Any = None) -> typing.Tuple[typing.List[Pixel], typing.Any]:
         # initialize GraphAPI SDK
-        _ = GraphAPISdkBase(startup.facebook_config, permanent_token)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
-        #  Get pixels for ad account
+        # Get pixels for ad account
         pixel_mapper = GraphAPIPixelMapping(target=GraphAPIPixelDto)
         ad_account = AdAccount(fbid=account_id)
         pixels = ad_account.get_ads_pixels(fields=GraphAPIPixelFields.get_values())
@@ -85,7 +85,7 @@ class GraphAPIPixelHandler:
                 pixel_stats = []
                 errors.append(copy.deepcopy(Tools.create_error(e, code="IntegrationEventError")))
 
-            #  Assemble final pixels response
+            # Assemble final pixels response
             pixel_dto = cls.__build_pixel(pixel, custom_audiences, da_checks, custom_conversions, pixel_stats, errors)
 
             response.append(pixel_dto)

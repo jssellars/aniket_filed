@@ -4,9 +4,6 @@ import typing
 from datetime import datetime
 
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from Core.Tools.RabbitMQ.RabbitMqClient import RabbitMqClient
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
-from FacebookApps.BackgroundTasks.Startup import startup
 from FacebookApps.Infrastructure.Domain.App import App
 from FacebookApps.Infrastructure.Domain.AppStateEnum import AppStateEnum
 from FacebookApps.Infrastructure.Domain.Event import Event
@@ -26,21 +23,18 @@ logger = logging.getLogger(__name__)
 
 class GetAllAppsMessageRequestHandler:
     @classmethod
-    def handle(cls, message_body: typing.AnyStr) -> typing.NoReturn:
+    def handle(cls, message_body: typing.AnyStr, config, fixtures) -> typing.NoReturn:
         # get apps
         try:
-            #  load message
             body = json.loads(message_body)
             message_mapper = GetAllAppsMessageRequestMapping(target=GetAllAppsMessageRequest)
             message = message_mapper.load(body)
 
-            # get permanent token
-            permanent_token = BusinessOwnerRepository(startup.session).get_permanent_token(
-                message.business_owner_facebook_id)
+            permanent_token = fixtures.business_owner_repository.get_permanent_token(message.business_owner_facebook_id)
 
             graph_api_apps_dtos, errors = GraphAPIAppsHandler.get_apps(permanent_token=permanent_token,
                                                                        account_id=message.ad_account_id,
-                                                                       startup=startup)
+                                                                       config=config)
         except Exception as e:
             raise e
 
@@ -56,7 +50,7 @@ class GetAllAppsMessageRequestHandler:
                                                  apps=apps,
                                                  errors=errors)
 
-            cls.__publish(response)
+            cls.__publish(response, fixtures)
         except Exception as e:
             raise e
 
@@ -89,12 +83,10 @@ class GetAllAppsMessageRequestHandler:
         return event
 
     @classmethod
-    def __publish(cls, response: GetAllAppsMessageResponse) -> typing.NoReturn:
+    def __publish(cls, response: GetAllAppsMessageResponse, fixtures) -> typing.NoReturn:
         try:
-            rabbitmq_client = RabbitMqClient(startup.rabbitmq_config,
-                                             startup.exchange_details.name,
-                                             startup.exchange_details.outbound_queue.key)
-            rabbitmq_client.publish(response)
-            logger.info({"rabbitmq": rabbitmq_client.serialize_message(response)})
+            rabbitmq_adapter = fixtures.rabbitmq_adapter
+            rabbitmq_adapter.publish(response)
+            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(response)})
         except Exception as e:
             raise e

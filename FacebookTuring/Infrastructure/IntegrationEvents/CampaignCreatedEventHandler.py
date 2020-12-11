@@ -22,7 +22,7 @@ class CampaignCreatedEventHandler:
     RATE_LIMIT_EXCEPTION_STATUS = 80004
     SLEEP_ON_RATE_LIMIT_EXCEPTION = 3600
     __repository = None
-    __startup = None
+    _config = None
 
     @classmethod
     def set_repository(cls, repository: TuringMongoRepository = None):
@@ -30,13 +30,13 @@ class CampaignCreatedEventHandler:
         return cls
 
     @classmethod
-    def set_startup(cls, startup=None):
-        cls.__startup = startup
+    def set_config(cls, config=None):
+        cls._config = config
         return cls
 
     @classmethod
     def handle(cls, message: CampaignCreatedEvent):
-        permanent_token = (BusinessOwnerRepository(cls.__startup.session).
+        permanent_token = (BusinessOwnerRepository(cls._config.sql_db_session).
                            get_permanent_token(message.business_owner_id))
 
         # process message. sync every campaign, ad set, ad
@@ -79,7 +79,7 @@ class CampaignCreatedEventHandler:
                permanent_token: typing.AnyStr = None) -> typing.NoReturn:
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        _ = GraphAPISdkBase(cls.__startup.facebook_config, permanent_token)
+        _ = GraphAPISdkBase(cls._config.facebook, permanent_token)
         try:
             graph_api_client = GraphAPIClientBase(permanent_token)
             structure_fields = StructureFields.get(level.value)
@@ -111,10 +111,10 @@ class CampaignCreatedEventHandler:
                                                      business_owner_permanent_token=None,
                                                      facebook_id=None,
                                                      fields=None) -> GraphAPIClientBaseConfig:
-        config = GraphAPIClientBaseConfig()
-        config.try_partial_requests = False
-        config.request = GraphAPIRequestSingleStructure(facebook_id=facebook_id,
+        api_config = GraphAPIClientBaseConfig()
+        api_config.try_partial_requests = False
+        api_config.request = GraphAPIRequestSingleStructure(facebook_id=facebook_id,
                                                         business_owner_permanent_token=business_owner_permanent_token,
                                                         fields=fields)
-        config.fields = fields
-        return config
+        api_config.fields = fields
+        return api_config

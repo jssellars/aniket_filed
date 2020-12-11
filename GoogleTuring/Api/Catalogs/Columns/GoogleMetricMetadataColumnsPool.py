@@ -5,8 +5,8 @@ from GoogleTuring.Infrastructure.Domain.GoogleMetricFieldsMetadata import Google
 
 
 class GoogleMetricMetadataColumnsPool:
-    #  Structure fields and parameters
-    #  Object names, IDs, statuses, and dates
+    # Structure fields and parameters
+    # Object names, IDs, statuses, and dates
     absolute_top_impression_percentage = ColumnMetadata(
         GoogleMetricFieldsMetadata.absolute_top_impression_percentage.name, ColumnType.text)
 

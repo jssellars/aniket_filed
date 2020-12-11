@@ -1,4 +1,4 @@
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase
+from Core.mongo_adapter import MongoRepositoryBase
 
 
 class LoggingMongoRepository(MongoRepositoryBase):

@@ -1,11 +1,10 @@
 from datetime import datetime
 
-from Core.Tools.MongoRepository.MongoConnectionHandler import MongoConnectionHandler
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
 from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
-from GoogleTuring.BackgroundTasks.Startup import startup
+from Core.mongo_adapter import MongoOperator
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
 from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.StructuresSynchronizer import StructuresSynchronizer
+from GoogleTuring.BackgroundTasks.startup import config, fixtures
 from GoogleTuring.Infrastructure.Domain.Enums.GoogleAccountStatus import GoogleAccountStatus
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoRepository import \
     GoogleBusinessOwnerMongoRepository
@@ -18,13 +17,11 @@ class AdWordsAPIDataSyncHandler:
     @classmethod
     def handle(cls, request):
         refresh_token = request.refresh_token
-        client = AdWordsBaseClient(config=startup.google_config, refresh_token=refresh_token)
-        mongo_conn_handler = MongoConnectionHandler(startup.mongo_config)
-        mongo_repository = GoogleBusinessOwnerMongoRepository(client=mongo_conn_handler.client,
-                                                              database_name=startup.mongo_config[
-                                                                  'google_accounts_database_name'],
-                                                              collection_name=startup.mongo_config[
-                                                                  'accounts_collection_name'])
+        client = AdWordsBaseClient(config=config.google, refresh_token=refresh_token)
+        mongo_adapter = fixtures.mongo_adapter
+        mongo_repository = GoogleBusinessOwnerMongoRepository(client=mongo_adapter.client,
+                                                              database_name=config.mongo.google_accounts_database_name,
+                                                              collection_name=config.mongo.accounts_collection_name)
 
         account_info = list(set([(str(customer.google_id), customer.name) for customer in request.customers]))
         bo_google_id = request.google_id
@@ -55,21 +52,20 @@ class AdWordsAPIDataSyncHandler:
             mongo_repository.change_status_many(ids=removed_customer_ids, new_status=GoogleAccountStatus.REMOVED.value,
                                                 id_key="client_customer_id.google_id")
 
-        mongo_structures_repository = GoogleTuringStructuresMongoRepository(client=mongo_conn_handler.client,
-                                                                            database_name=startup.mongo_config[
-                                                                                'google_structures_database_name'])
+        mongo_structures_repository = GoogleTuringStructuresMongoRepository(client=mongo_adapter.client,
+                                                                            database_name=config.mongo.google_structures_database_name)
         mongo_structures_repository.update_removed_structures(removed_customer_ids)
 
         for i, account_id in enumerate(account_ids):
             structures_synchronizer = StructuresSynchronizer(business_owner_id=bo_google_id, account_id=account_id,
-                                                             adwords_client=client, mongo_config=startup.mongo_config,
-                                                             mongo_conn_handler=mongo_conn_handler)
+                                                             adwords_client=client, mongo_config=config.mongo,
+                                                             mongo_adapter=mongo_adapter)
             structures_synchronizer.synchronize()
             last_update_time = google_id_to_last_update_time.get(account_id, None)
             insights_synchronizer = InsightsSynchronizer(business_owner_id=bo_google_id, account_id=account_id,
-                                                         adwords_client=client, mongo_config=startup.mongo_config,
+                                                         adwords_client=client, mongo_config=config.mongo,
                                                          last_update_time=last_update_time,
-                                                         mongo_conn_handler=mongo_conn_handler)
+                                                         mongo_adapter=mongo_adapter)
             insights_synchronizer.synchronize()
 
             google_account_doc = google_account_documents[i]

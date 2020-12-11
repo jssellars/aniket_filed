@@ -11,11 +11,11 @@ import time
 import schedule
 
 from GoogleTuring.BackgroundTasks.SyncJobs.DailySyncJob import daily_sync_job
-from GoogleTuring.BackgroundTasks.Startup import startup
+from GoogleTuring.BackgroundTasks.startup import config, fixtures
 
 
 def main():
-    schedule.every().day.at(startup.sync_time).do(daily_sync_job)
+    schedule.every().day.at(config.sync_time).do(daily_sync_job)
     while True:
         schedule.run_pending()
         time.sleep(5)

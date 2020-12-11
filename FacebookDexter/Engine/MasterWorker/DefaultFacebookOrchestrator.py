@@ -7,7 +7,7 @@ from Core.Dexter.Infrastructure.Domain.DaysEnum import DaysEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.OrchestratorBase import OrchestratorBase
 from Core.Dexter.PersistanceLayer.Helpers.DexterJournalMongoRepositoryHelper import DexterJournalMongoRepositoryHelper
-from Core.Tools.Misc.Constants import DEFAULT_DATETIME
+from Core.constants import DEFAULT_DATETIME
 from FacebookDexter.Engine.Algorithms.AlgorithmsEnum import FacebookAlgorithmsEnum
 from FacebookDexter.Engine.Algorithms.FacebookAlgorithmsFactory import FacebookAlgorithmsFactory
 from FacebookDexter.Engine.Algorithms.FacebookRuleEvaluatorFactory import FacebookRuleEvaluatorFactory
@@ -35,18 +35,18 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
             if alg_type == FacebookAlgorithmsEnum.DEXTER_FUZZY_INFERENCE:
                 algorithm = (algorithm.
                              set_business_owner_id(self.business_owner_id).
-                             set_facebook_config(self.startup.facebook_config).
-                             set_business_owner_repo_session(self.startup.session).
-                             set_external_services(self.startup.external_services).
-                             set_dexter_config(self.startup.dexter_config).
+                             set_facebook_config(self.config.facebook).
+                             set_business_owner_repo_session(self.config.sql_db_session).
+                             set_external_services(self.config.external_services).
+                             set_dexter_config(self.config.dexter).
                              set_fuzzyfier_factory(fuzzyfier_factory).
                              set_rules(rules).
-                             set_mongo_config(self.startup.mongo_config).
+                             set_mongo_config(self.config.mongo).
                              set_auth_token(self._auth_token).
                              create_mongo_repository())
             elif alg_type == FacebookAlgorithmsEnum.FACEBOOK_ENHANCER:
                 algorithm = (algorithm.
-                             set_mongo_config(self.startup.mongo_config).
+                             set_mongo_config(self.config.mongo).
                              create_mongo_repository())
         except Exception as e:
             raise e
@@ -67,13 +67,13 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
     def run_algorithm(self, search_query, time_interval, mongo_config):
         self.set_data_repository(FacebookDexterMongoRepository(config=mongo_config))
         try:
-            if not self.startup.dexter_config.date_stop:
+            if not self.config.dexter.date_stop:
                 date_stop = datetime.now() - timedelta(days=1)
             else:
-                date_stop = datetime.strptime(self.startup.dexter_config.date_stop, DEFAULT_DATETIME) - timedelta(days=1)
+                date_stop = datetime.strptime(self.config.dexter.date_stop, DEFAULT_DATETIME) - timedelta(days=1)
 
             time_interval_enum = DaysEnum(time_interval)
-            last_updated = self.startup.dexter_config.recommendation_days_last_updated
+            last_updated = self.config.dexter.recommendation_days_last_updated
 
             campaign_ids = self._data_repository.get_campaigns_by_account_id(self.ad_account_id)
             c = 1
@@ -172,7 +172,7 @@ class DefaultFacebookOrchestrator(OrchestratorBase):
                                                                            level)
         facebook_recommendations = facebook_enhancer_algorithm.run(structure_id)
         self._recommendations_repository.save_recommendations(facebook_recommendations,
-                                                              self.startup.dexter_config.recommendation_days_last_updated)
+                                                              self.config.dexter.recommendation_days_last_updated)
 
     def get_facebook_enhancer_algorithm(self, date_stop, time_interval_enum, level):
         facebook_enhancer_algorithm = self.__init_algorithm(alg_type=FacebookAlgorithmsEnum.FACEBOOK_ENHANCER,

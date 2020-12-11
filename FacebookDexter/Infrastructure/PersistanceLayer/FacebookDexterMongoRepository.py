@@ -8,9 +8,8 @@ from retry import retry
 
 from Core.Dexter.Infrastructure.Domain.Breakdowns import BreakdownMetadataBase
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum, LevelNameKeyEnum
-from Core.Tools.MongoRepository.MongoOperator import MongoOperator
-from Core.Tools.MongoRepository.MongoRepositoryBase import MongoRepositoryBase, MongoProjectionState
-from Core.Tools.MongoRepository.MongoRepositoryStatusBase import MongoRepositoryStatusBase
+from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, \
+    MongoRepositoryStatus, MongoOperator
 from FacebookDexter.Infrastructure.Domain.Breakdowns import FacebookBreakdownEnum, FacebookActionBreakdownEnum
 
 
@@ -29,7 +28,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         self._database = self._client[self._config.insights_database]
         collection_name = level.value + "_" + FacebookBreakdownEnum.NONE.value.name + "_" + \
                           FacebookActionBreakdownEnum.NONE.value.name
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             LevelIdKeyEnum.get_enum_by_name(level.name).value: {
@@ -49,7 +48,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             typing.List[typing.Tuple[typing.AnyStr, typing.AnyStr]]:
         self._database = self._client[self._config.insights_database]
         collection_name = level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             MongoOperator.AND.value: [
@@ -104,7 +103,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         collection_name = (level.value + "_" +
                            breakdown_metadata.breakdown.value.name + "_" +
                            breakdown_metadata.action_breakdown.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         # build mongo query
         query = [
@@ -143,7 +142,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             }
         ]
 
-        #  add breakdown to group by
+        # add breakdown to group by
         if breakdown_metadata.breakdown != FacebookBreakdownEnum.NONE:
             query[0][MongoOperator.GROUP.value][MongoOperator.GROUP_KEY.value][
                 breakdown_metadata.breakdown.value.name] = \
@@ -210,7 +209,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         collection_name = (level.value + "_" +
                            breakdown_metadata.breakdown.value.name + "_" +
                            breakdown_metadata.action_breakdown.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         # build mongo query
         query = [
@@ -242,7 +241,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             }
         ]
 
-        #  add breakdown to group by
+        # add breakdown to group by
         if breakdown_metadata.breakdown != FacebookBreakdownEnum.NONE:
             query[0][MongoOperator.GROUP.value][MongoOperator.GROUP_KEY.value][
                 breakdown_metadata.breakdown.value.name] = \
@@ -302,7 +301,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         collection_name = (level.value + "_" +
                            breakdown_metadata.breakdown.value.name + "_" +
                            breakdown_metadata.action_breakdown.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         # build mongo query
         query = [
@@ -335,7 +334,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
             }
         ]
 
-        #  add breakdown to group by
+        # add breakdown to group by
         if breakdown_metadata.breakdown != FacebookBreakdownEnum.NONE:
             query[0][MongoOperator.GROUP.value][MongoOperator.GROUP_KEY.value][
                 breakdown_metadata.breakdown.value.name] = \
@@ -389,7 +388,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                                             key_value: typing.AnyStr = None,
                                             level: LevelEnum = None) -> typing.Union[typing.Dict, typing.NoReturn]:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(level.value)
+        self.collection = level.value
 
         # build mongo query
         query = {
@@ -401,7 +400,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                 },
                 {
                     "status": {
-                        MongoRepositoryStatusBase.ACTIVE.value
+                        MongoRepositoryStatus.ACTIVE.value
                     }
                 }
             ]
@@ -423,7 +422,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
     def get_ad_account_id(self, key_value: typing.AnyStr = None, level: LevelEnum = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(level.value)
+        self.collection = level.value
 
         # build mongo query
         query = {
@@ -434,7 +433,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    "status": MongoRepositoryStatusBase.ACTIVE.value
+                    "status": MongoRepositoryStatus.ACTIVE.value
                 }
             ]
         }
@@ -457,7 +456,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                               key_value: typing.AnyStr = None,
                               level: LevelEnum = None) -> typing.Union[typing.Dict, typing.NoReturn]:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(level.value)
+        self.collection = level.value
 
         # build mongo query
         query = {
@@ -469,7 +468,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                 },
                 {
                     "status": {
-                        MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value
+                        MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value
                     }
                 }
             ]
@@ -495,7 +494,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
     def get_ads_by_adset_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         self._database = self._client[self._config.structures_database]
         collection_name = LevelEnum.AD.value
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             LevelIdKeyEnum.ADSET.value: {MongoOperator.EQUALS.value: key_value},
@@ -509,8 +508,8 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         return list(set([entry[LevelIdKeyEnum.AD.value] for entry in results]))
 
     def get_all_ads_by_adset_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
-        self.set_database(self._config.structures_database)
-        self.set_collection(LevelEnum.AD.value)
+        self.database = self._config.structures_database
+        self.collection = LevelEnum.AD.value
 
         query = {
             MongoOperator.AND.value: [
@@ -518,7 +517,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     LevelIdKeyEnum.ADSET.value: {MongoOperator.EQUALS.value: key_value}
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }
@@ -535,7 +534,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
         collection_name = (LevelEnum.ADSET.value + "_" +
                            FacebookBreakdownEnum.NONE.value.name + "_" +
                            FacebookActionBreakdownEnum.NONE.value.name)
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             LevelIdKeyEnum.CAMPAIGN.value: {MongoOperator.EQUALS.value: key_value},
@@ -550,7 +549,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
     def get_campaigns_by_account_id(self, key_value: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
         self._database = self._client[self._config.structures_database]
         collection_name = LevelEnum.CAMPAIGN.value
-        self.set_collection(collection_name)
+        self.collection = collection_name
 
         query = {
             MongoOperator.AND.value: [
@@ -558,7 +557,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     LevelIdKeyEnum.ACCOUNT.value: {MongoOperator.EQUALS.value: key_value}
                 },
                 {
-                    'status': {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    'status': {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }
@@ -571,7 +570,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
     def get_adset_id_by_campaign_id(self, key_value: typing.AnyStr = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(LevelEnum.ADSET.value)
+        self.collection = LevelEnum.ADSET.value
 
         query = {
             MongoOperator.AND.value: [
@@ -579,7 +578,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     LevelIdKeyEnum.CAMPAIGN.value: {MongoOperator.EQUALS.value: key_value},
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }
@@ -593,7 +592,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
     def get_adset_ids_by_campaign_id(self, key_value: typing.AnyStr = None) -> typing.List:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(LevelEnum.ADSET.value)
+        self.collection = LevelEnum.ADSET.value
 
         query = {
             MongoOperator.AND.value: [
@@ -601,7 +600,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     LevelIdKeyEnum.CAMPAIGN.value: {MongoOperator.EQUALS.value: key_value},
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }
@@ -614,7 +613,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
     def get_adset_id_by_ad_id(self, key_value: typing.AnyStr = None) -> typing.AnyStr:
         self._database = self._client[self._config.structures_database]
-        self.set_collection(LevelEnum.AD.value)
+        self.collection = LevelEnum.AD.value
 
         query = {
             MongoOperator.AND.value: [
@@ -622,7 +621,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     LevelIdKeyEnum.ADSET.value: {MongoOperator.EQUALS.value: key_value},
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }
@@ -636,7 +635,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
 
     def get_ad_name_by_ad_id(self, ad_id):
         self._database = self._client[self._config.structures_database]
-        self.set_collection(LevelEnum.AD.value)
+        self.collection = LevelEnum.AD.value
 
         query = {
             MongoOperator.AND.value: [
@@ -644,7 +643,7 @@ class FacebookDexterMongoRepository(MongoRepositoryBase):
                     LevelIdKeyEnum.AD.value: {MongoOperator.EQUALS.value: ad_id},
                 },
                 {
-                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatusBase.ACTIVE.value}
+                    "status": {MongoOperator.EQUALS.value: MongoRepositoryStatus.ACTIVE.value}
                 }
             ]
         }

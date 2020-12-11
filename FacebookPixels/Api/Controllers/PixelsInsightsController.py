@@ -13,7 +13,7 @@ from Core.Web.Security.Permissions import PixelPermissions
 from FacebookPixels.Api.Commands.PixelsInsightsCommand import PixelsInsightsCommand
 from FacebookPixels.Api.CommandsHandlers.PixelsInsightsCommandHandlers import PixelsInsightsCommandHandler
 from FacebookPixels.Api.Mappings.PixelsInsightsCommandMapping import PixelsInsightsCommandMapping
-from FacebookPixels.Api.Startup import startup
+from FacebookPixels.Api.startup import config, fixtures
 
 
 import logging
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class PixelsInsightsEndpoint(Resource):
-    @startup.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
+    @fixtures.authorize_permission(permission=PixelPermissions.CAN_ACCESS_PIXELS)
     def post(self, level: typing.AnyStr = None) -> typing.Union[typing.List[typing.NoReturn], typing.Dict]:
         logger.info(request_as_log_dict(request))
         try:

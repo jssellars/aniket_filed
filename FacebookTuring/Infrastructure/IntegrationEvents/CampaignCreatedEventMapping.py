@@ -1,6 +1,6 @@
 from marshmallow import EXCLUDE, fields
 
-from Core.Tools.Mapper.MapperBase import MapperNestedField, MapperBase
+from Core.mapper import MapperNestedField, MapperBase
 from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignTree
 
 
