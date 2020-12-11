@@ -1,9 +1,0 @@
-class AdsManagerUpdateStructureCommand:
-    details: dict = None
-
-class AdsManagerDuplicateStructureCommand:
-    number_of_duplicates: str = None
-    parent_ids: List[str] = None
-
-class AdsManagerSaveDraftCommand:
-    details: dict = None

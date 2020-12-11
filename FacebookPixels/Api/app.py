@@ -7,41 +7,27 @@ if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
 
-from flask import Flask
-from flask_cors import CORS
-from flask_restful import Api
+import flask
+import flask_cors
+import flask_restful
 
-from FacebookPixels.Api.Controllers.HealthCheckController import HealthCheckEndpoint, VersionEndpoint
-from FacebookPixels.Api.startup import config, fixtures
-from FacebookPixels.Api.Controllers.PixelsInsightsCatalogsController import \
-    CustomConversionsInsightsCatalogsEndpoint, PixelsInsightsCatalogsEndpoint
-from FacebookPixels.Api.Controllers.PixelsInsightsController import PixelsInsightsEndpoint
+from FacebookPixels.Api.startup import config
+from FacebookPixels.Api import routers
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 app.url_map.strict_slashes = False
+cors = flask_cors.CORS(app, resources={r"/api/*": {"origins": "*"}})
+api = flask_restful.Api(app)
 
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-api = Api(app)
-
-# Version / Healthcheck
-healthcheck_controller = "{base_url}/healthcheck".format(base_url=config.base_url.lower())
-api.add_resource(HealthCheckEndpoint, healthcheck_controller)
-
-version_controller = "{base_url}/version".format(base_url=config.base_url.lower())
-api.add_resource(VersionEndpoint, version_controller)
-
-# Pixel insights catalogs controller
-pixel_insights_catalogs_controller = "{base_url}/pixels/catalogs".format(base_url=config.base_url.lower())
-api.add_resource(PixelsInsightsCatalogsEndpoint, pixel_insights_catalogs_controller)
-
-custom_conversions_insights_catalogs_controller = "{base_url}/customconversions/catalogs".format(
-    base_url=config.base_url.lower())
-api.add_resource(CustomConversionsInsightsCatalogsEndpoint, custom_conversions_insights_catalogs_controller)
-
-# Pixel insights controller
-pixel_insights_controller = "{base_url}/<string:level>/insights".format(base_url=config.base_url.lower())
-api.add_resource(PixelsInsightsEndpoint, pixel_insights_controller)
+router_route_pairs = (
+    (routers.HealthCheck, "healthcheck"),
+    (routers.Version, "version"),
+    (routers.PixelsInsightsCatalogs, "pixels/catalogs"),
+    (routers.CustomConversionsInsightsCatalogs, "customconversions/catalogs"),
+    (routers.PixelsInsights, "<string:level>/insights"),
+)
+for router, route in router_route_pairs:
+    api.add_resource(router, f"{config.base_url.lower()}/{route}")
 
 if __name__ == "__main__":
     app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

@@ -2,23 +2,22 @@
 import os
 import sys
 
-
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
 
-from flask import Flask
-from flask_cors import CORS
-from flask_restful import Api
+import flask
+import flask_cors
+import flask_restful
 
 from FacebookCampaignsBuilder.Api import routers
-from FacebookCampaignsBuilder.Api.startup import config, fixtures
+from FacebookCampaignsBuilder.Api.startup import config
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 app.url_map.strict_slashes = False
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-api = Api(app)
+cors = flask_cors.CORS(app, resources={r"/api/*": {"origins": "*"}})
+api = flask_restful.Api(app)
 
 router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
@@ -46,7 +45,6 @@ router_route_pairs = (
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
-
 
 if __name__ == "__main__":
     app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

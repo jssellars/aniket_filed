@@ -192,3 +192,7 @@ class Model(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
+
+    @property
+    def version_endpoint_payload(self):
+        return {"name": self.name.full, "version": self.version, "environment": self.environment}

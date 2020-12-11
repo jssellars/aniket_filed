@@ -10,7 +10,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.AccountStatus import AccountStatus
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookAccounts.Api.Dtos.AccountAgGridViewsDto import accounts_ag_grid_view
+from FacebookAccounts.Api.dtos import accounts_ag_grid_view
 from FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import (
     GraphAPIAccountInsights,
     GraphAPIRequestInsights,

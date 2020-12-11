@@ -7,30 +7,25 @@ if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
 
-from flask import Flask
-from flask_cors import CORS
-from flask_restful import Api
+import flask
+import flask_cors
+import flask_restful
 
-from Logging.Api.Controllers.HealthcheckController import HealthCheckEndpoint, VersionEndpoint
-from Logging.Api.Controllers.LoggingController import LoggingEndpoint
-from Logging.Api.startup import config, fixtures
+from Logging.Api.startup import config
+from Logging.Api import routers
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
+app.url_map.strict_slashes = False
+cors = flask_cors.CORS(app, resources={r"/api/*": {"origins": "*"}})
+api = flask_restful.Api(app)
 
-cors = CORS(app, resources={r"*": {"origins": "*"}})
-
-api = Api(app)
-
-# Version / Healthcheck 
-healthcheck_controller = "{base_url}/healthcheck".format(base_url=config.base_url.lower())
-api.add_resource(HealthCheckEndpoint, healthcheck_controller)
-
-version_controller = "{base_url}/version".format(base_url=config.base_url.lower())
-api.add_resource(VersionEndpoint, version_controller)
-
-# Logging controller
-logging_endpoint = "{base_url}/log".format(base_url=config.base_url.lower())
-api.add_resource(LoggingEndpoint, logging_endpoint)
+router_route_pairs = (
+    (routers.HealthCheck, "healthcheck"),
+    (routers.Version, "version"),
+    (routers.Logging, "log"),
+)
+for router, route in router_route_pairs:
+    api.add_resource(router, f"{config.base_url.lower()}/{route}")
 
 if __name__ == "__main__":
     app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)
