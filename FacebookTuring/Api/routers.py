@@ -64,6 +64,7 @@ from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import 
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from FacebookTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
 from FacebookTuring.Api.startup import config, fixtures
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +141,32 @@ class AccountsElementsViews(Resource):
     @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
     def get(self):
         return ElementsViewsHandler.get()
+
+
+class AdsManagerAgGridStructuresPerformance(Resource):
+
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    def post(self, level):
+        logger.info(request_as_log_dict(request))
+
+        try:
+            if level not in [Level.CAMPAIGN.value, Level.ADSET.value]:
+                raise ValueError
+
+            request_json = request.get_json(force=True)
+            business_owner_id = extract_business_owner_facebook_id()
+            response = (AdsManagerInsightsCommandHandler.handle(
+                handler_type=AdsManagerInsightsCommandEnum.AG_GRID_ADD_AN_ADSET_AD_PARENT,
+                query_json=request_json,
+                business_owner_id=business_owner_id,
+                level=level)
+            )
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to process request."}, 400
 
 
 class AdsManagerCatalogsMetacolumns(Resource):

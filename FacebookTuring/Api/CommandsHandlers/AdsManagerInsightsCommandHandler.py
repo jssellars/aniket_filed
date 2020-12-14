@@ -10,15 +10,25 @@ from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsi
 from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-
 PERCENTAGE_DIFFERENCE_KEY = "percentage_difference"
 TREND_KEY = "trend"
+BASE_POPUP_FIELDS = [
+    FieldsMetadata.impressions.name,
+    FieldsMetadata.reach.name,
+    FieldsMetadata.unique_link_clicks.name,
+    FieldsMetadata.ctr_all.name,
+    FieldsMetadata.cpc_all.name,
+    FieldsMetadata.campaign_id.name,
+    FieldsMetadata.adset_id.name,
+]
 
 
 class AdsManagerInsightsCommandHandler:
@@ -35,6 +45,7 @@ class AdsManagerInsightsCommandHandler:
             AdsManagerInsightsCommandEnum.REPORTS: cls.get_reports_insights,
             AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS: cls.get_ag_grid_insights,
             AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS_TREND: cls.get_ag_grid_trend,
+            AdsManagerInsightsCommandEnum.AG_GRID_ADD_AN_ADSET_AD_PARENT: cls.get_ag_grid_popup
         }
         handler = handlers.get(handler_type, None)
         if handler is None:
@@ -115,6 +126,34 @@ class AdsManagerInsightsCommandHandler:
                              business_owner_id: str = None,
                              level: str = None) -> Dict:
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+        query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
+
+        return GraphAPIInsightsHandler.get_ag_grid_insights(
+            permanent_token=permanent_token,
+            level=level,
+            ad_account_id=query.facebook_id,
+            fields=query.fields,
+            parameters=query.parameters,
+            structure_fields=query.structure_fields,
+            requested_fields=query.requested_columns,
+            next_page_cursor=query.next_page_cursor,
+            page_size=query.page_size,
+        )
+
+    @classmethod
+    def get_ag_grid_popup(cls,
+                          query_json: Dict = None,
+                          business_owner_id: str = None,
+                          level: str = None) -> Dict:
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+
+        popup_fields = []
+        if level == Level.CAMPAIGN.value:
+            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.campaign_name.name])
+        else:
+            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.adset_name.name])
+
+        query_json['agColumns'] = ",".join(popup_fields)
         query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
 
         return GraphAPIInsightsHandler.get_ag_grid_insights(

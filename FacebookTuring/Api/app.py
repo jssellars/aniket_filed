@@ -49,6 +49,7 @@ router_route_pairs = (
     (routers.AdsManagerReportsDimensions, "get-dimensions"),
     (routers.AdsManagerReportsMetrics, "get-metrics"),
     (routers.AdsManagerReportsBreakdowns, "get-breakdowns"),
+    (routers.AdsManagerAgGridStructuresPerformance, "ag-grid-structures-performance/<string:level>"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
