@@ -1,6 +1,6 @@
 import typing
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, List
 
 from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
 from Core.constants import DEFAULT_DATETIME
@@ -82,7 +82,7 @@ class AdsManagerInsightsCommandHandler:
     def get_insights(cls,
                      query_json: typing.Dict = None,
                      business_owner_id: typing.AnyStr = None,
-                     level: typing.AnyStr = None) -> typing.Dict:
+                     level: typing.AnyStr = None) -> List[Dict]:
         permanent_token = (
             fixtures.business_owner_repository.get_permanent_token(business_owner_id)
         )
@@ -129,6 +129,7 @@ class AdsManagerInsightsCommandHandler:
         query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
 
         return GraphAPIInsightsHandler.get_ag_grid_insights(
+            config,
             permanent_token=permanent_token,
             level=level,
             ad_account_id=query.facebook_id,

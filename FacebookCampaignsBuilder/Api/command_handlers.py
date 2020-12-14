@@ -123,14 +123,12 @@ class CampaignPublish:
         except Exception as e:
             raise e
 
-    @staticmethod
-    def publish_response(response):
+    @classmethod
+    def publish_response(cls, response):
         try:
-            rabbitmq_client = RabbitMqClient(
-                startup.rabbitmq_config, startup.exchange_details.name, startup.exchange_details.outbound_queue.key
-            )
-            rabbitmq_client.publish(response)
-            logger.info({"rabbitmq": rabbitmq_client.serialize_message(response)})
+            rabbitmq_adapter = fixtures.rabbitmq_adapter
+            rabbitmq_adapter.publish(response)
+            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(response)})
         except Exception as e:
             raise e
 
@@ -140,11 +138,10 @@ class CampaignBuilderPublish:
     def handle(
         request: typing.Dict = None,
         business_owner_id: typing.AnyStr = None,
-        facebook_config: typing.Any = None,
         permanent_token: str = None,
     ) -> typing.List[typing.Dict]:
 
-        GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
+        GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=config.facebook)
 
         campaign_structure = request["campaign_optimization_details"]["campaign_structure"]
         campaign_template = request["campaign_template"]
@@ -374,15 +371,6 @@ class SmartCreatePublish:
 
         if parent_campaign.device:
             ad_set["targeting"]["device_platforms"] = [parent_campaign.device]
-
-    @classmethod
-    def publish_response(cls, response):
-        try:
-            rabbitmq_adapter = fixtures.rabbitmq_adapter
-            rabbitmq_adapter.publish(response)
-            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(response)})
-        except Exception as e:
-            raise e
 
     @staticmethod
     def process_geo_location(locations: List[Location]) -> Dict:
