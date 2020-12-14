@@ -40,7 +40,7 @@ from FacebookTuring.Api.CommandsHandlers.AdsManagerSaveDraftCommandHandler impor
 from FacebookTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
     AdsManagerUpdateStructureCommandHandler
 )
-from FacebookTuring.Api.Dtos import ElementsCardViews
+from FacebookTuring.Api.Dtos import ElementsCardViews, AdsManagerAgGridPopupViewsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsBreakdownsCombinationsDto import (
     AdsManagerCatalogsBreakdownsCombinationsDto
 )
@@ -112,6 +112,22 @@ class AdsManagerCatalogsViewsAgGrid(Resource):
     def get(self, level):
         try:
             return humps.camelize(AdsManagerCatalogsViewsAgGridDto.get(level)), 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to retrieve ag grid views by level."}, 400
+
+
+class AdsManagerAgGridStructuresPerformanceViews(Resource):
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
+    def get(self, level):
+        try:
+            if level not in [Level.CAMPAIGN.value, Level.ADSET.value]:
+                raise ValueError
+
+            response = AdsManagerAgGridPopupViewsDto.get_view(level)
+            return response, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))

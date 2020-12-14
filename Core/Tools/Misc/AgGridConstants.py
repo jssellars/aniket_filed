@@ -15,6 +15,7 @@ COLUMN_TYPE = "column_type"
 IS_TOGGLE = "is_toggle"
 IS_NAME_CLICKABLE = "is_name_clickable"
 
+
 class PinnedDirection(Enum):
     LEFT = "left"
     RIGHT = "right"
