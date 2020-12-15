@@ -18,6 +18,7 @@ class ViewColumn:
                  group_display_name: typing.AnyStr = None,  # ViewColumnGroupEnum
                  hidden: bool = False,
                  no_of_decimals: int = 0,
+                 is_hidden: bool = False
                  ):
         self.id = id
         self.display_name = display_name  # string
@@ -31,3 +32,4 @@ class ViewColumn:
         self.group_display_name = group_display_name
         self.hidden = hidden
         self.no_of_decimals = no_of_decimals
+        self.is_hidden = is_hidden

@@ -2,20 +2,28 @@ from Core.Metadata.Columns.ViewColumns.ViewColumn import ViewColumn
 from Core.Metadata.Columns.ViewColumns.ViewColumnType import ViewColumnType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
+ACCOUNT_ID = "account_id"
 ACCOUNTS_NAME = "account_name"
 ACCOUNT_STATUS = "account_status"
 CURRENCY = "currency"
 BUSINESS_ID = "business_id"
 AMOUNT_SPENT = "amount_spent"
-CPM = "cpm"
-UNIQUE_CTR_ALL = "unique_ctr_all"
-UNIQUE_LINK_CLICK_THROUGH_RATE = "unique_link_click_through_rate"
-UNIQUE_CLICKS_ALL = "unique_clicks_all"
 CPC = "cpc"
+CPM = "cpm"
+PURCHASES_COST = "purchases_cost"
+UNIQUE_CTR_ALL = "unique_ctr_all"
+UNIQUE_CLICKS_ALL = "unique_clicks_all"
+IMPRESSIONS = "impressions"
 PURCHASES = "purchases"
-LEADS_TOTAL = "leads_total"
+CTR = "ctr"
 
 ACCOUNT_COLUMNS_DEFINITION = {
+    ACCOUNT_ID: ViewColumn(
+        display_name="Account ID",
+        primary_value=FieldsMetadata.account_id,
+        type_id=ViewColumnType.TEXT.value,
+        is_hidden=True,
+    ),
     ACCOUNTS_NAME: ViewColumn(
         display_name="Account name",
         primary_value=FieldsMetadata.name,
@@ -42,10 +50,28 @@ ACCOUNT_COLUMNS_DEFINITION = {
         type_id=ViewColumnType.CURRENCY.value,
         no_of_decimals=2,
     ),
+    CPC: ViewColumn(
+        display_name="CPC (All)",
+        primary_value=FieldsMetadata.cpc_all,
+        type_id=ViewColumnType.CURRENCY.value,
+        no_of_decimals=2,
+    ),
     CPM: ViewColumn(
         display_name="CPM",
         primary_value=FieldsMetadata.cpm,
         type_id=ViewColumnType.CURRENCY.value,
+        no_of_decimals=2,
+    ),
+    PURCHASES_COST: ViewColumn(
+        display_name="CPP",
+        primary_value=FieldsMetadata.purchases_cost,
+        type_id=ViewColumnType.CURRENCY.value,
+        no_of_decimals=2,
+    ),
+    CTR: ViewColumn(
+        display_name="Unique link click-through rate",
+        primary_value=FieldsMetadata.ctr_all,
+        type_id=ViewColumnType.PERCENTAGE.value,
         no_of_decimals=2,
     ),
     UNIQUE_CTR_ALL: ViewColumn(
@@ -54,30 +80,15 @@ ACCOUNT_COLUMNS_DEFINITION = {
         type_id=ViewColumnType.PERCENTAGE.value,
         no_of_decimals=2,
     ),
-    UNIQUE_LINK_CLICK_THROUGH_RATE: ViewColumn(
+    IMPRESSIONS: ViewColumn(
         display_name="Unique link click-through rate",
-        primary_value=FieldsMetadata.unique_link_click_through_rate,
-        type_id=ViewColumnType.PERCENTAGE.value,
-        no_of_decimals=2,
+        primary_value=FieldsMetadata.impressions,
+        type_id=ViewColumnType.NUMBER.value,
     ),
     UNIQUE_CLICKS_ALL: ViewColumn(
         display_name="Unique clicks (All)",
         primary_value=FieldsMetadata.unique_clicks_all,
         type_id=ViewColumnType.NUMBER.value,
     ),
-    CPC: ViewColumn(
-        display_name="CPC (All)",
-        primary_value=FieldsMetadata.cpc_all,
-        type_id=ViewColumnType.CURRENCY.value,
-    ),
-    PURCHASES: ViewColumn(
-        display_name="Purchases (FB Pixel)",
-        primary_value=FieldsMetadata.purchases_total,
-        type_id=ViewColumnType.NUMBER.value,
-    ),
-    LEADS_TOTAL: ViewColumn(
-        display_name="Leads",
-        primary_value=FieldsMetadata.leads_total,
-        type_id=ViewColumnType.NUMBER.value,
-    ),
 }
+

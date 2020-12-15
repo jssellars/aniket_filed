@@ -272,6 +272,9 @@ def map_response(response: List[Any] = None) -> typing.List[Dict]:
                         mapped_entry[FieldsMetadata.account_status.name]
                     ).name
 
+                if FieldsMetadata.account_id.name in mapped_entry:
+                    mapped_entry[FieldsMetadata.account_id.name] = f"act_{mapped_entry[FieldsMetadata.account_id.name]}"
+
                 entry_result.update(mapped_entry)
             except Exception as e:
                 logger.exception(f"Failed to map the {column.primary_value.name} field || {repr(e)}")
