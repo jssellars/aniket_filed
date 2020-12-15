@@ -12,6 +12,7 @@ from Core.Tools.Misc.ObjectManipulators import extract_class_attributes_values
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.facebook.sdk_adapter.validations import JOINT_CATS
+from Core.settings_models import Model
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Api.catalogs import (
     special_ad_category,
@@ -121,7 +122,7 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
             ad_account_videos = [Tools.convert_to_json(entry) for entry in ad_account_videos_raw]
             for index, ad_video in enumerate(ad_account_videos):
                 ad_account_videos[index]["permalink_url"] = (
-                    self.__base_permalink_url + ad_account_videos[index]["permalink_url"]
+                        self.__base_permalink_url + ad_account_videos[index]["permalink_url"]
                 )
         except Exception as e:
             raise e
@@ -270,3 +271,11 @@ class TargetingSearchRegulatedInterests(TargetingSearchBase):
             return handler.get_regulated_interests(regulated_categories=regulated_categories)
         except Exception as e:
             raise e
+
+
+def get_account_advertisable_apps(ad_account_id: str, permanent_token: str, config: Model):
+    GraphAPISdkBase(facebook_config=config.facebook, business_owner_permanent_token=permanent_token)
+    ad_account = AdAccount(ad_account_id)
+    apps = ad_account.get_advertisable_applications()
+
+    return [entry.export_all_data() for entry in apps]
