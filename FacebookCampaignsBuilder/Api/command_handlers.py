@@ -26,7 +26,7 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPICampaignBu
     GraphAPICampaignBuilderHandler,
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import campaign_builder
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.ad_builder import AdBuilder
+from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import ad_builder
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import adset_builder
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.structures import CampaignSplit
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import Location
@@ -272,7 +272,6 @@ class SmartCreatePublish:
         facebook_config: typing.Any = None,
         permanent_token: str = None,
     ) -> typing.List[typing.Dict]:
-
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
         campaign_tree = []
@@ -312,19 +311,24 @@ class SmartCreatePublish:
                     campaign_tree[campaign_index]["ad_sets"].append(deepcopy(ad_set_response))
                     adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget})
 
+                    for ad_index, ad in enumerate(ads):
+                        ad.update({Ad.Field.adset_id: ad_set_facebook_id, Ad.Field.adset: ad_set_facebook_id})
+                        ad = ad_account.create_ad(params=ad)
+                        ad_facebook_id = ad.get_id()
+                        campaign_tree[campaign_index]["ad_sets"][ad_set_index]["ads"].append(ad_facebook_id)
+
                 if is_adset_using_cbo:
                     SmartCreatePublish.add_adsets_budget(
                         campaign_facebook_id, adset_budgets, campaign.campaign_template
                     )
-
             except Exception as e:
                 CampaignPublish.delete_incomplete_campaigns(campaign_tree)
                 raise e
-
         return campaign_tree
 
     @staticmethod
     def build_campaign_hierarchy(request):
+        ad_account_id = request["ad_account_id"]
         step_one = request["step_one_details"]
         step_two = request["step_two_details"]
         step_three = request["step_three_details"]
@@ -355,7 +359,7 @@ class SmartCreatePublish:
         )
 
         # Build ads
-        ads = AdBuilder.build_ads()
+        ads = ad_builder.build_ads(ad_account_id, step_two, step_three)
 
         return campaigns, ad_sets, ads
 

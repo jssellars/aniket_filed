@@ -154,7 +154,7 @@ class GraphAPIAdBuilderHandler(object):
 
     def _build_video_ad_creative(self, ad_account_id, ad_template, page_facebook_id, instagram_facebook_id):
         # Upload video on FB
-        if not ad_template['video_id']:
+        if not ad_template.get('video_id', None):
             ad_video_facebook_id = self._build_ad_video(ad_account_id, ad_template['media_url'])
         else:
             ad_video_facebook_id = ad_template['video_id']
