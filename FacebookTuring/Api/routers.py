@@ -565,22 +565,22 @@ class GetInsightsHandler:
 class AccountsReportInsights(Resource):
     @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
     def post(self):
-        return GetInsightsHandler.handle(), 200
+        return GetInsightsHandler.handle()
 
 
 class OptimizeReportInsights(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
-        return GetInsightsHandler.handle(), 200
+        return GetInsightsHandler.handle()
 
 
 class AdsManagerReportInsights(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def post(self):
-        return GetInsightsHandler.handle(), 200
+        return GetInsightsHandler.handle()
 
 
 class ReportsReportInsights(Resource):
     @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CAN_ACCESS_REPORTS_DATA)
     def post(self):
-        return GetInsightsHandler.handle(), 200
+        return GetInsightsHandler.handle()
