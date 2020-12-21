@@ -42,8 +42,8 @@ router_route_pairs = (
     (routers.SmartCreateCats, "smart-create/cats"),
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
     (routers.SmartCreatePublish, "smart-create/publish"),
-    (routers.SmartCreateAccountApps, "smart-create/account-advertisable-apps"),
-    (routers.AdsManagerAccountApps, "ads-manager/account-advertisable-apps"),
+    (routers.SmartCreateAccountAdvertisableApps, "smart-create/account-advertisable-apps/<string:account_id>"),
+    (routers.AdsManagerAccountAdvertisableApps, "ads-manager/account-advertisable-apps/<string:account_id>"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")

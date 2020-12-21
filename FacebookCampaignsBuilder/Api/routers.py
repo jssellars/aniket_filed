@@ -309,12 +309,11 @@ class TargetingSearchLanguages(Resource):
 
 class AccountAdvertisableApps:
     @staticmethod
-    def get():
+    def get(account_id: str):
         try:
-            request_json = humps.decamelize(request.get_json(force=True))
             business_owner_id = extract_business_owner_facebook_id()
             permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-            apps = queries.get_account_advertisable_apps(request_json["account_id"], permanent_token, config)
+            apps = queries.get_account_advertisable_apps(account_id, permanent_token, config)
             return object_to_camelized_dict(apps), 200
 
         except Exception as e:
@@ -323,14 +322,14 @@ class AccountAdvertisableApps:
             return Tools.create_error(e, code="BAD_REQUEST"), 400
 
 
-class SmartCreateAccountApps(Resource):
+class SmartCreateAccountAdvertisableApps(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
-    def get(self):
-        return AccountAdvertisableApps.get()
+    def get(self, account_id: str):
+        return AccountAdvertisableApps.get(account_id)
 
 
-class AdsManagerAccountApps(Resource):
+class AdsManagerAccountAdvertisableApps(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
-    def get(self):
-        return AccountAdvertisableApps.get()
+    def get(self, account_id: str):
+        return AccountAdvertisableApps.get(account_id)
 
