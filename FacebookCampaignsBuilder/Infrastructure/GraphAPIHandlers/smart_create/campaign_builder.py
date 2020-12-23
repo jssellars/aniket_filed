@@ -19,8 +19,8 @@ def build_campaigns(step_one, step_two, step_four) -> List[CampaignSplit]:
     budget_opt = None
     if "campaign_budget_optimization" in step_one:
         budget_opt = step_one["campaign_budget_optimization"]
-    elif "campaign_budget_optimization" in step_two:
-        budget_opt = step_two["campaign_budget_optimization"]
+    elif "budget_optimization" in step_two:
+        budget_opt = step_two["budget_optimization"]
 
     if budget_opt:
         set_budget_optimization(campaign_template, budget_opt)
@@ -44,20 +44,19 @@ def build_base_campaign(campaign_template, step_one):
     special_ad_categories = []
     if "special_ad_category" in step_one:
         special_ad_categories.append(step_one["special_ad_category"])
-    campaign_template[Campaign.Field.special_ad_categories] = special_ad_categories
 
-    # TODO: Check the budget objective optimization goal
-    # campaign_template[Campaign.Field.optimization_goal] = step_two["budget_objective_optimization_goal_type"]
-    campaign_template[Campaign.Field.bid_strategy] = BidStrategy[step_one["bid_strategy"]].value.name_sdk
-    campaign_template[Campaign.Field.pacing_type] = [step_one["delivery_type"]]
+    campaign_template[Campaign.Field.special_ad_categories] = special_ad_categories
 
 
 def set_budget_optimization(campaign_template, budget_opt):
-    amount = budget_opt["amount"] * 100
+    amount = int(budget_opt["amount"]) * 100
     if budget_opt["budget_allocated_type_id"] == 0:
         campaign_template[Campaign.Field.lifetime_budget] = amount
     else:
         campaign_template[Campaign.Field.daily_budget] = amount
+
+    campaign_template[Campaign.Field.bid_strategy] = BidStrategy[budget_opt["bid_strategy"]].value.name_sdk
+    campaign_template[Campaign.Field.pacing_type] = [budget_opt["delivery_type"]]
 
 
 def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSplit]:
@@ -76,7 +75,8 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
             for device in DevicePlatform.contexts[Contexts.SMART_CREATE].items:
                 campaign = deepcopy(campaign_template)
                 campaign[Campaign.Field.name] = format_campaign_name(
-                    campaign_template[Campaign.Field.name], device.name_sdk.title(), location["selected_location_string"]
+                    campaign_template[Campaign.Field.name], device.name_sdk.title(),
+                    location["selected_location_string"]
                 )
                 campaigns.append(
                     CampaignSplit(

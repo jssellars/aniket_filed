@@ -212,10 +212,12 @@ def build_ad_carousel_creative_link_data(ad_account: AdAccount, adverts: Dict):
         for k, v in list(child_attachment_data.items()):
             ad_creative_ldca[k] = v
 
-        if ad_template["media_type"] == FiledAdFormatEnum.IMAGE.value:
+        media_type = int(ad_template["media_type"])
+
+        if media_type == FiledAdFormatEnum.IMAGE.value:
             ad_image = _generate_image_hash(ad_account, ad_template["media_url"])
             ad_creative_ldca[AdCreativeLDCA.Field.image_hash] = ad_image[AdImage.Field.hash]
-        elif ad_template["media_type"] == FiledAdFormatEnum.VIDEO.value:
+        elif media_type == FiledAdFormatEnum.VIDEO.value:
             if "video_id" in ad_template and ad_template["video_id"]:
                 ad_creative_ldca[AdCreativeLDCA.Field.video_id] = ad_template["video_id"]
                 ad_image = _generate_image_hash(ad_account, ad_template.get("picture", None))

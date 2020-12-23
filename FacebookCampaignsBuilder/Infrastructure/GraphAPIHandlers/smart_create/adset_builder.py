@@ -59,21 +59,21 @@ def build_base_ad_sets(ad_set_template, step_two, step_three, is_using_cbo, is_u
     set_date_interval(ad_set_template, step_two)
     set_promoted_object(ad_set_template, is_using_conversions, step_three, step_two)
 
-    # TODO: check with FE once the solution is deployed
-    # ad_set_template[AdSet.Field.bid_strategy] = step_two["bid_strategy"]
-    # ad_set_template[AdSet.Field.optimization_goal] = step_two["budget_objective_optimization_goal_type"]
-    # ad_set_template[AdSet.Field.pacing_type] = [step_two["delivery_type"]]
-
-    ad_set_template[AdSet.Field.billing_event] = step_two["budget_billing_event"]
+    opt_and_delivery = step_two["optimization_and_delivery"]
+    ad_set_template[AdSet.Field.optimization_goal] = opt_and_delivery["optimization_goal"]
+    ad_set_template[AdSet.Field.billing_event] = opt_and_delivery["billing_event"]
 
     # TODO: This might change depening on step 4 where every adset has it's budget
     if not is_using_cbo:
-        budget_opt = step_two["campaign_budget_optimization"]
-        amount = budget_opt["amount"] * 100
+        budget_opt = step_two["budget_optimization"]
+        amount = int(budget_opt["amount"]) * 100
         if budget_opt["budget_allocated_type_id"] == 0:
             ad_set_template[AdSet.Field.lifetime_budget] = amount
         else:
             ad_set_template[AdSet.Field.daily_budget] = amount
+
+        ad_set_template[AdSet.Field.bid_strategy] = budget_opt["bid_strategy"]
+        ad_set_template[AdSet.Field.pacing_type] = [budget_opt["delivery_type"]]
 
 
 def set_statuses(ad_set_template):
@@ -244,7 +244,15 @@ def map_interests(interests):
 
 
 def extract_custom_audiences(targeting):
-    included_custom_audiences = targeting.get("custom_audiences", [])
+
+    audience_type = targeting.get("type", None)
+
+    if audience_type == 2:
+        included_custom_audiences = targeting.get("custom_audiences", [])
+        included_custom_audiences = map_custom_audiences(included_custom_audiences)
+        return included_custom_audiences, []
+
+    included_custom_audiences = targeting.get("included_custom_audiences", [])
     excluded_custom_audiences = targeting.get("exclude_custom_audiences", [])
 
     included_custom_audiences = map_custom_audiences(included_custom_audiences)

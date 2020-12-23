@@ -291,7 +291,7 @@ class SmartCreatePublish:
 
         step_two = request["step_two_details"]
         is_adset_using_cbo = (
-            "campaign_budget_optimization" in step_two and step_two["campaign_budget_optimization"] is not None
+            "budget_optimization" in step_two and step_two["budget_optimization"] is not None
         )
 
         for campaign_index, campaign in enumerate(campaigns):
@@ -392,7 +392,10 @@ class SmartCreatePublish:
         result = defaultdict(list)
 
         for location in locations:
-            result[keys[location.type]].append({"key": location.key})
+            if location.type == "country":
+                result[keys[location.type]].append(location.country_code)
+            else:
+                result[keys[location.type]].append({"key": location.key})
 
         return result
 
