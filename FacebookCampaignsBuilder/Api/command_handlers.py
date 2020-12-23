@@ -12,6 +12,7 @@ from facebook_business.adobjects.campaign import Campaign
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, Level
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
@@ -36,7 +37,7 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.struc
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
     Location,
     FlexibleTargeting,
-    Targeting,
+    Targeting
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIRequests.GraphAPIRequestAudienceSize import (
     GraphAPIRequestAudienceSize,
@@ -45,7 +46,6 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEv
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEventMapping import (
     CampaignCreatedEventMapping,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
 
 logger = logging.getLogger(__name__)
 
@@ -433,19 +433,18 @@ class AddStructuresToParent:
 
         parent_ids = request.get("parent_ids", None)
         child_ids = request.get("child_ids", None)
-
         if child_ids and parent_ids:
             new_structures = AddStructuresToParent._publish_structures_from_ids(level, child_ids, parent_ids)
         elif level == Level.ADSET.value and "ad_set_name" in request and parent_ids:
             new_structures = AddStructuresToParent._publish_adset_to_campaigns(request, parent_ids)
+        elif level == Level.AD.value and "ad_name" in request and parent_ids:
+            new_structures = AddStructuresToParent._publish_ad_to_adsets(request, parent_ids)
         else:
             raise ValueError("No valid existing keys found in request. Or list of Ids is empty.")
-
         return {level: new_structures}
 
     @staticmethod
     def _publish_structures_from_ids(level, child_ids, parent_ids):
-
         results = []
         for parent_id in parent_ids:
             for child_id in child_ids:
@@ -493,12 +492,19 @@ class AddStructuresToParent:
         results = []
         for parent_id in parent_ids:
             results.append(AddStructuresToParent._create_adset_for_campaign(request, parent_id))
+        return results
 
+    @staticmethod
+    def _publish_ad_to_adsets(request, parent_ids):
+        results = []
+        for parent_id in parent_ids:
+            results.append(AddStructuresToParent._create_ad_for_adset(request, parent_id))
         return results
 
     @staticmethod
     def _create_adset_for_campaign(request, campaign_id):
         ad_account = AdAccount(fbid=request["ad_account_id"])
+
         ad_set_template = {
             AdSet.Field.tune_for_category: request.get(AdSet.Field.tune_for_category, AdSet.TuneForCategory.none),
             AdSet.Field.name: request.get("ad_set_name", None),
@@ -511,7 +517,6 @@ class AddStructuresToParent:
 
         adset_builder.set_statuses(ad_set_template)
         adset_builder.set_date_interval(ad_set_template, request)
-
         is_using_conversions = request["objective"] == "CONVERSIONS"
         adset_builder.set_promoted_object(ad_set_template, is_using_conversions, request, request)
 
@@ -525,14 +530,27 @@ class AddStructuresToParent:
 
         targeting_request = request.get("targeting", None)
         AddStructuresToParent._set_targeting(ad_set_template, request, targeting_request)
-
         facebook_ad_set = ad_account.create_ad_set(params=ad_set_template)
 
         return facebook_ad_set.get_id()
 
     @staticmethod
+    def _create_ad_for_adset(request, adset_id):
+        ad_account_id = request["ad_account_id"]
+        ad_account = AdAccount(fbid=request["ad_account_id"])
+        # TODO: Modify build_ads function to accept a single argument for necessary fields
+        #  as opposed to per step fields
+        ads = ad_builder.build_ads(ad_account_id, request, request)
+
+        for ad in ads:
+            ad.update({Ad.Field.adset_id: adset_id, Ad.Field.adset: adset_id})
+            ad = ad_account.create_ad(params=ad)
+            return ad.get_id()
+
+    @staticmethod
     def _set_targeting(ad_set_template, request, targeting_request):
         languages = targeting_request.get("languages", [])
+
         if languages:
             languages = [language["key"] for language in languages]
 
