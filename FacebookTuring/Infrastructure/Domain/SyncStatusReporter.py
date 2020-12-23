@@ -3,7 +3,7 @@ from datetime import datetime
 
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
     TuringAdAccountJournalRepository
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository

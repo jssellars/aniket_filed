@@ -4,7 +4,7 @@ from marshmallow import fields, pre_load, EXCLUDE
 
 from Core.mapper import MapperBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookIdKeyMapping, \
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping, \
     LevelToFacebookNameKeyMapping
 
 

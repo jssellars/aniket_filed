@@ -8,7 +8,7 @@ from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import (
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     LevelToGraphAPIStructure,
     Level,
     LevelToFacebookIdKeyMapping,

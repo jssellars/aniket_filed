@@ -12,7 +12,7 @@ from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessage
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping, FacebookLevelPlural
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping, FacebookLevelPlural
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 

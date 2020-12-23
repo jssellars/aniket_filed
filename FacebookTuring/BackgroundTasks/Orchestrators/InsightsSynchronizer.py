@@ -12,7 +12,7 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSynchronizerBreakdownEnum
 from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 

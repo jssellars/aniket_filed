@@ -13,7 +13,7 @@ from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoO
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToFacebookIdKeyMapping, \
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping, \
     LevelToFacebookNameKeyMapping, Level
 
 

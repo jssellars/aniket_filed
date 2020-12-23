@@ -11,9 +11,9 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClie
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.Field import Field
-from FacebookTuring.BackgroundTasks.startup import config, fixtures
+from FacebookTuring.BackgroundTasks.startup import fixtures
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 

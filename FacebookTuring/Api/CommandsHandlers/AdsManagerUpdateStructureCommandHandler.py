@@ -8,7 +8,7 @@ from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import LevelToGraphAPIStructure, \
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, \
     LevelToFacebookIdKeyMapping, Level
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository

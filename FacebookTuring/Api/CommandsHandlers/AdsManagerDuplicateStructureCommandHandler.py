@@ -12,7 +12,7 @@ from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsM
 from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToGraphAPIStructure, \
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure, \
     LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureMapping, StructureFields
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository

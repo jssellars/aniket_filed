@@ -6,17 +6,10 @@ from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list, o
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Api.Catalogs.BusinessViews import ViewCarouselEngagement
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewBiddingAndOptimization import (
     ViewAdBiddingAndOptimization,
     ViewAdSetBiddingAndOptimization,
     ViewCampaignBiddingAndOptimization,
-)
-from FacebookTuring.Api.Catalogs.BusinessViews.ViewCarouselEngagement import ViewCampaignCarouselEngagement, ViewAdSetCarouselEngagement, ViewAdCarouselEngagement
-from FacebookTuring.Api.Catalogs.BusinessViews.ViewCrossDevice import (
-    ViewAdCrossDevice,
-    ViewAdSetCrossDevice,
-    ViewCampaignCrossDevice,
 )
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewDelivery import (
     ViewAdDelivery,
@@ -41,7 +34,6 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewPerformanceAndClicks import (
 )
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewQuickScan import ViewCampaignQuickScan, ViewAdSetQuickScan, ViewAdQuickScan
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewResults import ViewCampaignResults, ViewAdsetResults, ViewAdResults
-from FacebookTuring.Api.Catalogs.BusinessViews.ViewSetup import ViewCampaignSetup, ViewAdSetup, ViewAdsetSetup
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewTargetingAndCreative import (
     ViewAdSetTargetingAndCreative,
     ViewAdTargetingAndCreative,
@@ -55,7 +47,7 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewVideoEngagement import (
 from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumn import ViewColumn
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import View
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 
 class AdsManagerCatalogsViewsAgGridDto:

@@ -11,7 +11,7 @@ from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 
 import logging

@@ -8,7 +8,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignCreatedEvent
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 

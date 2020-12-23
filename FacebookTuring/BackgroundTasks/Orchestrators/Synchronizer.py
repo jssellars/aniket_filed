@@ -1,7 +1,6 @@
 import typing
 from ast import parse
 from datetime import datetime, timedelta
-from threading import Thread
 
 from bson import BSON
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
@@ -22,13 +21,13 @@ from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields impo
     INSIGHTS_SYNCHRONIZER_FIELDS,
 )
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
-from FacebookTuring.BackgroundTasks.startup import config, fixtures
+from FacebookTuring.BackgroundTasks.startup import config
 from FacebookTuring.BackgroundTasks.SynchronizerConfig import SynchronizerConfigRuntime, SynchronizerConfigStatic
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
     TuringAdAccountJournalRepository,

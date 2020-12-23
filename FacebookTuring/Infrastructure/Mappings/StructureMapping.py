@@ -7,7 +7,7 @@ from FacebookTuring.Infrastructure.Domain.CampaignModelFields import CampaignMod
 from FacebookTuring.Infrastructure.Mappings.AdMapping import AdMapping
 from FacebookTuring.Infrastructure.Mappings.AdSetMapping import AdSetMapping
 from FacebookTuring.Infrastructure.Mappings.CampaignMapping import CampaignMapping
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 
 class StructureMapping:

@@ -4,7 +4,7 @@ from Core.Tools.Misc.AgGridFilter import AgGridFilter
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 BASE_VIEW_COLUMNS = [
     ViewColumnsMaster.reach,

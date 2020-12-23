@@ -1,5 +1,5 @@
-from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Infrastructure.Mappings.LevelMapping import Level
+from FacebookTuring.Api.startup import config
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 

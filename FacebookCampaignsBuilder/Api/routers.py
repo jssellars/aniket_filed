@@ -333,3 +333,25 @@ class AdsManagerAccountAdvertisableApps(Resource):
     def get(self, account_id: str):
         return AccountAdvertisableApps.get(account_id)
 
+
+class AdsManagerAddStructuresToParent(Resource):
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
+    def post(self, level):
+        try:
+            raw_request = humps.decamelize(request.get_json(force=True))
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
+            response = command_handlers.AddStructuresToParent.publish_structures_to_parent(
+                level=level,
+                request=raw_request,
+                permanent_token=permanent_token,
+                facebook_config=config.facebook
+            )
+
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": "Failed to process request."}, 400
+
+
