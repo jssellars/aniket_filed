@@ -1,20 +1,30 @@
+import logging
 import typing
 from datetime import datetime, timedelta
+from functools import reduce
 from typing import Dict, List
 
-from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
 from Core.constants import DEFAULT_DATETIME
-from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderRequestMapper, AgGridInsightsRequest, AgGridTrendRequest
-from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
-from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
+from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import \
+    Placement
+from Core.facebook.sdk_adapter.validations import PLACEMENT_X_OBJECTIVE
+from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
+from Core.Tools.QueryBuilder.QueryBuilder import (AgGridInsightsRequest,
+                                                  AgGridTrendRequest,
+                                                  QueryBuilderRequestMapper)
+from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import \
+    QueryBuilderFacebookRequestParser
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import \
+    AdsManagerInsightsCommandEnum
 from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
     FiledFacebookInsightsTableEnum
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
-from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
-
-import logging
+from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import \
+    GraphAPIInsightsHandler
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import \
+    TuringMongoRepository
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +39,20 @@ BASE_POPUP_FIELDS = [
     FieldsMetadata.campaign_id.name,
     FieldsMetadata.adset_id.name,
 ]
+# TODO: Discuss with FE on structure of placements in request for ag_grid_popup
+DEFAULT_PLACEMENT_POSITIONS = {
+    "FACEBOOK": [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_STORIES,
+    ],
+    "INSTAGRAM": [
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_STORIES,
+    ],
+    "APP_NETWORK": [
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+    ],
+}
 
 
 class AdsManagerInsightsCommandHandler:
@@ -146,29 +170,43 @@ class AdsManagerInsightsCommandHandler:
                           query_json: Dict = None,
                           business_owner_id: str = None,
                           level: str = None) -> Dict:
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
         popup_fields = []
+
         if level == Level.CAMPAIGN.value:
             popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.campaign_name.name])
+            placements = query_json.get("placements")
+            if placements:
+                validation_keys = [placement["platformKey"] for placement in placements]
+                campaign_ids = cls.get_valid_campaign_ids(validation_keys, query_json)
+                query_json['filterModel'].update({
+                    "campaign_id": {
+                        "filter": campaign_ids,
+                        "filterType": "campaign_id",
+                        "type": "inValues"
+                    }
+                })
         else:
             popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.adset_name.name])
 
         query_json['agColumns'] = ",".join(popup_fields)
         query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
 
-        return GraphAPIInsightsHandler.get_ag_grid_insights(
+        insight_response, next_page_cursor, summary = GraphAPIInsightsHandler.get_insights_page(
             config,
             permanent_token=permanent_token,
-            level=level,
             ad_account_id=query.facebook_id,
             fields=query.fields,
             parameters=query.parameters,
-            structure_fields=query.structure_fields,
             requested_fields=query.requested_columns,
+            add_totals=True,
             next_page_cursor=query.next_page_cursor,
+            level=level,
             page_size=query.page_size,
         )
+
+        return {"nextPageCursor": next_page_cursor, "data": insight_response, "summary": summary}
 
     @classmethod
     def get_ag_grid_trend(cls,
@@ -257,3 +295,27 @@ class AdsManagerInsightsCommandHandler:
             level=level
         )
         return response
+
+    @classmethod
+    def get_valid_campaign_ids(cls,
+                               validation_keys: List,
+                               query_json: Dict) -> List:
+
+        mapped_keys = []
+        for validation_key in validation_keys:
+            if validation_key in DEFAULT_PLACEMENT_POSITIONS:
+                mapped_keys.extend(DEFAULT_PLACEMENT_POSITIONS[validation_key])
+
+        valid_objectives = [val for key, val in PLACEMENT_X_OBJECTIVE.items() if key in mapped_keys]
+        common_objectives = reduce(set.intersection, valid_objectives)
+        common_objectives = [objective.value.name_sdk for objective in common_objectives]
+
+        repository = TuringMongoRepository(
+            config=config.mongo,
+            database_name=config.mongo.structures_database_name,
+        )
+
+        query_result = repository.get_campaigns_by_objectives(common_objectives, query_json["facebookAccountId"][4:])
+        campaign_ids = [result["campaign_id"] for result in query_result]
+
+        return campaign_ids

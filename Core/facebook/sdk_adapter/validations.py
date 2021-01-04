@@ -1083,3 +1083,9 @@ def reverse_dict_items(cat_dict: Dict) -> Dict[Any, set]:
         for entry in v:
             result[entry].add(k)
     return result
+
+
+PLACEMENT_X_OBJECTIVE = reverse_dict_items(OBJECTIVE_X_PLACEMENT)
+MEDIA_FORMAT_X_PLACEMENT = reverse_dict_items(PLACEMENT_X_MEDIA_FORMAT)
+AD_FORMAT_X_PLACEMENT = reverse_dict_items(PLACEMENT_X_AD_FORMAT)
+CALL_TO_ACTION_TYPE_X_OBJECTIVE = reverse_dict_items(OBJECTIVE_X_CALL_TO_ACTION_TYPE)

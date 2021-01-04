@@ -8,6 +8,7 @@ from bson import BSON
 from pymongo.errors import AutoReconnect
 from retry import retry
 
+from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
 from Core.constants import DEFAULT_DATETIME_ISO
 from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -47,6 +48,39 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         projection = {
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+        try:
+            campaigns = self.get(query, projection)
+        except Exception as e:
+            raise e
+
+        return self.__decode_structure_details_from_bson(campaigns)
+
+    def get_campaigns_by_objectives(self, objectives: typing.List, account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+        self.collection = Level.CAMPAIGN.value
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    MiscFieldsEnum.account_id: {
+                        MongoOperator.EQUALS.value: account_id
+                    }
+                },
+                {
+                    FieldsMetricStructureMetadata.objective.name: {
+                        MongoOperator.IN.value: objectives
+                    }
+                },
+                {
+                    MiscFieldsEnum.status: {
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value]
+                    }
+                }
+            ]
+        }
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
+            FieldsMetricStructureMetadata.campaign_id.name: MongoProjectionState.ON.value
         }
         try:
             campaigns = self.get(query, projection)
