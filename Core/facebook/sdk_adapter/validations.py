@@ -1,4 +1,7 @@
+import collections
 from enum import Enum
+
+from typing import Dict, Any
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
 from Core.facebook.sdk_adapter.ad_objects.ad_creative import CallToActionType
@@ -17,7 +20,6 @@ from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placeme
 from Core.facebook.sdk_adapter.ad_objects.reach_frequency_prediction import BuyingType
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum
-
 
 # https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group#objective_creative
 # https://www.facebook.com/business/ads-guide/
@@ -232,7 +234,6 @@ OBJECTIVE_X_CALL_TO_ACTION_TYPE = {
     ],
 }
 
-
 PLACEMENT_X_AD_FORMAT = PLATFORM_X_POSITION_X_AD_FORMAT = {
     # TODO: ??? mobile should also be in instagram ???
     Placement.FACEBOOK_FEED: [
@@ -268,7 +269,6 @@ PLACEMENT_X_AD_FORMAT = PLATFORM_X_POSITION_X_AD_FORMAT = {
     Placement.MESSENGER_INBOX: [AdFormat.MESSENGER_MOBILE_INBOX_MEDIA],
     Placement.MESSENGER_STORIES: [AdFormat.MESSENGER_MOBILE_STORY_MEDIA],
 }
-
 
 # TODO: add Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__
 OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVICE_PLATFORM = {
@@ -427,7 +427,6 @@ _mf_img = MediaFormat.IMAGE
 _mf_vid = MediaFormat.VIDEO
 _mf_car = MediaFormat.CAROUSEL
 _mf_col = MediaFormat.COLLECTION
-
 
 OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
     # old catalogs: image, video, carousel
@@ -588,6 +587,183 @@ OBJECTIVE_X_PLACEMENT_X_MEDIA_FORMAT = {
     },
 }
 
+OBJECTIVE_X_PLACEMENT = {
+    # old catalogs: image, video, carousel
+    Objective.BRAND_AWARENESS: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.MESSENGER_STORIES,
+    ],
+    # old catalogs: image, video, carousel
+    Objective.REACH: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+        Placement.MESSENGER_STORIES,
+    ],
+    # old catalogs: image, video, carousel
+    Objective.LINK_CLICKS: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_RIGHT_COLUMN,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+        Placement.MESSENGER_INBOX,
+        Placement.MESSENGER_STORIES,
+    ],
+    # old catalogs: image, video
+    Objective.POST_ENGAGEMENT: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+    ],
+    # old catalogs: image, video, existing_post
+    Objective.PAGE_LIKES: [Placement.FACEBOOK_FEED],
+    # old catalogs: image, video
+    Objective.EVENT_RESPONSES: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_MARKETPLACE,
+    ],
+    # old catalogs: image, video, carousel
+    Objective.APP_INSTALLS: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+        Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
+        Placement.MESSENGER_INBOX,
+        Placement.MESSENGER_STORIES,
+    ],
+    # old catalogs: video, existing_post
+    Objective.VIDEO_VIEWS: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+        Placement.MESSENGER_STORIES,
+    ],
+    # old catalogs: image, video, carousel
+    Objective.LEAD_GENERATION: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+    ],
+    # Default: REPLIES / Other valid: REPLIES (Click-to-Messenger), IMPRESSIONS (Sponsored Messages)
+    # TODO: see how to include Click-to-Messenger and Sponsored Messages in the structure,
+    Objective.MESSAGES: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.SPONSORED_MESSAGE,
+        Placement.MESSENGER_INBOX,
+    ],
+    # old catalogs: image, video, carousel
+    Objective.CONVERSIONS: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_RIGHT_COLUMN,
+        Placement.FACEBOOK_INSTANT_ARTICLES,
+        Placement.FACEBOOK_IN_STREAM_VIDEO,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.FACEBOOK_VIDEO_FEEDS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+        Placement.AUDIENCE_NETWORK_REWARDED_VIDEO,
+        Placement.MESSENGER_INBOX,
+        Placement.MESSENGER_STORIES,
+    ],
+    # old catalogs: image, carousel
+    Objective.PRODUCT_CATALOG_SALES: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_RIGHT_COLUMN,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.FACEBOOK_SEARCH_RESULTS,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+        Placement.INSTAGRAM_EXPLORE,
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL,
+        Placement.MESSENGER_INBOX,
+    ],
+    Objective.LOCAL_AWARENESS: [
+        Placement.FACEBOOK_FEED,
+        Placement.FACEBOOK_MARKETPLACE,
+        Placement.FACEBOOK_STORIES,
+        Placement.INSTAGRAM_STORIES,
+        Placement.INSTAGRAM_FEED,
+    ],
+}
+
+PLACEMENT_X_MEDIA_FORMAT = {
+    # old catalogs: image, video, carousel
+    Placement.FACEBOOK_FEED: [_mf_img, _mf_vid, _mf_car],
+    Placement.FACEBOOK_RIGHT_COLUMN: [_mf_img, _mf_car],
+    Placement.FACEBOOK_INSTANT_ARTICLES: [_mf_img, _mf_vid, _mf_car],
+    Placement.FACEBOOK_IN_STREAM_VIDEO: [_mf_vid],
+    Placement.FACEBOOK_MARKETPLACE: [_mf_img, _mf_vid, _mf_car],
+    Placement.FACEBOOK_STORIES: [_mf_img, _mf_vid, _mf_car],
+    Placement.FACEBOOK_SEARCH_RESULTS: [_mf_img, _mf_vid, _mf_car],
+    Placement.FACEBOOK_VIDEO_FEEDS: [_mf_vid],
+    Placement.INSTAGRAM_STORIES: [_mf_img, _mf_vid, _mf_car],
+    Placement.INSTAGRAM_FEED: [_mf_img, _mf_vid, _mf_car],
+    Placement.INSTAGRAM_EXPLORE: [_mf_img, _mf_vid],
+    Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [_mf_img, _mf_vid, _mf_car],
+    Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: [_mf_vid],
+    Placement.MESSENGER_INBOX: [_mf_img, _mf_car],
+    Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
+}
 
 BID_STRATEGY_X_OBJECTIVE = {
     BidStrategy.COST_CAP: [
@@ -644,7 +820,6 @@ BID_STRATEGY_X_OBJECTIVE = {
     ],
 }
 
-
 BID_STRATEGY_X_PACING_TYPE = {
     BidStrategy.COST_CAP: [PacingType.STANDARD],
     BidStrategy.LOWEST_COST_WITHOUT_CAP: [PacingType.STANDARD],
@@ -652,7 +827,6 @@ BID_STRATEGY_X_PACING_TYPE = {
     BidStrategy.TARGET_COST: [PacingType.STANDARD],
     BidStrategy.LOWEST_COST_WITH_MIN_ROAS: [PacingType.STANDARD],
 }
-
 
 BUYING_TYPE_X_BILLING_EVENT = {
     BuyingType.RESERVED: [BillingEvent.APP_INSTALLS],
@@ -666,7 +840,6 @@ BUYING_TYPE_X_BILLING_EVENT = {
         BillingEvent.THRUPLAY,
     ],
 }
-
 
 OPTIMIZATION_GOAL_X_BILLING_EVENT = {
     OptimizationGoal.AD_RECALL_LIFT: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
@@ -696,7 +869,6 @@ OPTIMIZATION_GOAL_X_BILLING_EVENT = {
     OptimizationGoal.TWO_SECOND_CONTINUOUS_VIDEO_VIEWS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
     OptimizationGoal.VALUE: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
 }
-
 
 # https://developers.facebook.com/docs/marketing-api/bidding/overview#opt
 
@@ -823,7 +995,6 @@ OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL = {
     ],
 }
 
-
 # https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group#attribution_spec
 
 # TODO: see how to include this rule, adding all the combinations to the rule seems excessive
@@ -881,7 +1052,6 @@ OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBU
     },
 }
 
-
 JOINT_CATS = dict(
     OBJECTIVE_X_CALL_TO_ACTION_TYPE=JointCat.from_dict(OBJECTIVE_X_CALL_TO_ACTION_TYPE, Objective, CallToActionType),
     PLACEMENT_X_AD_FORMAT=JointCat.from_dict(PLACEMENT_X_AD_FORMAT, Placement, AdFormat),
@@ -905,3 +1075,11 @@ JOINT_CATS = dict(
         ActionAttributionWindowView,
     ),
 )
+
+
+def reverse_dict_items(cat_dict: Dict) -> Dict[Any, set]:
+    result = collections.defaultdict(set)
+    for k, v in cat_dict.items():
+        for entry in v:
+            result[entry].add(k)
+    return result
