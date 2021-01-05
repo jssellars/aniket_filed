@@ -209,11 +209,11 @@ def _split_age_groups(age_range: Dict, split_age_range_selected: int) -> List[Op
 
 
 def split_genders(is_split_by_gender_selected: bool, gender: int) -> List[Optional[GenderGroup]]:
-    if not gender:
+    if gender is None:
         return [None]
 
     gender = Gender(gender)
-    if is_split_by_gender_selected:
+    if is_split_by_gender_selected and gender == Gender.ALL:
         return [GenderGroup(genders=[FacebookGender.MALE]), GenderGroup(genders=[FacebookGender.FEMALE])]
 
     else:
