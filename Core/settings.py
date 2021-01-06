@@ -87,7 +87,7 @@ class Default:
     external_services = ExternalServices(
         authorize_permission_endpoint="http://cs-users-authorization-api:41005/api/v1/Permissions/authorize-permission",
         users_signin_endpoint="http://cs-users-api:41000/api/v1/users/signin",
-        subscription_update_business_owner_endpoint="http://cs-subscriptions-api:41010/api/v1/contacts/set-businessowner-facebook-id",
+        subscription_update_business_owner_endpoint="http://cs-subscriptions-and-billing-api:41010/api/v1/contacts/set-businessowner-facebook-id",
         targeting_search="http://py-facebook-campaigns-builder-api:47220/interests/suggestions/",
         facebook_auto_apply="http://py-facebook-turing-api:47350/api/v1/{level}/{structureId}",
         google_auto_apply="",
