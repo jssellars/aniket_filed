@@ -290,9 +290,11 @@ class SmartCreatePublish:
         ad_account = AdAccount(fbid=request["ad_account_id"])
 
         step_two = request["step_two_details"]
+        step_four = request["step_four_details"]
         is_adset_using_cbo = (
             "budget_optimization" in step_two and step_two["budget_optimization"] is not None
         )
+        is_adset_budget_split = step_four.get("is_split_by_budget")
 
         for campaign_index, campaign in enumerate(campaigns):
             try:
@@ -321,7 +323,11 @@ class SmartCreatePublish:
                     # Add new adset to response
                     ad_set_response = {"facebook_id": ad_set_facebook_id, "name": ad_set_name, "ads": []}
                     campaign_tree[campaign_index]["ad_sets"].append(deepcopy(ad_set_response))
-                    adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget})
+
+                    if is_adset_budget_split:
+                        adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget / len(ad_sets)})
+                    else:
+                        adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget})
 
                     for ad_index, ad in enumerate(ads):
                         ad.update({Ad.Field.adset_id: ad_set_facebook_id, Ad.Field.adset: ad_set_facebook_id})
