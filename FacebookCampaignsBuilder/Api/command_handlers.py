@@ -284,7 +284,7 @@ class SmartCreatePublish:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
         campaign_tree = []
-        campaign_response = {"facebook_id": None, "ad_sets": []}
+        campaign_response = {"facebook_id": None, "name": None, "ad_sets": []}
 
         campaigns, ad_sets, ads = SmartCreatePublish.build_campaign_hierarchy(request)
         ad_account = AdAccount(fbid=request["ad_account_id"])
@@ -299,10 +299,12 @@ class SmartCreatePublish:
                 # Publish campaign
                 facebook_campaign = ad_account.create_campaign(params=campaign.campaign_template)
                 campaign_facebook_id = facebook_campaign.get_id()
+                campaign_name = campaign.campaign_template.get("name")
 
                 # Add new campaign to response
                 campaign_tree.append(deepcopy(campaign_response))
                 campaign_tree[campaign_index]["facebook_id"] = campaign_facebook_id
+                campaign_tree[campaign_index]["name"] = campaign_name
                 adset_budgets = []
 
                 for ad_set_index, ad_set in enumerate(ad_sets):
@@ -314,9 +316,10 @@ class SmartCreatePublish:
 
                     facebook_ad_set = ad_account.create_ad_set(params=adset_create_template)
                     ad_set_facebook_id = facebook_ad_set.get_id()
+                    ad_set_name = adset_create_template.get("name")
 
                     # Add new adset to response
-                    ad_set_response = {"facebook_id": ad_set_facebook_id, "ads": []}
+                    ad_set_response = {"facebook_id": ad_set_facebook_id, "name": ad_set_name, "ads": []}
                     campaign_tree[campaign_index]["ad_sets"].append(deepcopy(ad_set_response))
                     adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget})
 
