@@ -2,12 +2,12 @@ import copy
 import typing
 
 from bson import BSON
-from marshmallow import pre_load, INCLUDE
+from marshmallow import INCLUDE, pre_load
 
-from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.mapper import MapperBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Mappings.FacebookToTuringStatusMapping import map_facebook_status
 
 
@@ -25,7 +25,7 @@ class AdSetMapping(MapperBase):
             data = Tools.convert_to_json(data)
 
         # map structure details
-        data[MiscFieldsEnum.business_owner_facebook_id] = None
+        data[FacebookMiscFields.business_owner_facebook_id] = None
         data[GraphAPIInsightsFields.account_id] = data.get(GraphAPIInsightsFields.account_id, None)
         data[GraphAPIInsightsFields.adset_name] = data.get(GraphAPIInsightsFields.name, None)
         data[GraphAPIInsightsFields.adset_id] = data.get(GraphAPIInsightsFields.structure_id, None)
@@ -37,23 +37,26 @@ class AdSetMapping(MapperBase):
         data[GraphAPIInsightsFields.start_time] = data.get(GraphAPIInsightsFields.start_time, None)
         data[GraphAPIInsightsFields.end_time] = data.get(GraphAPIInsightsFields.end_time, None)
         if GraphAPIInsightsFields.campaign in data.keys():
-            data[GraphAPIInsightsFields.campaign_name] = (data[GraphAPIInsightsFields.campaign].
-                                                          get(GraphAPIInsightsFields.name, None))
-        data[MiscFieldsEnum.last_updated_at] = data.get(GraphAPIInsightsFields.updated_time, None)
+            data[GraphAPIInsightsFields.campaign_name] = data[GraphAPIInsightsFields.campaign].get(
+                GraphAPIInsightsFields.name, None
+            )
+        data[FacebookMiscFields.last_updated_at] = data.get(GraphAPIInsightsFields.updated_time, None)
 
         # Save the promoted object custom event type if there is a pixel
         data[GraphAPIInsightsFields.custom_event_type] = None
         promoted_event = data.get(GraphAPIInsightsFields.promoted_object, None)
         if promoted_event:
             if self.__pixel_id in promoted_event:
-                data[GraphAPIInsightsFields.custom_event_type] = promoted_event.get(GraphAPIInsightsFields.custom_event_type, None)
-        data[GraphAPIInsightsFields.optimization_goal] = data.get(GraphAPIInsightsFields.optimization_goal, None)
+                data[GraphAPIInsightsFields.custom_event_type] = promoted_event.get(
+                    GraphAPIInsightsFields.custom_event_type, None
+                )
 
         # encode structure details
-        data[MiscFieldsEnum.details] = BSON.encode(copy.deepcopy(data))
+        data[FacebookMiscFields.details] = BSON.encode(copy.deepcopy(data))
 
         # map facebook status
-        data[MiscFieldsEnum.status] = map_facebook_status(data.get(GraphAPIInsightsFields.effective_status, None))
-        data[MiscFieldsEnum.actions] = {}
+        data[FacebookMiscFields.status] = map_facebook_status(data.get(GraphAPIInsightsFields.effective_status, None))
+        data[FacebookMiscFields.actions] = {}
 
         return self._remove_unknown_data(data)
+

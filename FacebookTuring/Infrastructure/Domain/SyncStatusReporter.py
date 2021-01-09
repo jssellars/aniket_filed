@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime
 
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
@@ -30,35 +30,35 @@ class SyncStatusReporter:
         reports = []
         for state in accounts_latest_state:
             try:
-                sync_start_date = state[MiscFieldsEnum.structures_sync_start_date]
-                sync_end_date = state[MiscFieldsEnum.insights_sync_end_date]
+                sync_start_date = state[FacebookMiscFields.structures_sync_start_date]
+                sync_end_date = state[FacebookMiscFields.insights_sync_end_date]
 
                 last_updated_campaigns = self.__structures_repository.get_latest_by_account_id(
-                    account_id=state[MiscFieldsEnum.account_id],
-                    start_date=state[MiscFieldsEnum.structures_sync_start_date],
+                    account_id=state[FacebookMiscFields.account_id],
+                    start_date=state[FacebookMiscFields.structures_sync_start_date],
                     collection=Level.CAMPAIGN.value)
                 last_updated_adsets = self.__structures_repository.get_latest_by_account_id(
-                    account_id=state[MiscFieldsEnum.account_id],
-                    start_date=state[MiscFieldsEnum.structures_sync_start_date],
+                    account_id=state[FacebookMiscFields.account_id],
+                    start_date=state[FacebookMiscFields.structures_sync_start_date],
                     collection=Level.ADSET.value)
                 last_updated_ads = self.__structures_repository.get_latest_by_account_id(
-                    account_id=state[MiscFieldsEnum.account_id],
-                    start_date=state[MiscFieldsEnum.structures_sync_start_date],
+                    account_id=state[FacebookMiscFields.account_id],
+                    start_date=state[FacebookMiscFields.structures_sync_start_date],
                     collection=Level.AD.value)
 
-                report = SyncStatusReport(ad_account_id=state[MiscFieldsEnum.account_id],
+                report = SyncStatusReport(ad_account_id=state[FacebookMiscFields.account_id],
                                           number_of_campaigns=len(last_updated_campaigns),
                                           number_of_adsets=len(last_updated_adsets),
                                           number_of_ads=len(last_updated_ads),
-                                          last_synced_on=state[MiscFieldsEnum.last_synced_on],
+                                          last_synced_on=state[FacebookMiscFields.last_synced_on],
                                           sync_start_date=sync_start_date,
                                           sync_end_date=sync_end_date,
                                           details=state)
                 reports.append(report)
             except Exception as e:
                 logger.exception(
-                    f"Failed to generate sync report for business owner {state[MiscFieldsEnum.business_owner_id]},"
-                    f" ad account {state[MiscFieldsEnum.account_id]} || {repr(e)}"
+                    f"Failed to generate sync report for business owner {state[FacebookMiscFields.business_owner_id]},"
+                    f" ad account {state[FacebookMiscFields.account_id]} || {repr(e)}"
                 )
 
         return reports

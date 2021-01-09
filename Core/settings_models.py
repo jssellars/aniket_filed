@@ -113,6 +113,7 @@ class ExternalServices(BaseModel):
     subscription_update_business_owner_endpoint: Optional[str]
     targeting_search: Optional[str]
     users_signin_endpoint: Optional[str]
+    notification_endpoint: Optional[str]
 
 
 class TechnicalUser(BaseModel):

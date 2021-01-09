@@ -44,7 +44,8 @@ class Field:
                  field_type: FieldType = FieldType.INSIGHT,
                  aggregation_type_id: int = FieldAggregationTypeEnum.SUM.value,
                  data_type_id: int = FieldDataTypeEnum.NUMBER.value,
-                 positive_effect_trend_direction: Optional[PositiveEffectTrendDirection] = None):
+                 positive_effect_trend_direction: Optional[PositiveEffectTrendDirection] = None,
+                 is_dexter_custom_metric: bool = False):
         self.name = name
         self.facebook_fields = facebook_fields if facebook_fields else []
         self.facebook_value = facebook_value
@@ -58,6 +59,7 @@ class Field:
         self.aggregation_id = aggregation_type_id
         self.type_id = data_type_id
         self.positive_effect_trend_direction = positive_effect_trend_direction
+        self.is_dexter_custom_metric = is_dexter_custom_metric
 
         self.__init_mapper()
 

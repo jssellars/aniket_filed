@@ -2,6 +2,7 @@ import sys
 import typing
 from datetime import datetime
 from enum import Enum
+from typing import Dict, List
 
 from pymongo import MongoClient
 from pymongo.errors import AutoReconnect
@@ -249,8 +250,28 @@ class MongoRepositoryBase:
         return results
 
     @retry(AutoReconnect, tries=RETRY_COUNT, delay=1)
+    def get_data_slice(
+        self, query: Dict = None, projection: Dict = None, limit: int = None, skip: int = None, sort_query: List = None
+    ) -> typing.List[typing.Dict]:
+        start = datetime.now()
+
+        try:
+            if not projection:
+                results = list(self.collection.find(query).limit(limit).skip(skip).sort(sort_query))
+            else:
+                results = list(self.collection.find(query, projection).limit(limit).skip(skip).sort(sort_query))
+        except Exception as e:
+            logger.error(
+                f"Failed to get documents || {repr(e)}",
+                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
+            )
+            raise e
+
+        return results
+
+    @retry(AutoReconnect, tries=RETRY_COUNT, delay=1)
     def get_sorted(
-        self, query: typing.Dict = None, projection: typing.Dict = None, sort_query: typing.Dict = None
+        self, query: typing.Dict = None, projection: typing.Dict = None, sort_query: typing.List = None
     ) -> typing.List[typing.Dict]:
         start = datetime.now()
 
@@ -290,11 +311,13 @@ class MongoRepositoryBase:
         return results
 
     @retry(AutoReconnect, tries=RETRY_COUNT, delay=1)
-    def update_one(self, query_filter: typing.Dict = None, query: typing.Dict = None) -> typing.NoReturn:
+    def update_one(
+        self, query_filter: typing.Dict = None, query: typing.Dict = None, upsert: bool = False
+    ) -> typing.NoReturn:
         start = datetime.now()
 
         try:
-            self.collection.update(query_filter, query)
+            self.collection.update(query_filter, query, upsert=upsert)
         except Exception as e:
             logger.error(
                 f"Failed to update one document || {repr(e)}",

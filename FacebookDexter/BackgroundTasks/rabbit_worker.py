@@ -2,6 +2,9 @@
 import os
 import sys
 
+from Core.mongo_adapter import MongoRepositoryBase
+from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import StrategyJournalMongoRepository
+
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -32,22 +35,22 @@ def callback(ch, method, properties, body):
         return
 
     try:
-        recommendations_repository = DexterRecommendationsMongoRepository(
+        recommendations_repository = MongoRepositoryBase(
             config=config.mongo,
             database_name=config.mongo.recommendations_database_name,
             collection_name=config.mongo.recommendations_collection_name,
         )
-        journal_repository = DexterJournalMongoRepository(
+        journal_repository = StrategyJournalMongoRepository(
             config=config.mongo,
             database_name=config.mongo.journal_database_name,
             collection_name=config.mongo.journal_collection_name,
         )
-        (
-            request_handler.set_config(config)
-            .set_journal_repository(journal_repository)
-            .set_recommendations_repository(recommendations_repository)
-            .handle(body)
-        )
+
+        request_handler(
+            journal_repository=journal_repository,
+            recommendations_repository=recommendations_repository,
+        ).handle(body)
+
     except Exception as e:
         logger.exception(repr(e), extra={"message_type": message_type, "integration_event_body": body})
 

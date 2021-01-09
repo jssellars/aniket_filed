@@ -5,9 +5,10 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 class InsightsSynchronizerBreakdownEnum(Enum):
     NONE = FieldsMetadata.breakdown_none
+    AGE_GENDER = FieldsMetadata.age_gender
+    PLACEMENT = FieldsMetadata.placement
     # AGE = FieldsMetadata.age_breakdown
     # GENDER = FieldsMetadata.gender_breakdown
-    # PLACEMENT = FieldsMetadata.placement
     # DEVICE = FieldsMetadata.impression_device
     # PLATFORM = FieldsMetadata.publisher_platform
     # HOUR = FieldsMetadata.hourly_stats_aggregated_by_advertiser_time_zone

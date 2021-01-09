@@ -17,7 +17,7 @@ class GraphAPIGetHelper(HTTPRequestBase):
     _async_job_failed_status = 'Job Failed'
 
     __report_run_id_key = "report_run_id"
-    __fields_num = 8
+    __fields_num = 5
 
     def _get_graph_api_base(self, config):
         try:

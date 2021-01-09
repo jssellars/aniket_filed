@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEvent import AdAccountDetails
@@ -20,9 +20,9 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def update_business_owner(self,
                               business_owner_id: typing.AnyStr = None,
                               ad_accounts: typing.List[AdAccountDetails] = None,
-                              days_to_sync: int = MiscFieldsEnum.last_three_months) -> typing.NoReturn:
+                              days_to_sync: int = FacebookMiscFields.last_three_months) -> typing.NoReturn:
         existing_ad_accounts = self.get_ad_accounts_by_business_owner_id(business_owner_id)
-        existing_ad_accounts_ids = [ad_account.get(MiscFieldsEnum.account_id, None) for ad_account in
+        existing_ad_accounts_ids = [ad_account.get(FacebookMiscFields.account_id, None) for ad_account in
                                     existing_ad_accounts]
         ad_accounts_ids = [ad_account.id.split("_")[1] for ad_account in ad_accounts]
 
@@ -39,10 +39,10 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def get_ad_accounts_by_business_owner_id(self, business_owner_id: typing.AnyStr = None):
         query = {
             MongoOperator.AND.value: [{
-                MiscFieldsEnum.business_owner_id: {
+                FacebookMiscFields.business_owner_id: {
                     MongoOperator.EQUALS.value: business_owner_id
                 },
-                MiscFieldsEnum.status: {
+                FacebookMiscFields.status: {
                     MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
                                              StructureStatusEnum.REMOVED.value]
                 }
@@ -54,19 +54,19 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         query = {
             MongoOperator.AND.value: [
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 },
                 {
-                    MiscFieldsEnum.structures_sync_status: {
+                    FacebookMiscFields.structures_sync_status: {
                         MongoOperator.IN.value: [AdAccountSyncStatusEnum.COMPLETED.value,
                                                  AdAccountSyncStatusEnum.PENDING.value,
                                                  AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS.value]
                     }
                 },
                 {
-                    MiscFieldsEnum.insights_sync_status: {
+                    FacebookMiscFields.insights_sync_status: {
                         MongoOperator.IN.value: [AdAccountSyncStatusEnum.COMPLETED.value,
                                                  AdAccountSyncStatusEnum.PENDING.value,
                                                  AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS.value]
@@ -75,7 +75,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             ]
         }
         if business_owner_id:
-            query[MongoOperator.AND.value].append({MiscFieldsEnum.business_owner_id:
+            query[MongoOperator.AND.value].append({FacebookMiscFields.business_owner_id:
                 {
                     MongoOperator.EQUALS.value: business_owner_id
                 }
@@ -93,48 +93,48 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         query = {
             MongoOperator.AND.value: [
                 {
-                    MiscFieldsEnum.business_owner_id: {
+                    FacebookMiscFields.business_owner_id: {
                         MongoOperator.EQUALS.value: business_owner_id
                     },
-                    MiscFieldsEnum.last_synced_on: {
+                    FacebookMiscFields.last_synced_on: {
                         MongoOperator.GREATERTHANEQUAL.value: last_updated_at
                     },
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
             ]
         }
         projection = {
-            MiscFieldsEnum.account_id: MongoProjectionState.ON.value,
+            FacebookMiscFields.account_id: MongoProjectionState.ON.value,
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
         }
         account_ids = self.get(query, projection)
-        return [account_id[MiscFieldsEnum.account_id] for account_id in account_ids]
+        return [account_id[FacebookMiscFields.account_id] for account_id in account_ids]
 
     def update_ad_accounts_status(self, ad_accounts: typing.List[typing.AnyStr] = None,
                                   new_status: StructureStatusEnum = None) -> typing.NoReturn:
         query_filter = {
-            MiscFieldsEnum.account_id: {
+            FacebookMiscFields.account_id: {
                 MongoOperator.IN.value: ad_accounts
             }
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.status: new_status,
+                FacebookMiscFields.status: new_status,
             }
         }
         return self.update_many(query_filter, query)
 
     def update_last_sync_time(self, account_id: typing.AnyStr = None):
         query_filter = {
-            MiscFieldsEnum.account_id: {
+            FacebookMiscFields.account_id: {
                 MongoOperator.EQUALS.value: account_id
             }
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.last_synced_on: datetime.now().strftime(self.DEFAULT_DATETIME_FORMAT),
+                FacebookMiscFields.last_synced_on: datetime.now().strftime(self.DEFAULT_DATETIME_FORMAT),
             }
         }
         self.update_one(query_filter, query)
@@ -142,7 +142,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def update_last_sync_time_by_business_owner_id(self, business_owner_id: typing.AnyStr = None) -> typing.NoReturn:
         # get business owner details
         query = {
-            MiscFieldsEnum.business_owner_id: {
+            FacebookMiscFields.business_owner_id: {
                 MongoOperator.EQUALS.value: business_owner_id
             }
         }
@@ -151,37 +151,37 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         # update last synced on to match the time when insights finished syncing for each ad account
         for detail in business_owner_details:
             update_last_sync_time_query_filter = {
-                MiscFieldsEnum.account_id: {
-                    MongoOperator.EQUALS.value: detail.get(MiscFieldsEnum.account_id)
+                FacebookMiscFields.account_id: {
+                    MongoOperator.EQUALS.value: detail.get(FacebookMiscFields.account_id)
                 }
             }
             update_last_sync_time_query = {
                 MongoOperator.SET.value: {
-                    MiscFieldsEnum.last_synced_on: detail.get(MiscFieldsEnum.insights_sync_end_date),
-                    MiscFieldsEnum.previous_last_synced_on: detail.get(MiscFieldsEnum.last_synced_on),
-                    MiscFieldsEnum.sync_status: AdAccountSyncStatusEnum.COMPLETED.value
+                    FacebookMiscFields.last_synced_on: detail.get(FacebookMiscFields.insights_sync_end_date),
+                    FacebookMiscFields.previous_last_synced_on: detail.get(FacebookMiscFields.last_synced_on),
+                    FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.COMPLETED.value
                 }
             }
             self.update_one(query_filter=update_last_sync_time_query_filter, query=update_last_sync_time_query)
 
     def add_ad_accounts(self, business_owner_id: typing.AnyStr = None,
                         ad_accounts: typing.List[AdAccountDetails] = None,
-                        days_to_sync: int = MiscFieldsEnum.last_one_months) -> typing.NoReturn:
+                        days_to_sync: int = FacebookMiscFields.last_one_months) -> typing.NoReturn:
         new_accounts = []
         for ad_account in ad_accounts:
             entry = object_to_json(ad_account)
-            entry[MiscFieldsEnum.account_id] = entry.pop(MiscFieldsEnum.id).split("_")[1]
-            entry[MiscFieldsEnum.business_owner_id] = business_owner_id
-            entry[MiscFieldsEnum.status] = StructureStatusEnum.ACTIVE.value
-            entry[MiscFieldsEnum.structures_sync_status] = AdAccountSyncStatusEnum.PENDING.value
-            entry[MiscFieldsEnum.insights_sync_status] = AdAccountSyncStatusEnum.PENDING.value
-            entry[MiscFieldsEnum.last_synced_on] = (datetime.now() -
-                                                    timedelta(days=days_to_sync))
-            entry[MiscFieldsEnum.previous_last_synced_on] = None
-            entry[MiscFieldsEnum.insights_sync_start_date] = None
-            entry[MiscFieldsEnum.insights_sync_end_date] = None
-            entry[MiscFieldsEnum.structures_sync_start_date] = None
-            entry[MiscFieldsEnum.structures_sync_end_date] = None
+            entry[FacebookMiscFields.account_id] = entry.pop(FacebookMiscFields.id).split("_")[1]
+            entry[FacebookMiscFields.business_owner_id] = business_owner_id
+            entry[FacebookMiscFields.status] = StructureStatusEnum.ACTIVE.value
+            entry[FacebookMiscFields.structures_sync_status] = AdAccountSyncStatusEnum.PENDING.value
+            entry[FacebookMiscFields.insights_sync_status] = AdAccountSyncStatusEnum.PENDING.value
+            entry[FacebookMiscFields.last_synced_on] = (datetime.now() -
+                                                        timedelta(days=days_to_sync))
+            entry[FacebookMiscFields.previous_last_synced_on] = None
+            entry[FacebookMiscFields.insights_sync_start_date] = None
+            entry[FacebookMiscFields.insights_sync_end_date] = None
+            entry[FacebookMiscFields.structures_sync_start_date] = None
+            entry[FacebookMiscFields.structures_sync_end_date] = None
 
             new_accounts.append(copy.deepcopy(entry))
 
@@ -197,18 +197,18 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             query_filter = {
                 MongoOperator.AND.value: [
                     {
-                        MiscFieldsEnum.business_owner_id: {
-                            MongoOperator.EQUALS.value: entry[MiscFieldsEnum.business_owner_id]
+                        FacebookMiscFields.business_owner_id: {
+                            MongoOperator.EQUALS.value: entry[FacebookMiscFields.business_owner_id]
                         }
                     },
                     {
-                        MiscFieldsEnum.account_id: {
-                            MongoOperator.EQUALS.value: entry[MiscFieldsEnum.account_id]
+                        FacebookMiscFields.account_id: {
+                            MongoOperator.EQUALS.value: entry[FacebookMiscFields.account_id]
                         }
                     },
                     {
-                        MiscFieldsEnum.status: {
-                            MongoOperator.EQUALS.value: entry[MiscFieldsEnum.status]
+                        FacebookMiscFields.status: {
+                            MongoOperator.EQUALS.value: entry[FacebookMiscFields.status]
                         }
                     }
                 ]
@@ -217,7 +217,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             # create query to update entry status to sync_status
             query = {
                 MongoOperator.SET.value: {
-                    MiscFieldsEnum.sync_status: sync_status.value
+                    FacebookMiscFields.sync_status: sync_status.value
                 }
             }
 
@@ -226,17 +226,17 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
     def change_account_sync_start_date(self, account_id: typing.AnyStr = None) -> typing.NoReturn:
         self.collection = self.config.accounts_journal_collection_name
         query_filter = {
-            MiscFieldsEnum.account_id: {
+            FacebookMiscFields.account_id: {
                 MongoOperator.EQUALS.value: account_id
             }
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.sync_start_date: datetime.now(),
-                MiscFieldsEnum.sync_end_date: None,
-                MiscFieldsEnum.sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
-                MiscFieldsEnum.insights_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
-                MiscFieldsEnum.structures_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value
+                FacebookMiscFields.sync_start_date: datetime.now(),
+                FacebookMiscFields.sync_end_date: None,
+                FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
+                FacebookMiscFields.insights_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
+                FacebookMiscFields.structures_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value
             }
         }
         self.update_one(query_filter=query_filter, query=query)
@@ -248,21 +248,21 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                                               end_date: datetime = None) -> typing.NoReturn:
         self.collection = self.config.accounts_journal_collection_name
         query_filter = {
-            MiscFieldsEnum.account_id: {
+            FacebookMiscFields.account_id: {
                 MongoOperator.EQUALS.value: account_id
             }
         }
 
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.structures_sync_status: new_status.value
+                FacebookMiscFields.structures_sync_status: new_status.value
             }
         }
 
         if start_date:
-            query[MongoOperator.SET.value][MiscFieldsEnum.structures_sync_start_date] = start_date
+            query[MongoOperator.SET.value][FacebookMiscFields.structures_sync_start_date] = start_date
         if end_date:
-            query[MongoOperator.SET.value][MiscFieldsEnum.structures_sync_end_date] = end_date
+            query[MongoOperator.SET.value][FacebookMiscFields.structures_sync_end_date] = end_date
 
         self.update_one(query_filter, query)
 
@@ -273,19 +273,19 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                                             end_date: datetime = None) -> typing.NoReturn:
         self.collection = self.config.accounts_journal_collection_name
         query_filter = {
-            MiscFieldsEnum.account_id: {
+            FacebookMiscFields.account_id: {
                 MongoOperator.EQUALS.value: account_id
             }
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.insights_sync_status: new_status.value
+                FacebookMiscFields.insights_sync_status: new_status.value
             }
         }
         if start_date:
-            query[MongoOperator.SET.value][MiscFieldsEnum.insights_sync_start_date] = start_date
+            query[MongoOperator.SET.value][FacebookMiscFields.insights_sync_start_date] = start_date
         if end_date:
-            query[MongoOperator.SET.value][MiscFieldsEnum.insights_sync_end_date] = end_date
+            query[MongoOperator.SET.value][FacebookMiscFields.insights_sync_end_date] = end_date
 
         self.update_one(query_filter, query)
 
@@ -294,8 +294,8 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                          created_at: datetime = None) -> typing.NoReturn:
         self.collection = self.config.accounts_journal_sync_reports_collection_name
         document = {
-            MiscFieldsEnum.created_at: created_at,
-            MiscFieldsEnum.report: [object_to_json(entry) for entry in report]
+            FacebookMiscFields.created_at: created_at,
+            FacebookMiscFields.report: [object_to_json(entry) for entry in report]
         }
         self.add_one(document)
 

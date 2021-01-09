@@ -12,7 +12,7 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import Field
 from Core.constants import DEFAULT_DATETIME_ISO
 from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping, \
     LevelToFacebookNameKeyMapping, Level
@@ -34,12 +34,12 @@ class TuringMongoRepository(MongoRepositoryBase):
         query = {
             MongoOperator.AND.value: [
                 {
-                    MiscFieldsEnum.account_id: {
+                    FacebookMiscFields.account_id: {
                         MongoOperator.EQUALS.value: account_id
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
                                                  StructureStatusEnum.PAUSED.value]
                     }
@@ -61,7 +61,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         query = {
             MongoOperator.AND.value: [
                 {
-                    MiscFieldsEnum.account_id: {
+                    FacebookMiscFields.account_id: {
                         MongoOperator.EQUALS.value: account_id
                     }
                 },
@@ -71,7 +71,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
                                                  StructureStatusEnum.PAUSED.value]
                     }
@@ -99,7 +99,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
                                                  StructureStatusEnum.PAUSED.value]
                     }
@@ -128,7 +128,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
@@ -171,7 +171,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: [
                             StructureStatusEnum.ACTIVE.value,
                             StructureStatusEnum.REMOVED.value
@@ -225,7 +225,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             statuses = [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
 
         query_by_status = {
-            MiscFieldsEnum.status: {
+            FacebookMiscFields.status: {
                 MongoOperator.IN.value: statuses
             }
         }
@@ -239,7 +239,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             LevelToFacebookNameKeyMapping.CAMPAIGN.value: MongoProjectionState.ON.value,
             LevelToFacebookNameKeyMapping.ADSET.value: MongoProjectionState.ON.value,
             LevelToFacebookNameKeyMapping.AD.value: MongoProjectionState.ON.value,
-            MiscFieldsEnum.status: MongoProjectionState.ON.value
+            FacebookMiscFields.status: MongoProjectionState.ON.value
         }
         structures = self.get(query, projection)
         return structures
@@ -281,7 +281,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             statuses = [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
 
         query_by_status = {
-            MiscFieldsEnum.status: {
+            FacebookMiscFields.status: {
                 MongoOperator.IN.value: statuses
             }
         }
@@ -311,7 +311,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
@@ -357,7 +357,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
                                                  StructureStatusEnum.PAUSED.value,
                                                  StructureStatusEnum.COMPLETED.value]
@@ -374,8 +374,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         self.collection = collection_name=level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structure = self.first_or_default(query, projection)
-        if MiscFieldsEnum.details in structure.keys():
-            structure[MiscFieldsEnum.details] = BSON.decode(structure[MiscFieldsEnum.details])
+        if FacebookMiscFields.details in structure.keys():
+            structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
         return structure
 
     def get_structure_details_many(self,
@@ -397,7 +397,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
                                                     StructureStatusEnum.REMOVED.value,
                                                     StructureStatusEnum.DEPRECATED.value]
@@ -407,13 +407,13 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
 
         projection = {
-            MiscFieldsEnum.details: MongoProjectionState.ON.value,
+            FacebookMiscFields.details: MongoProjectionState.ON.value,
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
         }
 
         structures = self.get(query, projection)
         structures = self.__decode_structure_details_from_bson(structures)
-        return [structure[MiscFieldsEnum.details] for structure in structures]
+        return [structure[FacebookMiscFields.details] for structure in structures]
 
     def get_results_fields_from_adsets(self,
                                        structure_ids: typing.List[typing.AnyStr] = None,
@@ -428,7 +428,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
                                                     StructureStatusEnum.REMOVED.value,
                                                     StructureStatusEnum.DEPRECATED.value]
@@ -461,7 +461,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
                                                     StructureStatusEnum.DEPRECATED.value]
                     }
@@ -470,13 +470,13 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
 
         projection = {
-            MiscFieldsEnum.details: MongoProjectionState.ON.value,
+            FacebookMiscFields.details: MongoProjectionState.ON.value,
             MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
         }
 
         structures = self.get(query, projection)
         structures = self.__decode_structure_details_from_bson(structures)
-        return [structure[MiscFieldsEnum.details] for structure in structures if MiscFieldsEnum.details in structure]
+        return [structure[FacebookMiscFields.details] for structure in structures if FacebookMiscFields.details in structure]
 
     def get_structures_by_parent_id(self, level: Level, parent_id) -> List[Dict]:
 
@@ -501,7 +501,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             MongoOperator.AND.value: [
                 {parent_key: {MongoOperator.EQUALS.value: parent_id}},
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.NOTIN.value: [
                             StructureStatusEnum.ARCHIVED.value,
                             StructureStatusEnum.DEPRECATED.value,
@@ -520,9 +520,9 @@ class TuringMongoRepository(MongoRepositoryBase):
         for entry in result:
             entry.update(
                 {
-                    MiscFieldsEnum.level: level.value,
-                    MiscFieldsEnum.structure_id: entry[LevelToFacebookIdKeyMapping[level.name].value],
-                    MiscFieldsEnum.details: BSON.decode(entry[MiscFieldsEnum.details])
+                    FacebookMiscFields.level: level.value,
+                    FacebookMiscFields.structure_id: entry[LevelToFacebookIdKeyMapping[level.name].value],
+                    FacebookMiscFields.details: BSON.decode(entry[FacebookMiscFields.details])
                 }
             )
 
@@ -531,11 +531,11 @@ class TuringMongoRepository(MongoRepositoryBase):
     @staticmethod
     def __decode_structure_details_from_bson(structures: typing.List[typing.Any] = None) -> typing.List[typing.Any]:
         for index in range(len(structures)):
-            encoded_structure = structures[index].get(MiscFieldsEnum.details, {})
+            encoded_structure = structures[index].get(FacebookMiscFields.details, {})
             if encoded_structure:
-                structures[index][MiscFieldsEnum.details] = BSON.decode(encoded_structure)
+                structures[index][FacebookMiscFields.details] = BSON.decode(encoded_structure)
             else:
-                structures[index][MiscFieldsEnum.details] = {}
+                structures[index][FacebookMiscFields.details] = {}
         return structures
 
     # TODO: This function can be removed once the delete functionality is properly working
@@ -559,7 +559,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: current_status
                     }
                 }
@@ -567,8 +567,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.status: new_status,
-                MiscFieldsEnum.last_updated_at: datetime.now()
+                FacebookMiscFields.status: new_status,
+                FacebookMiscFields.last_updated_at: datetime.now()
             }
         }
         self.update_one(query_filter, query)
@@ -587,7 +587,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: current_status
                     }
                 }
@@ -595,8 +595,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.status: new_status,
-                MiscFieldsEnum.last_updated_at: datetime.now()
+                FacebookMiscFields.status: new_status,
+                FacebookMiscFields.last_updated_at: datetime.now()
             }
         }
         self.update_many(query_filter, query)
@@ -615,23 +615,24 @@ class TuringMongoRepository(MongoRepositoryBase):
         for structure in structures:
             structure_id = self.__get_structure_id(structure, level)
             if isinstance(structure, dict):
-                current_structure_details = structure.get(MiscFieldsEnum.details)
+                current_structure_details = structure.get(FacebookMiscFields.details)
             else:
                 current_structure_details = BSON.decode(structure.details)
+            # TODO This is reading the structures one by one instead of reading all the data in one go
             existing_structure_details = self.get_structure_details(level=level, key_value=structure_id)
 
             if existing_structure_details and \
-                    current_structure_details != existing_structure_details.get(MiscFieldsEnum.details):
+                    current_structure_details != existing_structure_details.get(FacebookMiscFields.details):
                 self.deprecate_structure(level=level, key_value=structure_id)
                 if isinstance(structure, dict):
-                    structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+                    structure[FacebookMiscFields.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 else:
                     structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 structures_to_insert.append(structure)
 
             elif not existing_structure_details:
                 if isinstance(structure, dict):
-                    structure[MiscFieldsEnum.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
+                    structure[FacebookMiscFields.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 else:
                     structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
                 structures_to_insert.append(structure)
@@ -647,7 +648,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.status: StructureStatusEnum.DEPRECATED.value
+                FacebookMiscFields.status: StructureStatusEnum.DEPRECATED.value
             }
         }
         self.update_many(query_filter=query_filter, query=query)
@@ -657,13 +658,13 @@ class TuringMongoRepository(MongoRepositoryBase):
                                            level: Level = None) -> typing.NoReturn:
         self.collection = collection_name=level.value
         query_filter = {
-            MiscFieldsEnum.account_id: {
+            FacebookMiscFields.account_id: {
                 MongoOperator.EQUALS.value: account_id
             }
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.status: StructureStatusEnum.DEPRECATED.value
+                FacebookMiscFields.status: StructureStatusEnum.DEPRECATED.value
             }
         }
         self.update_many(query_filter, query)
@@ -722,7 +723,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.IN.value: [
                             StructureStatusEnum.ACTIVE.value,
                             StructureStatusEnum.PAUSED.value,
@@ -736,8 +737,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.status: StructureStatusEnum.DEPRECATED.value,
-                MiscFieldsEnum.last_updated_at: datetime.now()
+                FacebookMiscFields.status: StructureStatusEnum.DEPRECATED.value,
+                FacebookMiscFields.last_updated_at: datetime.now()
             }
         }
         self.update_many(query_filter, query)
@@ -756,7 +757,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
@@ -764,8 +765,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.actions: None,
-                MiscFieldsEnum.last_updated_at: datetime.now()
+                FacebookMiscFields.actions: None,
+                FacebookMiscFields.last_updated_at: datetime.now()
             }
         }
         self.update_one(query_filter, query)
@@ -783,7 +784,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                     }
                 },
                 {
-                    MiscFieldsEnum.status: {
+                    FacebookMiscFields.status: {
                         MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
                     }
                 }
@@ -791,8 +792,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         }
         query = {
             MongoOperator.SET.value: {
-                MiscFieldsEnum.actions: details,
-                MiscFieldsEnum.last_updated_at: datetime.now()
+                FacebookMiscFields.actions: details,
+                FacebookMiscFields.last_updated_at: datetime.now()
             }
         }
         self.update_one(query_filter, query)
@@ -806,12 +807,12 @@ class TuringMongoRepository(MongoRepositoryBase):
         query = {
             MongoOperator.AND.value: [
                 {
-                    MiscFieldsEnum.account_id: {
+                    FacebookMiscFields.account_id: {
                         MongoOperator.EQUALS.value: account_id
                     }
                 },
                 {
-                    MiscFieldsEnum.date_added: {
+                    FacebookMiscFields.date_added: {
                         MongoOperator.GREATERTHANEQUAL.value: start_date
                     }
                 }

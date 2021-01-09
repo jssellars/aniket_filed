@@ -120,46 +120,6 @@ class QueryBuilderFacebookRequestParser:
                                         FieldsMetadata.name.name,
                                         FieldsMetadata.id.name]
 
-    def parse_query_columns(self, query_columns, parse_breakdowns=True, column_type=None):
-        non_fields_types = [FieldType.BREAKDOWN,
-                            FieldType.TIME_BREAKDOWN,
-                            FieldType.ACTION_BREAKDOWN,
-                            FieldType.STRUCTURE]
-
-        for entry in query_columns:
-            mapped_entry = self.map(getattr(entry, column_type.value))
-            if mapped_entry:
-                self.__requested_columns.append(mapped_entry)
-
-            if mapped_entry and mapped_entry.field_type not in non_fields_types:
-                self.__fields += mapped_entry.facebook_fields
-
-            elif mapped_entry and mapped_entry.field_type == FieldType.STRUCTURE:
-                self.__structure_fields += mapped_entry.facebook_fields
-
-            elif mapped_entry and mapped_entry.field_type == FieldType.TIME_BREAKDOWN:
-                self.time_increment = mapped_entry.facebook_value
-                self.__fields += mapped_entry.facebook_fields
-
-            if mapped_entry and parse_breakdowns:
-                self.__breakdowns += mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
-
-                self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
-
-        for query_column in query_columns:
-            if FieldsMetadata.results.name == query_column.Name:
-                self.add_result_fields_to_request(
-                    field_groups=[PixelCustomEventTypeToResult, AdSetOptimizationToResult]
-                )
-                break
-
-        for query_column in query_columns:
-            if FieldsMetadata.cost_per_result.name == query_column.Name:
-                self.add_result_fields_to_request(
-                    field_groups=[PixelCustomEventTypeToCostPerResult, AdSetOptimizationToCostPerResult]
-                )
-                break
-
     def parse_query_columns_ag_grid(self, ag_query_columns=None, parse_breakdowns=True):
         if ag_query_columns is None:
             ag_query_columns = []
@@ -207,7 +167,7 @@ class QueryBuilderFacebookRequestParser:
                     if facebook_field not in self.__fields:
                         self.__fields += result.value.facebook_fields
 
-    def parse_structure_columns(self, query_columns, ag_query_columns=None, parse_breakdowns=True, column_type=None):
+    def parse_structure_columns(self, query_columns, parse_breakdowns=True, column_type=None):
         non_fields_types = [FieldType.BREAKDOWN,
                             FieldType.TIME_BREAKDOWN,
                             FieldType.ACTION_BREAKDOWN,
@@ -232,6 +192,20 @@ class QueryBuilderFacebookRequestParser:
                 self.__breakdowns += mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
 
                 self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
+
+        for query_column in query_columns:
+            if FieldsMetadata.results.name == query_column.Name:
+                self.add_result_fields_to_request(
+                    field_groups=[PixelCustomEventTypeToResult, AdSetOptimizationToResult]
+                )
+                break
+
+        for query_column in query_columns:
+            if FieldsMetadata.cost_per_result.name == query_column.Name:
+                self.add_result_fields_to_request(
+                    field_groups=[PixelCustomEventTypeToCostPerResult, AdSetOptimizationToCostPerResult]
+                )
+                break
 
     def parse_query_conditions(self, query_conditions):
         for entry in query_conditions:
@@ -260,8 +234,8 @@ class QueryBuilderFacebookRequestParser:
     def parse(self, request, parse_breakdowns=True):
         self.level = request.set_structure_columns(self.__request_structure_columns).get_level()
 
-        self.parse_query_columns(request.Columns, parse_breakdowns=parse_breakdowns,
-                                 column_type=self.QueryBuilderColumnName.COLUMN)
+        self.parse_structure_columns(request.Columns, parse_breakdowns=parse_breakdowns,
+                                     column_type=self.QueryBuilderColumnName.COLUMN)
         self.parse_structure_columns(request.Dimensions, parse_breakdowns=parse_breakdowns,
                                      column_type=self.QueryBuilderColumnName.DIMENSION)
         self.parse_query_conditions(request.Conditions)

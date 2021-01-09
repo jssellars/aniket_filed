@@ -115,10 +115,14 @@ class GraphAPIInsightsMapper:
                 if cost_per_optimization_goal:
                     facebook_results_field_value = cost_per_optimization_goal.value
 
+        if FieldsMetadata.result_type.name in data:
+            mapped_fields.append([{FieldsMetadata.result_type.name: data[FieldsMetadata.result_type.name]}])
+            return
+
         if facebook_results_field_value:
             result_value = facebook_results_field_value.mapper.map(data, facebook_results_field_value)
             mapped_fields.append([{requested_field.name: result_value[0].get(facebook_results_field_value.name)}])
-
+            mapped_fields.append([{FieldsMetadata.result_type.name: facebook_results_field_value.name}])
 
 def change_fields_from_upper_case(mapped_data: List, required_fields_to_change: List):
 

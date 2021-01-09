@@ -2,37 +2,46 @@ from enum import Enum
 
 
 class RecommendationField(Enum):
-    OBJECT_ID = '_id'
-    STRUCTURE_ID = 'structure_id'
-    LEVEL = 'level'
-    OPTIMIZATION_TYPE = 'optimization_type'
-    RECOMMENDATION_TYPE = 'recommendation_type'
-    CONFIDENCE = 'confidence'
-    IMPORTANCE = 'importance'
-    SOURCE = 'source'
-    CAMPAIGN_ID = 'campaign_id'
-    PARENT_ID = 'parent_id'
-    AD_ACCOUNT_ID = 'ad_account_id'
-    CREATED_AT = 'created_at'
-    CATEGORY = 'category'
-    TEMPLATE = 'template'
-    METRIC = 'metric'
-    APPLICATION_DETAILS = 'application_details'
-    APPLICATION_DATE = 'applicationDate'
-    CHANNEL = 'channel'
-    PARENT_NAME = 'parent_name'
-    CAMPAIGN_NAME = 'campaign_name'
-    STRUCTURE_NAME = 'structure_name'
-    BREAKDOWN = 'breakdown'
-    STATUS = 'status'
-    APPLIED_BY = 'applied_by'
-    RECOMMENDATION_ID = 'recommendation_id'
-    TIME_INTERVAL = 'time_interval'
-    METRICS = 'metrics'
-    LAST_UPDATED_AT = 'last_updated_at'
+    OBJECT_ID = "_id"
+    STRUCTURE_ID = "structure_id"
+    LEVEL = "level"
+    OPTIMIZATION_TYPE = "optimization_type"
+    RECOMMENDATION_TYPE = "recommendation_type"
+    CONFIDENCE = "confidence"
+    IMPORTANCE = "importance"
+    SOURCE = "source"
+    CAMPAIGN_ID = "campaign_id"
+    PARENT_ID = "parent_id"
+    AD_ACCOUNT_ID = "ad_account_id"
+    CREATED_AT = "created_at"
+    CATEGORY = "category"
+    TEMPLATE = "template"
+    METRIC = "metric"
+    APPLICATION_DETAILS = "application_details"
+    APPLICATION_DATE = "applicationDate"
+    CHANNEL = "channel"
+    PARENT_NAME = "parent_name"
+    CAMPAIGN_NAME = "campaign_name"
+    STRUCTURE_NAME = "structure_name"
+    BREAKDOWN = "breakdown"
+    STATUS = "status"
+    APPLIED_BY = "applied_by"
+    RECOMMENDATION_ID = "recommendation_id"
+    TIME_INTERVAL = "time_interval"
+    METRICS = "metrics"
+    LAST_UPDATED_AT = "last_updated_at"
+    TRIGGER_VARIANCE = "trigger_variance"
+    RECOMMENDATION = "recommendation"
+    ACCOUNT_ID = "account_id"
+    PRIORITY = "priority"
+    TITLE = "title"
+    SUBTEXT = "sub_text"
+    QUOTE = "quote"
+    ANALYSIS = "analysis"
+    BREAKDOWN_GROUP = "breakdown_group"
+
 
 class RecommendationFieldInsidersEnum(Enum):
-    DISPLAY_NAME = 'display_name'
-    NAME = 'name'
-    VALUE = 'value'
-
+    DISPLAY_NAME = "display_name"
+    NAME = "name"
+    VALUE = "value"

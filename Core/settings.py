@@ -91,6 +91,7 @@ class Default:
         targeting_search="http://py-facebook-campaigns-builder-api:47220/interests/suggestions/",
         facebook_auto_apply="http://py-facebook-turing-api:47350/api/v1/{level}/{structureId}",
         google_auto_apply="",
+        notification_endpoint="http://cs-notifications-api:41020/api/v1/email-messages/send-email",
     )
 
     es_enabled = False
@@ -115,6 +116,7 @@ class Local:
         targeting_search="http://localhost:47220/interests/suggestions/",
         facebook_auto_apply="http://localhost:47350/api/v1/{level}/{structureId}",
         google_auto_apply="",
+        notification_endpoint="http://localhost:41020/api/v1/email-messages/send-email",
     )
 
     sql_server = replace_in_class(

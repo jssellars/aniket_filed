@@ -1,7 +1,7 @@
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 
 
 class CampaignModelFields(StructureModelFieldBase):
@@ -55,17 +55,17 @@ class CampaignModelFields(StructureModelFieldBase):
 
     required_structure_fields = [
         # base structure fields
-        MiscFieldsEnum.account_id,
+        FacebookMiscFields.account_id,
         FieldsMetadata.campaign_name,
         FieldsMetadata.campaign_id,
-        MiscFieldsEnum.last_updated_at,
-        MiscFieldsEnum.actions,
+        FacebookMiscFields.last_updated_at,
+        FacebookMiscFields.actions,
         FieldsMetadata.status,
         FieldsMetadata.objective,
         FieldsMetadata.daily_budget,
         FieldsMetadata.lifetime_budget,
         GraphAPIInsightsFields.created_time,
         FieldsMetadata.start_date,
-        MiscFieldsEnum.end_time,
-        MiscFieldsEnum.date_added
+        FacebookMiscFields.end_time,
+        FacebookMiscFields.date_added
     ]

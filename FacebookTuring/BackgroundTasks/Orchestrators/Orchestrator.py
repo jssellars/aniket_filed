@@ -1,14 +1,12 @@
 import copy
-import math
 import typing
 from collections import defaultdict
 from datetime import datetime
-from threading import Thread
 
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
-from FacebookTuring.BackgroundTasks.startup import config, fixtures
+from FacebookTuring.BackgroundTasks.startup import fixtures
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
 from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
     UpdatedBusinessOwnersDetails,
@@ -111,7 +109,7 @@ class Orchestrator:
     def __group_by_business_owner_id(ad_accounts_details: typing.List[typing.Dict] = None) -> typing.Dict:
         business_owner_details = defaultdict(list)
         for entry in ad_accounts_details:
-            business_owner_details[entry[MiscFieldsEnum.business_owner_id]].append(copy.deepcopy(entry))
+            business_owner_details[entry[FacebookMiscFields.business_owner_id]].append(copy.deepcopy(entry))
         return business_owner_details
 
     def __publish_business_owner_synced_event(

@@ -27,4 +27,4 @@ class Default:
             )
         ]
     )
-    days_to_sync = 30
+    days_to_sync = 60

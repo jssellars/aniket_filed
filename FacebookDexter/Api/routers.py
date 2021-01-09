@@ -1,44 +1,43 @@
 import logging
 
 import flask_restful
-from flask import Response, request
+import humps
 
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Core.Web.Security.Permissions import AdsManagerPermissions, OptimizePermissions
+from FacebookDexter.Api.CommandHandlers import (
+    DexterApiGetCountsByCategoryCommandHandler,
+    DexterApiGetRecommendationsPageCommandHandler,
+)
 from FacebookDexter.Api.CommandHandlers.DexterApiApplyRecommendationCommandHandler import (
-    DexterApiApplyRecommendationCommandHandler
+    DexterApiApplyRecommendationCommandHandler,
 )
 from FacebookDexter.Api.CommandHandlers.DexterApiDismissRecommendationCommandHandler import (
-    DexterApiDismissRecommendationCommandHandler
+    DexterApiDismissRecommendationCommandHandler,
 )
-from FacebookDexter.Api.CommandHandlers.DexterApiGetCountsByCategoryCommandHandler import (
-    DexterApiGetCountsByCategoryCommandHandler
-)
-from FacebookDexter.Api.CommandHandlers.DexterApiGetRecommendationsPageCommandHandler import (
-    DexterApiGetRecommendationsPageCommandHandler
-)
+from FacebookDexter.Api.CommandHandlers import GetRecommendationsHandler
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
 from FacebookDexter.Api.Commands.DexterApiGetRecommendationsPageCommand import DexterApiGetRecommendationsPageCommand
 from FacebookDexter.Api.CommandValidators.DexterApiApplyRecommendationCommandValidator import (
-    DexterApiApplyRecommendationCommandValidator
+    DexterApiApplyRecommendationCommandValidator,
 )
 from FacebookDexter.Api.CommandValidators.DexterApiDismissRecommendationCommandValidator import (
-    DexterApiDismissRecommendationCommandValidator
+    DexterApiDismissRecommendationCommandValidator,
 )
 from FacebookDexter.Api.CommandValidators.DexterApiGetCountsByCategoryCommandValidator import (
-    DexterApiGetCountsByCategoryCommandValidator
+    DexterApiGetCountsByCategoryCommandValidator,
 )
 from FacebookDexter.Api.CommandValidators.DexterApiGetRecommendationsPageCommandValidator import (
-    DexterApiRecommendationsPageCommandValidator
+    DexterApiRecommendationsPageCommandValidator,
 )
-from FacebookDexter.Api.QueryParamsValidators.DexterApiGetCampaignsQueryValidator import (
-    DexterApiGetCampaignsQueryValidator
-)
+from FacebookDexter.Api.Commands.RecommendationPageCommand import RecommendationPageCommand, RecommendationPageCommandMapping, NumberOfPagesCommandMapping, NumberOfPagesCommand
+from FacebookDexter.Api.QueryParamsValidators import DexterApiGetCampaignsQueryValidator
 from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
+from flask import Response, request
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +78,9 @@ class GetCampaignsQuery(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self):
         try:
+            logger.info(request_as_log_dict(request))
             request_args = request.args
-            error_response_or_paramaters = DexterApiGetCampaignsQueryValidator().validate(request_args)
+            error_response_or_paramaters = DexterApiGetCampaignsQueryValidator.validate(request_args)
 
             if isinstance(error_response_or_paramaters, Response):
                 return error_response_or_paramaters
@@ -102,6 +102,8 @@ class GetRecommendationQuery(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self):
         try:
+
+            logger.info(request_as_log_dict(request))
             recommendation_id = request.args.get("id")
             if recommendation_id is None:
                 return "Please provide a recommendation id", 400
@@ -158,7 +160,9 @@ class GetRecommendationsPage(Resource):
                 parameters_or_errors.get("recommendations_sort"),
                 parameters_or_errors.get("excluded_ids"),
             )
-            handler = DexterApiGetRecommendationsPageCommandHandler()
+            handler = DexterApiGetRecommendationsPageCommandHandler.get_recommendations_page(
+                get_recommendations_page_command
+            )
 
             return handler.handle(get_recommendations_page_command), 200
 
@@ -182,7 +186,7 @@ class GetCountsByCategory(Resource):
             get_counts_by_category_command = DexterApiGetCountsByCategoryCommand(
                 parameters_or_errors.get("channel"), parameters_or_errors.get("campaign_ids")
             )
-            handler = DexterApiGetCountsByCategoryCommandHandler()
+            handler = DexterApiGetCountsByCategoryCommandHandler.get_categories_count(get_counts_by_category_command)
 
             return handler.handle(get_counts_by_category_command), 200
 
@@ -211,3 +215,51 @@ class DismissRecommendation(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return "An error occurred", 500
+
+
+class RecommendationsHandler(Resource):
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    def post(self):
+        data = humps.decamelize(request.get_json(force=True))
+        mapping = RecommendationPageCommandMapping(target=RecommendationPageCommand)
+        command = mapping.load(data)
+
+        try:
+            result = GetRecommendationsHandler.read_recommendations_page(command)
+            return result, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return "An error occurred", 400
+
+
+class NumberOfPagesHandler(Resource):
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    def post(self):
+        data = humps.decamelize(request.get_json(force=True))
+        mapping = NumberOfPagesCommandMapping(target=NumberOfPagesCommand)
+        command = mapping.load(data)
+
+        try:
+            result = GetRecommendationsHandler.get_number_of_pages(command)
+            return result, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return "An error occurred", 400
+
+
+class DismissRecommendationHandler(Resource):
+    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+    def put(self, recommendation_id: str):
+
+        try:
+            GetRecommendationsHandler.dismiss_recommendation(recommendation_id)
+            return None, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return "An error occurred", 400

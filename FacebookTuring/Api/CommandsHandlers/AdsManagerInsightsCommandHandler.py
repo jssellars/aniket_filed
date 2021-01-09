@@ -279,10 +279,12 @@ class AdsManagerInsightsCommandHandler:
         return {required_metric: metric_result, PERCENTAGE_DIFFERENCE_KEY: percentage_difference, TREND_KEY: trend}
 
     @classmethod
-    def get_reports_insights(cls,
-                             query_json: typing.Dict = None,
-                             business_owner_id: typing.AnyStr = None,
-                             level: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def get_reports_insights(
+            cls,
+            query_json: typing.Dict = None,
+            business_owner_id: typing.AnyStr = None,
+            level: typing.AnyStr = None
+    ) -> typing.List[typing.Dict]:
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
         query = cls.map_query(query_json, has_breakdowns=True)
         response = GraphAPIInsightsHandler.get_reports_insights(
@@ -292,7 +294,7 @@ class AdsManagerInsightsCommandHandler:
             fields=query.fields,
             parameters=query.parameters,
             requested_fields=query.requested_columns,
-            level=level
+            level=query.level
         )
         return response
 

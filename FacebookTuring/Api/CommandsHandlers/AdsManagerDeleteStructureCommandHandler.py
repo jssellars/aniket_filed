@@ -6,7 +6,7 @@ from bson import BSON
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     LevelToGraphAPIStructure,
@@ -34,13 +34,13 @@ class AdsManagerDeleteStructureCommandHandler:
         if not allow_structure_changes(deleted_structure):
             return None
 
-        deleted_structure[MiscFieldsEnum.level] = level
-        deleted_structure[MiscFieldsEnum.structure_id] = deleted_structure.get(
+        deleted_structure[FacebookMiscFields.level] = level
+        deleted_structure[FacebookMiscFields.structure_id] = deleted_structure.get(
             LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value,
             None,
         )
         to_be_deleted_structures = repository.get_structures_by_parent_id(
-            level=Level(level), parent_id=deleted_structure[MiscFieldsEnum.structure_id]
+            level=Level(level), parent_id=deleted_structure[FacebookMiscFields.structure_id]
         )
 
         to_be_deleted_structures.append(deleted_structure)
@@ -63,8 +63,8 @@ class AdsManagerDeleteStructureCommandHandler:
             for structure in to_be_deleted_structures:
                 structure = mark_structure_as_removed(structure, business_owner_facebook_id)
                 repository.add_structure(
-                    level=Level(structure[MiscFieldsEnum.level]),
-                    key_value=structure[MiscFieldsEnum.structure_id],
+                    level=Level(structure[FacebookMiscFields.level]),
+                    key_value=structure[FacebookMiscFields.structure_id],
                     document=structure,
                 )
         except Exception as e:
@@ -74,12 +74,12 @@ class AdsManagerDeleteStructureCommandHandler:
 
 
 def mark_structure_as_removed(structure: Dict, business_owner_facebook_id: str) -> Dict:
-    structure[MiscFieldsEnum.last_updated_at] = datetime.now()
-    structure[MiscFieldsEnum.business_owner_facebook_id] = business_owner_facebook_id
-    structure_details = structure[MiscFieldsEnum.details]
-    structure_details[MiscFieldsEnum.status] = StructureStatusEnum.REMOVED.name
-    structure_details[MiscFieldsEnum.effective_status] = StructureStatusEnum.REMOVED.name
-    structure[MiscFieldsEnum.status] = StructureStatusEnum.REMOVED.value
-    structure[MiscFieldsEnum.details] = BSON.encode(structure_details)
+    structure[FacebookMiscFields.last_updated_at] = datetime.now()
+    structure[FacebookMiscFields.business_owner_facebook_id] = business_owner_facebook_id
+    structure_details = structure[FacebookMiscFields.details]
+    structure_details[FacebookMiscFields.status] = StructureStatusEnum.REMOVED.name
+    structure_details[FacebookMiscFields.effective_status] = StructureStatusEnum.REMOVED.name
+    structure[FacebookMiscFields.status] = StructureStatusEnum.REMOVED.value
+    structure[FacebookMiscFields.details] = BSON.encode(structure_details)
 
     return structure

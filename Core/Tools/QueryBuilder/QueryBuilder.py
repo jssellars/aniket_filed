@@ -15,6 +15,7 @@ class QueryBuilderColumn:
 @dataclass
 class QueryBuilderDimension:
     GroupColumnName: typing.AnyStr = None
+    Name: typing.AnyStr = None
 
 
 @dataclass

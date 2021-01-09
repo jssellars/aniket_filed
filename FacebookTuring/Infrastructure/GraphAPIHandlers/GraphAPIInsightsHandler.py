@@ -6,6 +6,7 @@ from threading import Thread
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.Field import FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
@@ -184,10 +185,20 @@ class GraphAPIInsightsHandler:
             structure_results: typing.List = None,
     ) -> typing.List:
         for insight in insight_response:
+            possible_objective = []
             for structure in structure_results:
                 if insight[structure_key] == structure[structure_key]:
+                    if GraphAPIInsightsFields.custom_event_type in structure and structure[GraphAPIInsightsFields.custom_event_type]:
+                        if structure[GraphAPIInsightsFields.custom_event_type] not in possible_objective:
+                            possible_objective.append(structure[GraphAPIInsightsFields.custom_event_type])
+                    elif GraphAPIInsightsFields.optimization_goal in structure \
+                            and structure[GraphAPIInsightsFields.optimization_goal]:
+                        if structure[GraphAPIInsightsFields.optimization_goal] not in possible_objective:
+                            possible_objective.append(structure[GraphAPIInsightsFields.optimization_goal])
+                    if len(possible_objective) > 1:
+                        insight.update({FieldsMetadata.result_type.name: "multiple_conversion_types"})
+                        break
                     insight.update(structure)
-                    break
         return insight_response
 
     @classmethod

@@ -1,23 +1,55 @@
+from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import DexterEngineRunJournalEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
+
+from Core.mongo_adapter import MongoOperator, MongoRepositoryBase, MongoProjectionState
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
-from FacebookDexter.Api.startup import config, fixtures
-from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
+from FacebookDexter.Api.startup import config
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationCategory import RecommendationCategory
+from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
 
 
-class DexterApiGetCountsByCategoryCommandHandler:
-    def handle(self, command: DexterApiGetCountsByCategoryCommand):
-        recommendation_repository = RecommendationsRepository(config.mongo)
+# TODO: This will be deleted for V1 once the FE team finishes the new interface
+def get_categories_count(command: DexterApiGetCountsByCategoryCommand):
+    recommendation_repository = MongoRepositoryBase(
+        config=config.mongo,
+        database_name=config.mongo.recommendations_database_name,
+        collection_name=config.mongo.recommendations_collection_name,
+    )
 
-        count_filter = {}
+    result = dict()
+    for recommendation_type in RecommendationType:
+        result[recommendation_type.value] = 0
 
-        if isinstance(command.campaign_ids, list):
-            count_filter['campaign_id'] = {'$in': command.campaign_ids}
-        else:
-            count_filter['campaign_id'] = command.campaign_ids
+    for recommendation_category in RecommendationCategory:
+        result[recommendation_category.value] = 0
 
-        if isinstance(command.channel, list):
-            count_filter['channel'] = {'$in': command.channel}
-        else:
-            count_filter['channel'] = command.channel
+    on_metrics = [
+        LevelIdKeyEnum.CAMPAIGN.value,
+    ]
+    off_metrics = ["_id"]
 
-        counts = recommendation_repository.get_counts(count_filter)
-        return counts
+    repo_result = recommendation_repository.get(
+        query={
+            MongoOperator.AND.value: [
+                {
+                    LevelIdKeyEnum.CAMPAIGN.value: {
+                        MongoOperator.IN.value: command.campaign_ids
+                    }
+                },
+                {
+                    DexterEngineRunJournalEnum.CHANNEL.value: {
+                        MongoOperator.EQUALS.value: command.channel
+                    }
+                },
+            ]
+        },
+        projection={
+            **{m: MongoProjectionState.OFF.value for m in off_metrics},
+            **{m: MongoProjectionState.ON.value for m in on_metrics},
+        },
+    )
+
+    result[RecommendationCategory.OPTIMIZE_BUDGET.value] = len(repo_result)
+    result[RecommendationType.PERFORMANCE.value] = len(repo_result)
+
+    return result

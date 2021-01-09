@@ -55,11 +55,33 @@ INSIGHTS_SYNCHRONIZER_FIELDS = [
     FieldsMetadata.landing_page_views_total,
 ]
 
-FREEMIUM_USER_INSIGHTS_SYNCHRONIZER_FIELDS = [
+DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS = [
     FieldsMetadata.amount_spent,
     FieldsMetadata.reach,
     FieldsMetadata.link_clicks,
     FieldsMetadata.page_likes,
     FieldsMetadata.impressions,
-    FieldsMetadata.purchases_total
+    FieldsMetadata.purchases_total,
+    FieldsMetadata.conversions,
+    FieldsMetadata.unique_ctr_all,
+    FieldsMetadata.landing_page_views_total,
+    FieldsMetadata.leads_total,
+    FieldsMetadata.results,
+    FieldsMetadata.account_id,
+    FieldsMetadata.account_name,
+    FieldsMetadata.campaign_id,
+    FieldsMetadata.campaign_name,
+    FieldsMetadata.adset_id,
+    FieldsMetadata.adset_name,
+    FieldsMetadata.ad_id,
+    FieldsMetadata.ad_name,
+    FieldsMetadata.date_start,
+    FieldsMetadata.date_stop,
+    FieldsMetadata.frequency,
+    FieldsMetadata.unique_clicks_all,
+    FieldsMetadata.objective,
+    FieldsMetadata.cpc_all,
+    FieldsMetadata.ctr_all,
+    FieldsMetadata.clicks_all,
+    FieldsMetadata.cpm,
 ]

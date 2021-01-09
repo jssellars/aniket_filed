@@ -3,6 +3,7 @@ from ast import parse
 from datetime import datetime, timedelta
 
 from bson import BSON
+
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.mongo_adapter import MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -17,14 +18,13 @@ from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns 
     InsightsSynchronizerBreakdownEnum,
 )
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields import (
-    FREEMIUM_USER_INSIGHTS_SYNCHRONIZER_FIELDS,
-    INSIGHTS_SYNCHRONIZER_FIELDS,
+    DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS,
 )
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
 from FacebookTuring.BackgroundTasks.startup import config
 from FacebookTuring.BackgroundTasks.SynchronizerConfig import SynchronizerConfigRuntime, SynchronizerConfigStatic
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
-from FacebookTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
@@ -38,21 +38,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-SYNC_DAYS_INTERVAL = 2
-DAYS_UNTIL_OBSOLETE = 31
+SYNC_DAYS_INTERVAL = 0
+DAYS_UNTIL_OBSOLETE = 61
 USER_CONFIGS_BY_TYPE = {
     UserTypeEnum.FREEMIUM: SynchronizerConfigStatic(
-        levels=[Level.AD],
+        levels=[Level.CAMPAIGN],
         breakdowns=list(InsightsSynchronizerBreakdownEnum),
         action_breakdowns=list(InsightsSynchronizerActionBreakdownEnum),
-        requested_fields=FREEMIUM_USER_INSIGHTS_SYNCHRONIZER_FIELDS,
+        requested_fields=DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS,
     ),
     UserTypeEnum.PAYED: SynchronizerConfigStatic(
-        levels=[Level.CAMPAIGN, Level.ADSET, Level.AD],
+        levels=[Level.ADSET, Level.CAMPAIGN, Level.AD],
         breakdowns=list(InsightsSynchronizerBreakdownEnum),
         action_breakdowns=list(InsightsSynchronizerActionBreakdownEnum),
-        requested_fields=INSIGHTS_SYNCHRONIZER_FIELDS,
+        requested_fields=DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS,
     ),
 }
 
@@ -67,7 +66,7 @@ def sync(
     user_config_static = USER_CONFIGS_BY_TYPE.get(user_type, USER_CONFIGS_BY_TYPE[UserTypeEnum.PAYED])
 
     for entry in business_owner_details:
-        last_synced_on = entry[MiscFieldsEnum.last_synced_on]
+        last_synced_on = entry[FacebookMiscFields.last_synced_on]
         if isinstance(last_synced_on, str):
             try:
                 last_synced_on = parse(last_synced_on)
@@ -81,8 +80,8 @@ def sync(
                     insights_repository=insights_repository,
                     structure_repository=structures_repository,
                     account_journal_repository=account_journal_repository,
-                    business_owner_id=entry[MiscFieldsEnum.business_owner_id],
-                    account_id=entry[MiscFieldsEnum.account_id],
+                    business_owner_id=entry[FacebookMiscFields.business_owner_id],
+                    account_id=entry[FacebookMiscFields.account_id],
                     date_start=last_synced_on,
                 )
 
@@ -99,11 +98,10 @@ def sync(
                 sync_structures(user_config_static=user_config_static, user_config_runtime=user_config_runtime)
                 sync_insights(user_config_static=user_config_static, user_config_runtime=user_config_runtime)
 
-
             except Exception as e:
                 logger.exception(
-                    f"Failed sync data for business owner: {entry[MiscFieldsEnum.business_owner_id]}"
-                    f" and ad account: {entry[MiscFieldsEnum.account_id]} || {repr(e)}"
+                    f"Failed sync data for business owner: {entry[FacebookMiscFields.business_owner_id]}"
+                    f" and ad account: {entry[FacebookMiscFields.account_id]} || {repr(e)}"
                 )
 
         levels = [Level.CAMPAIGN, Level.ADSET, Level.AD]
@@ -113,7 +111,7 @@ def sync(
         delete_old_structures(
             structure_repository=structures_repository,
             levels=levels,
-            business_owner_id=entry[MiscFieldsEnum.business_owner_id],
+            business_owner_id=entry[FacebookMiscFields.business_owner_id],
         )
 
 
@@ -127,7 +125,7 @@ def sync_insights(user_config_static: SynchronizerConfigStatic, user_config_runt
     date_stop = datetime.now() - timedelta(days=1)
 
     for level in user_config_static.levels:
-        if level in [Level.CAMPAIGN, Level.ADSET]:
+        if level in [Level.ADSET]:
             for breakdown in user_config_static.breakdowns:
                 for action_breakdown in user_config_static.action_breakdowns:
                     synchronizer = InsightsSynchronizer(
@@ -274,14 +272,14 @@ def update_status_for_completed_structures(
     completed_structure_ids = [
         structure[structure_key]
         for structure in completed_structures
-        if structure[MiscFieldsEnum.status] == StructureStatusEnum.COMPLETED.value
+        if structure[FacebookMiscFields.status] == StructureStatusEnum.COMPLETED.value
     ]
 
     structures_repository.collection = level
     structures_repository.update_structure_status(
         structure_key=structure_key,
         structure_ids=completed_structure_ids,
-        status_key=MiscFieldsEnum.status,
+        status_key=FacebookMiscFields.status,
         status_value=StructureStatusEnum.COMPLETED.value,
     )
 
@@ -297,12 +295,12 @@ def mark_completed_campaigns_and_adsets(
 
         completed_adsets = mark_completed_adset(campaign_adsets)
         if completed_adsets == len(campaign_adsets):
-            campaigns[index][MiscFieldsEnum.status] = StructureStatusEnum.COMPLETED.value
+            campaigns[index][FacebookMiscFields.status] = StructureStatusEnum.COMPLETED.value
 
-        campaigns[index][MiscFieldsEnum.details] = BSON.encode(campaigns[index][MiscFieldsEnum.details])
+        campaigns[index][FacebookMiscFields.details] = BSON.encode(campaigns[index][FacebookMiscFields.details])
 
     for index in range(len(adsets)):
-        adsets[index][MiscFieldsEnum.details] = BSON.encode(adsets[index][MiscFieldsEnum.details])
+        adsets[index][FacebookMiscFields.details] = BSON.encode(adsets[index][FacebookMiscFields.details])
 
     return campaigns, adsets
 
@@ -310,12 +308,12 @@ def mark_completed_campaigns_and_adsets(
 def mark_completed_adset(adsets: typing.List[typing.Dict] = None) -> int:
     completed_adsets = 0
     for adset in adsets:
-        end_time = adset.get(MiscFieldsEnum.end_time)
+        end_time = adset.get(FacebookMiscFields.end_time)
         if end_time:
             end_time = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z")
             now = datetime.now(end_time.tzinfo)
             if end_time < now:
-                adset[MiscFieldsEnum.status] = StructureStatusEnum.COMPLETED.value
+                adset[FacebookMiscFields.status] = StructureStatusEnum.COMPLETED.value
                 completed_adsets += 1
     return completed_adsets
 
@@ -380,8 +378,8 @@ def get_structures_to_modify(
             for required_field in required_fields:
                 if required_field in old_structure:
                     minimum_structure[required_field] = old_structure[required_field]
-                elif MiscFieldsEnum.details in old_structure:
-                    current_structure_details = BSON.decode(old_structure[MiscFieldsEnum.details])
+                elif FacebookMiscFields.details in old_structure:
+                    current_structure_details = BSON.decode(old_structure[FacebookMiscFields.details])
                     if required_field in current_structure_details:
                         details[required_field] = current_structure_details[required_field]
                     elif "targetingsentencelines" not in details:
@@ -393,8 +391,8 @@ def get_structures_to_modify(
         except Exception as e:
             logger.exception(f"Failed to get modified structure || {repr(e)}")
 
-        minimum_structure[MiscFieldsEnum.business_owner_id] = business_owner_id
-        minimum_structure[MiscFieldsEnum.details] = BSON.encode(details)
+        minimum_structure[FacebookMiscFields.business_owner_id] = business_owner_id
+        minimum_structure[FacebookMiscFields.details] = BSON.encode(details)
         structure_ids_to_delete.append(old_structure[LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value])
         structures_to_insert.append(minimum_structure)
 
@@ -414,6 +412,8 @@ def check_targeting_sentence(
                 break
 
 
+# This functions can be used if the multi-threading becomes an option again
+# For now, syncing the structures and insights sequential is faster than updating insights one by one
 def update_results_for_insights(
     structures_repository: TuringMongoRepository = None,
     insights_repository: TuringMongoRepository = None,
@@ -423,22 +423,26 @@ def update_results_for_insights(
         if level in [Level.CAMPAIGN, Level.ADSET]:
             for breakdown in InsightsSynchronizerBreakdownEnum:
                 for action_breakdown in InsightsSynchronizerActionBreakdownEnum:
-                    insights_repository.collection = level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
+                    insights_repository.set_collection(
+                        level.value + "_" + breakdown.value.name + "_" + action_breakdown.value.name
+                    )
                     structure_key = LevelIdKeyEnum.get_enum_by_name(level.value.upper()).value
                     update_insight_records_with_result(
                         level=level.value,
                         structures_repository=structures_repository,
                         insights_repository=insights_repository,
-                        structure_key=structure_key,
+                        structure_join_key=structure_key,
                     )
 
         else:
-            insights_repository.collection = "_".join(
-                [
-                    level.value,
-                    InsightsSynchronizerBreakdownEnum.NONE.value.name,
-                    InsightsSynchronizerActionBreakdownEnum.NONE.value.name
-                ]
+            insights_repository.set_collection(
+                "_".join(
+                    [
+                        level.value,
+                        InsightsSynchronizerBreakdownEnum.NONE.value.name,
+                        InsightsSynchronizerActionBreakdownEnum.NONE.value.name
+                    ]
+                )
             )
 
             structure_key = LevelIdKeyEnum.get_enum_by_name(level.ADSET.name.upper()).value
@@ -446,49 +450,84 @@ def update_results_for_insights(
                 level=level.value,
                 structures_repository=structures_repository,
                 insights_repository=insights_repository,
-                structure_key=structure_key,
+                structure_join_key=structure_key,
             )
 
 
 def update_insight_records_with_result(
     level: typing.AnyStr = None,
-    structure_key: typing.AnyStr = None,
+    structure_join_key: typing.AnyStr = None,
     insights_repository: TuringMongoRepository = None,
     structures_repository: TuringMongoRepository = None,
 ):
+    collection_key = LevelIdKeyEnum.get_enum_by_name(level.upper()).value
     insights = insights_repository.get_all()
-    structure_ids = [x[structure_key] for x in insights if structure_key in x]
+    structure_ids = [x[structure_join_key] for x in insights if structure_join_key in x]
 
-    structures = structures_repository.get_results_fields_from_adsets(
-        structure_ids=structure_ids, structure_key=structure_key
+    adsets = structures_repository.get_results_fields_from_adsets(
+        structure_ids=structure_ids, structure_key=structure_join_key
     )
 
     for insight in insights:
-        for structure in structures:
-            if insight[structure_key] == structure[structure_key]:
-                results_field_value = None
-                if GraphAPIInsightsFields.custom_event_type in structure \
-                        and structure[GraphAPIInsightsFields.custom_event_type]:
-                    custom_event_type = PixelCustomEventTypeToResult.get_enum_by_name(
-                        structure[GraphAPIInsightsFields.custom_event_type]
-                    )
-                    if custom_event_type:
-                        results_field_value = custom_event_type.value.name
-                elif GraphAPIInsightsFields.optimization_goal in structure\
-                        and structure[GraphAPIInsightsFields.optimization_goal]:
-                    optimization_goal = AdSetOptimizationToResult.get_enum_by_name(
-                        structure[GraphAPIInsightsFields.optimization_goal]
-                    )
-                    if optimization_goal:
-                        results_field_value = optimization_goal.value.name
-                if results_field_value and results_field_value in insight:
-                    query = {MongoOperator.SET.value: {FieldsMetadata.results.name: insight[results_field_value]}}
-                    collection_key = LevelIdKeyEnum.get_enum_by_name(level.upper()).value
-                    query_filter = {
-                        collection_key: {MongoOperator.EQUALS.value: insight[collection_key]},
-                        FieldsMetadata.date_start.name: {
-                            MongoOperator.EQUALS.value: insight[FieldsMetadata.date_start.name]
-                        },
+        result_types = []
+        results_field_value = None
+        for adset in adsets:
+            if insight[structure_join_key] == adset[structure_join_key]:
+                results_field_value = get_structure_objective(adset)
+                if results_field_value:
+                    if results_field_value not in result_types:
+                        result_types.append(results_field_value)
+                    if len(result_types) > 1:
+                        break
+        insights_query_filter = {
+            collection_key: {
+                MongoOperator.EQUALS.value: insight[collection_key]
+            },
+            FieldsMetadata.date_start.name: {
+                MongoOperator.EQUALS.value: insight[FieldsMetadata.date_start.name]
+            },
+        }
+        # If there are multiple conversion types, update accordingly
+        if len(result_types) > 1:
+            insights_query = {
+                MongoOperator.SET.value: {
+                    FieldsMetadata.result_type.name: "Multiple conversion types"
+                }
+            }
+            insights_repository.update_one(query_filter=insights_query_filter, query=insights_query)
+            continue
+
+        if results_field_value:
+            insights_query = {
+                MongoOperator.SET.value: {
+                    FieldsMetadata.result_type.name: results_field_value
+                }
+            }
+            if results_field_value in insight:
+                insights_query = {
+                    MongoOperator.SET.value: {
+                        FieldsMetadata.results.name: insight[results_field_value],
+                        FieldsMetadata.result_type.name: results_field_value
                     }
-                    insights_repository.update_one(query_filter=query_filter, query=query)
-                    break
+                }
+
+            insights_repository.update_one(query_filter=insights_query_filter, query=insights_query)
+
+
+def get_structure_objective(structure: typing.Dict) -> str:
+    results_field_value = None
+    if GraphAPIInsightsFields.custom_event_type in structure \
+            and structure[GraphAPIInsightsFields.custom_event_type]:
+        custom_event_type = PixelCustomEventTypeToResult.get_enum_by_name(
+            structure[GraphAPIInsightsFields.custom_event_type]
+        )
+        if custom_event_type:
+            results_field_value = custom_event_type.value.name
+    elif GraphAPIInsightsFields.optimization_goal in structure \
+            and structure[GraphAPIInsightsFields.optimization_goal]:
+        optimization_goal = AdSetOptimizationToResult.get_enum_by_name(
+            structure[GraphAPIInsightsFields.optimization_goal]
+        )
+        if optimization_goal:
+            results_field_value = optimization_goal.value.name
+    return results_field_value
