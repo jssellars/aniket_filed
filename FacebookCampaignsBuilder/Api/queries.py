@@ -73,7 +73,8 @@ class AdCreativeAssetsImages(AdCreativeAssetsBase):
 
 
 class AdCreativeAssetsPagePosts(AdCreativeAssetsBase):
-    __page_posts_minimal_fields = [PagePost.Field.id, PagePost.Field.picture, PagePost.Field.message]
+    __page_posts_minimal_fields = [PagePost.Field.id, PagePost.Field.picture, PagePost.Field.message,
+                                   PagePost.Field.permalink_url, PagePost.Field.call_to_action]
     __page_posts_details_fields = None
 
     def __init__(self, **kwargs):
