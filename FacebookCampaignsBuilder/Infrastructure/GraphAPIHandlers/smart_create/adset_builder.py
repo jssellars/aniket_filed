@@ -22,10 +22,14 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targe
     Targeting,
 )
 
+FACEBOOK_DEFAULT_KEY = "FACEBOOK"
+INSTAGRAM_DEFAULT_KEY = "INSTAGRAM"
+AUDIENCE_NETWORK_DEFAULT_KEY = "AUDIENCE_NETWORK"
+
 DEFAULT_PLACEMENT_POSITIONS = {
-    "FACEBOOK": ["story", "feed"],
-    "INSTAGRAM": ["stream", "story"],
-    "APP_NETWORK": ["classic"],
+    FACEBOOK_DEFAULT_KEY: ["story", "feed"],
+    INSTAGRAM_DEFAULT_KEY: ["stream", "story"],
+    AUDIENCE_NETWORK_DEFAULT_KEY: ["classic"],
 }
 
 DEFAULT_PLACEMENTS = [
@@ -269,15 +273,15 @@ def add_placement_positions(step_two: Dict) -> Tuple[List, List, List, List]:
 
     if "placements" in step_two and step_two["placements"]:
         for placement in step_two["placements"]:
-            if placement["platform_key"] == "FACEBOOK":
+            if placement["platform_key"] == FACEBOOK_DEFAULT_KEY:
                 facebook_positions = DEFAULT_PLACEMENT_POSITIONS[placement["platform_key"]]
                 publisher_platforms.append(Platform.FACEBOOK.value.name_sdk.lower())
 
-            if placement["platform_key"] == "INSTAGRAM":
+            if placement["platform_key"] == INSTAGRAM_DEFAULT_KEY:
                 instragram_positions = DEFAULT_PLACEMENT_POSITIONS[placement["platform_key"]]
                 publisher_platforms.append(Platform.INSTAGRAM.value.name_sdk.lower())
 
-            if placement["platform_key"] == "APP_NETWORK":
+            if placement["platform_key"] == AUDIENCE_NETWORK_DEFAULT_KEY:
                 audience_network_positions = DEFAULT_PLACEMENT_POSITIONS[placement["platform_key"]]
                 publisher_platforms.append(Platform.AUDIENCE_NETWORK.value.name_sdk.lower())
 
