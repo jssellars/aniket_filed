@@ -75,8 +75,8 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
             for device in DevicePlatform.contexts[Contexts.SMART_CREATE].items:
                 campaign = deepcopy(campaign_template)
                 campaign[Campaign.Field.name] = format_campaign_name(
-                    campaign_template[Campaign.Field.name], device.name_sdk.title(),
-                    location["selected_location_string"]
+                    campaign_template[Campaign.Field.name], location["selected_location_string"],
+                    device.name_sdk.title()
                 )
                 campaigns.append(
                     CampaignSplit(
