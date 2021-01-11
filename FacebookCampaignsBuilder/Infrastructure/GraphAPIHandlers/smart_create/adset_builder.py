@@ -172,14 +172,14 @@ def set_split_fields_and_name(
         targeting: Targeting,
         ad_set_element: Dict,
 ):
+    if gender_group:
+        targeting.genders = [gender.value for gender in gender_group.genders]
+        ad_set_element[AdSet.Field.name] += " - " + " - ".join([gender.name for gender in gender_group.genders])
+
     if age_group:
         targeting.age_min = age_group.age_min
         targeting.age_max = age_group.age_max
         ad_set_element[AdSet.Field.name] += f" - {str(age_group.age_min)}-{str(age_group.age_max)}"
-
-    if gender_group:
-        targeting.genders = [gender.value for gender in gender_group.genders]
-        ad_set_element[AdSet.Field.name] += " - " + " - ".join([gender.name for gender in gender_group.genders])
 
     ad_set_element["targeting"] = asdict(targeting)
 
