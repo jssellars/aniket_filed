@@ -65,7 +65,7 @@ class AdCreativeAssetsPagePosts(Resource):
         try:
             query = queries.AdCreativeAssetsPagePosts(business_owner_id=business_owner_facebook_id, )
 
-            return object_to_camelized_dict(query.get(page_facebook_id=page_facebook_id)), 200
+            return query.get(page_facebook_id=page_facebook_id), 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))

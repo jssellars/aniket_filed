@@ -92,7 +92,15 @@ class AdCreativeAssetsPagePosts(AdCreativeAssetsBase):
         try:
             page = Page(fbid=page_facebook_id)
             page_posts_raw = page.get_posts(fields=self.__page_posts_minimal_fields)
-            return [Tools.convert_to_json(entry) for entry in page_posts_raw]
+            result = [Tools.convert_to_json(entry) for entry in page_posts_raw]
+            for entry in result:
+                entry["primary_text"] = entry.pop("message", None)
+                call_to_action = entry.get("call_to_action")
+                if call_to_action:
+                    call_to_action["value"] = call_to_action.pop("type")
+
+            return result
+
         except Exception as e:
             raise e
 
