@@ -9,6 +9,7 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
+from facebook_business.adobjects.adcreative import AdCreative
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
@@ -23,6 +24,7 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderH
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewBuilderHandler import (
     GraphAPIAdPreviewBuilderHandler,
+    FiledAdFormatEnum
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdSetBuilderHandler import (
     GraphAPIAdSetBuilderHandler,
@@ -58,16 +60,36 @@ class AdPreview:
         facebook_config: typing.Any = None,
         permanent_token: typing.AnyStr = None,
     ) -> Optional[str]:
-        ad_builder = GraphAPIAdPreviewBuilderHandler(facebook_config=facebook_config, permanent_token=permanent_token)
-        ad_builder.build_ad_creative(
-            account_id=command.account_id,
-            ad_template=command.ad_template,
-            page_facebook_id=command.page_facebook_id,
-            instagram_facebook_id=command.instagram_facebook_id,
-        )
-        params = {"ad_format": command.ad_format, "creative": ad_builder.ad_creative_details}
-        ad_account = AdAccount(fbid=command.account_id)
-        ad_preview = ad_account.get_generate_previews(params=params)
+        GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
+
+        ad_creative_id = None
+        # Check if website_url key is None, then AdPreview is for Page Post
+        if not command.ad_template["website_url"]:
+            ad_account = AdAccount(fbid=command.account_id)
+            if command.ad_template["ad_format"] == FiledAdFormatEnum.IMAGE.value:
+                ad_creative_id = ad_builder.build_image_ad_creative(dict(facebook_page_id=command.page_facebook_id),
+                                                                    command.ad_template,
+                                                                    ad_account)
+            elif command.ad_template["ad_format"] == FiledAdFormatEnum.VIDEO.value:
+                ad_creative_id = ad_builder.build_video_ad_creative(dict(facebook_page_id=command.page_facebook_id),
+                                                                    command.ad_template,
+                                                                    ad_account)
+
+            creative_details = AdCreative(fbid=ad_creative_id)
+            params = {"ad_format": command.ad_format, "creative": creative_details}
+            ad_preview = ad_account.get_generate_previews(params=params)
+        else:
+            graph_ad_builder = GraphAPIAdPreviewBuilderHandler(facebook_config=facebook_config,
+                                                               permanent_token=permanent_token)
+            graph_ad_builder.build_ad_creative(
+                account_id=command.account_id,
+                ad_template=command.ad_template,
+                page_facebook_id=command.page_facebook_id,
+                instagram_facebook_id=command.instagram_facebook_id,
+            )
+            params = {"ad_format": command.ad_format, "creative": graph_ad_builder.ad_creative_details}
+            ad_account = AdAccount(fbid=command.account_id)
+            ad_preview = ad_account.get_generate_previews(params=params)
 
         if ad_preview:
             return ad_preview[0].export_all_data()["body"].replace('scrolling="yes"', 'scrolling="no"')
@@ -377,7 +399,7 @@ class SmartCreatePublish:
         )
 
         # Build ads
-        ads = ad_builder.build_ads(ad_account_id, step_two, step_three)
+        ads = ad_builder.build_ads(ad_account_id, step_two, step_three, step_one["objective"])
 
         return campaigns, ad_sets, ads
 
