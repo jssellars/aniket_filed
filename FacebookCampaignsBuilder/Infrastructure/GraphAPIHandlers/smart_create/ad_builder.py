@@ -43,11 +43,11 @@ def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict
         return
 
     if ad_creative_type == FiledAdFormatEnum.IMAGE.value:
-        ad_creative_facebook_id = build_image_ad_creative(step_two, step_three["adverts"], ad_account, objective)
+        ad_creative_facebook_id, creative_params = build_image_ad_creative(step_two, step_three["adverts"], ad_account, objective)
     elif ad_creative_type == FiledAdFormatEnum.VIDEO.value:
-        ad_creative_facebook_id = build_video_ad_creative(step_two, step_three["adverts"], ad_account, objective)
+        ad_creative_facebook_id, creative_params = build_video_ad_creative(step_two, step_three["adverts"], ad_account, objective)
     elif ad_creative_type == FiledAdFormatEnum.CAROUSEL.value:
-        ad_creative_facebook_id = build_carousel_ad_creative(step_two, step_three["adverts"], ad_account)
+        ad_creative_facebook_id, creative_params = build_carousel_ad_creative(step_two, step_three["adverts"], ad_account)
 
     return ad_creative_facebook_id
 
@@ -73,7 +73,7 @@ def build_image_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount
     }
 
     ad_creative = ad_account.create_ad_creative(params=creative_params)
-    return ad_creative.get_id()
+    return ad_creative.get_id(), creative_params.keys()
 
 
 def build_video_ad_creative(
@@ -122,7 +122,7 @@ def build_video_ad_creative(
 
     ad_creative = ad_account.create_ad_creative(params=creative_params)
 
-    return ad_creative.get_id()
+    return ad_creative.get_id(), creative_params.keys()
 
 
 def build_creative_params(ad_video_facebook_id: str,
@@ -141,10 +141,8 @@ def build_creative_params(ad_video_facebook_id: str,
     if {"website_url", "display_link"} <= set(adverts):
         if not adverts["website_url"] and not adverts["display_link"]:
             # If objective is not part of the request, then this is called for generating Ad Preview
-            if not objective:
+            if not objective or objective == OptimizationGoal.PAGE_LIKES.name:
                 object_story_spec["video_data"]["call_to_action"]["type"] = CallToActionType.LIKE_PAGE.name
-                creative_params[AdCreative.Field.link_url] = f"https://www.facebook.com/{step_two['facebook_page_id']}"
-            elif objective == OptimizationGoal.PAGE_LIKES.name:
                 creative_params[AdCreative.Field.link_url] = f"https://www.facebook.com/{step_two['facebook_page_id']}"
         else:
             creative_params[AdCreative.Field.link_url] = adverts.get("display_link")
@@ -176,7 +174,7 @@ def build_carousel_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAcco
 
     ad_creative = ad_account.create_ad_creative(params=creative_params)
 
-    return ad_creative.get_id()
+    return ad_creative.get_id(), creative_params.keys()
 
 
 def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id: str, objective: str = None):
@@ -196,11 +194,9 @@ def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id
     if "website_url" in adverts:
         if not adverts["website_url"]:
             # If objective is not part of the request, then this is called for generating Ad Preview
-            if not objective:
+            if not objective or objective == OptimizationGoal.PAGE_LIKES.name:
                 ad_creative_data[AdCreativeLinkData.Field.link] = f"https://www.facebook.com/{facebook_page_id}"
-                call_to_action["type"] = CallToActionType.LIKE_PAGE.name
-            elif objective == OptimizationGoal.PAGE_LIKES.name:
-                ad_creative_data[AdCreativeLinkData.Field.link] = f"https://www.facebook.com/{facebook_page_id}"
+                call_to_action = {"type": CallToActionType.LIKE_PAGE.name}
         else:
             ad_creative_data[AdCreativeLinkData.Field.link] = adverts.get("website_url")
     else:

@@ -63,21 +63,23 @@ class AdPreview:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
         ad_creative_id = None
+        creative_params = []
         # Check if website_url key is None, then AdPreview is for Page Post
         if not command.ad_template["website_url"]:
             ad_account = AdAccount(fbid=command.account_id)
             if command.ad_template["ad_format"] == FiledAdFormatEnum.IMAGE.value:
-                ad_creative_id = ad_builder.build_image_ad_creative(dict(facebook_page_id=command.page_facebook_id),
+                ad_creative_id, creative_params = ad_builder.build_image_ad_creative(dict(facebook_page_id=command.page_facebook_id),
                                                                     command.ad_template,
                                                                     ad_account)
             elif command.ad_template["ad_format"] == FiledAdFormatEnum.VIDEO.value:
-                ad_creative_id = ad_builder.build_video_ad_creative(dict(facebook_page_id=command.page_facebook_id),
+                ad_creative_id, creative_params = ad_builder.build_video_ad_creative(dict(facebook_page_id=command.page_facebook_id),
                                                                     command.ad_template,
                                                                     ad_account)
 
             creative_details = AdCreative(fbid=ad_creative_id)
-            params = {"ad_format": command.ad_format, "creative": creative_details}
+            params = {"ad_format": command.ad_format, "creative": creative_details.api_get(fields=creative_params)}
             ad_preview = ad_account.get_generate_previews(params=params)
+
         else:
             graph_ad_builder = GraphAPIAdPreviewBuilderHandler(facebook_config=facebook_config,
                                                                permanent_token=permanent_token)
