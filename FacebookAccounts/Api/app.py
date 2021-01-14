@@ -29,7 +29,7 @@ router_route_pairs = (
     (routers.AdAccountInsights, "facebook-accounts-insights"),
     (routers.AdAccountPages, "pages/<string:account_id>"),
     (routers.AdAccountInstagram, "instagram-accounts/<string:account_id>"),
-    (routers.AdAccountPageInstagram, "instagram-business-account/<string:page_id>"),
+    (routers.AdAccountPageInstagram, "page-instagram-account/<string:page_id>"),
     (routers.AdAccountsAgGridView, "accounts-ag-grid-view"),
     (routers.AdAccountAgGridInsights, "accounts-ag-grid-insights"),
 )

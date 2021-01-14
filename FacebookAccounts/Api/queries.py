@@ -1,10 +1,12 @@
 import typing
 
+from facebook_business.adobjects.page import Page
+
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookAccounts.Api.startup import config, fixtures
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountInstagramHandler import \
     GraphAPIAdAccountInstagramHandler
-from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountPageInstagramHandler import \
-    GraphAPIAdAccountPageInstagramHandler
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountPagesHandler import GraphAPIAdAccountPagesHandler
 
 
@@ -23,11 +25,13 @@ class AdAccountPageInstagramQuery:
 
     @classmethod
     def handle(cls, business_owner_id: typing.AnyStr, page_id: typing.AnyStr) -> typing.List[typing.Dict]:
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+        permanent_token = fixtures.business_owner_repository.get_permanent_token_by_page_id(business_owner_id, page_id)
 
-        response = GraphAPIAdAccountPageInstagramHandler.handle(permanent_token, page_id, config)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
+        page = Page(page_id)
+        response = page.get_instagram_accounts(fields=["username"])
 
-        return response
+        return [Tools.convert_to_json(data) for data in response]
 
 
 class AdAccountPagesQuery:
