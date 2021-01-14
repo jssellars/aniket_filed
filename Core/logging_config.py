@@ -151,7 +151,7 @@ def init(config: Model):
     root_logger.addHandler(stream_handler)
 
     root_dir = os.environ.get("LOG_NETWORK_MOUNT_PATH")
-    service_path = Path(root_dir if root_dir else "logs") / "py" / config.name.full
+    service_path = Path(root_dir if root_dir else "logs")
     service_path.mkdir(parents=True, exist_ok=True)
 
     app_handler = get_timed_rotating_file_handler(str(service_path / "app"))
