@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from typing import ClassVar, Dict, List, Optional
 
 from bson import BSON
+from facebook_business.adobjects.targetingsearch import TargetingSearch
+
 from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
@@ -28,6 +30,7 @@ from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoReposito
 logger = logging.getLogger(__name__)
 
 INVALID_AUDIENCE_SIZE = -1
+HIDDEN_INTERESTS_LIMIT = 500
 
 
 def get_audience_size_priority(variance: float) -> int:
@@ -99,11 +102,15 @@ class AudienceSizeStrategy(DexterStrategyBase):
 
                 structure_details = dict(BSON.decode(structure["details"]))
 
+                targeting = structure_details["targeting"]
+                optimization_goal = structure_details["optimization_goal"]
+                promoted_object = structure_details["promoted_object"]
+
                 audience_size = get_audience_size(
                     account_id,
-                    structure_details["targeting"],
-                    structure_details["optimization_goal"],
-                    structure_details["promoted_object"],
+                    targeting,
+                    optimization_goal,
+                    promoted_object,
                 )
 
                 if audience_size is None:
@@ -111,6 +118,9 @@ class AudienceSizeStrategy(DexterStrategyBase):
 
                 variance = self.variance(audience_size, reach, None)
                 if variance >= trigger_metric.trigger.variance_percentage:
+
+                    hidden_interests = get_hidden_interests(targeting)
+
                     dexter_recommendation = trigger_metric.cause_metrics[0].output
 
                     if dexter_recommendation:
@@ -133,6 +143,7 @@ class AudienceSizeStrategy(DexterStrategyBase):
                             {"display_name": breakdown.name.replace("_", " ").title(), "name": breakdown.name},
                             algorithm_type=self.ALGORITHM,
                             debug_msg=f"Audience size - {audience_size} and total reach {reach}",
+                            hidden_interests=", ".join(hidden_interests)
                         )
 
                         dexter_recommendation.process_output(
@@ -159,3 +170,27 @@ def get_audience_size(
         response = Tools.convert_to_json(response[0])
         response = response.get("estimate_mau", None)
         return response if response != INVALID_AUDIENCE_SIZE else None
+
+
+def get_hidden_interests(targeting: Dict) -> List[str]:
+    if not targeting or targeting.get("custom_audiences"):
+        return []
+
+    flexible_spec = targeting.get("flexible_spec", [])
+    targeting_interests = []
+
+    targeting_interests.extend([interest["name"] for spec in flexible_spec for interest in spec.get("interests", [])])
+    targeting_interests.extend([interest["name"] for interest in targeting.get("interests", [])])
+
+    params = {
+        'interest_list': targeting_interests,
+        'type': TargetingSearch.TargetingSearchTypes.interest_suggestion,
+        'limit': HIDDEN_INTERESTS_LIMIT
+    }
+
+    results = TargetingSearch.search(params=params)
+    results = [Tools.convert_to_json(result) for result in results]
+
+    results = sorted(results, key=lambda i: i['audience_size'], reverse=True)[:3]
+
+    return [entry["name"] for entry in results if entry["name"] not in targeting_interests]

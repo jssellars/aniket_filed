@@ -74,4 +74,4 @@ class RecommendationEntryModel:
     algorithm_type: Optional[str] = None
     debug_msg: Optional[str] = None
     breakdown_group: Optional[str] = None
-
+    hidden_interests: Optional[str] = None

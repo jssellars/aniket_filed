@@ -2,9 +2,9 @@ from enum import Enum
 
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import (
     RecommendationPriority,
-    InfoRecommendationTemplate,
 )
 
+HIDDEN_INTERESTS_MESSAGE = "We suggest duplicating a new adset and targeting these new interests: {hidden_interests}"
 
 class BreakdownRecommendationTemplate(Enum):
     AGE_GENDER_BREAKDOWN = (
@@ -32,12 +32,11 @@ class BreakdownRecommendationTemplate(Enum):
 
 class AudienceRecommendationTemplate(Enum):
     AUDIENCE_EXHAUSTED = (
-        (
-            "You’ve reached {trigger_variance:.2f}% of your estimated audience size. Duplicate your audience now and"
-            " target this recommended audience [audience]."
-        ),
+        ("You’ve reached {trigger_variance:.2f}% of your estimated audience size. "),
         RecommendationPriority.MEDIUM,
         "New Interest Targeting ",
         "Your reach is high",
         "Dexter suggests creating new audiences because your reach has targeted 75% of the estimated audience size. ",
     )
+
+

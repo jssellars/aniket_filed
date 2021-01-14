@@ -39,6 +39,7 @@ class RecommendationField(Enum):
     QUOTE = "quote"
     ANALYSIS = "analysis"
     BREAKDOWN_GROUP = "breakdown_group"
+    HIDDEN_INTERESTS = "hidden_interests"
 
 
 class RecommendationFieldInsidersEnum(Enum):
