@@ -24,7 +24,7 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderH
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewBuilderHandler import (
     GraphAPIAdPreviewBuilderHandler,
-    FiledAdFormatEnum
+    FiledAdFormatEnum,
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdSetBuilderHandler import (
     GraphAPIAdSetBuilderHandler,
@@ -39,7 +39,7 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.struc
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
     Location,
     FlexibleTargeting,
-    Targeting
+    Targeting,
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIRequests.GraphAPIRequestAudienceSize import (
     GraphAPIRequestAudienceSize,
@@ -62,27 +62,30 @@ class AdPreview:
     ) -> Optional[str]:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
-        ad_creative_id = None
-        creative_params = []
+        ad_creative = None
         # Check if website_url key is None, then AdPreview is for Page Post
         if not command.ad_template["website_url"]:
             ad_account = AdAccount(fbid=command.account_id)
             if command.ad_template["ad_format"] == FiledAdFormatEnum.IMAGE.value:
-                ad_creative_id, creative_params = ad_builder.build_image_ad_creative(dict(facebook_page_id=command.page_facebook_id),
-                                                                    command.ad_template,
-                                                                    ad_account)
+                ad_creative = ad_builder.build_image_ad_creative(
+                    dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
+                )
             elif command.ad_template["ad_format"] == FiledAdFormatEnum.VIDEO.value:
-                ad_creative_id, creative_params = ad_builder.build_video_ad_creative(dict(facebook_page_id=command.page_facebook_id),
-                                                                    command.ad_template,
-                                                                    ad_account)
+                ad_creative = ad_builder.build_video_ad_creative(
+                    dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
+                )
+            elif command.ad_template["ad_format"] == FiledAdFormatEnum.CAROUSEL.value:
+                ad_creative = ad_builder.build_carousel_ad_creative(
+                    dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
+                )
 
-            creative_details = AdCreative(fbid=ad_creative_id)
-            params = {"ad_format": command.ad_format, "creative": creative_details.api_get(fields=creative_params)}
+            params = {"ad_format": command.ad_format, "creative": ad_creative}
             ad_preview = ad_account.get_generate_previews(params=params)
 
         else:
-            graph_ad_builder = GraphAPIAdPreviewBuilderHandler(facebook_config=facebook_config,
-                                                               permanent_token=permanent_token)
+            graph_ad_builder = GraphAPIAdPreviewBuilderHandler(
+                facebook_config=facebook_config, permanent_token=permanent_token
+            )
             graph_ad_builder.build_ad_creative(
                 account_id=command.account_id,
                 ad_template=command.ad_template,
@@ -315,9 +318,7 @@ class SmartCreatePublish:
 
         step_two = request["step_two_details"]
         step_four = request["step_four_details"]
-        is_adset_using_cbo = (
-            "budget_optimization" in step_two and step_two["budget_optimization"] is not None
-        )
+        is_adset_using_cbo = "budget_optimization" in step_two and step_two["budget_optimization"] is not None
         is_adset_budget_split = step_four.get("is_split_by_budget")
 
         for campaign_index, campaign in enumerate(campaigns):
@@ -460,10 +461,10 @@ class SmartCreatePublish:
 class AddStructuresToParent:
     @staticmethod
     def publish_structures_to_parent(
-            level: str,
-            request: Dict = None,
-            permanent_token: str = None,
-            facebook_config: Any = None,
+        level: str,
+        request: Dict = None,
+        permanent_token: str = None,
+        facebook_config: Any = None,
     ):
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 

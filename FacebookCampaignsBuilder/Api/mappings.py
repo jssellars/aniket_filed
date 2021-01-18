@@ -18,6 +18,7 @@ class AdPreviewCommand(MapperBase):
             page_facebook_id=data.get("page_id"),
             instagram_facebook_id=data.get("instagram_id"),
             ad_template=data.get("advert"),
+            objective=data.get("objective")
         )
         if mapped_data["ad_template"]:
             mapped_data["ad_format"] = mapped_data["ad_template"]["device_placement_position"]["facebook_key"]
