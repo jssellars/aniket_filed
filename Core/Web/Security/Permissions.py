@@ -59,10 +59,6 @@ class BackOfficePermissions(Flag):
     BILLING_AND_PAYMENT_DOWNLOAD_INVOICE = auto()
     BILLING_AND_PAYMENT_VIEW = auto()
 
-    CLIENTS_CREATE = auto()
-    CLIENTS_EDIT = auto()
-    CLIENTS_VIEW = auto()
-
     OFFERS_CREATE = auto()
     OFFERS_EDIT = auto()
     OFFERS_DELETE = auto()
@@ -114,11 +110,11 @@ class MiscellaneousPermissions(Flag):
 
     IS_BUSINESS_OWNER = auto()
     IS_CLIENT_EMPLOYEE = auto()
+    IS_FREEMIUM = auto()
 
-    FLAG_BIT_2 = auto()
     FLAG_BIT_3 = auto()
-    FLAG_BIT_4 = auto()
 
+    IS_ACCOUNT_MANAGER_ADMIN = auto()
     IS_ACCOUNT_MANAGER = auto()
     IS_SALES = auto()
     IS_SALES_ADMIN = auto()
@@ -126,9 +122,9 @@ class MiscellaneousPermissions(Flag):
 
     MISCELLANEOUS_FILED_SMART_TABLE_ACCESS = auto()
     MISCELLANEOUS_FILED_SMART_TABLE_EXPORT = auto()
-    MISCELLANEOUS_FACEBOOK_ACCESS = auto()
-    MISCELLANEOUS_GOOGLE_ACCESS = auto()
-    MISCELLANEOUS_SHOPIFY_ACCESS = auto()
+    MISCELLANEOUS_CONNECT_TO_FACEBOOK = auto()
+    MISCELLANEOUS_CONNECT_TO_GOOGLE = auto()
+    MISCELLANEOUS_CONNECT_TO_SHOPIFY = auto()
 
     @property
     def module(self):
@@ -222,19 +218,15 @@ class ReportsPermissions(Flag):
 
 class SettingsPermissions(Flag):
     SETTINGS_BILLING_AND_PAYMENT_VIEW = auto()
-
     SETTINGS_CHANGE_PASSWORD_VIEW = auto()
-
     SETTINGS_MANAGE_PERMISSIONS_VIEW = auto()
     SETTINGS_MANAGE_PERMISSIONS_EDIT = auto()
-
     SETTINGS_MY_ACCOUNT_VIEW = auto()
     SETTINGS_MY_ACCOUNT_EDIT = auto()
-
     SETTINGS_MY_SUBSCRIPTION_VIEW = auto()
-
     SETTINGS_USER_MANAGEMENT_FULL = auto()
     SETTINGS_USER_MANAGEMENT_VIEW = auto()
+    SETTINGS_USER_MANAGEMENT_EDIT = auto()
 
     @property
     def module(self):

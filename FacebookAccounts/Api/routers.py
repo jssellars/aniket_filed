@@ -162,7 +162,7 @@ class AdAccountAgGridInsights(Resource):
 
 
 class BusinessOwner(Resource):
-    @fixtures.authorize_permission(permission=MiscellaneousPermissions.MISCELLANEOUS_FACEBOOK_ACCESS)
+    @fixtures.authorize_permission(permission=MiscellaneousPermissions.MISCELLANEOUS_CONNECT_TO_FACEBOOK)
     def post(self):
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
