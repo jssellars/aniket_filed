@@ -48,6 +48,8 @@ def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict
         ad_creative = build_video_ad_creative(step_two, step_three["adverts"], ad_account, objective)
     elif ad_creative_type == FiledAdFormatEnum.CAROUSEL.value:
         ad_creative = build_carousel_ad_creative(step_two, step_three["adverts"], ad_account, objective)
+    elif ad_creative_type == FiledAdFormatEnum.EXISTING_POST.value:
+        ad_creative = build_existing_ad_creative(ad_account, step_three["adverts"]["post_id"])
 
     ad_creative_facebook_id = ad_creative.get_id()
     return ad_creative_facebook_id
@@ -73,8 +75,7 @@ def build_image_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount
         AdCreative.Field.link_url: adverts.get("display_link", adverts.get("deep_link", None)),
     }
 
-    ad_creative = ad_account.create_ad_creative(params=creative_params, fields=creative_params.keys())
-    return ad_creative
+    return build_ad_creative(ad_account, creative_params)
 
 
 def build_video_ad_creative(
@@ -95,7 +96,7 @@ def build_video_ad_creative(
                                             ad_account,
                                             step_two,
                                             objective)
-    ad_creative = ad_account.create_ad_creative(params=creative_params, fields=creative_params.keys())
+    ad_creative = build_ad_creative(ad_account, creative_params)
     remove_image_url(ad_creative, step_two)
     return ad_creative
 
@@ -203,9 +204,17 @@ def build_carousel_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAcco
         AdCreative.Field.link_url: adverts.get("display_link", adverts.get("deep_link", None)),
     }
 
-    ad_creative = ad_account.create_ad_creative(params=creative_params, fields=creative_params.keys())
+    return build_ad_creative(ad_account, creative_params)
 
-    return ad_creative
+
+def build_existing_ad_creative(ad_account: AdAccount, post_id: str):
+    creative_params = {"object_story_id": post_id}
+
+    return build_ad_creative(ad_account, creative_params)
+
+
+def build_ad_creative(ad_account, creative_params):
+    return ad_account.create_ad_creative(params=creative_params, fields=creative_params.keys())
 
 
 def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id: str, objective: str = None):

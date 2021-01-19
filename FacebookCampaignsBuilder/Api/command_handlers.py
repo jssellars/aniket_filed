@@ -63,38 +63,26 @@ class AdPreview:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
         ad_creative = None
-        # Check if website_url key is None, then AdPreview is for Page Post
-        if not command.ad_template["website_url"]:
-            ad_account = AdAccount(fbid=command.account_id)
-            if command.ad_template["ad_format"] == FiledAdFormatEnum.IMAGE.value:
-                ad_creative = ad_builder.build_image_ad_creative(
-                    dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
-                )
-            elif command.ad_template["ad_format"] == FiledAdFormatEnum.VIDEO.value:
-                ad_creative = ad_builder.build_video_ad_creative(
-                    dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
-                )
-            elif command.ad_template["ad_format"] == FiledAdFormatEnum.CAROUSEL.value:
-                ad_creative = ad_builder.build_carousel_ad_creative(
-                    dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
-                )
-
-            params = {"ad_format": command.ad_format, "creative": ad_creative}
-            ad_preview = ad_account.get_generate_previews(params=params)
-
-        else:
-            graph_ad_builder = GraphAPIAdPreviewBuilderHandler(
-                facebook_config=facebook_config, permanent_token=permanent_token
+        ad_account = AdAccount(fbid=command.account_id)
+        if command.ad_template["ad_format"] == FiledAdFormatEnum.IMAGE.value:
+            ad_creative = ad_builder.build_image_ad_creative(
+                dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
             )
-            graph_ad_builder.build_ad_creative(
-                account_id=command.account_id,
-                ad_template=command.ad_template,
-                page_facebook_id=command.page_facebook_id,
-                instagram_facebook_id=command.instagram_facebook_id,
+        elif command.ad_template["ad_format"] == FiledAdFormatEnum.VIDEO.value:
+            ad_creative = ad_builder.build_video_ad_creative(
+                dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
             )
-            params = {"ad_format": command.ad_format, "creative": graph_ad_builder.ad_creative_details}
-            ad_account = AdAccount(fbid=command.account_id)
-            ad_preview = ad_account.get_generate_previews(params=params)
+        elif command.ad_template["ad_format"] == FiledAdFormatEnum.CAROUSEL.value:
+            ad_creative = ad_builder.build_carousel_ad_creative(
+                dict(facebook_page_id=command.page_facebook_id), command.ad_template, ad_account, command.objective
+            )
+        elif command.ad_template["ad_format"] == FiledAdFormatEnum.EXISTING_POST.value:
+            ad_creative = ad_builder.build_existing_ad_creative(
+                ad_account, command.ad_template["post_id"]
+            )
+
+        params = {"ad_format": command.ad_format, "creative": ad_creative}
+        ad_preview = ad_account.get_generate_previews(params=params)
 
         if ad_preview:
             return ad_preview[0].export_all_data()["body"].replace('scrolling="yes"', 'scrolling="no"')
