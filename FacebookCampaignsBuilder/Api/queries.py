@@ -73,8 +73,13 @@ class AdCreativeAssetsImages(AdCreativeAssetsBase):
 
 
 class AdCreativeAssetsPagePosts(AdCreativeAssetsBase):
-    __page_posts_minimal_fields = [PagePost.Field.id, PagePost.Field.picture, PagePost.Field.message,
-                                   PagePost.Field.permalink_url, PagePost.Field.call_to_action]
+    __page_posts_minimal_fields = [
+        PagePost.Field.id,
+        PagePost.Field.picture,
+        PagePost.Field.message,
+        PagePost.Field.permalink_url,
+        PagePost.Field.call_to_action,
+    ]
     __page_posts_details_fields = None
 
     def __init__(self, **kwargs):
@@ -118,25 +123,30 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
         AdVideo.Field.title,
         AdVideo.Field.permalink_url,
         AdVideo.Field.picture,
+        AdVideo.Field.is_instagram_eligible,
     ]
     __base_permalink_url = "https://facebook.com"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self, ad_account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def get(self, ad_account_id: typing.AnyStr = None, is_instagram_eligible: bool = False) -> typing.List[typing.Dict]:
         try:
             ad_account = AdAccount(fbid=ad_account_id)
             ad_account_videos_raw = ad_account.get_ad_videos(fields=self.__ad_videos_minimal_fields)
             ad_account_videos = [Tools.convert_to_json(entry) for entry in ad_account_videos_raw]
             for index, ad_video in enumerate(ad_account_videos):
                 ad_account_videos[index]["permalink_url"] = (
-                        self.__base_permalink_url + ad_account_videos[index]["permalink_url"]
+                    self.__base_permalink_url + ad_account_videos[index]["permalink_url"]
                 )
         except Exception as e:
             raise e
 
-        return ad_account_videos
+        return (
+            ad_account_videos
+            if not is_instagram_eligible
+            else [video for video in ad_account_videos if video["is_instagram_eligible"]]
+        )
 
 
 class BudgetValidation:

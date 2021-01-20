@@ -1,5 +1,6 @@
 import logging
 import typing
+from distutils.util import strtobool
 
 import flask_restful
 import humps
@@ -49,9 +50,12 @@ class AdCreativeAssetsVideos(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, business_owner_facebook_id: typing.AnyStr = None, ad_account_id: typing.AnyStr = None):
         try:
-            query = queries.AdCreativeAssetsVideos(business_owner_id=business_owner_facebook_id, )
+            is_instagram_eligible = bool(strtobool(request.args.get("instagramEligible")))
+            query = queries.AdCreativeAssetsVideos(business_owner_id=business_owner_facebook_id)
 
-            return object_to_camelized_dict(query.get(ad_account_id=ad_account_id)), 200
+            return object_to_camelized_dict(
+                query.get(ad_account_id=ad_account_id,
+                          is_instagram_eligible=is_instagram_eligible)), 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
