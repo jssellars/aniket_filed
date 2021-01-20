@@ -900,13 +900,15 @@ OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL = {
     ObjectiveWithDestination.CONVERSIONS_X_UNDEFINED: [
         # first is default
         OptimizationGoal.OFFSITE_CONVERSIONS,
-        OptimizationGoal.IMPRESSIONS,
-        OptimizationGoal.POST_ENGAGEMENT,
-        OptimizationGoal.REACH,
-        OptimizationGoal.SOCIAL_IMPRESSIONS,
         OptimizationGoal.VALUE,
         OptimizationGoal.LANDING_PAGE_VIEWS,
         OptimizationGoal.LINK_CLICKS,
+        OptimizationGoal.REACH,
+        OptimizationGoal.IMPRESSIONS,
+        # These are commented out, since as of 20/01/2021
+        # FB platform only has the above Optimization Goals for this Objective
+        # OptimizationGoal.POST_ENGAGEMENT,
+        # OptimizationGoal.SOCIAL_IMPRESSIONS,
     ],
     # ObjectivePromotionTarget.EVENT
     ObjectiveWithDestination.EVENT_RESPONSES_X_UNDEFINED: [
@@ -963,9 +965,11 @@ OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL = {
     ObjectiveWithDestination.PAGE_LIKES_X_UNDEFINED: [
         # first is default
         OptimizationGoal.PAGE_LIKES,
-        OptimizationGoal.IMPRESSIONS,
-        OptimizationGoal.POST_ENGAGEMENT,
-        OptimizationGoal.REACH,
+        # These are commented out, since as of 20/01/2021
+        # FB platform only has Page Likes as Optimization Goal for this Objective
+        # OptimizationGoal.IMPRESSIONS,
+        # OptimizationGoal.POST_ENGAGEMENT,
+        # OptimizationGoal.REACH,
     ],
     ObjectiveWithDestination.POST_ENGAGEMENT_X_UNDEFINED: [
         # first is default
@@ -979,7 +983,6 @@ OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL = {
         OptimizationGoal.OFFSITE_CONVERSIONS,
         OptimizationGoal.IMPRESSIONS,
         OptimizationGoal.POST_ENGAGEMENT,
-        OptimizationGoal.OFFSITE_CONVERSIONS,
         OptimizationGoal.REACH,
         OptimizationGoal.LINK_CLICKS,
     ],
