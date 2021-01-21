@@ -50,7 +50,7 @@ class AdCreativeAssetsVideos(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, business_owner_facebook_id: typing.AnyStr = None, ad_account_id: typing.AnyStr = None):
         try:
-            is_instagram_eligible = bool(strtobool(request.args.get("instagramEligible")))
+            is_instagram_eligible = bool(strtobool(request.args.get("instagramEligible", "False")))
             query = queries.AdCreativeAssetsVideos(business_owner_id=business_owner_facebook_id)
 
             return object_to_camelized_dict(
