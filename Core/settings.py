@@ -37,7 +37,7 @@ class Default:
         client_id="17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
         client_secret="bk0Gae3BgAkbbf63GD5kU4jq",
     )
-    technical_user = TechnicalUser(email="technical_account@{domain}", password="Adm1n@Fil3ed")
+    technical_user = TechnicalUser(email="technical_account@{domain}", password="Fil3ed-Adm1n")
 
     sql_server = SqlServer(
         host="ng-dev-sql.{domain}",
