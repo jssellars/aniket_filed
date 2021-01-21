@@ -372,9 +372,7 @@ class AdsManager(Resource):
             if response is None:
                 return {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}, 400
 
-            # TODO: this will be returned once FE finishes their side as well to avoid crashes
-
-            return None, 200
+            return response, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
