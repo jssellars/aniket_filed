@@ -18,6 +18,7 @@ accounts_ag_grid_view = AgGridAccountsView(
         ACCOUNT_COLUMNS_DEFINITION[AgGridMasterView.ACCOUNTS_NAME],
         ACCOUNT_COLUMNS_DEFINITION[AgGridMasterView.ACCOUNT_STATUS],
         ACCOUNT_COLUMNS_DEFINITION[AgGridMasterView.BUSINESS_ID],
+        ACCOUNT_COLUMNS_DEFINITION[AgGridMasterView.BUSINESS_MANAGER],
         ACCOUNT_COLUMNS_DEFINITION[AgGridMasterView.CURRENCY],
     ],
     account_insight_columns=[

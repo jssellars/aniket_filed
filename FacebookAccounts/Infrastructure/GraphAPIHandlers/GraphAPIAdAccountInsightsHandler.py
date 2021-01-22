@@ -259,12 +259,14 @@ def map_response(response: List[Any] = None) -> typing.List[Dict]:
         for column in accounts_ag_grid_view.account_structure_columns:
             try:
                 # Business id is nested inside of a dict even if it is an account structure info...
-                if (
-                    column.primary_value.name == FieldsMetadata.business_id.name
-                    and GraphAPIInsightsFields.business in entry
-                ):
-                    entry_result.update({column.primary_value.name: entry["business"]["id"]})
-                    continue
+                if GraphAPIInsightsFields.business in entry:
+                    if column.primary_value.name == FieldsMetadata.business_id.name:
+                        entry_result.update({column.primary_value.name: entry["business"]["id"]})
+                        continue
+
+                    elif column.primary_value.name == FieldsMetadata.business_manager.name:
+                        entry_result.update({column.primary_value.name: entry["business"]["name"]})
+                        continue
 
                 mapped_entry = column.primary_value.mapper.map(entry, column.primary_value)[0]
                 if FieldsMetadata.account_status.name in mapped_entry:

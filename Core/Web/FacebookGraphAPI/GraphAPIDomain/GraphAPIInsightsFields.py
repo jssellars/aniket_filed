@@ -178,8 +178,7 @@ class GraphAPIInsightsFields:
     # ====== STRUCTURE ====== #
     name = 'name'
     account_status = 'account_status'
-    business = 'business'
-    business_id = 'business{id}'
+    business = business_manager = business_id = 'business'
     currency = 'currency'
     campaign_name_structure = 'campaign{name}'
     adset_name_structure = 'adset{name}'

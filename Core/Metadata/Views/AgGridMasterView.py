@@ -7,6 +7,7 @@ ACCOUNTS_NAME = "account_name"
 ACCOUNT_STATUS = "account_status"
 CURRENCY = "currency"
 BUSINESS_ID = "business_id"
+BUSINESS_MANAGER = "business_manager"
 AMOUNT_SPENT = "amount_spent"
 CPC = "cpc"
 CPM = "cpm"
@@ -25,12 +26,12 @@ ACCOUNT_COLUMNS_DEFINITION = {
         is_hidden=True,
     ),
     ACCOUNTS_NAME: ViewColumn(
-        display_name="Account name",
+        display_name="Account Name",
         primary_value=FieldsMetadata.name,
         type_id=ViewColumnType.TEXT.value,
     ),
     ACCOUNT_STATUS: ViewColumn(
-        display_name="Status",
+        display_name="Account Status",
         primary_value=FieldsMetadata.account_status,
         type_id=ViewColumnType.TEXT.value,
     ),
@@ -44,14 +45,19 @@ ACCOUNT_COLUMNS_DEFINITION = {
         primary_value=FieldsMetadata.business_id,
         type_id=ViewColumnType.TEXT.value,
     ),
+    BUSINESS_MANAGER: ViewColumn(
+        display_name="Business Manager",
+        primary_value=FieldsMetadata.business_manager,
+        type_id=ViewColumnType.TEXT.value,
+    ),
     AMOUNT_SPENT: ViewColumn(
-        display_name="Amount spent",
+        display_name="Total Spend",
         primary_value=FieldsMetadata.amount_spent,
         type_id=ViewColumnType.CURRENCY.value,
         no_of_decimals=2,
     ),
     CPC: ViewColumn(
-        display_name="CPC (All)",
+        display_name="CPC",
         primary_value=FieldsMetadata.cpc_all,
         type_id=ViewColumnType.CURRENCY.value,
         no_of_decimals=2,
@@ -69,7 +75,7 @@ ACCOUNT_COLUMNS_DEFINITION = {
         no_of_decimals=2,
     ),
     CTR: ViewColumn(
-        display_name="Unique link click-through rate",
+        display_name="CTR",
         primary_value=FieldsMetadata.ctr_all,
         type_id=ViewColumnType.PERCENTAGE.value,
         no_of_decimals=2,
@@ -81,12 +87,12 @@ ACCOUNT_COLUMNS_DEFINITION = {
         no_of_decimals=2,
     ),
     IMPRESSIONS: ViewColumn(
-        display_name="Unique link click-through rate",
+        display_name="Impressions",
         primary_value=FieldsMetadata.impressions,
         type_id=ViewColumnType.NUMBER.value,
     ),
     UNIQUE_CLICKS_ALL: ViewColumn(
-        display_name="Unique clicks (All)",
+        display_name="Unique Clicks",
         primary_value=FieldsMetadata.unique_clicks_all,
         type_id=ViewColumnType.NUMBER.value,
     ),

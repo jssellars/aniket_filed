@@ -84,6 +84,12 @@ class FieldsMetricStructureMetadata:
                         field_type=FieldType.STRUCTURE,
                         data_type_id=FieldDataTypeEnum.TEXT.value,
                         aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    business_manager = Field(name="business_manager",
+                             facebook_fields=[GraphAPIInsightsFields.business_manager],
+                             mapper=OneToOneFieldMapper(),
+                             field_type=FieldType.STRUCTURE,
+                             data_type_id=FieldDataTypeEnum.TEXT.value,
+                             aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
     currency = Field(name="currency",
                      facebook_fields=[GraphAPIInsightsFields.currency],
                      mapper=OneToOneFieldMapper(),
