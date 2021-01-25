@@ -107,6 +107,7 @@ def remove_image_url(ad_creative, step_two):
     video_data.pop("image_url")
     object_story_spec_data = {
         AdCreativeObjectStorySpec.Field.page_id: step_two["facebook_page_id"],
+        AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two["instagram_page_id"],
         AdCreativeObjectStorySpec.Field.video_data: video_data,
     }
     object_story_spec = build_object_story_spec(object_story_spec_data)
