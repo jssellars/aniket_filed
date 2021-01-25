@@ -259,12 +259,12 @@ class AdsManagerInsightsCommandHandler:
         positive_effect_trend_direction = requested_columns[0].positive_effect_trend_direction
 
         # TODO think of a way to redefine the contract and make some fields optional
-        if not result or not result[0] or required_metric not in result[0]:
+        if not result or not result[0] or not result[0].get(required_metric):
             return {required_metric: None, PERCENTAGE_DIFFERENCE_KEY: None, TREND_KEY: Trend.UNDEFINED.name}
 
         metric_result = result[0][required_metric]
 
-        if not past_period_result or not past_period_result[0] or required_metric not in past_period_result[0]:
+        if not past_period_result or not past_period_result[0] or not past_period_result[0].get(required_metric):
             return {required_metric: metric_result, PERCENTAGE_DIFFERENCE_KEY: None, TREND_KEY: Trend.UNDEFINED.name}
 
         previous_period_metric_result = past_period_result[0][required_metric]
