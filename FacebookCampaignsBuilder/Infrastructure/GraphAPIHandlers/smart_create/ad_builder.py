@@ -9,6 +9,7 @@ from facebook_business.adobjects.adcreativelinkdatachildattachment import (
     AdCreativeLinkDataChildAttachment as AdCreativeLDCA,
 )
 from facebook_business.adobjects.adcreativeobjectstoryspec import AdCreativeObjectStorySpec
+from facebook_business.adobjects.adcreativevideodata import AdCreativeVideoData
 from facebook_business.adobjects.adimage import AdImage
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
@@ -125,55 +126,44 @@ def build_creative_params(ad_video_facebook_id: str,
                           ad_account: Any,
                           step_two: Dict,
                           objective: str):
-    object_story_spec = None
-    link_url = None
     ad_image = _generate_image_hash(ad_account, adverts.get("picture", None))
 
-    if {"website_url", "display_link"} <= set(adverts):
-        if not adverts["website_url"] and not adverts["display_link"]:
-            if objective == OptimizationGoal.PAGE_LIKES.name:
-                call_to_action = {"type": CallToActionType.LIKE_PAGE.name}
-                video_data = {
-                    "call_to_action": call_to_action,
-                    "video_id": ad_video_facebook_id,
-                    "image_hash": ad_image[AdImage.Field.hash],
-                }
-                object_story_spec_data = {
-                    AdCreativeObjectStorySpec.Field.page_id: step_two["facebook_page_id"],
-                    AdCreativeObjectStorySpec.Field.video_data: video_data,
-                }
-                object_story_spec = build_object_story_spec(object_story_spec_data)
-                link_url = f"https://www.facebook.com/{step_two['facebook_page_id']}"
-        elif adverts["website_url"]:
-            call_to_action = {
-                "type": adverts["call_to_action"]["value"],
-                "value": {"link": adverts["website_url"]},
-            }
+    call_to_action = {}
+    link_url = ""
 
-            video_data = {
-                "call_to_action": call_to_action,
-                "video_id": ad_video_facebook_id,
-                "image_hash": ad_image[AdImage.Field.hash],
-            }
+    if not adverts["website_url"] and objective == OptimizationGoal.PAGE_LIKES.name:
+        call_to_action = {"type": CallToActionType.LIKE_PAGE.name}
+        link_url = f"https://www.facebook.com/{step_two['facebook_page_id']}"
 
-            object_story_spec_data = {
-                AdCreativeObjectStorySpec.Field.page_id: step_two.get("facebook_page_id", None),
-                AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two.get("instagram_page_id", None),
-                AdCreativeObjectStorySpec.Field.video_data: video_data,
-            }
+    elif adverts["website_url"]:
+        call_to_action = {
+            "type": adverts["call_to_action"]["value"],
+            "value": {"link": adverts["website_url"]},
+        }
 
-            object_story_spec = build_object_story_spec(object_story_spec_data)
-            link_url = adverts.get("website_url")
-        else:
-            link_url = adverts.get("display_link")
-    else:
-        link_url = adverts.get("deep_link")
+        if adverts.get("display_link"):
+            call_to_action["value"].update({"link_caption": adverts.get("display_link")})
+
+        link_url = adverts.get("website_url")
+
+    video_data = {
+        AdCreativeVideoData.Field.call_to_action: call_to_action,
+        AdCreativeVideoData.Field.video_id: ad_video_facebook_id,
+        AdCreativeVideoData.Field.image_hash: ad_image[AdImage.Field.hash],
+        AdCreativeVideoData.Field.message: adverts.get("primary_text", None),
+    }
+
+    object_story_spec_data = {
+        AdCreativeObjectStorySpec.Field.page_id: step_two.get("facebook_page_id", None),
+        AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two.get("instagram_page_id", None),
+        AdCreativeObjectStorySpec.Field.video_data: video_data,
+    }
+
+    object_story_spec = build_object_story_spec(object_story_spec_data)
 
     creative_params = {
         AdCreative.Field.name: adverts.get("headline", None),
         AdCreative.Field.video_id: ad_video_facebook_id,
-        AdCreative.Field.body: adverts.get("primary_test", None),
-        AdCreative.Field.link_deep_link_url: adverts.get("deep_link", None),
         AdCreative.Field.link_url: link_url,
         AdCreative.Field.object_story_spec: object_story_spec
     }
