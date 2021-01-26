@@ -105,7 +105,7 @@ OBJECTIVE_X_CALL_TO_ACTION_TYPE = {
         CallToActionType.APPLY_NOW,  # Apply Now
         CallToActionType.BOOK_TRAVEL,  # Book Now
         CallToActionType.BUY_TICKETS,  # Buy Tickets
-        CallToActionType.CALL,  # Call Now
+        # CallToActionType.CALL,  # Call Now
         CallToActionType.CONTACT_US,  # Contact Us
         CallToActionType.DOWNLOAD,  # Download
         CallToActionType.GET_OFFER,  # Get Offer
@@ -211,7 +211,7 @@ OBJECTIVE_X_CALL_TO_ACTION_TYPE = {
         CallToActionType.WHATSAPP_MESSAGE,  # Send WhatsApp Message
     ],
     Objective.LOCAL_AWARENESS: [
-        CallToActionType.CALL,  # Call Now
+        # CallToActionType.CALL,  # Call Now
         CallToActionType.GET_DIRECTIONS,  # Get Directions
         CallToActionType.LEARN_MORE,  # Learn More
         CallToActionType.MESSAGE_PAGE,  # Send Message
