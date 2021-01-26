@@ -9,6 +9,7 @@ from facebook_business.adobjects.adcreativelinkdatachildattachment import (
     AdCreativeLinkDataChildAttachment as AdCreativeLDCA,
 )
 from facebook_business.adobjects.adcreativeobjectstoryspec import AdCreativeObjectStorySpec
+from facebook_business.adobjects.adcreativephotodata import AdCreativePhotoData
 from facebook_business.adobjects.adcreativevideodata import AdCreativeVideoData
 from facebook_business.adobjects.adimage import AdImage
 
@@ -19,11 +20,9 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewB
 
 def build_ads(ad_account_id: str, step_two: Dict, step_three: Dict, objective: str = None):
     ads = []
-    ad_creative_facebook_id = get_ad_creative_id(int(step_three["ad_format_type"]),
-                                                 ad_account_id,
-                                                 step_two,
-                                                 step_three,
-                                                 objective)
+    ad_creative_facebook_id = get_ad_creative_id(
+        int(step_three["ad_format_type"]), ad_account_id, step_two, step_three, objective
+    )
 
     adverts = {
         Ad.Field.name: step_three["ad_name"],
@@ -57,18 +56,22 @@ def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict
 
 
 def build_image_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount, objective: str = None):
-    ad_creative_link_data = build_image_link_data(ad_account, adverts, step_two.get("facebook_page_id"), objective)
-
     object_story_spec_data = {
         AdCreativeObjectStorySpec.Field.page_id: step_two.get("facebook_page_id", None),
         AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two.get("instagram_page_id", None),
-        AdCreativeObjectStorySpec.Field.link_data: ad_creative_link_data,
     }
 
-    object_story_spec = AdCreativeObjectStorySpec()
+    if (
+        objective == OptimizationGoal.POST_ENGAGEMENT.name
+        and adverts["call_to_action"]["value"] == CallToActionType.NO_BUTTON.name
+    ):
+        ad_creative_photo_data = build_photo_data(ad_account, adverts)
+        object_story_spec_data[AdCreativeObjectStorySpec.Field.photo_data] = ad_creative_photo_data
+    else:
+        ad_creative_link_data = build_image_link_data(ad_account, adverts, step_two.get("facebook_page_id"), objective)
+        object_story_spec_data[AdCreativeObjectStorySpec.Field.link_data] = ad_creative_link_data
 
-    for k, v in object_story_spec_data.items():
-        object_story_spec[k] = v
+    object_story_spec = build_object_story_spec(object_story_spec_data)
 
     creative_params = {
         AdCreative.Field.name: adverts.get("headline", None),
@@ -79,12 +82,7 @@ def build_image_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount
     return build_ad_creative(ad_account, creative_params)
 
 
-def build_video_ad_creative(
-    step_two: Dict,
-    adverts: Dict,
-    ad_account: AdAccount,
-    objective: str = None
-):
+def build_video_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount, objective: str = None):
     # Upload video on FB
     # TODO: we also need to provide picture thumbnail after upload
     if "video_id" not in adverts:
@@ -92,11 +90,7 @@ def build_video_ad_creative(
     else:
         ad_video_facebook_id = adverts["video_id"]
 
-    creative_params = build_creative_params(ad_video_facebook_id,
-                                            adverts,
-                                            ad_account,
-                                            step_two,
-                                            objective)
+    creative_params = build_creative_params(ad_video_facebook_id, adverts, ad_account, step_two, objective)
     ad_creative = build_ad_creative(ad_account, creative_params)
     remove_image_url(ad_creative, step_two)
     return ad_creative
@@ -122,11 +116,7 @@ def build_object_story_spec(object_story_spec_data):
     return object_story_spec
 
 
-def build_creative_params(ad_video_facebook_id: str,
-                          adverts: Dict,
-                          ad_account: Any,
-                          step_two: Dict,
-                          objective: str):
+def build_creative_params(ad_video_facebook_id: str, adverts: Dict, ad_account: Any, step_two: Dict, objective: str):
     ad_image = _generate_image_hash(ad_account, adverts.get("picture", None))
 
     call_to_action = {}
@@ -166,17 +156,16 @@ def build_creative_params(ad_video_facebook_id: str,
         AdCreative.Field.name: adverts.get("headline", None),
         AdCreative.Field.video_id: ad_video_facebook_id,
         AdCreative.Field.link_url: link_url,
-        AdCreative.Field.object_story_spec: object_story_spec
+        AdCreative.Field.object_story_spec: object_story_spec,
     }
 
     return creative_params
 
 
 def build_carousel_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount, objective: str):
-    ad_creative_link_data = build_ad_carousel_creative_link_data(ad_account,
-                                                                 adverts,
-                                                                 step_two.get("facebook_page_id"),
-                                                                 objective)
+    ad_creative_link_data = build_ad_carousel_creative_link_data(
+        ad_account, adverts, step_two.get("facebook_page_id"), objective
+    )
 
     object_story_spec_data = {
         AdCreativeObjectStorySpec.Field.page_id: step_two.get("facebook_page_id", None),
@@ -184,10 +173,7 @@ def build_carousel_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAcco
         AdCreativeObjectStorySpec.Field.link_data: ad_creative_link_data,
     }
 
-    object_story_spec = AdCreativeObjectStorySpec()
-
-    for k, v in list(object_story_spec_data.items()):
-        object_story_spec[k] = v
+    object_story_spec = build_object_story_spec(object_story_spec_data)
 
     creative_params = {
         AdCreative.Field.body: adverts.get("primary_text", None),
@@ -221,14 +207,14 @@ def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id
         AdCreativeLinkData.Field.name: adverts.get("headline", None),
     }
     call_to_action["value"]["app_link"] = adverts.get("deep_link", None)
+    website_url = adverts.get("website_url")
 
-    if "website_url" in adverts:
-        if not adverts["website_url"]:
-            if objective == OptimizationGoal.PAGE_LIKES.name:
-                ad_creative_data[AdCreativeLinkData.Field.link] = f"https://www.facebook.com/{facebook_page_id}"
-                call_to_action = {"type": CallToActionType.LIKE_PAGE.name}
-        else:
-            ad_creative_data[AdCreativeLinkData.Field.link] = adverts.get("website_url")
+    if objective == OptimizationGoal.PAGE_LIKES.name:
+        ad_creative_data[AdCreativeLinkData.Field.link] = f"https://www.facebook.com/{facebook_page_id}"
+        call_to_action = {"type": CallToActionType.LIKE_PAGE.name}
+
+    elif website_url:
+        ad_creative_data[AdCreativeLinkData.Field.link] = website_url
     else:
         ad_creative_data[AdCreativeLinkData.Field.link] = adverts.get("deep_link")
 
@@ -244,6 +230,15 @@ def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id
     ad_creative_link_data[AdCreativeLinkData.Field.image_hash] = ad_image[AdImage.Field.hash]
 
     return ad_creative_link_data
+
+
+def build_photo_data(ad_account: AdAccount, adverts: Dict):
+    ad_image = _generate_image_hash(ad_account, adverts.get("media_url", None))
+    photo_data = AdCreativePhotoData()
+    photo_data[AdCreativePhotoData.Field.image_hash] = ad_image[AdImage.Field.hash]
+    photo_data[AdCreativePhotoData.Field.caption] = adverts.get("primary_text", None)
+
+    return photo_data
 
 
 def build_ad_carousel_creative_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id: str, objective: str):
