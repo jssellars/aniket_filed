@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 
+from bson import BSON
+
 from Core.Dexter.Infrastructure.Domain.Breakdowns import ActionBreakdownBaseEnum, BreakdownBaseEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
@@ -56,7 +58,7 @@ class StrategyDataMongoRepository(MongoRepositoryBase):
         ]
         off_metrics = ["_id"]
 
-        return self.get(
+        result = self.get(
             query={
                 MongoOperator.AND.value: [
                     {key: {MongoOperator.EQUALS.value: key_value}},
@@ -68,6 +70,11 @@ class StrategyDataMongoRepository(MongoRepositoryBase):
                 **{m: MongoProjectionState.ON.value for m in on_metrics},
             },
         )
+
+        for entry in result:
+            entry[FacebookMiscFields.details] = BSON.decode(entry.get(FacebookMiscFields.details))
+
+        return result
 
     def set_insights_collection(
             self, level: LevelEnum, breakdown: FieldsMetadata, action_breakdown: FieldsMetadata

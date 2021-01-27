@@ -5,7 +5,7 @@ from bson import BSON
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
+from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
@@ -14,8 +14,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     LevelToFacebookIdKeyMapping,
 )
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
-
-ALLOWED_AD_ACCOUNTS = ["756882231399117", "389109158588065"]
 
 
 class AdsManagerDeleteStructureCommandHandler:
@@ -31,7 +29,7 @@ class AdsManagerDeleteStructureCommandHandler:
         if not deleted_structure:
             return False
 
-        if not allow_structure_changes(deleted_structure):
+        if not allow_structure_changes(deleted_structure["account_id"], config):
             return None
 
         deleted_structure[FacebookMiscFields.level] = level

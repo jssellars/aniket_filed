@@ -4,25 +4,21 @@ from datetime import datetime, timedelta
 from typing import ClassVar, Dict, List, Optional
 
 from bson import BSON
-from facebook_business.adobjects.targetingsearch import TargetingSearch
-
 from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.targeting import Targeting
+from facebook_business.adobjects.targetingsearch import TargetingSearch
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import (
-    DexterGroupedData,
-    DexterStrategyBase,
-    get_group_data_from_list,
-)
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterGroupedData, DexterStrategyBase
 from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import TrendEnum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
@@ -55,7 +51,7 @@ class AudienceSizeStrategy(DexterStrategyBase):
         raise NotImplementedError
 
     def variance(
-            self, reference_data: float, current_data: float, trend: Optional[TrendEnum] = None
+        self, reference_data: float, current_data: float, trend: Optional[TrendEnum] = None
     ) -> Optional[float]:
         try:
             return current_data / reference_data * 100
@@ -65,14 +61,14 @@ class AudienceSizeStrategy(DexterStrategyBase):
             return None
 
     def generate_recommendation(
-            self,
-            grouped_data: List[DexterGroupedData],
-            level: LevelEnum,
-            breakdown: FieldsMetadata,
-            business_owner: str,
-            account_id: str,
-            structure: Dict,
-            recommendations_repository: MongoRepositoryBase,
+        self,
+        grouped_data: List[DexterGroupedData],
+        level: LevelEnum,
+        breakdown: FieldsMetadata,
+        business_owner: str,
+        account_id: str,
+        structure: Dict,
+        recommendations_repository: MongoRepositoryBase,
     ):
         structure_key = LevelIdKeyEnum[level.value.upper()].value
 
@@ -100,7 +96,10 @@ class AudienceSizeStrategy(DexterStrategyBase):
             for trigger_metric in time_bucket.triggers:
                 metric_name = trigger_metric.trigger.metric_field.name
 
-                structure_details = dict(BSON.decode(structure["details"]))
+                structure_details = structure.get(FacebookMiscFields.details)
+
+                if not structure_details:
+                    continue
 
                 targeting = structure_details["targeting"]
                 optimization_goal = structure_details["optimization_goal"]
@@ -119,41 +118,40 @@ class AudienceSizeStrategy(DexterStrategyBase):
                 variance = self.variance(audience_size, reach, None)
                 if variance >= trigger_metric.trigger.variance_percentage:
 
-                    hidden_interests = get_hidden_interests(targeting)
+                    hidden_interests = ", ".join(get_hidden_interests(targeting))
 
-                    dexter_recommendation = trigger_metric.cause_metrics[0].output
+                    dexter_output = trigger_metric.cause_metrics[0].output
+                    template_key = dexter_output.name
+                    dexter_recommendation = dexter_output.value
 
                     if dexter_recommendation:
+                        structure_data, reports_data = DexterStrategyBase.get_structure_and_reports_data(
+                            business_owner, account_id, structure, level, metric_name, breakdown
+                        )
+
                         entry = RecommendationEntryModel(
-                            dexter_recommendation.recommendation_template_key,
+                            template_key,
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
-                            business_owner,
-                            f"act_{str(account_id)}",
-                            structure[structure_key],
-                            structure[f"{level.value}_name"],
-                            structure[FieldsMetadata.campaign_id.name],
-                            structure[FieldsMetadata.campaign_name.name],
-                            level.value,
                             datetime.now(),
                             time_bucket.no_of_days,
                             ChannelEnum.FACEBOOK.value,
                             get_audience_size_priority(variance),
-                            [{"display_name": metric_name.replace("_", " ").title(), "name": metric_name}],
-                            {"display_name": breakdown.name.replace("_", " ").title(), "name": breakdown.name},
+                            structure_data,
+                            reports_data,
                             algorithm_type=self.ALGORITHM,
                             debug_msg=f"Audience size - {audience_size} and total reach {reach}",
-                            hidden_interests=", ".join(hidden_interests)
+                            hidden_interests=hidden_interests if hidden_interests else None,
                         )
 
                         dexter_recommendation.process_output(
                             recommendations_repository,
-                            recommendation_entry_model=entry,
+                            recommendation_entry_model=entry.get_extended_db_entry(),
                         )
 
 
 def get_audience_size(
-        ad_account_id: str, targeting_spec: Dict, optimization_goal: str, promoted_object: str
+    ad_account_id: str, targeting_spec: Dict, optimization_goal: str, promoted_object: str
 ) -> Optional[int]:
     ad_account = AdAccount(fbid=f"act_{ad_account_id}")
     targeting = Targeting()
@@ -183,14 +181,14 @@ def get_hidden_interests(targeting: Dict) -> List[str]:
     targeting_interests.extend([interest["name"] for interest in targeting.get("interests", [])])
 
     params = {
-        'interest_list': targeting_interests,
-        'type': TargetingSearch.TargetingSearchTypes.interest_suggestion,
-        'limit': HIDDEN_INTERESTS_LIMIT
+        "interest_list": targeting_interests,
+        "type": TargetingSearch.TargetingSearchTypes.interest_suggestion,
+        "limit": HIDDEN_INTERESTS_LIMIT,
     }
 
     results = TargetingSearch.search(params=params)
     results = [Tools.convert_to_json(result) for result in results]
 
-    results = sorted(results, key=lambda i: i['audience_size'], reverse=True)[:3]
+    results = sorted(results, key=lambda i: i["audience_size"], reverse=True)[:3]
 
     return [entry["name"] for entry in results if entry["name"] not in targeting_interests]

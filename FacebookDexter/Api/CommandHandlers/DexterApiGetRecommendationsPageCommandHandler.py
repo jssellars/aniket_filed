@@ -8,8 +8,7 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.mongo_adapter import MongoRepositoryBase, MongoOperator, MongoProjectionState
 from FacebookDexter.Api.Commands.DexterApiGetRecommendationsPageCommand import DexterApiGetRecommendationsPageCommand
 from FacebookDexter.Api.startup import config
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import get_formatted_message
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import InfoRecommendationTemplate
+from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
 from FacebookDexter.Infrastructure.Domain.Recommendations.RecommendationType import RecommendationType
 
 

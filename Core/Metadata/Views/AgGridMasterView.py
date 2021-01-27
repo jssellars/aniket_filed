@@ -51,7 +51,7 @@ ACCOUNT_COLUMNS_DEFINITION = {
         type_id=ViewColumnType.TEXT.value,
     ),
     AMOUNT_SPENT: ViewColumn(
-        display_name="Total Spend",
+        display_name="Total Spent",
         primary_value=FieldsMetadata.amount_spent,
         type_id=ViewColumnType.CURRENCY.value,
         no_of_decimals=2,

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
+    <style>
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -54,29 +54,30 @@ table tr td:nth-child(7) {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
-</style>
+
+    </style>
 </head>
 <body>
 
 <h2>Dexter Recommendations</h2>
 
 <table>
-  <tr>
-    <th>Template</th>
-    <th>Account ID</th>
-    <th>Structure ID</th>
-    <th>Structure Name</th>
-    <th>Level</th>
-    <th>Priority</th>
-    <th>Recommendation</th>
-  </tr>
-  {% for recommendation in recommendations %}
     <tr>
-      {% for value in recommendation %}
-          <td>{{recommendation[value]}}</td>
-      {% endfor %}
+        <th>Template</th>
+        <th>Account ID</th>
+        <th>Structure ID</th>
+        <th>Structure Name</th>
+        <th>Level</th>
+        <th>Priority</th>
+        <th>Recommendation</th>
     </tr>
-  {% endfor %}
+    {% for recommendation in recommendations %}
+    <tr>
+        {% for value in recommendation %}
+        <td>{{recommendation[value]}}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
 
 </table>
 </body>

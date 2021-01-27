@@ -11,7 +11,7 @@ class Default:
         journal_database_name="{env}_dexter_engine_run_journal",
         logs_database="{env}_facebook_dexter_logs",
         recommendations_collection_name="recommendations",
-        recommendations_database_name="{env}_dexter_fuzzy_inference_recommendations",
+        recommendations_database_name="{env}_dexter_recommendations",
         structures_database="{env}_facebook_turing_structures"
     )
     dexter = core.Dexter(

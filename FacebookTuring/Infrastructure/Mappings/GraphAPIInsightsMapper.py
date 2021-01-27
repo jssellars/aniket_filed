@@ -54,7 +54,6 @@ class GraphAPIInsightsMapper:
                 ]
                 change_fields_from_upper_case(mapped_data, required_fields_to_change)
 
-
                 mapped_response.extend(mapped_data)
 
         return mapped_response
@@ -124,8 +123,8 @@ class GraphAPIInsightsMapper:
             mapped_fields.append([{requested_field.name: result_value[0].get(facebook_results_field_value.name)}])
             mapped_fields.append([{FieldsMetadata.result_type.name: facebook_results_field_value.name}])
 
-def change_fields_from_upper_case(mapped_data: List, required_fields_to_change: List):
 
+def change_fields_from_upper_case(mapped_data: List, required_fields_to_change: List):
     for entry in mapped_data:
         for field in required_fields_to_change:
             if field in entry and entry[field]:

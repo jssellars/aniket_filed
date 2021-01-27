@@ -3,6 +3,7 @@ import logging
 import flask_restful
 import humps
 
+from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Core.Web.Security.Permissions import AdsManagerPermissions, OptimizePermissions
@@ -16,7 +17,7 @@ from FacebookDexter.Api.CommandHandlers.DexterApiApplyRecommendationCommandHandl
 from FacebookDexter.Api.CommandHandlers.DexterApiDismissRecommendationCommandHandler import (
     DexterApiDismissRecommendationCommandHandler,
 )
-from FacebookDexter.Api.CommandHandlers import GetRecommendationsHandler
+from FacebookDexter.Api.CommandHandlers import RecommendationsHandlers
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
@@ -33,7 +34,12 @@ from FacebookDexter.Api.CommandValidators.DexterApiGetCountsByCategoryCommandVal
 from FacebookDexter.Api.CommandValidators.DexterApiGetRecommendationsPageCommandValidator import (
     DexterApiRecommendationsPageCommandValidator,
 )
-from FacebookDexter.Api.Commands.RecommendationPageCommand import RecommendationPageCommand, RecommendationPageCommandMapping, NumberOfPagesCommandMapping, NumberOfPagesCommand
+from FacebookDexter.Api.Commands.RecommendationPageCommand import (
+    RecommendationPageCommand,
+    RecommendationPageCommandMapping,
+    NumberOfPagesCommandMapping,
+    NumberOfPagesCommand,
+)
 from FacebookDexter.Api.QueryParamsValidators import DexterApiGetCampaignsQueryValidator
 from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
@@ -71,7 +77,7 @@ class GetActionHistoryQuery(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
 class GetCampaignsQuery(Resource):
@@ -95,7 +101,7 @@ class GetCampaignsQuery(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
 class GetRecommendationQuery(Resource):
@@ -116,10 +122,10 @@ class GetRecommendationQuery(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
-class ApplyRecommendation(Resource):
+class OldApplyRecommendation(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def patch(self):
         data = request.args
@@ -140,7 +146,7 @@ class ApplyRecommendation(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
 class GetRecommendationsPage(Resource):
@@ -169,7 +175,7 @@ class GetRecommendationsPage(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
 class GetCountsByCategory(Resource):
@@ -193,10 +199,10 @@ class GetCountsByCategory(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
-class DismissRecommendation(Resource):
+class OldDismissRecommendation(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.OPTIMIZE_DELETE)
     def patch(self):
         data = request.args
@@ -214,10 +220,10 @@ class DismissRecommendation(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 500
+            return "An error occurred", 400
 
 
-class RecommendationsHandler(Resource):
+class GetRecommendations(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         data = humps.decamelize(request.get_json(force=True))
@@ -225,16 +231,17 @@ class RecommendationsHandler(Resource):
         command = mapping.load(data)
 
         try:
-            result = GetRecommendationsHandler.read_recommendations_page(command)
+            business_owner_id = extract_business_owner_facebook_id()
+            result = RecommendationsHandlers.read_recommendations_page(command, business_owner_id)
             return result, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 400
+            return {"message": "Failed to retrieve recommendations."}, 400
 
 
-class NumberOfPagesHandler(Resource):
+class GetNumberOfPages(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
         data = humps.decamelize(request.get_json(force=True))
@@ -242,24 +249,42 @@ class NumberOfPagesHandler(Resource):
         command = mapping.load(data)
 
         try:
-            result = GetRecommendationsHandler.get_number_of_pages(command)
+            business_owner_id = extract_business_owner_facebook_id()
+            result = RecommendationsHandlers.get_number_of_pages(command, business_owner_id)
             return result, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 400
+            return {"message": "Failed to get recommendation's number of pages"}, 400
 
 
-class DismissRecommendationHandler(Resource):
-    @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
+class DismissRecommendation(Resource):
+    @fixtures.authorize_permission(permission=OptimizePermissions.OPTIMIZE_DELETE)
     def put(self, recommendation_id: str):
 
         try:
-            GetRecommendationsHandler.dismiss_recommendation(recommendation_id)
+            RecommendationsHandlers.dismiss_recommendation(recommendation_id)
             return None, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
-            return "An error occurred", 400
+            return {"message": "Failed to dismiss recommendation"}, 400
+
+
+class ApplyRecommendation(Resource):
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    def put(self, recommendation_id: str):
+
+        try:
+            business_owner_id = extract_business_owner_facebook_id()
+            return (
+                RecommendationsHandlers.apply_recommendation(recommendation_id, business_owner_id, request.headers),
+                200,
+            )
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to apply recommendation"}, 400

@@ -4,9 +4,11 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Set, Union
 
+from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import RunStatusDexterEngineJournal
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
+from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     AdSetOptimizationToResult,
     PixelCustomEventTypeToResult,
@@ -14,8 +16,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import 
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
-from Core.constants import DEFAULT_DATETIME
-from Core.mongo_adapter import MongoRepositoryBase
 from FacebookDexter.BackgroundTasks.Strategies.AudienceSizeStrategy import AudienceSizeStrategy
 from FacebookDexter.BackgroundTasks.Strategies.BreakdownStrategy import BreakdownAverageStrategy
 from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import OverTimeTrendStrategy

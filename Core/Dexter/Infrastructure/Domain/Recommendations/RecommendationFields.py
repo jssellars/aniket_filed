@@ -4,6 +4,7 @@ from enum import Enum
 class RecommendationField(Enum):
     OBJECT_ID = "_id"
     STRUCTURE_ID = "structure_id"
+    BUSINESS_OWNER_ID = "business_owner_id"
     LEVEL = "level"
     OPTIMIZATION_TYPE = "optimization_type"
     RECOMMENDATION_TYPE = "recommendation_type"
@@ -40,9 +41,12 @@ class RecommendationField(Enum):
     ANALYSIS = "analysis"
     BREAKDOWN_GROUP = "breakdown_group"
     HIDDEN_INTERESTS = "hidden_interests"
+    APPLY_PARAMETERS = "apply_parameters"
+    IS_APPLICABLE = "is_applicable"
 
 
 class RecommendationFieldInsidersEnum(Enum):
     DISPLAY_NAME = "display_name"
     NAME = "name"
     VALUE = "value"
+

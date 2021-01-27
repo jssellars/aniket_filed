@@ -1,14 +1,11 @@
 from enum import Enum
 
-
-class RecommendationPriority(Enum):
-    HIGH = 3
-    MEDIUM = 2
-    LOW = 1
+from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecommendationOutput, RecommendationPriority
+from FacebookDexter.Infrastructure.DexterRules.RecommendationApplyActions import ApplyActionType
 
 
-class InfoRecommendationTemplate(Enum):
-    CR_DOWN_CTR_DOWN_CPC_UP = (
+class OverTimeTrendTemplate(Enum):
+    CR_DOWN_CTR_DOWN_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed your cost is increasing and people are less interested in your ads. This is a trend we’ve seen"
             " over the {no_of_days} days and it's becoming more expensive to run ads by {trigger_variance:.2f}%."
@@ -23,7 +20,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    CR_DOWN_CPM_UP = (
+    CR_DOWN_CPM_UP = DexterRecommendationOutput(
         (
             "We’ve noticed your conversions are getting more expensive and results are decreasing by"
             " {trigger_variance:.2f}% over the last {no_of_days} days on average."
@@ -37,7 +34,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_CPM_UP_CR_DOWN = (
+    RESULTS_DOWN_CPM_UP_CR_DOWN = DexterRecommendationOutput(
         (
             "We’ve noticed your conversions are getting more expensive and results are decreasing by"
             " {trigger_variance:.2f}% over the last {no_of_days} days on average."
@@ -51,7 +48,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_CPC_UP_CTR_UP = (
+    RESULTS_DOWN_CPC_UP_CTR_UP = DexterRecommendationOutput(
         (
             "We noticed the cost is getting more expensive to run your ads. People are clicking on your ads, but"
             " results are trending down by {trigger_variance:.2f}% in the last {no_of_days} days on average. Your"
@@ -66,7 +63,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_CPC_UP_CTR_DOWN = (
+    RESULTS_DOWN_CPC_UP_CTR_DOWN = DexterRecommendationOutput(
         (
             "There is less interest in with your ad, results have decreased by {trigger_variance:.2f}% over the last"
             " {no_of_days} days."
@@ -80,7 +77,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_CR_DOWN_CPR_UP = (
+    RESULTS_DOWN_CR_DOWN_CPR_UP = DexterRecommendationOutput(
         (
             "We’ve noticed your results, conversion rate and cost per result are all moving in the wrong direction over"
             " {no_of_days} days. Dexter thinks your message isn’t resonating with your interest targeting. "
@@ -94,7 +91,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_UNIQUE_CTR_UP = (
+    RESULTS_DOWN_UNIQUE_CTR_UP = DexterRecommendationOutput(
         (
             "Your results are falling, but CTR is increasing. We noticed a change in results by"
             " {trigger_variance:.2f}% in the last {no_of_days} days on average."
@@ -108,7 +105,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_UNIQUE_CTR_DOWN = (
+    RESULTS_DOWN_UNIQUE_CTR_DOWN = DexterRecommendationOutput(
         (
             "Dexter noticed your CTR and results both have decreasing trends. For example, your results changed by"
             " {trigger_variance:.2f}% in the last {no_of_days} days on average. "
@@ -122,7 +119,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP = (
+    RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP = DexterRecommendationOutput(
         (
             "Following your recent budget increase, the cost of running your ads has increased and results are falling"
             " by {trigger_variance:.2f}%  over {no_of_days} days as a result. "
@@ -131,9 +128,10 @@ class InfoRecommendationTemplate(Enum):
         "Decrease Budget",
         "Following your recent budget increase, the cost has increased and results are falling.",
         "Dexter suggests lowering your budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
 
-    RESULTS_DOWN_CPR_UP_CPC_UP = (
+    RESULTS_DOWN_CPR_UP_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed that it’s becoming increasingly more expensive to keep your ads running. Your results are more"
             " expensive, your CPCs have increased and results have decreased by {trigger_variance:.2f}% over"
@@ -143,9 +141,10 @@ class InfoRecommendationTemplate(Enum):
         "Decrease Budget",
         "Your results are getting expensive and results have decreased over time.",
         "Dexter suggests lowering your budget by 20% to see if that helps bring your cost down. ",
+        apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
 
-    RESULTS_UP_UNIQUE_CTR_DOWN = (
+    RESULTS_UP_UNIQUE_CTR_DOWN = DexterRecommendationOutput(
         (
             "Your results are increasing, but CTR has also decreased so stay alert. Dexter noticed a change in results"
             " by {trigger_variance:.2f}% in the last {no_of_days} days on average. "
@@ -159,47 +158,52 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    RESULTS_UP_CPC_DOWN_CTR_UP = (
+    RESULTS_UP_CPC_DOWN_CTR_UP = DexterRecommendationOutput(
         "Your campaign is performing well, don't touch it. ",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Dexter suggests you should increase budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    RESULTS_UP_CPC_DOWN_CPM_DOWN = (
+    RESULTS_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
         "Your campaign is performing well, don't touch it. ",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Dexter suggests you should increase budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN = (
+    RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN = DexterRecommendationOutput(
         "Your campaign is performing well, don't touch it. ",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Dexter suggests you should increase budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN = (
+    RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
         "Following your budget increase, your ads are performing well. ",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Consider increasing your budget by 20% more. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    RESULTS_UP_CPR_DOWN_CPM_DOWN = (
+    RESULTS_UP_CPR_DOWN_CPM_DOWN = DexterRecommendationOutput(
         "Your campaign is performing well, don't touch it. ",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Dexter suggests increasing budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    CTR_DOWN_CPM_UP_CPC_UP = (
+    CTR_DOWN_CPM_UP_CPC_UP = DexterRecommendationOutput(
         (
             "Dexter wants you to be aware, It's getting more competitive to run your ads in the marketplace and your"
             " CTR has decreased by {trigger_variance:.2f}% in {no_of_days} days. "
@@ -210,7 +214,7 @@ class InfoRecommendationTemplate(Enum):
         "Have you considered running new interest targeting? ",
     )
 
-    CTR_UP_CPM_DOWN_CPC_DOWN = (
+    CTR_UP_CPM_DOWN_CPC_DOWN = DexterRecommendationOutput(
         (
             "Your campaign is performing really well. Dexter has noticed that your CTR has increased by"
             " {trigger_variance:.2f}% in {no_of_days} days. Your CPMs and CPCs have also both decreased during this period,"
@@ -220,9 +224,10 @@ class InfoRecommendationTemplate(Enum):
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Increase your budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    CPM_UP_RESULTS_DOWN_CTR_UP = (
+    CPM_UP_RESULTS_DOWN_CTR_UP = DexterRecommendationOutput(
         (
             "We’ve noticed that it’s increasingly becoming more competitive to run your ad right now, your CPMs have"
             " increased by {trigger_variance:.2f}%. There’s also less interest in your ads over {no_of_days} days as your"
@@ -234,7 +239,7 @@ class InfoRecommendationTemplate(Enum):
         "Dexter suggests reducing your budget or refreshing your creatives by testing different ad creatives or copy?",
     )
 
-    CPM_UP_RESULTS_DOWN_CPR_UP = (
+    CPM_UP_RESULTS_DOWN_CPR_UP = DexterRecommendationOutput(
         (
             "We’ve noticed your cost per result has increased and your CPMs have increased by {trigger_variance:.2f}%"
             " over {no_of_days} days. There’s also less interest in your ads over {no_of_days} days as your results have fallen. "
@@ -246,9 +251,10 @@ class InfoRecommendationTemplate(Enum):
             "Dexter suggests reducing your budget or trying a new interest targeting to help your overall campaign"
             " performance?"
         ),
+        apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
 
-    CLICKS_DOWN_CPC_UP = (
+    CLICKS_DOWN_CPC_UP = DexterRecommendationOutput(
         "Dexter noticed your clicks are decreasing and getting more expensive to run your ads. ",
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
@@ -256,7 +262,7 @@ class InfoRecommendationTemplate(Enum):
         " Consider pausing your campaign or targeting some new interests. ",
     )
 
-    CLICKS_DOWN_CPM_UP = (
+    CLICKS_DOWN_CPM_UP = DexterRecommendationOutput(
         "Dexter noticed your clicks are decreasing and getting more expensive to run your ads. ",
         RecommendationPriority.MEDIUM,
         "New Interest Targeting",
@@ -264,15 +270,16 @@ class InfoRecommendationTemplate(Enum):
         "Consider pausing your campaign or targeting some new interests. ",
     )
 
-    CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN = (
+    CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
         "Your campaign is performing well, don't touch it. ",
         RecommendationPriority.LOW,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         " Dexter suggests increasing your budget by 20%. ",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    AMOUNT_SPENT_DOWN_CPR_UP = (
+    AMOUNT_SPENT_DOWN_CPR_UP = DexterRecommendationOutput(
         (
             "You decreased the amount spent and your cost per result is increasing. It changed by"
             " {trigger_variance:.2f}% in the last {no_of_days} days on average. Your bid for this audience might not be"
@@ -287,7 +294,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    AMOUNT_SPENT_DOWN_CPR_DOWN = (
+    AMOUNT_SPENT_DOWN_CPR_DOWN = DexterRecommendationOutput(
         (
             "Good job! You decreased the amount spent and your cost per result is decreasing as a result. It changed by"
             " {trigger_variance:.2f} % in the last {no_of_days} days average. "
@@ -296,9 +303,10 @@ class InfoRecommendationTemplate(Enum):
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "At this point, it’s safe to say your ad performance looks great. Don't make any changes at this time.",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    AMOUNT_SPENT_DOWN_RESULTS_UP = (
+    AMOUNT_SPENT_DOWN_RESULTS_UP = DexterRecommendationOutput(
         (
             "Good job! You decreased the amount spent and your results are increasing as a result. It changed by"
             " {trigger_variance:.2f}% in the last {no_of_days} days average. "
@@ -307,9 +315,10 @@ class InfoRecommendationTemplate(Enum):
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
         "Dexter suggests increasing your budget by 20% in order to get even more results.",
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    AMOUNT_SPENT_UP_CPR_UP = (
+    AMOUNT_SPENT_UP_CPR_UP = DexterRecommendationOutput(
         (
             "You raised the amount spent and your cost per result have both increased. It changed by"
             " {trigger_variance:.2f}% in the last {no_of_days} days average. "
@@ -321,9 +330,10 @@ class InfoRecommendationTemplate(Enum):
             "Breakdown your campaign by age, gender or placements to see which target is spending budget without"
             " notable results. "
         ),
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    AMOUNT_SPENT_UP_CPR_DOWN = (
+    AMOUNT_SPENT_UP_CPR_DOWN = DexterRecommendationOutput(
         (
             "Good job! Your amount spent and your cost per result are decreasing. It changed by {trigger_variance:.2f}%"
             " in the last {no_of_days} days on average. "
@@ -335,9 +345,10 @@ class InfoRecommendationTemplate(Enum):
             "Dexter suggests increasing your budget by  20% and keep a close eye on performance to ensure your cost per"
             " result doesn’t increase over time."
         ),
+        apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
-    CPR_UP_IMPRESSIONS_DOWN = (
+    CPR_UP_IMPRESSIONS_DOWN = DexterRecommendationOutput(
         "Your cost per result is increasing while impressions have decreased overtime. ",
         RecommendationPriority.HIGH,
         "Improve Ad Copy & Creatives",
@@ -349,7 +360,7 @@ class InfoRecommendationTemplate(Enum):
         ),
     )
 
-    LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP = (
+    LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP = DexterRecommendationOutput(
         "Your landing page conversion rate is decreasing while your clicks are increasing. ",
         RecommendationPriority.HIGH,
         "Improve Ad Copy & Creatives",

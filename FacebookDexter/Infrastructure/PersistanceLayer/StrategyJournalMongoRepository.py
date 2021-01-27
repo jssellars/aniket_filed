@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Optional, Dict, List
 
@@ -18,14 +18,14 @@ class StrategyJournalMongoRepository(MongoRepositoryBase):
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def update_journal_entry(
-        self,
-        business_owner: str,
-        account_id: str,
-        run_status: RunStatusDexterEngineJournal,
-        channel: ChannelEnum,
-        algorithm: str,
-        start_time: datetime = None,
-        end_time: datetime = None,
+            self,
+            business_owner: str,
+            account_id: str,
+            run_status: RunStatusDexterEngineJournal,
+            channel: ChannelEnum,
+            algorithm: str,
+            start_time: datetime = None,
+            end_time: datetime = None,
     ):
         query_filter = {
             MongoOperator.AND.value: [
@@ -54,10 +54,7 @@ class StrategyJournalMongoRepository(MongoRepositoryBase):
 
 
 @dataclass
-class RecommendationEntryModel:
-    template: str
-    status: str
-    trigger_variance: float
+class StructureRecommendationModel:
     business_owner_id: str
     account_id: str
     structure_id: str
@@ -65,13 +62,33 @@ class RecommendationEntryModel:
     campaign_id: str
     campaign_name: str
     level: str
+
+
+@dataclass
+class ReportRecommendationDataModel:
+    metrics: List[Dict]
+    breakdown: Dict
+
+
+@dataclass
+class RecommendationEntryModel:
+    template: str
+    status: str
+    trigger_variance: float
     created_at: datetime
     time_interval: int
     channel: str
     priority: int
-    metrics: List[Dict]
-    breakdown: Dict
+    structure_data: StructureRecommendationModel
+    reports_data: ReportRecommendationDataModel
     algorithm_type: Optional[str] = None
-    debug_msg: Optional[str] = None
     breakdown_group: Optional[str] = None
     hidden_interests: Optional[str] = None
+    debug_msg: Optional[str] = None
+    apply_parameters: Optional[Dict] = None
+
+    def get_extended_db_entry(self):
+        recommendation = asdict(self)
+        recommendation.update(recommendation.pop("structure_data"))
+        recommendation.update(recommendation.pop("reports_data"))
+        return recommendation

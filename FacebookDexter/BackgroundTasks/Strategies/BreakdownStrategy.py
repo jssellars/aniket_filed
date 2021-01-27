@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import ClassVar, Dict, List, Optional, Tuple
 
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
@@ -19,8 +19,8 @@ from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
     CUSTOM_DEXTER_METRICS,
     CauseMetricBase,
     TrendEnum,
+    recommendation_enums_union,
 )
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterOutput
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
@@ -108,39 +108,34 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                     variance = self.variance(reference_data, breakdown_data.total, trend)
 
                     if variance >= trigger.variance_percentage:
-                        dexter_recommendation, cause_variance, cause_metric = self.check_causes(
+                        dexter_output, cause_variance, cause_metric = self.check_causes(
                             trigger_metric.cause_metrics,
                             grouped_data,
                             time_bucket.no_of_days,
                             breakdown_data.breakdown_group,
                         )
-                        if dexter_recommendation:
-                            structure_key = LevelIdKeyEnum[level.value.upper()].value
+                        if dexter_output:
+                            structure_data, reports_data = DexterStrategyBase.get_structure_and_reports_data(
+                                business_owner, account_id, structure, level, metric_name, breakdown
+                            )
 
                             entry = RecommendationEntryModel(
-                                dexter_recommendation.recommendation_template_key,
+                                dexter_output.name,
                                 RecommendationStatusEnum.ACTIVE.value,
                                 variance,
-                                business_owner,
-                                f"act_{str(account_id)}",
-                                structure[structure_key],
-                                structure[f"{level.value}_name"],
-                                structure[FieldsMetadata.campaign_id.name],
-                                structure[FieldsMetadata.campaign_name.name],
-                                level.value,
                                 datetime.now(),
                                 time_bucket.no_of_days,
                                 ChannelEnum.FACEBOOK.value,
                                 get_breakdown_priority(cause_variance),
-                                [{"display_name": cause_metric.replace("_", " ").title(), "name": cause_metric}],
-                                {"display_name": breakdown.name.replace("_", " ").title(), "name": breakdown.name},
+                                structure_data,
+                                reports_data,
                                 algorithm_type=self.ALGORITHM,
                                 debug_msg=json.dumps([asdict(x) for x in grouped_data]),
                                 breakdown_group=breakdown_data.breakdown_group,
                             )
-                            dexter_recommendation.process_output(
+                            dexter_output.value.process_output(
                                 recommendations_repository,
-                                recommendation_entry_model=entry,
+                                recommendation_entry_model=entry.get_extended_db_entry(),
                             )
 
     def check_causes(
@@ -149,7 +144,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         grouped_data: List[DexterGroupedData],
         no_of_days: int,
         breakdown: str,
-    ) -> Tuple[Optional[DexterOutput], Optional[float], Optional[str]]:
+    ) -> Tuple[Optional[recommendation_enums_union], Optional[float], Optional[str]]:
 
         # TODO extract this logic to a method and use twice
         for cause_metric in cause_metrics:

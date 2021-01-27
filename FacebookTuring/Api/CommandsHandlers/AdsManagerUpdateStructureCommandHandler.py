@@ -5,7 +5,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClie
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Api.CommandsHandlers.AdsManagerRestrictionFunctions import allow_structure_changes
+from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, \
@@ -34,7 +34,7 @@ class AdsManagerUpdateStructureCommandHandler:
             if isinstance(updated_structure, Exception):
                 raise updated_structure
 
-            if not allow_structure_changes(updated_structure):
+            if not allow_structure_changes(updated_structure["account_id"], config):
                 return None
 
             structure = LevelToGraphAPIStructure.get(level, facebook_id)

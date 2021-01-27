@@ -22,9 +22,10 @@ api = flask_restful.Api(app)
 router_route_pairs = (
     (routers.HealthCheck, 'healthcheck'),
     (routers.Version, 'version'),
-    (routers.RecommendationsHandler, 'get-recommendations'),
-    (routers.NumberOfPagesHandler, 'recommendations-number-of-pages'),
-    (routers.DismissRecommendationHandler, 'dismiss-recommendation/<string:recommendation_id>'),
+    (routers.GetRecommendations, 'get-recommendations'),
+    (routers.GetNumberOfPages, 'recommendations-number-of-pages'),
+    (routers.DismissRecommendation, 'dismiss-recommendation/<string:recommendation_id>'),
+    (routers.ApplyRecommendation, 'apply-recommendation/<string:recommendation_id>'),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")

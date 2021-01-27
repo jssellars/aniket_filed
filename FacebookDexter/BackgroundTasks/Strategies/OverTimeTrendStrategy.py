@@ -5,9 +5,10 @@ from statistics import mean
 from typing import ClassVar, Dict, List, Optional, Tuple
 
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.mongo_adapter import MongoRepositoryBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import (
     DexterGroupedData,
@@ -15,11 +16,19 @@ from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import (
     get_group_data_from_list,
     get_number_of_days,
 )
-from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import CauseMetricBase, TrendEnum
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterOutput, get_formatted_message
+from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
+    CauseMetricBase,
+    TrendEnum,
+    recommendation_enums_union,
+)
+from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
+from FacebookDexter.Infrastructure.DexterRules.RecommendationApplyActions import ApplyParameters, get_apply_action
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
+
+BUDGET_INCREASE_PERCENTAGE = 0.20
+BUDGET_DECREASE_PERCENTAGE = 0.20
 
 
 @dataclass
@@ -82,16 +91,16 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                 reference_time = max(time_frames_with_data)
 
                 if trend == trigger_metric.trigger.trend and variance >= trigger_metric.trigger.variance_percentage:
-                    (dexter_recommendation, cause_benchmark, cause_current,) = self.check_causes(
+                    (dexter_output, cause_benchmark, cause_current,) = self.check_causes(
                         trigger_metric.cause_metrics,
                         grouped_data,
                         time_bucket.no_of_days,
                         reference_time,
                         variance,
                     )
-                    if dexter_recommendation:
+                    if dexter_output:
                         debug_msg = create_debug_message(
-                            dexter_recommendation.recommendation_template_key,
+                            dexter_output.name,
                             variance,
                             time_bucket.no_of_days,
                             reference_time,
@@ -105,30 +114,44 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                             cause_current,
                         )
 
-                        structure_key = LevelIdKeyEnum[level.value.upper()].value
+                        structure_data, reports_data = DexterStrategyBase.get_structure_and_reports_data(
+                            business_owner, account_id, structure, level, metric_name, breakdown
+                        )
+
+                        dexter_recommendation = dexter_output.value
+                        apply_action = get_apply_action(dexter_recommendation.apply_action_type)
+                        apply_parameters = None
+
+                        if apply_action:
+                            apply_parameters = apply_action.get_action_parameters(
+                                ApplyParameters(
+                                    budget_increase=BUDGET_INCREASE_PERCENTAGE,
+                                    budget_decrease=BUDGET_DECREASE_PERCENTAGE,
+                                ),
+                                structure.get(FacebookMiscFields.details),
+                            )
+
+                            # If something went wrong while processing the apply action then don't generate
+                            # recommendation
+                            if apply_parameters is None:
+                                continue
 
                         entry = RecommendationEntryModel(
-                            dexter_recommendation.recommendation_template_key,
+                            dexter_output.name,
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
-                            business_owner,
-                            f"act_{str(account_id)}",
-                            structure[structure_key],
-                            structure[f"{level.value}_name"],
-                            structure[FieldsMetadata.campaign_id.name],
-                            structure[FieldsMetadata.campaign_name.name],
-                            level.value,
                             datetime.now(),
                             time_bucket.no_of_days,
                             ChannelEnum.FACEBOOK.value,
                             dexter_recommendation.priority.value,
-                            [{"display_name": metric_name.replace("_", " ").title(), "name": metric_name}],
-                            {"display_name": breakdown.name.replace("_", " ").title(), "name": breakdown.name},
+                            structure_data,
+                            reports_data,
                             algorithm_type=self.ALGORITHM,
                             debug_msg=debug_msg,
+                            apply_parameters=apply_parameters,
                         )
                         dexter_recommendation.process_output(
-                            recommendations_repository, recommendation_entry_model=entry
+                            recommendations_repository, recommendation_entry_model=entry.get_extended_db_entry()
                         )
                         # For testing purposes we let the algorithm keep generating
                         # return None
@@ -142,7 +165,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
         no_of_days: int,
         reference_time: int,
         trigger_variance: float,
-    ) -> Tuple[Optional[DexterOutput], Optional[List[List[float]]], Optional[List[List[float]]]]:
+    ) -> Tuple[Optional[recommendation_enums_union], Optional[List[List[float]]], Optional[List[List[float]]]]:
 
         testing_benchmark_cause_values = []
         testing_recent_cause_values = []
@@ -168,8 +191,8 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                 # If one of the causes is not triggering, return
                 return None, None, None
 
-            cause_metric.output.no_of_days = no_of_days
-            cause_metric.output.trigger_variance = trigger_variance
+            cause_metric.output.value.no_of_days = no_of_days
+            cause_metric.output.value.trigger_variance = trigger_variance
 
             return (
                 cause_metric.output,

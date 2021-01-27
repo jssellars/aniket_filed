@@ -8,5 +8,5 @@ class Default:
     mongo = core.replace_in_class(
         core.Default.mongo,
         recommendations_collection_name="recommendations",
-        recommendations_database_name="{env}_dexter_fuzzy_inference_recommendations"
+        recommendations_database_name="{env}_dexter_recommendations"
     )

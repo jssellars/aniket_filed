@@ -3,6 +3,8 @@ import json
 from dataclasses import dataclass
 
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import DexterEngineRunJournalEnum
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
 from Core.mongo_adapter import MongoOperator
 from FacebookDexter.BackgroundTasks.Strategies.EmailNotificationsSystem import send_email
@@ -40,6 +42,7 @@ class FacebookTuringSyncDoneHandler:
                 MongoOperator.AND.value: [
                     {"account_id": {MongoOperator.IN.value: account_ids}},
                     {DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value: {MongoOperator.EQUALS.value: business_owner.business_owner_facebook_id}},
+                    {RecommendationField.STATUS.value: {MongoOperator.NOTEQUAL.value: RecommendationStatusEnum.APPLIED.value}}
                 ]
             }
 

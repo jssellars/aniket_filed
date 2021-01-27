@@ -1,18 +1,18 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List
 
 import requests
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import RecommendationPriority, get_formatted_message
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import InfoRecommendationTemplate
+from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
+from FacebookDexter.Infrastructure.DexterRules.DexterOutput import RecommendationPriority
 from jinja2 import Template
 
-EMAIL_RECIPIENTS = ["ovidiu.istrate@filed.com", "mo@filed.com", "Chase@filed.com"]
-THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-HTML_FILE = os.path.join(THIS_FOLDER, "EmailTable.html")
+EMAIL_RECIPIENTS = ["ovidiu.istrate@filed.com", "Chase@filed.com"]
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+HTML_FILE = os.path.join(CURRENT_DIR, "EmailTable.html")
 
 
 def send_email(recommendations_repository: MongoRepositoryBase, account_ids: List[str]):

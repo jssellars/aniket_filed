@@ -1,11 +1,15 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterOutput
+from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import (
+    AudienceRecommendationTemplate,
+    BreakdownRecommendationTemplate,
+)
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import OverTimeTrendTemplate
 
 
 class TrendEnum(Enum):
@@ -41,6 +45,10 @@ CUSTOM_DEXTER_METRICS = {
     ),
 }
 
+recommendation_enums_union = Union[
+    OverTimeTrendTemplate, BreakdownRecommendationTemplate, AudienceRecommendationTemplate
+]
+
 
 @dataclass
 class MetricClause:
@@ -53,7 +61,7 @@ class MetricClause:
 @dataclass
 class CauseMetricBase:
     metric_clauses: List[MetricClause]
-    output: Optional[DexterOutput] = None
+    output: Optional[recommendation_enums_union] = None
 
 
 @dataclass

@@ -7,8 +7,7 @@ from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
     TrendEnum,
     TriggerMetric,
 )
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterOutput, DexterRecommendationOutput
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import InfoRecommendationTemplate
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import OverTimeTrendTemplate
 
 # THREE DAYS BUCKETS
 THREE_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
@@ -23,13 +22,13 @@ THREE_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CTR_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CTR_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CPM_UP,
         ),
     ],
 )
@@ -42,27 +41,21 @@ THREE_DAYS_RESULTS_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.conversion_rate, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -77,39 +70,29 @@ THREE_DAYS_RESULTS_DOWN = TriggerMetric(
                     variance_percentage=20,
                 ),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.amount_spent, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPR_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPR_UP_CPC_UP,
         ),
     ],
 )
@@ -119,27 +102,21 @@ THREE_DAYS_RESULTS_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -147,9 +124,7 @@ THREE_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -157,18 +132,14 @@ THREE_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -181,7 +152,7 @@ THREE_DAYS_CTR_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_DOWN_CPM_UP_CPC_UP),
+            output=OverTimeTrendTemplate.CTR_DOWN_CPM_UP_CPC_UP,
         ),
     ],
 )
@@ -194,7 +165,7 @@ THREE_DAYS_CTR_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_UP_CPM_DOWN_CPC_DOWN),
+            output=OverTimeTrendTemplate.CTR_UP_CPM_DOWN_CPC_DOWN,
         ),
     ],
 )
@@ -207,18 +178,14 @@ THREE_DAYS_CPM_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CPR_UP,
         ),
     ],
 )
@@ -230,13 +197,13 @@ THREE_DAYS_CLICKS_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPM_UP,
         ),
     ],
 )
@@ -250,9 +217,7 @@ THREE_DAYS_CLICKS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -268,7 +233,7 @@ THREE_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -278,15 +243,11 @@ THREE_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.results, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP,
         ),
     ],
 )
@@ -302,7 +263,7 @@ THREE_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -312,7 +273,7 @@ THREE_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_DOWN),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_DOWN,
         ),
     ],
 )
@@ -326,7 +287,7 @@ THREE_DAYS_COST_PER_RESULT_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.impressions, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CPR_UP_IMPRESSIONS_DOWN),
+            output=OverTimeTrendTemplate.CPR_UP_IMPRESSIONS_DOWN,
         )
     ],
 )
@@ -342,9 +303,7 @@ THREE_DAYS_LANDING_PAGE_CONVERSION_RATE_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.unique_clicks_all, TrendEnum.INCREASING, variance_percentage=20)
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP
-            ),
+            output=OverTimeTrendTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP,
         )
     ],
 )
@@ -377,13 +336,13 @@ SEVEN_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CTR_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CTR_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CPM_UP,
         ),
     ],
 )
@@ -396,27 +355,21 @@ SEVEN_DAYS_RESULTS_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.conversion_rate, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -431,39 +384,29 @@ SEVEN_DAYS_RESULTS_DOWN = TriggerMetric(
                     variance_percentage=20,
                 ),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.amount_spent, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPR_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPR_UP_CPC_UP,
         ),
     ],
 )
@@ -473,27 +416,21 @@ SEVEN_DAYS_RESULTS_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -501,9 +438,7 @@ SEVEN_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -511,18 +446,14 @@ SEVEN_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -535,7 +466,7 @@ SEVEN_DAYS_CTR_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_DOWN_CPM_UP_CPC_UP),
+            output=OverTimeTrendTemplate.CTR_DOWN_CPM_UP_CPC_UP,
         ),
     ],
 )
@@ -548,7 +479,7 @@ SEVEN_DAYS_CTR_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_UP_CPM_DOWN_CPC_DOWN),
+            output=OverTimeTrendTemplate.CTR_UP_CPM_DOWN_CPC_DOWN,
         ),
     ],
 )
@@ -561,18 +492,14 @@ SEVEN_DAYS_CPM_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CPR_UP,
         ),
     ],
 )
@@ -584,13 +511,13 @@ SEVEN_DAYS_CLICKS_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPM_UP,
         ),
     ],
 )
@@ -604,9 +531,7 @@ SEVEN_DAYS_CLICKS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -622,7 +547,7 @@ SEVEN_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -632,15 +557,11 @@ SEVEN_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.results, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP,
         ),
     ],
 )
@@ -656,7 +577,7 @@ SEVEN_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -666,7 +587,7 @@ SEVEN_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_DOWN),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_DOWN,
         ),
     ],
 )
@@ -680,7 +601,7 @@ SEVEN_DAYS_COST_PER_RESULT_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.impressions, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CPR_UP_IMPRESSIONS_DOWN),
+            output=OverTimeTrendTemplate.CPR_UP_IMPRESSIONS_DOWN,
         )
     ],
 )
@@ -696,9 +617,7 @@ SEVEN_DAYS_LANDING_PAGE_CONVERSION_RATE_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.unique_clicks_all, TrendEnum.INCREASING, variance_percentage=20)
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP
-            ),
+            output=OverTimeTrendTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP,
         )
     ],
 )
@@ -730,13 +649,13 @@ FOURTEEN_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CTR_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CTR_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CPM_UP,
         ),
     ],
 )
@@ -749,27 +668,21 @@ FOURTEEN_DAYS_RESULTS_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.conversion_rate, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -784,39 +697,29 @@ FOURTEEN_DAYS_RESULTS_DOWN = TriggerMetric(
                     variance_percentage=20,
                 ),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.amount_spent, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPR_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPR_UP_CPC_UP,
         ),
     ],
 )
@@ -826,27 +729,21 @@ FOURTEEN_DAYS_RESULTS_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -854,9 +751,7 @@ FOURTEEN_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -864,18 +759,14 @@ FOURTEEN_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -888,7 +779,7 @@ FOURTEEN_DAYS_CTR_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_DOWN_CPM_UP_CPC_UP),
+            output=OverTimeTrendTemplate.CTR_DOWN_CPM_UP_CPC_UP,
         ),
     ],
 )
@@ -901,7 +792,7 @@ FOURTEEN_DAYS_CTR_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_UP_CPM_DOWN_CPC_DOWN),
+            output=OverTimeTrendTemplate.CTR_UP_CPM_DOWN_CPC_DOWN,
         ),
     ],
 )
@@ -914,18 +805,14 @@ FOURTEEN_DAYS_CPM_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CPR_UP,
         ),
     ],
 )
@@ -937,13 +824,13 @@ FOURTEEN_DAYS_CLICKS_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPM_UP,
         ),
     ],
 )
@@ -957,9 +844,7 @@ FOURTEEN_DAYS_CLICKS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -975,7 +860,7 @@ FOURTEEN_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -985,15 +870,11 @@ FOURTEEN_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.results, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP,
         ),
     ],
 )
@@ -1009,7 +890,7 @@ FOURTEEN_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -1019,7 +900,7 @@ FOURTEEN_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_DOWN),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_DOWN,
         ),
     ],
 )
@@ -1033,7 +914,7 @@ FOURTEEN_DAYS_COST_PER_RESULT_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.impressions, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CPR_UP_IMPRESSIONS_DOWN),
+            output=OverTimeTrendTemplate.CPR_UP_IMPRESSIONS_DOWN,
         )
     ],
 )
@@ -1049,9 +930,7 @@ FOURTEEN_DAYS_LANDING_PAGE_CONVERSION_RATE_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.unique_clicks_all, TrendEnum.INCREASING, variance_percentage=20)
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP
-            ),
+            output=OverTimeTrendTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP,
         )
     ],
 )
@@ -1083,13 +962,13 @@ THIRTY_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CTR_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CTR_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CR_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CR_DOWN_CPM_UP,
         ),
     ],
 )
@@ -1102,27 +981,21 @@ THIRTY_DAYS_RESULTS_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.conversion_rate, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPM_UP_CR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPC_UP_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -1137,39 +1010,29 @@ THIRTY_DAYS_RESULTS_DOWN = TriggerMetric(
                     variance_percentage=20,
                 ),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CR_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.amount_spent, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_DOWN_CPR_UP_CPC_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_DOWN_CPR_UP_CPC_UP,
         ),
     ],
 )
@@ -1179,27 +1042,21 @@ THIRTY_DAYS_RESULTS_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_UNIQUE_CTR_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CTR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -1207,9 +1064,7 @@ THIRTY_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -1217,18 +1072,14 @@ THIRTY_DAYS_RESULTS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.RESULTS_UP_CPR_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -1241,7 +1092,7 @@ THIRTY_DAYS_CTR_DOWN = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_DOWN_CPM_UP_CPC_UP),
+            output=OverTimeTrendTemplate.CTR_DOWN_CPM_UP_CPC_UP,
         ),
     ],
 )
@@ -1254,7 +1105,7 @@ THIRTY_DAYS_CTR_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CTR_UP_CPM_DOWN_CPC_DOWN),
+            output=OverTimeTrendTemplate.CTR_UP_CPM_DOWN_CPC_DOWN,
         ),
     ],
 )
@@ -1267,18 +1118,14 @@ THIRTY_DAYS_CPM_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.ctr_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CTR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CTR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.results, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CPM_UP_RESULTS_DOWN_CPR_UP
-            ),
+            output=OverTimeTrendTemplate.CPM_UP_RESULTS_DOWN_CPR_UP,
         ),
     ],
 )
@@ -1290,13 +1137,13 @@ THIRTY_DAYS_CLICKS_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPC_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPC_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CLICKS_DOWN_CPM_UP),
+            output=OverTimeTrendTemplate.CLICKS_DOWN_CPM_UP,
         ),
     ],
 )
@@ -1310,9 +1157,7 @@ THIRTY_DAYS_CLICKS_UP = TriggerMetric(
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.DECREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpm, TrendEnum.DECREASING, variance_percentage=20),
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN
-            ),
+            output=OverTimeTrendTemplate.CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN,
         ),
     ],
 )
@@ -1328,7 +1173,7 @@ THIRTY_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -1338,15 +1183,11 @@ THIRTY_DAYS_AMOUNT_SPENT_DOWN = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_CPR_DOWN,
         ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.results, TrendEnum.INCREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP
-            ),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_DOWN_RESULTS_UP,
         ),
     ],
 )
@@ -1362,7 +1203,7 @@ THIRTY_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_UP),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_UP,
         ),
         CauseMetricBase(
             metric_clauses=[
@@ -1372,7 +1213,7 @@ THIRTY_DAYS_AMOUNT_SPENT_UP = TriggerMetric(
                     variance_percentage=20,
                 )
             ],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.AMOUNT_SPENT_UP_CPR_DOWN),
+            output=OverTimeTrendTemplate.AMOUNT_SPENT_UP_CPR_DOWN,
         ),
     ],
 )
@@ -1386,7 +1227,7 @@ THIRTY_DAYS_COST_PER_RESULT_UP = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.impressions, TrendEnum.DECREASING, variance_percentage=20)],
-            output=DexterRecommendationOutput.from_recommendation(InfoRecommendationTemplate.CPR_UP_IMPRESSIONS_DOWN),
+            output=OverTimeTrendTemplate.CPR_UP_IMPRESSIONS_DOWN,
         )
     ],
 )
@@ -1402,9 +1243,7 @@ THIRTY_DAYS_LANDING_PAGE_CONVERSION_RATE_DOWN = TriggerMetric(
             metric_clauses=[
                 MetricClause(FieldsMetadata.unique_clicks_all, TrendEnum.INCREASING, variance_percentage=20)
             ],
-            output=DexterRecommendationOutput.from_recommendation(
-                InfoRecommendationTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP
-            ),
+            output=OverTimeTrendTemplate.LANDING_PAGE_CONVERSION_RATE_DOWN_UNIQUE_CLICKS_UP,
         )
     ],
 )

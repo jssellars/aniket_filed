@@ -1,17 +1,16 @@
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
-    StrategyTimeBucket,
-    TriggerMetric,
-    MetricClause,
-    TrendEnum,
     CauseMetricBase,
+    MetricClause,
+    StrategyTimeBucket,
+    TrendEnum,
+    TriggerMetric,
 )
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import (
-    BreakdownRecommendationTemplate,
     AudienceRecommendationTemplate,
+    BreakdownRecommendationTemplate,
 )
-from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecommendationOutput
 
 AGE_GENDER_BREAKDOWN_RULE = [
     TriggerMetric(
@@ -26,9 +25,7 @@ AGE_GENDER_BREAKDOWN_RULE = [
                 metric_clauses=[
                     MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=30)
                 ],
-                output=DexterRecommendationOutput.from_recommendation(
-                    BreakdownRecommendationTemplate.AGE_GENDER_BREAKDOWN
-                ),
+                output=BreakdownRecommendationTemplate.AGE_GENDER_BREAKDOWN,
             )
         ],
     )
@@ -47,14 +44,11 @@ PLACEMENT_BREAKDOWN_RULE = [
                 metric_clauses=[
                     MetricClause(FieldsMetadata.cost_per_result, TrendEnum.INCREASING, variance_percentage=30)
                 ],
-                output=DexterRecommendationOutput.from_recommendation(
-                    BreakdownRecommendationTemplate.PLACEMENT_BREAKDOWN
-                ),
+                output=BreakdownRecommendationTemplate.PLACEMENT_BREAKDOWN,
             )
         ],
     )
 ]
-
 
 AGE_GENDER_BREAKDOWN_BUCKET = [
     StrategyTimeBucket(
@@ -87,9 +81,7 @@ REACH_AUDIENCE_SIZE_RULE = [
         cause_metrics=[
             CauseMetricBase(
                 metric_clauses=[],
-                output=DexterRecommendationOutput.from_recommendation(
-                    AudienceRecommendationTemplate.AUDIENCE_EXHAUSTED
-                ),
+                output=AudienceRecommendationTemplate.AUDIENCE_EXHAUSTED,
             )
         ],
     )
