@@ -67,6 +67,7 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
     split_by_location = step_four["is_split_by_location"]
     split_by_device = step_four["is_split_by_devices"]
     locations = step_two["targeting"]["locations"]
+    campaign_budget_allocation = step_four.get("budget_allocation", {}).get("campaigns_budget")
 
     all_locations = [Location(**location) for location in locations]
 
@@ -75,9 +76,11 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
             for device in DevicePlatform.contexts[Contexts.SMART_CREATE].items:
                 campaign = deepcopy(campaign_template)
                 campaign[Campaign.Field.name] = format_campaign_name(
-                    campaign_template[Campaign.Field.name], location["selected_location_string"],
-                    device.name_sdk.title()
+                    campaign_template[Campaign.Field.name],
+                    location["selected_location_string"],
+                    device.name_sdk.title(),
                 )
+                allocate_campaign_budget(campaign, campaign_budget_allocation, location, device)
                 campaigns.append(
                     CampaignSplit(
                         campaign,
@@ -91,6 +94,7 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
             campaign[Campaign.Field.name] = format_campaign_name(
                 campaign_template[Campaign.Field.name], location["selected_location_string"]
             )
+            allocate_campaign_budget(campaign, campaign_budget_allocation, location=location)
             campaigns.append(CampaignSplit(campaign, location=Location(**location)))
     elif not split_by_location and split_by_device:
         for device in DevicePlatform.contexts[Contexts.SMART_CREATE].items:
@@ -98,8 +102,43 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
             campaign[Campaign.Field.name] = format_campaign_name(
                 campaign_template[Campaign.Field.name], device.name_sdk.title()
             )
+            allocate_campaign_budget(campaign, campaign_budget_allocation, device=device)
             campaigns.append(CampaignSplit(campaign, all_locations=all_locations, device=device.name_sdk))
     else:
         campaigns.append(CampaignSplit(deepcopy(campaign_template), all_locations=all_locations))
 
     return campaigns
+
+
+def get_budget_allocated_type(campaign):
+    return Campaign.Field.lifetime_budget if Campaign.Field.lifetime_budget in campaign else Campaign.Field.daily_budget
+
+
+def allocate_campaign_budget(campaign, campaign_budget_allocation, location=None, device=None):
+    if not campaign_budget_allocation:
+        return
+
+    location = location.get("key")
+    try:
+        device = device.name_sdk
+    except AttributeError:
+        device = None
+
+    budget_allocated_type = get_budget_allocated_type(campaign)
+    for allocation in campaign_budget_allocation:
+
+        is_location_match = location == allocation.get("location")
+        is_device_match = device == allocation.get("device")
+
+        if "location" in allocation and "device" in allocation:
+            if is_location_match and is_device_match:
+                campaign[budget_allocated_type] = allocation.get("budget") * 100
+                return
+        elif "location" in allocation:
+            if is_location_match:
+                campaign[budget_allocated_type] = allocation.get("budget") * 100
+                return
+        elif "device" in allocation:
+            if is_device_match:
+                campaign[budget_allocated_type] = allocation.get("budget") * 100
+                return
