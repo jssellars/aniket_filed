@@ -63,6 +63,7 @@ from FacebookTuring.Api.Mappings.AdsManagerSaveDraftCommandMapping import AdsMan
 from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from FacebookTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
+from FacebookTuring.Api.Queries.campaign_trees_structure import CampaignTreesStructure
 from FacebookTuring.Api.startup import config, fixtures
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
@@ -286,6 +287,20 @@ class AdsManagerCampaignTreeStructure(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Could not retrieve tree for {facebook_id}"}, 400
+
+
+class SmartEditCampaignTreesStructure(Resource):
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    def get(self, level, structure_ids):
+        try:
+            structure_ids = structure_ids.split(",")
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            return humps.camelize(CampaignTreesStructure.get(level, structure_ids, business_owner_facebook_id)), 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": f"Could not retrieve tree for {structure_ids}"}, 400
 
 
 class GetStructuresHandler:

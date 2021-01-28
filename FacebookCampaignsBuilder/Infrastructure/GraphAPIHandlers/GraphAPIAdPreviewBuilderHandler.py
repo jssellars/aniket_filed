@@ -1,5 +1,4 @@
 import typing
-from enum import Enum
 
 import requests
 from facebook_business.adobjects.adaccount import AdAccount
@@ -9,16 +8,8 @@ from facebook_business.adobjects.adcreativelinkdatachildattachment import AdCrea
 from facebook_business.adobjects.adcreativeobjectstoryspec import AdCreativeObjectStorySpec
 from facebook_business.adobjects.adimage import AdImage
 
+from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-
-
-class FiledAdFormatEnum(Enum):
-    IMAGE = 1
-    CAROUSEL = 2
-    COLLECTION = 3
-    SLIDESHOW = 4
-    VIDEO = 5
-    EXISTING_POST = 6
 
 
 class GraphAPIAdPreviewBuilderHandler:

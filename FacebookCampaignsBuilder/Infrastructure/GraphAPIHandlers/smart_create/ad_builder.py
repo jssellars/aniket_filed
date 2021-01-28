@@ -15,7 +15,7 @@ from facebook_business.adobjects.adimage import AdImage
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
 from Core.facebook.sdk_adapter.ad_objects.ad_creative import CallToActionType
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewBuilderHandler import FiledAdFormatEnum
+from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 
 
 def build_ads(ad_account_id: str, step_two: Dict, step_three: Dict, objective: str = None):

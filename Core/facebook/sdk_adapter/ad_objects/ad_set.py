@@ -56,3 +56,30 @@ class DestinationType(Enum):
     MESSENGER = Cat(_destination_type.messenger)
     UNDEFINED = Cat(_destination_type.undefined)
     WEBSITE = Cat(_destination_type.website)
+
+
+@cat_enum
+class MobileDeviceGroup(Enum):
+    ANDROID_SMARTPHONES = Cat("Android_Smartphone", display_name="Android Smartphones (all)")
+    ANDROID_TABLETS = Cat("Android_Tablet", display_name="Android Tables (all)")
+    IPADS = Cat("iPad", display_name="iPads (all)")
+    IPHONES = Cat("iPhone", display_name="iPhones (all)")
+    IPODS = Cat("iPod", display_name="iPods (all)")
+
+
+@cat_enum
+class OSWithMobileDeviceGroup(Enum):
+    ALL = Cat(None, display_name="All Mobile Devices")
+    ANDROID = Cat(
+        "Android",
+        MobileDeviceGroup.ANDROID_SMARTPHONES,
+        MobileDeviceGroup.ANDROID_TABLETS,
+        display_name="Android Devices Only",
+    )
+    IOS = Cat(
+        "iOS",
+        MobileDeviceGroup.IPADS,
+        MobileDeviceGroup.IPHONES,
+        MobileDeviceGroup.IPODS,
+        display_name="iOS Devices Only",
+    )

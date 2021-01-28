@@ -14,13 +14,12 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.const
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
     AgeGroup,
     CustomAudience,
-    FacebookGender,
     FlexibleTargeting,
-    Gender,
     GenderGroup,
     Interest,
     Targeting,
 )
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import Gender, FacebookGender
 
 FACEBOOK_DEFAULT_KEY = "FACEBOOK"
 INSTAGRAM_DEFAULT_KEY = "INSTAGRAM"
@@ -97,14 +96,13 @@ def set_promoted_object(ad_set_template, is_using_conversions, step_three, step_
     if is_using_conversions:
         promoted_object = dict(pixel_id=step_three["pixel_id"])
 
-        # TODO: check if this is necessary
         if "custom_event_type" in step_three:
             promoted_object["custom_event_type"] = step_three["custom_event_type"]
 
         if "pixel_rule" in step_three and step_three["pixel_rule"]:
             pixel_rule = step_three["pixel_rule"]
             if isinstance(pixel_rule, str):
-                pixel_rule = json.loads(pixel_rule).replace("\\", "")
+                pixel_rule = json.loads(pixel_rule.replace("\\", ""))
 
             promoted_object["pixel_rule"] = pixel_rule
 

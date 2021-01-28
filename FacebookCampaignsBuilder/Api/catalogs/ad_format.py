@@ -1,9 +1,7 @@
 from FacebookCampaignsBuilder.Api.catalogs import objectives
 from FacebookCampaignsBuilder.Api.catalogs.base import Base
 from FacebookCampaignsBuilder.Api.catalogs.node import Node
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewBuilderHandler import (
-    FiledAdFormatEnum,
-)
+from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 
 image = Node(str(FiledAdFormatEnum.IMAGE.value))
 video = Node(str(FiledAdFormatEnum.VIDEO.value))

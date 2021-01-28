@@ -39,11 +39,8 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetVali
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIInterestsHandler import (
     GraphAPIInterestsHandler,
 )
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPILanguagesHandler import (
-    GraphAPILanguagesHandler,
-)
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPILocationsHandler import (
-    GraphAPILocationsHandler,
+from Core.Web.FacebookGraphAPI.search import (
+    GraphAPILocationsHandler, GraphAPILanguagesHandler,
 )
 
 

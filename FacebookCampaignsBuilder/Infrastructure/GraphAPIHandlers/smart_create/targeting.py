@@ -1,19 +1,8 @@
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import List, Optional
 
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.constants import FB_MAX_AGE, FB_MIN_AGE
-
-
-class Gender(Enum):
-    ALL = 0
-    WOMEN = 1
-    MEN = 2
-
-
-class FacebookGender(Enum):
-    MALE = 1
-    FEMALE = 2
 
 
 @dataclass

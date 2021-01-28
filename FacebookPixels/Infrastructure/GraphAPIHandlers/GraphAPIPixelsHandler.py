@@ -226,11 +226,11 @@ class GraphAPIPixelHandler:
         return da_checks
 
     @staticmethod
-    def __filter_custom_conversion_by_pixel_id(custom_conversions: typing.List[GraphAPICustomConversionDto] = None,
-                                               pixel_id: typing.AnyStr = None) -> typing.List[
+    def __filter_custom_conversions(custom_conversions: typing.List[GraphAPICustomConversionDto] = None,
+                                    pixel_id: typing.AnyStr = None) -> typing.List[
         GraphAPICustomConversionDto]:
         filtered_custom_conversions = [custom_conversion for custom_conversion in custom_conversions
-                                       if custom_conversion.pixel_id == pixel_id]
+                                       if custom_conversion.pixel_id == pixel_id and not custom_conversion.is_archived]
         return filtered_custom_conversions
 
     @classmethod
@@ -240,7 +240,7 @@ class GraphAPIPixelHandler:
         custom_conversion_mapper = GraphAPICustomConversionMapping(target=GraphAPICustomConversionDto)
         custom_conversions = ad_account.get_custom_conversions(fields=GraphAPICustomConversionFields.get_values())
         custom_conversions = custom_conversion_mapper.load(custom_conversions, many=True)
-        custom_conversions = cls.__filter_custom_conversion_by_pixel_id(custom_conversions, pixel_id)
+        custom_conversions = cls.__filter_custom_conversions(custom_conversions, pixel_id)
         return custom_conversions
 
     @classmethod

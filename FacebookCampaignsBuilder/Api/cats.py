@@ -4,7 +4,8 @@ from Core.facebook.sdk_adapter.ad_objects.ad_creative import ApplinkTreatment, C
 from Core.facebook.sdk_adapter.ad_objects.ad_insights import ActionAttributionWindowClick, ActionAttributionWindowView
 from Core.facebook.sdk_adapter.ad_objects.ad_place_page_set import LocationTypeGroup, LocationType
 from Core.facebook.sdk_adapter.ad_objects.ad_preview import AdFormat
-from Core.facebook.sdk_adapter.ad_objects.ad_set import BillingEvent, PacingType, DestinationType
+from Core.facebook.sdk_adapter.ad_objects.ad_set import BillingEvent, PacingType, DestinationType, \
+    OSWithMobileDeviceGroup
 from Core.facebook.sdk_adapter.ad_objects.campaign import BidStrategy, Objective, SpecialAdCategories, \
     ObjectiveWithDestination, ObjectiveWithDestinationGroup, BudgetTimespan
 from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Platform, Position, Placement
@@ -12,7 +13,6 @@ from Core.facebook.sdk_adapter.ad_objects.gender import Gender, GenderGroup
 from Core.facebook.sdk_adapter.ad_objects.product_event_stat import DeviceType
 from Core.facebook.sdk_adapter.ad_objects.reach_frequency_prediction import BuyingType
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
-
 
 # Campaign creation params
 #
@@ -72,6 +72,7 @@ CATS = [
     AdFormat,
     DevicePlatform,
     DeviceType,
+    OSWithMobileDeviceGroup,
     # Media URL
     # Primary text
     # Headline

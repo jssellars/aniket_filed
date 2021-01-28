@@ -1,8 +1,9 @@
+import logging
 import sys
 import typing
 from copy import deepcopy
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, AnyStr
 
 from bson import BSON
 from pymongo.errors import AutoReconnect
@@ -16,9 +17,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import Facebook
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping, \
     LevelToFacebookNameKeyMapping, Level
-
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -161,8 +159,109 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         return results
 
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
+    def get_bo_structures_by_ids(self, business_owner_id: AnyStr, structure_id_key: AnyStr,
+                                 structure_ids: List[AnyStr]) -> List[Dict]:
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    structure_id_key: {
+                        MongoOperator.IN.value: structure_ids
+                    }
+                },
+                {
+                    FacebookMiscFields.status: {
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value]
+                    }
+                },
+                {
+                    "business_owner_facebook_id": business_owner_id
+                }
+            ]
+        }
+
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        try:
+            structures = list(self.collection.find(query, projection))
+            for structure in structures:
+                if FacebookMiscFields.details in structure:
+                    structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
+        except Exception as e:
+            logger.error(f"Failed to get active structures ids || {repr(e)}")
+            raise e
+
+        return structures
+
+    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
+    def get_bo_structures_by_id(self, business_owner_id: AnyStr, structure_id_key: AnyStr,
+                                structure_id: AnyStr) -> List[Dict]:
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    structure_id_key: structure_id
+                },
+                {
+                    FacebookMiscFields.status: {
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value]
+                    }
+                },
+                {
+                    "business_owner_facebook_id": business_owner_id
+                }
+            ]
+        }
+
+        projection = {
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        try:
+            structures = list(self.collection.find(query, projection))
+            for structure in structures:
+                if FacebookMiscFields.details in structure:
+                    structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
+        except Exception as e:
+            logger.error(f"Failed to get active structures ids || {repr(e)}")
+            raise e
+
+        return structures
+
+    def get_bo_unique_campaign_ids(self, business_owner_id: AnyStr, structure_id_key: AnyStr,
+                                   structure_ids: List[AnyStr]):
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    structure_id_key: {
+                        MongoOperator.IN.value: structure_ids
+                    }
+                },
+                {
+                    FacebookMiscFields.status: {
+                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value,
+                                                 StructureStatusEnum.PAUSED.value]
+                    }
+                },
+                {
+                    "business_owner_facebook_id": business_owner_id
+                }
+            ]
+        }
+
+        try:
+            campaign_ids = list(self.collection.distinct("campaign_id", query))
+        except Exception as e:
+            logger.error(f"Failed to get active structures ids || {repr(e)}")
+            raise e
+
+        return campaign_ids
+
     def get_structure_ids(self, level: Level = None, account_id: typing.AnyStr = None) -> typing.List[typing.AnyStr]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -194,7 +293,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                            campaign_ids: typing.List[typing.AnyStr] = None,
                            adset_ids: typing.List[typing.AnyStr] = None,
                            statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
 
         query = {
             MongoOperator.AND.value: [
@@ -250,7 +349,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                     campaign_ids: typing.List[typing.AnyStr] = None,
                                     adset_ids: typing.List[typing.AnyStr] = None,
                                     statuses: typing.List[int] = None) -> typing.List[typing.Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
 
         query = {
             MongoOperator.AND.value: [
@@ -301,7 +400,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                key_value: typing.Any = None,
                                id_key_name: typing.AnyStr = None,
                                name_key_name: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         # only get active data
         query = {
             MongoOperator.AND.value: [
@@ -371,7 +470,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return query, projection
 
     def get_structure_details(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.Dict:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structure = self.first_or_default(query, projection)
         if FacebookMiscFields.details in structure.keys():
@@ -381,14 +480,14 @@ class TuringMongoRepository(MongoRepositoryBase):
     def get_structure_details_many(self,
                                    level: Level = None,
                                    key_value: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structures = self.get(query, projection)
         return self.__decode_structure_details_from_bson(structures)
 
     def get_all_structures_by_ad_account_id(self, level: Level = None, account_id: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -419,7 +518,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                        structure_ids: typing.List[typing.AnyStr] = None,
                                        structure_key: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
-        self.collection = collection_name=Level.ADSET.value
+        self.collection = Level.ADSET.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -452,7 +551,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                                       structure_ids: typing.List[typing.AnyStr] = None,
                                       structure_key: typing.AnyStr = None) -> \
             typing.List[typing.Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query = {
             MongoOperator.AND.value: [
                 {
@@ -496,7 +595,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return child_results
 
     def get_children_from_parent_key(self, parent_key: str, parent_id: str, level: Level) -> List[Dict]:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query = {
             MongoOperator.AND.value: [
                 {parent_key: {MongoOperator.EQUALS.value: parent_id}},
@@ -544,7 +643,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                       key_value: typing.Any = None,
                       current_status: int = None,
                       new_status: int = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         if current_status is None:
             current_status = [StructureStatusEnum.ACTIVE.value,
                               StructureStatusEnum.REMOVED.value,
@@ -578,7 +677,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                            key_value: typing.Any = None,
                            current_status: int = None,
                            new_status: int = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -610,7 +709,7 @@ class TuringMongoRepository(MongoRepositoryBase):
     def add_structures_many_with_deprecation(self,
                                              level: Level = None,
                                              structures: typing.List[typing.Any] = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         structures_to_insert = []
         for structure in structures:
             structure_id = self.__get_structure_id(structure, level)
@@ -640,7 +739,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         self.add_many(structures_to_insert)
 
     def deprecate_structure(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query_filter = {
             LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
                 MongoOperator.EQUALS.value: key_value
@@ -656,7 +755,7 @@ class TuringMongoRepository(MongoRepositoryBase):
     def deprecate_structures_by_account_id(self,
                                            account_id: typing.AnyStr = None,
                                            level: Level = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query_filter = {
             FacebookMiscFields.account_id: {
                 MongoOperator.EQUALS.value: account_id
@@ -671,7 +770,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
     def add_structure_many(self, account_id: typing.AnyStr = None, level: Level = None,
                            structures: typing.List[typing.Any] = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         # get existing active or removed structures ids
         existing_structures_ids = self.get_structure_ids(level, account_id)
         existing_structures_ids = set(existing_structures_ids)
@@ -714,7 +813,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
     def add_structure(self, level: Level = None, key_value: typing.Any = None,
                       document: typing.Dict = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -733,7 +832,6 @@ class TuringMongoRepository(MongoRepositoryBase):
                 }
             ]
 
-
         }
         query = {
             MongoOperator.SET.value: {
@@ -748,7 +846,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             raise e
 
     def discard_structure_draft(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {
@@ -775,7 +873,7 @@ class TuringMongoRepository(MongoRepositoryBase):
                              level: Level = None,
                              key_value: typing.AnyStr = None,
                              details: typing.Dict = None) -> typing.NoReturn:
-        self.collection = collection_name=level.value
+        self.collection = level.value
         query_filter = {
             MongoOperator.AND.value: [
                 {

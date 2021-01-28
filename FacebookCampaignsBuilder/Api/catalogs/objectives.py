@@ -1,20 +1,17 @@
 from facebook_business.adobjects.adpreview import AdPreview
 from facebook_business.adobjects.campaign import Campaign
 
+from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
+from FacebookCampaignsBuilder.Api.catalogs import optimization_goal
 from FacebookCampaignsBuilder.Api.catalogs.base import Base
 from FacebookCampaignsBuilder.Api.catalogs.node import Node
-from FacebookCampaignsBuilder.Api.catalogs import optimization_goal
 
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers import GraphAPIAdPreviewBuilderHandler
-
-
-_media_format = GraphAPIAdPreviewBuilderHandler.FiledAdFormatEnum
 media_formats = "MEDIA_FORMATS"
 
-_mf_img = _media_format.IMAGE.name
-_mf_vid = _media_format.VIDEO.name
-_mf_car = _media_format.CAROUSEL.name
-_mf_col = _media_format.COLLECTION.name
+_mf_img = FiledAdFormatEnum.IMAGE.name
+_mf_vid = FiledAdFormatEnum.VIDEO.name
+_mf_car = FiledAdFormatEnum.CAROUSEL.name
+_mf_col = FiledAdFormatEnum.COLLECTION.name
 
 # https://www.facebook.com/business/help/279271845888065
 
@@ -36,8 +33,8 @@ class AdFormat:
     instant_article_standard = Node(_format.instant_article_standard)
     instream_video_desktop = Node(_format.instream_video_desktop)
     instream_video_mobile = Node(_format.instream_video_mobile)
-    job_browser_desktop = Node(_format.job_browser_desktop)  #  unused
-    job_browser_mobile = Node(_format.job_browser_mobile)  #  unused
+    job_browser_desktop = Node(_format.job_browser_desktop)  # unused
+    job_browser_mobile = Node(_format.job_browser_mobile)  # unused
     marketplace_mobile = Node(_format.marketplace_mobile)
     messenger_mobile_inbox_media = Node(_format.messenger_mobile_inbox_media)
     messenger_mobile_story_media = Node(_format.messenger_mobile_story_media)
