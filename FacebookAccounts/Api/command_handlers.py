@@ -1,3 +1,4 @@
+import logging
 import typing
 
 import requests
@@ -9,21 +10,22 @@ from Core.Web.Security.Authorization import add_bearer_token, generate_technical
 from FacebookAccounts.Api.dtos import BusinessOwnerCreatedDto
 from FacebookAccounts.Api.startup import config, fixtures
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountHandler import GraphAPIAdAccountHandler
-from FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import \
-    get_exchange_temporary_token_url, get_generate_permanent_token_url
-from FacebookAccounts.Infrastructure.IntegrationEvents.BusinessOwnerCreatedEvent import \
-    BusinessOwnerCreatedEvent
-
-
-import logging
+from FacebookAccounts.Infrastructure.GraphAPIRequests.PermanentTokenGraphAPIRequests import (
+    get_exchange_temporary_token_url,
+    get_generate_permanent_token_url,
+)
+from FacebookAccounts.Infrastructure.IntegrationEvents.BusinessOwnerCreatedEvent import BusinessOwnerCreatedEvent
 
 logger = logging.getLogger(__name__)
 
 
 class BusinessOwnerCreateCommandHandler:
-
     @classmethod
     def handle(cls, command):
+        # validate if the business owner already exists
+        cls.validate_business_owner(command.facebook_id)
+
+        # generate permanent tokens for each page
         cls.generate_permanent_token(command)
 
         # call subscription that new user has been successfully added to the system
@@ -33,12 +35,14 @@ class BusinessOwnerCreateCommandHandler:
         business = cls.get_businesses(command)
 
         # publish businesses details to facebook ad accounts queue
-        response = BusinessOwnerCreatedEvent(facebook_id=business.facebook_id,
-                                             filed_user_id=business.filed_user_id,
-                                             name=business.name,
-                                             email=business.email,
-                                             requested_permissions=business.requested_permissions,
-                                             businesses=business.businesses)
+        response = BusinessOwnerCreatedEvent(
+            facebook_id=business.facebook_id,
+            filed_user_id=business.filed_user_id,
+            name=business.name,
+            email=business.email,
+            requested_permissions=business.requested_permissions,
+            businesses=business.businesses,
+        )
 
         cls.publish_response(response)
 
@@ -49,13 +53,11 @@ class BusinessOwnerCreateCommandHandler:
 
             headers = add_bearer_token(technical_token)
 
-            body = {
-                "UserId": command.filed_user_id,
-                "BusinessOwnerFacebookId": command.facebook_id
-            }
+            body = {"UserId": command.filed_user_id, "BusinessOwnerFacebookId": command.facebook_id}
 
-            _ = requests.put(config.external_services.subscription_update_business_owner_endpoint, json=body,
-                             headers=headers)
+            _ = requests.put(
+                config.external_services.subscription_update_business_owner_endpoint, json=body, headers=headers
+            )
         except Exception as e:
             raise e
 
@@ -91,7 +93,8 @@ class BusinessOwnerCreateCommandHandler:
                     name=command.name,
                     email=command.email,
                     token=entry["access_token"],
-                    page_id=entry["id"])
+                    page_id=entry["id"],
+                )
         except Exception as e:
             raise e
 
@@ -101,27 +104,32 @@ class BusinessOwnerCreateCommandHandler:
             permanent_token = fixtures.business_owner_repository.get_permanent_token(command.facebook_id)
 
             businesses = GraphAPIAdAccountHandler(permanent_token, config.facebook).get_business_owner_details(
-                command.facebook_id)
+                command.facebook_id
+            )
 
-            businesses = BusinessOwnerCreatedDto(facebook_id=command.facebook_id,
-                                                 name=command.name,
-                                                 email=command.email,
-                                                 requested_permissions=command.requested_permissions,
-                                                 filed_user_id=command.filed_user_id,
-                                                 businesses=businesses)
+            businesses = BusinessOwnerCreatedDto(
+                facebook_id=command.facebook_id,
+                name=command.name,
+                email=command.email,
+                requested_permissions=command.requested_permissions,
+                filed_user_id=command.filed_user_id,
+                businesses=businesses,
+            )
 
         except Exception as e:
             raise e
 
         return businesses
 
+    @classmethod
+    def validate_business_owner(cls, business_owner_id: str):
+        if fixtures.business_owner_repository.business_owner_already_exists(business_owner_id):
+            raise Exception("Business owner already exists!")
+
 
 class BusinessOwnerDeletePermissionsCommandHandler:
-
     @classmethod
-    def handle(cls,
-               business_owner_id: typing.AnyStr = None,
-               permissions: typing.AnyStr = None) -> typing.Dict:
+    def handle(cls, business_owner_id: typing.AnyStr = None, permissions: typing.AnyStr = None) -> typing.Dict:
 
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
@@ -129,17 +137,14 @@ class BusinessOwnerDeletePermissionsCommandHandler:
         _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         user = User(fbid=business_owner_id)
-        response = {
-            'successful': [],
-            'failed': []
-        }
+        response = {"successful": [], "failed": []}
         permissions = permissions.split(",")
         for permission in permissions:
             try:
                 fb_response = user.delete_permissions(params={"permission": permission})
                 if fb_response:
-                    response['successful'].append(permission)
+                    response["successful"].append(permission)
             except:
-                response['failed'].append(permission)
+                response["failed"].append(permission)
 
         return response
