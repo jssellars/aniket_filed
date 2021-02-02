@@ -51,6 +51,9 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEv
 
 logger = logging.getLogger(__name__)
 
+# TODO: Add the rest of location options into keys
+LOCATION_OPTIONS = dict(city="cities", country="countries", geo_market="geo_markets", region="regions", zip="zips")
+
 
 class AdPreview:
     @classmethod
@@ -310,6 +313,7 @@ class SmartCreatePublish:
         step_four = request["step_four_details"]
         is_adset_using_cbo = "budget_optimization" in step_two and step_two["budget_optimization"] is not None
         is_adset_budget_split = step_four.get("is_split_by_budget")
+        adset_budget_allocation = step_four.get("budget_allocation", {}).get("adset_budget")
 
         for campaign_index, campaign in enumerate(campaigns):
             try:
@@ -341,6 +345,15 @@ class SmartCreatePublish:
 
                     if is_adset_budget_split:
                         adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget / len(ad_sets)})
+                    elif adset_budget_allocation:
+                        SmartCreatePublish.allocate_adset_budget(
+                            adset_budgets,
+                            adset_create_template,
+                            adset_budget_allocation,
+                            ad_set_facebook_id,
+                            adset_budget_type,
+                            step_four,
+                        )
                     else:
                         adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget})
 
@@ -411,15 +424,13 @@ class SmartCreatePublish:
 
     @staticmethod
     def process_geo_location(locations: List[Location]) -> Dict:
-        # TODO: Add the rest of location options into keys
-        keys = dict(city="cities", country="countries", geo_market="geo_markets", region="regions", zip="zips")
         result = defaultdict(list)
 
         for location in locations:
             if location.type == "country":
-                result[keys[location.type]].append(location.country_code)
+                result[LOCATION_OPTIONS[location.type]].append(location.country_code)
             else:
-                result[keys[location.type]].append({"key": location.key})
+                result[LOCATION_OPTIONS[location.type]].append({"key": location.key})
 
         return result
 
@@ -446,6 +457,97 @@ class SmartCreatePublish:
             return adset_budget_type, budget
 
         return None, None
+
+    @staticmethod
+    def allocate_adset_budget(
+        adset_budgets: List,
+        adset_create_template: Dict,
+        adset_budget_allocation: Dict,
+        ad_set_facebook_id: str,
+        adset_budget_type: str,
+        step_four: Dict,
+    ):
+        targeting = adset_create_template["targeting"]
+
+        device, location = SmartCreatePublish.get_location_device(targeting)
+        campaign_split_fields = dict(location=location, device=device)
+
+        age_split, gender = SmartCreatePublish.get_gender_age_split(step_four, targeting)
+        adset_split_fields = dict(gender=gender, age_split=age_split)
+
+        for allocation in adset_budget_allocation:
+            allocation_location = allocation.get("location")
+            if isinstance(allocation_location, list):
+                location = set(allocation_location)
+            else:
+                location = allocation_location
+            allocation_location_device = dict(location=location, device=allocation.get("device"))
+
+            if campaign_split_fields == allocation_location_device:
+                adset_allocations = allocation.get("ad_sets")
+
+                for adset_allocation in adset_allocations:
+                    if "budget" in adset_allocation:
+                        budget = adset_allocation.pop("budget")
+                    else:
+                        continue
+
+                    if adset_split_fields == adset_allocation:
+                        adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget * 100})
+                        return
+                    else:
+                        adset_allocation.setdefault("budget", budget)
+
+    @staticmethod
+    def get_gender_age_split(step_four: Dict, targeting: Dict):
+        # FE will send gender:null if adsets aren't split by genders
+        targeting_genders = targeting["genders"]
+        gender = targeting_genders if step_four.get("is_split_by_gender_selected") else None
+        if isinstance(gender, list):
+            gender = gender[0]
+
+        # FE will send age_split:null if adsets aren't split by age
+        age_split = (
+            dict(
+                min=targeting["age_min"],
+                max=targeting["age_max"],
+            )
+            if step_four.get("split_age_range_selected")
+            else None
+        )
+
+        return age_split, gender
+
+    @staticmethod
+    def get_location_device(targeting: Dict):
+        # Refer to SmartCreate.process_geo_location for how location is encoded inside targeting
+        location = []
+        for _, location_type in LOCATION_OPTIONS.items():
+            geo_locations = targeting["geo_locations"].get(location_type)
+            if not geo_locations:
+                continue
+            elif isinstance(geo_locations, list):
+                if location_type == "countries":
+                    location.extend(geo_locations)
+                else:
+                    location.extend([loc.get("key") for loc in geo_locations])
+            else:
+                if location_type == "countries":
+                    location.append(geo_locations)
+                else:
+                    location.append(geo_locations.get("key"))
+
+        if len(location) == 1:
+            location = location[0]
+        else:
+            location = set(location)
+
+        # FE will send device:null if campaigns aren't split by devices
+        # BE represents no device split as device:['desktop','mobile']
+        device_platforms = targeting["device_platforms"]
+        device = device_platforms[0] if len(device_platforms) == 1 else None
+
+        return device, location
 
 
 class AddStructuresToParent:
@@ -586,7 +688,7 @@ class AddStructuresToParent:
 
         (
             facebook_positions,
-            instragram_positions,
+            instagram_positions,
             audience_network_positions,
             publisher_platforms,
         ) = adset_builder.add_placement_positions(request)
@@ -609,7 +711,7 @@ class AddStructuresToParent:
             exclusions=FlexibleTargeting(interests=excluded_interests),
             locales=languages,
             facebook_positions=facebook_positions,
-            instagram_positions=instragram_positions,
+            instagram_positions=instagram_positions,
             audience_network_positions=audience_network_positions,
             publisher_platforms=publisher_platforms,
             device_platforms=[x.name_sdk for x in DevicePlatform.contexts[Contexts.SMART_CREATE].items],
