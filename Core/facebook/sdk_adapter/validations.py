@@ -290,7 +290,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.FACEBOOK_IN_STREAM_VIDEO: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.FACEBOOK_STORIES: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_FEED: [DevicePlatform.MOBILE],
-        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
+        # Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         # Placement.__AUDIENCE_NETWORK__INSTREAM_VIDEO__: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
     Objective.CONVERSIONS: {
