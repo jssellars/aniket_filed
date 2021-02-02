@@ -349,7 +349,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.FACEBOOK_VIDEO_FEEDS: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
     },
     Objective.POST_ENGAGEMENT: {
-        Placement.FACEBOOK_STORIES: [DevicePlatform.MOBILE],
+        # Placement.FACEBOOK_STORIES: [DevicePlatform.MOBILE],
         Placement.FACEBOOK_FEED: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.FACEBOOK_INSTANT_ARTICLES: [DevicePlatform.MOBILE],
         Placement.FACEBOOK_IN_STREAM_VIDEO: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
@@ -358,7 +358,7 @@ OBJECTIVE_X_PLACEMENT_X_DEVICE_PLATFORM = OBJECTIVE_X_PLATFORM_X_POSITION_X_DEVI
         Placement.FACEBOOK_VIDEO_FEEDS: [DevicePlatform.MOBILE, DevicePlatform.DESKTOP],
         Placement.INSTAGRAM_FEED: [DevicePlatform.MOBILE],
         Placement.INSTAGRAM_EXPLORE: [DevicePlatform.MOBILE],
-        Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
+        # Placement.INSTAGRAM_STORIES: [DevicePlatform.MOBILE],
     },
     Objective.PRODUCT_CATALOG_SALES: {
         Placement.FACEBOOK_STORIES: [DevicePlatform.MOBILE],
