@@ -118,7 +118,9 @@ def allocate_campaign_budget(campaign, campaign_budget_allocation, location=None
     if not campaign_budget_allocation:
         return
 
-    location = location.get("key")
+    if location:
+        location = location.get("key")
+
     try:
         device = device.name_sdk
     except AttributeError:
