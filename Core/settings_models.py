@@ -90,6 +90,8 @@ class Mongo(BaseModel):
     recommendations_database_name: Optional[str]
     structures_database: Optional[str]
     structures_database_name: Optional[str]
+    publish_feedback_database_name: Optional[str]
+    publish_feedback_collection_name: Optional[str]
 
     @property
     def connection_string_internal(self):

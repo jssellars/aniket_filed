@@ -359,3 +359,15 @@ class AdsManagerAddStructuresToParent(Resource):
             return {"message": "Failed to process request."}, 400
 
 
+class SmartCreatePublishProgress(Resource):
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    def get(self, template_id: typing.AnyStr):
+        try:
+            response = command_handlers.SmartCreatePublish.get_publish_feedback(template_id)
+            
+            return object_to_camelized_dict(response), 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return Tools.create_error(e, code="POTTER_BAD_REQUEST"), 400

@@ -17,6 +17,7 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraph
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
+from Core.mongo_adapter import MongoRepositoryBase, MongoOperator
 from FacebookCampaignsBuilder.Api import commands
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderHandler import (
@@ -48,6 +49,7 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEv
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEventMapping import (
     CampaignCreatedEventMapping,
 )
+from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
 
 logger = logging.getLogger(__name__)
 
@@ -294,6 +296,12 @@ class CampaignBuilderPublish:
 
 
 class SmartCreatePublish:
+    feedback_repository = MongoRepositoryBase(
+        config=config.mongo,
+        database_name=config.mongo.publish_feedback_database_name,
+        collection_name=config.mongo.publish_feedback_collection_name,
+    )
+
     @staticmethod
     def handle(
         request: typing.Dict = None,
@@ -313,7 +321,19 @@ class SmartCreatePublish:
         step_four = request["step_four_details"]
         is_adset_using_cbo = "budget_optimization" in step_two and step_two["budget_optimization"] is not None
         is_adset_budget_split = step_four.get("is_split_by_budget")
-        adset_budget_allocation = step_four.get("budget_allocation", {}).get("adset_budget")
+        adset_budget_allocation = step_four.get("budget_allocation", {}).get("ad_sets_budget")
+
+        # TODO: Ask C# to provide template ID in request
+        template_id = request.get("template_id")
+
+        feedback_data = dict(
+            template_id=template_id,
+            publish_status=PublishStatus.IN_PROGRESS.value,
+            published_structures=0,
+            total_structures=len(campaigns) + len(campaigns) * len(ad_sets) + len(campaigns) * len(ad_sets) * len(ads),
+        )
+
+        SmartCreatePublish.feedback_repository.add_one(feedback_data)
 
         for campaign_index, campaign in enumerate(campaigns):
             try:
@@ -321,6 +341,8 @@ class SmartCreatePublish:
                 facebook_campaign = ad_account.create_campaign(params=campaign.campaign_template)
                 campaign_facebook_id = facebook_campaign.get_id()
                 campaign_name = campaign.campaign_template.get("name")
+
+                feedback_data["published_structures"] += 1
 
                 # Add new campaign to response
                 campaign_tree.append(deepcopy(campaign_response))
@@ -338,6 +360,8 @@ class SmartCreatePublish:
                     facebook_ad_set = ad_account.create_ad_set(params=adset_create_template)
                     ad_set_facebook_id = facebook_ad_set.get_id()
                     ad_set_name = adset_create_template.get("name")
+
+                    feedback_data["published_structures"] += 1
 
                     # Add new adset to response
                     ad_set_response = {"facebook_id": ad_set_facebook_id, "name": ad_set_name, "ads": []}
@@ -363,14 +387,51 @@ class SmartCreatePublish:
                         ad_facebook_id = ad.get_id()
                         campaign_tree[campaign_index]["ad_sets"][ad_set_index]["ads"].append(ad_facebook_id)
 
+                        feedback_data["published_structures"] += 1
+                    else:
+                        SmartCreatePublish.update_feedback_database(
+                            feedback_data,
+                            template_id,
+                            PublishStatus.IN_PROGRESS.value,
+                        )
+
+                else:
+                    SmartCreatePublish.update_feedback_database(
+                        feedback_data,
+                        template_id,
+                        PublishStatus.IN_PROGRESS.value,
+                    )
+
                 if is_adset_using_cbo:
                     SmartCreatePublish.add_adsets_budget(
                         campaign_facebook_id, adset_budgets, campaign.campaign_template
                     )
             except Exception as e:
                 CampaignPublish.delete_incomplete_campaigns(campaign_tree)
+                SmartCreatePublish.update_feedback_database(
+                    feedback_data, template_id, PublishStatus.FAILED.value
+                )
                 raise e
+        else:
+            SmartCreatePublish.update_feedback_database(
+                feedback_data, template_id, PublishStatus.SUCCESS.value
+            )
+
         return campaign_tree
+
+    @staticmethod
+    def update_feedback_database(feedback_data, template_id, status):
+        query = {
+            MongoOperator.SET.value: {
+                "published_structures": feedback_data.get("published_structures"),
+                "publish_status": status,
+            }
+        }
+        SmartCreatePublish.feedback_repository.update_many({"template_id": template_id}, query)
+
+    @staticmethod
+    def get_publish_feedback(template_id: str):
+        return SmartCreatePublish.feedback_repository.get_first_by_key(key_name="template_id", key_value=template_id)
 
     @staticmethod
     def build_campaign_hierarchy(request):

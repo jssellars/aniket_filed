@@ -17,3 +17,8 @@ class Default:
             )
         ]
     )
+    mongo = core.replace_in_class(
+        core.Default.mongo,
+        publish_feedback_collection_name="publish_feedback",
+        publish_feedback_database_name="{env}_campaign_builder_publish_feedback"
+    )

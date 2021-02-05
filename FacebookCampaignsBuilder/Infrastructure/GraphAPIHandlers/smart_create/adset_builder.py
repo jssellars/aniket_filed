@@ -265,25 +265,25 @@ def extract_custom_audiences(targeting):
 
 def add_placement_positions(step_two: Dict) -> Tuple[List, List, List, List]:
     facebook_positions = []
-    instragram_positions = []
+    instagram_positions = []
     audience_network_positions = []
     publisher_platforms = []
 
     if "placements" in step_two and step_two["placements"]:
         for placement in step_two["placements"]:
-            if placement["platform_key"] == FACEBOOK_DEFAULT_KEY:
-                facebook_positions = DEFAULT_PLACEMENT_POSITIONS[placement["platform_key"]]
+            if placement["name"] == FACEBOOK_DEFAULT_KEY:
+                facebook_positions = DEFAULT_PLACEMENT_POSITIONS[placement["name"]]
                 publisher_platforms.append(Platform.FACEBOOK.value.name_sdk.lower())
 
-            if placement["platform_key"] == INSTAGRAM_DEFAULT_KEY:
-                instragram_positions = DEFAULT_PLACEMENT_POSITIONS[placement["platform_key"]]
+            if placement["name"] == INSTAGRAM_DEFAULT_KEY:
+                instagram_positions = DEFAULT_PLACEMENT_POSITIONS[placement["name"]]
                 publisher_platforms.append(Platform.INSTAGRAM.value.name_sdk.lower())
 
-            if placement["platform_key"] == AUDIENCE_NETWORK_DEFAULT_KEY:
-                audience_network_positions = DEFAULT_PLACEMENT_POSITIONS[placement["platform_key"]]
+            if placement["name"] == AUDIENCE_NETWORK_DEFAULT_KEY:
+                audience_network_positions = DEFAULT_PLACEMENT_POSITIONS[placement["name"]]
                 publisher_platforms.append(Platform.AUDIENCE_NETWORK.value.name_sdk.lower())
 
-    return facebook_positions, instragram_positions, audience_network_positions, publisher_platforms
+    return facebook_positions, instagram_positions, audience_network_positions, publisher_platforms
 
 
 def map_custom_audiences(custom_audiences):

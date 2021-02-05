@@ -45,6 +45,7 @@ router_route_pairs = (
     (routers.SmartCreateAccountAdvertisableApps, "smart-create/account-advertisable-apps/<string:account_id>"),
     (routers.AdsManagerAccountAdvertisableApps, "ads-manager/account-advertisable-apps/<string:account_id>"),
     (routers.AdsManagerAddStructuresToParent, "add-structures-to-parent/<string:level>"),
+    (routers.SmartCreatePublishProgress, "smart-create/publish-progress/<string:template_id>"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
