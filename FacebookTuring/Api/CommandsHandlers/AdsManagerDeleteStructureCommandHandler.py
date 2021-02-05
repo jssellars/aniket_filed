@@ -4,6 +4,7 @@ from typing import Dict
 from bson import BSON
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.settings import Prod
 from FacebookTuring.Api.startup import config, fixtures
 from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
@@ -30,6 +31,9 @@ class AdsManagerDeleteStructureCommandHandler:
             return False
 
         if not allow_structure_changes(deleted_structure["account_id"], config):
+            return None
+
+        if level == Level.CAMPAIGN.value and config.environment != Prod.environment:
             return None
 
         deleted_structure[FacebookMiscFields.level] = level
