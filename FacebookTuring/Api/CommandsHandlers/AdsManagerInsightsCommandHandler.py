@@ -156,13 +156,7 @@ class AdsManagerInsightsCommandHandler:
             config,
             permanent_token=permanent_token,
             level=level,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
-            structure_fields=query.structure_fields,
-            requested_fields=query.requested_columns,
-            next_page_cursor=query.next_page_cursor,
-            page_size=query.page_size,
+            query=query,
         )
 
     @classmethod

@@ -514,6 +514,41 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.__decode_structure_details_from_bson(structures)
         return [structure[FacebookMiscFields.details] for structure in structures]
 
+    def get_ad_account_slice(self,
+                             level: Level = None,
+                             account_id: typing.AnyStr = None,
+                             start_row: int = 0,
+                             end_row: int = 0
+                             ) -> typing.List[typing.Dict]:
+        self.collection = level.value
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    LevelToFacebookIdKeyMapping.ACCOUNT.value: {
+                        MongoOperator.EQUALS.value: account_id
+                    }
+                },
+                {
+                    FacebookMiscFields.status: {
+                        MongoOperator.NOTIN.value: [StructureStatusEnum.ARCHIVED.value,
+                                                    StructureStatusEnum.REMOVED.value,
+                                                    StructureStatusEnum.DEPRECATED.value]
+                    }
+                }
+            ]
+        }
+
+        projection = {
+            FacebookMiscFields.details: MongoProjectionState.ON.value,
+            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value
+        }
+
+        sort_query = [("created_time", -1)]
+
+        structures = self.get_data_slice(query=query, projection=projection, limit=end_row, skip=start_row, sort_query=sort_query)
+        structures = self.__decode_structure_details_from_bson(structures)
+        return [structure[FacebookMiscFields.details] for structure in structures]
+
     def get_results_fields_from_adsets(self,
                                        structure_ids: typing.List[typing.AnyStr] = None,
                                        structure_key: typing.AnyStr = None) -> \

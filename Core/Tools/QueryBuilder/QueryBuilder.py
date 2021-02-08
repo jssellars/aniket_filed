@@ -157,6 +157,9 @@ class AgGridInsightsRequest:
         self.time_range = query_builder_request['timeRange']
         self.facebook_account_id = query_builder_request['facebookAccountId']
         self.page_size = query_builder_request['pageSize']
+        self.has_delivery = query_builder_request.get('hasDelivery', True)
+        self.start_row = query_builder_request['startRow']
+        self.end_row = query_builder_request['endRow']
 
 
 class AgGridTrendRequest:

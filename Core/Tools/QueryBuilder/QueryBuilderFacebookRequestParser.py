@@ -4,6 +4,7 @@ from enum import Enum
 
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     PixelCustomEventTypeToResult,
     AdSetOptimizationToResult,
@@ -59,6 +60,9 @@ class QueryBuilderFacebookRequestParser:
         self.__sort = None
         self.next_page_cursor = None
         self.page_size = 200
+        self.has_delivery = True
+        self.start_row = 0
+        self.end_row = 200
 
     @property
     def parameters(self):
@@ -247,6 +251,9 @@ class QueryBuilderFacebookRequestParser:
         self.facebook_id = request.facebook_account_id
         self.time_range = request.time_range
         self.page_size = request.page_size
+        self.has_delivery = request.has_delivery
+        self.start_row = request.start_row
+        self.end_row = request.end_row
 
         self.parse_query_columns_ag_grid(
             parse_breakdowns=parse_breakdowns,
@@ -269,9 +276,23 @@ class QueryBuilderFacebookRequestParser:
 
     def parse_filter_model(self, filter_model=None):
         if filter_model is None:
-            return []
+            return
 
         filter_objects = []
+        if not self.has_delivery:
+            filter_objects.append(
+                {
+                    "field": self.retrieve_filter_property_name(
+                        LevelToFacebookIdKeyMapping.get_enum_by_name(self.level.upper()).value
+                    ),
+                    "operator": AgGridFacebookOperator.IN.name,
+                    # This list will be populated later with structure ids
+                    "value": []
+                }
+            )
+            self.filtering = json.dumps(filter_objects)
+            return
+
         for column_name, filter_val in filter_model.items():
             facebook_filter_name = self.retrieve_filter_property_name(column_name)
             if facebook_filter_name:
@@ -284,7 +305,6 @@ class QueryBuilderFacebookRequestParser:
                         "value": filter_value
                     }
                 )
-
         self.filtering = json.dumps(filter_objects)
 
     def parse_sort_condition(self, sort_model=None) -> None:

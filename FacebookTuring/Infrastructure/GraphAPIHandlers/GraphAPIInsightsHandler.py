@@ -3,7 +3,9 @@ import typing
 from collections import OrderedDict
 from queue import Queue
 from threading import Thread
+import json
 
+from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -155,7 +157,7 @@ class GraphAPIInsightsHandler:
             raise e
 
     @classmethod
-    def get_structure_page(
+    def get_structures_for_insights(
             cls,
             config,
             structure_key: typing.AnyStr = None,
@@ -233,6 +235,29 @@ class GraphAPIInsightsHandler:
             structures_response = GraphAPIInsightsMapper().map(structure_fields, structures)
             structures_response = list(map(dict, set(tuple(x.items()) for x in structures_response)))
             return copy.deepcopy({thread: (structures_response, summary)})
+        except Exception as e:
+            raise e
+
+    @classmethod
+    def get_structures_page(
+            cls,
+            config,
+            ad_account_id: typing.AnyStr = None,
+            structure_fields: typing.List[FieldsMetadata] = None,
+            level: typing.AnyStr = None,
+            start_row: int = 0,
+            end_row: int = 200,
+    ) -> typing.List:
+        try:
+            repository = TuringMongoRepository(
+                config=config.mongo,
+                database_name=config.mongo.structures_database_name,
+            )
+            structures = repository.get_ad_account_slice(level=Level(level), account_id=ad_account_id, start_row=start_row, end_row=end_row)
+            structures_response = GraphAPIInsightsMapper().map(structure_fields, structures)
+            structures_response = list(map(dict, set(tuple(x.items()) for x in structures_response)))
+            return structures_response
+
         except Exception as e:
             raise e
 
@@ -437,16 +462,46 @@ class GraphAPIInsightsHandler:
             config,
             permanent_token: typing.AnyStr = None,
             level: str = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            parameters: typing.Dict = None,
-            structure_fields: typing.List[typing.AnyStr] = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            next_page_cursor: typing.AnyStr = None,
-            page_size: int = 200,
+            query: QueryBuilderFacebookRequestParser = None,
     ) -> typing.Dict:
 
-        insights, structures, next_page_cursor, summary = cls._get_insights_and_structure_data(
+        ad_account_id = query.facebook_id
+        fields = query.fields
+        parameters = query.parameters
+        structure_fields = query.structure_fields
+        requested_fields = query.requested_columns
+        next_page_cursor = query.next_page_cursor
+        page_size = query.page_size
+        has_delivery = query.has_delivery
+        start_row = query.start_row
+        end_row = query.end_row
+
+        if has_delivery:
+
+            insights, structures, next_page_cursor, summary = cls._get_insights_master_data(
+                config,
+                permanent_token=permanent_token,
+                level=level,
+                ad_account_id=ad_account_id,
+                fields=fields,
+                parameters=parameters,
+                structure_fields=structure_fields,
+                requested_fields=requested_fields,
+                next_page_cursor=next_page_cursor,
+                page_size=page_size,
+            )
+
+            response = cls.left_join_insights_and_structures(
+                level=level,
+                requested_fields=requested_fields,
+                insights=insights,
+                structures=structures,
+                structure_fields=structure_fields,
+            )
+
+            return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
+
+        insights, structures, next_page_cursor, summary = cls._get_structure_master_data(
             config,
             permanent_token=permanent_token,
             level=level,
@@ -455,16 +510,16 @@ class GraphAPIInsightsHandler:
             parameters=parameters,
             structure_fields=structure_fields,
             requested_fields=requested_fields,
-            next_page_cursor=next_page_cursor,
             page_size=page_size,
+            start_row=start_row,
+            end_row=end_row,
         )
 
-        response = cls.left_join_insights_and_structures(
+        response = cls.right_join_insights_and_structures(
             level=level,
             requested_fields=requested_fields,
             insights=insights,
             structures=structures,
-            structure_fields=structure_fields,
         )
 
         return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
@@ -628,7 +683,7 @@ class GraphAPIInsightsHandler:
         return responses
 
     @classmethod
-    def _get_insights_and_structure_data(
+    def _get_insights_master_data(
             cls,
             config,
             permanent_token: typing.AnyStr = None,
@@ -662,7 +717,7 @@ class GraphAPIInsightsHandler:
         requested_structure_fields = [
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
         ]
-        structures_response = cls.get_structure_page(
+        structures_response = cls.get_structures_for_insights(
             config,
             structure_key=structure_key,
             level=level,
@@ -672,6 +727,74 @@ class GraphAPIInsightsHandler:
 
         if summary and f"{level}_name" in summary[0]:
             summary[0][f"{level}_name"] = FacebookLevelPlural[level.upper()].value.capitalize()
+
+        return insight_response, structures_response, next_page_cursor, summary
+
+    @classmethod
+    def _get_structure_master_data(
+            cls,
+            config,
+            permanent_token: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            parameters: typing.Dict = None,
+            structure_fields: typing.List[typing.AnyStr] = None,
+            requested_fields: typing.List[FieldsMetadata] = None,
+            page_size: int = 200,
+            start_row: int = 0,
+            end_row: int = 200,
+    ):
+        requested_structure_fields = [
+            getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
+        ]
+
+        structures_response = cls.get_structures_page(
+            config=config,
+            ad_account_id=ad_account_id.replace("act_", ""),
+            level=level,
+            structure_fields=requested_structure_fields,
+            start_row=start_row,
+            end_row=end_row
+        )
+
+        structure_ids = [x["id"] for x in structures_response if "id" in x]
+
+        # Adding structure filter ids to parameters
+        params = json.loads(parameters["filtering"])
+        params[0]["value"] = structure_ids
+        parameters["filtering"] = str(params)
+
+        insight_response, _, summary = cls.get_insights_page(
+            config,
+            permanent_token=permanent_token,
+            ad_account_id=ad_account_id,
+            fields=fields,
+            parameters=parameters,
+            requested_fields=requested_fields,
+            add_totals=True,
+            level=level,
+            page_size=page_size,
+        )
+
+        parameters.pop("filtering")
+
+        # Get collective summary (without filtering)
+        _, _, summary = cls.get_insights_page(
+            config,
+            permanent_token=permanent_token,
+            ad_account_id=ad_account_id,
+            fields=fields,
+            parameters=parameters,
+            requested_fields=requested_fields,
+            add_totals=True,
+            level=Level.CAMPAIGN.value,
+            page_size=1,
+        )
+
+        # Placeholder next page cursor to simulate facebook behaviour
+        # To get data slice we use star_row and end_row instead, not the cursor
+        next_page_cursor = str(start_row + end_row) if len(structures_response) == end_row else None
 
         return insight_response, structures_response, next_page_cursor, summary
 
@@ -726,7 +849,7 @@ class GraphAPIInsightsHandler:
         inactive_structures = [
             {**empty_structure_dict, **structure}
             for structure in structures
-            if structure[structure_id_key] in structures_only_ids
+            if str(structure[structure_id_key]) in structures_only_ids
         ]
 
         response = active_structures + inactive_structures
