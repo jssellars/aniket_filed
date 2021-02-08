@@ -40,7 +40,8 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIInterestsH
     GraphAPIInterestsHandler,
 )
 from Core.Web.FacebookGraphAPI.search import (
-    GraphAPILocationsHandler, GraphAPILanguagesHandler,
+    GraphAPILocationsHandler,
+    GraphAPILanguagesHandler,
 )
 
 
@@ -55,7 +56,13 @@ class AdCreativeAssetsBase:
 
 
 class AdCreativeAssetsImages(AdCreativeAssetsBase):
-    __ad_images_minimal_fields = [AdImage.Field.id, AdImage.Field.name, AdImage.Field.permalink_url]
+    __ad_images_minimal_fields = [
+        AdImage.Field.id,
+        AdImage.Field.name,
+        AdImage.Field.permalink_url,
+        AdImage.Field.height,
+        AdImage.Field.width,
+    ]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
