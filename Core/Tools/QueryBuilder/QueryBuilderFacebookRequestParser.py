@@ -279,7 +279,7 @@ class QueryBuilderFacebookRequestParser:
             return
 
         filter_objects = []
-        if not self.has_delivery:
+        if not self.has_delivery and not filter_model:
             filter_objects.append(
                 {
                     "field": self.retrieve_filter_property_name(

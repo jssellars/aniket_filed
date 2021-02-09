@@ -517,6 +517,8 @@ class TuringMongoRepository(MongoRepositoryBase):
     def get_ad_account_slice(self,
                              level: Level = None,
                              account_id: typing.AnyStr = None,
+                             structure_key: typing.AnyStr = None,
+                             structure_ids: typing.List[typing.AnyStr] = None,
                              start_row: int = 0,
                              end_row: int = 0
                              ) -> typing.List[typing.Dict]:
@@ -537,6 +539,13 @@ class TuringMongoRepository(MongoRepositoryBase):
                 }
             ]
         }
+        if structure_ids:
+            query_filter = {
+                structure_key: {
+                    MongoOperator.IN.value: structure_ids
+                }
+            }
+            query[MongoOperator.AND.value].append(query_filter)
 
         projection = {
             FacebookMiscFields.details: MongoProjectionState.ON.value,

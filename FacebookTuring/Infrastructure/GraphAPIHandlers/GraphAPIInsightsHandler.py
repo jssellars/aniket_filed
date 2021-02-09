@@ -245,6 +245,7 @@ class GraphAPIInsightsHandler:
             ad_account_id: typing.AnyStr = None,
             structure_fields: typing.List[FieldsMetadata] = None,
             level: typing.AnyStr = None,
+            parameter: typing.Dict = None,
             start_row: int = 0,
             end_row: int = 200,
     ) -> typing.List:
@@ -253,7 +254,21 @@ class GraphAPIInsightsHandler:
                 config=config.mongo,
                 database_name=config.mongo.structures_database_name,
             )
-            structures = repository.get_ad_account_slice(level=Level(level), account_id=ad_account_id, start_row=start_row, end_row=end_row)
+            if parameter['value']:
+                structure_ids = parameter['value']
+            else:
+                structure_ids = None
+            structure_key = parameter['field'].replace(".", "_")
+            if structure_key not in [enum.value for enum in LevelToFacebookIdKeyMapping]:
+                return []
+            structures = repository.get_ad_account_slice(
+                level=Level(level),
+                account_id=ad_account_id,
+                structure_key=structure_key,
+                structure_ids=structure_ids,
+                start_row=start_row,
+                end_row=end_row
+            )
             structures_response = GraphAPIInsightsMapper().map(structure_fields, structures)
             structures_response = list(map(dict, set(tuple(x.items()) for x in structures_response)))
             return structures_response
@@ -749,10 +764,13 @@ class GraphAPIInsightsHandler:
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
         ]
 
+        filter_params = json.loads(parameters["filtering"])[0]
+
         structures_response = cls.get_structures_page(
             config=config,
             ad_account_id=ad_account_id.replace("act_", ""),
             level=level,
+            parameter=filter_params,
             structure_fields=requested_structure_fields,
             start_row=start_row,
             end_row=end_row
@@ -761,11 +779,14 @@ class GraphAPIInsightsHandler:
         structure_ids = [x["id"] for x in structures_response if "id" in x]
 
         # Adding structure filter ids to parameters
-        params = json.loads(parameters["filtering"])
-        params[0]["value"] = structure_ids
-        parameters["filtering"] = str(params)
+        if not filter_params['value']:
+            is_filtered_on_parent = False
+            filter_params["value"] = structure_ids
+            parameters["filtering"] = [(json.dumps(filter_params))]
+        else:
+            is_filtered_on_parent = True
 
-        insight_response, _, summary = cls.get_insights_page(
+        insight_response, _, _ = cls.get_insights_page(
             config,
             permanent_token=permanent_token,
             ad_account_id=ad_account_id,
@@ -777,7 +798,9 @@ class GraphAPIInsightsHandler:
             page_size=page_size,
         )
 
-        parameters.pop("filtering")
+        # pop only when filter model is None
+        if not is_filtered_on_parent:
+            parameters.pop("filtering")
 
         # Get collective summary (without filtering)
         _, _, summary = cls.get_insights_page(
