@@ -321,9 +321,9 @@ class SmartCreatePublish:
         step_four = request["step_four_details"]
         is_adset_using_cbo = "budget_optimization" in step_two and step_two["budget_optimization"] is not None
         is_adset_budget_split = step_four.get("is_split_by_budget")
-        adset_budget_allocation = step_four.get("budget_allocation", {}).get("ad_sets_budget")
+        budget_allocation = step_four.get("budget_allocation", {})
+        adset_budget_allocation = (budget_allocation.get("ad_sets_budget") if budget_allocation else None)
 
-        # TODO: Ask C# to provide template ID in request
         template_id = request.get("template_id")
 
         feedback_data = dict(

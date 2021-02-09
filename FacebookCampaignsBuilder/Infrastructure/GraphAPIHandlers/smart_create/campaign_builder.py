@@ -67,7 +67,8 @@ def split_campaigns(campaign_template, step_four, step_two) -> List[CampaignSpli
     split_by_location = step_four["is_split_by_location"]
     split_by_device = step_four["is_split_by_devices"]
     locations = step_two["targeting"]["locations"]
-    campaign_budget_allocation = step_four.get("budget_allocation", {}).get("campaigns_budget")
+    budget_allocation = step_four.get("budget_allocation", {})
+    campaign_budget_allocation = budget_allocation.get("campaigns_budget") if budget_allocation else None
 
     all_locations = [Location(**location) for location in locations]
 
