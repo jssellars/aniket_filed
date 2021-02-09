@@ -27,4 +27,5 @@ class Default:
             )
         ]
     )
+    port = 47351
     days_to_sync = 60

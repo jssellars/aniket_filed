@@ -1,5 +1,5 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from GoogleTuring.BackgroundTasks.IntegrationEvents import \
+from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdatedEventHandler import \
     GoogleUserPreferencesUpdatedEventHandler
 
 

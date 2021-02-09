@@ -2,8 +2,8 @@ from datetime import datetime
 
 from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
 from Core.mongo_adapter import MongoOperator
-from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
-from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.StructuresSynchronizer import StructuresSynchronizer
+from GoogleTuring.BackgroundTasks.Synchronizers.InsightsSynchronizer import InsightsSynchronizer
+from GoogleTuring.BackgroundTasks.Synchronizers.StructuresSynchronizer import StructuresSynchronizer
 from GoogleTuring.BackgroundTasks.startup import config, fixtures
 from GoogleTuring.Infrastructure.Domain.Enums.GoogleAccountStatus import GoogleAccountStatus
 from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoRepository import \

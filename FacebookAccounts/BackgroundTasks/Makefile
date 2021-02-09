@@ -1,4 +1,4 @@
 include ../../share/Makefile
 
 .PHONY: start
-start: rabbit_worker
+start: uwsgi-nginx-flask

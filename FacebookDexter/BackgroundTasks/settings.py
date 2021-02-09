@@ -22,3 +22,4 @@ class Default:
         date_stop=None,
         minimum_number_of_data_points=core.MinimumNumberOfDataPoints.parse_obj({"3": 2, "7": 4, "14": 9, "30": 20}),
     )
+    port = 47301

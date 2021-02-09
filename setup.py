@@ -23,8 +23,7 @@ SHARED_LIBRARIES = ["Core"]
 PACKAGE_DIRS = [PACKAGE_NAME] + SHARED_LIBRARIES
 CONSOLE_SCRIPTS = {
     "api-server": "Api.app:app",
-    "rabbit-worker": "BackgroundTasks.rabbit_worker:main",
-    "sync-job": "BackgroundTasks.rabbit_worker:main",
+    "rabbit-worker": "BackgroundTasks.app:app",
 }
 # SOURCES_ROOT = "src"
 

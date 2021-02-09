@@ -4,8 +4,7 @@ from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdated
     GoogleUserPreferencesUpdatedEvent
 from GoogleTuring.BackgroundTasks.IntegrationEvents.GoogleUserPreferencesUpdatedEventMapping import \
     GoogleUserPreferencesUpdatedEventMapping
-from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.AdWordsAPIDataSyncHandler import \
-    AdWordsAPIDataSyncHandler
+from GoogleTuring.BackgroundTasks.Synchronizers.AdWordsAPIDataSyncHandler import AdWordsAPIDataSyncHandler
 
 
 class GoogleUserPreferencesUpdatedEventHandler:

@@ -6,7 +6,7 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 from googleads import adwords
 
-from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.BaseSynchronizer import BaseSynchronizer
+from GoogleTuring.BackgroundTasks.Synchronizers.BaseSynchronizer import BaseSynchronizer
 from GoogleTuring.Infrastructure.Domain.Enums.ActionBreakdown import ACTION_BREAKDOWN_TO_FIELD
 from GoogleTuring.Infrastructure.Domain.Enums.Breakdown import BreakdownType, BREAKDOWN_TO_FIELD, \
     DEFAULT_TIME_BREAKDOWN_FIELD

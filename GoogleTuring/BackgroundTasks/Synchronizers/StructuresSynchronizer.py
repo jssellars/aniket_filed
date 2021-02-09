@@ -1,4 +1,4 @@
-from GoogleTuring.BackgroundTasks.SyncJobs.Synchronizers.BaseSynchronizer import BaseSynchronizer
+from GoogleTuring.BackgroundTasks.Synchronizers.BaseSynchronizer import BaseSynchronizer
 from GoogleTuring.Infrastructure.Domain.Structures.StructureFields import CAMPAIGN_STRUCTURE_FIELDS, \
     AD_STRUCTURE_FIELDS, AD_GROUP_KEYWORDS_STRUCTURE_FIELDS, \
     AD_GROUP_STRUCTURE_FIELDS, \

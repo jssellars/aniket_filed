@@ -1,2 +1,2 @@
 def test_init():
-    from FacebookAudiences.BackgroundTasks import rabbit_worker
+    from FacebookAudiences.BackgroundTasks import app

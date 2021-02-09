@@ -23,6 +23,7 @@ class Default:
         time_intervals=[3, 7, 14, 30],
         date_stop=None,
     )
+    port = 47501
 
 
 class Prod:

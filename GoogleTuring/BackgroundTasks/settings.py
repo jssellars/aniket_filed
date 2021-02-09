@@ -24,3 +24,4 @@ class Default:
             )
         ]
     )
+    port = 47551

@@ -1,25 +1,64 @@
-# ====== CONFIGURE PATH TO SOLUTION - DO NOT DELETE ====== #
-import os
-import sys
+from datetime import datetime
 
-path = os.environ.get("PYTHON_SOLUTION_PATH")
-if path:
-    sys.path.append(path)
-# ====== END OF CONFIG SECTION ====== #
-import time
-
-import schedule
-
-from GoogleTuring.BackgroundTasks.SyncJobs.DailySyncJob import daily_sync_job
+from Core.Web.GoogleAdWordsAPI.AdWordsAPI.AdWordsBaseClient import AdWordsBaseClient
+from Core.mongo_adapter import MongoRepositoryBase, MongoOperator
+from GoogleTuring.BackgroundTasks.Synchronizers import InsightsSynchronizer
+from GoogleTuring.BackgroundTasks.Synchronizers import StructuresSynchronizer
 from GoogleTuring.BackgroundTasks.startup import config, fixtures
+from GoogleTuring.Infrastructure.PersistenceLayer.GoogleBusinessOwnerMongoRepository import \
+    GoogleBusinessOwnerMongoRepository
 
 
-def main():
-    schedule.every().day.at(config.sync_time).do(daily_sync_job)
-    while True:
-        schedule.run_pending()
-        time.sleep(5)
+def get_ad_accounts_details(mongo_adapter):
+    mongo_repository = GoogleBusinessOwnerMongoRepository(client=mongo_adapter.client,
+                                                          database_name=config.mongo.google_accounts_database_name,
+                                                          collection_name=config.mongo.accounts_collection_name)
+
+    result = mongo_repository.get_all_active_google_accounts()
+    return result
 
 
-if __name__ == "__main__":
-    main()
+def set_update_time(ad_account_id, mongo_adapter):
+    mongo_repository = MongoRepositoryBase(client=mongo_adapter.client,
+                                           database_name=config.mongo.google_accounts_database_name,
+                                           collection_name=config.mongo.accounts_collection_name)
+
+    query_filter = {
+        "client_customer_id": {MongoOperator.EQUALS.value: ad_account_id}
+    }
+    query = {
+        MongoOperator.SET.value: {
+            "last_updated_time": datetime.now()
+        }
+    }
+    mongo_repository.update_one(query_filter=query_filter, query=query)
+
+
+def sync():
+    mongo_adapter = fixtures.mongo_adapter
+    ad_accounts_to_sync = get_ad_accounts_details(mongo_adapter)
+
+    for ad_account in ad_accounts_to_sync:
+        refresh_token = ad_account["refresh_token"]
+        bo_google_id = ad_account["business_owner_google_id"]
+        account_id = ad_account["client_customer_id"]["google_id"]
+        last_update_time = ad_account["last_update_time"]
+        client = AdWordsBaseClient(config=config.google, refresh_token=refresh_token)
+        structure_synchronizer = StructuresSynchronizer(
+            business_owner_id=bo_google_id,
+            account_id=account_id,
+            adwords_client=client,
+            mongo_config=config.mongo,
+            mongo_adapter=mongo_adapter,
+        )
+        structure_synchronizer.synchronize()
+        insight_synchronizer = InsightsSynchronizer(
+            business_owner_id=bo_google_id,
+            account_id=account_id,
+            adwords_client=client,
+            mongo_config=config.mongo,
+            last_update_time=last_update_time,
+            mongo_adapter=mongo_adapter,
+        )
+        insight_synchronizer.synchronize()
+        set_update_time(account_id, mongo_adapter)
