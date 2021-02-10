@@ -19,8 +19,6 @@ def build_campaigns(step_one, step_two, step_four) -> List[CampaignSplit]:
     budget_opt = None
     if "campaign_budget_optimization" in step_one:
         budget_opt = step_one["campaign_budget_optimization"]
-    elif "budget_optimization" in step_two:
-        budget_opt = step_two["budget_optimization"]
 
     if budget_opt:
         set_budget_optimization(campaign_template, budget_opt)

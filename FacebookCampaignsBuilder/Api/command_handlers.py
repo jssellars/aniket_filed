@@ -9,8 +9,6 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
-from facebook_business.adobjects.adcreative import AdCreative
-
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, Level
@@ -24,7 +22,6 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdBuilderH
     GraphAPIAdBuilderHandler,
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewBuilderHandler import (
-    GraphAPIAdPreviewBuilderHandler,
     FiledAdFormatEnum,
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdSetBuilderHandler import (
@@ -320,9 +317,9 @@ class SmartCreatePublish:
         step_two = request["step_two_details"]
         step_four = request["step_four_details"]
         is_adset_using_cbo = "budget_optimization" in step_two and step_two["budget_optimization"] is not None
-        is_adset_budget_split = step_four.get("is_split_by_budget")
+        is_adset_budget_split_evenly = step_four.get("is_budget_split_evenly")
         budget_allocation = step_four.get("budget_allocation", {})
-        adset_budget_allocation = (budget_allocation.get("ad_sets_budget") if budget_allocation else None)
+        adset_budget_allocation = budget_allocation.get("ad_sets_budget") if budget_allocation else None
 
         template_id = request.get("template_id")
 
@@ -348,38 +345,34 @@ class SmartCreatePublish:
                 campaign_tree.append(deepcopy(campaign_response))
                 campaign_tree[campaign_index]["facebook_id"] = campaign_facebook_id
                 campaign_tree[campaign_index]["name"] = campaign_name
-                adset_budgets = []
 
                 for ad_set_index, ad_set in enumerate(ad_sets):
                     SmartCreatePublish.populate_missing_adset_fields(campaign_facebook_id, ad_set, campaign)
 
-                    # This is needed because we cannot have budget on both campaign + adsets
-                    adset_create_template = deepcopy(ad_set)
-                    adset_budget_type, budget = SmartCreatePublish.extract_budget_from_adset(adset_create_template)
+                    adset_budget_type = (
+                        AdSet.Field.lifetime_budget
+                        if AdSet.Field.lifetime_budget in ad_set
+                        else AdSet.Field.daily_budget
+                    )
+                    if is_adset_using_cbo:
+                        if is_adset_budget_split_evenly:
+                            ad_set[adset_budget_type] /= len(ad_sets)
+                        elif adset_budget_allocation:
+                            ad_set[adset_budget_type] = SmartCreatePublish.allocate_adset_budget(
+                                ad_set,
+                                adset_budget_allocation,
+                                step_four,
+                            )
 
-                    facebook_ad_set = ad_account.create_ad_set(params=adset_create_template)
+                    facebook_ad_set = ad_account.create_ad_set(params=ad_set)
                     ad_set_facebook_id = facebook_ad_set.get_id()
-                    ad_set_name = adset_create_template.get("name")
+                    ad_set_name = ad_set.get("name")
 
                     feedback_data["published_structures"] += 1
 
                     # Add new adset to response
                     ad_set_response = {"facebook_id": ad_set_facebook_id, "name": ad_set_name, "ads": []}
                     campaign_tree[campaign_index]["ad_sets"].append(deepcopy(ad_set_response))
-
-                    if is_adset_budget_split:
-                        adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget / len(ad_sets)})
-                    elif adset_budget_allocation:
-                        SmartCreatePublish.allocate_adset_budget(
-                            adset_budgets,
-                            adset_create_template,
-                            adset_budget_allocation,
-                            ad_set_facebook_id,
-                            adset_budget_type,
-                            step_four,
-                        )
-                    else:
-                        adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget})
 
                     for ad_index, ad in enumerate(ads):
                         ad.update({Ad.Field.adset_id: ad_set_facebook_id, Ad.Field.adset: ad_set_facebook_id})
@@ -401,21 +394,12 @@ class SmartCreatePublish:
                         template_id,
                         PublishStatus.IN_PROGRESS.value,
                     )
-
-                if is_adset_using_cbo:
-                    SmartCreatePublish.add_adsets_budget(
-                        campaign_facebook_id, adset_budgets, campaign.campaign_template
-                    )
             except Exception as e:
                 CampaignPublish.delete_incomplete_campaigns(campaign_tree)
-                SmartCreatePublish.update_feedback_database(
-                    feedback_data, template_id, PublishStatus.FAILED.value
-                )
+                SmartCreatePublish.update_feedback_database(feedback_data, template_id, PublishStatus.FAILED.value)
                 raise e
         else:
-            SmartCreatePublish.update_feedback_database(
-                feedback_data, template_id, PublishStatus.SUCCESS.value
-            )
+            SmartCreatePublish.update_feedback_database(feedback_data, template_id, PublishStatus.SUCCESS.value)
 
         return campaign_tree
 
@@ -496,36 +480,9 @@ class SmartCreatePublish:
         return result
 
     @staticmethod
-    def add_adsets_budget(campaign_facebook_id: str, adset_budgets: List[Dict], campaign_template: Dict):
-        fb_campaign = Campaign(campaign_facebook_id)
-        campaign_template.update({"adset_budgets": adset_budgets})
-        campaign_template.pop(Campaign.Field.bid_strategy, None)
-        campaign_template.pop(Campaign.Field.pacing_type, None)
-        # Is either lifetime_budget or daily_budget
-        campaign_template.pop(AdSet.Field.lifetime_budget, None)
-        campaign_template.pop(AdSet.Field.daily_budget, None)
-        fb_campaign.api_update(params=campaign_template)
-
-    @staticmethod
-    def extract_budget_from_adset(ad_set: Dict):
-        if AdSet.Field.lifetime_budget in ad_set:
-            adset_budget_type = AdSet.Field.lifetime_budget
-            budget = ad_set.pop(AdSet.Field.lifetime_budget)
-            return adset_budget_type, budget
-        elif AdSet.Field.daily_budget in ad_set:
-            adset_budget_type = AdSet.Field.daily_budget
-            budget = ad_set.pop(AdSet.Field.daily_budget)
-            return adset_budget_type, budget
-
-        return None, None
-
-    @staticmethod
     def allocate_adset_budget(
-        adset_budgets: List,
         adset_create_template: Dict,
         adset_budget_allocation: Dict,
-        ad_set_facebook_id: str,
-        adset_budget_type: str,
         step_four: Dict,
     ):
         targeting = adset_create_template["targeting"]
@@ -554,8 +511,7 @@ class SmartCreatePublish:
                         continue
 
                     if adset_split_fields == adset_allocation:
-                        adset_budgets.append({"adset_id": ad_set_facebook_id, adset_budget_type: budget * 100})
-                        return
+                        return budget * 100
                     else:
                         adset_allocation.setdefault("budget", budget)
 
