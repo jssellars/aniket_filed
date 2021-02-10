@@ -3,16 +3,18 @@ import typing
 from datetime import datetime
 from typing import Any, Dict, List
 
+from facebook_business.adobjects.user import User
+
 from Core.Metadata.Columns.ViewColumns.ViewColumn import ViewColumn
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.AccountStatus import AccountStatus
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookAccounts.Api.dtos import accounts_ag_grid_view
 from FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import (
-    GraphAPIAccountInsights,
     GraphAPIRequestInsights,
 )
 
@@ -221,24 +223,16 @@ def get_account_insights_base(
     config: Any,
 ) -> typing.List[typing.Dict]:
 
-    api_config = GraphAPIClientBaseConfig()
     account_fields = get_facebook_fields(accounts_ag_grid_view.account_structure_columns)
     insights_fields = get_facebook_fields(accounts_ag_grid_view.account_insight_columns)
 
-    api_config.request = GraphAPIAccountInsights(
-        api_version=config.facebook.api_version,
-        access_token=permanent_token,
-        business_owner_facebook_id=business_owner_facebook_id,
-        since=from_date,
-        until=to_date,
-        account_fields=",".join(account_fields),
-        insights_fields=",".join(insights_fields),
-    )
+    _ = GraphAPISdkBase(config.facebook, permanent_token)
 
-    graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
-    response, _ = graph_api_client.call_facebook()
-    if isinstance(response, Exception):
-        raise response
+    insight_string = f"insights.time_range({{'since':'{from_date}','until':'{to_date}'}}){{{','.join(insights_fields)}}}"
+    account_fields.append(insight_string)
+
+    business = User(business_owner_facebook_id)
+    response = business.get_ad_accounts(fields=account_fields)
 
     return map_response(response)
 
