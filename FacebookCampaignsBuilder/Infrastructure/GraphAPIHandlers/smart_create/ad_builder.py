@@ -12,6 +12,7 @@ from facebook_business.adobjects.adcreativeobjectstoryspec import AdCreativeObje
 from facebook_business.adobjects.adcreativephotodata import AdCreativePhotoData
 from facebook_business.adobjects.adcreativevideodata import AdCreativeVideoData
 from facebook_business.adobjects.adimage import AdImage
+from facebook_business.adobjects.conversionactionquery import ConversionActionQuery
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
 from Core.facebook.sdk_adapter.ad_objects.ad_creative import CallToActionType
@@ -29,11 +30,38 @@ def build_ads(ad_account_id: str, step_two: Dict, step_three: Dict, objective: s
         Ad.Field.creative: {"creative_id": ad_creative_facebook_id},
         Ad.Field.status: Ad.Status.paused,
         Ad.Field.effective_status: Ad.EffectiveStatus.paused,
-        Ad.Field.tracking_specs: step_three.get("tracking_spec", None),
     }
+
+    tracking_specs = get_tracking_specs(step_three)
+    if tracking_specs:
+        adverts[Ad.Field.tracking_specs] = tracking_specs
 
     ads.append(adverts)
     return ads
+
+
+def get_tracking_specs(step_three):
+    # Actions prepended by app_custom_event come from mobile app events and actions
+    # prepended by offsite_conversion come from the Facebook Pixel.
+    # Source: https://developers.facebook.com/docs/marketing-api/reference/ads-action-stats/
+    tracking_specs = []
+    pixel_id = step_three.get("pixel_id")
+    pixel_app_event_id = step_three.get("pixel_app_event_id")
+    if pixel_id:
+        tracking_specs.append(
+            {
+                ConversionActionQuery.Field.field_action_type: "offsite_conversion",
+                ConversionActionQuery.Field.fb_pixel: pixel_id,
+            }
+        )
+    if pixel_app_event_id:
+        tracking_specs.append(
+            {
+                ConversionActionQuery.Field.field_action_type: "app_custom_event",
+                ConversionActionQuery.Field.application: pixel_app_event_id,
+            }
+        )
+    return tracking_specs
 
 
 def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict, step_three: Dict, objective: str):
