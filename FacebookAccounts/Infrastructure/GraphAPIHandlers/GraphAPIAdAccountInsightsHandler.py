@@ -1,22 +1,12 @@
-import copy
 import typing
-from datetime import datetime
 from typing import Any, Dict, List
-
 from facebook_business.adobjects.user import User
-
 from Core.Metadata.Columns.ViewColumns.ViewColumn import ViewColumn
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.AccountStatus import AccountStatus
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookAccounts.Api.dtos import accounts_ag_grid_view
-from FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import (
-    GraphAPIRequestInsights,
-)
 
 import logging
 
@@ -25,180 +15,6 @@ logger = logging.getLogger(__name__)
 
 INSIGHTS_KEY = "insights"
 DATA_KEY = "data"
-
-
-class GraphAPIAdAccountInsightsHandlerClass:
-    @classmethod
-    def handle(cls, request: typing.Any, config: typing.Any, fixtures: typing.Any) -> typing.List[typing.Dict]:
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(request.business_owner_facebook_id)
-
-        from_date = cls.__convert_datetime(request.from_date)
-        to_date = cls.__convert_datetime(request.to_date)
-
-        response = cls.get_account_insights_base(
-            permanent_token=permanent_token,
-            business_owner_facebook_id=request.business_owner_facebook_id,
-            from_date=from_date,
-            to_date=to_date,
-            config=config,
-        )
-
-        return response
-
-    @classmethod
-    def get_account_insights_base(
-        cls,
-        permanent_token: typing.AnyStr = None,
-        business_owner_facebook_id: typing.AnyStr = None,
-        from_date: typing.AnyStr = None,
-        to_date: typing.AnyStr = None,
-        config: typing.Any = None,
-    ) -> typing.List[typing.Dict]:
-        api_config = GraphAPIClientBaseConfig()
-        api_config.request = GraphAPIRequestInsights(
-            api_version=config.facebook.api_version,
-            access_token=permanent_token,
-            business_owner_facebook_id=business_owner_facebook_id,
-            since=from_date,
-            until=to_date,
-        )
-
-        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
-        response, _ = graph_api_client.call_facebook()
-        if isinstance(response, Exception):
-            raise response
-
-        return cls.__map_response(response)
-
-    @classmethod
-    def __map_response(cls, response: typing.List[typing.Any] = None) -> typing.List[typing.Dict]:
-        for index, entry in enumerate(response):
-            if not isinstance(entry, dict):
-                entry = Tools.convert_to_json(entry)
-
-            # map business
-            entry = cls.__map_business(entry)
-
-            # map account_status
-            entry = cls.__map_account_status(entry)
-
-            # map conversions
-            entry = cls.__map_conversions(entry)
-
-            # map cost per conversion
-            entry = cls.__map_cost_per_conversion(entry)
-
-            # map simple insights
-            entry = cls.__map_simple_insights(entry)
-
-            entry["account_name"] = entry.pop("name")
-            entry["ad_account_id"] = entry.pop("id")
-            entry["amount_spent"] = float(entry.pop("amount_spent")) / 100
-
-            if INSIGHTS_KEY in entry.keys():
-                del entry[INSIGHTS_KEY]
-
-            response[index] = copy.deepcopy(entry)
-
-        return response
-
-    @classmethod
-    def __map_simple_insights(cls, response: typing.Dict) -> typing.Dict:
-        if INSIGHTS_KEY not in response.keys():
-            return response
-        else:
-            insights = response[INSIGHTS_KEY][DATA_KEY][0]
-
-        insight_keys = ["cpc", "cpm", "cpp", "ctr", "unique_clicks", "unique_ctr", "clicks", "impressions"]
-
-        for insight_key in insight_keys:
-            if insight_key in insights.keys():
-                response[insight_key] = float(insights[insight_key])
-            else:
-                response[insight_key] = None
-
-        return response
-
-    @classmethod
-    def __map_conversions(cls, response: typing.Dict) -> typing.Dict:
-        response["conversions"] = None
-        if INSIGHTS_KEY not in response.keys():
-            return response
-        else:
-            insights = response[INSIGHTS_KEY]
-
-        if DATA_KEY not in insights.keys():
-            return response
-        else:
-            insights = insights[DATA_KEY][0]
-
-        if "actions" not in insights.keys():
-            return response
-        else:
-            actions = insights["actions"]
-
-        response["conversions"] = sum(
-            [
-                float(entry["value"])
-                for entry in list(filter(lambda x: x["action_type"].find("omni") > -1, actions))
-                if entry["value"]
-            ]
-        )
-
-        return response
-
-    @classmethod
-    def __map_cost_per_conversion(cls, response: typing.Dict) -> typing.Dict:
-        try:
-            response["cost_per_conversion"] = float(response["amount_spent"]) / response["conversions"]
-        except:
-            response["cost_per_conversion"] = None
-
-        return response
-
-    @classmethod
-    def __map_business(cls, response: typing.Dict) -> typing.Dict:
-        if "business" in response.keys():
-            business = response.pop("business")
-            response["business_name"] = business["name"]
-            response["business_id"] = business["id"]
-
-        return response
-
-    @classmethod
-    def __map_account_status(cls, response: typing.Dict) -> typing.Dict:
-
-        if "account_status" in response.keys():
-            response["account_status"] = AccountStatus(response["account_status"]).name
-        else:
-            response["account_status"] = "UNKNOWN"
-
-        return response
-
-    @classmethod
-    def __load_all_pages_facebook_response(cls, response: typing.Dict) -> typing.List[typing.Dict]:
-        return [response]
-
-    @staticmethod
-    def __convert_datetime(input_date) -> typing.AnyStr:
-        __MINIMUM_DATETIME_LENGTH__ = 10
-        __DEFAULT_DATETIME_FORMAT__ = "%Y-%m-%d"
-        __INCOMING_DATETIME_FORMAT__ = "%Y-%m-%dT%H:%M:%S+00:00"
-        __ISO_DATETIME_FORMAT__ = "%Y-%m-%dT%H:%M:%S"
-
-        date = input_date.split(".")[0]
-        if len(date) != __MINIMUM_DATETIME_LENGTH__ and isinstance(input_date, datetime):
-            try:
-
-                date = datetime.strptime(date, __INCOMING_DATETIME_FORMAT__)
-            except ValueError:
-                date = datetime.strptime(date, __ISO_DATETIME_FORMAT__)
-            except Exception as e:
-                raise Exception(f"Invalid datetime format: {input_date} || {repr(e)}")
-        elif isinstance(input_date, str):
-            return input_date
-
-        return date.strftime(__DEFAULT_DATETIME_FORMAT__)
 
 
 def handle_accounts_insights(request: Any, config: Any, fixtures: Any, ) -> List[Dict]:
@@ -234,7 +50,7 @@ def get_account_insights_base(
     business = User(business_owner_facebook_id)
     response = business.get_ad_accounts(fields=account_fields)
 
-    return map_response(response)
+    return _map_response(response)
 
 
 def get_facebook_fields(view_fields: List[ViewColumn]) -> List[str]:
@@ -246,7 +62,7 @@ def get_facebook_fields(view_fields: List[ViewColumn]) -> List[str]:
     return list(facebook_fields)
 
 
-def map_response(response: List[Any] = None) -> typing.List[Dict]:
+def _map_response(response: List[Any] = None) -> typing.List[Dict]:
     result = []
     for entry in response:
         entry_result = {}

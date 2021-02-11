@@ -21,12 +21,8 @@ from FacebookAccounts.Api.command_handlers import BusinessOwnerCreateCommandHand
     BusinessOwnerDeletePermissionsCommandHandler
 from FacebookAccounts.Api import dtos
 from FacebookAccounts.Api.mappings import AdAccountInsightsCommandMapping
-from FacebookAccounts.Api.queries import AdAccountInstagramQuery, AdAccountPageInstagramQuery, AdAccountPagesQuery
+from FacebookAccounts.Api.queries import AdAccountPageInstagramQuery, AdAccountPagesQuery
 from FacebookAccounts.Api.startup import config, fixtures
-from FacebookAccounts.Infrastructure.GraphAPIHandlers import GraphAPIAdAccountInsightsHandler
-from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountInsightsHandler import (
-    GraphAPIAdAccountInsightsHandlerClass
-)
 
 logger = logging.getLogger(__name__)
 
@@ -62,23 +58,6 @@ class AdAccountPages(Resource):
             return {"message": f"Failed to retrieve pages for {account_id}"}, 400
 
 
-class AdAccountInstagram(Resource):
-    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
-    def get(self, account_id):
-
-        try:
-            business_owner_id = extract_business_owner_facebook_id()
-            instagram_accounts = AdAccountInstagramQuery.handle(business_owner_id, account_id)
-            response = humps.camelize(instagram_accounts)
-
-            return response, 200
-
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return {"message": f"Failed to retrieve instagram accounts for {account_id}. Error {repr(e)}"}, 400
-
-
 class AdAccountPageInstagram(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self, page_id):
@@ -94,34 +73,6 @@ class AdAccountPageInstagram(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Failed to retrieve instagram accounts for {page_id}. Error {repr(e)}"}, 400
-
-
-class AdAccountInsights(Resource):
-    @fixtures.authorize_permission(permission=AccountsPermissions.CAN_ACCESS_ACCOUNTS)
-    def post(self):
-
-        try:
-            business_owner_facebook_id = extract_business_owner_facebook_id()
-            raw_request = humps.decamelize(request.get_json(force=True))
-            mapping = AdAccountInsightsCommandMapping(AdAccountInsightsCommand)
-            command = mapping.load(raw_request)
-            command.business_owner_facebook_id = business_owner_facebook_id
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-            response = {"message": f"Failed to process request. Error {repr(e)}"}
-
-            return response, 400
-
-        try:
-            response = GraphAPIAdAccountInsightsHandlerClass.handle(command, config, fixtures)
-            response = humps.camelize(response)
-
-            return response, 200
-
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return Tools.create_error(e, "POTTER_FACEBOOK_ACCOUNTS_BAD_REQUEST"), 400
 
 
 class AdAccountsAgGridView(Resource):
