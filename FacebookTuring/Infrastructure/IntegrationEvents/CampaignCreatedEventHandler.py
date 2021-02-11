@@ -1,19 +1,17 @@
+import logging
 import typing
 from datetime import datetime
 
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.fixtures import Fixtures
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
     GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignCreatedEvent
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
-
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +33,9 @@ class CampaignCreatedEventHandler:
         return cls
 
     @classmethod
-    def handle(cls, message: CampaignCreatedEvent):
-        permanent_token = (BusinessOwnerRepository(cls._config.sql_db_session).
-                           get_permanent_token(message.business_owner_id))
+    def handle(cls, message: CampaignCreatedEvent, fixtures: Fixtures):
+
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(message.business_owner_id)
 
         # process message. sync every campaign, ad set, ad
         for campaign in message.campaign_tree:

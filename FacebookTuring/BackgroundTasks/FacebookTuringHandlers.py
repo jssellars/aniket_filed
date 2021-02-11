@@ -1,6 +1,7 @@
 import json
 
 from FacebookTuring.BackgroundTasks.Orchestrators.Orchestrator import Orchestrator
+from FacebookTuring.BackgroundTasks.startup import fixtures
 from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignCreatedEvent
 from FacebookTuring.Infrastructure.IntegrationEvents.CampaignCreatedEventMapping import CampaignCreatedEventMapping
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
@@ -44,7 +45,7 @@ def campaign_created_handler(request_handler=None, message_body=None, config=Non
     (request_handler.
      set_repository(structures_repository).
      set_config(config).
-     handle(message))
+     handle(message, fixtures))
 
 
 FACEBOOK_TURING_HANDLERS = {
