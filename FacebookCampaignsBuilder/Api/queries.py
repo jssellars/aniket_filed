@@ -33,7 +33,7 @@ from FacebookCampaignsBuilder.Api.catalogs import (
     optimization_goal,
 )
 from FacebookCampaignsBuilder.Api.cats import CATS
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
+from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
 )
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIInterestsHandler import (
@@ -157,10 +157,9 @@ class BudgetValidation:
     @staticmethod
     def get(business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
         return GraphAPIBudgetValidationHandler.handle(
-            account_id=account_id,
-            access_token=(
-                fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id=business_owner_id)
-            ),
+            account_id,
+            fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id=business_owner_id),
+            config
         )
 
 

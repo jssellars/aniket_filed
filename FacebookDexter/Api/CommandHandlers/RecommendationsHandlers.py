@@ -6,17 +6,19 @@ from bson import ObjectId
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
 from FacebookDexter.Api.Commands.RecommendationPageCommand import NumberOfPagesCommand, RecommendationPageCommand
-from FacebookDexter.Api.startup import config
+from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import HIDDEN_INTERESTS_MESSAGE
 from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message, get_output_enum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
-from FacebookDexter.Infrastructure.DexterRules.RecommendationApplyActions import get_apply_action
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import get_apply_action
 
 RECOMMENDATION_FIELDS = [
     RecommendationField.TEMPLATE,
+    RecommendationField.BUSINESS_OWNER_ID,
     RecommendationField.BREAKDOWN,
     RecommendationField.ACCOUNT_ID,
     RecommendationField.STRUCTURE_ID,
@@ -28,7 +30,7 @@ RECOMMENDATION_FIELDS = [
     RecommendationField.TIME_INTERVAL,
     RecommendationField.OBJECT_ID,
     RecommendationField.CHANNEL,
-    RecommendationField.BREAKDOWN_GROUP,
+    RecommendationField.UNDERPERFORMING_BREAKDOWNS,
     RecommendationField.HIDDEN_INTERESTS,
     RecommendationField.APPLY_PARAMETERS,
 ]
@@ -38,7 +40,7 @@ UNUSED_FE_FIELDS = [
     RecommendationField.TRIGGER_VARIANCE,
     RecommendationField.ACCOUNT_ID,
     RecommendationField.OBJECT_ID,
-    RecommendationField.BREAKDOWN_GROUP,
+    RecommendationField.UNDERPERFORMING_BREAKDOWNS,
     RecommendationField.HIDDEN_INTERESTS,
     RecommendationField.APPLY_PARAMETERS,
 ]
@@ -99,9 +101,13 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
 
     dexter_output = output_enum[template_key].value
 
+    permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+
+    _ = GraphAPISdkBase(config.facebook, permanent_token)
+
     # Get the specific action instance and let it deal with the action
-    apply_action = get_apply_action(dexter_output.apply_action_type)
-    apply_action.process_action(config.external_services, recommendation, headers)
+    apply_action = get_apply_action(dexter_output.apply_action_type, config, fixtures)
+    apply_action.process_action(recommendation, headers)
 
     # In the end, mark the recommendation as applied
     query = {
@@ -167,7 +173,7 @@ def _convert_db_entry_to_recommendation(entry: Dict) -> Dict:
         entry[RecommendationField.TEMPLATE.value],
         trigger_variance=entry.get(RecommendationField.TRIGGER_VARIANCE.value),
         no_of_days=entry.get(RecommendationField.TIME_INTERVAL.value),
-        breakdown_group=entry.get(RecommendationField.BREAKDOWN_GROUP.value),
+        underperforming_breakdowns=entry.get(RecommendationField.UNDERPERFORMING_BREAKDOWNS.value),
     )
 
     entry[RecommendationField.PRIORITY.value] = RecommendationPriority(

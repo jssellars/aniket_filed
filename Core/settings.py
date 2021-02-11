@@ -102,7 +102,7 @@ class Local:
         authorize_permission_endpoint="http://localhost:41005/api/v1/Permissions/authorize-permission",
         users_signin_endpoint="http://localhost:41000/api/v1/users/signin",
         subscription_update_business_owner_endpoint="http://localhost:41010/api/v1/contacts/set-businessowner-facebook-id",
-        targeting_search="http://localhost:47220/interests/suggestions/",
+        targeting_search="http://localhost:47220/api/v1/interests/suggestions/",
         facebook_auto_apply="http://localhost:47350/api/v1/{level}/{structureId}",
         google_auto_apply="",
         notification_endpoint="http://localhost:41020/api/v1/email-messages/send-email",

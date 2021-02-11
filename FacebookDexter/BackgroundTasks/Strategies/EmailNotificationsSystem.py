@@ -10,7 +10,7 @@ from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_form
 from FacebookDexter.Infrastructure.DexterRules.DexterOutput import RecommendationPriority
 from jinja2 import Template
 
-EMAIL_RECIPIENTS = ["ovidiu.istrate@filed.com", "Chase@filed.com"]
+EMAIL_RECIPIENTS = ["ovidiu.istrate@filed.com"]
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 HTML_FILE = os.path.join(CURRENT_DIR, "EmailTable.html")
 
@@ -66,7 +66,7 @@ def read_recommendations(recommendations_repository: MongoRepositoryBase, accoun
                     entry[RecommendationField.TEMPLATE.value],
                     trigger_variance=entry.get("trigger_variance", None),
                     no_of_days=entry.get("time_interval", None),
-                    breakdown_group=entry.get("breakdown_group", None),
+                    underperforming_breakdowns=entry.get("underperforming_breakdowns", None),
                 )
             }
         )

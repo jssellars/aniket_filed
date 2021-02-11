@@ -9,6 +9,7 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
+
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, Level
@@ -30,9 +31,9 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdSetBuild
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPICampaignBuilderHandler import (
     GraphAPICampaignBuilderHandler,
 )
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import campaign_builder
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import ad_builder
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import adset_builder
+from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import campaign_builder
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.structures import CampaignSplit
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
     Location,

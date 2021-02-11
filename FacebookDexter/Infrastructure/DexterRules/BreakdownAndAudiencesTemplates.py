@@ -1,5 +1,6 @@
 from enum import Enum
 
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyActionType
 from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecommendationOutput
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 
@@ -9,19 +10,20 @@ HIDDEN_INTERESTS_MESSAGE = "We suggest duplicating a new adset and targeting the
 class BreakdownRecommendationTemplate(Enum):
     AGE_GENDER_BREAKDOWN = DexterRecommendationOutput(
         (
-            "Your {breakdown_group} breakdown is not performing. Please consider removing it now to lower your cost per"
-            " result. "
+            "Your following breakdowns are not performing: {underperforming_breakdowns}. Please consider removing them"
+            " now to lower your cost per result. "
         ),
         RecommendationPriority.MEDIUM,
         "Change Your Breakdown ",
         "You age or gender is not performing ",
         "Dexter suggests changing your age and gender breakdown to help lower your cost per result. ",
+        apply_action_type=ApplyActionType.AGE_GENDER_BREAKDOWN_SPLIT,
     )
 
     PLACEMENT_BREAKDOWN = DexterRecommendationOutput(
         (
-            "Your {breakdown_group} breakdown is not performing. Please consider removing it now to lower your cost per"
-            " result.  "
+            "Your following breakdowns are not performing: {underperforming_breakdowns}. Please consider removing them"
+            " now to lower your cost per result. "
         ),
         RecommendationPriority.MEDIUM,
         "Change Interest Targeting ",

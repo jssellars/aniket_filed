@@ -1,15 +1,13 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Any
 
 from bson import BSON
-
-from Core.Dexter.Infrastructure.Domain.Breakdowns import ActionBreakdownBaseEnum, BreakdownBaseEnum
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase, MongoRepositoryStatus
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.startup import config
 from pymongo.errors import AutoReconnect
 from retry import retry
+
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase, MongoRepositoryStatus
 
 
 class StrategyDataMongoRepository(MongoRepositoryBase):
@@ -77,11 +75,11 @@ class StrategyDataMongoRepository(MongoRepositoryBase):
         return result
 
     def set_insights_collection(
-            self, level: LevelEnum, breakdown: FieldsMetadata, action_breakdown: FieldsMetadata
+            self, level: LevelEnum, breakdown: FieldsMetadata, action_breakdown: FieldsMetadata, config: Any
     ) -> None:
         self.database = config.mongo.insights_database
         self.collection = "_".join([level.value, breakdown.name, action_breakdown.name])
 
-    def set_structures_collection(self, level: LevelEnum) -> None:
+    def set_structures_collection(self, level: LevelEnum, config: Any) -> None:
         self.database = config.mongo.structures_database
         self.collection = level.value

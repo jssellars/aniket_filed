@@ -82,7 +82,7 @@ class RecommendationEntryModel:
     structure_data: StructureRecommendationModel
     reports_data: ReportRecommendationDataModel
     algorithm_type: Optional[str] = None
-    breakdown_group: Optional[str] = None
+    underperforming_breakdowns: Optional[List[str]] = None
     hidden_interests: Optional[str] = None
     debug_msg: Optional[str] = None
     apply_parameters: Optional[Dict] = None

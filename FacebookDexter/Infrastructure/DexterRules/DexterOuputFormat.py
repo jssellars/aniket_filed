@@ -8,10 +8,10 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import Ove
 
 
 def get_formatted_message(
-        template: str,
-        trigger_variance: Optional[float] = None,
-        no_of_days: Optional[int] = None,
-        breakdown_group: Optional[str] = None,
+    template: str,
+    trigger_variance: Optional[float] = None,
+    no_of_days: Optional[int] = None,
+    underperforming_breakdowns: Optional[str] = None,
 ):
     if template in OverTimeTrendTemplate.__members__:
         output_enum = OverTimeTrendTemplate
@@ -22,11 +22,14 @@ def get_formatted_message(
     else:
         return
 
-    if breakdown_group:
-        breakdown_group = breakdown_group.replace(",", " -").replace("_", "-").title()
+    if underperforming_breakdowns:
+        underperforming_breakdowns = [
+            entry.replace(",", " -").replace("_", "-").title() for entry in underperforming_breakdowns
+        ]
+        underperforming_breakdowns = ", ".join(underperforming_breakdowns)
 
     return output_enum[template].value.analysis.format(
-        trigger_variance=trigger_variance, no_of_days=no_of_days, breakdown_group=breakdown_group
+        trigger_variance=trigger_variance, no_of_days=no_of_days, underperforming_breakdowns=underperforming_breakdowns
     )
 
 

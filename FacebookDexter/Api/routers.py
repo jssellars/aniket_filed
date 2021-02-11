@@ -285,6 +285,6 @@ class ApplyRecommendation(Resource):
             )
 
         except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
+            logger.exception(f"Failed to apply recommendation || {repr(e)}")
+            
             return {"message": "Failed to apply recommendation"}, 400

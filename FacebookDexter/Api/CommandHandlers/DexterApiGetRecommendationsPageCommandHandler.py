@@ -90,7 +90,7 @@ def convert_db_entry_to_recommendation(entry: Dict) -> Dict:
             entry[RecommendationField.TEMPLATE.value],
             trigger_variance=entry.get("trigger_variance", None),
             no_of_days=entry.get("time_interval", None),
-            breakdown_group=entry.get("breakdown_group", None),
+            underperforming_breakdowns=entry.get("breakdown_group", None),
         ),
         RecommendationField.LEVEL.value: entry[RecommendationField.LEVEL.value],
         RecommendationField.CAMPAIGN_ID.value: entry[RecommendationField.CAMPAIGN_ID.value],

@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import ClassVar, Dict, List, Optional
 
-from bson import BSON
 from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
@@ -17,9 +16,11 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.targeting import Targeting
 from facebook_business.adobjects.targetingsearch import TargetingSearch
+
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterGroupedData, DexterStrategyBase
-from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import TrendEnum
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import TrendEnum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
@@ -62,7 +63,7 @@ class AudienceSizeStrategy(DexterStrategyBase):
 
     def generate_recommendation(
         self,
-        grouped_data: List[DexterGroupedData],
+        grouped_data: List[BreakdownGroupedData],
         level: LevelEnum,
         breakdown: FieldsMetadata,
         business_owner: str,
@@ -171,7 +172,7 @@ def get_audience_size(
 
 
 def get_hidden_interests(targeting: Dict) -> List[str]:
-    if not targeting or targeting.get("custom_audiences"):
+    if not targeting:
         return []
 
     flexible_spec = targeting.get("flexible_spec", [])

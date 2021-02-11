@@ -1,15 +1,15 @@
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
+from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import (
+    AudienceRecommendationTemplate,
+    BreakdownRecommendationTemplate,
+)
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CauseMetricBase,
     MetricClause,
     StrategyTimeBucket,
     TrendEnum,
     TriggerMetric,
-)
-from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import (
-    AudienceRecommendationTemplate,
-    BreakdownRecommendationTemplate,
 )
 
 AGE_GENDER_BREAKDOWN_RULE = [

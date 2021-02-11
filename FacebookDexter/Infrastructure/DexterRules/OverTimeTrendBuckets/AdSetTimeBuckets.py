@@ -1,6 +1,6 @@
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CauseMetricBase,
     MetricClause,
     StrategyTimeBucket,

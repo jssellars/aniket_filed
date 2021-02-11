@@ -39,10 +39,11 @@ class RecommendationField(Enum):
     SUBTEXT = "sub_text"
     QUOTE = "quote"
     ANALYSIS = "analysis"
-    BREAKDOWN_GROUP = "breakdown_group"
+    UNDERPERFORMING_BREAKDOWNS = "underperforming_breakdowns"
     HIDDEN_INTERESTS = "hidden_interests"
     APPLY_PARAMETERS = "apply_parameters"
     IS_APPLICABLE = "is_applicable"
+    ADSETS_SPLITS = "adsets_splits"
 
 
 class RecommendationFieldInsidersEnum(Enum):

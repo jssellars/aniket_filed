@@ -1,5 +1,5 @@
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringSyncDoneHandler import FacebookTuringSyncDoneHandler
+from FacebookDexter.BackgroundTasks.Strategies.FacebookTuringSyncDoneHandler import FacebookTuringSyncDoneHandler
 
 
 class HandlersEnum(EnumerationBase):

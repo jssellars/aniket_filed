@@ -1,8 +1,9 @@
-import typing
+from typing import Any, Dict, List, Optional
+
 from facebook_business.adobjects.adaccount import AdAccount
 from forex_python.converter import CurrencyCodes
+
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from FacebookCampaignsBuilder.Api.startup import config
 
 
 class GraphAPIBudgetValidationHandler:
@@ -10,9 +11,9 @@ class GraphAPIBudgetValidationHandler:
     @classmethod
     def map_minimum_budgets_response(
             cls,
-            minimum_budgets_facebook: typing.List[typing.Dict],
-            currency: typing.AnyStr = None
-    ) -> typing.Union[typing.Dict, typing.NoReturn]:
+            minimum_budgets_facebook: List[Dict],
+            currency: str = None
+    ) -> Optional[Dict]:
 
         minimum_budgets = list(filter(lambda x: x if x['currency'] == currency else None, minimum_budgets_facebook))[0]
 
@@ -33,10 +34,10 @@ class GraphAPIBudgetValidationHandler:
     @classmethod
     def map_budget_validation_response(
             cls,
-            facebook_response: typing.Dict,
-            max_bid: typing.Dict,
-            minimum_budgets: typing.List[typing.Dict]
-    ) -> typing.Dict:
+            facebook_response: Dict,
+            max_bid: Dict,
+            minimum_budgets: List[Dict]
+    ) -> Dict:
 
         _currency_converter = CurrencyCodes()
         mapped_budget_validation_response = {
@@ -50,7 +51,7 @@ class GraphAPIBudgetValidationHandler:
         return mapped_budget_validation_response
 
     @classmethod
-    def handle(cls, account_id: typing.AnyStr = None, access_token: typing.AnyStr = None) -> typing.Dict:
+    def handle(cls, account_id: str, access_token: str, config: Any) -> Dict:
 
         _ = GraphAPISdkBase(config.facebook, access_token)
 

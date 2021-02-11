@@ -7,19 +7,18 @@ if path:
     sys.path.append(path)
 # ====== END OF CONFIG SECTION ====== #
 import atexit
+import logging
+
 import flask
 import flask_cors
 import flask_restful
-import logging
-
-from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.Infrastructure.IntegrationEvents.HandlersEnum import HandlersEnum
-from FacebookDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
+from apscheduler.schedulers.background import BackgroundScheduler
 from Core.mongo_adapter import MongoRepositoryBase
 from FacebookDexter.BackgroundTasks import routers
-from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import \
-    StrategyJournalMongoRepository
-from apscheduler.schedulers.background import BackgroundScheduler
+from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.Strategies.HandlersEnum import HandlersEnum
+from FacebookDexter.Infrastructure.IntegrationEvents.MessageTypeEnum import RequestTypeEnum
+from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import StrategyJournalMongoRepository
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +69,7 @@ router_route_pairs = (
 scheduler = BackgroundScheduler()
 scheduler.start()
 scheduler.add_job(
-    fixtures.rabbitmq_adapter
-    .register_callback(callback)
+    fixtures.rabbitmq_adapter.register_callback(callback)
     .register_consumer(config.rabbitmq.consumer_name)
     .start_consuming
 )

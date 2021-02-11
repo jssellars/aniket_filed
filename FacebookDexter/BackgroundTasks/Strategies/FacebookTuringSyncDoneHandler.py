@@ -2,6 +2,8 @@ import logging
 import json
 from dataclasses import dataclass
 
+from typing import Any
+
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import DexterEngineRunJournalEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
@@ -11,6 +13,7 @@ from FacebookDexter.BackgroundTasks.Strategies.EmailNotificationsSystem import s
 
 from FacebookDexter.BackgroundTasks.Strategies.StrategyMaster import DexterStrategyMaster, DexterStrategiesEnum
 from FacebookDexter.BackgroundTasks.startup import config
+
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
     FacebookTuringDataSyncCompletedEvent,
 )

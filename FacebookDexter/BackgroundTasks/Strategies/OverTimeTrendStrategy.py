@@ -10,19 +10,20 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums impor
 from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import (
-    DexterGroupedData,
-    DexterStrategyBase,
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
+from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
+    BreakdownGroupedData,
     get_group_data_from_list,
     get_number_of_days,
 )
-from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CauseMetricBase,
     TrendEnum,
     recommendation_enums_union,
 )
 from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
-from FacebookDexter.Infrastructure.DexterRules.RecommendationApplyActions import ApplyParameters, get_apply_action
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters, get_apply_action
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
@@ -63,7 +64,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
 
     def generate_recommendation(
         self,
-        grouped_data: List[DexterGroupedData],
+        grouped_data: List[BreakdownGroupedData],
         level: LevelEnum,
         breakdown: FieldsMetadata,
         business_owner: str,
@@ -119,12 +120,13 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                         )
 
                         dexter_recommendation = dexter_output.value
-                        apply_action = get_apply_action(dexter_recommendation.apply_action_type)
+                        apply_action = get_apply_action(dexter_recommendation.apply_action_type, config, fixtures)
                         apply_parameters = None
 
                         if apply_action:
                             apply_parameters = apply_action.get_action_parameters(
                                 ApplyParameters(
+                                    business_owner_id=business_owner,
                                     budget_increase=BUDGET_INCREASE_PERCENTAGE,
                                     budget_decrease=BUDGET_DECREASE_PERCENTAGE,
                                 ),
@@ -141,7 +143,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
                             datetime.now(),
-                            time_bucket.no_of_days,
+                            reference_time,
                             ChannelEnum.FACEBOOK.value,
                             dexter_recommendation.priority.value,
                             structure_data,
@@ -153,15 +155,14 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                         dexter_recommendation.process_output(
                             recommendations_repository, recommendation_entry_model=entry.get_extended_db_entry()
                         )
-                        # For testing purposes we let the algorithm keep generating
-                        # return None
+                        return
 
-        return None
+        return
 
     def check_causes(
         self,
         cause_metrics: List[CauseMetricBase],
-        grouped_data: List[DexterGroupedData],
+        grouped_data: List[BreakdownGroupedData],
         no_of_days: int,
         reference_time: int,
         trigger_variance: float,
@@ -203,7 +204,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
         return None, None, None
 
     def get_trend_and_variance(
-        self, grouped_data: List[DexterGroupedData], current_time: int, metric_name: str
+        self, grouped_data: List[BreakdownGroupedData], current_time: int, metric_name: str
     ) -> (float, float):
 
         time_frames_with_data = get_number_of_days(grouped_data, metric_name)

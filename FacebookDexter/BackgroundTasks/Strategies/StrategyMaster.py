@@ -19,13 +19,15 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import Field
 from FacebookDexter.BackgroundTasks.Strategies.AudienceSizeStrategy import AudienceSizeStrategy
 from FacebookDexter.BackgroundTasks.Strategies.BreakdownStrategy import BreakdownAverageStrategy
 from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import OverTimeTrendStrategy
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import BreakdownData, DexterGroupedData, DexterStrategyBase
-from FacebookDexter.BackgroundTasks.Strategies.StrategyTimeBucket import (
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownData, BreakdownGroupedData
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CUSTOM_DEXTER_METRICS,
     CauseMetricBase,
     MetricClause,
     StrategyTimeBucket,
 )
+from FacebookDexter.BackgroundTasks.startup import config
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesRules import (
     AGE_GENDER_BREAKDOWN_BUCKET,
     AUDIENCE_SIZE_BUCKET,
@@ -108,13 +110,13 @@ class DexterStrategyMaster:
             for breakdown in self.dexter_strategy.breakdowns:
                 for action_breakdown in self.dexter_strategy.action_breakdowns:
 
-                    self.data_repository.set_structures_collection(level)
+                    self.data_repository.set_structures_collection(level, config)
                     structure_key = LevelIdKeyEnum[level.value.upper()].value
                     structures = self.data_repository.get_structures_by_key(
                         key=LevelIdKeyEnum.ACCOUNT.value, key_value=account_id, level=level, structure_key=structure_key
                     )
                     self.data_repository.set_insights_collection(
-                        level=level, breakdown=breakdown, action_breakdown=action_breakdown
+                        level, breakdown, action_breakdown, config
                     )
 
                     for structure in structures:
@@ -159,7 +161,7 @@ class DexterStrategyMaster:
 
     def get_grouped_data(
         self, metrics_data: List[Dict], level: LevelEnum, breakdown: FieldsMetadata
-    ) -> List[DexterGroupedData]:
+    ) -> List[BreakdownGroupedData]:
 
         result = []
 
@@ -215,7 +217,7 @@ def get_metric_group_data(
     metric: Union[MetricClause, CauseMetricBase],
     metrics_data: List[Dict],
     breakdown: FieldsMetadata,
-    all_grouped_data: List[DexterGroupedData],
+    all_grouped_data: List[BreakdownGroupedData],
 ) -> None:
     end_date = datetime.now() - timedelta(time_bucket.no_of_days + 1)
     is_none_breakdown = breakdown == FieldsMetadata.breakdown_none
@@ -235,7 +237,7 @@ def add_missing_metric_to_group(
     metric_field: FacebookField,
     metrics_data: List[Dict],
     breakdown: FieldsMetadata,
-    all_grouped_data: List[DexterGroupedData],
+    all_grouped_data: List[BreakdownGroupedData],
     end_date: datetime,
 ):
     existing_metric = False
@@ -258,7 +260,7 @@ def add_missing_metric_to_group(
     for entry in bucket_data:
         if metric_field.name in entry and breakdown_name in entry:
             if not grouped_data:
-                grouped_data = DexterGroupedData(
+                grouped_data = BreakdownGroupedData(
                     time_bucket.no_of_days,
                     metric_field.name,
                     [BreakdownData(entry[breakdown_name], [entry[metric_field.name]])],

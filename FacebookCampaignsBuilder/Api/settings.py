@@ -12,9 +12,9 @@ class Default:
                 name="{env}.direct",
                 type="direct",
                 outbound_queue=core.Queue(
-                    name="{env}.{app_domain}.{app_name}.outbound", key="{env}.{app_domain}.{app_name}.outbound.key"
+                    name="{env}.{app_domain}.turing.outbound", key="{env}.{app_domain}.turing.outbound.key"
                 ),
-            )
+            ),
         ]
     )
     mongo = core.replace_in_class(
