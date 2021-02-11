@@ -401,6 +401,15 @@ class SmartCreatePublish:
         else:
             SmartCreatePublish.update_feedback_database(feedback_data, template_id, PublishStatus.SUCCESS.value)
 
+        try:
+            mapper = CampaignCreatedEventMapping(target=CampaignCreatedEvent)
+            response = mapper.load(campaign_tree)
+            response.business_owner_id = business_owner_id
+            response.account_id = request["ad_account_id"]
+            CampaignPublish.publish_response(response)
+        except Exception as e:
+            raise e
+
         return campaign_tree
 
     @staticmethod

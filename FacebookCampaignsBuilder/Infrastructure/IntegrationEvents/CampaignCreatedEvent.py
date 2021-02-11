@@ -11,6 +11,7 @@ class AdSetTree:
 @dataclass
 class CampaignTree:
     facebook_id: typing.AnyStr = None
+    name: typing.AnyStr = None
     ad_sets: typing.List[AdSetTree] = field(default_factory=list)
 
 
