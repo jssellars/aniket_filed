@@ -23,6 +23,7 @@ from FacebookAccounts.Api import dtos
 from FacebookAccounts.Api.mappings import AdAccountInsightsCommandMapping
 from FacebookAccounts.Api.queries import AdAccountPageInstagramQuery, AdAccountPagesQuery
 from FacebookAccounts.Api.startup import config, fixtures
+from FacebookAccounts.Infrastructure.GraphAPIHandlers import GraphAPIAdAccountInsightsHandler
 
 logger = logging.getLogger(__name__)
 
