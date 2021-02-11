@@ -11,7 +11,6 @@ _device_platforms = Targeting.DevicePlatforms
 
 @cat_enum
 class DevicePlatform(Enum):
-    CONNECTED_TV = Cat(_device_platforms.connected_tv)
     DESKTOP = Cat(_device_platforms.desktop)
     MOBILE = Cat(_device_platforms.mobile)
 

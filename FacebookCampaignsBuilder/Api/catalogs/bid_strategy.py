@@ -9,7 +9,6 @@ accelerated_delivery = Node("no_pacing")
 
 lowest_cost = Node(Campaign.BidStrategy.lowest_cost_without_cap, standard_delivery)
 lowest_cost_with_bid_cap = Node(Campaign.BidStrategy.lowest_cost_with_bid_cap, standard_delivery)
-target_cost = Node(Campaign.BidStrategy.target_cost, standard_delivery)
 
 
 class BidStrategy(Base):

@@ -3,14 +3,14 @@ from string import Template
 
 
 class GraphAPIRequestInstagram:
-    __default_api_version = "v7.0"
+    __default_api_version = "v9.0"
 
-    def __init__(self,
-                 access_token: typing.AnyStr = None,
-                 business_id: typing.AnyStr = None,
-                 api_version: typing.AnyStr = None):
+    def __init__(
+        self, access_token: typing.AnyStr = None, business_id: typing.AnyStr = None, api_version: typing.AnyStr = None
+    ):
         self.__url = Template(
-            "https://graph.facebook.com/$api_version/$business_id?fields=instagram_accounts{id,username}&access_token=$access_token")
+            "https://graph.facebook.com/$api_version/$business_id?fields=instagram_accounts{id,username}&access_token=$access_token"
+        )
 
         self.__access_token = access_token
         self.__business_id = business_id
@@ -19,8 +19,8 @@ class GraphAPIRequestInstagram:
     @property
     def url(self):
         url = self.__url
-        url = url.substitute(api_version=self.__api_version,
-                             access_token=self.__access_token,
-                             business_id=self.__business_id)
+        url = url.substitute(
+            api_version=self.__api_version, access_token=self.__access_token, business_id=self.__business_id
+        )
 
         return url

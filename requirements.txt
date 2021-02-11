@@ -10,7 +10,7 @@ click==7.1.1
 cryptography==2.8
 curlify==2.2.1
 cycler==0.10.0
-facebook-business==7.0.0
+facebook-business==9.0.2
 Flask==1.1.1
 Flask-Cors==3.0.8
 Flask-RESTful==0.3.8

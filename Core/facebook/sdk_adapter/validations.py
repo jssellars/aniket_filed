@@ -165,7 +165,9 @@ OBJECTIVE_X_CALL_TO_ACTION_TYPE = {
         CallToActionType.SIGN_UP,  # Sign Up
         CallToActionType.SUBSCRIBE,  # Subscribe
     ],
-    Objective.PAGE_LIKES: [CallToActionType.LIKE_PAGE,],  # Like Page
+    Objective.PAGE_LIKES: [
+        CallToActionType.LIKE_PAGE,
+    ],  # Like Page
     Objective.POST_ENGAGEMENT: [
         CallToActionType.GET_QUOTE,  # Get Quote
         CallToActionType.LEARN_MORE,  # Learn More
@@ -805,13 +807,6 @@ BID_STRATEGY_X_OBJECTIVE = {
         Objective.STORE_VISITS,
         Objective.VIDEO_VIEWS,
     ],
-    BidStrategy.TARGET_COST: [
-        Objective.APP_INSTALLS,
-        Objective.CONVERSIONS,
-        Objective.LEAD_GENERATION,
-        Objective.PRODUCT_CATALOG_SALES,
-        Objective.STORE_VISITS,
-    ],
     BidStrategy.LOWEST_COST_WITH_MIN_ROAS: [
         Objective.APP_INSTALLS,
         Objective.CONVERSIONS,
@@ -823,7 +818,6 @@ BID_STRATEGY_X_PACING_TYPE = {
     BidStrategy.COST_CAP: [PacingType.STANDARD],
     BidStrategy.LOWEST_COST_WITHOUT_CAP: [PacingType.STANDARD],
     BidStrategy.LOWEST_COST_WITH_BID_CAP: [PacingType.STANDARD],
-    BidStrategy.TARGET_COST: [PacingType.STANDARD],
     BidStrategy.LOWEST_COST_WITH_MIN_ROAS: [PacingType.STANDARD],
 }
 

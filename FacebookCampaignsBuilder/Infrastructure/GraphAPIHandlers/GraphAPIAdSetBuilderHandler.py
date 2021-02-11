@@ -21,8 +21,6 @@ class GraphAPIAdSetBuilderHandler(object):
     def _convert_bid_strategy(bid_strategy):
         if bid_strategy == 'Cost Cap':
             return 'LOWEST_COST_WITHOUT_CAP'
-        elif bid_strategy == 'Target Cost':
-            return 'TARGET_COST'
         elif bid_strategy == 'Bid Cap':
             return 'LOWEST_COST_WITH_BID_CAP'
         else:

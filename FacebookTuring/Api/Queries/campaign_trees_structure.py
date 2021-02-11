@@ -1,24 +1,22 @@
 import logging
 from dataclasses import asdict
-from functools import lru_cache
 from typing import List
 
-from facebook_business.adobjects.adsinterest import AdsInterest
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import (
+    FacebookGender, Gender)
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.search import (GraphAPICountryGroupsLegend,
+                                              GraphAPILanguagesHandler)
+# from facebook_business.adobjects.adsinterest import AdsInterest TODO: find a way to cache all the interest without using this class
 from facebook_business.adobjects.flexibletargeting import FlexibleTargeting
 from facebook_business.adobjects.targeting import Targeting
-
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, Gender
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
-from Core.Web.FacebookGraphAPI.search import GraphAPILanguagesHandler, GraphAPICountryGroupsLegend
 from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Infrastructure.Domain.fe_structure_models import (
-    Campaign,
-    AdSet,
-    Ad,
-    Interest,
-)
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+from FacebookTuring.Infrastructure.Domain.fe_structure_models import (Ad,
+                                                                      AdSet,
+                                                                      Campaign)
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import \
+    TuringMongoRepository
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +194,8 @@ class CampaignTreeBuilder:
 
             adset.device_platforms = targeting.get(Targeting.Field.device_platforms, ["mobile", "desktop"])
 
-            self.__map_adset_interests(adset, targeting)
+            # TODO: Uncomment when the interests issue is solved
+            # self.__map_adset_interests(adset, targeting)
             self.__map_adset_locations(adset, targeting)
             self.__map_adset_languages(adset, targeting)
 
@@ -245,17 +244,17 @@ class CampaignTreeBuilder:
         if _interest:
             adset_interests.append(_interest)
 
-    @staticmethod
-    @lru_cache(maxsize=1024)  # TODO: this can be changed and extracted as a constant
-    def __get_interest(interest_id):
-        try:
-            graph_interest = AdsInterest(interest_id)
-            _interest = Interest(**dict(graph_interest.api_get()))
-            return _interest
-        except Exception as e:
-            # Some interests might be removed from facebook
-            logger.exception(repr(e))
-            return None
+    # @staticmethod
+    # @lru_cache(maxsize=1024)  # TODO: this can be changed and extracted as a constant
+    # def __get_interest(interest_id):
+    #     try:
+    #         graph_interest = AdsInterest(interest_id)
+    #         _interest = Interest(**dict(graph_interest.api_get()))
+    #         return _interest
+    #     except Exception as e:
+    #         # Some interests might be removed from facebook
+    #         logger.exception(repr(e))
+    #         return None
 
     @staticmethod
     def __map_ads(raw_ads) -> List[Ad]:

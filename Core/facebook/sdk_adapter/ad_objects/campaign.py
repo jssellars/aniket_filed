@@ -246,8 +246,6 @@ class BidStrategy(Enum):
     COST_CAP = Cat(_bid_strategy.cost_cap)
     LOWEST_COST_WITHOUT_CAP = Cat(_bid_strategy.lowest_cost_without_cap, display_name="Lowest cost")
     LOWEST_COST_WITH_BID_CAP = Cat(_bid_strategy.lowest_cost_with_bid_cap)
-    TARGET_COST = Cat(_bid_strategy.target_cost)
-
     LOWEST_COST_WITH_MIN_ROAS = Cat("LOWEST_COST_WITH_MIN_ROAS")
 
     contexts = Contexts.all_with_items(LOWEST_COST_WITHOUT_CAP)

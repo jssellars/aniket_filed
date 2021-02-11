@@ -2,32 +2,21 @@ from __future__ import annotations
 
 import os
 from types import ModuleType
-from typing import Type, Dict
+from typing import Dict, Type
 
+from Core.pydantic_extensions import replace_in_class
 # WARNING: keep all imports, they are imported from this file downstream
 from Core.settings_models import (
-    Queue,
-    Exchange,
-    RabbitMq,
-    SqlServer,
-    Mongo,
-    ExternalServices,
-    TechnicalUser,
-    Facebook,
-    Google,
-    MinimumNumberOfDataPoints,
-    Dexter,
-    Name,
-    Model,
-)
-from Core.pydantic_extensions import replace_in_class
+    Dexter, Exchange, ExternalServices, Facebook, Google,
+    MinimumNumberOfDataPoints, Model, Mongo, Name, Queue, RabbitMq, SqlServer,
+    TechnicalUser)
 
 
 class Default:
     domain = "filed.com"
     facebook = Facebook(
         description="Filed Live",
-        api_version="v7.0",
+        api_version="v9.0",
         app_id="174014546372191",
         app_secret="718ab2ca9cc128cf4b1b7793ecc116cb",
     )
