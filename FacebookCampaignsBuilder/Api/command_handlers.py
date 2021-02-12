@@ -11,7 +11,6 @@ from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, Level
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
@@ -39,9 +38,6 @@ from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targe
     Location,
     FlexibleTargeting,
     Targeting,
-)
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIRequests.GraphAPIRequestAudienceSize import (
-    GraphAPIRequestAudienceSize,
 )
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEvent import CampaignCreatedEvent
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.CampaignCreatedEventMapping import (
@@ -101,13 +97,14 @@ class AudienceSize:
         cls,
         permanent_token: typing.AnyStr = None,
         account_id: typing.AnyStr = None,
-        audience_details: typing.AnyStr = None,
+        audience_details: typing.Dict = None,
     ):
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
+
         try:
-            audience_size_request = GraphAPIRequestAudienceSize(
-                access_token=permanent_token, account_id=account_id, audience_details=audience_details
-            )
-            response, _ = HTTPRequestBase.get(audience_size_request.url)
+            account = AdAccount(account_id)
+            response = account.get_delivery_estimate(fields=["estimate_mau"], params=audience_details)
+
         except Exception as e:
             raise e
 
