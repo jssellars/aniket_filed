@@ -1,3 +1,4 @@
+import urllib
 from typing import Dict, Any
 
 import requests
@@ -339,9 +340,12 @@ def build_ad_carousel_creative_link_data(ad_account: AdAccount, adverts: Dict, f
 
 def _generate_image_hash(ad_account: AdAccount, image_url: str):
     # Download image from URL
-    image_file = open("adCreativeImage.jpg", "wb")
-    image_file.write(requests.get(image_url).content)
-    image_file.close()
+    with open("adCreativeImage.jpg", "wb") as image_file:
+        if image_url.startswith("data:image"):
+            response = urllib.request.urlopen(image_url)
+            image_file.write(response.file.read())
+        else:
+            image_file.write(requests.get(image_url).content)
 
     # Create AdImage
     ad_image = {AdImage.Field.filename: "adCreativeImage.jpg"}
