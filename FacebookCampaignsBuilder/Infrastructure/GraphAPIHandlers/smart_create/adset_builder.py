@@ -114,7 +114,7 @@ def set_promoted_object(ad_set_template, is_using_conversions, step_three, step_
 def split_ad_sets(ad_set_template, step_two, step_four):
     ad_sets = []
 
-    split_age_range_selected = step_four.get("split_age_range_selected")
+    is_split_age_range_selected = step_four.get("is_split_age_range_selected")
     is_split_by_gender_selected = step_four["is_split_by_gender_selected"]
 
     targeting_request = step_two["targeting"]
@@ -125,7 +125,7 @@ def split_ad_sets(ad_set_template, step_two, step_four):
     included_interests, excluded_interests, narrow_interests = extract_interests(targeting_request)
     included_custom_audiences, excluded_custom_audiences = extract_custom_audiences(targeting_request)
 
-    age_groups = split_age_groups(split_age_range_selected, targeting_request.get("age_range"))
+    age_groups = split_age_groups(is_split_age_range_selected, targeting_request.get("age_range"))
     gender_groups = split_genders(is_split_by_gender_selected, targeting_request.get("gender"))
 
     (

@@ -494,7 +494,7 @@ class SmartCreatePublish:
     ):
         targeting = adset_create_template["targeting"]
 
-        device, location = SmartCreatePublish.get_location_device(targeting)
+        device, location = SmartCreatePublish.get_location_device(step_four, targeting)
         campaign_split_fields = dict(location=location, device=device)
 
         age_split, gender = SmartCreatePublish.get_gender_age_split(step_four, targeting)
@@ -514,6 +514,7 @@ class SmartCreatePublish:
                 for adset_allocation in adset_allocations:
                     if "budget" in adset_allocation:
                         budget = adset_allocation.pop("budget")
+                        adset_allocation.pop("ad_set_name", None)
                     else:
                         continue
 
@@ -536,35 +537,39 @@ class SmartCreatePublish:
                 min=targeting["age_min"],
                 max=targeting["age_max"],
             )
-            if step_four.get("split_age_range_selected")
+            if step_four.get("is_split_age_range_selected")
             else None
         )
 
         return age_split, gender
 
     @staticmethod
-    def get_location_device(targeting: Dict):
+    def get_location_device(step_four: Dict, targeting: Dict):
         # Refer to SmartCreate.process_geo_location for how location is encoded inside targeting
         location = []
-        for _, location_type in LOCATION_OPTIONS.items():
-            geo_locations = targeting["geo_locations"].get(location_type)
-            if not geo_locations:
-                continue
-            elif isinstance(geo_locations, list):
-                if location_type == "countries":
-                    location.extend(geo_locations)
+        if step_four.get("is_split_by_location"):
+            for _, location_type in LOCATION_OPTIONS.items():
+                geo_locations = targeting["geo_locations"].get(location_type)
+                if not geo_locations:
+                    continue
+                elif isinstance(geo_locations, list):
+                    if location_type == "countries":
+                        location.extend(geo_locations)
+                    else:
+                        location.extend([loc.get("key") for loc in geo_locations])
                 else:
-                    location.extend([loc.get("key") for loc in geo_locations])
-            else:
-                if location_type == "countries":
-                    location.append(geo_locations)
-                else:
-                    location.append(geo_locations.get("key"))
+                    if location_type == "countries":
+                        location.append(geo_locations)
+                    else:
+                        location.append(geo_locations.get("key"))
 
-        if len(location) == 1:
-            location = location[0]
+            if len(location) == 1:
+                location = location[0]
+            else:
+                location = set(location)
         else:
-            location = set(location)
+            location = None
+
 
         # FE will send device:null if campaigns aren't split by devices
         # BE represents no device split as device:['desktop','mobile']
