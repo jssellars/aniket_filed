@@ -128,6 +128,10 @@ class Dev3:
     environment = "dev3"
 
 
+class Stage:
+    environment = "stage"
+
+
 class Staging:
     environment = "staging"
     # TODO: see why staged has a separate host and what makes it different from dev / dev2 / dev3
