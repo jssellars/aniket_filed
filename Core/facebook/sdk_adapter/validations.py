@@ -766,6 +766,7 @@ PLACEMENT_X_MEDIA_FORMAT = {
     Placement.MESSENGER_STORIES: [_mf_img, _mf_vid],
 }
 
+# Source: https://developers.facebook.com/docs/marketing-api/bidding/overview/bid-strategy#bid-strategy
 BID_STRATEGY_X_OBJECTIVE = {
     BidStrategy.COST_CAP: [
         Objective.APP_INSTALLS,
@@ -834,6 +835,7 @@ BUYING_TYPE_X_BILLING_EVENT = {
     ],
 }
 
+# Source: https://developers.facebook.com/docs/marketing-api/bidding/overview/billing-events#opt_bids
 OPTIMIZATION_GOAL_X_BILLING_EVENT = {
     OptimizationGoal.AD_RECALL_LIFT: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
     OptimizationGoal.APP_INSTALLS: {
@@ -846,8 +848,8 @@ OPTIMIZATION_GOAL_X_BILLING_EVENT = {
     OptimizationGoal.LANDING_PAGE_VIEWS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
     OptimizationGoal.LEAD_GENERATION: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
     OptimizationGoal.LINK_CLICKS: {
-        BillingEvent.LINK_CLICKS: [BuyingType.AUCTION],
         BillingEvent.IMPRESSIONS: [BuyingType.AUCTION],
+        BillingEvent.LINK_CLICKS: [BuyingType.AUCTION],
     },
     OptimizationGoal.OFFSITE_CONVERSIONS: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
     OptimizationGoal.PAGE_LIKES: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
@@ -863,9 +865,8 @@ OPTIMIZATION_GOAL_X_BILLING_EVENT = {
     OptimizationGoal.VALUE: {BillingEvent.IMPRESSIONS: [BuyingType.AUCTION]},
 }
 
-# https://developers.facebook.com/docs/marketing-api/bidding/overview#opt
 
-
+# Source: https://developers.facebook.com/docs/marketing-api/bidding/overview#opt
 # TODO: find a more readable way of defining default values
 # the default is the first value, and the order is as is
 OBJECTIVE_WITH_DESTINATION_X_OPTIMIZATION_GOAL = {
