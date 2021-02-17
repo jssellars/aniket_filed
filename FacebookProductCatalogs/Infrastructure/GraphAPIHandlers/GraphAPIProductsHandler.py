@@ -1,30 +1,32 @@
-import typing
 from copy import deepcopy
+from typing import Any, List, Tuple, Dict
 
-from facebook_business.adobjects.productcatalog import ProductCatalog
-from facebook_business.adobjects.productgroup import ProductGroup as FacebookProductGroup
-from facebook_business.adobjects.productitem import ProductItem as FacebookProductItem
-
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
+from Core.settings_models import Model
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import \
+    GraphAPIClientBase
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import \
+    GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from facebook_business.adobjects.productcatalog import ProductCatalog
+from facebook_business.adobjects.productgroup import \
+    ProductGroup as FacebookProductGroup
+from facebook_business.adobjects.productitem import \
+    ProductItem as FacebookProductItem
 from FacebookProductCatalogs.Infrastructure.Domain.Product import Product
-from FacebookProductCatalogs.Infrastructure.Domain.ProductGroup import ProductGroup
-from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductFields import PRODUCT_FIELDS, \
-    PRODUCT_GROUPS_FIELDS, PRODUCT_SETS_FIELD_BY_PRODUCT
+from FacebookProductCatalogs.Infrastructure.Domain.ProductGroup import \
+    ProductGroup
+from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductFields import (
+    PRODUCT_FIELDS, PRODUCT_GROUPS_FIELDS, PRODUCT_SETS_FIELD_BY_PRODUCT)
 from FacebookProductCatalogs.Infrastructure.GraphAPIRequests.GraphAPIRequestProducts import \
     GraphAPIRequestProduct
 
 
 class GraphAPIProductsHandler:
-
     @classmethod
-    def handle(cls,
-               permanent_token: typing.AnyStr = None,
-               product_catalog_id: typing.AnyStr = None,
-               config: typing.Any = None) -> typing.Tuple[typing.List[typing.Any],
-                                                           typing.List[typing.Any]]:
+    def handle(
+        cls, permanent_token: str = None, product_catalog_id: str = None, config: Model = None
+    ) -> Tuple[List[Any], List[Any]]:
         # initialize GraphAPI SDK
         _ = GraphAPISdkBase(config.facebook, permanent_token)
 
@@ -43,10 +45,12 @@ class GraphAPIProductsHandler:
         products = []
         try:
             api_config = GraphAPIClientBaseConfig()
-            api_config.request = GraphAPIRequestProduct(api_version=config.facebook.api_version,
-                                                    access_token=permanent_token,
-                                                    product_catalog_id=product_catalog_id,
-                                                    fields=PRODUCT_FIELDS)
+            api_config.request = GraphAPIRequestProduct(
+                api_version=config.facebook.api_version,
+                access_token=permanent_token,
+                product_catalog_id=product_catalog_id,
+                fields=PRODUCT_FIELDS,
+            )
             graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
             response, _ = graph_api_client.call_facebook()
             if isinstance(products, Exception):
@@ -67,15 +71,14 @@ class GraphAPIProductsHandler:
         return product_groups, errors
 
     @classmethod
-    def __get_products_by_product_group_id(cls,
-                                           product_group_id: typing.AnyStr = None,
-                                           products: typing.List[Product] = None):
-        relevant_products = [product for product in products
-                             if product.facebook_product_group_id == product_group_id]
+    def __get_products_by_product_group_id(
+        cls, product_group_id: str = None, products: List[Product] = None
+    ):
+        relevant_products = [product for product in products if product.facebook_product_group_id == product_group_id]
         return relevant_products
 
     @classmethod
-    def __map_facebook_group(cls, facebook_product_group: typing.Any = None, products: typing.List[Product] = None):
+    def __map_facebook_group(cls, facebook_product_group: Any = None, products: List[Product] = None):
         facebook_product_group = Tools.convert_to_json(facebook_product_group)
         product_group = ProductGroup()
         product_group.id = facebook_product_group[FacebookProductGroup.Field.id]
@@ -84,7 +87,7 @@ class GraphAPIProductsHandler:
         return product_group
 
     @classmethod
-    def __map_facebook_product(cls, facebook_product: typing.Any = None):
+    def __map_facebook_product(cls, facebook_product: Any = None):
         if not isinstance(facebook_product, dict):
             facebook_product = Tools.convert_to_json(facebook_product)
         product = Product()
@@ -108,24 +111,26 @@ class GraphAPIProductsHandler:
         product.custom_label_2 = facebook_product.get(FacebookProductItem.Field.custom_label_2)
         product.custom_label_3 = facebook_product.get(FacebookProductItem.Field.custom_label_3)
         product.custom_label_4 = facebook_product.get(FacebookProductItem.Field.custom_label_4)
-        product.facebook_product_set_ids = cls.__get_product_set_ids_from_product(facebook_product.get(PRODUCT_SETS_FIELD_BY_PRODUCT, []))
+        product.facebook_product_set_ids = cls.__get_product_set_ids_from_product(
+            facebook_product.get(PRODUCT_SETS_FIELD_BY_PRODUCT, [])
+        )
 
         return product
 
     @staticmethod
-    def __map_custom_data(raw_custom_data: typing.List[typing.Dict]) -> typing.Dict:
+    def __map_custom_data(raw_custom_data: List[Dict]) -> Dict:
         mapped_custom_data = {}
         if raw_custom_data:
             for entry in raw_custom_data:
-                mapped_custom_data[entry['key']] = entry['value']
+                mapped_custom_data[entry["key"]] = entry["value"]
         return mapped_custom_data
 
     @classmethod
-    def __get_product_set_ids_from_product(cls, product_sets: typing.Dict = None) -> typing.List[typing.AnyStr]:
+    def __get_product_set_ids_from_product(cls, product_sets: Dict = None) -> List[str]:
         if not product_sets:
             return []
-        product_sets = product_sets.get('data')
+        product_sets = product_sets.get("data")
         product_set_ids = []
         if product_sets:
-            product_set_ids = [product_set.get('id') for product_set in product_sets]
+            product_set_ids = [product_set.get("id") for product_set in product_sets]
         return product_set_ids

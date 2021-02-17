@@ -30,7 +30,7 @@ def callback(ch, method, properties, body):
         request_handler_name = RequestTypeEnum.get_by_value(message_type)
         request_handler = HandlersEnum.get_enum_by_name(request_handler_name).value
         body = json.loads(body)
-        request_handler.set_config(config).handle(body)
+        request_handler.handle(body, fixtures, config)
     except Exception as e:
         logger.exception(repr(e), extra={"message_type": getattr(properties, "type", None), "event_body": body})
 

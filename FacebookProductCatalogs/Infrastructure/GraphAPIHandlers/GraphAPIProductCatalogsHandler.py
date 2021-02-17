@@ -1,12 +1,13 @@
-import typing
 from copy import deepcopy
 from enum import Enum
+from typing import Tuple, List, Any
 
 from facebook_business.adobjects.business import Business
 from facebook_business.adobjects.productcatalog import ProductCatalog as FacebookProductCatalog
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from Core.settings_models import Model
 from FacebookProductCatalogs.Infrastructure.Domain.ProductCatalog import ProductCatalog
 from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductFields import \
     PRODUCT_CATALOGS_FIELDS
@@ -21,9 +22,9 @@ class GraphAPIProductCatalogsHandler:
 
     @classmethod
     def handle(cls,
-               permanent_token: typing.AnyStr = None,
-               business_id: typing.AnyStr = None,
-               config: typing.Any = None) -> typing.Tuple[typing.List[typing.Any], typing.List[typing.Any]]:
+               permanent_token: str = None,
+               business_id: str = None,
+               config: Model = None) -> Tuple[List[Any], List[Any]]:
         # initialize GraphAPI SDK
         _ = GraphAPISdkBase(config.facebook, permanent_token)
 
@@ -51,7 +52,7 @@ class GraphAPIProductCatalogsHandler:
         return product_catalogs, errors
 
     @classmethod
-    def __map_facebook_catalog(cls, facebook_product_catalog: typing.Any = None, catalog_type: typing.AnyStr = None):
+    def __map_facebook_catalog(cls, facebook_product_catalog: Any = None, catalog_type: str = None):
         facebook_product_catalog = Tools.convert_to_json(facebook_product_catalog)
         product_catalog = ProductCatalog()
         product_catalog.name = facebook_product_catalog[FacebookProductCatalog.Field.name]

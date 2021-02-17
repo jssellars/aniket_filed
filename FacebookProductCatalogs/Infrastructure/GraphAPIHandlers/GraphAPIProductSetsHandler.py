@@ -1,21 +1,22 @@
-import typing
 from copy import deepcopy
+from typing import Any, List, Tuple
 
-from facebook_business.adobjects.productcatalog import ProductCatalog
-from facebook_business.adobjects.productset import ProductSet as FacebookProductSet
-
+from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from facebook_business.adobjects.productcatalog import ProductCatalog
+from facebook_business.adobjects.productset import \
+    ProductSet as FacebookProductSet
 from FacebookProductCatalogs.Infrastructure.Domain.ProductSet import ProductSet
-from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductFields import PRODUCT_SETS_FIELDS
+from FacebookProductCatalogs.Infrastructure.GraphAPIHandlers.GraphAPIProductFields import \
+    PRODUCT_SETS_FIELDS
 
 
 class GraphAPIProductSetsHandler:
     @classmethod
-    def handle(cls,
-               permanent_token: typing.AnyStr = None,
-               product_catalog_id: typing.AnyStr = None,
-               config: typing.Any = None) -> typing.Tuple[typing.List[typing.Any], typing.List[typing.Any]]:
+    def handle(
+        cls, permanent_token: str = None, product_catalog_id: str = None, config: Model = None
+    ) -> Tuple[List[Any], List[Any]]:
         # initialize GraphAPI SDK
         _ = GraphAPISdkBase(config.facebook, permanent_token)
 
@@ -34,7 +35,7 @@ class GraphAPIProductSetsHandler:
         return product_sets, errors
 
     @classmethod
-    def __map_facebook_sets(cls, facebook_product_set: typing.Any = None):
+    def __map_facebook_sets(cls, facebook_product_set: Any = None):
         facebook_product_set = Tools.convert_to_json(facebook_product_set)
         product_set = ProductSet()
         product_set.name = facebook_product_set[FacebookProductSet.Field.name]
