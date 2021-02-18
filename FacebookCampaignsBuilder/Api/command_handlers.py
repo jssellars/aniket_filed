@@ -9,6 +9,7 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
+from werkzeug.datastructures import FileStorage
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure, Level
@@ -58,6 +59,7 @@ class AdPreview:
         command: commands.AdPreview = None,
         facebook_config: typing.Any = None,
         permanent_token: typing.AnyStr = None,
+        uploaded_image: FileStorage = None,
     ) -> Optional[str]:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
@@ -69,7 +71,7 @@ class AdPreview:
         )
         if command.ad_template["ad_format"] == FiledAdFormatEnum.IMAGE.value:
             ad_creative = ad_builder.build_image_ad_creative(
-                page_ids, command.ad_template, ad_account, command.objective
+                page_ids, command.ad_template, ad_account, command.objective, uploaded_image
             )
         elif command.ad_template["ad_format"] == FiledAdFormatEnum.VIDEO.value:
             ad_creative = ad_builder.build_video_ad_creative(

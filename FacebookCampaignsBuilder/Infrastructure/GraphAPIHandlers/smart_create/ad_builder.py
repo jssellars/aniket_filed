@@ -14,6 +14,7 @@ from facebook_business.adobjects.adcreativephotodata import AdCreativePhotoData
 from facebook_business.adobjects.adcreativevideodata import AdCreativeVideoData
 from facebook_business.adobjects.adimage import AdImage
 from facebook_business.adobjects.conversionactionquery import ConversionActionQuery
+from werkzeug.datastructures import FileStorage
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
 from Core.facebook.sdk_adapter.ad_objects.ad_creative import CallToActionType
@@ -84,7 +85,9 @@ def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict
     return ad_creative_facebook_id
 
 
-def build_image_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount, objective: str = None):
+def build_image_ad_creative(
+    step_two: Dict, adverts: Dict, ad_account: AdAccount, objective: str = None, uploaded_image: FileStorage = None
+):
     object_story_spec_data = {
         AdCreativeObjectStorySpec.Field.page_id: step_two.get("facebook_page_id", None),
         AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two.get("instagram_page_id", None),
@@ -97,7 +100,9 @@ def build_image_ad_creative(step_two: Dict, adverts: Dict, ad_account: AdAccount
         ad_creative_photo_data = build_photo_data(ad_account, adverts)
         object_story_spec_data[AdCreativeObjectStorySpec.Field.photo_data] = ad_creative_photo_data
     else:
-        ad_creative_link_data = build_image_link_data(ad_account, adverts, step_two.get("facebook_page_id"), objective)
+        ad_creative_link_data = build_image_link_data(
+            ad_account, adverts, step_two.get("facebook_page_id"), objective, uploaded_image
+        )
         object_story_spec_data[AdCreativeObjectStorySpec.Field.link_data] = ad_creative_link_data
 
     object_story_spec = build_object_story_spec(object_story_spec_data)
@@ -223,7 +228,9 @@ def build_ad_creative(ad_account, creative_params):
     return ad_account.create_ad_creative(params=creative_params, fields=creative_params.keys())
 
 
-def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id: str, objective: str = None):
+def build_image_link_data(
+    ad_account: AdAccount, adverts: Dict, facebook_page_id: str, objective: str = None, uploaded_image: FileStorage = None
+):
     call_to_action = {
         "type": adverts["call_to_action"]["value"],
         "value": {"link": adverts["website_url"]},
@@ -255,7 +262,7 @@ def build_image_link_data(ad_account: AdAccount, adverts: Dict, facebook_page_id
     ad_creative_link_data[AdCreativeLinkData.Field.call_to_action] = call_to_action
 
     # Get image hash and attach to creative
-    ad_image = _generate_image_hash(ad_account, adverts.get("media_url", None))
+    ad_image = _generate_image_hash(ad_account, adverts.get("media_url", None), uploaded_image)
     ad_creative_link_data[AdCreativeLinkData.Field.image_hash] = ad_image[AdImage.Field.hash]
 
     return ad_creative_link_data
@@ -338,17 +345,24 @@ def build_ad_carousel_creative_link_data(ad_account: AdAccount, adverts: Dict, f
     return ad_creative_link_data
 
 
-def _generate_image_hash(ad_account: AdAccount, image_url: str):
+def _generate_image_hash(ad_account: AdAccount, image_url: str = None, uploaded_image: FileStorage = None):
     # Download image from URL
-    with open("adCreativeImage.jpg", "wb") as image_file:
-        if image_url.startswith("data:image"):
-            response = urllib.request.urlopen(image_url)
-            image_file.write(response.file.read())
+    image_name = "adCreativeImage.jpg"
+    with open(image_name, "wb") as image_file:
+        if image_url:
+            if image_url.startswith("data:image"):
+                response = urllib.request.urlopen(image_url)
+                image_file.write(response.file.read())
+            else:
+                image_file.write(requests.get(image_url).content)
         else:
-            image_file.write(requests.get(image_url).content)
+            if uploaded_image:
+                uploaded_image.save(image_name)
+            else:
+                raise RuntimeError("No image available to be used as ad image.")
 
     # Create AdImage
-    ad_image = {AdImage.Field.filename: "adCreativeImage.jpg"}
+    ad_image = {AdImage.Field.filename: image_name}
     ad_image = ad_account.create_ad_image(params=ad_image)
 
     return ad_image
