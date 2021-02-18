@@ -15,7 +15,7 @@ from FacebookDexter.BackgroundTasks.startup import config, fixtures
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
     BreakdownGroupedData,
     get_group_data_from_list,
-    get_number_of_days,
+    get_max_number_of_days,
 )
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CauseMetricBase,
@@ -85,11 +85,9 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                 if not trend and not variance:
                     continue
 
-                time_frames_with_data = get_number_of_days(grouped_data, metric_name)
-                if not time_frames_with_data:
+                reference_time = get_max_number_of_days(grouped_data, metric_name)
+                if not reference_time:
                     continue
-
-                reference_time = max(time_frames_with_data)
 
                 if trend == trigger_metric.trigger.trend and variance >= trigger_metric.trigger.variance_percentage:
                     (dexter_output, cause_benchmark, cause_current,) = self.check_causes(
@@ -207,11 +205,10 @@ class OverTimeTrendStrategy(DexterStrategyBase):
         self, grouped_data: List[BreakdownGroupedData], current_time: int, metric_name: str
     ) -> (float, float):
 
-        time_frames_with_data = get_number_of_days(grouped_data, metric_name)
-        if not time_frames_with_data:
+        reference_time = get_max_number_of_days(grouped_data, metric_name)
+        if not reference_time:
             return None, None
 
-        reference_time = max(time_frames_with_data)
         if current_time == reference_time:
             return None, None
 

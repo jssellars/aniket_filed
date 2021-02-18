@@ -50,11 +50,15 @@ def get_group_data_from_list(
     return None
 
 
-def get_number_of_days(grouped_data: List[BreakdownGroupedData], metric_name: str):
+def get_max_number_of_days(grouped_data: List[BreakdownGroupedData], metric_name: str) -> Optional[int]:
     result = []
 
     for data_group in grouped_data:
         if data_group.metric_name == metric_name:
-            result.append(data_group.no_of_days)
+            for breakdown_data in data_group.breakdown_data:
+                result.append(len(breakdown_data.data_points))
 
-    return result
+    if not result:
+        return
+
+    return max(result)

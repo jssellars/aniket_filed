@@ -19,7 +19,7 @@ from facebook_business.adobjects.targetingsearch import TargetingSearch
 
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData, get_max_number_of_days
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import TrendEnum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
@@ -130,12 +130,16 @@ class AudienceSizeStrategy(DexterStrategyBase):
                             business_owner, account_id, structure, level, metric_name, breakdown
                         )
 
+                        reference_time = get_max_number_of_days(grouped_data, metric_name)
+                        if not reference_time:
+                            continue
+
                         entry = RecommendationEntryModel(
                             template_key,
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
                             datetime.now(),
-                            time_bucket.no_of_days,
+                            reference_time,
                             ChannelEnum.FACEBOOK.value,
                             get_audience_size_priority(variance),
                             structure_data,

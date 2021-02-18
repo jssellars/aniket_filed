@@ -16,7 +16,7 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGro
     BreakdownData,
     BreakdownGroupedData,
     get_group_data_from_list,
-)
+    get_max_number_of_days)
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CUSTOM_DEXTER_METRICS,
     CauseMetricBase,
@@ -24,7 +24,11 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTime
     recommendation_enums_union,
 )
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import get_apply_action, ApplyParameters, TOTAL_KEY
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
+    get_apply_action,
+    ApplyParameters,
+    TOTAL_KEY,
+    INVALID_METRIC_VALUE)
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
@@ -45,7 +49,6 @@ def get_breakdown_priority(variance: float) -> int:
 @dataclass
 class BreakdownAverageStrategy(DexterStrategyBase):
     ALGORITHM: ClassVar[str] = "breakdown_average_algorithm"
-    INVALID_METRIC = -1
 
     def trend(self, reference_data: float, current_data: float) -> Optional[TrendEnum]:
         try:
@@ -58,7 +61,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             logger.exception(f"Trend calculation error || {repr(e)}")
 
     def variance(
-            self, reference_data: float, current_data: float, trend: Optional[TrendEnum] = None
+        self, reference_data: float, current_data: float, trend: Optional[TrendEnum] = None
     ) -> Optional[float]:
         try:
             variance = ((current_data / reference_data) - 1) * 100
@@ -70,14 +73,14 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             return None
 
     def generate_recommendation(
-            self,
-            grouped_data: List[BreakdownGroupedData],
-            level: LevelEnum,
-            breakdown: FieldsMetadata,
-            business_owner: str,
-            account_id: str,
-            structure: Dict,
-            recommendations_repository: MongoRepositoryBase,
+        self,
+        grouped_data: List[BreakdownGroupedData],
+        level: LevelEnum,
+        breakdown: FieldsMetadata,
+        business_owner: str,
+        account_id: str,
+        structure: Dict,
+        recommendations_repository: MongoRepositoryBase,
     ):
 
         self.aggregate_grouped_data(grouped_data)
@@ -139,11 +142,14 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             apply_parameters = None
 
             if apply_action:
+                cause_metric_name = trigger_metric.cause_metrics[0].metric_clauses[0].metric_field.name
                 apply_parameters = apply_action.get_action_parameters(
                     ApplyParameters(
                         business_owner_id=business_owner,
-                        existing_breakdowns=grouped_metric_data,
+                        existing_breakdowns=grouped_data,
                         underperforming_breakdowns=underperforming_breakdowns,
+                        metric_name=cause_metric_name,
+                        no_of_days=time_bucket.no_of_days
                     ),
                     structure.get(FacebookMiscFields.details),
                 )
@@ -157,12 +163,16 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                 business_owner, account_id, structure, level, metric_name, breakdown
             )
 
+            reference_time = get_max_number_of_days(grouped_data, metric_name)
+            if not reference_time:
+                continue
+
             entry = RecommendationEntryModel(
                 dexter_breakdown_recommendation.name,
                 RecommendationStatusEnum.ACTIVE.value,
                 variance,
                 datetime.now(),
-                time_bucket.no_of_days,
+                reference_time,
                 ChannelEnum.FACEBOOK.value,
                 get_breakdown_priority(cause_variance),
                 structure_data,
@@ -178,11 +188,11 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             )
 
     def check_causes(
-            self,
-            cause_metrics: List[CauseMetricBase],
-            grouped_data: List[BreakdownGroupedData],
-            no_of_days: int,
-            breakdown: str,
+        self,
+        cause_metrics: List[CauseMetricBase],
+        grouped_data: List[BreakdownGroupedData],
+        no_of_days: int,
+        breakdown: str,
     ) -> Tuple[Optional[recommendation_enums_union], Optional[float], Optional[str]]:
 
         # TODO extract this logic to a method and use twice
@@ -206,7 +216,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                 reference_data = metric_data.get_breakdown_total(TOTAL_KEY) / no_of_breakdowns
 
                 current_data = metric_data.get_breakdown_total(breakdown)
-                if current_data == self.INVALID_METRIC:
+                if current_data == INVALID_METRIC_VALUE:
                     return cause_metric.output, None, metric_name
 
                 trend = self.trend(reference_data, current_data)
@@ -238,10 +248,10 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         return
 
     def add_totals_to_breakdowns(
-            self,
-            grouped_data: List[BreakdownGroupedData],
-            metric,
-            no_of_days: int,
+        self,
+        grouped_data: List[BreakdownGroupedData],
+        metric,
+        no_of_days: int,
     ):
 
         # If there is a custom metric, we need to aggregate data first and then do the math for the total value
@@ -264,7 +274,9 @@ class BreakdownAverageStrategy(DexterStrategyBase):
 
                 breakdown_data.total = sum(breakdown_data.data_points)
 
-    def aggregate_custom_metric(self, grouped_data: List[BreakdownGroupedData], metric: FieldsMetadata, no_of_days: int):
+    def aggregate_custom_metric(
+        self, grouped_data: List[BreakdownGroupedData], metric: FieldsMetadata, no_of_days: int
+    ):
         custom_metric = CUSTOM_DEXTER_METRICS[metric.name]
         denominator_name = custom_metric.denominator.name
         numerator_name = custom_metric.numerator.name
@@ -297,7 +309,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             numerator_breakpoint_data = numerator_data.get_breakdown_datapoints(breakdown)
             denominator_breakpoint_data = denominator_data.get_breakdown_datapoints(breakdown)
             if numerator_breakpoint_data is None or denominator_breakpoint_data is None:
-                metric_data.breakdown_data.append(BreakdownData(breakdown, [], total=self.INVALID_METRIC))
+                metric_data.breakdown_data.append(BreakdownData(breakdown, [], total=INVALID_METRIC_VALUE))
                 continue
 
             data[numerator_name] = sum(numerator_breakpoint_data)

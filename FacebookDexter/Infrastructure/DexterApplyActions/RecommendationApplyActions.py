@@ -1,19 +1,21 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from bson import BSON
-from Core.constants import DEFAULT_DATETIME_ISO
+from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.campaign import Campaign
+
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import (
     RecommendationField,
 )
-from Core.mongo_adapter import MongoOperator, MongoRepositoryStatus
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import (
     FacebookGender,
     FacebookMiscFields,
@@ -25,11 +27,11 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     LevelToGraphAPIStructure,
 )
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from facebook_business.adobjects.ad import Ad
-from facebook_business.adobjects.adset import AdSet
-from facebook_business.adobjects.campaign import Campaign
+from Core.constants import DEFAULT_DATETIME_ISO
+from Core.mongo_adapter import MongoOperator, MongoRepositoryStatus
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
     BreakdownGroupedData,
+    get_group_data_from_list,
 )
 from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import (
     FacebookBudgetTypeEnum,
@@ -43,6 +45,7 @@ from FacebookDexter.Infrastructure.PersistanceLayer.StrategyDataMongoRepository 
     StrategyDataMongoRepository,
 )
 
+INVALID_METRIC_VALUE = -1
 TOTAL_KEY = "total"
 UNKNOWN_KEY = "unknown"
 
@@ -63,8 +66,10 @@ class ApplyParameters:
     business_owner_id: str
     budget_increase: Optional[float] = None
     budget_decrease: Optional[float] = None
-    existing_breakdowns: Optional[BreakdownGroupedData] = None
+    existing_breakdowns: Optional[List[BreakdownGroupedData]] = field(default_factory=dict)
     underperforming_breakdowns: Optional[List[str]] = None
+    metric_name: Optional[str] = None
+    no_of_days: Optional[int] = None
 
 
 @dataclass
@@ -86,7 +91,6 @@ class RecommendationAction:
 
 @dataclass
 class BudgetAlterAction(RecommendationAction):
-
     def process_action(self, recommendation: Dict, headers: str):
         url = self.config.external_services.facebook_auto_apply.format(
             level=recommendation.get(RecommendationField.LEVEL.value),
@@ -185,11 +189,13 @@ class AgeGenderBreakdownSplit(RecommendationAction):
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         existing_breakdowns = defaultdict(list)
-        removed_amount_spent = 0
+        removed_cpr = 0
 
-        total_amount_spent = apply_parameters.existing_breakdowns.get_breakdown_total(TOTAL_KEY)
+        breakdown_grouped_data = get_group_data_from_list(
+            apply_parameters.existing_breakdowns, apply_parameters.metric_name, apply_parameters.no_of_days
+        )
 
-        for breakdown in apply_parameters.existing_breakdowns.breakdown_data:
+        for breakdown in breakdown_grouped_data.breakdown_data:
             if breakdown.breakdown_key == TOTAL_KEY:
                 continue
 
@@ -198,7 +204,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
                 continue
 
             min_age, max_age = AgeGenderBreakdownSplit._get_min_max_age(age)
-            existing_breakdowns[gender].append(AdSetBreakdownSplit(min_age, max_age, breakdown.total))
+            existing_breakdowns[gender].append(AdSetBreakdownSplit(min_age, max_age, 1 / breakdown.total))
 
         for to_be_removed_breakdown in apply_parameters.underperforming_breakdowns:
             if to_be_removed_breakdown == TOTAL_KEY:
@@ -210,23 +216,19 @@ class AgeGenderBreakdownSplit(RecommendationAction):
                 AdSetBreakdownSplit(
                     min_age,
                     max_age,
-                    apply_parameters.existing_breakdowns.get_breakdown_total(to_be_removed_breakdown),
+                    1 / breakdown_grouped_data.get_breakdown_total(to_be_removed_breakdown),
                 )
             )
-            removed_amount_spent += apply_parameters.existing_breakdowns.get_breakdown_total(to_be_removed_breakdown)
 
         min_budget = 0
         if _does_budget_exist(structure_details):
             budget, budget_type = _get_budget_value_and_type(structure_details)
+            min_budget = self._get_minimum_budget(structure_details, apply_parameters, budget_type)
             AgeGenderBreakdownSplit._distribute_remaining_budget(
                 existing_breakdowns,
-                total_amount_spent,
-                removed_amount_spent,
                 budget,
                 budget_type,
             )
-
-            min_budget = self._get_minimum_budget(structure_details, apply_parameters, budget_type)
 
         adsets_splits = AgeGenderBreakdownSplit._merge_continuous_ages(existing_breakdowns, min_budget)
 
@@ -278,7 +280,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         structure_details: Dict,
         apply_parameters: ApplyParameters,
         budget_type: str,
-    ):
+    ) -> int:
         minimum_budget = GraphAPIBudgetValidationHandler.handle(
             f"act_{structure_details[LevelIdKeyEnum.ACCOUNT.value]}",
             self.fixtures.business_owner_repository.get_permanent_token(
@@ -311,7 +313,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         structure: Union[AdSet, Campaign, Ad],
         gender: str,
         recommendation: Dict,
-    ):
+    ) -> str:
         adset_split = AdSetBreakdownSplit(**split)
         current_targeting = deepcopy(targeting)
 
@@ -369,7 +371,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
                 )
 
             for adset_breakdown_split in merged_ages:
-                if not adset_breakdown_split.budget:
+                if adset_breakdown_split.budget is None:
                     continue
 
                 if adset_breakdown_split.budget < min_budget:
@@ -396,15 +398,30 @@ class AgeGenderBreakdownSplit(RecommendationAction):
     @staticmethod
     def _distribute_remaining_budget(
         existing_breakdowns: Dict[str, List[AdSetBreakdownSplit]],
-        total_amount_spent: float,
-        removed_amount_spent: float,
         budget: int,
         budget_type: str,
-    ):
+    ) -> None:
+
+        total_cpr = AgeGenderBreakdownSplit._calculate_total_cpr(existing_breakdowns)
+
         for gender in existing_breakdowns:
             for split in existing_breakdowns[gender]:
                 split.budget_type = budget_type
-                split.budget = (budget * split.metric_total) / (total_amount_spent - removed_amount_spent)
+                if split.metric_total == INVALID_METRIC_VALUE:
+                    split.budget = 0
+                    continue
+
+                split.budget = budget * (split.metric_total / total_cpr)
+
+    @staticmethod
+    def _calculate_total_cpr(existing_breakdowns: Dict[str, List[AdSetBreakdownSplit]]) -> float:
+        total_cpr = 0
+        for gender in existing_breakdowns:
+            for adset_split in existing_breakdowns[gender]:
+                if adset_split.metric_total != INVALID_METRIC_VALUE:
+                    total_cpr += adset_split.metric_total
+
+        return total_cpr
 
 
 class ApplyActionType(Enum):
