@@ -5,6 +5,7 @@ from facebook_business.adobjects.minimumbudget import MinimumBudget
 from forex_python.converter import CurrencyCodes
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationFields import GraphAPIBudgetValidationField
 
 
 class GraphAPIBudgetValidationHandler:
@@ -24,14 +25,14 @@ class GraphAPIBudgetValidationHandler:
         )
 
         mapped_minimum_budgets = {
-            "IMPRESSIONS": round(minimum_budgets[MinimumBudget.Field.min_daily_budget_imp] / 100, cls.PRECISION),
-            "VIDEO_VIEWS": round(
+            GraphAPIBudgetValidationField.IMPRESSIONS.value: round(minimum_budgets[MinimumBudget.Field.min_daily_budget_imp] / 100, cls.PRECISION),
+            GraphAPIBudgetValidationField.VIDEO_VIEWS.value: round(
                 minimum_budgets[MinimumBudget.Field.min_daily_budget_video_views] / 100, cls.PRECISION
             ),
-            "APP_INSTALLS": round(minimum_budgets[MinimumBudget.Field.min_daily_budget_low_freq] / 100, cls.PRECISION),
-            "LINK_CLICK": min_daily_budget_high_freq,
-            "PAGE_LIKES": min_daily_budget_high_freq,
-            "DEFAULT": min_daily_budget_high_freq,
+            GraphAPIBudgetValidationField.APP_INSTALLS.value: round(minimum_budgets[MinimumBudget.Field.min_daily_budget_low_freq] / 100, cls.PRECISION),
+            GraphAPIBudgetValidationField.LINK_CLICKS.value: min_daily_budget_high_freq,
+            GraphAPIBudgetValidationField.PAGE_LIKES.value: min_daily_budget_high_freq,
+            GraphAPIBudgetValidationField.DEFAULT.value: min_daily_budget_high_freq,
         }
 
         return mapped_minimum_budgets
@@ -43,11 +44,11 @@ class GraphAPIBudgetValidationHandler:
 
         _currency_converter = CurrencyCodes()
         mapped_budget_validation_response = {
-            "currency": facebook_response["currency"],
-            "currencySymbol": _currency_converter.get_symbol(facebook_response["currency"]),
-            "maximumAdAccountBid": round(max_bid["max_bid"] / 100, cls.PRECISION),
-            "minimumAdAccountDailyBudget": round(facebook_response["min_daily_budget"] / 100, cls.PRECISION),
-            "minimumAdAccountBudgets": cls.map_minimum_budgets_response(minimum_budgets, facebook_response["currency"]),
+            GraphAPIBudgetValidationField.CURRENCY.value: facebook_response["currency"],
+            GraphAPIBudgetValidationField.CURRENCY_SYMBOL.value: _currency_converter.get_symbol(facebook_response["currency"]),
+            GraphAPIBudgetValidationField.MAX_AD_ACCOUNT_BID.value: round(max_bid["max_bid"] / 100, cls.PRECISION),
+            GraphAPIBudgetValidationField.MIN_AD_ACCOUNT_DAILY_BUDGET.value: round(facebook_response["min_daily_budget"] / 100, cls.PRECISION),
+            GraphAPIBudgetValidationField.MIN_AD_ACCOUNT_BUDGETS.value: cls.map_minimum_budgets_response(minimum_budgets, facebook_response["currency"]),
         }
 
         return mapped_budget_validation_response

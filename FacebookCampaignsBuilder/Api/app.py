@@ -56,7 +56,7 @@ router_route_pairs = (
     (routers.TargetingSearchLocations, "targeting-search/locations/country-groups"),
     (routers.TargetingSearchLocationSearch, "targeting-search/locations/search/<string:query_string>"),
     (routers.TargetingSearchLanguages, "targeting-search/languages"),
-    (routers.BudgetValidation, "budget-validation/<string:business_owner_id>/<string:account_id>"),
+    (routers.BudgetValidation, "budget-validation/<string:account_id>"),
     (routers.SmartCreateCats, "smart-create/cats"),
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
     (routers.SmartCreateAccountAdvertisableApps, "smart-create/account-advertisable-apps/<string:account_id>"),

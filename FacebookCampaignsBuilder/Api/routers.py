@@ -140,11 +140,10 @@ class AudienceSize(Resource):
 
 class BudgetValidation(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
-    def get(self, business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
-        try:
-            business_owner_id = extract_business_owner_facebook_id()
-        except:
-            pass
+    def get(self, account_id: typing.AnyStr = None):
+
+        business_owner_id = extract_business_owner_facebook_id()
+
         try:
             query = queries.BudgetValidation.get(business_owner_id=business_owner_id, account_id=account_id)
 
