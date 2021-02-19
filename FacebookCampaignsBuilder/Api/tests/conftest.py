@@ -2,25 +2,7 @@ import pytest
 import jwt
 
 from FacebookCampaignsBuilder.Api.app import app
-
-BUSINESS_OWNER_ID = "1623950661230875"
-ACCOUNT_ID = "act_389109158588065"
-SECRET_KEY = "dummy-key"
-
-PAYLOAD = {
-    "jti": "69360ad6-3560-4f6c-ba5e-141663acc5b5",
-    "sub": "dev-test@filed.com",
-    "user_filed_id": "3",
-    "user_firstname": "Andrew",
-    "user_lastname": "G",
-    "user_account_state": "1",
-    "user_is_frontoffice_user": "True",
-    "permissions_filed": "01^3|02^f|03^f|1E^3|1F^1ff|82^7c02|96^3|A0^1|A1^1ff|B4^7fffff|BE^3ff",
-    "user_facebook_businessowner_id": BUSINESS_OWNER_ID,
-    "exp": 1617460349,
-    "iss": "Filed-Token-Issuer",
-    "aud": "Filed-Client-Apps",
-}
+from Core.test_config import PAYLOAD, SECRET_KEY, BUSINESS_OWNER_ID, ACCOUNT_ID
 
 
 @pytest.fixture(scope="session")

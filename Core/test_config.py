@@ -1,0 +1,7 @@
+
+BUSINESS_OWNER_ID = "1623950661230875"
+ACCOUNT_ID = "act_389109158588065"
+SECRET_KEY = "dummy-key"
+PAYLOAD = {
+    "user_facebook_businessowner_id": BUSINESS_OWNER_ID,
+}
