@@ -42,9 +42,7 @@ DEFAULT_PLACEMENTS = [
 
 def build_ad_sets(step_two, step_three, step_four, is_using_cbo, is_using_conversions, destination_type):
     ad_set_template = {}
-    build_base_ad_sets(
-        ad_set_template, step_two, step_three, is_using_cbo, is_using_conversions, destination_type
-    )
+    build_base_ad_sets(ad_set_template, step_two, step_three, is_using_cbo, is_using_conversions, destination_type)
     return split_ad_sets(ad_set_template, step_two, step_four)
 
 
@@ -158,23 +156,32 @@ def split_ad_sets(ad_set_template, step_two, step_four):
             )
 
             ad_set_element = deepcopy(ad_set_template)
-            set_split_fields_and_name(age_group, gender_group, targeting, ad_set_element)
+            set_split_fields_and_name(
+                age_group,
+                gender_group,
+                targeting,
+                ad_set_element,
+                is_split_by_gender_selected,
+                is_split_age_range_selected,
+            )
             ad_sets.append(ad_set_element)
 
     return ad_sets
 
 
 def set_split_fields_and_name(
-        age_group: Optional[AgeGroup],
-        gender_group: Optional[GenderGroup],
-        targeting: Targeting,
-        ad_set_element: Dict,
+    age_group: Optional[AgeGroup],
+    gender_group: Optional[GenderGroup],
+    targeting: Targeting,
+    ad_set_element: Dict,
+    is_split_by_gender_selected: bool,
+    is_split_age_range_selected: bool,
 ):
-    if gender_group:
+    if is_split_by_gender_selected:
         targeting.genders = [gender.value for gender in gender_group.genders]
         ad_set_element[AdSet.Field.name] += " - " + " - ".join([gender.name for gender in gender_group.genders])
 
-    if age_group:
+    if is_split_age_range_selected:
         targeting.age_min = age_group.age_min
         targeting.age_max = age_group.age_max
         ad_set_element[AdSet.Field.name] += f" - {str(age_group.age_min)}-{str(age_group.age_max)}"
