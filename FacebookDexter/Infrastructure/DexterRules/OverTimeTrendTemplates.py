@@ -14,7 +14,7 @@ class OverTimeTrendTemplate(Enum):
         "Improve Ad Copy & Creatives",
         "Your cost is increasing and there is less interest in your ads.",
         (
-            "Dexter recommends looking at your ads, if the budget are high, to consider lowering. You should also make"
+            "Dexter recommends looking at your ads, if the budget is high, to consider lowering. You should also make"
             " sure to ad copy matches what displays on your landing page to make sure it aligns and the CTA on the"
             " landing page and ads are very clear."
         ),
@@ -236,7 +236,7 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
         "It’s getting more competitive to run your ads right now, but we have some new ideas for you.",
-        "Dexter suggests reducing your budget or refreshing your creatives by testing different ad creatives or copy?",
+        "Dexter suggests reducing your budget or refreshing your creatives by testing different ad creatives or copy. ",
     )
 
     CPM_UP_RESULTS_DOWN_CPR_UP = DexterRecommendationOutput(
@@ -249,7 +249,7 @@ class OverTimeTrendTemplate(Enum):
         "Your cost is increasing and there is less interest in your ads.",
         (
             "Dexter suggests reducing your budget or trying a new interest targeting to help your overall campaign"
-            " performance?"
+            " performance. "
         ),
         apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
@@ -275,7 +275,7 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.LOW,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
-        " Dexter suggests increasing your budget by 20%. ",
+        "Dexter suggests increasing your budget by 20%. ",
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -325,7 +325,7 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.MEDIUM,
         "Increase Budget",
-        "Your amount spent and cost per result have increased. Cosider increasing the budget!",
+        "Your amount spent and cost per result have increased. Consider increasing the budget!",
         (
             "Breakdown your campaign by age, gender or placements to see which target is spending budget without"
             " notable results. "

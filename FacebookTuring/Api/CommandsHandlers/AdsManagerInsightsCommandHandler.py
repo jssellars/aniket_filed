@@ -64,8 +64,6 @@ class AdsManagerInsightsCommandHandler:
                business_owner_id: typing.AnyStr = None,
                level: typing.AnyStr = None) -> typing.List[typing.Dict]:
         handlers = {
-            AdsManagerInsightsCommandEnum.INSIGHTS: cls.get_insights,
-            AdsManagerInsightsCommandEnum.INSIGHTS_WITH_TOTALS: cls.get_insights_with_totals,
             AdsManagerInsightsCommandEnum.REPORTS: cls.get_reports_insights,
             AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS: cls.get_ag_grid_insights,
             AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS_TREND: cls.get_ag_grid_trend,
@@ -101,48 +99,6 @@ class AdsManagerInsightsCommandHandler:
         query = QueryBuilderFacebookRequestParser()
         query.parse_ag_grid_trend_query(query_builder_request, level, parse_breakdowns=has_breakdowns)
         return query
-
-    @classmethod
-    def get_insights(cls,
-                     query_json: typing.Dict = None,
-                     business_owner_id: typing.AnyStr = None,
-                     level: typing.AnyStr = None) -> List[Dict]:
-        permanent_token = (
-            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-        )
-        query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.get_insights(
-            config,
-            permanent_token=permanent_token,
-            level=query.level,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
-            structure_fields=query.structure_fields,
-            requested_fields=query.requested_columns,
-            filter_params=query.filtering
-        )
-        return response
-
-    @classmethod
-    def get_insights_with_totals(cls,
-                                 query_json: typing.Dict = None,
-                                 business_owner_id: typing.AnyStr = None,
-                                 level: typing.AnyStr = None) -> typing.Dict:
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-        query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.get_insights_with_totals(
-            config,
-            permanent_token=permanent_token,
-            level=query.level,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
-            structure_fields=query.structure_fields,
-            requested_fields=query.requested_columns,
-            filter_params=query.filtering
-        )
-        return response
 
     @classmethod
     def get_ag_grid_insights(cls,

@@ -1,6 +1,7 @@
 import typing
 from dataclasses import dataclass
 from datetime import datetime
+from typing import List, Optional
 
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
     TuringAdAccountJournalRepository
@@ -8,19 +9,19 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
     TuringMongoRepository
 
 
-@dataclass(frozen=True)
+@dataclass
 class SynchronizerConfigStatic:
-    levels: typing.List
-    breakdowns: typing.List
-    action_breakdowns: typing.List
-    requested_fields: typing.List
+    levels: List
+    breakdowns: List
+    action_breakdowns: List
+    requested_fields: List
+    insights_repository: Optional[TuringMongoRepository] = None
+    structure_repository: Optional[TuringMongoRepository] = None
+    account_journal_repository: Optional[TuringAdAccountJournalRepository] = None
 
 
 @dataclass(frozen=True)
 class SynchronizerConfigRuntime:
-    insights_repository: TuringMongoRepository
-    structure_repository: TuringMongoRepository
-    account_journal_repository: TuringAdAccountJournalRepository
-    business_owner_id: typing.AnyStr
-    account_id: typing.AnyStr
+    business_owner_id: str
+    account_id: str
     date_start: datetime

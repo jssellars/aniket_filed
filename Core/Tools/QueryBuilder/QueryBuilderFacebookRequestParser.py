@@ -74,7 +74,7 @@ class QueryBuilderFacebookRequestParser:
             "time_increment": self.time_increment,
             "time_range": self.time_range,
             "filtering": self.filtering,
-            "sort": self.__sort
+            "sort": self.__sort,
         }
 
         return parameters

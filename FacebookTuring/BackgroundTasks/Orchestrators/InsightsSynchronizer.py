@@ -2,19 +2,48 @@ import functools
 import operator
 import typing
 from time import sleep
+from typing import List, Dict, Any
 
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.exceptions import FacebookRequestError
 
 from Core import mongo_adapter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSynchronizerBreakdownEnum
 from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
+LEVEL_TO_STRUCTURE_FIELDS = {
+    Level.CAMPAIGN: [
+        FieldsMetadata.account_name,
+        FieldsMetadata.account_id,
+        FieldsMetadata.campaign_name,
+        FieldsMetadata.campaign_id,
+    ],
+    Level.ADSET: [
+        FieldsMetadata.account_name,
+        FieldsMetadata.account_id,
+        FieldsMetadata.campaign_id,
+        FieldsMetadata.campaign_name,
+        FieldsMetadata.adset_name,
+        FieldsMetadata.adset_id,
+    ],
+    Level.AD: [
+        FieldsMetadata.account_name,
+        FieldsMetadata.account_id,
+        FieldsMetadata.campaign_id,
+        FieldsMetadata.campaign_name,
+        FieldsMetadata.adset_id,
+        FieldsMetadata.adset_name,
+        FieldsMetadata.ad_name,
+        FieldsMetadata.ad_id,
+    ],
+}
 
 class InsightsSynchronizer:
     RATE_LIMIT_EXCEPTION_STATUS = 80000
@@ -44,16 +73,12 @@ class InsightsSynchronizer:
         self.__mongo_repository = None
         self.__permanent_token_retries = 3
 
-    def run(self) -> typing.NoReturn:
+    def run(self, ad_report_run: AdReportRun) -> None:
         try:
-            if self.breakdown is not None and self.breakdown != InsightsSynchronizerBreakdownEnum.NONE.value:
-                self.requested_fields += [self.breakdown]
-            response = GraphAPIInsightsHandler.get_reports_insights(
+
+            response = GraphAPIInsightsHandler.process_async_report(
                 config,
-                permanent_token=self.permanent_token,
-                ad_account_id=self.__ad_account_id,
-                fields=self.__get_fields(),
-                parameters=self.__get_parameters(),
+                ad_report_run,
                 requested_fields=self.requested_fields,
                 level=self.level.value,
             )
@@ -64,8 +89,10 @@ class InsightsSynchronizer:
         except FacebookRequestError as fb_ex:
             if fb_ex.http_status() == self.RATE_LIMIT_EXCEPTION_STATUS:
                 sleep(self.SLEEP_ON_RATE_LIMIT_EXCEPTION)
-        except Exception as e:
-            raise e
+            else:
+                raise
+        except Exception:
+            raise
 
     def set_mongo_repository(self, mongo_repository: TuringMongoRepository = None) -> typing.Any:
         self.__mongo_repository = mongo_repository
@@ -127,20 +154,14 @@ class InsightsSynchronizer:
         collection_name = self.level.value + "_" + self.breakdown.name + "_" + self.action_breakdown.name
         return collection_name
 
-    def check_data(self, date_start: typing.AnyStr = None, date_stop: typing.AnyStr = None) -> typing.List:
-        check_data_parameters = {
-            "level": self.level.value,
-            "time_range": {GraphAPIInsightsFields.since: date_start, GraphAPIInsightsFields.until: date_stop},
-        }
-        try:
-            response = GraphAPIInsightsHandler.get_reports_insights(
-                config,
-                permanent_token=self.permanent_token,
-                ad_account_id=self.__ad_account_id,
-                fields=[FieldsMetadata.impressions.name],
-                parameters=check_data_parameters,
-                requested_fields=[FieldsMetadata.impressions],
-            )
-            return response
-        except Exception as e:
-            raise e
+    def get_async_insights_report(self, ad_account_id: str) -> List:
+
+        if self.breakdown is not None and self.breakdown != InsightsSynchronizerBreakdownEnum.NONE.value:
+            self.requested_fields += [self.breakdown]
+
+        self.requested_fields += LEVEL_TO_STRUCTURE_FIELDS[self.level]
+
+        ad_account = AdAccount(f'act_{ad_account_id}')
+        ad_report_run = ad_account.get_insights_async(fields=self.__get_fields(), params=self.__get_parameters())
+        return ad_report_run
+

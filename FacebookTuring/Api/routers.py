@@ -479,26 +479,6 @@ class AdsManagerDuplicateStructure(Resource):
             return {"message": f"Failed to duplicate structure {facebook_id}."}, 400
 
 
-class AdsManagerInsightsWithTotals(Resource):
-    @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
-    def post(self):
-        try:
-            request_json = request.get_json(force=True)
-            business_owner_id = extract_business_owner_facebook_id()
-            response = AdsManagerInsightsCommandHandler.handle(
-                handler_type=AdsManagerInsightsCommandEnum.INSIGHTS_WITH_TOTALS,
-                query_json=request_json,
-                business_owner_id=business_owner_id,
-            )
-
-            return response, 200
-
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return {"message": "Failed to process request."}, 400
-
-
 class AdsManagerAgGridInsights(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self, level):

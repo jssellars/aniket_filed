@@ -28,7 +28,7 @@ class AdModelFields(StructureModelFieldBase):
         FieldsMetadata.source_ad,
         FieldsMetadata.source_ad_id,
         FieldsMetadata.targetingsentencelines,
-        FieldsMetadata.ad_creatives,
+        # FieldsMetadata.ad_creatives,
         FieldsMetadata.updated_time,
         FieldsMetadata.tracking_specs,
         FieldsMetadata.status

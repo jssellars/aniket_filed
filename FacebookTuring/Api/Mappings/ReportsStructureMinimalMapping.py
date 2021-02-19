@@ -28,7 +28,6 @@ class ReportsStructureMinimalMapping(MapperBase):
         for id_field_key in id_field_keys:
             data["keys"][id_field_key] = data.pop(id_field_key)
 
-
         name_field_key = LevelToFacebookNameKeyMapping.get_by_name(self.__level)
         data["display_name"] = data.pop(name_field_key)
 

@@ -1,12 +1,13 @@
 import functools
+import logging
 import operator
 import typing
 from time import sleep
 from typing import List
 
+from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
 
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -16,6 +17,8 @@ from FacebookTuring.BackgroundTasks.startup import fixtures
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+
+logger = logging.getLogger(__name__)
 
 
 class StructuresSyncronizer:
@@ -30,7 +33,6 @@ class StructuresSyncronizer:
         self.__ad_account_id = "act_" + self.account_id
         self.__permanent_token = None
         self.__mongo_repository = None
-        self.__facebook_config = None
 
     def run(self) -> typing.NoReturn:
         try:
@@ -42,7 +44,6 @@ class StructuresSyncronizer:
                 return
 
             structures_response = self.__sync(
-                permanent_token=self.permanent_token,
                 level=self.level,
                 account_id=self.__ad_account_id,
                 fields=fields.get_structure_fields(),
@@ -55,78 +56,83 @@ class StructuresSyncronizer:
             structures = [structure for structure in structures if self.__is_complete_structure(structure, self.level)]
 
             # insert structures
-            self.__mongo_repository.add_structures_many_with_deprecation(level=self.level, structures=structures)
+            self.__mongo_repository.add_updated_structures(self.level, self.__ad_account_id, structures)
         except FacebookRequestError as fb_ex:
             if fb_ex.http_status() == self.RATE_LIMIT_EXCEPTION_STATUS:
                 sleep(self.SLEEP_ON_RATE_LIMIT_EXCEPTION)
-        except Exception as e:
-            raise e
+            else:
+                raise
+        except Exception:
+            raise
 
     def __is_complete_structure(self, structure=None, level=None) -> bool:
         if level == Level.CAMPAIGN:
             if (
-                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
-                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                    getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                    or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
             ):
                 return False
 
         if level == Level.ADSET:
             if (
-                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
-                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
-                or getattr(structure, GraphAPIInsightsFields.adset_name) is None
-                or getattr(structure, GraphAPIInsightsFields.adset_id) is None
+                    getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                    or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                    or getattr(structure, GraphAPIInsightsFields.adset_name) is None
+                    or getattr(structure, GraphAPIInsightsFields.adset_id) is None
             ):
                 return False
 
         if level == Level.AD:
             if (
-                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
-                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
-                or getattr(structure, GraphAPIInsightsFields.adset_name) is None
-                or getattr(structure, GraphAPIInsightsFields.adset_id) is None
-                or getattr(structure, GraphAPIInsightsFields.ad_name) is None
-                or getattr(structure, GraphAPIInsightsFields.ad_id) is None
+                    getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                    or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                    or getattr(structure, GraphAPIInsightsFields.adset_name) is None
+                    or getattr(structure, GraphAPIInsightsFields.adset_id) is None
+                    or getattr(structure, GraphAPIInsightsFields.ad_name) is None
+                    or getattr(structure, GraphAPIInsightsFields.ad_id) is None
             ):
                 return False
 
         return True
 
     def __sync(
-        self,
-        level: Level = None,
-        account_id: typing.AnyStr = None,
-        permanent_token: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
+            self,
+            level: Level = None,
+            account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
     ) -> List:
 
-        # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        GraphAPISdkBase(self.__facebook_config, permanent_token)
-
         try:
-            graph_api_client = GraphAPIClientBase(permanent_token)
-            graph_api_client.config = self.build_get_structure_config(
-                permanent_token=permanent_token, level=level.value, ad_account_id=account_id, fields=fields
-            )
-            structures, _ = graph_api_client.call_facebook()
-            if isinstance(structures, Exception):
-                raise structures
+            # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
+            ad_account = AdAccount(account_id)
+
+            if level == Level.CAMPAIGN:
+                structures = ad_account.get_campaigns(fields=fields)
+            elif level == Level.ADSET:
+                structures = ad_account.get_ad_sets(fields=fields)
+            elif level == Level.AD:
+                structures = ad_account.get_ads(fields=fields)
+            else:
+                structures = None
+
+            if not structures:
+                return []
 
             # Map Facebook structure to domain model
             mapping = StructureMapping.get(level.value)
-            structures = mapping.load(structures, many=True)
+            structures = mapping.load([structure.export_all_data() for structure in structures], many=True)
         except Exception as e:
             raise e
 
         return structures
 
     def build_get_structure_config(
-        self,
-        permanent_token: typing.AnyStr = None,
-        level: typing.AnyStr = None,
-        ad_account_id: typing.AnyStr = None,
-        fields: typing.List[typing.AnyStr] = None,
-        filter_params: typing.List[typing.Dict] = None,
+            self,
+            permanent_token: typing.AnyStr = None,
+            level: typing.AnyStr = None,
+            ad_account_id: typing.AnyStr = None,
+            fields: typing.List[typing.AnyStr] = None,
+            filter_params: typing.List[typing.Dict] = None,
     ) -> GraphAPIClientBaseConfig:
         api_config = GraphAPIClientBaseConfig()
         api_config.try_partial_requests = True
@@ -147,16 +153,6 @@ class StructuresSyncronizer:
         self.__mongo_repository = mongo_repository
         return self
 
-    def set_facebook_config(self, facebook_config=None):
-        self.__facebook_config = facebook_config
-        return self
-
-    @property
-    def permanent_token(self) -> typing.AnyStr:
-        if self.__permanent_token is None:
-            self.__permanent_token = fixtures.business_owner_repository.get_permanent_token(self.business_owner_id)
-        return self.__permanent_token
-
     @staticmethod
     def __get_fields(fields: typing.List[Field] = None) -> typing.List[typing.AnyStr]:
         fields = [field.facebook_fields for field in fields]
@@ -165,7 +161,7 @@ class StructuresSyncronizer:
 
     @staticmethod
     def __set_business_owner_id(
-        structures: typing.List[typing.Any] = None, business_owner_id: typing.AnyStr = None
+            structures: typing.List[typing.Any] = None, business_owner_id: typing.AnyStr = None
     ) -> typing.List[typing.Any]:
         for index in range(len(structures)):
             structures[index].business_owner_facebook_id = business_owner_id

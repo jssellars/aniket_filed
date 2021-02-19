@@ -750,110 +750,10 @@ class TuringMongoRepository(MongoRepositoryBase):
         else:
             return getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
 
-    def add_structures_many_with_deprecation(self,
-                                             level: Level = None,
-                                             structures: typing.List[typing.Any] = None) -> typing.NoReturn:
+    def add_updated_structures(self, level, account_id: str, structures: List[Dict]) -> None:
         self.collection = level.value
-        structures_to_insert = []
-        for structure in structures:
-            structure_id = self.__get_structure_id(structure, level)
-            if isinstance(structure, dict):
-                current_structure_details = structure.get(FacebookMiscFields.details)
-            else:
-                current_structure_details = BSON.decode(structure.details)
-            # TODO This is reading the structures one by one instead of reading all the data in one go
-            existing_structure_details = self.get_structure_details(level=level, key_value=structure_id)
-
-            if existing_structure_details and \
-                    current_structure_details != existing_structure_details.get(FacebookMiscFields.details):
-                self.deprecate_structure(level=level, key_value=structure_id)
-                if isinstance(structure, dict):
-                    structure[FacebookMiscFields.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
-                else:
-                    structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
-                structures_to_insert.append(structure)
-
-            elif not existing_structure_details:
-                if isinstance(structure, dict):
-                    structure[FacebookMiscFields.date_added] = datetime.now().strftime(DEFAULT_DATETIME_ISO)
-                else:
-                    structure.date_added = datetime.now().strftime(DEFAULT_DATETIME_ISO)
-                structures_to_insert.append(structure)
-
-        self.add_many(structures_to_insert)
-
-    def deprecate_structure(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
-        self.collection = level.value
-        query_filter = {
-            LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
-                MongoOperator.EQUALS.value: key_value
-            }
-        }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.status: StructureStatusEnum.DEPRECATED.value
-            }
-        }
-        self.update_many(query_filter=query_filter, query=query)
-
-    def deprecate_structures_by_account_id(self,
-                                           account_id: typing.AnyStr = None,
-                                           level: Level = None) -> typing.NoReturn:
-        self.collection = level.value
-        query_filter = {
-            FacebookMiscFields.account_id: {
-                MongoOperator.EQUALS.value: account_id
-            }
-        }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.status: StructureStatusEnum.DEPRECATED.value
-            }
-        }
-        self.update_many(query_filter, query)
-
-    def add_structure_many(self, account_id: typing.AnyStr = None, level: Level = None,
-                           structures: typing.List[typing.Any] = None) -> typing.NoReturn:
-        self.collection = level.value
-        # get existing active or removed structures ids
-        existing_structures_ids = self.get_structure_ids(level, account_id)
-        existing_structures_ids = set(existing_structures_ids)
-
-        # get structures ids
-        structure_ids = [self.__get_structure_id(structure, level) for structure in structures]
-        structure_ids = set(structure_ids)
-
-        # change current structures status to remove
-        removed_structures_ids = list(existing_structures_ids - structure_ids)
-        if removed_structures_ids:
-            self.change_status_many(level=level,
-                                    key_value=removed_structures_ids,
-                                    current_status=StructureStatusEnum.ACTIVE.value,
-                                    new_status=StructureStatusEnum.REMOVED.value)
-
-        # add new structures
-        new_structures_ids = list(structure_ids - existing_structures_ids)
-        new_structures = [structure for structure in structures
-                          if self.__get_structure_id(structure, level) in new_structures_ids]
-
-        if new_structures:
-            self.add_many(new_structures)
-
-        # update common structures
-        common_structures_ids = list(existing_structures_ids.intersection(structure_ids))
-        common_structures = [structure for structure in structures
-                             if self.__get_structure_id(structure, level) in common_structures_ids]
-
-        if common_structures:
-            self.change_status_many(level=level,
-                                    key_value=common_structures_ids,
-                                    current_status=StructureStatusEnum.ACTIVE.value,
-                                    new_status=StructureStatusEnum.DEPRECATED.value)
-            self.change_status_many(level=level,
-                                    key_value=common_structures_ids,
-                                    current_status=StructureStatusEnum.REMOVED.value,
-                                    new_status=StructureStatusEnum.DEPRECATED.value)
-            self.add_many(common_structures)
+        self.delete_many({FacebookMiscFields.account_id: account_id})
+        self.add_many(structures)
 
     def add_structure(self, level: Level = None, key_value: typing.Any = None,
                       document: typing.Dict = None) -> typing.NoReturn:
@@ -877,13 +777,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             ]
 
         }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.status: StructureStatusEnum.DEPRECATED.value,
-                FacebookMiscFields.last_updated_at: datetime.now()
-            }
-        }
-        self.update_many(query_filter, query)
+        self.delete_many(query_filter)
         try:
             self.add_one(self._convert_to_dict(document))
         except Exception as e:

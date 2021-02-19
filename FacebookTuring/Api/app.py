@@ -22,7 +22,6 @@ api = flask_restful.Api(app)
 router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
     (routers.Version, "version"),
-    (routers.AdsManagerInsightsWithTotals, "insights-with-totals"),
     (routers.AccountsReportInsights, "accounts/reports"),
     (routers.OptimizeReportInsights, "optimize/reports"),
     (routers.AdsManagerAgGridTrend, "ads-manager/ag-grid-insights-trend/<string:level>"),

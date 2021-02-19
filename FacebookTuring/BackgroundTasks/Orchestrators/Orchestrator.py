@@ -1,16 +1,19 @@
+import concurrent.futures
 import copy
+import logging
+import os
 import typing
 from collections import defaultdict
 from datetime import datetime
 
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.startup import fixtures
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
 from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
-    UpdatedBusinessOwnersDetails,
     FacebookTuringDataSyncCompletedEvent,
+    UpdatedBusinessOwnersDetails,
 )
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
@@ -18,20 +21,14 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalReposi
 )
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
-
-import logging
-
 logger = logging.getLogger(__name__)
 
-
 class Orchestrator:
-    ACCOUNTS_PER_THREAD = 0.20
-
     def __init__(
-            self,
-            insights_repository: TuringMongoRepository = None,
-            structures_repository: TuringMongoRepository = None,
-            account_journal_repository: TuringAdAccountJournalRepository = None,
+        self,
+        insights_repository: TuringMongoRepository = None,
+        structures_repository: TuringMongoRepository = None,
+        account_journal_repository: TuringAdAccountJournalRepository = None,
     ):
 
         self.__insights_repository = insights_repository
@@ -74,19 +71,18 @@ class Orchestrator:
 
         # for each BO for each ad account, start a structures sync thread and an insights sync thread
         for business_owner_id, business_owner_details in business_owners.items():
-            sync(
-                self.__structures_repository.new_structures_repository(),
-                self.__insights_repository.new_insights_repository(),
-                self.__account_journal_repository.new_ad_account_journal_repository(),
-                business_owner_details,
-                user_type,
-            )
-
-            # # uncomment to test in sync
-            # sync(self.__structures_repository.new_structures_repository(),
-            #      self.__insights_repository.new_insights_repository(),
-            #      self.__account_journal_repository.new_ad_account_journal_repository(),
-            #      entry)
+            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for business_owner in business_owner_details:
+                    executor.submit(
+                        sync,
+                        self.__structures_repository.new_structures_repository(),
+                        self.__insights_repository.new_insights_repository(),
+                        self.__account_journal_repository.new_ad_account_journal_repository(),
+                        [business_owner],
+                        user_type,
+                        permanent_token,
+                    )
 
             # update ad account last sync time for current business owner based on the time when the insights sync
             # finished for each ad account.
@@ -113,7 +109,7 @@ class Orchestrator:
         return business_owner_details
 
     def __publish_business_owner_synced_event(
-            self, business_owner_id: typing.AnyStr = None, sync_start_date: datetime = None
+        self, business_owner_id: typing.AnyStr = None, sync_start_date: datetime = None
     ) -> None:
         account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id, sync_start_date)
         business_owner_updated_details = UpdatedBusinessOwnersDetails(
