@@ -11,6 +11,17 @@ class Default:
             core.Exchange(
                 name="{env}.direct",
                 type="direct",
+                inbound_queue=core.Queue(
+                    name="{env}.{app_domain}.{app_name}.inbound", key="{env}.{app_domain}.{app_name}.inbound.key"
+                ),
+                outbound_queue=core.Queue(
+                    name="{env}.api.{app_domain}.smartcreate.outbound",
+                    key="{env}.api.{app_domain}.smartcreate.outbound.key"
+                ),
+            ),
+            core.Exchange(
+                name="{env}.direct",
+                type="direct",
                 outbound_queue=core.Queue(
                     name="{env}.{app_domain}.turing.outbound", key="{env}.{app_domain}.turing.outbound.key"
                 ),

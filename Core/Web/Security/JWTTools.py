@@ -12,7 +12,7 @@ def extract_business_owner_google_id():
     return jwt_data.get("user_google_businessowner_id")
 
 
-def extract_field_user_id():
+def extract_user_filed_id():
     jwt_data = decode_jwt_from_headers()
     return jwt_data.get('user_filed_id')
 

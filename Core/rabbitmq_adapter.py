@@ -4,8 +4,8 @@ from typing import Any, Dict, Callable
 
 import pika
 
-from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core import settings
+from Core.Tools.Misc.ObjectSerializers import object_to_json
 
 
 class RabbitMqAdapter:
@@ -13,9 +13,16 @@ class RabbitMqAdapter:
     def serialize_message(cls, data: Any) -> Dict:
         return object_to_json(data)
 
-    def __init__(self, config: settings.RabbitMq, exchange: settings.Exchange, prefetch_count: int = 50) -> None:
+    def __init__(
+        self,
+        config: settings.RabbitMq,
+        exchange: settings.Exchange,
+        secondary_exchange: settings.Exchange,
+        prefetch_count: int = 50,
+    ) -> None:
         self._config = config
         self._exchange = exchange
+        self._secondary_exchange = secondary_exchange
         self._prefetch_count = prefetch_count
         self._callback = None
         self._channel = None
@@ -35,12 +42,19 @@ class RabbitMqAdapter:
             blocked_connection_timeout=self._config.connection_timeout,
         )
 
-    def publish(self, message_body: Any) -> None:
+    def publish(self, message_body: Any, on_secondary: bool = False) -> None:
+        if on_secondary:
+            exchange_name = self._secondary_exchange.name
+            outbound_key = self._secondary_exchange.outbound_queue.key
+        else:
+            exchange_name = self._exchange.name
+            outbound_key = self._exchange.outbound_queue.key
+
         with pika.BlockingConnection(self._connection_parameters) as connection:
             with connection.channel() as channel:
                 channel.basic_publish(
-                    self._exchange.name,
-                    self._exchange.outbound_queue.key,
+                    exchange_name,
+                    outbound_key,
                     json.dumps(RabbitMqAdapter.serialize_message(message_body)),
                     properties=pika.BasicProperties(
                         type=message_body.message_type,

@@ -45,6 +45,13 @@ class RabbitMq(BaseModel):
 
         return None
 
+    @property
+    def secondary_exchange(self) -> Optional[Exchange]:
+        if len(self.exchanges) == 2:
+            return self.exchanges[1]
+
+        return None
+
 
 class SqlServer(BaseModel):
     host: str

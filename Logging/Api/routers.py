@@ -5,7 +5,7 @@ import flask_restful
 import humps
 from flask import request
 
-from Core.Web.Security.JWTTools import extract_field_user_id
+from Core.Web.Security.JWTTools import extract_user_filed_id
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Logging.Api.command_mappings import LoggingCommandMapping
@@ -35,7 +35,7 @@ class Logging(Resource):
     def post(self):
         try:
             # get business owner
-            user_id = extract_field_user_id()
+            user_id = extract_user_filed_id()
 
             # get request
             request_json = request.get_json(force=True)

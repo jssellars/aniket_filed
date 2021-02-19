@@ -46,10 +46,9 @@ router_route_pairs = (
 scheduler = BackgroundScheduler()
 scheduler.start()
 scheduler.add_job(
-    fixtures.rabbitmq_adapter
-        .register_callback(callback)
-        .register_consumer(config.rabbitmq.consumer_name)
-        .start_consuming
+    fixtures.rabbitmq_adapter.register_callback(callback)
+    .register_consumer(config.rabbitmq.consumer_name)
+    .start_consuming
 )
 atexit.register(lambda: scheduler.shutdown())
 

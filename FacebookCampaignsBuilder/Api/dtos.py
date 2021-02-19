@@ -1,9 +1,14 @@
-import typing
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import Any, Dict
 
 
 @dataclass
-class PublishCampaignResponse:
-    business_owner_facebook_id: typing.AnyStr = None
-    ad_account_id: typing.AnyStr = None
-    campaigns: typing.List[typing.AnyStr] = field(default_factory=list)
+class SmartCreatePublishRequest:
+    user_filed_id: int
+    business_owner_facebook_id: str
+    ad_account_id: str
+    template_id: int
+    step_one_details: Dict[str, Any]
+    step_two_details: Dict[str, Any]
+    step_three_details: Dict[str, Any]
+    step_four_details: Dict[str, Any]

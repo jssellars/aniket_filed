@@ -1,9 +1,7 @@
 import typing
 
-from marshmallow import EXCLUDE, INCLUDE, fields, post_load, pre_load
-
 from Core.mapper import MapperBase
-from Core.Tools.Misc.ObjectSerializers import object_to_json
+from marshmallow import EXCLUDE, INCLUDE, fields, post_load
 
 
 class AdPreviewCommand(MapperBase):
@@ -29,24 +27,15 @@ class AdPreviewCommand(MapperBase):
         return mapped_data
 
 
-class PublishCampaignResponseDto(MapperBase):
+class SmartCreatePublishRequest(MapperBase):
+    user_filed_id = fields.Int()
     business_owner_facebook_id = fields.String()
     ad_account_id = fields.String()
-    campaigns = fields.List(fields.String)
+    template_id = fields.Int()
+    step_one_details = fields.Dict()
+    step_two_details = fields.Dict()
+    step_three_details = fields.Dict()
+    step_four_details = fields.Dict()
 
     class Meta:
         unknown = EXCLUDE
-
-    @pre_load
-    def build(self, data: typing.Any, **kwargs):
-        if not isinstance(data, typing.MutableMapping):
-            data = object_to_json(data)
-
-        return data
-
-    @post_load
-    def build(self, data: typing.Any, **kwargs):
-        if self._target:
-            return self._target(**data)
-
-        return data

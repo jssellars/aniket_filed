@@ -3,8 +3,12 @@ from sqlalchemy.orm import sessionmaker
 
 from Core import settings
 from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
-from Core.Web.Security.Authorization import authorize_permission, fake_authorize_permission, fake_authorize_jwt, \
-    authorize_jwt
+from Core.Web.Security.Authorization import (
+    authorize_permission,
+    fake_authorize_permission,
+    fake_authorize_jwt,
+    authorize_jwt,
+)
 from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 from Core.mongo_adapter import MongoAdapter
 from Core.rabbitmq_adapter import RabbitMqAdapter
@@ -51,13 +55,17 @@ class Fixtures:
         """Uses default exchange."""
         if self._rabbitmq_adapter is None:
             self._rabbitmq_adapter = RabbitMqAdapter(
-                self.config.rabbitmq, self.config.rabbitmq.default_exchange
+                self.config.rabbitmq, self.config.rabbitmq.default_exchange, self.config.rabbitmq.secondary_exchange
             )
 
         return self._rabbitmq_adapter
 
     def get_rabbit_mq_adapter(self, exchange_type: str) -> RabbitMqAdapter:
-        return RabbitMqAdapter(self.config.rabbitmq, self.config.rabbitmq.get_exchange_by_type(exchange_type))
+        return RabbitMqAdapter(
+            self.config.rabbitmq,
+            self.config.rabbitmq.get_exchange_by_type(exchange_type),
+            self.config.rabbitmq.secondary_exchange,
+        )
 
     @property
     def sql_db_engine(self):

@@ -3,17 +3,21 @@ import logging
 import typing
 from distutils.util import strtobool
 
-import flask_restful
-import humps
 from flask import request
 
-from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
-from Core.Web.FacebookGraphAPI.Tools import Tools
-from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
-from Core.Web.Security.Permissions import CampaignBuilderPermissions, AdsManagerPermissions
+import flask_restful
+import humps
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
-from FacebookCampaignsBuilder.Api import command_handlers, commands, dtos, mappings, queries
+from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
+from Core.Web.FacebookGraphAPI.Tools import Tools
+from Core.Web.Security.JWTTools import (extract_business_owner_facebook_id,
+                                        extract_user_filed_id)
+from Core.Web.Security.Permissions import (AdsManagerPermissions,
+                                           CampaignBuilderPermissions)
+from FacebookCampaignsBuilder.Api import (
+    command_handlers, commands, mappings, queries)
+from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 
 logger = logging.getLogger(__name__)
@@ -150,58 +154,6 @@ class BudgetValidation(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return Tools.create_error(e, code="POTTER_BAD_REQUEST"), 400
-
-
-class PublishCampaign(Resource):
-    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
-    def post(self):
-        try:
-            request_json = humps.decamelize(request.get_json(force=True))
-            business_owner_id = extract_business_owner_facebook_id()
-            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-            campaigns = command_handlers.CampaignBuilderPublish.handle(
-                request=request_json,
-                permanent_token=permanent_token,
-                business_owner_id=business_owner_id,
-            )
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return Tools.create_error(e, code="BadRequest_PublishCampaignEndpoint"), 400
-
-        mapper = mappings.PublishCampaignResponseDto(target=dtos.PublishCampaignResponse)
-        response = mapper.load(request_json)
-        response.business_owner_facebook_id = business_owner_id
-        response.campaigns = campaigns
-
-        return object_to_camelized_dict(response), 200
-
-
-class SmartCreatePublish(Resource):
-    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
-    def post(self):
-
-        try:
-            request_json = humps.decamelize(request.get_json(force=True))
-            business_owner_id = extract_business_owner_facebook_id()
-            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-            campaigns = command_handlers.SmartCreatePublish.handle(
-                request=request_json,
-                permanent_token=permanent_token,
-                business_owner_id=business_owner_id,
-                facebook_config=config.facebook,
-            )
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return Tools.create_error(e, code="BadRequest_PublishSmartCreateEndpoint"), 400
-
-        mapper = mappings.PublishCampaignResponseDto(target=dtos.PublishCampaignResponse)
-        response = mapper.load(request_json)
-        response.business_owner_facebook_id = business_owner_id
-        response.campaigns = campaigns
-
-        return object_to_camelized_dict(response), 200
 
 
 class SmartCreateCats(Resource):
@@ -388,11 +340,15 @@ class AdsManagerAddStructuresToParent(Resource):
 
 class SmartCreatePublishProgress(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
-    def get(self, template_id: typing.AnyStr):
+    def get(self):
         try:
-            response = command_handlers.SmartCreatePublish.get_publish_feedback(template_id)
+            user_filed_id = extract_user_filed_id()
+            response = SmartCreatePublish.get_publish_feedback(int(user_filed_id))
 
-            return object_to_camelized_dict(response), 200
+            if response:
+                return object_to_camelized_dict(response), 200
+
+            return None, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
