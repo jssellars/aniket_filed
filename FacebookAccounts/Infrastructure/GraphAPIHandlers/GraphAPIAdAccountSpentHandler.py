@@ -1,68 +1,66 @@
 import typing
 from datetime import datetime
 
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
+from facebook_business.adobjects.adaccount import AdAccount
+
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookAccounts.Infrastructure.Domain.AdAccountAmountSpentModel import AdAccountAmountSpentModel
-from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountSpentMapping import \
-    GraphAPIAdAccountSpentMapping
-from FacebookAccounts.Infrastructure.GraphAPIRequests.GraphAPIRequestAdAccountSpent import \
-    GraphAPIRequestAdAccountSpent
+from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountSpentMapping import GraphAPIAdAccountSpentMapping
 
 
 class GraphAPIAdAccountSpentHandler:
     @classmethod
     def handle(cls, request, config, fixtures):
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(request.user_id)
-
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(request.business_owner_facebook_id)
         ad_accounts_amount_spent = []
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         response_mapper = GraphAPIAdAccountSpentMapping(AdAccountAmountSpentModel)
 
-        for account_detail in request.ad_accounts_details:
-            from_date = cls.__convert_datetime(account_detail.from_date)
-            to_date = cls.__convert_datetime(account_detail.to_date)
-            response = cls.get_account_spent_base(config,
-                                                  permanent_token=permanent_token,
-                                                  business_owner_facebook_id=request.user_id,
-                                                  account_id=account_detail.facebook_id,
-                                                  from_date=from_date,
-                                                  to_date=to_date)
-            if isinstance(response, list) and len(response) == 1:
-                response = response[0]
+        for account_id in request.ad_account_ids:
+            for date in request.dates:
+                response = cls.get_account_spent_base(
+                    account_id=account_id,
+                    from_date=date.isoformat(),
+                    to_date=date.isoformat(),
+                )
+                if isinstance(response, list) and len(response) == 1:
+                    response = response[0]
 
-            mapped_response = response_mapper.load(response)
-            ad_accounts_amount_spent.append(mapped_response)
+                if not response:
+                    response = dict(ad_account_id=account_id, amount_spent=0)
+
+                mapped_response = response_mapper.load(response)
+                mapped_response.date = date.isoformat()
+                ad_accounts_amount_spent.append(mapped_response)
 
         return ad_accounts_amount_spent, []
 
     @classmethod
-    def get_account_spent_base(cls,
-                               config,
-                               permanent_token: typing.AnyStr = None,
-                               business_owner_facebook_id: typing.AnyStr = None,
-                               account_id: typing.AnyStr = None,
-                               from_date: typing.AnyStr = None,
-                               to_date: typing.AnyStr = None):
-        account_id = account_id.split("_")[1]
-        api_config = GraphAPIClientBaseConfig()
-        api_config.request = GraphAPIRequestAdAccountSpent(api_version=config.facebook.api_version,
-                                                       access_token=permanent_token,
-                                                       business_owner_facebook_id=business_owner_facebook_id,
-                                                       account_id=account_id,
-                                                       since=from_date,
-                                                       until=to_date)
+    def get_account_spent_base(
+        cls,
+        account_id: typing.AnyStr = None,
+        from_date: typing.AnyStr = None,
+        to_date: typing.AnyStr = None,
+    ):
 
-        graph_api_client = GraphAPIClientBase(business_owner_permanent_token=permanent_token, config=api_config)
-        response, _ = graph_api_client.call_facebook()
+        fields = [FieldsMetadata.account_id.name, FieldsMetadata.currency.name, FacebookMiscFields.business]
+        filtered_insights = f"insights.time_range({{'since':'{from_date}','until': '{to_date}'}})"
+        fields.append(filtered_insights)
 
-        return response
+        ad_account = AdAccount(f'act_{account_id}')
+
+        response = ad_account.api_get(fields=fields)
+
+        return response.export_all_data()
 
     @staticmethod
     def __convert_datetime(input_date):
         __MINIMUM_DATETIME_LENGTH__ = 10
-        __DEFAULT_DATETIME_FORMAT__ = '%Y-%m-%d'
-        __INCOMING_DATETIME_FORMAT__ = '%Y-%m-%dT%H:%M:%S+00:00'
+        __DEFAULT_DATETIME_FORMAT__ = "%Y-%m-%d"
+        __INCOMING_DATETIME_FORMAT__ = "%Y-%m-%dT%H:%M:%S+00:00"
         __ISO_DATETIME_FORMAT__ = "%Y-%m-%dT%H:%M:%S"
 
         date = input_date.split(".")[0]

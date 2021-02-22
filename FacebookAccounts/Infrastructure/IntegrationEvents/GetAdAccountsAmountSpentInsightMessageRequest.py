@@ -1,5 +1,7 @@
 import typing
 from dataclasses import dataclass
+from datetime import datetime
+from typing import List
 
 
 @dataclass
@@ -11,11 +13,10 @@ class AdAccountDetails:
 
 @dataclass
 class GetAdAccountsAmountSpentInsightMessageRequest:
-    filed_user_id: int = None
-    user_id: str = None
-    from_date: str = None
-    to_date: str = None
-    ad_accounts_details: typing.List[typing.Any] = None  # typing.List[AdAccountDetails]
+    filed_user_id: int
+    business_owner_facebook_id: str
+    ad_account_ids: List[str]
+    dates: List[datetime]
 
 
 """

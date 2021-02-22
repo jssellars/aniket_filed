@@ -39,6 +39,7 @@ class FacebookMiscFields:
     age_max = "age_max"
     genders = "genders"
     copied_adset_id = "copied_adset_id"
+    business = "business"
 
 
 class Gender(Enum):

@@ -1,8 +1,6 @@
 from marshmallow import fields, EXCLUDE
 
-from Core.mapper import MapperBase, MapperNestedField
-from FacebookAccounts.Infrastructure.IntegrationEvents.GetAdAccountsAmountSpentInsightMessageRequest import \
-    AdAccountDetails
+from Core.mapper import MapperBase
 
 
 class GetAdAccountsAmountSpentInsightMessageRequestMapping(MapperBase):
@@ -10,7 +8,6 @@ class GetAdAccountsAmountSpentInsightMessageRequestMapping(MapperBase):
         unknown = EXCLUDE
 
     filed_user_id = fields.Integer()
-    user_id = fields.String()
-    from_date = fields.String()
-    to_date = fields.String()
-    ad_accounts_details = MapperNestedField(target=AdAccountDetails, many=True)
+    business_owner_facebook_id = fields.String()
+    ad_account_ids = fields.List(fields.String())
+    dates = fields.List(fields.Date())

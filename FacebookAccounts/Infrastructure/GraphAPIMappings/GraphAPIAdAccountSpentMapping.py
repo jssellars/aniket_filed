@@ -10,8 +10,8 @@ class GraphAPIAdAccountSpentMapping(MapperBase):
     ad_account_id = fields.String()
     business_id = fields.String()
     business_name = fields.String()
-    amount_spent = fields.Float()
     currency = fields.String()
+    amount_spent = fields.Float(required=False)
 
     @pre_load
     def convert(self, data: typing.Dict, **kwargs):

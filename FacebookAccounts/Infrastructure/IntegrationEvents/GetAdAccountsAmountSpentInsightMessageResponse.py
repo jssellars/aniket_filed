@@ -1,13 +1,26 @@
-import typing
 from dataclasses import dataclass
+from datetime import datetime
+from typing import List
+
+
+@dataclass
+class SpendingPerDay:
+    date: datetime
+    amount: float
+
+
+@dataclass
+class FacebookAdAccountsSpending:
+    ad_account_id: str
+    business_id: str
+    business_name: str
+    currency: str
+    spendings_per_day: List[SpendingPerDay]
 
 
 @dataclass
 class GetAdAccountsAmountSpentInsightMessageResponse:
     message_type = "GetAdAccountsAmountSpentInsightMessageResponse"
-    filed_user_id: int = None
-    user_id: str = None
-    from_date: str = None
-    to_date: str = None
-    ad_accounts_amount_spent: typing.List[typing.Any] = None  # typing.List[AdAccountAmountSpentModel]
-    errors: typing.List[typing.Dict] = None
+    filed_user_id: int
+    business_owner_facebook_id: int
+    spendings: List[FacebookAdAccountsSpending]
