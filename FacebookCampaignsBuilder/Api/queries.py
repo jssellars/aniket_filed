@@ -1,6 +1,6 @@
-import typing
 import urllib.parse
 from dataclasses import asdict
+from typing import Dict, List
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adimage import AdImage
@@ -46,7 +46,7 @@ from Core.Web.FacebookGraphAPI.search import (
 
 
 class AdCreativeAssetsBase:
-    def __init__(self, business_owner_id: typing.AnyStr = None):
+    def __init__(self, business_owner_id: str = None):
         self._permanent_token = fixtures.business_owner_repository.get_permanent_token(
             business_owner_facebook_id=business_owner_id
         )
@@ -64,16 +64,29 @@ class AdCreativeAssetsImages(AdCreativeAssetsBase):
         AdImage.Field.width,
     ]
 
+    # The choice of largest minimum dimension is based on this doc: https://www.facebook.com/business/ads-guide/image
+    # Additional check for aspect ratio (width:height) is based on Facebook Instagram Feed placement
+    MINIMUM_IMAGE_DIMENSION = 600
+    MINIMUM_ASPECT_RATIO = 4 / 5
+    MAXIMUM_ASPECT_RATIO = 191 / 100
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self, ad_account_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def get(self, ad_account_id: str = None) -> List[Dict]:
         try:
             ad_account = AdAccount(fbid=ad_account_id)
             ad_account_images_raw = ad_account.get_ad_images(fields=self.__ad_images_minimal_fields)
-            return [Tools.convert_to_json(entry) for entry in ad_account_images_raw]
+            ad_images_json = (Tools.convert_to_json(entry) for entry in ad_account_images_raw)
+            return [image for image in ad_images_json if self.is_valid_image(image)]
+
         except Exception as e:
             raise e
+
+    def is_valid_image(self, image: Dict):
+        return (
+            image["width"] >= self.MINIMUM_IMAGE_DIMENSION and image["height"] >= self.MINIMUM_IMAGE_DIMENSION
+        ) and self.MAXIMUM_ASPECT_RATIO >= (image["width"] / image["height"]) >= self.MINIMUM_ASPECT_RATIO
 
 
 class AdCreativeAssetsPagePosts(AdCreativeAssetsBase):
@@ -89,7 +102,7 @@ class AdCreativeAssetsPagePosts(AdCreativeAssetsBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_post_details(self, page_post_facebook_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def get_post_details(self, page_post_facebook_id: str = None) -> List[Dict]:
         try:
             pagePost = PagePost(fbid=page_post_facebook_id)
             pagePostRaw = pagePost.api_get(fields=self.page_posts_detail_fields)
@@ -97,7 +110,7 @@ class AdCreativeAssetsPagePosts(AdCreativeAssetsBase):
         except Exception as e:
             raise e
 
-    def get(self, page_facebook_id: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def get(self, page_facebook_id: str = None) -> List[Dict]:
         try:
             page = Page(fbid=page_facebook_id)
             page_posts_raw = page.get_posts(fields=self.__page_posts_minimal_fields)
@@ -134,7 +147,7 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self, ad_account_id: typing.AnyStr = None, is_instagram_eligible: bool = False) -> typing.List[typing.Dict]:
+    def get(self, ad_account_id: str = None, is_instagram_eligible: bool = False) -> List[Dict]:
         try:
             ad_account = AdAccount(fbid=ad_account_id)
             ad_account_videos_raw = ad_account.get_ad_videos(fields=self.__ad_videos_minimal_fields)
@@ -155,11 +168,11 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
 
 class BudgetValidation:
     @staticmethod
-    def get(business_owner_id: typing.AnyStr = None, account_id: typing.AnyStr = None):
+    def get(business_owner_id: str = None, account_id: str = None):
         return GraphAPIBudgetValidationHandler.handle(
             account_id,
             fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id=business_owner_id),
-            config
+            config,
         )
 
 
@@ -198,7 +211,7 @@ class SmartCreateCatalogs:
 
 
 class TargetingSearchBase:
-    def __init__(self, business_owner_id: typing.AnyStr = None):
+    def __init__(self, business_owner_id: str = None):
         self._permanent_token = fixtures.business_owner_repository.get_permanent_token(
             business_owner_facebook_id=business_owner_id
         )
@@ -211,7 +224,7 @@ class TargetingSearchInterestsSearch(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def search(self, query_string: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def search(self, query_string: str = None) -> List[Dict]:
         try:
             handler = GraphAPIInterestsHandler(graph_api_sdk=self._graph_api_sdk)
             return handler.search_interest(query_string=query_string)
@@ -223,7 +236,7 @@ class TargetingSearchInterestsSuggestions(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def search(self, query_string: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def search(self, query_string: str = None) -> List[Dict]:
         try:
             source_interests = urllib.parse.unquote(query_string)
             source_interests = source_interests.replace("&", "")
@@ -239,7 +252,7 @@ class TargetingSearchInterestsTree(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self) -> typing.List[typing.Dict]:
+    def get(self) -> List[Dict]:
         try:
             handler = GraphAPIInterestsHandler(graph_api_sdk=self._graph_api_sdk)
             return handler.interests
@@ -251,7 +264,7 @@ class TargetingSearchLanguages(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self) -> typing.List[typing.Dict]:
+    def get(self) -> List[Dict]:
         try:
             handler = GraphAPILanguagesHandler(graph_api_sdk=self._graph_api_sdk)
             return handler.get_all()
@@ -263,7 +276,7 @@ class TargetingSearchLocationsCountryGroups(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self) -> typing.List[typing.Dict]:
+    def get(self) -> List[Dict]:
         try:
             handler = GraphAPILocationsHandler(graph_api_sdk=self._graph_api_sdk)
             return handler.get_country_groups()
@@ -275,7 +288,7 @@ class TargetingSearchLocationsSearch(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def search(self, query_string: typing.AnyStr = None) -> typing.List[typing.Dict]:
+    def search(self, query_string: str = None) -> List[Dict]:
         try:
             handler = GraphAPILocationsHandler(graph_api_sdk=self._graph_api_sdk)
             return handler.search_location(query_string=query_string)
@@ -287,7 +300,7 @@ class TargetingSearchRegulatedInterests(TargetingSearchBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self, regulated_categories: typing.List[typing.AnyStr] = None) -> typing.List[typing.Dict]:
+    def get(self, regulated_categories: List[str] = None) -> List[Dict]:
         try:
             handler = GraphAPIInterestsHandler(graph_api_sdk=self._graph_api_sdk)
             return handler.get_regulated_interests(regulated_categories=regulated_categories)
