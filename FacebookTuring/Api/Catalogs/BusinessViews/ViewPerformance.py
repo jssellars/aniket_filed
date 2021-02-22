@@ -78,8 +78,7 @@ class ViewAdPerformance(View):
         ViewColumnsMaster.purchase_roas,
         ViewColumnsMaster.quality_ranking,
         ViewColumnsMaster.engagement_rate_ranking,
-        ViewColumnsMaster.conversion_rate_ranking,
-        ViewColumnsMaster.stop_time,
+        ViewColumnsMaster.conversion_rate_ranking
     ]
 
 

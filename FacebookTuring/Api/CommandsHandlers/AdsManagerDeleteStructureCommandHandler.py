@@ -6,7 +6,7 @@ from bson import BSON
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.settings import Prod
 from FacebookTuring.Api.startup import config, fixtures
-from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
+from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes, AccountEnvNotAllowedException
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
@@ -31,10 +31,10 @@ class AdsManagerDeleteStructureCommandHandler:
             return False
 
         if not allow_structure_changes(deleted_structure["account_id"], config):
-            return None
+            raise AccountEnvNotAllowedException
 
         if level == Level.CAMPAIGN.value and config.environment != Prod.environment:
-            return None
+            raise AccountEnvNotAllowedException
 
         deleted_structure[FacebookMiscFields.level] = level
         deleted_structure[FacebookMiscFields.structure_id] = deleted_structure.get(
@@ -54,23 +54,19 @@ class AdsManagerDeleteStructureCommandHandler:
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
         _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
-        try:
-            structure = LevelToGraphAPIStructure.get(level, facebook_id)
-            structure.api_delete()
-        except Exception as e:
-            raise e
+
+        structure = LevelToGraphAPIStructure.get(level, facebook_id)
+        structure.api_delete()
+
 
         # Update structure to REMOVED in our DB
-        try:
-            for structure in to_be_deleted_structures:
-                structure = mark_structure_as_removed(structure, business_owner_facebook_id)
-                repository.add_structure(
-                    level=Level(structure[FacebookMiscFields.level]),
-                    key_value=structure[FacebookMiscFields.structure_id],
-                    document=structure,
-                )
-        except Exception as e:
-            raise e
+        for structure in to_be_deleted_structures:
+            structure = mark_structure_as_removed(structure, business_owner_facebook_id)
+            repository.add_structure(
+                level=Level(structure[FacebookMiscFields.level]),
+                key_value=structure[FacebookMiscFields.structure_id],
+                document=structure,
+            )
 
         return True
 

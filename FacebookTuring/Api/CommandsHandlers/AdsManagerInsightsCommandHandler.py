@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import Dict, List
 
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.constants import DEFAULT_DATETIME
 from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import \
     Placement
@@ -122,6 +123,7 @@ class AdsManagerInsightsCommandHandler:
                           level: str = None) -> Dict:
 
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
         popup_fields = []
 
         if level == Level.CAMPAIGN.value:
@@ -145,15 +147,11 @@ class AdsManagerInsightsCommandHandler:
 
         insight_response, next_page_cursor, summary = GraphAPIInsightsHandler.get_insights_page(
             config,
-            permanent_token=permanent_token,
             ad_account_id=query.facebook_id,
             fields=query.fields,
             parameters=query.parameters,
             requested_fields=query.requested_columns,
-            add_totals=True,
-            next_page_cursor=query.next_page_cursor,
             level=level,
-            page_size=query.page_size,
         )
 
         return {"nextPageCursor": next_page_cursor, "data": insight_response, "summary": summary}
@@ -165,6 +163,7 @@ class AdsManagerInsightsCommandHandler:
                           level: typing.AnyStr = None) -> Dict:
 
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
         query = cls.map_ag_grid_trend_query(query_json, level, has_breakdowns=True)
 
         requested_columns = query.requested_columns
@@ -174,15 +173,11 @@ class AdsManagerInsightsCommandHandler:
 
         _, _, result = GraphAPIInsightsHandler.get_insights_page(
             config,
-            permanent_token=permanent_token,
             level=level,
             ad_account_id=query.facebook_id,
             fields=query.fields,
             parameters=query.parameters,
-            add_totals=True,
             requested_fields=requested_columns,
-            next_page_cursor=query.next_page_cursor,
-            page_size=1,
         )
 
         since_date = datetime.strptime(query.time_range["since"], DEFAULT_DATETIME)
@@ -194,15 +189,11 @@ class AdsManagerInsightsCommandHandler:
 
         _, _, past_period_result = GraphAPIInsightsHandler.get_insights_page(
             config,
-            permanent_token=permanent_token,
             level=level,
             ad_account_id=query.facebook_id,
             fields=query.fields,
             parameters=query.parameters,
-            add_totals=True,
             requested_fields=requested_columns,
-            next_page_cursor=query.next_page_cursor,
-            page_size=1,
         )
 
         required_metric = requested_columns[0].name
@@ -236,6 +227,8 @@ class AdsManagerInsightsCommandHandler:
             level: typing.AnyStr = None
     ) -> typing.List[typing.Dict]:
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
+
         query = cls.map_query(query_json, has_breakdowns=True)
         response = GraphAPIInsightsHandler.get_reports_insights(
             config,

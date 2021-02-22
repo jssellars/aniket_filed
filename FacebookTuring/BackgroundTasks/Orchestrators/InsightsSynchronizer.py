@@ -69,9 +69,7 @@ class InsightsSynchronizer:
         self.date_stop = date_stop
         self.requested_fields = requested_fields
         self.__ad_account_id = "act_" + self.account_id
-        self.__permanent_token = None
         self.__mongo_repository = None
-        self.__permanent_token_retries = 3
 
     def run(self, ad_report_run: AdReportRun) -> None:
         try:
@@ -79,6 +77,7 @@ class InsightsSynchronizer:
             response = GraphAPIInsightsHandler.process_async_report(
                 config,
                 ad_report_run,
+                f'act_{self.account_id}',
                 requested_fields=self.requested_fields,
                 level=self.level.value,
             )
@@ -97,25 +96,6 @@ class InsightsSynchronizer:
     def set_mongo_repository(self, mongo_repository: TuringMongoRepository = None) -> typing.Any:
         self.__mongo_repository = mongo_repository
         return self
-
-    @property
-    def permanent_token(self) -> typing.AnyStr:
-        if self.__permanent_token is None:
-            error = None
-            retries = 0
-            while self.__permanent_token is None and retries < self.__permanent_token_retries:
-                try:
-                    self.__permanent_token = fixtures.business_owner_repository.get_permanent_token(
-                        self.business_owner_id
-                    )
-                except Exception as e:
-                    retries += 1
-                    error = e
-
-            if error:
-                raise error
-
-        return self.__permanent_token
 
     def __get_fields(self) -> typing.List[typing.AnyStr]:
         fields = [
@@ -147,6 +127,7 @@ class InsightsSynchronizer:
             "action_breakdowns": list(set(self.__get_action_breakdowns())),
             "time_increment": FieldsMetadata.day.facebook_value,
             "time_range": self.__get_time_range(),
+            "limit": 50,
         }
         return parameters
 
@@ -154,14 +135,13 @@ class InsightsSynchronizer:
         collection_name = self.level.value + "_" + self.breakdown.name + "_" + self.action_breakdown.name
         return collection_name
 
-    def get_async_insights_report(self, ad_account_id: str) -> List:
+    def get_async_insights_report(self) -> List:
 
         if self.breakdown is not None and self.breakdown != InsightsSynchronizerBreakdownEnum.NONE.value:
             self.requested_fields += [self.breakdown]
 
         self.requested_fields += LEVEL_TO_STRUCTURE_FIELDS[self.level]
 
-        ad_account = AdAccount(f'act_{ad_account_id}')
+        ad_account = AdAccount(f'act_{self.account_id}')
         ad_report_run = ad_account.get_insights_async(fields=self.__get_fields(), params=self.__get_parameters())
         return ad_report_run
-

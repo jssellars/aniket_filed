@@ -783,57 +783,6 @@ class TuringMongoRepository(MongoRepositoryBase):
         except Exception as e:
             raise e
 
-    def discard_structure_draft(self, level: Level = None, key_value: typing.AnyStr = None) -> typing.NoReturn:
-        self.collection = level.value
-        query_filter = {
-            MongoOperator.AND.value: [
-                {
-                    LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
-                        MongoOperator.EQUALS.value: key_value
-                    }
-                },
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
-                    }
-                }
-            ]
-        }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.actions: None,
-                FacebookMiscFields.last_updated_at: datetime.now()
-            }
-        }
-        self.update_one(query_filter, query)
-
-    def save_structure_draft(self,
-                             level: Level = None,
-                             key_value: typing.AnyStr = None,
-                             details: typing.Dict = None) -> typing.NoReturn:
-        self.collection = level.value
-        query_filter = {
-            MongoOperator.AND.value: [
-                {
-                    LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
-                        MongoOperator.EQUALS.value: key_value
-                    }
-                },
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value
-                    }
-                }
-            ]
-        }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.actions: details,
-                FacebookMiscFields.last_updated_at: datetime.now()
-            }
-        }
-        self.update_one(query_filter, query)
-
     def get_latest_by_account_id(self,
                                  collection: typing.AnyStr = None,
                                  start_date: typing.Union[datetime, typing.AnyStr] = None,

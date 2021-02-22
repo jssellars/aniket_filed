@@ -160,7 +160,7 @@ def _get_async_reports(user_config_static: SynchronizerConfigStatic, user_config
                         date_stop=date_stop.date().isoformat(),
                     )
                     synchronizer.set_mongo_repository(user_config_static.insights_repository)
-                    async_reports.append((synchronizer.get_async_insights_report(user_config_runtime.account_id), synchronizer))
+                    async_reports.append((synchronizer.get_async_insights_report(), synchronizer))
         else:
             synchronizer = InsightsSynchronizer(
                 business_owner_id=user_config_runtime.business_owner_id,
@@ -173,7 +173,7 @@ def _get_async_reports(user_config_static: SynchronizerConfigStatic, user_config
                 date_stop=date_stop.date().isoformat(),
             )
             synchronizer.set_mongo_repository(user_config_static.insights_repository)
-            async_reports.append((synchronizer.get_async_insights_report(user_config_runtime.account_id), synchronizer))
+            async_reports.append((synchronizer.get_async_insights_report(), synchronizer))
 
     return async_reports
 
@@ -208,12 +208,12 @@ def _process_all_accounts_async_reports(user_config_static: SynchronizerConfigSt
                         )
 
                 except Exception as e:
+                    logger.exception(f"Failed to get insights async || {repr(e)}")
                     user_config_static.account_journal_repository.change_account_insights_sync_status(
                         synchronizer.account_id, AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS, end_date=datetime.now()
                     )
                     synchronizer.remove(async_data)
 
-                    logger.exception(f"Failed to get insights async || {repr(e)}")
         sleep(5)
 
 

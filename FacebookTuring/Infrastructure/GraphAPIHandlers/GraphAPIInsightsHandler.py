@@ -1,22 +1,25 @@
 import copy
+import itertools
 import json
-import typing
 from collections import OrderedDict
-from time import sleep
+from typing import List, Dict, Union, Tuple
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import get_sdk_structures, create_facebook_filter, get_next_page_cursor, get_sdk_insights_page
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     Level,
     LevelToFacebookIdKeyMapping,
     FacebookLevelPlural,
 )
+from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
@@ -74,14 +77,13 @@ class GraphAPIInsightsHandler:
             cls,
             config,
             ad_report_run: AdReportRun,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            level: typing.AnyStr = None,):
+            ad_account_id: str,
+            requested_fields: List[FieldsMetadata] = None,
+            level: str = None, ):
         try:
             insights = ad_report_run.get_insights()
             if not insights:
                 return {}
-            #
-            # summary = insights.summary() if parameters["default_summary"] else None
 
             results_requested = any(
                 [
@@ -93,7 +95,7 @@ class GraphAPIInsightsHandler:
             insights_data = [insight.export_all_data() for insight in insights]
 
             if results_requested:
-                cls.add_results_to_response(config, level=level, response=insights_data)
+                cls.add_results_to_response(config, level, insights_data, ad_account_id)
             insights_response = (
                 GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
                 if insights_data
@@ -114,15 +116,15 @@ class GraphAPIInsightsHandler:
     def get_insights_base(
             cls,
             config,
-            permanent_token: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            parameters: typing.Dict = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
+            permanent_token: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            requested_fields: List[FieldsMetadata] = None,
             add_totals: bool = False,
-            thread: typing.Union[typing.AnyStr, int] = None,
-            level: typing.AnyStr = None,
-    ) -> typing.Dict:
+            thread: Union[str, int] = None,
+            level: str = None,
+    ) -> Dict:
 
         try:
             graph_api_client = GraphAPIClientBase(permanent_token)
@@ -133,7 +135,6 @@ class GraphAPIInsightsHandler:
                 params=parameters,
                 add_totals=add_totals,
             )
-            GraphAPISdkBase(config.facebook, permanent_token)
             ad_account = AdAccount(ad_account_id)
             insights = ad_account.get_insights(fields=fields, params=parameters)
 
@@ -155,13 +156,13 @@ class GraphAPIInsightsHandler:
                 insights.params = parameters
 
             if results_requested:
-                cls.add_results_to_response(config, level=level, response=insights_data)
+                cls.add_results_to_response(config, level, insights_data, ad_account_id)
             insights_response = (
                 GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
                 if insights_data
                 else []
             )
-            summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
+            summary_response = GraphAPIInsightsMapper().map(requested_fields, [json.loads(summary[10:])]) if summary else []
 
             # Warning: These mappings might need to be reactivated after extensive testing
             # It looks like it messes up the order of the items in the response
@@ -176,29 +177,15 @@ class GraphAPIInsightsHandler:
     def get_insights_page(
             cls,
             config,
-            permanent_token: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            parameters: typing.Dict = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            add_totals: bool = False,
-            next_page_cursor: typing.AnyStr = None,
-            level: typing.AnyStr = None,
-            page_size: int = 200,
-    ) -> typing.Tuple:
-        graph_api_client = GraphAPIClientBase(permanent_token)
-        graph_api_client.config = cls.build_get_insights_config(
-            permanent_token=permanent_token,
-            ad_account_id=ad_account_id,
-            fields=fields,
-            params=parameters,
-            add_totals=add_totals,
-            next_page_cursor=next_page_cursor,
-            page_size=page_size,
-        )
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            requested_fields: List[FieldsMetadata] = None,
+            level: str = None,
+    ) -> Tuple:
 
         try:
-            response, next_page_cursor, summary = graph_api_client.get_page_from_facebook()
+            response, next_page_cursor, summary = get_sdk_insights_page(ad_account_id, fields, parameters, Level[level.upper()])
             results_requested = any(
                 [
                     FieldsMetadata.results.name == x.name or FieldsMetadata.cost_per_result.name == x.name
@@ -206,7 +193,7 @@ class GraphAPIInsightsHandler:
                 ]
             )
             if results_requested:
-                cls.add_results_to_response(config, level=level, response=response)
+                cls.add_results_to_response(config, level, response, ad_account_id)
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
             summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
 
@@ -222,20 +209,21 @@ class GraphAPIInsightsHandler:
     @classmethod
     def get_structures_for_insights(
             cls,
-            config,
-            structure_key: typing.AnyStr = None,
-            level: typing.AnyStr = None,
-            insight_ids: typing.List[typing.AnyStr] = None,
-            structure_fields: typing.List[FieldsMetadata] = None,
-    ) -> typing.List:
+            ad_account_id: str,
+            level: str,
+            insight_ids: List[str],
+            structure_fields: List[FacebookField],
+    ) -> List:
         try:
-            repository = TuringMongoRepository(
-                config=config.mongo,
-                database_name=config.mongo.structures_database_name,
-            )
-            structures = repository.get_all_structures_by_id_list(
-                level=Level(level), structure_ids=insight_ids, structure_key=structure_key
-            )
+
+            facebook_structure_fields = [structure_field.facebook_fields for structure_field in structure_fields]
+            facebook_structure_fields = list(itertools.chain(*facebook_structure_fields))
+
+            facebook_structure_key = LevelToFacebookIdKeyMapping[level.upper()].value.replace("_", ".")
+
+            structures_filter = {"filtering": [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, insight_ids)]}
+            structures = get_sdk_structures(ad_account_id, Level[level.upper()], facebook_structure_fields, structures_filter)
+
             structures_response = GraphAPIInsightsMapper().map(structure_fields, structures)
             structures_response = list(map(dict, set(tuple(x.items()) for x in structures_response)))
             return structures_response
@@ -245,10 +233,10 @@ class GraphAPIInsightsHandler:
     @classmethod
     def __join_insights_and_structure_results(
             cls,
-            structure_key: typing.AnyStr = None,
-            insight_response: typing.List = None,
-            structure_results: typing.List = None,
-    ) -> typing.List:
+            structure_key: str = None,
+            insight_response: List = None,
+            structure_results: List = None,
+    ) -> List:
         for insight in insight_response:
             possible_objective = []
             for structure in structure_results:
@@ -275,14 +263,14 @@ class GraphAPIInsightsHandler:
     def get_structures_base(
             cls,
             config,
-            permanent_token: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            level: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            filter_params: typing.List[typing.Dict] = None,
-            structure_fields: typing.List[FieldsMetadata] = None,
-            thread: typing.Union[typing.AnyStr, int] = None,
-    ) -> typing.Dict:
+            permanent_token: str = None,
+            ad_account_id: str = None,
+            level: str = None,
+            fields: List[str] = None,
+            filter_params: List[Dict] = None,
+            structure_fields: List[FieldsMetadata] = None,
+            thread: Union[str, int] = None,
+    ) -> Dict:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_structure_config(
             permanent_token=permanent_token,
@@ -310,13 +298,13 @@ class GraphAPIInsightsHandler:
     def get_structures_page(
             cls,
             config,
-            ad_account_id: typing.AnyStr = None,
-            structure_fields: typing.List[FieldsMetadata] = None,
-            level: typing.AnyStr = None,
-            parameter: typing.Dict = None,
+            ad_account_id: str,
+            structure_fields: List[FieldsMetadata],
+            level: str,
+            parameter: Dict = None,
             start_row: int = 0,
             end_row: int = 200,
-    ) -> typing.List:
+    ) -> List:
         try:
             repository = TuringMongoRepository(
                 config=config.mongo,
@@ -345,32 +333,47 @@ class GraphAPIInsightsHandler:
             raise e
 
     @classmethod
-    def add_results_to_response(cls, config, level: typing.AnyStr = None, response: typing.List = None):
+    def add_results_to_response(cls, config, level: str, response: List, account_id: str):
+        if not response:
+            return
+
         structure_key = ""
         if level == Level.CAMPAIGN.value or level == Level.ADSET.value:
             structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(level.upper()).value
         elif level == Level.AD.value:
             structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(Level.ADSET.value.upper()).value
-        structure_ids = [x[structure_key] for x in response if structure_key in x]
-        structure_repository = TuringMongoRepository(
-            config=config.mongo,
-            database_name=config.mongo.structures_database_name,
-        )
-        structure_results = structure_repository.get_results_fields_from_adsets(
-            structure_ids=structure_ids, structure_key=structure_key
-        )
+        structure_ids = list({x[structure_key] for x in response if structure_key in x})
+
+        params = {"filtering": [json.dumps(create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids))]}
+        fields = [GraphAPIInsightsFields.promoted_object, structure_key, GraphAPIInsightsFields.optimization_goal]
+        structure_results = AdAccount(account_id).get_ad_sets(fields=fields, params=params)
+
+        mapped_structures = []
+        for structure in structure_results:
+            structure[structure_key] = structure.pop("id")
+
+            promoted_event = structure.pop(GraphAPIInsightsFields.promoted_object, None)
+            if promoted_event:
+                if "pixel_id" in promoted_event:
+                    structure[GraphAPIInsightsFields.custom_event_type] = promoted_event.get(
+                        GraphAPIInsightsFields.custom_event_type, None
+                    )
+            mapped_structures.append(structure)
+
         cls.__join_insights_and_structure_results(
-            structure_key=structure_key, insight_response=response, structure_results=structure_results
+            structure_key=structure_key, insight_response=response, structure_results=mapped_structures
         )
 
     @classmethod
     def get_ag_grid_insights(
             cls,
             config,
-            permanent_token: typing.AnyStr = None,
+            permanent_token: str = None,
             level: str = None,
             query: QueryBuilderFacebookRequestParser = None,
-    ) -> typing.Dict:
+    ) -> Dict:
+
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         ad_account_id = query.facebook_id
         fields = query.fields
@@ -380,21 +383,16 @@ class GraphAPIInsightsHandler:
         next_page_cursor = query.next_page_cursor
         page_size = query.page_size
         has_delivery = query.has_delivery
-        start_row = query.start_row
-        end_row = query.end_row
 
         if has_delivery:
             insights, structures, next_page_cursor, summary = cls._get_insights_master_data(
                 config,
-                permanent_token=permanent_token,
                 level=level,
                 ad_account_id=ad_account_id,
                 fields=fields,
                 parameters=parameters,
                 structure_fields=structure_fields,
                 requested_fields=requested_fields,
-                next_page_cursor=next_page_cursor,
-                page_size=page_size,
             )
 
             response = cls.left_join_insights_and_structures(
@@ -409,7 +407,6 @@ class GraphAPIInsightsHandler:
 
         insights, structures, next_page_cursor, summary = cls._get_structure_master_data(
             config,
-            permanent_token=permanent_token,
             level=level,
             ad_account_id=ad_account_id,
             fields=fields,
@@ -417,8 +414,7 @@ class GraphAPIInsightsHandler:
             structure_fields=structure_fields,
             requested_fields=requested_fields,
             page_size=page_size,
-            start_row=start_row,
-            end_row=end_row,
+            next_page_cursor=next_page_cursor,
         )
 
         response = cls.right_join_insights_and_structures(
@@ -434,31 +430,24 @@ class GraphAPIInsightsHandler:
     def _get_insights_master_data(
             cls,
             config,
-            permanent_token: typing.AnyStr = None,
-            level: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            parameters: typing.Dict = None,
-            structure_fields: typing.List[typing.AnyStr] = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            next_page_cursor: typing.AnyStr = None,
-            page_size: int = 200,
-    ) -> typing.Tuple:
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            structure_fields: List[str] = None,
+            requested_fields: List[FieldsMetadata] = None,
+    ) -> Tuple:
 
         insight_response, next_page_cursor, summary = cls.get_insights_page(
             config,
-            permanent_token=permanent_token,
             ad_account_id=ad_account_id,
             fields=fields,
             parameters=parameters,
             requested_fields=requested_fields,
-            add_totals=True,
-            next_page_cursor=next_page_cursor,
             level=level,
-            page_size=page_size,
         )
 
-        structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(level.upper()).value
+        structure_key = LevelToFacebookIdKeyMapping[level.upper()].value
         insight_ids = [x[structure_key] for x in insight_response if structure_key in x]
 
         # get structures
@@ -466,11 +455,10 @@ class GraphAPIInsightsHandler:
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
         ]
         structures_response = cls.get_structures_for_insights(
-            config,
-            structure_key=structure_key,
-            level=level,
-            insight_ids=insight_ids,
-            structure_fields=requested_structure_fields,
+            ad_account_id,
+            level,
+            insight_ids,
+            requested_structure_fields,
         )
 
         if summary and f"{level}_name" in summary[0]:
@@ -482,75 +470,54 @@ class GraphAPIInsightsHandler:
     def _get_structure_master_data(
             cls,
             config,
-            permanent_token: typing.AnyStr = None,
-            level: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            parameters: typing.Dict = None,
-            structure_fields: typing.List[typing.AnyStr] = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            structure_fields: List[str] = None,
+            requested_fields: List[FieldsMetadata] = None,
             page_size: int = 200,
-            start_row: int = 0,
-            end_row: int = 200,
+            next_page_cursor: str = None,
     ):
         requested_structure_fields = [
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
         ]
+        facebook_structure_fields = [structure_field.facebook_fields for structure_field in requested_structure_fields]
+        facebook_structure_fields = list(itertools.chain(*facebook_structure_fields))
+        structures_filter = {"after": next_page_cursor, "limit": page_size, "filtering": parameters.get("filtering")}
 
-        filter_params = json.loads(parameters["filtering"])[0]
+        structures = get_sdk_structures(ad_account_id, Level[level.upper()], facebook_structure_fields, structures_filter)
 
-        structures_response = cls.get_structures_page(
-            config=config,
-            ad_account_id=ad_account_id.replace("act_", ""),
-            level=level,
-            parameter=filter_params,
-            structure_fields=requested_structure_fields,
-            start_row=start_row,
-            end_row=end_row,
-        )
+        # iterate like this to avoid swapping page on the iterator
+        structures_response = []
+        for i in range(0, len(structures)):
+            structures_response.append(structures[i])
 
         structure_ids = [x["id"] for x in structures_response if "id" in x]
+        next_page_cursor = get_next_page_cursor(structures)
 
-        # Adding structure filter ids to parameters
-        if not filter_params["value"]:
-            is_filtered_on_parent = False
-            filter_params["value"] = structure_ids
-            parameters["filtering"] = [(json.dumps(filter_params))]
-        else:
-            is_filtered_on_parent = True
+        if not parameters.get("filtering"):
+            facebook_structure_key = LevelToFacebookIdKeyMapping[level.upper()].value.replace("_", ".")
+            parameters["filtering"] = [json.dumps(create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, structure_ids))]
 
         insight_response, _, _ = cls.get_insights_page(
             config,
-            permanent_token=permanent_token,
             ad_account_id=ad_account_id,
             fields=fields,
             parameters=parameters,
             requested_fields=requested_fields,
-            add_totals=True,
             level=level,
-            page_size=page_size,
         )
-
-        # pop only when filter model is None
-        if not is_filtered_on_parent:
-            parameters.pop("filtering")
 
         # Get collective summary (without filtering)
         _, _, summary = cls.get_insights_page(
             config,
-            permanent_token=permanent_token,
             ad_account_id=ad_account_id,
             fields=fields,
             parameters=parameters,
             requested_fields=requested_fields,
-            add_totals=True,
             level=Level.CAMPAIGN.value,
-            page_size=1,
         )
-
-        # Placeholder next page cursor to simulate facebook behaviour
-        # To get data slice we use star_row and end_row instead, not the cursor
-        next_page_cursor = str(start_row + end_row) if len(structures_response) == end_row else None
 
         return insight_response, structures_response, next_page_cursor, summary
 
@@ -560,11 +527,11 @@ class GraphAPIInsightsHandler:
             config,
             permanent_token: str = None,
             ad_account_id: str = None,
-            fields: typing.List[typing.AnyStr] = None,
-            parameters: typing.Dict = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            level: typing.AnyStr = None,
-    ) -> typing.List[typing.Dict]:
+            fields: List[str] = None,
+            parameters: Dict = None,
+            requested_fields: List[FieldsMetadata] = None,
+            level: str = None,
+    ) -> List[Dict]:
         report_insights_thread = 1
         insights_response = cls.get_insights_base(
             config,
@@ -581,11 +548,11 @@ class GraphAPIInsightsHandler:
     @classmethod
     def right_join_insights_and_structures(
             cls,
-            level: typing.AnyStr = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            insights: typing.List[typing.Dict] = None,
-            structures: typing.List[typing.Dict] = None,
-    ) -> typing.List[typing.Dict]:
+            level: str = None,
+            requested_fields: List[FieldsMetadata] = None,
+            insights: List[Dict] = None,
+            structures: List[Dict] = None,
+    ) -> List[Dict]:
         requested_fields_names = [field.name for field in requested_fields]
         structure_id_key = cls.__ids_keymap[level]["structure"]
         insight_id_key = cls.__ids_keymap[level]["insight"]
@@ -615,12 +582,12 @@ class GraphAPIInsightsHandler:
     @classmethod
     def left_join_insights_and_structures(
             cls,
-            level: typing.AnyStr = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            structure_fields: typing.List[typing.AnyStr] = None,
-            insights: typing.List[typing.Dict] = None,
-            structures: typing.List[typing.Dict] = None,
-    ) -> typing.List[typing.Dict]:
+            level: str = None,
+            requested_fields: List[FieldsMetadata] = None,
+            structure_fields: List[str] = None,
+            insights: List[Dict] = None,
+            structures: List[Dict] = None,
+    ) -> List[Dict]:
         structure_id_key = cls.__ids_keymap[level]["structure"]
         insight_id_key = cls.__ids_keymap[level]["insight"]
         requested_fields_names = [field.name for field in requested_fields]
@@ -650,10 +617,10 @@ class GraphAPIInsightsHandler:
     @classmethod
     def map_to_requested_fields(
             cls,
-            level: typing.AnyStr = None,
-            requested_fields: typing.List[FieldsMetadata] = None,
-            response: typing.List[typing.Dict] = None,
-    ) -> typing.List[typing.Dict]:
+            level: str = None,
+            requested_fields: List[FieldsMetadata] = None,
+            response: List[Dict] = None,
+    ) -> List[Dict]:
         sorted_fields = sorted([field.name for field in requested_fields])
 
         def f(entry):
@@ -666,7 +633,7 @@ class GraphAPIInsightsHandler:
                         if sorted_response.get(key) is not None and sorted_response.get(key) != 0:
                             value = sorted_response.pop(key)
                             if structure_key == FieldsMetadata.budget.name:
-                                value = value / 100
+                                value = int(value) / 100
                             answer = f"{value} {key.split(underscore)[0]}"
                             sorted_response[structure_key] = answer
                             found = True
@@ -684,11 +651,11 @@ class GraphAPIInsightsHandler:
     @classmethod
     def build_get_structure_config(
             cls,
-            permanent_token: typing.AnyStr = None,
-            level: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            filter_params: typing.List[typing.Dict] = None,
+            permanent_token: str = None,
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            filter_params: List[Dict] = None,
     ) -> GraphAPIClientBaseConfig:
         api_config = GraphAPIClientBaseConfig()
         api_config.try_partial_requests = True
@@ -707,12 +674,12 @@ class GraphAPIInsightsHandler:
     @classmethod
     def build_get_insights_config(
             cls,
-            permanent_token: typing.AnyStr = None,
-            ad_account_id: typing.AnyStr = None,
-            fields: typing.List[typing.AnyStr] = None,
-            params: typing.Dict = None,
+            permanent_token: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            params: Dict = None,
             add_totals: bool = False,
-            next_page_cursor: typing.AnyStr = None,
+            next_page_cursor: str = None,
             page_size: int = 200,
     ) -> GraphAPIClientBaseConfig:
         params["default_summary"] = add_totals

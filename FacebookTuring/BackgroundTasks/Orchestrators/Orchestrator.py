@@ -23,12 +23,15 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 
 logger = logging.getLogger(__name__)
 
+NUMBER_OF_WORKERS = (os.cpu_count() or 1) * 2
+
+
 class Orchestrator:
     def __init__(
-        self,
-        insights_repository: TuringMongoRepository = None,
-        structures_repository: TuringMongoRepository = None,
-        account_journal_repository: TuringAdAccountJournalRepository = None,
+            self,
+            insights_repository: TuringMongoRepository = None,
+            structures_repository: TuringMongoRepository = None,
+            account_journal_repository: TuringAdAccountJournalRepository = None,
     ):
 
         self.__insights_repository = insights_repository
@@ -72,7 +75,7 @@ class Orchestrator:
         # for each BO for each ad account, start a structures sync thread and an insights sync thread
         for business_owner_id, business_owner_details in business_owners.items():
             permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=NUMBER_OF_WORKERS) as executor:
                 for business_owner in business_owner_details:
                     executor.submit(
                         sync,
@@ -109,7 +112,7 @@ class Orchestrator:
         return business_owner_details
 
     def __publish_business_owner_synced_event(
-        self, business_owner_id: typing.AnyStr = None, sync_start_date: datetime = None
+            self, business_owner_id: typing.AnyStr = None, sync_start_date: datetime = None
     ) -> None:
         account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id, sync_start_date)
         business_owner_updated_details = UpdatedBusinessOwnersDetails(

@@ -68,7 +68,6 @@ class ViewAdTargetingAndCreative(ViewTargetingAndCreativeBase):
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.budget,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.stop_time,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cpm,
         ViewColumnsMaster.link_clicks,

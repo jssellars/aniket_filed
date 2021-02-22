@@ -4,12 +4,15 @@ from enum import Enum
 
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
+    LevelToFacebookIdKeyMapping,
+)
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     PixelCustomEventTypeToResult,
     AdSetOptimizationToResult,
     PixelCustomEventTypeToCostPerResult,
-    AdSetOptimizationToCostPerResult
+    AdSetOptimizationToCostPerResult,
 )
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
@@ -17,10 +20,10 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 class QueryBuilderFacebookRequestParser:
     class Level:
-        ACCOUNT = 'account'
-        CAMPAIGN = 'campaign'
-        ADSET = 'adset'
-        AD = 'ad'
+        ACCOUNT = "account"
+        CAMPAIGN = "campaign"
+        ADSET = "adset"
+        AD = "ad"
 
     class QueryBuilderColumnName(Enum):
         COLUMN = "Name"
@@ -35,12 +38,14 @@ class QueryBuilderFacebookRequestParser:
         DATE_STOP = "date_stop"
         TIME_INCREMENT = "time_increment"
 
-    __request_structure_columns = [FieldsMetadata.campaign_id.name,
-                                   FieldsMetadata.campaign_name.name,
-                                   FieldsMetadata.adset_id.name,
-                                   FieldsMetadata.adset_name.name,
-                                   FieldsMetadata.ad_id.name,
-                                   FieldsMetadata.ad_name.name]
+    __request_structure_columns = [
+        FieldsMetadata.campaign_id.name,
+        FieldsMetadata.campaign_name.name,
+        FieldsMetadata.adset_id.name,
+        FieldsMetadata.adset_name.name,
+        FieldsMetadata.ad_id.name,
+        FieldsMetadata.ad_name.name,
+    ]
 
     def __init__(self):
         super().__init__()
@@ -63,19 +68,23 @@ class QueryBuilderFacebookRequestParser:
         self.has_delivery = True
         self.start_row = 0
         self.end_row = 200
+        self.action_filtering = []
 
     @property
     def parameters(self):
         parameters = {
             "level": self.level,
             "breakdowns": self.breakdowns,
-            "action_breakdowns": self.action_breakdowns,
-            "action_attribution_windows": self.__action_attribution_windows,
             "time_increment": self.time_increment,
             "time_range": self.time_range,
             "filtering": self.filtering,
             "sort": self.__sort,
+            "limit": self.page_size,
+            "default_summary": True
         }
+
+        if self.next_page_cursor:
+            parameters["after"] = self.next_page_cursor
 
         return parameters
 
@@ -103,65 +112,89 @@ class QueryBuilderFacebookRequestParser:
 
     def __add_structure_meta_information(self):
         if self.level == self.Level.CAMPAIGN:
-            self.__structure_fields += [FieldsMetadata.account_name.name,
-                                        FieldsMetadata.account_id.name,
-                                        FieldsMetadata.name.name,
-                                        FieldsMetadata.id.name]
+            self.__structure_fields += [
+                FieldsMetadata.account_name.name,
+                FieldsMetadata.account_id.name,
+                FieldsMetadata.name.name,
+                FieldsMetadata.id.name,
+            ]
         elif self.level == self.Level.ADSET:
-            self.__structure_fields += [FieldsMetadata.account_name.name,
-                                        FieldsMetadata.account_id.name,
-                                        FieldsMetadata.campaign_id.name,
-                                        FieldsMetadata.campaign_name.name,
-                                        FieldsMetadata.name.name,
-                                        FieldsMetadata.id.name]
+            self.__structure_fields += [
+                FieldsMetadata.account_name.name,
+                FieldsMetadata.account_id.name,
+                FieldsMetadata.campaign_id.name,
+                FieldsMetadata.campaign_name.name,
+                FieldsMetadata.name.name,
+                FieldsMetadata.id.name,
+            ]
         elif self.level == self.Level.AD:
-            self.__structure_fields += [FieldsMetadata.account_name.name,
-                                        FieldsMetadata.account_id.name,
-                                        FieldsMetadata.campaign_id.name,
-                                        FieldsMetadata.campaign_name.name,
-                                        FieldsMetadata.adset_id.name,
-                                        FieldsMetadata.adset_name.name,
-                                        FieldsMetadata.name.name,
-                                        FieldsMetadata.id.name]
+            self.__structure_fields += [
+                FieldsMetadata.account_name.name,
+                FieldsMetadata.account_id.name,
+                FieldsMetadata.campaign_id.name,
+                FieldsMetadata.campaign_name.name,
+                FieldsMetadata.adset_id.name,
+                FieldsMetadata.adset_name.name,
+                FieldsMetadata.name.name,
+                FieldsMetadata.id.name,
+            ]
 
     def parse_query_columns_ag_grid(self, ag_query_columns=None, parse_breakdowns=True):
         if ag_query_columns is None:
             ag_query_columns = []
-        non_fields_types = [FieldType.BREAKDOWN,
-                            FieldType.TIME_BREAKDOWN,
-                            FieldType.ACTION_BREAKDOWN,
-                            FieldType.STRUCTURE]
+        non_fields_types = [
+            FieldType.BREAKDOWN,
+            FieldType.TIME_BREAKDOWN,
+            FieldType.ACTION_BREAKDOWN,
+            FieldType.STRUCTURE,
+        ]
 
-        request_columns = ag_query_columns[0].split(',')
+        request_columns = ag_query_columns[0].split(",")
 
         for entry in request_columns:
             mapped_entry = self.map(entry)
-            if mapped_entry:
-                self.__requested_columns.append(mapped_entry)
 
-            if mapped_entry and mapped_entry.field_type not in non_fields_types:
+            if not mapped_entry:
+                continue
+
+            self.__requested_columns.append(mapped_entry)
+
+            if mapped_entry.field_type == FieldType.ACTION_INSIGHT:
+                mapper = mapped_entry.mapper
+                for action_filter in mapper.filter:
+                    if action_filter.field_value:
+                        self.action_filtering.append(action_filter.field_value)
+
+            if mapped_entry.field_type not in non_fields_types:
                 self.__fields += mapped_entry.facebook_fields
 
-            elif mapped_entry and mapped_entry.field_type == FieldType.STRUCTURE:
+            elif mapped_entry.field_type == FieldType.STRUCTURE:
                 self.__structure_fields += mapped_entry.facebook_fields
 
-            elif mapped_entry and mapped_entry.field_type == FieldType.TIME_BREAKDOWN:
+            elif mapped_entry.field_type == FieldType.TIME_BREAKDOWN:
                 self.time_increment = mapped_entry.facebook_value
                 self.__fields += mapped_entry.facebook_fields
 
-            if mapped_entry and parse_breakdowns:
-                self.__breakdowns += mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
+            if parse_breakdowns:
+                self.__breakdowns += (
+                    mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
+                )
 
-                self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
+                self.__action_breakdowns += (
+                    mapped_entry.action_breakdowns
+                    if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN
+                    else []
+                )
 
         if FieldsMetadata.results.name in request_columns:
-            self.add_result_fields_to_request(
-                field_groups=[PixelCustomEventTypeToResult, AdSetOptimizationToResult]
-            )
+            self.add_result_fields_to_request(field_groups=[PixelCustomEventTypeToResult, AdSetOptimizationToResult])
 
         if FieldsMetadata.cost_per_result.name in request_columns:
             self.add_result_fields_to_request(
-                field_groups=[PixelCustomEventTypeToCostPerResult, AdSetOptimizationToCostPerResult]
+                field_groups=[
+                    PixelCustomEventTypeToCostPerResult,
+                    AdSetOptimizationToCostPerResult,
+                ]
             )
 
     def add_result_fields_to_request(self, field_groups):
@@ -172,10 +205,12 @@ class QueryBuilderFacebookRequestParser:
                         self.__fields += result.value.facebook_fields
 
     def parse_structure_columns(self, query_columns, parse_breakdowns=True, column_type=None):
-        non_fields_types = [FieldType.BREAKDOWN,
-                            FieldType.TIME_BREAKDOWN,
-                            FieldType.ACTION_BREAKDOWN,
-                            FieldType.STRUCTURE]
+        non_fields_types = [
+            FieldType.BREAKDOWN,
+            FieldType.TIME_BREAKDOWN,
+            FieldType.ACTION_BREAKDOWN,
+            FieldType.STRUCTURE,
+        ]
 
         for entry in query_columns:
             mapped_entry = self.map(getattr(entry, column_type.value))
@@ -193,21 +228,33 @@ class QueryBuilderFacebookRequestParser:
                 self.__fields += mapped_entry.facebook_fields
 
             if mapped_entry and parse_breakdowns:
-                self.__breakdowns += mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
+                self.__breakdowns += (
+                    mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
+                )
 
-                self.__action_breakdowns += mapped_entry.action_breakdowns if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN else []
+                self.__action_breakdowns += (
+                    mapped_entry.action_breakdowns
+                    if mapped_entry.action_breakdowns or mapped_entry.field_type == FieldType.ACTION_BREAKDOWN
+                    else []
+                )
 
         for query_column in query_columns:
             if FieldsMetadata.results.name == query_column.Name:
                 self.add_result_fields_to_request(
-                    field_groups=[PixelCustomEventTypeToResult, AdSetOptimizationToResult]
+                    field_groups=[
+                        PixelCustomEventTypeToResult,
+                        AdSetOptimizationToResult,
+                    ]
                 )
                 break
 
         for query_column in query_columns:
             if FieldsMetadata.cost_per_result.name == query_column.Name:
                 self.add_result_fields_to_request(
-                    field_groups=[PixelCustomEventTypeToCostPerResult, AdSetOptimizationToCostPerResult]
+                    field_groups=[
+                        PixelCustomEventTypeToCostPerResult,
+                        AdSetOptimizationToCostPerResult,
+                    ]
                 )
                 break
 
@@ -221,7 +268,9 @@ class QueryBuilderFacebookRequestParser:
                 self.time_range[self.TimeRangeEnum.UNTIL.value] = entry.Value
 
             elif mapped_condition and (
-                    mapped_condition.name == FieldsMetadata.account_id.name or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name):
+                    mapped_condition.name == FieldsMetadata.account_id.name
+                    or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name
+            ):
                 self.facebook_id = entry.Value
 
             elif entry.ColumnName == self.TimeIntervalEnum.TIME_INCREMENT.value:
@@ -232,16 +281,22 @@ class QueryBuilderFacebookRequestParser:
                 self.filtering.append(facebook_filter.as_dict())
 
     def sort_insights_by_time(self):
-        if self.parameters.get('time_increment'):
-            self.__sort = ['date_start']
+        if self.parameters.get("time_increment"):
+            self.__sort = ["date_start"]
 
     def parse(self, request, parse_breakdowns=True):
         self.level = request.set_structure_columns(self.__request_structure_columns).get_level()
 
-        self.parse_structure_columns(request.Columns, parse_breakdowns=parse_breakdowns,
-                                     column_type=self.QueryBuilderColumnName.COLUMN)
-        self.parse_structure_columns(request.Dimensions, parse_breakdowns=parse_breakdowns,
-                                     column_type=self.QueryBuilderColumnName.DIMENSION)
+        self.parse_structure_columns(
+            request.Columns,
+            parse_breakdowns=parse_breakdowns,
+            column_type=self.QueryBuilderColumnName.COLUMN,
+        )
+        self.parse_structure_columns(
+            request.Dimensions,
+            parse_breakdowns=parse_breakdowns,
+            column_type=self.QueryBuilderColumnName.DIMENSION,
+        )
         self.parse_query_conditions(request.Conditions)
         self.sort_insights_by_time()
 
@@ -279,47 +334,35 @@ class QueryBuilderFacebookRequestParser:
             return
 
         filter_objects = []
+
+        if self.action_filtering:
+            filter_objects.append(create_facebook_filter("action_type", AgGridFacebookOperator.IN, self.action_filtering))
+
         if not self.has_delivery and not filter_model:
-            filter_objects.append(
-                {
-                    "field": self.retrieve_filter_property_name(
-                        LevelToFacebookIdKeyMapping.get_enum_by_name(self.level.upper()).value
-                    ),
-                    "operator": AgGridFacebookOperator.IN.name,
-                    # This list will be populated later with structure ids
-                    "value": []
-                }
-            )
-            self.filtering = json.dumps(filter_objects)
             return
 
         for column_name, filter_val in filter_model.items():
             facebook_filter_name = self.retrieve_filter_property_name(column_name)
             if facebook_filter_name:
-                filter_operator = AgGridFacebookOperator.get_by_value(filter_val['type'])
-                filter_value = filter_val['filter']
-                filter_objects.append(
-                    {
-                        "field": facebook_filter_name,
-                        "operator": filter_operator,
-                        "value": filter_value
-                    }
-                )
+                filter_operator = AgGridFacebookOperator(filter_val["type"])
+                filter_value = filter_val["filter"]
+                filter_objects.append(create_facebook_filter(facebook_filter_name, filter_operator, filter_value))
+
         self.filtering = json.dumps(filter_objects)
 
     def parse_sort_condition(self, sort_model=None) -> None:
 
         if not sort_model:
-            self.__sort = ['date_start']
+            self.__sort = ["date_start"]
             return
 
         required_sort = sort_model[0]
-        column_name = required_sort['colId']
-        facebook_filter_name = self.retrieve_filter_property_name(column_name)
+        column_name = required_sort["colId"]
+        facebook_filter_name = self.retrieve_filter_property_name(column_name, is_filtered=False)
 
-        if required_sort['sort'] == "asc":
+        if required_sort["sort"] == "asc":
             self.__sort = facebook_filter_name + "_ascending"
-        elif required_sort['sort'] == "desc":
+        elif required_sort["sort"] == "desc":
             self.__sort = facebook_filter_name + "_descending"
 
     def remove_structure_fields(self):
@@ -329,18 +372,21 @@ class QueryBuilderFacebookRequestParser:
     def map(self, name: typing.AnyStr) -> Field:
         return getattr(FieldsMetadata, name, None)
 
-    def retrieve_filter_property_name(self, column_name):
-        if column_name in [FieldsMetadata.results.name, FieldsMetadata.cost_per_result.name]:
+    def retrieve_filter_property_name(self, column_name: str, is_filtered=True):
+        if column_name in [
+            FieldsMetadata.results.name,
+            FieldsMetadata.cost_per_result.name,
+        ]:
             return column_name
 
         # Facebook Graph API requires campaign.id instead of campaign_id
-        if column_name in [
+        if is_filtered and column_name in [
             FieldsMetadata.campaign_id.name,
             FieldsMetadata.campaign_name.name,
             FieldsMetadata.adset_id.name,
             FieldsMetadata.adset_name.name,
             FieldsMetadata.ad_id.name,
-            FieldsMetadata.ad_name.name
+            FieldsMetadata.ad_name.name,
         ]:
             return column_name.replace("_", ".")
 

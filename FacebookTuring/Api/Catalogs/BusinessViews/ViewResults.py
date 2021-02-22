@@ -58,7 +58,6 @@ class ViewAdResults(ViewCampaignResults):
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.cost_per_result,
         ViewColumnsMaster.amount_spent,
-        ViewColumnsMaster.stop_time,
         ViewColumnsMaster.adset_schedule,
         ViewColumnsMaster.video_plays_3s,
         ViewColumnsMaster.video_average_play_time,

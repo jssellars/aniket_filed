@@ -12,7 +12,7 @@ class QueryBuilderLogicalOperator(Enum):
     IN = 6
 
 
-class AgGridFacebookOperator(EnumerationBase):
+class AgGridFacebookOperator(Enum):
     CONTAIN = "contains"
     NOT_CONTAIN = "notContains"
     EQUAL = "equals"

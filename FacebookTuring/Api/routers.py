@@ -6,6 +6,8 @@ import flask_restful
 import humps
 from flask import request
 
+from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import AccountEnvNotAllowedException
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.Web.Security.Permissions import (
@@ -20,13 +22,9 @@ from Core.utils import snake_to_camelcase
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
 from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
-from FacebookTuring.Api.Commands.AdsManagerSaveDraftCommand import AdsManagerSaveDraftCommand
 from FacebookTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import (
     AdsManagerDeleteStructureCommandHandler
-)
-from FacebookTuring.Api.CommandsHandlers.AdsManagerDiscardDraftCommandHandler import (
-    AdsManagerDiscardDraftCommandHandler
 )
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDuplicateStructureCommandHandler import (
     AdsManagerDuplicateStructureCommandHandler,
@@ -36,7 +34,6 @@ from FacebookTuring.Api.CommandsHandlers.AdsManagerFilteredStructuresCommandHand
     AdsManagerFilteredStructuresCommandHandler
 )
 from FacebookTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import AdsManagerInsightsCommandHandler
-from FacebookTuring.Api.CommandsHandlers.AdsManagerSaveDraftCommandHandler import AdsManagerSaveDraftCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
     AdsManagerUpdateStructureCommandHandler
 )
@@ -59,13 +56,11 @@ from FacebookTuring.Api.Mappings.AdsManagerDuplicateStructureCommandMapping impo
 from FacebookTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import (
     AdsManagerFilteredStructuresCommandMapping
 )
-from FacebookTuring.Api.Mappings.AdsManagerSaveDraftCommandMapping import AdsManagerSaveDraftCommandMapping
 from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from FacebookTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
 from FacebookTuring.Api.Queries.campaign_trees_structure import CampaignTreesStructure
 from FacebookTuring.Api.startup import config, fixtures
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 logger = logging.getLogger(__name__)
 
@@ -289,6 +284,7 @@ class AdsManagerCampaignTreeStructure(Resource):
             return {"message": f"Could not retrieve tree for {facebook_id}"}, 400
 
 
+# TODO migrate Smart Edit to SDK calls
 class SmartEditCampaignTreesStructure(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def get(self, level, structure_ids):
@@ -384,9 +380,6 @@ class AdsManager(Resource):
                 business_owner_facebook_id=business_owner_facebook_id,
             )
 
-            if response is None:
-                return {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}, 400
-
             return response, 200
 
         except Exception as e:
@@ -400,8 +393,6 @@ class AdsManager(Resource):
         business_owner_facebook_id = extract_business_owner_facebook_id()
         try:
             response = AdsManagerDeleteStructureCommandHandler.handle(level, facebook_id, business_owner_facebook_id)
-            if response is None:
-                return {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}, 400
 
             if not response:
                 return {"message": f"Missing structure {facebook_id}."}, 400
@@ -412,41 +403,6 @@ class AdsManager(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Failed to delete structure {facebook_id}."}, 400
-
-
-class AdsManagerUpdateStructureDraft(Resource):
-    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
-    def put(self, level, facebook_id):
-        try:
-            raw_request = humps.decamelize(request.get_json(force=True))
-            mapping = AdsManagerSaveDraftCommandMapping(target=AdsManagerSaveDraftCommand)
-            command = mapping.load(raw_request)
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return {"message": "Failed to process request."}, 400
-
-        try:
-            AdsManagerSaveDraftCommandHandler.handle(command, level, facebook_id)
-
-            return None, 204
-
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return {"message": f"Failed to save draft for {facebook_id}."}, 400
-
-    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
-    def delete(self, level, facebook_id):
-        try:
-            AdsManagerDiscardDraftCommandHandler.handle(level, facebook_id)
-
-            return None, 204
-
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return {"message": f"Failed to delete draft for {facebook_id}."}, 400
 
 
 class AdsManagerDuplicateStructure(Resource):

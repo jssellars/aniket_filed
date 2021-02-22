@@ -50,6 +50,8 @@ class ViewFieldsMetricStructureMetadata:
         is_fixed=True,
         is_editable=True,
         pinned=PinnedDirection.LEFT,
+        is_sortable=True,
+        is_filterable=True,
     )
     adset_id = ViewColumn(
         Autoincrement.hex_string("adset_id"),
@@ -69,6 +71,8 @@ class ViewFieldsMetricStructureMetadata:
         is_fixed=True,
         is_editable=True,
         pinned=PinnedDirection.LEFT,
+        is_sortable=True,
+        is_filterable=True,
     )
     campaign_id = ViewColumn(
         Autoincrement.hex_string("campaign_id"),
@@ -88,6 +92,8 @@ class ViewFieldsMetricStructureMetadata:
         is_fixed=True,
         is_editable=True,
         pinned=PinnedDirection.LEFT,
+        is_sortable=True,
+        is_filterable=True,
     )
     objective = ViewColumn(
         Autoincrement.hex_string("objective"),
