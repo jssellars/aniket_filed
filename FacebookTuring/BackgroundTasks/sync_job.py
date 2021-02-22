@@ -10,13 +10,8 @@ from time import sleep
 
 import schedule
 
-from FacebookTuring.BackgroundTasks.startup import config, fixtures
+from FacebookTuring.BackgroundTasks.startup import config
 from FacebookTuring.BackgroundTasks.Orchestrators.Orchestrator import Orchestrator
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
-    TuringAdAccountJournalRepository,
-)
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
-
 
 import logging
 
@@ -24,25 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 def sync():
-    account_journal_repository = TuringAdAccountJournalRepository(
-        config=config.mongo,
-        database_name=config.mongo.accounts_journal_database_name,
-        collection_name=config.mongo.accounts_journal_collection_name,
-    )
-    insights_repository = TuringMongoRepository(
-        config=config.mongo, database_name=config.mongo.insights_database_name
-    )
-    structures_repository = TuringMongoRepository(
-        config=config.mongo, database_name=config.mongo.structures_database_name
-    )
+
     try:
-        (
-            Orchestrator()
-            .set_account_journal_repository(account_journal_repository)
-            .set_insights_repository(insights_repository)
-            .set_structures_repository(structures_repository)
-            .run()
-        )
+        Orchestrator().run()
     except Exception as e:
         logger.exception(f"Failed to sync data || {repr(e)}")
 

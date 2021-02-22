@@ -81,6 +81,7 @@ class Mongo(BaseModel):
     accounts_journal_collection_name: Optional[str]
     accounts_journal_database_name: Optional[str]
     accounts_journal_sync_reports_collection_name: Optional[str]
+    business_owner_pages_collection_name: Optional[str]
     google_accounts_database_name: Optional[str]
     google_insights_database_name: Optional[str]
     google_structures_database_name: Optional[str]

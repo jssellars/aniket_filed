@@ -45,20 +45,21 @@ LEVEL_TO_STRUCTURE_FIELDS = {
     ],
 }
 
+
 class InsightsSynchronizer:
     RATE_LIMIT_EXCEPTION_STATUS = 80000
     SLEEP_ON_RATE_LIMIT_EXCEPTION = 3600
 
     def __init__(
-        self,
-        business_owner_id: typing.AnyStr = None,
-        account_id: typing.AnyStr = None,
-        level: Level = None,
-        breakdown: Field = None,
-        action_breakdown: Field = None,
-        date_start: typing.AnyStr = None,
-        date_stop: typing.AnyStr = None,
-        requested_fields: typing.List = None,
+            self,
+            business_owner_id: typing.AnyStr = None,
+            account_id: typing.AnyStr = None,
+            level: Level = None,
+            breakdown: Field = None,
+            action_breakdown: Field = None,
+            date_start: typing.AnyStr = None,
+            date_stop: typing.AnyStr = None,
+            requested_fields: typing.List = None,
     ):
         self.business_owner_id = business_owner_id
         self.account_id = account_id

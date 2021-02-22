@@ -1,22 +1,21 @@
-import typing
 from itertools import chain
+from typing import Dict, List
 
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.business import Business
+from Core.mongo_adapter import MongoProjectionState
+from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from facebook_business.adobjects.adaccount import AdAccount
 from FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import GraphAPIBusinessDto
-from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import \
-    GraphAPIAdAccountBusinessMapping
+from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import (
+    GraphAPIAdAccountBusinessMapping,
+)
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 class GraphAPIAdAccountPagesHandler:
     @classmethod
-    def handle(
-        cls,
-        permanent_token: typing.AnyStr,
-        account_id: typing.AnyStr,
-        config
-    ) -> typing.List[typing.Dict]:
+    def handle(cls, permanent_token: str, account_id: str, config) -> List[Dict]:
 
         _ = GraphAPISdkBase(config.facebook, permanent_token)
 
@@ -28,24 +27,26 @@ class GraphAPIAdAccountPagesHandler:
 
         business = business_mapping.load(response)
 
-        return cls.get_all_pages(account_id=account_id, business_id=business.id)
+        return cls.get_all_pages(config=config, account_id=account_id, business_id=business.id)
 
     @classmethod
-    def get_all_pages(cls, account_id: typing.AnyStr, business_id: typing.AnyStr):
+    def get_all_pages(cls, config: Model, account_id: str, business_id: str):
 
         account = AdAccount(account_id)
-        business = Business(business_id)
+        business_owner_pages_repository = TuringMongoRepository(
+            config=config.mongo,
+            database_name=config.mongo.accounts_journal_database_name,
+            collection_name=config.mongo.business_owner_pages_collection_name,
+        )
 
-        # get owned pages
-        owned_pages = business.get_owned_pages()
-
-        # get client pages
-        client_pages = business.get_client_pages()
+        db_pages_result = business_owner_pages_repository.get(
+            query={FieldsMetadata.business_id.name: business_id}, projection={"_id": MongoProjectionState.OFF.value}
+        )
 
         # get promoted pages
         promote_pages = account.get_promote_pages()
 
-        all_pages = chain(owned_pages, client_pages, promote_pages)
+        all_pages = chain(db_pages_result, promote_pages)
 
         # Map and remove duplicates
         ids = set()

@@ -22,18 +22,9 @@ def turing_data_sync_handler(request_handler=None, message_body=None, config=Non
         database_name=config.mongo.accounts_journal_database_name,
         collection_name=config.mongo.accounts_journal_collection_name,
     )
-    insights_repository = TuringMongoRepository(config=config.mongo, database_name=config.mongo.insights_database_name)
-    structures_repository = TuringMongoRepository(
-        config=config.mongo, database_name=config.mongo.structures_database_name
-    )
 
     # Initialize orchestrator
-    orchestrator = (
-        Orchestrator()
-        .set_account_journal_repository(account_journal_repository)
-        .set_insights_repository(insights_repository)
-        .set_structures_repository(structures_repository)
-    )
+    orchestrator = Orchestrator()
 
     # handle message
     (
@@ -57,7 +48,6 @@ def campaign_created_handler(request_handler=None, message_body=None, config=Non
 
 
 def dexter_new_structure_created_handler(request_handler=None, message_body=None, config=None):
-
     structures_repository = TuringMongoRepository(
         config=config.mongo, database_name=config.mongo.structures_database_name
     )
