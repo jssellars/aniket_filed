@@ -1,7 +1,7 @@
 from itertools import chain
 from typing import Dict, List
 
-from Core.mongo_adapter import MongoProjectionState
+from Core.mongo_adapter import MongoProjectionState, MongoRepositoryBase
 from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
@@ -10,7 +10,6 @@ from FacebookAccounts.Infrastructure.GraphAPIDtos.GraphAPIBusinessDto import Gra
 from FacebookAccounts.Infrastructure.GraphAPIMappings.GraphAPIAdAccountBusinessMapping import (
     GraphAPIAdAccountBusinessMapping,
 )
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 class GraphAPIAdAccountPagesHandler:
@@ -33,7 +32,7 @@ class GraphAPIAdAccountPagesHandler:
     def get_all_pages(cls, config: Model, account_id: str, business_id: str):
 
         account = AdAccount(account_id)
-        business_owner_pages_repository = TuringMongoRepository(
+        business_owner_pages_repository = MongoRepositoryBase(
             config=config.mongo,
             database_name=config.mongo.accounts_journal_database_name,
             collection_name=config.mongo.business_owner_pages_collection_name,
