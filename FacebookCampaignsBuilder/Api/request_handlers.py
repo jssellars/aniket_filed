@@ -257,20 +257,22 @@ class SmartCreatePublish:
 
     @staticmethod
     def get_publish_feedback(user_filed_id: int):
-        feedback_docs = SmartCreatePublish.feedback_repository.get_all_by_key(
-            key_name="user_filed_id", key_value=user_filed_id
+        date_key = "start_date"
+        query = {"user_filed_id": {MongoOperator.EQUALS.value: user_filed_id}}
+        sort_query = [(date_key, -1)]
+
+        feedback_docs = SmartCreatePublish.feedback_repository.get_sorted(
+            query=query, sort_query=sort_query
         )
         if not feedback_docs:
             return
-
-        if len(feedback_docs) > 1:
-            raise Exception("Something went wrong, please retry!")
 
         feedback = feedback_docs[0]
         if feedback["publish_status"] != PublishStatus.IN_PROGRESS.value:
             SmartCreatePublish.feedback_repository.delete_many({"user_filed_id": user_filed_id})
 
-        feedback["start_date"] = feedback["start_date"].isoformat()
+        feedback[date_key] = feedback[date_key].isoformat()
+        feedback.pop("_id")
 
         return feedback
 
