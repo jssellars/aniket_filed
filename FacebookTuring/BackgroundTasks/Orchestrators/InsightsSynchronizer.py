@@ -75,17 +75,16 @@ class InsightsSynchronizer:
     def run(self, ad_report_run: AdReportRun) -> None:
         try:
 
-            response = GraphAPIInsightsHandler.process_async_report(
-                config,
+            self.__mongo_repository.collection = self.__get_mongo_repository_collection()
+
+            GraphAPIInsightsHandler.process_async_report(
                 ad_report_run,
                 f'act_{self.account_id}',
                 requested_fields=self.requested_fields,
+                mongo_repository=self.__mongo_repository,
                 level=self.level.value,
             )
 
-            response = mongo_adapter.filter_null_values_from_documents(response)
-            self.__mongo_repository.collection = self.__get_mongo_repository_collection()
-            self.__mongo_repository.add_many(response)
         except FacebookRequestError as fb_ex:
             if fb_ex.http_status() == self.RATE_LIMIT_EXCEPTION_STATUS:
                 sleep(self.SLEEP_ON_RATE_LIMIT_EXCEPTION)

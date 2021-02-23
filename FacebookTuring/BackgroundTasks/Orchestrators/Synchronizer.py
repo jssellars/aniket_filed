@@ -11,6 +11,7 @@ from facebook_business.adobjects.adreportrun import AdReportRun
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.mongo_adapter import MongoOperator
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSynchronizer import InsightsSynchronizer
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import (
     InsightsSynchronizerActionBreakdownEnum,
@@ -66,7 +67,7 @@ def sync(
     _delete_old_insights(insights_repository=insights_repository)
 
 
-def _sequantial_sync(business_owner_details: List, user_config_static: SynchronizerConfigStatic, permanent_token:str):
+def _sequantial_sync(business_owner_details: List, user_config_static: SynchronizerConfigStatic, permanent_token: str):
     for entry in business_owner_details:
         async_reports = _get_async_report_for_one_ad_account(entry, user_config_static, permanent_token)
         sync_one_ad_account_structures(entry, user_config_static, permanent_token)
@@ -344,3 +345,4 @@ def _delete_old_insights(insights_repository: TuringMongoRepository) -> None:
         insights_repository.collection = insights_collection
         date = (datetime.now() - timedelta(days=DAYS_UNTIL_OBSOLETE)).date().isoformat()
         insights_repository.delete_many_older_than_date(date)
+

@@ -9,6 +9,7 @@ from bson import BSON
 from pymongo.errors import AutoReconnect
 from retry import retry
 
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
 from Core.constants import DEFAULT_DATETIME_ISO
 from Core.mongo_adapter import MongoRepositoryBase, MongoProjectionState, MongoOperator
@@ -750,9 +751,8 @@ class TuringMongoRepository(MongoRepositoryBase):
         else:
             return getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
 
-    def add_updated_structures(self, level, account_id: str, structures: List[Dict]) -> None:
+    def add_updated_structures(self, level, structure_ids: List[str], structures: List[Dict]) -> None:
         self.collection = level.value
-        self.delete_many({FacebookMiscFields.account_id: account_id})
         self.add_many(structures)
 
     def add_structure(self, level: Level = None, key_value: typing.Any = None,

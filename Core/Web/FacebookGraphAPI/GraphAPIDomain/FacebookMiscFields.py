@@ -4,6 +4,7 @@ from enum import Enum
 class FacebookMiscFields:
     business_owner_id = "business_owner_id"
     business_owner_facebook_id = "business_owner_facebook_id"
+    business_facebook_id = "business_facebook_id"
     account_id = "account_id"
     status = "status"
     sync_status = "sync_status"

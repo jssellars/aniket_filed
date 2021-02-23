@@ -7,13 +7,14 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import chain
 from time import sleep
-from typing import Dict
+from typing import Dict, List
 
 from facebook_business.adobjects.business import Business
 from facebook_business.exceptions import FacebookRequestError
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.mongo_adapter import MongoOperator
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.startup import fixtures, config
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
@@ -48,7 +49,6 @@ class Orchestrator:
         self.__structures_repository = TuringMongoRepository(
             config=config.mongo, database_name=config.mongo.structures_database_name
         )
-
         self.__business_owner_pages_repository = TuringMongoRepository(
             config=config.mongo,
             database_name=config.mongo.accounts_journal_database_name,
@@ -78,12 +78,14 @@ class Orchestrator:
         # group ad accounts by business owner id
         business_owners = self.__group_by_business_owner_id(ad_accounts_details)
 
+        self.__delete_old_structures(business_owners)
+
         self.__sync_business_pages(business_owners)
 
         # for each BO for each ad account, start a structures sync thread and an insights sync thread
         for business_owner_id, business_owner_details in business_owners.items():
             permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=NUMBER_OF_WORKERS) as executor:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
                 for business_owner in business_owner_details:
                     executor.submit(
                         sync,
@@ -178,3 +180,25 @@ class Orchestrator:
             logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(business_owner_synced_event)})
         except Exception as e:
             logger.exception(f"{business_owner_synced_event.message_type} || {repr(e)}")
+
+    def __delete_old_structures(self, business_owners: Dict) -> None:
+
+        for business_owner_id, business_owner_details in business_owners.items():
+
+            ad_account_ids = [business_owner[FacebookMiscFields.account_id] for business_owner in business_owner_details]
+
+            query = {
+                MongoOperator.AND.value: [
+                    {
+                        FacebookMiscFields.business_owner_facebook_id: business_owner_id
+                    },
+                    {
+                        FacebookMiscFields.account_id: {MongoOperator.NOTIN.value: ad_account_ids}
+                    }
+                ]
+            }
+
+            structure_collections = self.__structures_repository.get_collections()
+            for structure_collection in structure_collections:
+                self.__structures_repository.collection = structure_collection
+                self.__structures_repository.delete_many(query_filter=query)
