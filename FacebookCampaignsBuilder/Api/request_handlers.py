@@ -267,8 +267,10 @@ class SmartCreatePublish:
             raise Exception("Something went wrong, please retry!")
 
         feedback = feedback_docs[0]
-        if feedback["status"] != PublishStatus.IN_PROGRESS.value:
+        if feedback["publish_status"] != PublishStatus.IN_PROGRESS.value:
             SmartCreatePublish.feedback_repository.delete_many({"user_filed_id": user_filed_id})
+
+        feedback["start_date"] = feedback["start_date"].isoformat()
 
         return feedback
 
