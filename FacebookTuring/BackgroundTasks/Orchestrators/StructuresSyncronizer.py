@@ -102,14 +102,15 @@ class StructuresSyncronizer:
         self.__mongo_repository.collection = level.value
         self.__mongo_repository.delete_many({FacebookMiscFields.account_id: account_id.replace("act_", "")})
 
-        structures_slice = structures[:len(structures)]
-        structures_slice = [structure.export_all_data() for structure in structures_slice]
-        self.map_and_insert_structures(level, structures_slice)
+        structures_slice = []
+        for structure in structures:
+            structures_slice.append(structure.export_all_data())
 
-        while structures.load_next_page():
-            structures_slice = structures[:len(structures)]
-            structures_slice = [structure.export_all_data() for structure in structures_slice]
-            self.map_and_insert_structures(level, structures_slice)
+            if len(structures_slice) == self.PAGE_SIZE:
+                self.map_and_insert_structures(level, structures_slice)
+                structures_slice = []
+
+        self.map_and_insert_structures(level, structures_slice)
 
         return
 

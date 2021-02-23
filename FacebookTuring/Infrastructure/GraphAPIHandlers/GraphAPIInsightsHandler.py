@@ -101,8 +101,21 @@ class GraphAPIInsightsHandler:
             ]
         )
 
-        insights_slice = insights[:len(insights)]
-        insights_slice = [insight.export_all_data() for insight in insights_slice]
+        insights_slice = []
+        for insight in insights:
+            insights_slice.append(insight.export_all_data())
+
+            if len(insights_slice) == PAGE_SIZE:
+                cls.insert_insights_into_db(
+                    results_requested,
+                    level,
+                    insights_slice,
+                    ad_account_id,
+                    requested_fields,
+                    mongo_repository,
+                )
+                insights_slice = []
+
         cls.insert_insights_into_db(
             results_requested,
             level,
@@ -111,18 +124,6 @@ class GraphAPIInsightsHandler:
             requested_fields,
             mongo_repository,
         )
-
-        while insights.load_next_page():
-            insights_slice = insights[: len(insights)]
-            insights_slice = [insight.export_all_data() for insight in insights_slice]
-            cls.insert_insights_into_db(
-                results_requested,
-                level,
-                insights_slice,
-                ad_account_id,
-                requested_fields,
-                mongo_repository,
-            )
 
         return
 
