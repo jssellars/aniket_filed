@@ -3,6 +3,7 @@ import typing
 from collections import ChainMap, namedtuple
 from typing import List
 
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.FieldMapperResult import FieldMapperResult
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
@@ -75,6 +76,7 @@ class GraphAPIInsightsMapper:
                     )
                 else:
                     mapped_fields.append(requested_fields[index].mapper.map(data, requested_fields[index]))
+
         return mapped_fields
 
     @classmethod

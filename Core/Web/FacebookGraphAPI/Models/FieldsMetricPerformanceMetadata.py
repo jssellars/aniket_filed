@@ -107,17 +107,3 @@ class FieldsMetricPerformanceMetadata:
                             field_type=FieldType.ACTION_INSIGHT,
                             is_dexter_custom_metric=True)
 
-    # Dexter only used fields
-    result_type = Field(
-        name="result_type",
-    )
-
-    landing_page_conversion_rate = Field(
-        name="landing_page_conversion_rate",
-        is_dexter_custom_metric=True
-    )
-
-    conversion_rate = Field(
-        name="conversion_rate",
-        is_dexter_custom_metric=True
-    )

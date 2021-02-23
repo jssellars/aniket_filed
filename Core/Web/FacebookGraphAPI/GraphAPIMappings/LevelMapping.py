@@ -1,12 +1,9 @@
-from enum import Enum
-
-from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
+
+from Core.Tools.Misc.EnumerationBase import EnumerationBase
 
 
 class Level(EnumerationBase):
@@ -55,19 +52,6 @@ class LevelToFacebookDeleteNamesKeyMapping(EnumerationBase):
     CAMPAIGN = []
     ADSET = ["campaign_name"]
     AD = ["campaign_name", "adset_name"]
-
-
-class LevelToIdentificationFields(Enum):
-    ACCOUNT = [FieldsMetadata.id.name, FieldsMetadata.name.name, FieldsMetadata.status.name]
-    CAMPAIGN = [FieldsMetadata.id.name, FieldsMetadata.name.name, FieldsMetadata.status.name]
-    ADSET = [FieldsMetadata.id.name, FieldsMetadata.name.name, FieldsMetadata.campaign_id.name, FieldsMetadata.status.name]
-    AD = [
-        FieldsMetadata.id.name,
-        FieldsMetadata.name.name,
-        FieldsMetadata.campaign_id.name,
-        FieldsMetadata.adset_id.name,
-        FieldsMetadata.status.name
-    ]
 
 
 class LevelToGraphAPIStructure:

@@ -2,6 +2,7 @@ import json
 import typing
 from enum import Enum
 
+from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderDimension
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
@@ -80,7 +81,7 @@ class QueryBuilderFacebookRequestParser:
             "filtering": self.filtering,
             "sort": self.__sort,
             "limit": self.page_size,
-            "default_summary": True
+            "default_summary": True,
         }
 
         if self.next_page_cursor:
@@ -214,20 +215,29 @@ class QueryBuilderFacebookRequestParser:
 
         for entry in query_columns:
             mapped_entry = self.map(getattr(entry, column_type.value))
-            if mapped_entry:
-                self.__requested_columns.append(mapped_entry)
+            if not mapped_entry:
+                continue
 
-            if mapped_entry and mapped_entry.field_type not in non_fields_types:
+            if mapped_entry.field_type == FieldType.CUSTOM_INSIGHTS_METRIC:
+                self.parse_structure_columns(
+                    [QueryBuilderDimension(Name=field.name) for field in mapped_entry.composing_fields],
+                    parse_breakdowns,
+                    column_type,
+                )
+
+            self.__requested_columns.append(mapped_entry)
+
+            if mapped_entry.field_type not in non_fields_types:
                 self.__fields += mapped_entry.facebook_fields
 
-            elif mapped_entry and mapped_entry.field_type == FieldType.STRUCTURE:
+            elif mapped_entry.field_type == FieldType.STRUCTURE:
                 self.__structure_fields += mapped_entry.facebook_fields
 
-            elif mapped_entry and mapped_entry.field_type == FieldType.TIME_BREAKDOWN:
+            elif mapped_entry.field_type == FieldType.TIME_BREAKDOWN:
                 self.time_increment = mapped_entry.facebook_value
                 self.__fields += mapped_entry.facebook_fields
 
-            if mapped_entry and parse_breakdowns:
+            if parse_breakdowns:
                 self.__breakdowns += (
                     mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
                 )
@@ -268,8 +278,8 @@ class QueryBuilderFacebookRequestParser:
                 self.time_range[self.TimeRangeEnum.UNTIL.value] = entry.Value
 
             elif mapped_condition and (
-                    mapped_condition.name == FieldsMetadata.account_id.name
-                    or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name
+                mapped_condition.name == FieldsMetadata.account_id.name
+                or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name
             ):
                 self.facebook_id = entry.Value
 
@@ -336,7 +346,9 @@ class QueryBuilderFacebookRequestParser:
         filter_objects = []
 
         if self.action_filtering:
-            filter_objects.append(create_facebook_filter("action_type", AgGridFacebookOperator.IN, self.action_filtering))
+            filter_objects.append(
+                create_facebook_filter("action_type", AgGridFacebookOperator.IN, self.action_filtering)
+            )
 
         if not self.has_delivery and not filter_model:
             return

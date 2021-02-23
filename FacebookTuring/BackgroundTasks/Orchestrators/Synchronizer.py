@@ -11,7 +11,6 @@ from facebook_business.adobjects.adreportrun import AdReportRun
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
-from Core.mongo_adapter import MongoOperator
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSynchronizer import InsightsSynchronizer
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import (
     InsightsSynchronizerActionBreakdownEnum,
@@ -71,7 +70,7 @@ def _sequantial_sync(business_owner_details: List, user_config_static: Synchroni
     for entry in business_owner_details:
         async_reports = _get_async_report_for_one_ad_account(entry, user_config_static, permanent_token)
         sync_one_ad_account_structures(entry, user_config_static, permanent_token)
-        _process_all_accounts_async_reports(user_config_static, async_reports)
+        _process_all_accounts_async_reports(user_config_static, async_reports, permanent_token)
 
 
 def sync_one_ad_account_structures(entry, user_config_static: SynchronizerConfigStatic, permanent_token: str):
@@ -193,8 +192,9 @@ def _sync_structures_for_all_accounts(business_owner_details: List, user_config_
         sync_one_ad_account_structures(entry, user_config_static, permanent_token)
 
 
-def _process_all_accounts_async_reports(user_config_static: SynchronizerConfigStatic, async_reports: List):
+def _process_all_accounts_async_reports(user_config_static: SynchronizerConfigStatic, async_reports: List, permanent_token: str):
     while async_reports:
+        GraphAPISdkBase(config.facebook, permanent_token)
         for async_data in async_reports:
             async_report, synchronizer = async_data
             async_report.api_get()

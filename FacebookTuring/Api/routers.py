@@ -6,7 +6,6 @@ import flask_restful
 import humps
 from flask import request
 
-from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import AccountEnvNotAllowedException
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id

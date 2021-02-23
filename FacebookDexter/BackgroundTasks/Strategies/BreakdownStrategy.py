@@ -18,11 +18,11 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGro
     get_group_data_from_list,
     get_max_number_of_days)
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
-    CUSTOM_DEXTER_METRICS,
     CauseMetricBase,
     TrendEnum,
     recommendation_enums_union,
 )
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     get_apply_action,

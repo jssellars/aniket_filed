@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
@@ -16,34 +16,6 @@ class TrendEnum(Enum):
     INCREASING = auto()
     DECREASING = auto()
 
-
-@dataclass
-class CostPerMetric:
-    numerator: FacebookField
-    denominator: FacebookField
-    multiplier: int = 1
-
-    def calculate_cost(self, data: Dict) -> Optional[float]:
-        try:
-            if self.numerator.name in data and self.denominator.name in data:
-                return data[self.numerator.name] * self.multiplier / data[self.denominator.name]
-        except Exception as e:
-            # Can consider logging but too many divisions by zero occur
-            return
-
-
-# Custom dexter computed metrics
-CUSTOM_DEXTER_METRICS = {
-    FieldsMetadata.cost_per_result.name: CostPerMetric(
-        numerator=FieldsMetadata.amount_spent, denominator=FieldsMetadata.results
-    ),
-    FieldsMetadata.landing_page_conversion_rate.name: CostPerMetric(
-        numerator=FieldsMetadata.conversions, denominator=FieldsMetadata.unique_clicks_all, multiplier=100
-    ),
-    FieldsMetadata.conversion_rate.name: CostPerMetric(
-        numerator=FieldsMetadata.purchases_total, denominator=FieldsMetadata.clicks_all, multiplier=100
-    ),
-}
 
 recommendation_enums_union = Union[
     OverTimeTrendTemplate, BreakdownRecommendationTemplate, AudienceRecommendationTemplate

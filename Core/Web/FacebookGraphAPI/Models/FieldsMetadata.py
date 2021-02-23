@@ -3,6 +3,7 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import Grap
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldMapper import ActionFieldMapper
+from Core.Web.FacebookGraphAPI.Models.DexterCustomFields import DexterCustomFields
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.Field import FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsBreakdownMetadata import FieldsBreakdownMetadata
@@ -23,7 +24,8 @@ class FieldsMetadata(FieldsStructureMetadata,
                      FieldsMetricPerformanceMetadata,
                      FieldsMetricEngagementMetadata,
                      FieldsMetricStandardEventsMetadata,
-                     FieldsMetricCustomConversionsMetadata):
+                     FieldsMetricCustomConversionsMetadata,
+                     DexterCustomFields):
     website_purchase_roas = Field(name="website_purchase_roas",
                                   facebook_fields=[GraphAPIInsightsFields.website_purchase_roas],
                                   mapper=ActionFieldMapper(

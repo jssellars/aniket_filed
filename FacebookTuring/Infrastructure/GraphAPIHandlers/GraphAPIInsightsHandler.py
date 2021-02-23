@@ -542,7 +542,12 @@ class GraphAPIInsightsHandler:
         # iterate like this to avoid swapping page on the iterator
         structures_response = []
         for i in range(0, len(structures)):
-            structures_response.append(structures[i])
+            current_structure = structures[i].export_all_data()
+            for field in facebook_structure_fields:
+                if field not in current_structure:
+                    current_structure[field] = None
+
+            structures_response.append(current_structure)
 
         structure_ids = [x["id"] for x in structures_response if "id" in x]
         next_page_cursor = get_next_page_cursor(structures)
@@ -595,6 +600,10 @@ class GraphAPIInsightsHandler:
             thread=report_insights_thread,
             level=level,
         )
+
+        if not insights_response:
+            return []
+
         return insights_response[report_insights_thread][0]
 
     @classmethod

@@ -22,11 +22,11 @@ from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import Over
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownData, BreakdownGroupedData
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
-    CUSTOM_DEXTER_METRICS,
     CauseMetricBase,
     MetricClause,
     StrategyTimeBucket,
 )
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from FacebookDexter.BackgroundTasks.startup import config
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesRules import (
     AGE_GENDER_BREAKDOWN_BUCKET,
