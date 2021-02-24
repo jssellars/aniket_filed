@@ -195,7 +195,7 @@ def get_data_after_end_date(
     for metric_day in metrics_data:
         metric_end_date = datetime.strptime(metric_day[FieldsMetricStructureMetadata.date_stop.name], DEFAULT_DATETIME)
         if metric.is_dexter_custom_metric:
-            metric_day.update({metric.name: CUSTOM_DEXTER_METRICS[metric.name].calculate_cost(metric_day)})
+            metric_day.update({metric.name: CUSTOM_DEXTER_METRICS[metric.name].calculate_metric(metric_day)})
 
         if metric_end_date >= end_date and metric_day.get(metric.name, None) is not None:
             result.append(metric_day)

@@ -101,9 +101,6 @@ class Orchestrator:
             # finished for each ad account.
             self.__account_journal_repository.update_last_sync_time_by_business_owner_id(business_owner_id)
 
-            # publish message to Dexter Background tasks to start processing the data for the current business owner
-            self.__publish_business_owner_synced_event(business_owner_id, start_sync_date)
-
         # compile and send sync status report
         if ad_accounts_details:
             self.__reporter = SyncStatusReporter(
@@ -163,23 +160,6 @@ class Orchestrator:
         for entry in ad_accounts_details:
             business_owner_details[entry[FacebookMiscFields.business_owner_id]].append(copy.deepcopy(entry))
         return business_owner_details
-
-    def __publish_business_owner_synced_event(
-            self, business_owner_id: typing.AnyStr = None, sync_start_date: datetime = None
-    ) -> None:
-        account_ids = self.__account_journal_repository.get_last_updated_accounts(business_owner_id, sync_start_date)
-        business_owner_updated_details = UpdatedBusinessOwnersDetails(
-            business_owner_facebook_id=business_owner_id, ad_account_ids=account_ids
-        )
-        business_owner_synced_event = FacebookTuringDataSyncCompletedEvent(
-            business_owners=[business_owner_updated_details]
-        )
-        try:
-            rabbitmq_adapter = fixtures.rabbitmq_adapter
-            rabbitmq_adapter.publish(business_owner_synced_event)
-            logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(business_owner_synced_event)})
-        except Exception as e:
-            logger.exception(f"{business_owner_synced_event.message_type} || {repr(e)}")
 
     def __delete_old_structures(self, business_owners: Dict) -> None:
 

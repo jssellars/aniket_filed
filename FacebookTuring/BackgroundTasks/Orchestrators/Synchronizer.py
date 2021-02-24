@@ -21,9 +21,10 @@ from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerFields impo
 )
 from FacebookTuring.BackgroundTasks.Orchestrators.StructuresSyncronizer import StructuresSyncronizer
 from FacebookTuring.BackgroundTasks.SynchronizerConfig import SynchronizerConfigRuntime, SynchronizerConfigStatic
-from FacebookTuring.BackgroundTasks.startup import config
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
+from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import UpdatedBusinessOwnersDetails, FacebookTuringDataSyncCompletedEvent
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
     TuringAdAccountJournalRepository,
@@ -71,6 +72,7 @@ def _sequantial_sync(business_owner_details: List, user_config_static: Synchroni
         async_reports = _get_async_report_for_one_ad_account(entry, user_config_static, permanent_token)
         sync_one_ad_account_structures(entry, user_config_static, permanent_token)
         _process_all_accounts_async_reports(user_config_static, async_reports, permanent_token)
+        _publish_business_owner_synced_event(entry[FacebookMiscFields.business_owner_id], entry[FacebookMiscFields.account_id])
 
 
 def sync_one_ad_account_structures(entry, user_config_static: SynchronizerConfigStatic, permanent_token: str):
@@ -262,7 +264,7 @@ def _sync_structures(
 
 
 def mark_structures_as_completed(
-        account_id: typing.AnyStr = None, structures_repository: TuringMongoRepository = None
+        account_id: str = None, structures_repository: TuringMongoRepository = None
 ) -> typing.NoReturn:
     campaigns = structures_repository.get_campaigns_by_ad_account(account_id)
     campaign_ids = [campaign[LevelToFacebookIdKeyMapping.CAMPAIGN.value] for campaign in campaigns]
@@ -287,8 +289,8 @@ def mark_structures_as_completed(
 def update_status_for_completed_structures(
         structures_repository: TuringMongoRepository = None,
         completed_structures: typing.List = None,
-        structure_key: typing.AnyStr = None,
-        level: typing.AnyStr = None,
+        structure_key: str = None,
+        level: str = None,
 ):
     completed_structure_ids = [
         structure[structure_key]
@@ -346,3 +348,19 @@ def _delete_old_insights(insights_repository: TuringMongoRepository) -> None:
         date = (datetime.now() - timedelta(days=DAYS_UNTIL_OBSOLETE)).date().isoformat()
         insights_repository.delete_many_older_than_date(date)
 
+
+def _publish_business_owner_synced_event(
+    business_owner_id: str, ad_account_id: str
+) -> None:
+    business_owner_updated_details = UpdatedBusinessOwnersDetails(
+        business_owner_facebook_id=business_owner_id, ad_account_ids=[ad_account_id]
+    )
+    business_owner_synced_event = FacebookTuringDataSyncCompletedEvent(
+        business_owners=[business_owner_updated_details]
+    )
+    try:
+        rabbitmq_adapter = fixtures.rabbitmq_adapter
+        rabbitmq_adapter.publish(business_owner_synced_event)
+        logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(business_owner_synced_event)})
+    except Exception as e:
+        logger.exception(f"{business_owner_synced_event.message_type} || {repr(e)}")

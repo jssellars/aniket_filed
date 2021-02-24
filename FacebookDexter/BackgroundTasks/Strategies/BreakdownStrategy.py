@@ -297,7 +297,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         if metric_data is not None:
             return
 
-        total_breakpoint = BreakdownData(TOTAL_KEY, [], custom_metric.calculate_cost(data))
+        total_breakpoint = BreakdownData(TOTAL_KEY, [], custom_metric.calculate_metric(data))
         metric_data = BreakdownGroupedData(no_of_days, metric.name, [total_breakpoint])
         grouped_data.append(metric_data)
 
@@ -315,4 +315,4 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             data[numerator_name] = sum(numerator_breakpoint_data)
             data[denominator_name] = sum(denominator_breakpoint_data)
 
-            metric_data.breakdown_data.append(BreakdownData(breakdown, [], custom_metric.calculate_cost(data)))
+            metric_data.breakdown_data.append(BreakdownData(breakdown, [], custom_metric.calculate_metric(data)))

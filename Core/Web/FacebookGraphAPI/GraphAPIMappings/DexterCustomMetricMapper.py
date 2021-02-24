@@ -18,16 +18,19 @@ class DexterCustomMetricMapper(ActionFieldMapperBase):
 
         mapped_data = [dict(ChainMap(*entry)) for entry in itertools.product(*result)][0]
 
-        return [FieldMapperResult().set_field(field.name, CUSTOM_DEXTER_METRICS[field.name].calculate_cost(mapped_data))]
+        custom_metric = CUSTOM_DEXTER_METRICS[field.name].calculate_metric(mapped_data)
+        custom_metric = round(custom_metric, 2) if custom_metric else None
+
+        return [FieldMapperResult().set_field(field.name, custom_metric)]
 
 
 @dataclass
-class CostPerMetric:
+class DexterCustomMetric:
     numerator: str
     denominator: str
     multiplier: int = 1
 
-    def calculate_cost(self, data: Dict) -> Optional[float]:
+    def calculate_metric(self, data: Dict) -> Optional[float]:
         try:
             if self.numerator in data and self.denominator in data:
                 return data[self.numerator] * self.multiplier / data[self.denominator]
@@ -37,13 +40,13 @@ class CostPerMetric:
 
 
 CUSTOM_DEXTER_METRICS = {
-    "cost_per_result": CostPerMetric(
+    "cost_per_result": DexterCustomMetric(
         numerator="amount_spent", denominator="results"
     ),
-    "landing_page_conversion_rate": CostPerMetric(
+    "landing_page_conversion_rate": DexterCustomMetric(
         numerator="conversions", denominator="unique_clicks_all", multiplier=100
     ),
-    "conversion_rate": CostPerMetric(
+    "conversion_rate": DexterCustomMetric(
         numerator="purchases_total", denominator="clicks_all", multiplier=100
     ),
 }
