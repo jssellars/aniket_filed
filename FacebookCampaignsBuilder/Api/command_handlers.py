@@ -2,10 +2,9 @@ import logging
 from dataclasses import asdict
 from typing import Any, Dict, Optional
 
-from werkzeug.datastructures import FileStorage
-
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
+from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     Level, LevelToGraphAPIStructure)
@@ -16,17 +15,13 @@ from facebook_business.adobjects.adset import AdSet
 from FacebookCampaignsBuilder.Api import commands
 from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish
 from FacebookCampaignsBuilder.Api.startup import config
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIAdPreviewBuilderHandler import \
-    FiledAdFormatEnum
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import (
     ad_builder, adset_builder)
 from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
     FlexibleTargeting, Location, Targeting)
+from werkzeug.datastructures import FileStorage
 
 logger = logging.getLogger(__name__)
-
-
-# TODO: Add the rest of location options into keys
 
 
 class AdPreview:
@@ -73,10 +68,10 @@ class AdPreview:
 class AudienceSize:
     @classmethod
     def handle(
-            cls,
-            permanent_token: str = None,
-            account_id: str = None,
-            audience_details: Dict = None,
+        cls,
+        permanent_token: str = None,
+        account_id: str = None,
+        audience_details: Dict = None,
     ):
         _ = GraphAPISdkBase(config.facebook, permanent_token)
 
@@ -97,10 +92,10 @@ class AudienceSize:
 class AddStructuresToParent:
     @staticmethod
     def publish_structures_to_parent(
-            level: str,
-            request: Dict = None,
-            permanent_token: str = None,
-            facebook_config: Any = None,
+        level: str,
+        request: Dict = None,
+        permanent_token: str = None,
+        facebook_config: Any = None,
     ):
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=facebook_config)
 
@@ -228,8 +223,7 @@ class AddStructuresToParent:
             languages = [language["key"] for language in languages]
 
         included_interests, excluded_interests, narrow_interests = adset_builder.extract_interests(targeting_request)
-        included_custom_audiences, excluded_custom_audiences = adset_builder.extract_custom_audiences(
-            targeting_request)
+        included_custom_audiences, excluded_custom_audiences = adset_builder.extract_custom_audiences(targeting_request)
 
         (
             facebook_positions,

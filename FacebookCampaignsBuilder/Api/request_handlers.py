@@ -31,6 +31,7 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
 
 logger = logging.getLogger(__name__)
+# TODO: Add the rest of location options into keys
 LOCATION_OPTIONS = dict(city="cities", country="countries", geo_market="geo_markets", region="regions", zip="zips")
 
 
