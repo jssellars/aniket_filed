@@ -44,4 +44,3 @@ class TestAdAccountPages:
             name = response.get("name", None)
             assert len(name) > 0
             assert isinstance(name, str)
-

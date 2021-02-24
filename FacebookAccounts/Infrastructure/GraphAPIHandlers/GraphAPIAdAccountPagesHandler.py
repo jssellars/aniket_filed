@@ -1,6 +1,7 @@
 from itertools import chain
 from typing import Dict, List
 
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.mongo_adapter import MongoProjectionState, MongoRepositoryBase
 from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -39,7 +40,12 @@ class GraphAPIAdAccountPagesHandler:
         )
 
         db_pages_result = business_owner_pages_repository.get(
-            query={FieldsMetadata.business_id.name: business_id}, projection={"_id": MongoProjectionState.OFF.value}
+            query={FieldsMetadata.business_id.name: business_id},
+            projection={
+                "_id": MongoProjectionState.OFF.value,
+                FacebookMiscFields.id: MongoProjectionState.ON.value,
+                FacebookMiscFields.name: MongoProjectionState.ON.value,
+            },
         )
 
         # get promoted pages
