@@ -208,8 +208,8 @@ def add_metrics_to_set(required_fields: Set, metric: Union[MetricClause, CauseMe
     if not metric.metric_field.is_dexter_custom_metric:
         return
 
-    required_fields.add(CUSTOM_DEXTER_METRICS[metric.metric_field.name].denominator.name)
-    required_fields.add(CUSTOM_DEXTER_METRICS[metric.metric_field.name].numerator.name)
+    required_fields.add(CUSTOM_DEXTER_METRICS[metric.metric_field.name].denominator)
+    required_fields.add(CUSTOM_DEXTER_METRICS[metric.metric_field.name].numerator)
 
 
 def get_metric_group_data(
@@ -225,8 +225,7 @@ def get_metric_group_data(
     if is_none_breakdown or not metric.metric_field.is_dexter_custom_metric:
         required_metrics = [metric.metric_field]
     else:
-        custom_metric = CUSTOM_DEXTER_METRICS[metric.metric_field.name]
-        required_metrics = [custom_metric.denominator, custom_metric.numerator]
+        required_metrics = metric.metric_field.composing_fields
 
     for metric in required_metrics:
         add_missing_metric_to_group(time_bucket, metric, metrics_data, breakdown, all_grouped_data, end_date)

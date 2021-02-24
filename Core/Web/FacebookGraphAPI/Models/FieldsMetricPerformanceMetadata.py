@@ -3,7 +3,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import Grap
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldCondition import ActionFieldCondition, \
     ActionFieldConditionOperatorEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ActionFieldMapper import ActionFieldMapper
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.CostPerActionFieldMapper import CostPerActionFieldMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.OneToOneFieldMapper import OneToOneFieldMapper
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldAggregationTypeEnum import FieldAggregationTypeEnum
@@ -95,15 +94,3 @@ class FieldsMetricPerformanceMetadata:
                                                            field_value_map=None)]),
                     action_breakdowns=[GraphAPIInsightsFields.action_type],
                     field_type=FieldType.ACTION_INSIGHT)
-    cost_per_result = Field(name="cost_per_result",
-                            facebook_fields=[GraphAPIInsightsFields.actions,
-                                             GraphAPIInsightsFields.objective,
-                                             GraphAPIInsightsFields.spend],
-                            mapper=CostPerActionFieldMapper(
-                                field_filter=[ActionFieldCondition(field_name=GraphAPIInsightsFields.action_type,
-                                                                   operator=ActionFieldConditionOperatorEnum.LIKE,
-                                                                   field_value_map=None)]),
-                            action_breakdowns=[GraphAPIInsightsFields.action_type],
-                            field_type=FieldType.ACTION_INSIGHT,
-                            is_dexter_custom_metric=True)
-

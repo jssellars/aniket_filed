@@ -278,8 +278,8 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         self, grouped_data: List[BreakdownGroupedData], metric: FieldsMetadata, no_of_days: int
     ):
         custom_metric = CUSTOM_DEXTER_METRICS[metric.name]
-        denominator_name = custom_metric.denominator.name
-        numerator_name = custom_metric.numerator.name
+        denominator_name = custom_metric.denominator
+        numerator_name = custom_metric.numerator
 
         denominator_data = get_group_data_from_list(grouped_data, denominator_name, no_of_days)
         numerator_data = get_group_data_from_list(grouped_data, numerator_name, no_of_days)
