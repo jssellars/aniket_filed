@@ -235,7 +235,13 @@ class GraphAPIInsightsHandler:
             if results_requested:
                 cls.add_results_to_response(level, response, ad_account_id)
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
+
+            if not summary and not insights_response:
+                summary = {field: None for field in requested_fields}
+
             summary_response = GraphAPIInsightsMapper().map(requested_fields, [summary]) if summary else []
+
+            cls._add_level_name_to_summary(summary_response, level)
 
             # Warning: These mappings might need to be reactivated after extensive testing
             # It looks like it messes up the order of the items in the response
@@ -511,9 +517,6 @@ class GraphAPIInsightsHandler:
             requested_structure_fields,
         )
 
-        if summary and f"{level}_name" in summary[0]:
-            summary[0][f"{level}_name"] = FacebookLevelPlural[level.upper()].value.capitalize()
-
         return insight_response, structures_response, next_page_cursor, summary
 
     @classmethod
@@ -575,7 +578,7 @@ class GraphAPIInsightsHandler:
             fields=fields,
             parameters=parameters,
             requested_fields=requested_fields,
-            level=Level.CAMPAIGN.value,
+            level=level,
         )
 
         return insight_response, structures_response, next_page_cursor, summary
@@ -761,3 +764,8 @@ class GraphAPIInsightsHandler:
         api_config.page_size = page_size
 
         return api_config
+
+    @classmethod
+    def _add_level_name_to_summary(self, summary: List[Dict], level: str):
+        if summary and f"{level}_name" in summary[0]:
+            summary[0][f"{level}_name"] = FacebookLevelPlural[level.upper()].value.capitalize()
