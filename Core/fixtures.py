@@ -84,7 +84,7 @@ class Fixtures:
     @property
     def business_owner_repository(self):
         if self._business_owner_repository is None:
-            self._business_owner_repository = BusinessOwnerRepository(self.sql_db_session)
+            self._business_owner_repository = BusinessOwnerRepository(self.config.facebook, self.sql_db_session)
 
         return self._business_owner_repository
 

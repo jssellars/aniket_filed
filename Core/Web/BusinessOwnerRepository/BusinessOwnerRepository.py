@@ -1,12 +1,17 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional, List
+
+from facebook_business.adobjects.user import User
+from facebook_business.exceptions import FacebookRequestError
 
 from Core.Web.BusinessOwnerRepository.Models.BusinessOwnerModel import BusinessOwnerModel
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 
 
 class BusinessOwnerRepository:
-    def __init__(self, session):
+    def __init__(self, facebook_config, session):
         self.__session = session()
+        self.__facebook_config = facebook_config
 
     def get_permanent_token(self, business_owner_facebook_id: str) -> Optional[str]:
         results = (
@@ -15,12 +20,10 @@ class BusinessOwnerRepository:
             .all()
         )
 
-        token = [result.Token for result in results]
+        tokens = [result.Token for result in results]
 
         self.__session.close()
-
-        if token:
-            return token[0]
+        return self.__get_valid_token(tokens)
 
     def get_permanent_token_by_page_id(self, business_owner_facebook_id: str, page_id: str) -> None:
         results = (
@@ -30,12 +33,11 @@ class BusinessOwnerRepository:
             .all()
         )
 
-        token = [result.Token for result in results]
+        tokens = [result.Token for result in results]
 
         self.__session.close()
 
-        if token:
-            return token[0]
+        return tokens[0] if tokens else None
 
     def modify_user_token(
         self,
@@ -119,9 +121,16 @@ class BusinessOwnerRepository:
             self.create_user_token(business_owner_facebook_id, name, email, token, page_id)
 
     def delete_permissions(self, business_owner_facebook_id: str) -> None:
-        try:
-            self.__session.query(BusinessOwnerModel).filter(
-                BusinessOwnerModel.FacebookId == business_owner_facebook_id
-            ).delete()
-        except Exception as e:
-            raise e
+        self.__session.query(BusinessOwnerModel).filter(
+            BusinessOwnerModel.FacebookId == business_owner_facebook_id
+        ).delete()
+
+    def __get_valid_token(self, tokens: List[str]) -> Optional[str]:
+        for token in tokens:
+            try:
+                GraphAPISdkBase(self.__facebook_config, token)
+                User("me").api_get()
+                return token
+            except FacebookRequestError:
+                self.__session.query(BusinessOwnerModel).filter(BusinessOwnerModel.Token == token).delete()
+                self.__session.commit()

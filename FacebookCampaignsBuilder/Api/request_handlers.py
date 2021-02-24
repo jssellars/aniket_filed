@@ -202,9 +202,10 @@ class SmartCreatePublish:
                         PublishStatus.IN_PROGRESS.value,
                     )
             except FacebookRequestError as e:
+                error_message = e.body().get("error", {}).get("error_user_msg") or e.get_message()
                 SmartCreatePublish.clean_and_publish_response(
                     campaign_tree=campaign_tree,
-                    error_message=e.get_message(),
+                    error_message=error_message,
                     feedback_data=feedback_data,
                     publish_response=publish_response,
                     template_id=request.template_id,
