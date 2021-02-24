@@ -103,11 +103,15 @@ class SmartCreatePublish:
         campaigns, ad_sets, ads = SmartCreatePublish.build_campaign_hierarchy(request)
         ad_account = AdAccount(fbid=request.ad_account_id)
 
+        is_campaign_using_cbo = (
+            "campaign_budget_optimization" in request.step_one_details
+            and request.step_one_details["campaign_budget_optimization"] is not None
+        )
         is_adset_using_cbo = (
             "budget_optimization" in request.step_two_details
             and request.step_two_details["budget_optimization"] is not None
         )
-        is_adset_budget_split_evenly = request.step_four_details.get("is_budget_split_evenly")
+        is_budget_split_evenly = request.step_four_details.get("is_budget_split_evenly")
         budget_allocation = request.step_four_details.get("budget_allocation", {})
         adset_budget_allocation = budget_allocation.get("ad_sets_budget") if budget_allocation else None
 
@@ -131,6 +135,10 @@ class SmartCreatePublish:
         for campaign_index, campaign in enumerate(campaigns):
             try:
                 # Publish campaign
+                campaign_budget_type = campaign_builder.get_budget_allocated_type(campaign.campaign_template)
+                if is_campaign_using_cbo and is_budget_split_evenly:
+                    campaign.campaign_template[campaign_budget_type] /= len(campaigns)
+
                 facebook_campaign = ad_account.create_campaign(params=campaign.campaign_template)
                 campaign_facebook_id = facebook_campaign.get_id()
                 campaign_name = campaign.campaign_template.get("name")
@@ -152,7 +160,7 @@ class SmartCreatePublish:
                         else AdSet.Field.daily_budget
                     )
                     if is_adset_using_cbo:
-                        if is_adset_budget_split_evenly:
+                        if is_budget_split_evenly:
                             ad_set[adset_budget_type] /= len(ad_sets)
                         elif adset_budget_allocation:
                             ad_set[adset_budget_type] = SmartCreatePublish.allocate_adset_budget(
