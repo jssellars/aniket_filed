@@ -82,7 +82,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
 
                 trend, variance = self.get_trend_and_variance(grouped_data, time_bucket.no_of_days, metric_name)
 
-                if not trend and not variance:
+                if not trend or not variance:
                     continue
 
                 reference_time = get_max_number_of_days(grouped_data, metric_name)
@@ -175,7 +175,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
 
                 trend, variance = self.get_trend_and_variance(grouped_data, no_of_days, metric_name)
 
-                if trend is None and variance is None:
+                if trend is None or variance is None:
                     return None, None, None
 
                 if trend == metric_clause.trend and variance >= metric_clause.variance_percentage:
