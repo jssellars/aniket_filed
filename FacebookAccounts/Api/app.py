@@ -23,6 +23,7 @@ router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
     (routers.Version, "version"),
     (routers.BusinessOwner, "business-owner"),
+    (routers.BusinessOwnerGrantedPermissions, "business-owner/granted-permissions"),
     (routers.BusinessOwnerDeletePermissions, "business-owner/<string:permissions>"),
     # TODO: Once V1 is fully implemented and deployed,
     #  this can be deleted along with the related controllers and handlers

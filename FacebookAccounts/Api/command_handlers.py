@@ -1,12 +1,14 @@
 import logging
-import typing
+from typing import Dict, List
 
 import requests
-from facebook_business.adobjects.user import User
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.HTTPRequestBase import HTTPRequestBase
 from Core.Web.Security.Authorization import add_bearer_token, generate_technical_token
+from facebook_business.adobjects.permission import Permission
+from facebook_business.adobjects.user import User
+from facebook_business.api import Cursor
 from FacebookAccounts.Api.dtos import BusinessOwnerCreatedDto
 from FacebookAccounts.Api.startup import config, fixtures
 from FacebookAccounts.Infrastructure.GraphAPIHandlers.GraphAPIAdAccountHandler import GraphAPIAdAccountHandler
@@ -129,8 +131,7 @@ class BusinessOwnerCreateCommandHandler:
 
 class BusinessOwnerDeletePermissionsCommandHandler:
     @classmethod
-    def handle(cls, business_owner_id: typing.AnyStr = None, permissions: typing.AnyStr = None) -> typing.Dict:
-
+    def handle(cls, business_owner_id: str, permissions: str) -> Dict:
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
         # initialize GraphAPI SDK
@@ -148,3 +149,22 @@ class BusinessOwnerDeletePermissionsCommandHandler:
                 response["failed"].append(permission)
 
         return response
+
+
+class BusinessOwnerGetGrantedPermissionsCommandHandler:
+    @classmethod
+    def handle(cls, business_owner_id: str) -> List[str]:
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+
+        # initialize GraphAPI SDK
+        _ = GraphAPISdkBase(config.facebook, permanent_token)
+        permissions_cursor = User(fbid=business_owner_id).get_permissions()
+        return cls.map_granted_permissions(permissions_cursor)
+
+    @classmethod
+    def map_granted_permissions(cls, permissions_cursor: Cursor) -> List[str]:
+        return [
+            permissions[Permission.Field.permission]
+            for permissions in permissions_cursor
+            if permissions[Permission.Field.status] == Permission.Status.granted
+        ]

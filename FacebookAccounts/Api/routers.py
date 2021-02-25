@@ -1,25 +1,26 @@
 import logging
-import typing
 
-import flask_restful
-import humps
 from flask import request
 
 import FacebookAccounts.Api.mappings
+import flask_restful
+import humps
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.Web.Security.Permissions import (
     AccountsPermissions,
     CampaignBuilderPermissions,
     MiscellaneousPermissions,
-    SettingsPermissions
+    SettingsPermissions,
 )
-from FacebookAccounts.Api.commands import BusinessOwnerCreateCommand, AdAccountInsightsCommand
-from FacebookAccounts.Api.command_handlers import BusinessOwnerCreateCommandHandler, \
-    BusinessOwnerDeletePermissionsCommandHandler
 from FacebookAccounts.Api import dtos
+from FacebookAccounts.Api.command_handlers import (
+    BusinessOwnerCreateCommandHandler,
+    BusinessOwnerDeletePermissionsCommandHandler,
+    BusinessOwnerGetGrantedPermissionsCommandHandler,
+)
+from FacebookAccounts.Api.commands import AdAccountInsightsCommand, BusinessOwnerCreateCommand
 from FacebookAccounts.Api.mappings import AdAccountInsightsCommandMapping
 from FacebookAccounts.Api.queries import AdAccountPageInstagramQuery, AdAccountPagesQuery
 from FacebookAccounts.Api.startup import config, fixtures
@@ -138,12 +139,28 @@ class BusinessOwner(Resource):
 
 class BusinessOwnerDeletePermissions(Resource):
     @fixtures.authorize_permission(permission=SettingsPermissions.SETTINGS_MANAGE_PERMISSIONS_EDIT)
-    def delete(self, permissions: typing.List[typing.AnyStr] = None):
+    def delete(self, permissions: str):
 
         try:
             business_owner_facebook_id = extract_business_owner_facebook_id()
 
             response = BusinessOwnerDeletePermissionsCommandHandler.handle(business_owner_facebook_id, permissions)
+            response = humps.camelize(response)
+
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": f"Failed to delete permissions. Error {repr(e)}"}, 400
+
+
+class BusinessOwnerGrantedPermissions(Resource):
+    @fixtures.authorize_permission(permission=SettingsPermissions.SETTINGS_MANAGE_PERMISSIONS_VIEW)
+    def get(self):
+        try:
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            response = BusinessOwnerGetGrantedPermissionsCommandHandler.handle(business_owner_facebook_id)
             response = humps.camelize(response)
 
             return response, 200
