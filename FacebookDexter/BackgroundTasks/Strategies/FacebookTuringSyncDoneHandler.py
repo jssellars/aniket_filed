@@ -66,10 +66,3 @@ class FacebookTuringSyncDoneHandler:
                     business_owner.business_owner_facebook_id,
                     business_owner.ad_account_ids,
                 )
-
-            response = send_email(self.recommendations_repository, account_ids)
-            if response.status_code != 200:
-                logger.error(
-                    "Failed to send Dexter recommendations emails.",
-                    extra=dict(business_owner=business_owner),
-                )
