@@ -160,8 +160,10 @@ class SmartCreatePublish:
                         else AdSet.Field.daily_budget
                     )
                     if is_adset_using_cbo:
+                        initial_budget = int(request.step_two_details["budget_optimization"]["amount"]) * 100
+                        total_adsets = len(campaigns) * len(ad_sets)
                         if is_budget_split_evenly:
-                            ad_set[adset_budget_type] /= len(ad_sets)
+                            ad_set[adset_budget_type] = round(initial_budget / total_adsets)
                         elif adset_budget_allocation:
                             ad_set[adset_budget_type] = SmartCreatePublish.allocate_adset_budget(
                                 ad_set,

@@ -223,15 +223,15 @@ def split_genders(is_split_by_gender_selected: bool, gender: int) -> List[Option
 
     gender = Gender(gender)
     if is_split_by_gender_selected and gender == Gender.ALL:
-        return [GenderGroup(genders=[FacebookGender.MALE]), GenderGroup(genders=[FacebookGender.FEMALE])]
+        return [GenderGroup(genders=[FacebookGender.MEN]), GenderGroup(genders=[FacebookGender.WOMEN])]
 
     else:
         if gender == Gender.WOMEN:
-            return [GenderGroup(genders=[FacebookGender.FEMALE])]
+            return [GenderGroup(genders=[FacebookGender.WOMEN])]
         elif gender == Gender.MEN:
-            return [GenderGroup(genders=[FacebookGender.MALE])]
+            return [GenderGroup(genders=[FacebookGender.MEN])]
 
-        return [GenderGroup(genders=[FacebookGender.MALE, FacebookGender.FEMALE])]
+        return [GenderGroup(genders=[FacebookGender.MEN, FacebookGender.WOMEN])]
 
 
 def extract_interests(targeting):

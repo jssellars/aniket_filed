@@ -187,7 +187,7 @@ class CampaignTreeBuilder:
                 genders = targeting[Targeting.Field.genders]
 
                 if len(genders) == 1:
-                    if genders[0] == FacebookGender.MALE.value:
+                    if genders[0] == FacebookGender.MEN.value:
                         adset.gender = Gender.MEN.value
                     else:
                         adset.gender = Gender.WOMEN.value
