@@ -4,8 +4,10 @@ import json
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple, Union
 
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adreportrun import AdReportRun
+
 from Core import mongo_adapter
-from Core.settings_models import Model
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
@@ -25,8 +27,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
 )
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.adreportrun import AdReportRun
 from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
@@ -619,6 +619,9 @@ class GraphAPIInsightsHandler:
         structures: List[Dict] = None,
     ) -> List[Dict]:
         requested_fields_names = [field.name for field in requested_fields]
+        if FieldsMetadata.result_type.name not in requested_fields_names:
+            requested_fields_names.append(FieldsMetadata.result_type.name)
+
         structure_id_key = cls.__ids_keymap[level]["structure"]
         insight_id_key = cls.__ids_keymap[level]["insight"]
 

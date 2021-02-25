@@ -79,3 +79,4 @@ def read_recommendations(recommendations_repository: MongoRepositoryBase, accoun
         entry.pop(RecommendationField.TIME_INTERVAL.value, None)
 
     return result
+

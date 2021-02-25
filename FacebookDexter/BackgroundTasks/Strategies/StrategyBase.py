@@ -4,11 +4,15 @@ from typing import ClassVar, Dict, List, Optional, Tuple
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import StrategyTimeBucket, TrendEnum
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
+    StrategyTimeBucket,
+    TrendEnum,
+)
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import (
     ReportRecommendationDataModel,
     StructureRecommendationModel,
 )
+
 
 @dataclass
 class DexterStrategyBase:
