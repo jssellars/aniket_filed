@@ -12,11 +12,11 @@ from typing import Dict, List
 from facebook_business.adobjects.business import Business
 from facebook_business.exceptions import FacebookRequestError
 
+from Core.mongo_adapter import MongoOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from Core.mongo_adapter import MongoOperator
 from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
-from FacebookTuring.BackgroundTasks.startup import fixtures, config
+from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
 from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
@@ -116,6 +116,9 @@ class Orchestrator:
         for business_owner_id, business_owner_details in business_owners.items():
 
             permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            if not permanent_token:
+                continue
+
             GraphAPISdkBase(config.facebook, permanent_token)
 
             business_ids = set()
@@ -165,16 +168,14 @@ class Orchestrator:
 
         for business_owner_id, business_owner_details in business_owners.items():
 
-            ad_account_ids = [business_owner[FacebookMiscFields.account_id] for business_owner in business_owner_details]
+            ad_account_ids = [
+                business_owner[FacebookMiscFields.account_id] for business_owner in business_owner_details
+            ]
 
             query = {
                 MongoOperator.AND.value: [
-                    {
-                        FacebookMiscFields.business_owner_facebook_id: business_owner_id
-                    },
-                    {
-                        FacebookMiscFields.account_id: {MongoOperator.NOTIN.value: ad_account_ids}
-                    }
+                    {FacebookMiscFields.business_owner_facebook_id: business_owner_id},
+                    {FacebookMiscFields.account_id: {MongoOperator.NOTIN.value: ad_account_ids}},
                 ]
             }
 

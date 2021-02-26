@@ -15,11 +15,11 @@ repos:
     hooks:
     -   id: isort
         args: [-l 120, --profile, black]
--   repo: local
-    hooks:
-    -   id: pytest-check
-        name: pytest-check
-        entry: pytest FacebookTuring/Api/tests
-        language: system
-        pass_filenames: false
-        always_run: true
+#-   repo: local
+#    hooks:
+#    -   id: pytest-check
+#        name: pytest-check
+#        entry: pytest FacebookTuring/Api/tests
+#        language: system
+#        pass_filenames: false
+#        always_run: true
