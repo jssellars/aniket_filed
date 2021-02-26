@@ -1,19 +1,18 @@
 import json
 import typing
 from enum import Enum
+from typing import List
 
 from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderDimension
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
-    LevelToFacebookIdKeyMapping,
-)
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
-    PixelCustomEventTypeToResult,
+    AdSetOptimizationToCostPerResult,
     AdSetOptimizationToResult,
     PixelCustomEventTypeToCostPerResult,
-    AdSetOptimizationToCostPerResult,
+    PixelCustomEventTypeToResult,
 )
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
@@ -140,17 +139,14 @@ class QueryBuilderFacebookRequestParser:
                 FieldsMetadata.id.name,
             ]
 
-    def parse_query_columns_ag_grid(self, ag_query_columns=None, parse_breakdowns=True):
-        if ag_query_columns is None:
-            ag_query_columns = []
+    def parse_query_columns_ag_grid(self, request_columns: List, parse_breakdowns=True):
+
         non_fields_types = [
             FieldType.BREAKDOWN,
             FieldType.TIME_BREAKDOWN,
             FieldType.ACTION_BREAKDOWN,
             FieldType.STRUCTURE,
         ]
-
-        request_columns = ag_query_columns[0].split(",")
 
         for entry in request_columns:
             mapped_entry = self.map(entry)
@@ -320,9 +316,13 @@ class QueryBuilderFacebookRequestParser:
         self.start_row = request.start_row
         self.end_row = request.end_row
 
+        request_columns = request.ag_columns[0].split(",")
+        if LevelToFacebookIdKeyMapping[self.level.upper()].value not in request_columns:
+            request_columns.append(LevelToFacebookIdKeyMapping[self.level.upper()].value)
+
         self.parse_query_columns_ag_grid(
             parse_breakdowns=parse_breakdowns,
-            ag_query_columns=request.ag_columns,
+            request_columns=request_columns,
         )
         self.parse_filter_model(request.filter_model)
         self.parse_sort_condition(request.sort_model)
@@ -332,9 +332,11 @@ class QueryBuilderFacebookRequestParser:
         self.facebook_id = request.facebook_account_id
         self.time_range = request.time_range
 
+        request_columns = request.ag_columns[0].split(",")
+
         self.parse_query_columns_ag_grid(
             parse_breakdowns=parse_breakdowns,
-            ag_query_columns=request.ag_columns,
+            request_columns=request_columns,
         )
         self.parse_filter_model(request.filter_model)
         self.parse_sort_condition()

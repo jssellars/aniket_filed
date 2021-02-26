@@ -1,11 +1,11 @@
-from datetime import datetime
-
-import pytest
 import json
+from datetime import datetime
 from enum import Enum
 
-from Core.test_config import ACCOUNT_ID
+import pytest
+
 from Core.constants import DEFAULT_DATETIME_UTC
+from Core.test_config import ACCOUNT_ID
 
 
 class AgGridInsightField(Enum):
@@ -60,27 +60,29 @@ class TestAgGridInsights:
         "nextPageCursor": None,
     }
 
-    ag_columns = ["selected",
-                  "status",
-                  "adset_id",
-                  "adset_name",
-                  "effective_status",
-                  "budget",
-                  "amount_spent",
-                  "impressions",
-                  "cpm",
-                  "frequency",
-                  "unique_clicks_all",
-                  "cost_per_unique_click_all",
-                  "unique_ctr_all",
-                  "results",
-                  "cost_per_result",
-                  "conversion_rate_ranking",
-                  "landing_page_views_total",
-                  "landing_page_views_unique",
-                  "purchases_value",
-                  "purchase_roas",
-                  "stop_time"]
+    ag_columns = [
+        "selected",
+        "status",
+        "adset_id",
+        "adset_name",
+        "effective_status",
+        "budget",
+        "amount_spent",
+        "impressions",
+        "cpm",
+        "frequency",
+        "unique_clicks_all",
+        "cost_per_unique_click_all",
+        "unique_ctr_all",
+        "results",
+        "cost_per_result",
+        "conversion_rate_ranking",
+        "landing_page_views_total",
+        "landing_page_views_unique",
+        "purchases_value",
+        "purchase_roas",
+        "stop_time",
+    ]
 
     @pytest.fixture(scope="session", params=[True, False])
     def has_delivery(self, request):
@@ -104,7 +106,6 @@ class TestAgGridInsights:
 
 
 class TestAgGridInsightsBaseParam(TestAgGridInsights):
-
     def test_status_code_200(self, response):
         assert response.status_code == 200
 
@@ -131,14 +132,13 @@ class TestAgGridInsightsBaseParam(TestAgGridInsights):
     def test_data_in_summary_is_non_empty_dict(self, response_json):
         summary = response_json.get("summary")[0]
         assert isinstance(summary, dict)
-        if TestAgGridInsights.level == "ad":
-            assert len(summary) == 16
-        else:
+        if TestAgGridInsights.level != "campaign":
             assert len(summary) == 17
+        else:
+            assert len(summary) == 18
 
 
 class TestAgGridInsightsSummaryParam(TestAgGridInsights):
-
     @pytest.fixture(scope="class")
     def data(self, response_json):
         return response_json.get("summary")
@@ -146,13 +146,8 @@ class TestAgGridInsightsSummaryParam(TestAgGridInsights):
     def test_cost_per_unique_click_all_is_positive_float(self, data):
         for summary in data:
             assert AgGridInsightField.COST_PER_UNIQUE_CLICK_ALL.value in summary
-            cost_per_unique_click_all = summary.get(
-                AgGridInsightField.COST_PER_UNIQUE_CLICK_ALL.value
-            )
-            if (
-                    cost_per_unique_click_all is not None
-                    and cost_per_unique_click_all is not 0
-            ):
+            cost_per_unique_click_all = summary.get(AgGridInsightField.COST_PER_UNIQUE_CLICK_ALL.value)
+            if cost_per_unique_click_all is not None and cost_per_unique_click_all is not 0:
                 assert isinstance(cost_per_unique_click_all, float)
                 assert cost_per_unique_click_all >= 0
 
@@ -212,9 +207,7 @@ class TestAgGridInsightsSummaryParam(TestAgGridInsights):
     def test_landing_page_views_unique_is_positive_int(self, data):
         for summary in data:
             assert AgGridInsightField.LANDING_PAGE_VIEWS_UNIQUE.value in summary
-            landing_page_views_unique = summary.get(
-                AgGridInsightField.LANDING_PAGE_VIEWS_UNIQUE.value
-            )
+            landing_page_views_unique = summary.get(AgGridInsightField.LANDING_PAGE_VIEWS_UNIQUE.value)
             if landing_page_views_unique is not None:
                 assert isinstance(landing_page_views_unique, int)
                 assert landing_page_views_unique >= 0
@@ -222,9 +215,7 @@ class TestAgGridInsightsSummaryParam(TestAgGridInsights):
     def test_landing_page_views_total_is_positive_int(self, data):
         for summary in data:
             assert AgGridInsightField.LANDING_PAGE_VIEWS_TOTAL.value in summary
-            landing_page_views_total = summary.get(
-                AgGridInsightField.LANDING_PAGE_VIEWS_TOTAL.value
-            )
+            landing_page_views_total = summary.get(AgGridInsightField.LANDING_PAGE_VIEWS_TOTAL.value)
             if landing_page_views_total is not None:
                 assert isinstance(landing_page_views_total, int)
                 assert landing_page_views_total >= 0
@@ -280,9 +271,7 @@ class TestAgGridInsightsSummaryParam(TestAgGridInsights):
     def test_conversion_rate_ranking_is_non_empty_string(self, data):
         for summary in data:
             assert AgGridInsightField.CONVERSION_RATE_RANKING.value in summary
-            conversion_rate_ranking = summary.get(
-                AgGridInsightField.CONVERSION_RATE_RANKING.value
-            )
+            conversion_rate_ranking = summary.get(AgGridInsightField.CONVERSION_RATE_RANKING.value)
             if conversion_rate_ranking is not None:
                 assert isinstance(conversion_rate_ranking, str)
                 assert len(conversion_rate_ranking) > 0
@@ -298,7 +287,6 @@ class TestAgGridInsightsSummaryParam(TestAgGridInsights):
 
 
 class TestAgGridInsightsDataParams(TestAgGridInsightsSummaryParam):
-
     @pytest.fixture(scope="class")
     def data(self, response_json):
         return response_json.get("data")
