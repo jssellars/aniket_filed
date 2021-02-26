@@ -40,13 +40,17 @@ DEFAULT_PLACEMENTS = [
 ]
 
 
-def build_ad_sets(step_two, step_three, step_four, is_using_cbo, is_using_conversions, destination_type):
+def build_ad_sets(step_one, step_two, step_three, step_four, is_using_cbo, is_using_conversions, destination_type):
     ad_set_template = {}
-    build_base_ad_sets(ad_set_template, step_two, step_three, is_using_cbo, is_using_conversions, destination_type)
+    build_base_ad_sets(
+        ad_set_template, step_one, step_two, step_three, is_using_cbo, is_using_conversions, destination_type
+    )
     return split_ad_sets(ad_set_template, step_two, step_four)
 
 
-def build_base_ad_sets(ad_set_template, step_two, step_three, is_using_cbo, is_using_conversions, destination_type):
+def build_base_ad_sets(
+    ad_set_template, step_one, step_two, step_three, is_using_cbo, is_using_conversions, destination_type
+):
     # TODO: this is not specified - maybe some default ?
     if AdSet.Field.tune_for_category in step_two:
         ad_set_template[AdSet.Field.tune_for_category] = step_two[AdSet.Field.tune_for_category]
@@ -57,7 +61,7 @@ def build_base_ad_sets(ad_set_template, step_two, step_three, is_using_cbo, is_u
     ad_set_template[AdSet.Field.destination_type] = destination_type
 
     set_statuses(ad_set_template)
-    set_date_interval(ad_set_template, step_two)
+    set_date_interval(ad_set_template, step_one, step_two)
     set_promoted_object(ad_set_template, is_using_conversions, step_three, step_two)
 
     opt_and_delivery = step_two["optimization_and_delivery"]
@@ -83,8 +87,8 @@ def set_statuses(ad_set_template):
     ad_set_template[AdSet.Field.status] = AdSet.Status.paused
 
 
-def set_date_interval(ad_set_template, step_two):
-    date_interval = step_two["date"]
+def set_date_interval(ad_set_template, step_one, step_two):
+    date_interval = step_two["date"] if "date" in step_two else step_one["date"]
     ad_set_template[AdSet.Field.start_time] = date_interval["start_date"]
     if "end_date" in date_interval and date_interval["end_date"]:
         ad_set_template[AdSet.Field.end_time] = date_interval["end_date"]

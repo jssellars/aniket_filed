@@ -306,6 +306,7 @@ class SmartCreatePublish:
 
         # Build ad_sets
         ad_sets = adset_builder.build_ad_sets(
+            step_one=request.step_one_details,
             step_two=request.step_two_details,
             step_three=request.step_three_details,
             step_four=request.step_four_details,
