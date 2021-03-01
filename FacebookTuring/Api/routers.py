@@ -6,6 +6,9 @@ import flask_restful
 import humps
 from flask import request
 
+from Core.flask_extensions import log_request
+from Core.logging_config import request_as_log_dict
+from Core.utils import snake_to_camelcase
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
@@ -13,32 +16,29 @@ from Core.Web.Security.Permissions import (
     AccountsPermissions,
     AdsManagerPermissions,
     OptimizePermissions,
-    ReportsPermissions
+    ReportsPermissions,
 )
-from Core.flask_extensions import log_request
-from Core.logging_config import request_as_log_dict
-from Core.utils import snake_to_camelcase
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
 from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
 from FacebookTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import (
-    AdsManagerDeleteStructureCommandHandler
+    AdsManagerDeleteStructureCommandHandler,
 )
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDuplicateStructureCommandHandler import (
     AdsManagerDuplicateStructureCommandHandler,
-    AdsManagerDuplicateStructureCommandHandlerException
+    AdsManagerDuplicateStructureCommandHandlerException,
 )
 from FacebookTuring.Api.CommandsHandlers.AdsManagerFilteredStructuresCommandHandler import (
-    AdsManagerFilteredStructuresCommandHandler
+    AdsManagerFilteredStructuresCommandHandler,
 )
 from FacebookTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import AdsManagerInsightsCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
-    AdsManagerUpdateStructureCommandHandler
+    AdsManagerUpdateStructureCommandHandler,
 )
-from FacebookTuring.Api.Dtos import ElementsCardViews, AdsManagerAgGridPopupViewsDto
+from FacebookTuring.Api.Dtos import AdsManagerAgGridPopupViewsDto, ElementsCardViews
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsBreakdownsCombinationsDto import (
-    AdsManagerCatalogsBreakdownsCombinationsDto
+    AdsManagerCatalogsBreakdownsCombinationsDto,
 )
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsBreakdownsDto import AdsManagerCatalogsBreakdownsDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsMetacolumnsDto import AdsManagerCatalogsMetacolumnsDto
@@ -50,10 +50,10 @@ from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsAgGridDto import AdsManagerC
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsByLevelDto import AdsManagerCatalogsViewsByLevelDto
 from FacebookTuring.Api.Dtos.AdsManagerCatalogsViewsDto import AdsManagerCatalogsViewsDto
 from FacebookTuring.Api.Mappings.AdsManagerDuplicateStructureCommandMapping import (
-    AdsManagerDuplicateStructureCommandMapping
+    AdsManagerDuplicateStructureCommandMapping,
 )
 from FacebookTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import (
-    AdsManagerFilteredStructuresCommandMapping
+    AdsManagerFilteredStructuresCommandMapping,
 )
 from FacebookTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
@@ -155,7 +155,6 @@ class AccountsElementsViews(Resource):
 
 
 class AdsManagerAgGridStructuresPerformance(Resource):
-
     @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self, level):
         logger.info(request_as_log_dict(request))
@@ -166,11 +165,11 @@ class AdsManagerAgGridStructuresPerformance(Resource):
 
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
-            response = (AdsManagerInsightsCommandHandler.handle(
+            response = AdsManagerInsightsCommandHandler.handle(
                 handler_type=AdsManagerInsightsCommandEnum.AG_GRID_ADD_AN_ADSET_AD_PARENT,
                 query_json=request_json,
                 business_owner_id=business_owner_id,
-                level=level)
+                level=level,
             )
             return response, 200
 
@@ -286,11 +285,16 @@ class AdsManagerCampaignTreeStructure(Resource):
 # TODO migrate Smart Edit to SDK calls
 class SmartEditCampaignTreesStructure(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
-    def get(self, level, structure_ids):
+    def get(self, account_id, level, structure_ids):
         try:
             structure_ids = structure_ids.split(",")
             business_owner_facebook_id = extract_business_owner_facebook_id()
-            return humps.camelize(CampaignTreesStructure.get(level, structure_ids, business_owner_facebook_id)), 200
+            return (
+                humps.camelize(
+                    CampaignTreesStructure.get(account_id, level, structure_ids, business_owner_facebook_id)
+                ),
+                200,
+            )
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))

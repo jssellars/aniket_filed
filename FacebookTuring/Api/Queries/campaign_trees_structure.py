@@ -2,21 +2,20 @@ import logging
 from dataclasses import asdict
 from typing import List
 
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import (
-    FacebookGender, Gender)
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
-from Core.Web.FacebookGraphAPI.search import (GraphAPICountryGroupsLegend,
-                                              GraphAPILanguagesHandler)
 # from facebook_business.adobjects.adsinterest import AdsInterest TODO: find a way to cache all the interest without using this class
 from facebook_business.adobjects.flexibletargeting import FlexibleTargeting
 from facebook_business.adobjects.targeting import Targeting
+
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_sdk_structures
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, FacebookMiscFields, Gender
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from Core.Web.FacebookGraphAPI.search import GraphAPICountryGroupsLegend, GraphAPILanguagesHandler
 from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Infrastructure.Domain.fe_structure_models import (Ad,
-                                                                      AdSet,
-                                                                      Campaign)
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import \
-    TuringMongoRepository
+from FacebookTuring.Infrastructure.Domain.fe_structure_models import Ad, AdSet, Campaign
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +51,9 @@ LEVEL_TO_ID_KEY = {Level.CAMPAIGN: CampaignKeyMap.id, Level.ADSET: AdSetKeyMap.i
 
 class CampaignTreesStructure:
     @staticmethod
-    def get(level, structure_ids, business_owner_facebook_id):
+    def get(account_id, level, structure_ids, business_owner_facebook_id):
         level_enum = Level(level)
-        campaign_tree_builder = CampaignTreeBuilder(level_enum, structure_ids, business_owner_facebook_id)
+        campaign_tree_builder = CampaignTreeBuilder(account_id, level_enum, structure_ids, business_owner_facebook_id)
         result = campaign_tree_builder.create_campaign_trees()
         return result
 
@@ -63,7 +62,8 @@ class CampaignTreeBuilder:
     languages = None
     countries = None
 
-    def __init__(self, level_enum, structure_ids, business_owner_facebook_id):
+    def __init__(self, account_id, level_enum, structure_ids, business_owner_facebook_id):
+        self.account_id = account_id
         self.level = level_enum
         self.structure_ids = structure_ids
         self.business_owner_facebook_id = business_owner_facebook_id
@@ -126,9 +126,14 @@ class CampaignTreeBuilder:
         )
 
     def __get_structures_campaign_ids(self):
-        return self.repository.get_bo_unique_campaign_ids(
-            self.business_owner_facebook_id, LEVEL_TO_ID_KEY[self.level], self.structure_ids
-        )
+        facebook_structure_key = LevelToFacebookIdKeyMapping[self.level.value.upper()].value.replace("_", ".")
+        structures_filter = {
+            "filtering": [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, self.structure_ids)]
+        }
+        fields = [Level.CAMPAIGN.value]
+        response = get_sdk_structures(self.account_id, self.level, fields=fields, params=structures_filter)
+
+        return [item[Level.CAMPAIGN.value][FacebookMiscFields.id] for item in response]
 
     def __get_raw_structures_by_id(self, structure_key, ids):
         return self.repository.get_bo_structures_by_id(self.business_owner_facebook_id, structure_key, ids)
