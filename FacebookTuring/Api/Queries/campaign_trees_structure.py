@@ -10,11 +10,12 @@ from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOp
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_sdk_structures
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, FacebookMiscFields, Gender
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.search import GraphAPICountryGroupsLegend, GraphAPILanguagesHandler
 from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.fe_structure_models import Ad, AdSet, Campaign
+from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,7 @@ class CampaignTreeBuilder:
         else:
             campaigns_ids = self.__get_structures_campaign_ids()
 
-        raw_campaigns = self.__get_campaigns_from_db(campaigns_ids)
+        raw_campaigns = self.__get_campaigns(campaigns_ids)
         campaigns = self.__map_campaigns(raw_campaigns)
         campaigns_trees = self.__build_campaign_trees(campaigns)
         return list(map(asdict, campaigns_trees))
@@ -119,11 +120,15 @@ class CampaignTreeBuilder:
 
         return campaigns
 
-    def __get_campaigns_from_db(self, campaign_ids):
-        self.repository.collection = Level.CAMPAIGN.value
-        return self.repository.get_bo_structures_by_ids(
-            self.business_owner_facebook_id, LEVEL_TO_ID_KEY[Level.CAMPAIGN], campaign_ids
-        )
+    def __get_campaigns(self, campaign_ids):
+        facebook_structure_key = LevelToFacebookIdKeyMapping.CAMPAIGN.value.replace("_", ".")
+        structures_filter = {
+            "filtering": [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, campaign_ids)]
+        }
+        structure_fields = StructureFields.get(Level.CAMPAIGN.value).structure_fields
+        fields = [field.facebook_fields[0] for field in structure_fields]
+
+        return get_sdk_structures(self.account_id, Level.CAMPAIGN, fields=fields, params=structures_filter)
 
     def __get_structures_campaign_ids(self):
         facebook_structure_key = LevelToFacebookIdKeyMapping[self.level.value.upper()].value.replace("_", ".")
@@ -142,19 +147,19 @@ class CampaignTreeBuilder:
     def __map_campaigns(raw_campaigns) -> List[Campaign]:
         campaigns = []
         for raw_campaign in raw_campaigns:
-            details = raw_campaign["details"]
             campaign = Campaign(
-                id=raw_campaign["campaign_id"],
-                name=raw_campaign["campaign_name"],
-                status=raw_campaign["status"],
-                objective=raw_campaign["objective"],
-                buying_type=details["buying_type"],
-                special_ad_category=details["special_ad_category"],
-                bid_strategy=details.get("bid_strategy"),
+                id=raw_campaign[GraphAPIInsightsFields.structure_id],
+                name=raw_campaign[GraphAPIInsightsFields.name],
+                status=raw_campaign[GraphAPIInsightsFields.status],
+                objective=raw_campaign[GraphAPIInsightsFields.objective],
+                buying_type=raw_campaign[GraphAPIInsightsFields.buying_type],
+                special_ad_category=raw_campaign[GraphAPIInsightsFields.special_ad_category],
+                bid_strategy=raw_campaign.get(GraphAPIInsightsFields.bid_strategy, None),
             )
 
             campaign.set_budget_opt(
-                daily_budget=raw_campaign["daily_budget"], lifetime_budget=raw_campaign["lifetime_budget"]
+                daily_budget=raw_campaign.get(GraphAPIInsightsFields.daily_budget, None),
+                lifetime_budget=raw_campaign.get(GraphAPIInsightsFields.lifetime_budget, None),
             )
             campaigns.append(campaign)
 
