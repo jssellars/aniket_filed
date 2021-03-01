@@ -1,4 +1,4 @@
-import typing
+from typing import Dict, MutableMapping
 from dataclasses import dataclass
 
 from FacebookAudiences.Infrastructure.Domain.AudienceStateEnum import AudienceStateEnum
@@ -6,14 +6,15 @@ from FacebookAudiences.Infrastructure.Domain.AudienceStateEnum import AudienceSt
 
 @dataclass
 class Audience:
-    facebook_id: typing.AnyStr = None
-    name: typing.AnyStr = None
-    date_created: typing.AnyStr = None
-    last_updated: typing.AnyStr = None
-    source: typing.AnyStr = None
-    subtype: typing.AnyStr = None
-    type: typing.AnyStr = None
+    facebook_id: str = None
+    name: str = None
+    date_created: str = None
+    last_updated: str = None
+    source: str = None
+    subtype: str = None
+    type: str = None
     size: int = None
-    details: typing.MutableMapping = None
-    pixel_id: typing.AnyStr = None
-    audience_state: typing.AnyStr = AudienceStateEnum.INACTIVE.value
+    details: MutableMapping = None
+    pixel_id: str = None
+    audience_state: str = AudienceStateEnum.INACTIVE.value
+    locations: Dict = None

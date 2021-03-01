@@ -1,5 +1,5 @@
-import typing
-from dataclasses import dataclass
+from typing import Dict, List
+from dataclasses import dataclass, field
 
 from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import \
     GraphAPIAudiencesPermissionsForActionsDto
@@ -9,21 +9,22 @@ from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesSentenceLine
 
 @dataclass
 class AdAccount:
-    account_id: typing.AnyStr = None
-    id: typing.AnyStr = None
+    account_id: str = None
+    id: str = None
 
 
 @dataclass
 class GraphAPISavedAudienceDto:
     account: AdAccount = None
     approximate_count: int = None
-    description: typing.AnyStr = None
-    extra_info: typing.AnyStr = None
-    id: typing.AnyStr = None
-    name: typing.AnyStr = None
+    description: str = None
+    extra_info: str = None
+    id: str = None
+    name: str = None
     permission_for_actions: GraphAPIAudiencesPermissionsForActionsDto = None
-    run_status: typing.AnyStr = None
-    targeting: typing.Dict = None
-    sentence_lines: typing.List[GraphAPIAudiencesSentenceLineDto] = None
-    time_created: typing.AnyStr = None
-    time_updated: typing.AnyStr = None
+    run_status: str = None
+    targeting: Dict = None
+    sentence_lines: List[GraphAPIAudiencesSentenceLineDto] = None
+    time_created: str = None
+    time_updated: str = None
+    locations: List[Dict] = field(default_factory=list)
