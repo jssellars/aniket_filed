@@ -562,6 +562,9 @@ class GraphAPIInsightsHandler:
                 [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, structure_ids)]
             )
 
+        # The after cursor is valid only for structures, not insights on this flow
+        parameters.pop("after", None)
+
         insight_response, _, _ = cls.get_insights_page(
             config,
             ad_account_id=ad_account_id,
