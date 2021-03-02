@@ -106,6 +106,9 @@ class GraphAPIAudiencesHandler:
         audience.audience_state = saved_audience.run_status
         audience.locations = saved_audience.locations
         audience.languages = saved_audience.languages
+        audience.interests = saved_audience.interests
+        audience.excluded_interests = saved_audience.excluded_interests
+        audience.narrow_interests = saved_audience.narrow_interests
 
         last_updated = cls.__timestamp_to_datetime(saved_audience.time_updated)
         audience.last_updated = last_updated if last_updated else datetime.now().strftime(cls.__datetime_format)
