@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.adobjects.adcreativelinkdata import AdCreativeLinkData
@@ -11,9 +11,9 @@ from facebook_business.adobjects.adcreativevideodata import AdCreativeVideoData
 from facebook_business.adobjects.adpromotedobject import AdPromotedObject
 from facebook_business.adobjects.conversionactionquery import ConversionActionQuery
 
+from Core.facebook.sdk_adapter.ad_objects.ad_set import OSWithMobileDeviceGroup
 from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import Gender
-from Core.facebook.sdk_adapter.ad_objects.ad_set import OSWithMobileDeviceGroup
 
 _ad_creative = AdCreative.Field
 _object_story_spec = AdCreativeObjectStorySpec.Field
@@ -96,7 +96,7 @@ class Ad:
 
     @classmethod
     def from_ad_details(
-            cls, id: str, name: str, status: int, ad_creative_data: Dict, tracking_specs: List[Dict[str, List[str]]]
+        cls, id: str, name: str, status: int, ad_creative_data: Dict, tracking_specs: List[Dict[str, List[str]]]
     ):
         params = {}
 
@@ -105,7 +105,7 @@ class Ad:
             params["advert"] = cls.__build_advert(ad_creative_data, object_story_spec)
             params["facebook_page_id"] = object_story_spec.get(_object_story_spec.page_id)
             params["instagram_page_id"] = object_story_spec.get(_object_story_spec.instagram_actor_id)
-            params["ad_format_type"] = params["advert"].media_type
+            params["ad_format_type"] = params["advert"].media_type if params.get("advert") else None
         else:
             params["post_id"] = ad_creative_data.get(_ad_creative.object_story_id)
             params["ad_format_type"] = FiledAdFormatEnum.EXISTING_POST.value
@@ -139,7 +139,9 @@ class Ad:
 
             return advert
 
-        link_data = object_story_spec[_object_story_spec.link_data]
+        link_data = object_story_spec.get(_object_story_spec.link_data)
+        if not link_data:
+            return {}
         if _link_data.child_attachments in link_data:
             cards = []
             for child_attachment in link_data[_link_data.child_attachments]:
@@ -150,9 +152,9 @@ class Ad:
                         website_url=child_attachment.get(_link_data_child_attach.link),
                         description=child_attachment.get(_link_data_child_attach.description),
                         headline=child_attachment.get(_link_data_child_attach.name),
-                        call_to_action=child_attachment.get(
-                            _link_data_child_attach.call_to_action, {}
-                        ).get(_link_data_cta.value),
+                        call_to_action=child_attachment.get(_link_data_child_attach.call_to_action, {}).get(
+                            _link_data_cta.value
+                        ),
                         media_url=child_attachment.get(_link_data_child_attach.picture),
                         video_id=child_attachment[_link_data_child_attach.video_id],
                     )
@@ -163,9 +165,9 @@ class Ad:
                         website_url=child_attachment.get(_link_data_child_attach.link),
                         description=child_attachment.get(_link_data_child_attach.description),
                         headline=child_attachment.get(_link_data_child_attach.name),
-                        call_to_action=child_attachment.get(
-                            _link_data_child_attach.call_to_action, {}
-                        ).get(_link_data_cta.value),
+                        call_to_action=child_attachment.get(_link_data_child_attach.call_to_action, {}).get(
+                            _link_data_cta.value
+                        ),
                         media_url=child_attachment.get(_link_data_child_attach.picture),
                     )
 
@@ -180,9 +182,7 @@ class Ad:
                 website_url=link_data.get(_link_data.link),
                 description=link_data.get(_link_data.description),
                 headline=link_data.get(_link_data.name),
-                call_to_action=link_data.get(_link_data.call_to_action, {}).get(
-                    _link_data_cta.type
-                ),
+                call_to_action=link_data.get(_link_data.call_to_action, {}).get(_link_data_cta.type),
                 media_url=ad_creative_data.get(_ad_creative.image_url),
             )
 

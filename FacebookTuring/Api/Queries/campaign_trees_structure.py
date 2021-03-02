@@ -3,6 +3,7 @@ from dataclasses import asdict
 from typing import List
 
 # from facebook_business.adobjects.adsinterest import AdsInterest TODO: find a way to cache all the interest without using this class
+from facebook_business.adobjects.ad import Ad as FacebookAd
 from facebook_business.adobjects.flexibletargeting import FlexibleTargeting
 from facebook_business.adobjects.targeting import Targeting
 
@@ -106,15 +107,15 @@ class CampaignTreeBuilder:
 
     def __build_campaign_trees(self, campaigns: List[Campaign]):
         for campaign in campaigns:
-            self.repository.collection = Level.ADSET.value
-            campaign_id_key = LEVEL_TO_ID_KEY[Level.CAMPAIGN]
-            raw_adsets = self.__get_raw_structures_by_id(campaign_id_key, campaign.id)
+            level = Level.ADSET
+            campaign_id_key = LevelToFacebookIdKeyMapping.CAMPAIGN.value.replace("_", ".")
+            raw_adsets = self.__get_raw_structures_by_id(level, campaign_id_key, campaign.id)
 
             campaign.adsets = self.__map_adsets(raw_adsets)
             for adset in campaign.adsets:
-                self.repository.collection = Level.AD.value
-                adset_id_key = LEVEL_TO_ID_KEY[Level.ADSET]
-                raw_ads = self.__get_raw_structures_by_id(adset_id_key, adset.id)
+                level = Level.AD
+                adset_id_key = LevelToFacebookIdKeyMapping.ADSET.value.replace("_", ".")
+                raw_ads = self.__get_raw_structures_by_id(level, adset_id_key, adset.id)
 
                 adset.ads = self.__map_ads(raw_ads)
 
@@ -140,8 +141,12 @@ class CampaignTreeBuilder:
 
         return [item[Level.CAMPAIGN.value][FacebookMiscFields.id] for item in response]
 
-    def __get_raw_structures_by_id(self, structure_key, ids):
-        return self.repository.get_bo_structures_by_id(self.business_owner_facebook_id, structure_key, ids)
+    def __get_raw_structures_by_id(self, level, structure_key, ids):
+        structures_filter = {"filtering": [create_facebook_filter(structure_key, AgGridFacebookOperator.EQUAL, ids)]}
+        structure_fields = StructureFields.get(level.value).structure_fields
+        fields = [field.facebook_fields[0] for field in structure_fields]
+
+        return get_sdk_structures(self.account_id, level, fields=fields, params=structures_filter)
 
     @staticmethod
     def __map_campaigns(raw_campaigns) -> List[Campaign]:
@@ -168,28 +173,27 @@ class CampaignTreeBuilder:
     def __map_adsets(self, raw_adsets) -> List[AdSet]:
         adsets = []
         for raw_adset in raw_adsets:
-            details = raw_adset["details"]
-            targeting = details["targeting"]
-            promoted_object = details.get("promoted_object")
+            targeting = raw_adset[GraphAPIInsightsFields.targeting]
+            promoted_object = raw_adset.get(GraphAPIInsightsFields.promoted_object)
 
             adset = AdSet(
-                id=raw_adset["adset_id"],
-                name=raw_adset["adset_name"],
-                status=raw_adset["status"],
-                destination_type=details["destination_type"],
-                optimization_goal=details["optimization_goal"],
-                billing_event=details["billing_event"],
+                id=raw_adset[GraphAPIInsightsFields.structure_id],
+                name=raw_adset[GraphAPIInsightsFields.name],
+                status=raw_adset[GraphAPIInsightsFields.status],
+                destination_type=raw_adset[GraphAPIInsightsFields.destination_type],
+                optimization_goal=raw_adset[GraphAPIInsightsFields.optimization_goal],
+                billing_event=raw_adset[GraphAPIInsightsFields.billing_event],
                 publisher_platforms=targeting.get(Targeting.Field.publisher_platforms),
                 min_age=targeting[Targeting.Field.age_min],
                 max_age=targeting[Targeting.Field.age_max],
-                start_time=raw_adset["start_time"],
-                end_time=raw_adset["end_time"],
+                start_time=raw_adset[GraphAPIInsightsFields.start_time],
+                end_time=raw_adset.get(GraphAPIInsightsFields.end_time),
             )
 
             if promoted_object:
                 adset.set_promoted_object_fields(promoted_object)
 
-            bid_control = details.get("bid_amount")
+            bid_control = raw_adset.get(GraphAPIInsightsFields.bid_amount)
             if bid_control:
                 adset.bid_control = bid_control / 100
 
@@ -220,7 +224,10 @@ class CampaignTreeBuilder:
                 audience["id"] for audience in targeting.get(Targeting.Field.excluded_custom_audiences, [])
             ]
 
-            adset.set_budget_opt(daily_budget=raw_adset["daily_budget"], lifetime_budget=raw_adset["lifetime_budget"])
+            adset.set_budget_opt(
+                daily_budget=raw_adset[GraphAPIInsightsFields.daily_budget],
+                lifetime_budget=raw_adset[GraphAPIInsightsFields.lifetime_budget],
+            )
             adset.set_mobile_fields(
                 user_os=targeting.get(Targeting.Field.user_os, []),
                 user_device=targeting.get(Targeting.Field.user_device, []),
@@ -270,18 +277,23 @@ class CampaignTreeBuilder:
     def __map_ads(raw_ads) -> List[Ad]:
         ads = []
         for raw_ad in raw_ads:
-            details = raw_ad["details"]
-            tracking_specs = details.get("tracking_specs", [])
+            tracking_specs = raw_ad.get(GraphAPIInsightsFields.tracking_specs, [])
 
-            if "adcreatives" not in details:
-                # TODO: check for sync problems
-                logger.debug("adcreatives key not found in details")
-                continue
+            fields_string = GraphAPIInsightsFields.adcreatives
+            fields_string = fields_string[fields_string.find("{") + 1 : fields_string.find("}")]
+            fields = fields_string.split(",")
 
-            ad_creative_data = details["adcreatives"]["data"][0]
+            ad_id = raw_ad[GraphAPIInsightsFields.structure_id]
+            ad_account = FacebookAd(ad_id)
+            ad_creative_data = ad_account.get_ad_creatives(fields=fields)
+            ad_creative_data = [item for item in ad_creative_data][0]
 
             ad = Ad.from_ad_details(
-                raw_ad["ad_id"], raw_ad["ad_name"], raw_ad["status"], ad_creative_data, tracking_specs
+                raw_ad[GraphAPIInsightsFields.structure_id],
+                raw_ad[GraphAPIInsightsFields.name],
+                raw_ad[GraphAPIInsightsFields.status],
+                ad_creative_data,
+                tracking_specs,
             )
             ads.append(ad)
 
