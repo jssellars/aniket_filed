@@ -28,3 +28,7 @@ class GraphAPISavedAudienceDto:
     time_created: str = None
     time_updated: str = None
     locations: List[Dict] = field(default_factory=list)
+    languages: List[Dict] = field(default_factory=list)
+    interests: List[Dict] = field(default_factory=list)
+    narrow_interests: List[Dict] = field(default_factory=list)
+    excluded_interests: List[Dict] = field(default_factory=list)

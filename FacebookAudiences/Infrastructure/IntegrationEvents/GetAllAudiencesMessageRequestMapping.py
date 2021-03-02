@@ -1,6 +1,5 @@
-from marshmallow import fields, EXCLUDE
-
 from Core.mapper import MapperBase
+from marshmallow import EXCLUDE, fields
 
 
 class GetAllAudiencesMessageRequestMapping(MapperBase):

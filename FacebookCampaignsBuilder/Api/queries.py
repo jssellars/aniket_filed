@@ -36,12 +36,9 @@ from FacebookCampaignsBuilder.Api.cats import CATS
 from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
     GraphAPIBudgetValidationHandler,
 )
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.GraphAPIInterestsHandler import (
-    GraphAPIInterestsHandler,
-)
 from Core.Web.FacebookGraphAPI.search import (
     GraphAPILocationsHandler,
-    GraphAPILanguagesHandler,
+    GraphAPILanguagesHandler, GraphAPIInterestsHandler,
 )
 
 

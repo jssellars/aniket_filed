@@ -1,34 +1,37 @@
 import copy
-import typing
 from datetime import datetime
+from typing import Any, List, Tuple, Union
 
-from facebook_business.adobjects.adaccount import AdAccount
-
+from Core.settings_models import Model
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from facebook_business.adobjects.adaccount import AdAccount
 from FacebookAudiences.Infrastructure.Domain.Audience import Audience
 from FacebookAudiences.Infrastructure.Domain.AudienceStateEnum import AudienceStateEnum
 from FacebookAudiences.Infrastructure.Domain.AudienceTypeEnum import AudienceTypeEnum
-from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import GraphAPICustomAudienceDto, \
-    OperationStatus
-from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIFields import GraphAPICustomAudienceFields, \
-    GraphAPISavedAudienceFields
+from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import (
+    GraphAPICustomAudienceDto,
+    OperationStatus,
+)
+from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIFields import (
+    GraphAPICustomAudienceFields,
+    GraphAPISavedAudienceFields,
+)
 from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPISavedAudienceDto import GraphAPISavedAudienceDto
-from FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPICustomAudienceMapping import \
-    GraphAPICustomAudienceMapping
-from FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPISavedAudienceMapping import \
-    GraphAPISavedAudienceMapping
+from FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPICustomAudienceMapping import (
+    GraphAPICustomAudienceMapping,
+)
+from FacebookAudiences.Infrastructure.GraphAPIMappings.GraphAPISavedAudienceMapping import GraphAPISavedAudienceMapping
 
 
 class GraphAPIAudiencesHandler:
     __datetime_format = "%Y-%m-%dT%H:%M:%S"
 
     @classmethod
-    def get_audiences(cls,
-                      permanent_token: typing.AnyStr = None,
-                      account_id: typing.AnyStr = None,
-                      config: typing.Any = None) -> typing.Tuple[typing.List[Audience], typing.Any]:
+    def get_audiences(
+        cls, permanent_token: str = None, account_id: str = None, config: Model = None
+    ) -> Tuple[List[Audience], Any]:
 
         # initialize GraphAPI SDK
         _ = GraphAPISdkBase(config.facebook, permanent_token)
@@ -53,7 +56,7 @@ class GraphAPIAudiencesHandler:
         return audiences, errors
 
     @classmethod
-    def get_custom_audiences(cls, account_id: typing.AnyStr = None) -> typing.List[GraphAPICustomAudienceDto]:
+    def get_custom_audiences(cls, account_id: str = None) -> List[GraphAPICustomAudienceDto]:
         ad_account = AdAccount(fbid=account_id)
         custom_audiences = ad_account.get_custom_audiences(fields=GraphAPICustomAudienceFields.get_values())
         custom_audience_mapper = GraphAPICustomAudienceMapping(target=GraphAPICustomAudienceDto)
@@ -62,7 +65,7 @@ class GraphAPIAudiencesHandler:
         return custom_audiences
 
     @classmethod
-    def get_saved_audiences(cls, account_id: typing.AnyStr = None) -> typing.List[GraphAPISavedAudienceDto]:
+    def get_saved_audiences(cls, account_id: str = None) -> List[GraphAPISavedAudienceDto]:
         ad_account = AdAccount(fbid=account_id)
         saved_audiences = ad_account.get_saved_audiences(fields=GraphAPISavedAudienceFields.get_values())
         saved_audiences_mapper = GraphAPISavedAudienceMapping(target=GraphAPISavedAudienceDto)
@@ -71,21 +74,21 @@ class GraphAPIAudiencesHandler:
         return saved_audiences
 
     @classmethod
-    def __timestamp_to_datetime(cls, timestamp: typing.Union[int, str] = None) -> typing.AnyStr:
+    def __timestamp_to_datetime(cls, timestamp: Union[int, str] = None) -> str:
         if isinstance(timestamp, int):
             return datetime.fromtimestamp(timestamp).strftime(cls.__datetime_format)
         else:
             return timestamp
 
     @classmethod
-    def __map_delivery_status(cls, delivery_status: OperationStatus) -> typing.AnyStr:
+    def __map_delivery_status(cls, delivery_status: OperationStatus) -> str:
         if delivery_status.code == 200:
             return AudienceStateEnum.ACTIVE.value
         else:
             return AudienceStateEnum.INACTIVE.value
 
     @classmethod
-    def __map_custom_audience_subtype(cls, subtype: typing.AnyStr = None) -> typing.AnyStr:
+    def __map_custom_audience_subtype(cls, subtype: str = None) -> str:
         if subtype == AudienceTypeEnum.LOOKALIKE.value:
             return AudienceTypeEnum.LOOKALIKE.value
         else:
@@ -101,7 +104,8 @@ class GraphAPIAudiencesHandler:
         audience.size = saved_audience.approximate_count
         audience.details = copy.deepcopy(object_to_json(saved_audience))
         audience.audience_state = saved_audience.run_status
-        audience.locations = saved_audience.targeting.get("locations")
+        audience.locations = saved_audience.locations
+        audience.languages = saved_audience.languages
 
         last_updated = cls.__timestamp_to_datetime(saved_audience.time_updated)
         audience.last_updated = last_updated if last_updated else datetime.now().strftime(cls.__datetime_format)

@@ -1,5 +1,5 @@
-from typing import Dict, MutableMapping
-from dataclasses import dataclass
+from typing import Dict, List, MutableMapping
+from dataclasses import dataclass, field
 
 from FacebookAudiences.Infrastructure.Domain.AudienceStateEnum import AudienceStateEnum
 
@@ -17,4 +17,8 @@ class Audience:
     details: MutableMapping = None
     pixel_id: str = None
     audience_state: str = AudienceStateEnum.INACTIVE.value
-    locations: Dict = None
+    locations: List[Dict] = field(default_factory=list)
+    languages: List[Dict] = field(default_factory=list)
+    interests: List[Dict] = field(default_factory=list)
+    narrow_interests: List[Dict] = field(default_factory=list)
+    excluded_interests: List[Dict] = field(default_factory=list)

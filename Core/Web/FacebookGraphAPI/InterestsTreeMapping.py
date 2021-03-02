@@ -14,7 +14,7 @@ class Node(dict):
         if self.name == name:
             return self
 
-        if not hasattr(self, 'children'):
+        if not hasattr(self, "children"):
             return "Not found"
 
         for child in self.children:
@@ -33,7 +33,7 @@ class Node(dict):
             parent.children.append(child)
 
     def __has_child(self, child_name):
-        if not hasattr(self, 'children'):
+        if not hasattr(self, "children"):
             return False
         for child in self.children:
             if child.name == child_name:
@@ -56,31 +56,31 @@ def flatten_data(data):
         "Life Events": "Demographics",
         "Industries": "Demographics",
         "User Device": "Interests",
-        "User Os": "Interests"
+        "User Os": "Interests",
     }
     for node_data in data:
         node_type = ""
-        if 'type' in node_data.keys():
-            if node_data['type'] and isinstance(node_data['type'], str):
-                node_type = " ".join(node_data['type'].title().split("_"))
+        if "type" in node_data.keys():
+            if node_data["type"] and isinstance(node_data["type"], str):
+                node_type = " ".join(node_data["type"].title().split("_"))
             else:
                 node_type = ""
-            if 'path' in node_data.keys() and isinstance(node_data['path'], list):
-                if node_type not in node_data['path']:
-                    node_data['path'].insert(0, node_type)
+            if "path" in node_data.keys() and isinstance(node_data["path"], list):
+                if node_type not in node_data["path"]:
+                    node_data["path"].insert(0, node_type)
             else:
-                node_data['path'] = [node_type]
+                node_data["path"] = [node_type]
             # del node_data['type']
 
         if node_type in extra_nodes.keys():
             node_type = extra_nodes[node_type]
-            node_data['path'].insert(0, node_type)
+            node_data["path"].insert(0, node_type)
 
-        if node_data['name'] not in node_data['path']:
-            node_data['path'].append(node_data['name'])
-        leaf_node = node_data['path'].pop()
-        node_data['leaf'] = leaf_node
-        del node_data['name']
+        if node_data["name"] not in node_data["path"]:
+            node_data["path"].append(node_data["name"])
+        leaf_node = node_data["path"].pop()
+        node_data["leaf"] = leaf_node
+        del node_data["name"]
 
     return data
 
@@ -92,14 +92,14 @@ def map_interests(raw_interests: typing.List[typing.Dict] = None):
         raw_results = raw_interests
     results = []
     for result in raw_results:
-        if 'fields' in result.keys():
-            result = result['fields']
-        if 'path' not in result.keys():
-            result['path'] = ['Uncategorised']
-        if 'key' not in result.keys() and 'id' in result.keys():
-            result['key'] = result.get('id')
-        elif 'key' not in result.keys() and 'id' not in result.keys():
-            result['key'] = str(uuid.uuid4())
+        if "fields" in result.keys():
+            result = result["fields"]
+        if "path" not in result.keys():
+            result["path"] = ["Uncategorised"]
+        if "key" not in result.keys() and "id" in result.keys():
+            result["key"] = result.get("id")
+        elif "key" not in result.keys() and "id" not in result.keys():
+            result["key"] = str(uuid.uuid4())
         results.append(result)
 
     results = flatten_data(results)
@@ -114,11 +114,11 @@ def map_interests(raw_interests: typing.List[typing.Dict] = None):
             if k not in ignored_keys:
                 properties[k] = v
 
-        for path_node in node_data['path']:
+        for path_node in node_data["path"]:
             root.add_child(parent_node, Node(path_node))
             parent_node = path_node
 
-        leaf_name = node_data['leaf']
+        leaf_name = node_data["leaf"]
         root.add_child(parent_node, Leaf(leaf_name, properties))
 
     return root.children

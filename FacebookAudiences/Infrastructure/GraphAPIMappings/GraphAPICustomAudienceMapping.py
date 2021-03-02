@@ -1,15 +1,19 @@
-import typing
-
-from marshmallow import INCLUDE, pre_load
+from typing import Any, MutableMapping
 
 from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesLookalikeSpecDto import \
-    GraphAPIAudiencesLookalikeSpecDto
-from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import \
-    GraphAPIAudiencesPermissionsForActionsDto
-from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import OperationStatus, DataSource, \
-    SharingStatus
+from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesLookalikeSpecDto import (
+    GraphAPIAudiencesLookalikeSpecDto,
+)
+from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPIAudiencesPermissionsForActionsDto import (
+    GraphAPIAudiencesPermissionsForActionsDto,
+)
+from FacebookAudiences.Infrastructure.GraphAPIDtos.GraphAPICustomAudienceDto import (
+    DataSource,
+    OperationStatus,
+    SharingStatus,
+)
+from marshmallow import INCLUDE, pre_load
 
 
 class GraphAPICustomAudienceMapping(MapperBase):
@@ -17,13 +21,14 @@ class GraphAPICustomAudienceMapping(MapperBase):
         unknown = INCLUDE
 
     @pre_load
-    def convert(self, data: typing.Any, **kwargs):
-        if not isinstance(data, typing.MutableMapping):
+    def convert(self, data: Any, **kwargs):
+        if not isinstance(data, MutableMapping):
             data = Tools.convert_to_json(data)
 
         if "permissions_for_actions" in data.keys():
             data["permissions_for_actions"] = GraphAPIAudiencesPermissionsForActionsDto(
-                **data["permissions_for_actions"])
+                **data["permissions_for_actions"]
+            )
 
         if "external_event_source" in data.keys():
             data["external_event_source"] = data["external_event_source"]["id"]
