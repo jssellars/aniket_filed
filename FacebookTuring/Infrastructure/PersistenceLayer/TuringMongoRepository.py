@@ -6,6 +6,9 @@ from datetime import datetime
 from typing import AnyStr, Dict, List, Tuple
 
 from bson import BSON
+from pymongo.errors import AutoReconnect
+from retry import retry
+
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -16,8 +19,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
 )
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
 from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
-from pymongo.errors import AutoReconnect
-from retry import retry
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +49,7 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         return self.__decode_structure_details_from_bson(campaigns)
 
-    def get_campaigns_by_objectives(
-        self, objectives: typing.List, account_id: str = None
-    ) -> typing.List[typing.Dict]:
+    def get_campaigns_by_objectives(self, objectives: typing.List, account_id: str = None) -> typing.List[typing.Dict]:
         self.collection = Level.CAMPAIGN.value
         query = {
             MongoOperator.AND.value: [
@@ -96,9 +95,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return self.__decode_structure_details_from_bson(adsets)
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
-    def get_active_structure_ids(
-        self, key_name: str = None, key_value: str = None
-    ) -> typing.List[typing.Dict]:
+    def get_active_structure_ids(self, key_name: str = None, key_value: str = None) -> typing.List[typing.Dict]:
         query = {
             MongoOperator.AND.value: [
                 {key_name: {MongoOperator.EQUALS.value: key_value}},
@@ -391,9 +388,7 @@ class TuringMongoRepository(MongoRepositoryBase):
         return results
 
     @staticmethod
-    def __get_structure_details_query(
-        level: Level = None, key_value: str = None
-    ) -> Tuple[Dict, Dict]:
+    def __get_structure_details_query(level: Level = None, key_value: str = None) -> Tuple[Dict, Dict]:
         query = {
             MongoOperator.AND.value: [
                 {
@@ -423,9 +418,7 @@ class TuringMongoRepository(MongoRepositoryBase):
             structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
         return structure
 
-    def get_structure_details_many(
-        self, level: Level = None, key_value: str = None
-    ) -> typing.List[typing.Dict]:
+    def get_structure_details_many(self, level: Level = None, key_value: str = None) -> typing.List[typing.Dict]:
         self.collection = level.value
         query, projection = self.__get_structure_details_query(level, key_value)
         structures = self.get(query, projection)
@@ -723,9 +716,3 @@ class TuringMongoRepository(MongoRepositoryBase):
         projection = {MongoOperator.GROUP_KEY.value: MongoProjectionState.ON.value}
         results = self.get(query=query, projection=projection)
         return results
-
-    def new_insights_repository(self):
-        return TuringMongoRepository(config=self.config, database_name=self.config.insights_database_name)
-
-    def new_structures_repository(self):
-        return TuringMongoRepository(config=self.config, database_name=self.config.structures_database_name)

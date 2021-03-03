@@ -4,10 +4,10 @@ import logging
 import os
 import typing
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import chain
 from time import sleep
-from typing import Dict, List
+from typing import Dict
 
 from facebook_business.adobjects.business import Business
 from facebook_business.exceptions import FacebookRequestError
@@ -19,10 +19,6 @@ from FacebookTuring.BackgroundTasks.Orchestrators.Synchronizer import sync
 from FacebookTuring.BackgroundTasks.startup import config, fixtures
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReporter import SyncStatusReporter
-from FacebookTuring.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
-    FacebookTuringDataSyncCompletedEvent,
-    UpdatedBusinessOwnersDetails,
-)
 from FacebookTuring.Infrastructure.IntegrationEvents.MessageTypeEnum import UserTypeEnum
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
     TuringAdAccountJournalRepository,
@@ -64,7 +60,9 @@ class Orchestrator:
         return self
 
     def run(self, business_owner_id: typing.AnyStr = None, user_type: UserTypeEnum = None):
-        start_sync_date = datetime.now()
+
+        self.__update_in_progress_ad_accounts(business_owner_id)
+
         # get latest ad account state for all BO
         ad_accounts_details = self.__account_journal_repository.get_latest_accounts_active(
             business_owner_id=business_owner_id
@@ -89,9 +87,9 @@ class Orchestrator:
                 for business_owner in business_owner_details:
                     executor.submit(
                         sync,
-                        self.__structures_repository.new_structures_repository(),
-                        self.__insights_repository.new_insights_repository(),
-                        self.__account_journal_repository.new_ad_account_journal_repository(),
+                        self.__structures_repository,
+                        self.__insights_repository,
+                        self.__account_journal_repository,
                         [business_owner],
                         user_type,
                         permanent_token,
@@ -183,3 +181,44 @@ class Orchestrator:
             for structure_collection in structure_collections:
                 self.__structures_repository.collection = structure_collection
                 self.__structures_repository.delete_many(query_filter=query)
+
+    def __update_in_progress_ad_accounts(self, business_owner_id: str):
+
+        query = {
+            MongoOperator.AND.value: [
+                {
+                    MongoOperator.OR.value: [
+                        {FacebookMiscFields.insights_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value},
+                        {FacebookMiscFields.structures_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value},
+                        {FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value},
+                    ]
+                },
+                {FacebookMiscFields.business_owner_id: business_owner_id},
+            ]
+        }
+
+        in_progress_ad_accounts = self.__account_journal_repository.get(query=query)
+        account_ids = [entry[FacebookMiscFields.account_id] for entry in in_progress_ad_accounts]
+
+        query = {
+            MongoOperator.SET.value: {
+                FacebookMiscFields.insights_sync_status: AdAccountSyncStatusEnum.PENDING.value,
+                FacebookMiscFields.structures_sync_status: AdAccountSyncStatusEnum.PENDING.value,
+                FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.PENDING.value,
+                FacebookMiscFields.last_synced_on: datetime.now() - timedelta(days=config.days_to_sync),
+            }
+        }
+
+        query_filter = {FacebookMiscFields.account_id: {MongoOperator.IN.value: account_ids}}
+
+        self.__account_journal_repository.update_many(query_filter, query)
+
+        structure_collections = self.__structures_repository.get_collections()
+        insights_collections = self.__insights_repository.get_collections()
+        for structure_collection in structure_collections:
+            self.__structures_repository.collection = structure_collection
+            self.__structures_repository.delete_many(query_filter=query_filter)
+
+        for insights_collection in insights_collections:
+            self.__insights_repository.collection = insights_collection
+            self.__insights_repository.delete_many(query_filter=query_filter)
