@@ -429,7 +429,7 @@ class MongoAdapter(metaclass=type_extensions.Singleton):
     @property
     def client(self):
         if not self._config.ssh_tunnel:
-            self._client = MongoClient(self._config.connection_string_external)
+            self._client = MongoClient(self._config.connection_string_external, connect=False)
 
             return self._client
 
@@ -446,6 +446,7 @@ class MongoAdapter(metaclass=type_extensions.Singleton):
             port=self._ssh_tunnel.local_bind_port,
             username=self._config.mongo_username,
             password=self._config.mongo_password,
+            connect=False,
             retryWrites=self._config.retry_writes,
             maxIdleTimeMS=1000,
             serverSelectionTimeoutMS=60000,
