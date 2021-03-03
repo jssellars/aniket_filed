@@ -776,6 +776,21 @@ FOURTEEN_DAYS_CTR_DOWN = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[
+                MetricClause(
+                    FieldsMetadata.cost_per_result,
+                    TrendEnum.INCREASING,
+                    variance_percentage=20,
+                ),
+                MetricClause(
+                    FieldsMetadata.cpm,
+                    TrendEnum.INCREASING,
+                    variance_percentage=20,
+                ),
+            ],
+            output=OverTimeTrendTemplate.CTR_DOWN_CPR_UP_CPM_UP,
+        ),
+        CauseMetricBase(
+            metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
@@ -1089,6 +1104,21 @@ THIRTY_DAYS_CTR_DOWN = TriggerMetric(
     cause_metrics=[
         CauseMetricBase(
             metric_clauses=[
+                MetricClause(
+                    FieldsMetadata.cost_per_result,
+                    TrendEnum.INCREASING,
+                    variance_percentage=20,
+                ),
+                MetricClause(
+                    FieldsMetadata.cpm,
+                    TrendEnum.INCREASING,
+                    variance_percentage=20,
+                ),
+            ],
+            output=OverTimeTrendTemplate.CTR_DOWN_CPR_UP_CPM_UP,
+        ),
+        CauseMetricBase(
+            metric_clauses=[
                 MetricClause(FieldsMetadata.cpm, TrendEnum.INCREASING, variance_percentage=20),
                 MetricClause(FieldsMetadata.cpc_all, TrendEnum.INCREASING, variance_percentage=20),
             ],
@@ -1265,7 +1295,7 @@ THIRTY_DAYS_BUCKET = [
 
 ADSET_TIME_BUCKETS = [
     StrategyTimeBucket(no_of_days=60, minimum_days_of_data=40, triggers=THIRTY_DAYS_BUCKET, level=LevelEnum.ADSET),
-    StrategyTimeBucket(no_of_days=30, minimum_days_of_data=5, triggers=THIRTY_DAYS_BUCKET, level=LevelEnum.ADSET),
+    StrategyTimeBucket(no_of_days=30, minimum_days_of_data=20, triggers=THIRTY_DAYS_BUCKET, level=LevelEnum.ADSET),
     StrategyTimeBucket(no_of_days=14, minimum_days_of_data=10, triggers=FOURTEEN_DAYS_BUCKET, level=LevelEnum.ADSET),
     StrategyTimeBucket(no_of_days=7, minimum_days_of_data=4, triggers=SEVEN_DAYS_BUCKET, level=LevelEnum.ADSET),
     StrategyTimeBucket(no_of_days=3, minimum_days_of_data=2, triggers=THREE_DAYS_BUCKET, level=LevelEnum.ADSET),

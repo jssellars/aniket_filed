@@ -7,28 +7,27 @@ from typing import ClassVar, Dict, List, Optional, Tuple
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.mongo_adapter import MongoRepositoryBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import INVALID_METRIC_VALUE, TOTAL_KEY
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
     BreakdownData,
     BreakdownGroupedData,
     get_group_data_from_list,
-    get_max_number_of_days)
+    get_max_number_of_days,
+)
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CauseMetricBase,
     TrendEnum,
     recommendation_enums_union,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
-    get_apply_action,
-    ApplyParameters,
-    TOTAL_KEY,
-    INVALID_METRIC_VALUE)
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
@@ -149,7 +148,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                         existing_breakdowns=grouped_data,
                         underperforming_breakdowns=underperforming_breakdowns,
                         metric_name=cause_metric_name,
-                        no_of_days=time_bucket.no_of_days
+                        no_of_days=time_bucket.no_of_days,
                     ),
                     structure.get(FacebookMiscFields.details),
                 )

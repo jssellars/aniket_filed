@@ -9,6 +9,7 @@ from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import RunStatusDexterEngineJournal
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.mongo_adapter import MongoRepositoryBase
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     AdSetOptimizationToResult,
     PixelCustomEventTypeToResult,
@@ -16,18 +17,11 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import 
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
+from FacebookDexter.BackgroundTasks.startup import config
 from FacebookDexter.BackgroundTasks.Strategies.AudienceSizeStrategy import AudienceSizeStrategy
 from FacebookDexter.BackgroundTasks.Strategies.BreakdownStrategy import BreakdownAverageStrategy
 from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import OverTimeTrendStrategy
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownData, BreakdownGroupedData
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
-    CauseMetricBase,
-    MetricClause,
-    StrategyTimeBucket,
-)
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
-from FacebookDexter.BackgroundTasks.startup import config
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesRules import (
     AGE_GENDER_BREAKDOWN_BUCKET,
     AUDIENCE_SIZE_BUCKET,
@@ -35,7 +29,16 @@ from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesRules import
 )
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.AdSetTimeBuckets import ADSET_TIME_BUCKETS
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.AdTimeBuckets import AD_TIME_BUCKETS
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
+    BreakdownData,
+    BreakdownGroupedData,
+)
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.CampaignTimeBuckets import CAMPAIGN_TIME_BUCKETS
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
+    CauseMetricBase,
+    MetricClause,
+    StrategyTimeBucket,
+)
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyDataMongoRepository import StrategyDataMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import StrategyJournalMongoRepository
 
@@ -115,9 +118,7 @@ class DexterStrategyMaster:
                     structures = self.data_repository.get_structures_by_key(
                         key=LevelIdKeyEnum.ACCOUNT.value, key_value=account_id, level=level, structure_key=structure_key
                     )
-                    self.data_repository.set_insights_collection(
-                        level, breakdown, action_breakdown, config
-                    )
+                    self.data_repository.set_insights_collection(level, breakdown, action_breakdown, config)
 
                     for structure in structures:
                         try:

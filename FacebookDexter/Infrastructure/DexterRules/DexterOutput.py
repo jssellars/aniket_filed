@@ -3,7 +3,7 @@ from enum import Enum
 from typing import ClassVar, Optional
 
 from Core.mongo_adapter import MongoRepositoryBase, filter_null_values_from_documents
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyActionType
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import ApplyActionType
 
 
 class RecommendationPriority(Enum):

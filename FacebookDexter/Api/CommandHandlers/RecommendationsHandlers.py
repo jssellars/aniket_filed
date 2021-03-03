@@ -3,18 +3,19 @@ from typing import Dict, Union
 
 import humps
 from bson import ObjectId
+
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from FacebookDexter.Api.Commands.RecommendationPageCommand import NumberOfPagesCommand, RecommendationPageCommand
 from FacebookDexter.Api.startup import config, fixtures
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import HIDDEN_INTERESTS_MESSAGE
 from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message, get_output_enum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import get_apply_action
 
 RECOMMENDATION_FIELDS = [
     RecommendationField.TEMPLATE,

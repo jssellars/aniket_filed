@@ -1265,7 +1265,7 @@ THIRTY_DAYS_BUCKET = [
 
 AD_TIME_BUCKETS = [
     StrategyTimeBucket(no_of_days=60, minimum_days_of_data=40, triggers=THIRTY_DAYS_BUCKET, level=LevelEnum.AD),
-    StrategyTimeBucket(no_of_days=30, minimum_days_of_data=5, triggers=THIRTY_DAYS_BUCKET, level=LevelEnum.AD),
+    StrategyTimeBucket(no_of_days=30, minimum_days_of_data=20, triggers=THIRTY_DAYS_BUCKET, level=LevelEnum.AD),
     StrategyTimeBucket(no_of_days=14, minimum_days_of_data=10, triggers=FOURTEEN_DAYS_BUCKET, level=LevelEnum.AD),
     StrategyTimeBucket(no_of_days=7, minimum_days_of_data=4, triggers=SEVEN_DAYS_BUCKET, level=LevelEnum.AD),
     StrategyTimeBucket(no_of_days=3, minimum_days_of_data=2, triggers=THREE_DAYS_BUCKET, level=LevelEnum.AD),

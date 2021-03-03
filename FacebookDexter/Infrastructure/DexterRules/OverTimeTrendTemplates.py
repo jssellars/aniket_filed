@@ -1,6 +1,6 @@
 from enum import Enum
 
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyActionType
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import ApplyActionType
 from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecommendationOutput, RecommendationPriority
 
 
@@ -225,6 +225,15 @@ class OverTimeTrendTemplate(Enum):
         "Your campaign is performing really well, consider increasing the budget!",
         "Increase your budget by 20%. ",
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
+    )
+
+    CTR_DOWN_CPR_UP_CPM_UP = DexterRecommendationOutput(
+        ("We've noticed that your adset is fatiguing. Consider recreating the adset. "),
+        RecommendationPriority.HIGH,
+        "Recreate adset",
+        "Looks like your adset if fatiguing",
+        "Dexter suggests you to recreate the adset",
+        apply_action_type=ApplyActionType.DUPLICATE_AND_PAUSE_STRUCTURE,
     )
 
     CPM_UP_RESULTS_DOWN_CTR_UP = DexterRecommendationOutput(

@@ -10,8 +10,11 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums impor
 from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters
+from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
     BreakdownGroupedData,
     get_group_data_from_list,
@@ -22,8 +25,6 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTime
     TrendEnum,
     recommendation_enums_union,
 )
-from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters, get_apply_action
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
@@ -153,6 +154,8 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                         dexter_recommendation.process_output(
                             recommendations_repository, recommendation_entry_model=entry.get_extended_db_entry()
                         )
+                        # TODO: This can be commented if we want to stop after the
+                        #  first recommendation for the structure
                         return
 
         return

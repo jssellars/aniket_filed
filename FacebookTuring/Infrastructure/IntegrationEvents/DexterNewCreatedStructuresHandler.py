@@ -1,15 +1,15 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List
+from typing import List
 
 from marshmallow import EXCLUDE, fields
 
+from Core.fixtures import Fixtures
+from Core.mapper import MapperBase, MapperNestedField
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping, Level
-from Core.mapper import MapperBase, MapperNestedField
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
@@ -55,20 +55,16 @@ class DexterNewCreatedStructuresHandler:
         return cls
 
     @classmethod
-    def handle(cls, message: DexterNewCreatedStructureEvent, permanent_token: str):
+    def handle(cls, message: DexterNewCreatedStructureEvent, fixtures: Fixtures):
+
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(message.business_owner_id)
         for structure in message.new_created_structures:
             cls.__sync(permanent_token, message.business_owner_id, structure)
 
     @classmethod
-    def __sync(
-            cls,
-            permanent_token: str,
-            business_owner_id: str,
-            structure: NewCreatedStructureKeys
-    ) -> None:
+    def __sync(cls, permanent_token: str, business_owner_id: str, structure: NewCreatedStructureKeys) -> None:
 
         # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        _ = GraphAPISdkBase(cls._config.facebook, permanent_token)
         try:
             graph_api_client = GraphAPIClientBase(permanent_token)
             structure_fields = StructureFields.get(structure.level)
@@ -94,7 +90,9 @@ class DexterNewCreatedStructuresHandler:
             structure_id = getattr(
                 updated_structure, LevelToFacebookIdKeyMapping.get_enum_by_name(Level(structure.level).name).value
             )
-            cls.__repository.add_structure(level=Level[structure.level.upper()], key_value=structure_id, document=updated_structure)
+            cls.__repository.add_structure(
+                level=Level[structure.level.upper()], key_value=structure_id, document=updated_structure
+            )
         except Exception as e:
             raise e
 
@@ -109,5 +107,3 @@ class DexterNewCreatedStructuresHandler:
         )
         api_config.fields = fields
         return api_config
-
-

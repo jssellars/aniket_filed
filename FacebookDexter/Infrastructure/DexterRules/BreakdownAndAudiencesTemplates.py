@@ -1,6 +1,6 @@
 from enum import Enum
 
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyActionType
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import ApplyActionType
 from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecommendationOutput
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 
