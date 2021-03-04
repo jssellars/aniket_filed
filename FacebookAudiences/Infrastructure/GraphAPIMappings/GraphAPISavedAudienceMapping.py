@@ -3,6 +3,7 @@ import logging
 from functools import lru_cache
 from typing import Any, Dict
 
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import Gender
 from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.search import GraphAPICountryGroupsLegend, GraphAPILanguagesHandler
 from Core.Web.FacebookGraphAPI.Tools import Tools
@@ -60,6 +61,7 @@ class GraphAPISavedAudienceMapping(MapperBase):
             self.__map_audience_locations(data)
             self.__map_audience_languages(data)
             self.__map_audience_interests(data)
+            self.__map_targeting_fields_to_audience(data)
 
         return data
 
@@ -139,3 +141,21 @@ class GraphAPISavedAudienceMapping(MapperBase):
             # Some interests might be removed from facebook
             logger.exception(repr(e))
             return None
+
+    def __map_targeting_fields_to_audience(self, data: Any):  # noqa
+        targeting = data["targeting"]
+
+        if {Targeting.Field.age_max, Targeting.Field.age_min}.issubset(targeting.keys()):
+            data["age_range"] = {
+                Targeting.Field.age_min: targeting[Targeting.Field.age_min],
+                Targeting.Field.age_max: targeting[Targeting.Field.age_max],
+            }
+
+        data[Targeting.Field.custom_audiences] = targeting.get(Targeting.Field.custom_audiences, [])
+        data[Targeting.Field.excluded_custom_audiences] = targeting.get(Targeting.Field.excluded_custom_audiences, [])
+
+        genders = targeting.get(Targeting.Field.genders)
+        if genders:
+            data["gender"] = genders[0] if len(genders) == 1 else Gender.ALL.value
+        else:
+            data["gender"] = Gender.ALL.value

@@ -32,3 +32,7 @@ class GraphAPISavedAudienceDto:
     interests: List[Dict] = field(default_factory=list)
     narrow_interests: List[Dict] = field(default_factory=list)
     excluded_interests: List[Dict] = field(default_factory=list)
+    age_range: Dict = field(default_factory=dict)
+    gender: int = None
+    custom_audiences: List[Dict] = field(default_factory=list)
+    excluded_custom_audiences: List[Dict] = field(default_factory=list)
