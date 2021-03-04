@@ -3,17 +3,17 @@ from typing import Dict
 
 from bson import BSON
 
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.settings import Prod
-from FacebookTuring.Api.startup import config, fixtures
-from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes, AccountEnvNotAllowedException
+from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import AccountEnvNotAllowedException, allow_structure_changes
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
-    LevelToGraphAPIStructure,
     Level,
     LevelToFacebookIdKeyMapping,
+    LevelToGraphAPIStructure,
 )
+from FacebookTuring.Api.startup import config, fixtures
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
@@ -57,7 +57,6 @@ class AdsManagerDeleteStructureCommandHandler:
 
         structure = LevelToGraphAPIStructure.get(level, facebook_id)
         structure.api_delete()
-
 
         # Update structure to REMOVED in our DB
         for structure in to_be_deleted_structures:

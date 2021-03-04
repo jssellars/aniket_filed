@@ -3,7 +3,7 @@ import sys
 import typing
 from copy import deepcopy
 from datetime import datetime
-from typing import AnyStr, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 from bson import BSON
 from pymongo.errors import AutoReconnect
@@ -11,14 +11,13 @@ from retry import retry
 
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     Level,
     LevelToFacebookIdKeyMapping,
     LevelToFacebookNameKeyMapping,
 )
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
-from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 
 logger = logging.getLogger(__name__)
 
@@ -128,113 +127,6 @@ class TuringMongoRepository(MongoRepositoryBase):
 
         return results
 
-    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
-    def get_bo_structures_by_ids(
-        self, business_owner_id: AnyStr, structure_id_key: AnyStr, structure_ids: List[AnyStr]
-    ) -> List[Dict]:
-        query = {
-            MongoOperator.AND.value: [
-                {structure_id_key: {MongoOperator.IN.value: structure_ids}},
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
-                    }
-                },
-                {"business_owner_facebook_id": business_owner_id},
-            ]
-        }
-
-        projection = {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value}
-
-        try:
-            structures = list(self.collection.find(query, projection))
-            for structure in structures:
-                if FacebookMiscFields.details in structure:
-                    structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
-        except Exception as e:
-            logger.error(f"Failed to get active structures ids || {repr(e)}")
-            raise e
-
-        return structures
-
-    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
-    def get_bo_structures_by_id(
-        self, business_owner_id: AnyStr, structure_id_key: AnyStr, structure_id: AnyStr
-    ) -> List[Dict]:
-        query = {
-            MongoOperator.AND.value: [
-                {structure_id_key: structure_id},
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
-                    }
-                },
-                {"business_owner_facebook_id": business_owner_id},
-            ]
-        }
-
-        projection = {MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value}
-
-        try:
-            structures = list(self.collection.find(query, projection))
-            for structure in structures:
-                if FacebookMiscFields.details in structure:
-                    structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
-        except Exception as e:
-            logger.error(f"Failed to get active structures ids || {repr(e)}")
-            raise e
-
-        return structures
-
-    def get_bo_unique_campaign_ids(
-        self, business_owner_id: AnyStr, structure_id_key: AnyStr, structure_ids: List[AnyStr]
-    ):
-        query = {
-            MongoOperator.AND.value: [
-                {structure_id_key: {MongoOperator.IN.value: structure_ids}},
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.PAUSED.value]
-                    }
-                },
-                {"business_owner_facebook_id": business_owner_id},
-            ]
-        }
-
-        try:
-            campaign_ids = list(self.collection.distinct("campaign_id", query))
-        except Exception as e:
-            logger.error(f"Failed to get active structures ids || {repr(e)}")
-            raise e
-
-        return campaign_ids
-
-    def get_structure_ids(self, level: Level = None, account_id: str = None) -> typing.List[str]:
-        self.collection = level.value
-        query = {
-            MongoOperator.AND.value: [
-                {
-                    LevelToFacebookIdKeyMapping.get_enum_by_name(Level.ACCOUNT.name).value: {
-                        MongoOperator.EQUALS.value: account_id
-                    }
-                },
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.IN.value: [StructureStatusEnum.ACTIVE.value, StructureStatusEnum.REMOVED.value]
-                    }
-                },
-            ]
-        }
-        projection = {
-            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
-            LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: MongoProjectionState.ON.value,
-        }
-        structure_ids = self.get(query, projection)
-        return [
-            structure_id.get(LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
-            for structure_id in structure_ids
-        ]
-
     def get_structure_info(
         self,
         level: Level = None,
@@ -338,55 +230,6 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.get(query, projection)
         return structures
 
-    @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
-    def get_id_and_name_by_key(
-        self,
-        level: Level = None,
-        key_value: typing.Any = None,
-        id_key_name: str = None,
-        name_key_name: str = None,
-    ) -> typing.List[typing.Dict]:
-        self.collection = level.value
-        # only get active data
-        query = {
-            MongoOperator.AND.value: [
-                {
-                    LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
-                        MongoOperator.EQUALS.value: key_value
-                    }
-                },
-                {FacebookMiscFields.status: {MongoOperator.EQUALS.value: StructureStatusEnum.ACTIVE.value}},
-            ]
-        }
-        projection = {
-            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
-            id_key_name: MongoProjectionState.ON.value,
-            name_key_name: MongoProjectionState.ON.value,
-        }
-
-        start = datetime.now()
-        try:
-            results = self.collection.find(query, projection)
-            results = list(results)
-        except Exception as e:
-            logger.error(
-                f"Failed to get structures by id and name || {repr(e)}",
-                extra=dict(duration=(datetime.now() - start).total_seconds(), query=query, projection=projection),
-            )
-            raise e
-
-        logger.debug(
-            "Get structures by id and name",
-            extra=dict(
-                data_size=sys.getsizeof(results),
-                duration=(datetime.now() - start).total_seconds(),
-                query=query,
-                projection=projection,
-            ),
-        )
-
-        return results
-
     @staticmethod
     def __get_structure_details_query(level: Level = None, key_value: str = None) -> Tuple[Dict, Dict]:
         query = {
@@ -417,12 +260,6 @@ class TuringMongoRepository(MongoRepositoryBase):
         if FacebookMiscFields.details in structure.keys():
             structure[FacebookMiscFields.details] = BSON.decode(structure[FacebookMiscFields.details])
         return structure
-
-    def get_structure_details_many(self, level: Level = None, key_value: str = None) -> typing.List[typing.Dict]:
-        self.collection = level.value
-        query, projection = self.__get_structure_details_query(level, key_value)
-        structures = self.get(query, projection)
-        return self.__decode_structure_details_from_bson(structures)
 
     def get_all_structures_by_ad_account_id(
         self, level: Level = None, account_id: str = None
@@ -493,64 +330,6 @@ class TuringMongoRepository(MongoRepositoryBase):
         structures = self.__decode_structure_details_from_bson(structures)
         return [structure[FacebookMiscFields.details] for structure in structures]
 
-    def get_results_fields_from_adsets(
-        self, structure_ids: typing.List[str] = None, structure_key: str = None
-    ) -> typing.List[typing.Dict]:
-        self.collection = Level.ADSET.value
-        query = {
-            MongoOperator.AND.value: [
-                {structure_key: {MongoOperator.IN.value: structure_ids}},
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.NOTIN.value: [
-                            StructureStatusEnum.ARCHIVED.value,
-                            StructureStatusEnum.REMOVED.value,
-                            StructureStatusEnum.DEPRECATED.value,
-                        ]
-                    }
-                },
-            ]
-        }
-
-        projection = {
-            GraphAPIInsightsFields.custom_event_type: MongoProjectionState.ON.value,
-            GraphAPIInsightsFields.optimization_goal: MongoProjectionState.ON.value,
-            structure_key: MongoProjectionState.ON.value,
-            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
-        }
-
-        structures = self.get(query, projection)
-        return structures
-
-    def get_all_structures_by_id_list(
-        self, level: Level = None, structure_ids: typing.List[str] = None, structure_key: str = None
-    ) -> typing.List[typing.Dict]:
-        self.collection = level.value
-        query = {
-            MongoOperator.AND.value: [
-                {structure_key: {MongoOperator.IN.value: structure_ids}},
-                {
-                    FacebookMiscFields.status: {
-                        MongoOperator.NOTIN.value: [
-                            StructureStatusEnum.ARCHIVED.value,
-                            StructureStatusEnum.DEPRECATED.value,
-                        ]
-                    }
-                },
-            ]
-        }
-
-        projection = {
-            FacebookMiscFields.details: MongoProjectionState.ON.value,
-            MongoOperator.GROUP_KEY.value: MongoProjectionState.OFF.value,
-        }
-
-        structures = self.get(query, projection)
-        structures = self.__decode_structure_details_from_bson(structures)
-        return [
-            structure[FacebookMiscFields.details] for structure in structures if FacebookMiscFields.details in structure
-        ]
-
     def get_structures_by_parent_id(self, level: Level, parent_id) -> List[Dict]:
 
         child_results = []
@@ -610,61 +389,6 @@ class TuringMongoRepository(MongoRepositoryBase):
             else:
                 structures[index][FacebookMiscFields.details] = {}
         return structures
-
-    # TODO: This function can be removed once the delete functionality is properly working
-    def change_status(
-        self, level: Level = None, key_value: typing.Any = None, current_status: int = None, new_status: int = None
-    ) -> typing.NoReturn:
-        self.collection = level.value
-        if current_status is None:
-            current_status = [
-                StructureStatusEnum.ACTIVE.value,
-                StructureStatusEnum.REMOVED.value,
-                StructureStatusEnum.PAUSED.value,
-            ]
-        else:
-            current_status = [current_status]
-        query_filter = {
-            MongoOperator.AND.value: [
-                {
-                    LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {
-                        MongoOperator.EQUALS.value: key_value
-                    }
-                },
-                {FacebookMiscFields.status: {MongoOperator.IN.value: current_status}},
-            ]
-        }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.status: new_status,
-                FacebookMiscFields.last_updated_at: datetime.now(),
-            }
-        }
-        self.update_one(query_filter, query)
-
-    def change_status_many(
-        self, level: Level = None, key_value: typing.Any = None, current_status: int = None, new_status: int = None
-    ) -> typing.NoReturn:
-        self.collection = level.value
-        query_filter = {
-            MongoOperator.AND.value: [
-                {LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value: {MongoOperator.IN.value: key_value}},
-                {FacebookMiscFields.status: {MongoOperator.EQUALS.value: current_status}},
-            ]
-        }
-        query = {
-            MongoOperator.SET.value: {
-                FacebookMiscFields.status: new_status,
-                FacebookMiscFields.last_updated_at: datetime.now(),
-            }
-        }
-        self.update_many(query_filter, query)
-
-    def __get_structure_id(self, structure: typing.Any = None, level: Level = None) -> str:
-        if isinstance(structure, dict):
-            return structure.get(LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
-        else:
-            return getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(level.name).value)
 
     def add_updated_structures(self, level, account_id: str, structures: List[Dict]) -> None:
         self.collection = level.value

@@ -5,8 +5,8 @@ from typing import Dict, List
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Domain.AdAccountSyncStatusEnum import AdAccountSyncStatusEnum
-from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 from FacebookTuring.Infrastructure.Domain.SyncStatusReport import SyncStatusReport
 from FacebookTuring.Infrastructure.IntegrationEvents.BusinessOwnerPreferencesChangedEvent import AdAccountDetails
 
