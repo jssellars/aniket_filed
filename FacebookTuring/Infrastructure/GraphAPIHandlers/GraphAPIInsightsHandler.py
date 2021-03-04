@@ -471,6 +471,7 @@ class GraphAPIInsightsHandler:
             requested_fields=requested_fields,
             page_size=page_size,
             next_page_cursor=next_page_cursor,
+            insights_actions_filtering=query.action_filtering,
         )
 
         response = cls.right_join_insights_and_structures(
@@ -531,13 +532,18 @@ class GraphAPIInsightsHandler:
         requested_fields: List[FieldsMetadata] = None,
         page_size: int = 200,
         next_page_cursor: str = None,
+        insights_actions_filtering: Dict = None,
     ):
         requested_structure_fields = [
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
         ]
         facebook_structure_fields = [structure_field.facebook_fields for structure_field in requested_structure_fields]
         facebook_structure_fields = list(itertools.chain(*facebook_structure_fields))
-        structures_filter = {"after": next_page_cursor, "limit": page_size, "filtering": parameters.get("filtering")}
+        structures_filter = {
+            "after": next_page_cursor,
+            "limit": page_size,
+            "filtering": parameters.get("filtering", []),
+        }
 
         structures = get_sdk_structures(
             ad_account_id, Level[level.upper()], facebook_structure_fields, structures_filter
@@ -556,11 +562,11 @@ class GraphAPIInsightsHandler:
         structure_ids = [x["id"] for x in structures_response if "id" in x]
         next_page_cursor = get_next_page_cursor(structures)
 
-        if not parameters.get("filtering"):
-            facebook_structure_key = LevelToFacebookIdKeyMapping[level.upper()].value.replace("_", ".")
-            parameters["filtering"] = json.dumps(
-                [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, structure_ids)]
-            )
+        facebook_structure_key = LevelToFacebookIdKeyMapping[level.upper()].value.replace("_", ".")
+        filtering = [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, structure_ids)]
+        if insights_actions_filtering:
+            filtering.append(insights_actions_filtering)
+        parameters["filtering"] = filtering
 
         # The after cursor is valid only for structures, not insights on this flow
         parameters.pop("after", None)

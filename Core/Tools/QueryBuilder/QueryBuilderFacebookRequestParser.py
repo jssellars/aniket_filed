@@ -348,8 +348,8 @@ class QueryBuilderFacebookRequestParser:
         filter_objects = []
 
         if self.action_filtering:
-            filter_objects.append(
-                create_facebook_filter("action_type", AgGridFacebookOperator.IN, self.action_filtering)
+            self.action_filtering = create_facebook_filter(
+                "action_type", AgGridFacebookOperator.IN, self.action_filtering
             )
 
         if not self.has_delivery and not filter_model:
@@ -362,7 +362,7 @@ class QueryBuilderFacebookRequestParser:
                 filter_value = filter_val["filter"]
                 filter_objects.append(create_facebook_filter(facebook_filter_name, filter_operator, filter_value))
 
-        self.filtering = json.dumps(filter_objects)
+        self.filtering = filter_objects
 
     def parse_sort_condition(self, sort_model=None) -> None:
 
