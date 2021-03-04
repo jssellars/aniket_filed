@@ -1,19 +1,19 @@
 from datetime import datetime
 
+from Core.settings import Prod
+from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import AccountEnvNotAllowedException, allow_structure_changes
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.settings import Prod
-from FacebookTuring.Api.startup import config, fixtures
-from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes, AccountEnvNotAllowedException
-from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import GraphAPIRequestSingleStructure
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
-    LevelToGraphAPIStructure,
-    LevelToFacebookIdKeyMapping,
     Level,
+    LevelToFacebookIdKeyMapping,
+    LevelToGraphAPIStructure,
 )
-from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookTuring.Api.startup import config, fixtures
+from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 

@@ -2,9 +2,8 @@ import functools
 import logging
 import operator
 from time import sleep
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
@@ -12,9 +11,9 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import get_sdk_structur
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
-from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields, StructureMapping
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 logger = logging.getLogger(__name__)
@@ -60,38 +59,38 @@ class StructuresSyncronizer:
     def __is_complete_structure(self, structure=None, level=None) -> bool:
         if level == Level.CAMPAIGN:
             if (
-                    getattr(structure, GraphAPIInsightsFields.campaign_name) is None
-                    or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
             ):
                 return False
 
         if level == Level.ADSET:
             if (
-                    getattr(structure, GraphAPIInsightsFields.campaign_name) is None
-                    or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
-                    or getattr(structure, GraphAPIInsightsFields.adset_name) is None
-                    or getattr(structure, GraphAPIInsightsFields.adset_id) is None
+                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_name) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_id) is None
             ):
                 return False
 
         if level == Level.AD:
             if (
-                    getattr(structure, GraphAPIInsightsFields.campaign_name) is None
-                    or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
-                    or getattr(structure, GraphAPIInsightsFields.adset_name) is None
-                    or getattr(structure, GraphAPIInsightsFields.adset_id) is None
-                    or getattr(structure, GraphAPIInsightsFields.ad_name) is None
-                    or getattr(structure, GraphAPIInsightsFields.ad_id) is None
+                getattr(structure, GraphAPIInsightsFields.campaign_name) is None
+                or getattr(structure, GraphAPIInsightsFields.campaign_id) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_name) is None
+                or getattr(structure, GraphAPIInsightsFields.adset_id) is None
+                or getattr(structure, GraphAPIInsightsFields.ad_name) is None
+                or getattr(structure, GraphAPIInsightsFields.ad_id) is None
             ):
                 return False
 
         return True
 
     def __sync(
-            self,
-            level: Level = None,
-            account_id: str = None,
-            fields: List[str] = None,
+        self,
+        level: Level = None,
+        account_id: str = None,
+        fields: List[str] = None,
     ) -> None:
 
         structures = get_sdk_structures(account_id, level, fields, params={"limit": self.PAGE_SIZE})
@@ -132,12 +131,12 @@ class StructuresSyncronizer:
         self.__mongo_repository.add_updated_structures(self.level, structure_ids, structures)
 
     def build_get_structure_config(
-            self,
-            permanent_token: str = None,
-            level: str = None,
-            ad_account_id: str = None,
-            fields: List[str] = None,
-            filter_params: List[Dict] = None,
+        self,
+        permanent_token: str = None,
+        level: str = None,
+        ad_account_id: str = None,
+        fields: List[str] = None,
+        filter_params: List[Dict] = None,
     ) -> GraphAPIClientBaseConfig:
         api_config = GraphAPIClientBaseConfig()
         api_config.try_partial_requests = True
@@ -165,9 +164,7 @@ class StructuresSyncronizer:
         return fields
 
     @staticmethod
-    def __set_business_owner_id(
-            structures: List[Any] = None, business_owner_id: str = None
-    ) -> List[Any]:
+    def __set_business_owner_id(structures: List[Any] = None, business_owner_id: str = None) -> List[Any]:
         for index in range(len(structures)):
             structures[index].business_owner_facebook_id = business_owner_id
         return structures

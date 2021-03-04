@@ -1,7 +1,7 @@
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureModelFieldsBase import StructureModelFieldBase
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 
 class CampaignModelFields(StructureModelFieldBase):
@@ -43,14 +43,14 @@ class CampaignModelFields(StructureModelFieldBase):
         FieldsMetadata.updated_time,
         # FieldsMetadata.ad_rules_governed,
         # FieldsMetadata.copies,
-        FieldsMetadata.recommendations
+        FieldsMetadata.recommendations,
     ]
 
     insights_fields = [
         FieldsMetadata.account_name,
         FieldsMetadata.account_id,
         FieldsMetadata.campaign_id,
-        FieldsMetadata.campaign_name
+        FieldsMetadata.campaign_name,
     ]
 
     required_structure_fields = [
@@ -67,5 +67,5 @@ class CampaignModelFields(StructureModelFieldBase):
         GraphAPIInsightsFields.created_time,
         FieldsMetadata.start_date,
         FacebookMiscFields.end_time,
-        FacebookMiscFields.date_added
+        FacebookMiscFields.date_added,
     ]

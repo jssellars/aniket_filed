@@ -1,8 +1,9 @@
 import logging
 from dataclasses import asdict
+from functools import lru_cache
 from typing import List
 
-# from facebook_business.adobjects.adsinterest import AdsInterest TODO: find a way to cache all the interest without using this class
+from facebook_business.adobjects.abstractcrudobject import AbstractCrudObject
 from facebook_business.adobjects.ad import Ad as FacebookAd
 from facebook_business.adobjects.flexibletargeting import FlexibleTargeting
 from facebook_business.adobjects.targeting import Targeting
@@ -13,28 +14,12 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, FacebookMiscFields, Gender
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields
 from Core.Web.FacebookGraphAPI.search import GraphAPICountryGroupsLegend, GraphAPILanguagesHandler
-from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Infrastructure.Domain.fe_structure_models import Ad, AdSet, Campaign
-from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureFields
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
+from FacebookCampaignsBuilder.Infrastructure.Domain.fe_structure_models import Ad, AdSet, Campaign, Interest
 
 logger = logging.getLogger(__name__)
-
-
-class CampaignKeyMap:
-    id = "campaign_id"
-    name = "campaign_name"
-
-
-class AdSetKeyMap:
-    id = "adset_id"
-    name = "adset_name"
-
-
-class AdKeyMap:
-    id = "ad_id"
-    name = "ad_name"
 
 
 LOCATION_TYPES_TO_SINGULAR = {
@@ -45,10 +30,6 @@ LOCATION_TYPES_TO_SINGULAR = {
     "zips": "zip",
     "electoral_districts": "electoral_district",
 }
-
-LEVEL_TO_NAME_KEY = {Level.CAMPAIGN: CampaignKeyMap.name, Level.ADSET: AdSetKeyMap.name, Level.AD: AdKeyMap.name}
-
-LEVEL_TO_ID_KEY = {Level.CAMPAIGN: CampaignKeyMap.id, Level.ADSET: AdSetKeyMap.id, Level.AD: AdKeyMap.id}
 
 
 class CampaignTreesStructure:
@@ -69,9 +50,6 @@ class CampaignTreeBuilder:
         self.level = level_enum
         self.structure_ids = structure_ids
         self.business_owner_facebook_id = business_owner_facebook_id
-        self.repository = TuringMongoRepository(
-            config=config.mongo, database_name=config.mongo.structures_database_name, collection_name=self.level.value
-        )
 
         permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=config.facebook)
@@ -208,8 +186,7 @@ class CampaignTreeBuilder:
 
             adset.device_platforms = targeting.get(Targeting.Field.device_platforms, ["mobile", "desktop"])
 
-            # TODO: Uncomment when the interests issue is solved
-            # self.__map_adset_interests(adset, targeting)
+            self.__map_adset_interests(adset, targeting)
             self.__map_adset_locations(adset, targeting)
             self.__map_adset_languages(adset, targeting)
 
@@ -261,17 +238,18 @@ class CampaignTreeBuilder:
         if _interest:
             adset_interests.append(_interest)
 
-    # @staticmethod
-    # @lru_cache(maxsize=1024)  # TODO: this can be changed and extracted as a constant
-    # def __get_interest(interest_id):
-    #     try:
-    #         graph_interest = AdsInterest(interest_id)
-    #         _interest = Interest(**dict(graph_interest.api_get()))
-    #         return _interest
-    #     except Exception as e:
-    #         # Some interests might be removed from facebook
-    #         logger.exception(repr(e))
-    #         return None
+    @staticmethod
+    @lru_cache(maxsize=1024)  # TODO: this can be changed and extracted as a constant
+    def __get_interest(interest_id):
+        try:
+            interest_obj = AbstractCrudObject()
+            fb_api = interest_obj.get_api()
+            interest = fb_api.call(method="GET", path=(interest_id,))
+            return Interest(**interest.json())
+        except Exception as e:
+            # Some interests might be removed from facebook
+            logger.exception(repr(e))
+            return None
 
     @staticmethod
     def __map_ads(raw_ads) -> List[Ad]:

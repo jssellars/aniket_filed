@@ -7,14 +7,16 @@ from facebook_business.adobjects.campaign import Campaign
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
+    Level,
+    LevelToFacebookIdKeyMapping,
+    LevelToGraphAPIStructure,
+)
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsManagerCampaignTreeStructureQuery
 from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import \
-    GraphAPIRequestSingleStructure
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure, \
-    LevelToFacebookIdKeyMapping
-from FacebookTuring.Infrastructure.Mappings.StructureMapping import StructureMapping, StructureFields
+from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestSingleStructure import GraphAPIRequestSingleStructure
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
@@ -27,8 +29,8 @@ class AdsManagerDuplicateStructureCommandHandler:
 
     def handle(self, command, level, facebook_id, business_owner_facebook_id):
         # get business owner permanent Facebook token
-        business_owner_permanent_token = (
-            fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
+        business_owner_permanent_token = fixtures.business_owner_repository.get_permanent_token(
+            business_owner_facebook_id
         )
 
         # Create a Facebook API client
@@ -38,73 +40,79 @@ class AdsManagerDuplicateStructureCommandHandler:
         if command.parent_ids:
             try:
                 for parent_id in command.parent_ids:
-                    self.__duplicate_structure(command,
-                                               business_owner_facebook_id,
-                                               business_owner_permanent_token,
-                                               level,
-                                               facebook_id,
-                                               parent_id)
+                    self.__duplicate_structure(
+                        command,
+                        business_owner_facebook_id,
+                        business_owner_permanent_token,
+                        level,
+                        facebook_id,
+                        parent_id,
+                    )
             except Exception as e:
                 raise e
         else:
             try:
-                self.__duplicate_structure(command,
-                                           business_owner_facebook_id,
-                                           business_owner_permanent_token,
-                                           level,
-                                           facebook_id)
+                self.__duplicate_structure(
+                    command, business_owner_facebook_id, business_owner_permanent_token, level, facebook_id
+                )
             except Exception as e:
                 raise e
 
-    def __duplicate_structure(self,
-                              command,
-                              business_owner_facebook_id,
-                              business_owner_permanent_token,
-                              level,
-                              facebook_id,
-                              parent_id=None):
+    def __duplicate_structure(
+        self, command, business_owner_facebook_id, business_owner_permanent_token, level, facebook_id, parent_id=None
+    ):
         try:
             tree = AdsManagerCampaignTreeStructureQuery.get(level, facebook_id)
         except Exception as e:
             raise AdsManagerDuplicateStructureCommandHandlerException(e)
 
         if level == Level.ADSET.value:
-            tree["children"] = [entry for entry in tree['children'] if entry['id'] == facebook_id]
+            tree["children"] = [entry for entry in tree["children"] if entry["id"] == facebook_id]
 
         for index in range(int(command.number_of_duplicates)):
             new_structure_facebook_id = self.__duplicate_structure_on_facebook(level, facebook_id, parent_id)
 
             # get full STRUCTURE for newly created entity
-            new_structure_details = self.__get_new_structure_details(business_owner_permanent_token,
-                                                                     new_structure_facebook_id, level)
+            new_structure_details = self.__get_new_structure_details(
+                business_owner_permanent_token, new_structure_facebook_id, level
+            )
 
             # Add new STRUCTURE
-            self.__save_structure_details(business_owner_facebook_id=business_owner_facebook_id,
-                                          structure=new_structure_details,
-                                          level=level)
+            self.__save_structure_details(
+                business_owner_facebook_id=business_owner_facebook_id, structure=new_structure_details, level=level
+            )
 
             if level == Level.CAMPAIGN.value:
                 for adset in tree["children"]:
-                    new_adset_facebook_id = self.__duplicate_adset(adset["id"], business_owner_facebook_id, business_owner_permanent_token,
-                                                                   new_structure_facebook_id)
+                    new_adset_facebook_id = self.__duplicate_adset(
+                        adset["id"],
+                        business_owner_facebook_id,
+                        business_owner_permanent_token,
+                        new_structure_facebook_id,
+                    )
 
                     for ad in adset["children"]:
-                        self.__duplicate_ad(ad["id"], business_owner_facebook_id, business_owner_permanent_token, new_adset_facebook_id)
+                        self.__duplicate_ad(
+                            ad["id"], business_owner_facebook_id, business_owner_permanent_token, new_adset_facebook_id
+                        )
 
             elif level == Level.ADSET.value:
                 for ad_id in tree["children"]:
-                    self.__duplicate_ad(ad_id, business_owner_facebook_id, business_owner_permanent_token, new_structure_facebook_id)
+                    self.__duplicate_ad(
+                        ad_id, business_owner_facebook_id, business_owner_permanent_token, new_structure_facebook_id
+                    )
 
     def __duplicate_adset(self, adset_id, business_owner_facebook_id, business_owner_permanent_token, parent_id):
         new_adset_facebook_id = self.__duplicate_structure_on_facebook(Level.ADSET.value, adset_id, parent_id)
 
         # get full STRUCTURE for newly created entity
-        new_adset_details = self.__get_new_structure_details(business_owner_permanent_token,
-                                                             new_adset_facebook_id, Level.ADSET.value)
+        new_adset_details = self.__get_new_structure_details(
+            business_owner_permanent_token, new_adset_facebook_id, Level.ADSET.value
+        )
         # Add new STRUCTURE
-        self.__save_structure_details(business_owner_facebook_id=business_owner_facebook_id,
-                                      structure=new_adset_details,
-                                      level=Level.ADSET.value)
+        self.__save_structure_details(
+            business_owner_facebook_id=business_owner_facebook_id, structure=new_adset_details, level=Level.ADSET.value
+        )
 
         return new_adset_facebook_id
 
@@ -112,12 +120,13 @@ class AdsManagerDuplicateStructureCommandHandler:
         new_ad_facebook_id = self.__duplicate_structure_on_facebook(Level.AD.value, ad_id, parent_id)
 
         # get full STRUCTURE for newly created entity
-        new_ad_details = self.__get_new_structure_details(business_owner_permanent_token,
-                                                          new_ad_facebook_id, Level.AD.value)
+        new_ad_details = self.__get_new_structure_details(
+            business_owner_permanent_token, new_ad_facebook_id, Level.AD.value
+        )
         # Add new STRUCTURE
-        self.__save_structure_details(business_owner_facebook_id=business_owner_facebook_id,
-                                      structure=new_ad_details,
-                                      level=Level.AD.value)
+        self.__save_structure_details(
+            business_owner_facebook_id=business_owner_facebook_id, structure=new_ad_details, level=Level.AD.value
+        )
 
     def __duplicate_structure_on_facebook(self, level, facebook_id, parent_id=None):
         structure = LevelToGraphAPIStructure.get(level, facebook_id)
@@ -125,7 +134,7 @@ class AdsManagerDuplicateStructureCommandHandler:
         new_structure_id = structure.create_copy(params=params)
         new_structure_id = Tools.convert_to_json(new_structure_id)
         if "ad_object_ids" in new_structure_id:
-            return new_structure_id["ad_object_ids"][0]['copied_id']
+            return new_structure_id["ad_object_ids"][0]["copied_id"]
         elif "copied_ad_id" in new_structure_id:
             return new_structure_id["copied_ad_id"]
         else:
@@ -133,9 +142,11 @@ class AdsManagerDuplicateStructureCommandHandler:
 
     def __get_new_structure_details(self, business_owner_permanent_token, facebook_id, level):
         structure_fields = StructureFields.get(level)
-        self.graph_api_client.config = self.__build_facebook_api_client_get_details_config(facebook_id=facebook_id,
-                                                                                           business_owner_permanent_token=business_owner_permanent_token,
-                                                                                           fields=structure_fields.get_structure_fields())
+        self.graph_api_client.config = self.__build_facebook_api_client_get_details_config(
+            facebook_id=facebook_id,
+            business_owner_permanent_token=business_owner_permanent_token,
+            fields=structure_fields.get_structure_fields(),
+        )
         new_structure_details, _ = self.graph_api_client.call_facebook()
 
         mapping = StructureMapping.get(level)
@@ -146,9 +157,9 @@ class AdsManagerDuplicateStructureCommandHandler:
         structure.business_owner_facebook_id = business_owner_facebook_id
         structure.last_updated_at = datetime.now()
 
-        repository = TuringMongoRepository(config=config.mongo,
-                                           database_name=config.mongo.structures_database_name,
-                                           collection_name=level)
+        repository = TuringMongoRepository(
+            config=config.mongo, database_name=config.mongo.structures_database_name, collection_name=level
+        )
         structure_id = getattr(structure, LevelToFacebookIdKeyMapping.get_enum_by_name(Level(level).name).value)
         repository.add_structure(level=Level(level), key_value=structure_id, document=structure)
 
@@ -156,9 +167,9 @@ class AdsManagerDuplicateStructureCommandHandler:
     def __build_facebook_api_client_get_details_config(business_owner_permanent_token, facebook_id, fields):
         api_config = GraphAPIClientBaseConfig()
         api_config.try_partial_requests = False
-        api_config.request = GraphAPIRequestSingleStructure(facebook_id=facebook_id,
-                                                        business_owner_permanent_token=business_owner_permanent_token,
-                                                        fields=fields)
+        api_config.request = GraphAPIRequestSingleStructure(
+            facebook_id=facebook_id, business_owner_permanent_token=business_owner_permanent_token, fields=fields
+        )
         api_config.fields = fields
 
         return api_config
@@ -175,25 +186,15 @@ class AdsManagerDuplicateStructureCommandHandler:
 
     @staticmethod
     def __duplicate_campaign_parameters():
-        parameters = {
-            "deep_copy": False,
-            "status_option": Campaign.StatusOption.paused
-        }
+        parameters = {"deep_copy": False, "status_option": Campaign.StatusOption.paused}
         return parameters
 
     @staticmethod
     def __duplicate_adset_parameters(parent_id):
-        parameters = {
-            "campaign_id": parent_id,
-            "deep_copy": False,
-            "status_option": AdSet.StatusOption.paused
-        }
+        parameters = {"campaign_id": parent_id, "deep_copy": False, "status_option": AdSet.StatusOption.paused}
         return parameters
 
     @staticmethod
     def __duplicate_ad_parameters(parent_id):
-        parameters = {
-            "adset_id": parent_id,
-            "status_option": Ad.StatusOption.paused
-        }
+        parameters = {"adset_id": parent_id, "status_option": Ad.StatusOption.paused}
         return parameters

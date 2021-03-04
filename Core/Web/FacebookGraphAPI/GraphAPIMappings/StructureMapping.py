@@ -1,12 +1,12 @@
-from FacebookTuring.Infrastructure.Domain.AdModel import AdModel
-from FacebookTuring.Infrastructure.Domain.AdModelFields import AdModelFields
-from FacebookTuring.Infrastructure.Domain.AdSetModel import AdSetModel
-from FacebookTuring.Infrastructure.Domain.AdSetModelFields import AdSetModelFields
-from FacebookTuring.Infrastructure.Domain.CampaignModel import CampaignModel
-from FacebookTuring.Infrastructure.Domain.CampaignModelFields import CampaignModelFields
-from FacebookTuring.Infrastructure.Mappings.AdMapping import AdMapping
-from FacebookTuring.Infrastructure.Mappings.AdSetMapping import AdSetMapping
-from FacebookTuring.Infrastructure.Mappings.CampaignMapping import CampaignMapping
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.AdModel import AdModel
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.AdModelFields import AdModelFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.AdSetModel import AdSetModel
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.AdSetModelFields import AdSetModelFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.CampaignModel import CampaignModel
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.CampaignModelFields import CampaignModelFields
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.AdMapping import AdMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.AdSetMapping import AdSetMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.CampaignMapping import CampaignMapping
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 

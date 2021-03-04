@@ -8,15 +8,17 @@ if path:
 # ====== END OF CONFIG SECTION ====== #
 import atexit
 import logging
+
 import flask
 import flask_cors
 import flask_restful
 from apscheduler.schedulers.background import BackgroundScheduler
+
 from FacebookCampaignsBuilder.Api import routers
-from FacebookCampaignsBuilder.Api.startup import config, fixtures
-from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import RequestTypeEnum
 from FacebookCampaignsBuilder.Api.request_handlers import HandlersEnum
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Api.sync_job import clean_publish_feedback
+from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import RequestTypeEnum
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +65,10 @@ router_route_pairs = (
     (routers.AdsManagerAccountAdvertisableApps, "ads-manager/account-advertisable-apps/<string:account_id>"),
     (routers.AdsManagerAddStructuresToParent, "add-structures-to-parent/<string:level>"),
     (routers.SmartCreatePublishProgress, "smart-create/publish-progress"),
+    (
+        routers.SmartEditCampaignTreesStructure,
+        "campaign-trees-structure/<string:account_id>/<string:level>/<string:structure_ids>",
+    ),
 )
 
 scheduler = BackgroundScheduler()

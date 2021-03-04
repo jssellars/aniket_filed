@@ -41,10 +41,6 @@ router_route_pairs = (
     (routers.OptimizeGetStructures, "optimize/<string:level>s/<string:account_id>"),
     (routers.AdsManagerFilteredStructures, "filtered-structures/<string:level>"),
     (routers.AdsManagerCampaignTreeStructure, "campaign-structure-tree/<string:level>/<string:facebook_id>"),
-    (
-        routers.SmartEditCampaignTreesStructure,
-        "campaign-trees-structure/<string:account_id>/<string:level>/<string:structure_ids>",
-    ),
     (routers.AdsManager, "<string:level>/<string:facebook_id>"),
     (routers.AdsManagerDuplicateStructure, "<string:level>/<string:facebook_id>/duplicate"),
     (routers.AdsManagerReports, "get-reports"),

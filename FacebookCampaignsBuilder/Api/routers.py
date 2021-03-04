@@ -3,20 +3,18 @@ import logging
 import typing
 from distutils.util import strtobool
 
-from flask import request
-
 import flask_restful
 import humps
+from flask import request
+
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from Core.Web.Security.JWTTools import (extract_business_owner_facebook_id,
-                                        extract_user_filed_id)
-from Core.Web.Security.Permissions import (AdsManagerPermissions,
-                                           CampaignBuilderPermissions)
-from FacebookCampaignsBuilder.Api import (
-    command_handlers, commands, mappings, queries)
+from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extract_user_filed_id
+from Core.Web.Security.Permissions import AdsManagerPermissions, CampaignBuilderPermissions
+from FacebookCampaignsBuilder.Api import command_handlers, commands, mappings, queries
+from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure
 from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 
@@ -353,3 +351,22 @@ class SmartCreatePublishProgress(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return Tools.create_error(e, code="POTTER_BAD_REQUEST"), 400
+
+
+class SmartEditCampaignTreesStructure(Resource):
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    def get(self, account_id, level, structure_ids):
+        try:
+            structure_ids = structure_ids.split(",")
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            return (
+                humps.camelize(
+                    CampaignTreesStructure.get(account_id, level, structure_ids, business_owner_facebook_id)
+                ),
+                200,
+            )
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": f"Could not retrieve tree for {structure_ids}"}, 400

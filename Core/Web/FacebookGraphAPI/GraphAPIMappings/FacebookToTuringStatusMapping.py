@@ -1,25 +1,24 @@
 import typing
 from enum import Enum
 
-from facebook_business.adobjects.campaign import Campaign
-
-from FacebookTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
 
 
 class EffectiveStatusEnum(Enum):
 
-    ACTIVE = 'ACTIVE'
-    PAUSED = 'PAUSED'
-    DELETED = 'DELETED'
-    PENDING_REVIEW = 'PENDING_REVIEW'
-    DISAPPROVED = 'DISAPPROVED'
-    PREAPPROVED = 'PREAPPROVED'
-    PENDING_BILLING_INFO = 'PENDING_BILLING_INFO'
-    CAMPAIGN_PAUSED = 'CAMPAIGN_PAUSED'
-    ARCHIVED = 'ARCHIVED'
-    ADSET_PAUSED = 'ADSET_PAUSED'
-    IN_PROCESS = 'IN_PROCESS'
-    WITH_ISSUES = 'WITH_ISSUES'
+    ACTIVE = "ACTIVE"
+    PAUSED = "PAUSED"
+    DELETED = "DELETED"
+    PENDING_REVIEW = "PENDING_REVIEW"
+    DISAPPROVED = "DISAPPROVED"
+    PREAPPROVED = "PREAPPROVED"
+    PENDING_BILLING_INFO = "PENDING_BILLING_INFO"
+    CAMPAIGN_PAUSED = "CAMPAIGN_PAUSED"
+    ARCHIVED = "ARCHIVED"
+    ADSET_PAUSED = "ADSET_PAUSED"
+    IN_PROCESS = "IN_PROCESS"
+    WITH_ISSUES = "WITH_ISSUES"
+
 
 def map_facebook_status(facebook_status: typing.AnyStr = None) -> int:
     if not facebook_status:

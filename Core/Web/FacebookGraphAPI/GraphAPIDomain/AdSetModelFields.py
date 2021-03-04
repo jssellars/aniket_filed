@@ -1,7 +1,7 @@
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureModelFieldsBase import StructureModelFieldBase
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 
 class AdSetModelFields(StructureModelFieldBase):
@@ -59,14 +59,10 @@ class AdSetModelFields(StructureModelFieldBase):
         # FieldsMetadata.ad_rules_governed,
         FieldsMetadata.targetingsentencelines,
         FieldsMetadata.recommendations,
-        FieldsMetadata.learning_stage_info
+        FieldsMetadata.learning_stage_info,
     ]
 
-    insights_fields = [
-        FieldsMetadata.account_id,
-        FieldsMetadata.account_name,
-        FieldsMetadata.adset_id
-    ]
+    insights_fields = [FieldsMetadata.account_id, FieldsMetadata.account_name, FieldsMetadata.adset_id]
 
     required_structure_fields = [
         # base structure fields
@@ -94,5 +90,5 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.age,
         FieldsMetadata.gender,
         FieldsMetadata.bid_strategy,
-        FieldsMetadata.last_significant_edit
+        FieldsMetadata.last_significant_edit,
     ]

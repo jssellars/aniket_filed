@@ -27,5 +27,5 @@ class StructureModelFieldBase:
 
     @classmethod
     def get_required_structure_fields(cls):
-        fields = [field.name if hasattr(field, 'name') else field for field in cls.required_structure_fields]
+        fields = [field.name if hasattr(field, "name") else field for field in cls.required_structure_fields]
         return list(set(fields))

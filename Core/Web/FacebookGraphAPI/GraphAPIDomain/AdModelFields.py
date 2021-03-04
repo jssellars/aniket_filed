@@ -1,7 +1,7 @@
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from FacebookTuring.Infrastructure.Domain.StructureModelFieldsBase import StructureModelFieldBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureModelFieldsBase import StructureModelFieldBase
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
 
 class AdModelFields(StructureModelFieldBase):
@@ -31,16 +31,13 @@ class AdModelFields(StructureModelFieldBase):
         # FieldsMetadata.ad_creatives,
         FieldsMetadata.updated_time,
         FieldsMetadata.tracking_specs,
-        FieldsMetadata.status
+        FieldsMetadata.status,
     ]
 
-    insights_fields = [
-        FieldsMetadata.account_name,
-        FieldsMetadata.ad_id
-    ]
+    insights_fields = [FieldsMetadata.account_name, FieldsMetadata.ad_id]
 
     required_structure_fields = [
-        #base structure fields
+        # base structure fields
         FieldsMetadata.account_id,
         FieldsMetadata.campaign_name,
         FieldsMetadata.campaign_id,
@@ -55,7 +52,7 @@ class AdModelFields(StructureModelFieldBase):
         FieldsMetadata.start_date,
         FacebookMiscFields.end_time,
         FacebookMiscFields.date_added,
-        #details structure fields
+        # details structure fields
         FieldsMetadata.daily_budget,
         FieldsMetadata.lifetime_budget,
         FieldsMetadata.headline,

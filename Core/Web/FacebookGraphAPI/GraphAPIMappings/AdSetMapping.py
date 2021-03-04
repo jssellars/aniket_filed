@@ -4,11 +4,11 @@ import typing
 from bson import BSON
 from marshmallow import INCLUDE, pre_load
 
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.mapper import MapperBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from FacebookTuring.Infrastructure.Mappings.FacebookToTuringStatusMapping import map_facebook_status
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import map_facebook_status
+from Core.Web.FacebookGraphAPI.Tools import Tools
 
 
 class AdSetMapping(MapperBase):
@@ -59,4 +59,3 @@ class AdSetMapping(MapperBase):
         data[FacebookMiscFields.actions] = {}
 
         return self._remove_unknown_data(data)
-
