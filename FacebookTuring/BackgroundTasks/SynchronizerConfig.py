@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import \
-    TuringAdAccountJournalRepository
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import \
-    TuringMongoRepository
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringAdAccountJournalRepository import (
+    TuringAdAccountJournalRepository,
+)
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 
 @dataclass
@@ -15,8 +15,6 @@ class SynchronizerConfigStatic:
     breakdowns: List
     action_breakdowns: List
     requested_fields: List
-    insights_repository: Optional[TuringMongoRepository] = None
-    structure_repository: Optional[TuringMongoRepository] = None
     account_journal_repository: Optional[TuringAdAccountJournalRepository] = None
 
 

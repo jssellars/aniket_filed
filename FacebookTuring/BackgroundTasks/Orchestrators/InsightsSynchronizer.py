@@ -2,19 +2,18 @@ import functools
 import operator
 import typing
 from time import sleep
-from typing import List, Dict, Any
+from typing import List
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.exceptions import FacebookRequestError
 
-from Core import mongo_adapter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.BackgroundTasks.Orchestrators.InsightsSyncronizerBreakdowns import InsightsSynchronizerBreakdownEnum
-from FacebookTuring.BackgroundTasks.startup import config, fixtures
+from FacebookTuring.BackgroundTasks.startup import config
 from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
@@ -51,15 +50,15 @@ class InsightsSynchronizer:
     SLEEP_ON_RATE_LIMIT_EXCEPTION = 3600
 
     def __init__(
-            self,
-            business_owner_id: typing.AnyStr = None,
-            account_id: typing.AnyStr = None,
-            level: Level = None,
-            breakdown: Field = None,
-            action_breakdown: Field = None,
-            date_start: typing.AnyStr = None,
-            date_stop: typing.AnyStr = None,
-            requested_fields: typing.List = None,
+        self,
+        business_owner_id: typing.AnyStr = None,
+        account_id: typing.AnyStr = None,
+        level: Level = None,
+        breakdown: Field = None,
+        action_breakdown: Field = None,
+        date_start: typing.AnyStr = None,
+        date_stop: typing.AnyStr = None,
+        requested_fields: typing.List = None,
     ):
         self.business_owner_id = business_owner_id
         self.account_id = account_id
@@ -70,16 +69,17 @@ class InsightsSynchronizer:
         self.date_stop = date_stop
         self.requested_fields = requested_fields
         self.__ad_account_id = "act_" + self.account_id
-        self.__mongo_repository = None
+
+        self.__mongo_repository = TuringMongoRepository(
+            config=config.mongo, database_name=config.mongo.insights_database_name
+        )
 
     def run(self, ad_report_run: AdReportRun) -> None:
         try:
 
-            self.__mongo_repository.collection = self.__get_mongo_repository_collection()
-
             GraphAPIInsightsHandler.process_async_report(
                 ad_report_run,
-                f'act_{self.account_id}',
+                f"act_{self.account_id}",
                 requested_fields=self.requested_fields,
                 mongo_repository=self.__mongo_repository,
                 level=self.level.value,
@@ -137,11 +137,13 @@ class InsightsSynchronizer:
 
     def get_async_insights_report(self) -> List:
 
+        self.__mongo_repository.collection = self.__get_mongo_repository_collection()
+
         if self.breakdown is not None and self.breakdown != InsightsSynchronizerBreakdownEnum.NONE.value:
             self.requested_fields += [self.breakdown]
 
         self.requested_fields += LEVEL_TO_STRUCTURE_FIELDS[self.level]
 
-        ad_account = AdAccount(f'act_{self.account_id}')
+        ad_account = AdAccount(f"act_{self.account_id}")
         ad_report_run = ad_account.get_insights_async(fields=self.__get_fields(), params=self.__get_parameters())
         return ad_report_run

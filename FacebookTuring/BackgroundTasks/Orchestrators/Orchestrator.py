@@ -39,16 +39,17 @@ class Orchestrator:
             database_name=config.mongo.accounts_journal_database_name,
             collection_name=config.mongo.accounts_journal_collection_name,
         )
-        self.__insights_repository = TuringMongoRepository(
-            config=config.mongo, database_name=config.mongo.insights_database_name
-        )
-        self.__structures_repository = TuringMongoRepository(
-            config=config.mongo, database_name=config.mongo.structures_database_name
-        )
         self.__business_owner_pages_repository = TuringMongoRepository(
             config=config.mongo,
             database_name=config.mongo.accounts_journal_database_name,
             collection_name=config.mongo.business_owner_pages_collection_name,
+        )
+        self.__structures_repository = TuringMongoRepository(
+            config=config.mongo, database_name=config.mongo.structures_database_name
+        )
+
+        self.__insights_repository = TuringMongoRepository(
+            config=config.mongo, database_name=config.mongo.insights_database_name
         )
 
         self.__structures_syncronizer = None
@@ -87,8 +88,6 @@ class Orchestrator:
                 for business_owner in business_owner_details:
                     executor.submit(
                         sync,
-                        self.__structures_repository,
-                        self.__insights_repository,
                         self.__account_journal_repository,
                         [business_owner],
                         user_type,

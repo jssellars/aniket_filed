@@ -13,6 +13,7 @@ from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import Grap
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
 from Core.Web.FacebookGraphAPI.Models.Field import Field
+from FacebookTuring.BackgroundTasks.startup import config
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
@@ -31,7 +32,9 @@ class StructuresSyncronizer:
 
         self.__ad_account_id = "act_" + self.account_id
         self.__permanent_token = None
-        self.__mongo_repository = None
+        self.__mongo_repository = TuringMongoRepository(
+            config=config.mongo, database_name=config.mongo.structures_database_name
+        )
 
     def run(self) -> None:
         try:

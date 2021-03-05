@@ -52,20 +52,16 @@ USER_CONFIGS_BY_TYPE = {
 
 
 def sync(
-    structures_repository: TuringMongoRepository = None,
-    insights_repository: TuringMongoRepository = None,
     account_journal_repository: TuringAdAccountJournalRepository = None,
     business_owner_details: typing.List[typing.Dict] = None,
     user_type: UserTypeEnum = None,
     permanent_token: str = None,
 ) -> None:
     user_config_static = USER_CONFIGS_BY_TYPE.get(user_type, USER_CONFIGS_BY_TYPE[UserTypeEnum.PAYED])
-    user_config_static.structure_repository = structures_repository
-    user_config_static.insights_repository = insights_repository
     user_config_static.account_journal_repository = account_journal_repository
 
     _sequantial_sync(business_owner_details, user_config_static, permanent_token)
-    _delete_old_insights(insights_repository=insights_repository)
+    _delete_old_insights(insights_repository=user_config_static.insights_repository)
 
 
 def _sequantial_sync(business_owner_details: List, user_config_static: SynchronizerConfigStatic, permanent_token: str):
@@ -169,7 +165,6 @@ def _get_async_reports(user_config_static: SynchronizerConfigStatic, user_config
                         date_start=user_config_runtime.date_start.date().isoformat(),
                         date_stop=date_stop.date().isoformat(),
                     )
-                    synchronizer.set_mongo_repository(user_config_static.insights_repository)
                     async_reports.append((synchronizer.get_async_insights_report(), synchronizer))
         else:
             synchronizer = InsightsSynchronizer(
@@ -182,7 +177,6 @@ def _get_async_reports(user_config_static: SynchronizerConfigStatic, user_config
                 date_start=user_config_runtime.date_start.date().isoformat(),
                 date_stop=date_stop.date().isoformat(),
             )
-            synchronizer.set_mongo_repository(user_config_static.insights_repository)
             async_reports.append((synchronizer.get_async_insights_report(), synchronizer))
 
     return async_reports
@@ -256,7 +250,8 @@ def _sync_structures(
             level=level,
         )
         try:
-            (synchronizer.set_mongo_repository(user_config_static.structure_repository).run())
+
+            (synchronizer.run())
         except Exception as e:
             logger.exception(
                 f"Failed sync structures for business owner: {user_config_runtime.business_owner_id}"
@@ -266,9 +261,7 @@ def _sync_structures(
 
     # mark campaigns and adsets as completed based on the end time value
     try:
-        mark_structures_as_completed(
-            account_id=user_config_runtime.account_id, structures_repository=user_config_static.structure_repository
-        )
+        mark_structures_as_completed(account_id=user_config_runtime.account_id)
     except Exception as e:
         logger.exception(
             f"Failed updating completed structure ids for business owner: {user_config_runtime.business_owner_id}"
@@ -283,9 +276,12 @@ def _sync_structures(
     )
 
 
-def mark_structures_as_completed(
-    account_id: str = None, structures_repository: TuringMongoRepository = None
-) -> typing.NoReturn:
+def mark_structures_as_completed(account_id: str = None) -> None:
+
+    structures_repository = TuringMongoRepository(
+        config=config.mongo, database_name=config.mongo.structures_database_name
+    )
+
     campaigns = structures_repository.get_campaigns_by_ad_account(account_id)
     campaign_ids = [campaign[LevelToFacebookIdKeyMapping.CAMPAIGN.value] for campaign in campaigns]
     adsets = structures_repository.get_adsets_by_campaign_id(campaign_ids)
