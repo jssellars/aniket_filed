@@ -111,7 +111,7 @@ class GraphAPIAudiencesHandler:
         audience.narrow_interests = saved_audience.narrow_interests
         audience.age_range = saved_audience.age_range
         audience.gender = saved_audience.gender
-        audience.custom_audiences = saved_audience.custom_audiences
+        audience.custom_audiences = audience.included_custom_audiences = saved_audience.custom_audiences
         audience.excluded_custom_audiences = saved_audience.excluded_custom_audiences
 
         last_updated = cls.__timestamp_to_datetime(saved_audience.time_updated)

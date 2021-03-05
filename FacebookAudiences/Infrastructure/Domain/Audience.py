@@ -25,4 +25,6 @@ class Audience:
     age_range: Dict = field(default_factory=dict)
     gender: int = None
     custom_audiences: List[Dict] = field(default_factory=list)
-    excluded_custom_audiences: List[Dict] = field(default_factory=list)
+    included_custom_audiences: List[Dict] = field(default_factory=list)
+    # Renamed 'excluded' to 'exclude' to be consistent with Filed Saved Audience Field
+    exclude_custom_audiences: List[Dict] = field(default_factory=list)
