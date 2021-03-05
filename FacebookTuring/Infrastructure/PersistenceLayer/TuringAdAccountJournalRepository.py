@@ -121,9 +121,9 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
         }
         self.update_one(query_filter, query)
 
-    def update_last_sync_time_by_business_owner_id(self, business_owner_id: str = None) -> None:
+    def update_last_sync_time_by_account_id(self, account_id: str = None) -> None:
         # get business owner details
-        query = {FacebookMiscFields.business_owner_id: {MongoOperator.EQUALS.value: business_owner_id}}
+        query = {FacebookMiscFields.account_id: {MongoOperator.EQUALS.value: account_id}}
         business_owner_details = self.get(query)
 
         # update last synced on to match the time when insights finished syncing for each ad account

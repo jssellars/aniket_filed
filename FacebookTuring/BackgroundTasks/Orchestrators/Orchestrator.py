@@ -95,10 +95,6 @@ class Orchestrator:
                         permanent_token,
                     )
 
-            # update ad account last sync time for current business owner based on the time when the insights sync
-            # finished for each ad account.
-            self.__account_journal_repository.update_last_sync_time_by_business_owner_id(business_owner_id)
-
         # compile and send sync status report
         if ad_accounts_details:
             self.__reporter = SyncStatusReporter(

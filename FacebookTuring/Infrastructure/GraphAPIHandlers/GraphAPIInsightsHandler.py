@@ -33,7 +33,7 @@ from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures im
 from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
-PAGE_SIZE = 200
+PAGE_SIZE = 100
 
 
 class GraphAPIInsightsHandler:

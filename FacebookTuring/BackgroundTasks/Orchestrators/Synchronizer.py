@@ -76,6 +76,9 @@ def _sequantial_sync(business_owner_details: List, user_config_static: Synchroni
         _publish_business_owner_synced_event(
             entry[FacebookMiscFields.business_owner_id], entry[FacebookMiscFields.account_id]
         )
+        user_config_static.account_journal_repository.update_last_sync_time_by_account_id(
+            entry[FacebookMiscFields.account_id]
+        )
 
 
 def sync_one_ad_account_structures(entry, user_config_static: SynchronizerConfigStatic, permanent_token: str):
@@ -206,6 +209,9 @@ def _sync_structures_for_all_accounts(
 def _process_all_accounts_async_reports(
     user_config_static: SynchronizerConfigStatic, async_reports: List, permanent_token: str
 ):
+
+    failed_accounts = set()
+
     while async_reports:
         GraphAPISdkBase(config.facebook, permanent_token)
         for async_data in async_reports:
@@ -216,7 +222,10 @@ def _process_all_accounts_async_reports(
                     synchronizer.run(async_report)
                     async_reports.remove(async_data)
                     # If no async reports are left for this account, then mark it as completed
-                    if synchronizer.account_id not in [entry[1].account_id for entry in async_reports]:
+                    if (
+                        synchronizer.account_id not in [entry[1].account_id for entry in async_reports]
+                        and synchronizer.account_id not in failed_accounts
+                    ):
                         user_config_static.account_journal_repository.change_account_insights_sync_status(
                             synchronizer.account_id, AdAccountSyncStatusEnum.COMPLETED, end_date=datetime.now()
                         )
@@ -227,6 +236,7 @@ def _process_all_accounts_async_reports(
                         synchronizer.account_id, AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS, end_date=datetime.now()
                     )
                     synchronizer.remove(async_data)
+                    failed_accounts.add(synchronizer.account_id)
 
         sleep(5)
 
