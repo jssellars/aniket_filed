@@ -235,7 +235,7 @@ def _process_all_accounts_async_reports(
                     user_config_static.account_journal_repository.change_account_insights_sync_status(
                         synchronizer.account_id, AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS, end_date=datetime.now()
                     )
-                    synchronizer.remove(async_data)
+                    async_reports.remove(async_data)
                     failed_accounts.add(synchronizer.account_id)
 
         sleep(5)
