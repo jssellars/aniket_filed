@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from bson import BSON
 from pymongo.errors import AutoReconnect
@@ -6,6 +6,7 @@ from retry import retry
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase, MongoRepositoryStatus
 
@@ -15,7 +16,7 @@ class StrategyDataMongoRepository(MongoRepositoryBase):
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def read_metrics_data(
-            self, key_value: str, metrics: List[str], level: LevelEnum, breakdown: FieldsMetadata
+        self, key_value: str, metrics: List[str], level: LevelEnum, breakdown: FieldsMetadata
     ) -> List[Dict]:
         on_metrics = metrics + [
             FieldsMetadata.result_type.name,
@@ -74,9 +75,7 @@ class StrategyDataMongoRepository(MongoRepositoryBase):
 
         return result
 
-    def set_insights_collection(
-            self, level: LevelEnum, breakdown: FieldsMetadata, action_breakdown: FieldsMetadata, config: Any
-    ) -> None:
+    def set_insights_collection(self, level: LevelEnum, breakdown: Field, action_breakdown: Field, config: Any) -> None:
         self.database = config.mongo.insights_database
         self.collection = "_".join([level.value, breakdown.name, action_breakdown.name])
 

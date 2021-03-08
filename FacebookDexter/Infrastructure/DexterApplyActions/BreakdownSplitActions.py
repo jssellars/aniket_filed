@@ -180,10 +180,6 @@ class AgeGenderBreakdownSplit(RecommendationAction):
     ) -> int:
         minimum_budget = GraphAPIBudgetValidationHandler.handle(
             f"act_{structure_details[LevelIdKeyEnum.ACCOUNT.value]}",
-            self.fixtures.business_owner_repository.get_permanent_token(
-                business_owner_facebook_id=apply_parameters.business_owner_id
-            ),
-            self.config,
         )
 
         # This might need to be changed based on the optimization goal of the structure

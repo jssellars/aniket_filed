@@ -143,7 +143,8 @@ class BudgetValidation(Resource):
         business_owner_id = extract_business_owner_facebook_id()
 
         try:
-            query = queries.BudgetValidation.get(business_owner_id=business_owner_id, account_id=account_id)
+            fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id=business_owner_id)
+            query = queries.BudgetValidation.get(account_id=account_id)
 
             return object_to_camelized_dict(query), 200
 

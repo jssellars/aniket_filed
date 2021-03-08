@@ -8,38 +8,37 @@ from facebook_business.adobjects.advideo import AdVideo
 from facebook_business.adobjects.page import Page
 from facebook_business.adobjects.pagepost import PagePost
 
-from Core.Tools.Misc.ObjectManipulators import extract_class_attributes_values
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.facebook.sdk_adapter.validations import JOINT_CATS
 from Core.settings_models import Model
-from FacebookCampaignsBuilder.Api.startup import config, fixtures
+from Core.Tools.Misc.ObjectManipulators import extract_class_attributes_values
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import GraphAPIBudgetValidationHandler
+from Core.Web.FacebookGraphAPI.search import (
+    GraphAPIInterestsHandler,
+    GraphAPILanguagesHandler,
+    GraphAPILocationsHandler,
+)
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookCampaignsBuilder.Api.catalogs import (
-    special_ad_category,
-    special_ad_categories,
-    objectives,
-    bid_strategy,
-    placement,
-    cta,
+    action_attribution_windows,
     ad_format,
     ad_preview_format,
-    device_type,
     app_store,
-    location_type,
     applink_treatment,
-    action_attribution_windows,
-    buying_type,
+    bid_strategy,
     billing_event,
+    buying_type,
+    cta,
+    device_type,
+    location_type,
+    objectives,
     optimization_goal,
+    placement,
+    special_ad_categories,
+    special_ad_category,
 )
 from FacebookCampaignsBuilder.Api.cats import CATS
-from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import (
-    GraphAPIBudgetValidationHandler,
-)
-from Core.Web.FacebookGraphAPI.search import (
-    GraphAPILocationsHandler,
-    GraphAPILanguagesHandler, GraphAPIInterestsHandler,
-)
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
 
 
 class AdCreativeAssetsBase:
@@ -165,12 +164,8 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
 
 class BudgetValidation:
     @staticmethod
-    def get(business_owner_id: str = None, account_id: str = None):
-        return GraphAPIBudgetValidationHandler.handle(
-            account_id,
-            fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id=business_owner_id),
-            config,
-        )
+    def get(account_id: str = None):
+        return GraphAPIBudgetValidationHandler.handle(account_id)
 
 
 class SmartCreateCats:

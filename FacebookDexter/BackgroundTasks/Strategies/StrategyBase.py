@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import ClassVar, Dict, List, Optional, Tuple
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
+from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     StrategyTimeBucket,
@@ -17,8 +18,8 @@ from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoReposito
 class DexterStrategyBase:
     ALGORITHM: ClassVar[str] = "Base_Algorithm"
     levels: List[LevelEnum]
-    breakdowns: List[FieldsMetadata]
-    action_breakdowns: List[FieldsMetadata]
+    breakdowns: List[Field]
+    action_breakdowns: List[Field]
     time_buckets: List[StrategyTimeBucket]
 
     def trend(self, reference_data: List[float], current_data: List[float]) -> Optional[TrendEnum]:

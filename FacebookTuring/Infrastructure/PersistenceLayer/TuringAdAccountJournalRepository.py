@@ -66,15 +66,6 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                         ]
                     }
                 },
-                {
-                    FacebookMiscFields.insights_sync_status: {
-                        MongoOperator.IN.value: [
-                            AdAccountSyncStatusEnum.COMPLETED.value,
-                            AdAccountSyncStatusEnum.PENDING.value,
-                            AdAccountSyncStatusEnum.COMPLETED_WITH_ERRORS.value,
-                        ]
-                    }
-                },
             ]
         }
         if business_owner_id:
@@ -133,7 +124,7 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             }
             update_last_sync_time_query = {
                 MongoOperator.SET.value: {
-                    FacebookMiscFields.last_synced_on: detail.get(FacebookMiscFields.insights_sync_end_date),
+                    FacebookMiscFields.last_synced_on: detail.get(FacebookMiscFields.structures_sync_end_date),
                     FacebookMiscFields.previous_last_synced_on: detail.get(FacebookMiscFields.last_synced_on),
                     FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.COMPLETED.value,
                 }
@@ -153,11 +144,8 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             entry[FacebookMiscFields.business_owner_id] = business_owner_id
             entry[FacebookMiscFields.status] = StructureStatusEnum.ACTIVE.value
             entry[FacebookMiscFields.structures_sync_status] = AdAccountSyncStatusEnum.PENDING.value
-            entry[FacebookMiscFields.insights_sync_status] = AdAccountSyncStatusEnum.PENDING.value
             entry[FacebookMiscFields.last_synced_on] = datetime.now() - timedelta(days=days_to_sync)
             entry[FacebookMiscFields.previous_last_synced_on] = None
-            entry[FacebookMiscFields.insights_sync_start_date] = None
-            entry[FacebookMiscFields.insights_sync_end_date] = None
             entry[FacebookMiscFields.structures_sync_start_date] = None
             entry[FacebookMiscFields.structures_sync_end_date] = None
 
@@ -197,7 +185,6 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
                 FacebookMiscFields.sync_start_date: datetime.now(),
                 FacebookMiscFields.sync_end_date: None,
                 FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
-                FacebookMiscFields.insights_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
                 FacebookMiscFields.structures_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value,
             }
         }
@@ -221,28 +208,3 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             query[MongoOperator.SET.value][FacebookMiscFields.structures_sync_end_date] = end_date
 
         self.update_one(query_filter, query)
-
-    def change_account_insights_sync_status(
-        self,
-        account_id: str = None,
-        new_status: AdAccountSyncStatusEnum = None,
-        start_date: datetime = None,
-        end_date: datetime = None,
-    ) -> None:
-        self.collection = self.config.accounts_journal_collection_name
-        query_filter = {FacebookMiscFields.account_id: {MongoOperator.EQUALS.value: account_id}}
-        query = {MongoOperator.SET.value: {FacebookMiscFields.insights_sync_status: new_status.value}}
-        if start_date:
-            query[MongoOperator.SET.value][FacebookMiscFields.insights_sync_start_date] = start_date
-        if end_date:
-            query[MongoOperator.SET.value][FacebookMiscFields.insights_sync_end_date] = end_date
-
-        self.update_one(query_filter, query)
-
-    def save_sync_report(self, report: List[SyncStatusReport] = None, created_at: datetime = None) -> None:
-        self.collection = self.config.accounts_journal_sync_reports_collection_name
-        document = {
-            FacebookMiscFields.created_at: created_at,
-            FacebookMiscFields.report: [object_to_json(entry) for entry in report],
-        }
-        self.add_one(document)

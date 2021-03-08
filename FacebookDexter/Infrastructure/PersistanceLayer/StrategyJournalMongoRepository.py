@@ -1,15 +1,15 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
+
+from pymongo.errors import AutoReconnect
+from retry import retry
 
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import (
     DexterEngineRunJournalEnum,
     RunStatusDexterEngineJournal,
 )
-from pymongo.errors import AutoReconnect
-from retry import retry
-
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 
 
@@ -18,19 +18,20 @@ class StrategyJournalMongoRepository(MongoRepositoryBase):
 
     @retry(AutoReconnect, tries=__RETRY_LIMIT, delay=1)
     def update_journal_entry(
-            self,
-            business_owner: str,
-            account_id: str,
-            run_status: RunStatusDexterEngineJournal,
-            channel: ChannelEnum,
-            algorithm: str,
-            start_time: datetime = None,
-            end_time: datetime = None,
+        self,
+        business_owner: str,
+        account_id: str,
+        run_status: RunStatusDexterEngineJournal,
+        channel: ChannelEnum,
+        algorithm: str,
+        start_time: datetime = None,
+        end_time: datetime = None,
     ):
         query_filter = {
             MongoOperator.AND.value: [
                 {DexterEngineRunJournalEnum.AD_ACCOUNT_ID.value: {MongoOperator.EQUALS.value: account_id}},
                 {DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value: {MongoOperator.EQUALS.value: business_owner}},
+                {DexterEngineRunJournalEnum.ALGORITHM_TYPE.value: algorithm},
             ]
         }
 

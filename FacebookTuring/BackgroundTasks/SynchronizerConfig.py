@@ -12,9 +12,6 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 @dataclass
 class SynchronizerConfigStatic:
     levels: List
-    breakdowns: List
-    action_breakdowns: List
-    requested_fields: List
     account_journal_repository: Optional[TuringAdAccountJournalRepository] = None
 
 

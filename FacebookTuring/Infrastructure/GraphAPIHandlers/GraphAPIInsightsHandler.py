@@ -14,12 +14,13 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClient
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
+    add_results_to_response,
     create_facebook_filter,
     get_next_page_cursor,
     get_sdk_insights_page,
     get_sdk_structures,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     FacebookLevelPlural,
     Level,
@@ -30,7 +31,6 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Infrastructure.Domain.BudgetMessageEnum import BudgetMessageEnum
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestInsights import GraphAPIRequestInsights
 from FacebookTuring.Infrastructure.GraphAPIRequests.GraphAPIRequestStructures import GraphAPIRequestStructures
-from FacebookTuring.Infrastructure.Mappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 PAGE_SIZE = 100
@@ -81,75 +81,6 @@ class GraphAPIInsightsHandler:
     }
 
     @classmethod
-    def process_async_report(
-        cls,
-        ad_report_run: AdReportRun,
-        ad_account_id: str,
-        requested_fields: List[FieldsMetadata],
-        mongo_repository: TuringMongoRepository,
-        level: Optional[str] = None,
-    ):
-
-        insights = ad_report_run.get_insights()
-        if not insights:
-            return {}
-
-        results_requested = any(
-            [
-                FieldsMetadata.results.name == x.name or FieldsMetadata.cost_per_result.name == x.name
-                for x in requested_fields
-            ]
-        )
-
-        insights_slice = []
-        for insight in insights:
-            insights_slice.append(insight.export_all_data())
-
-            if len(insights_slice) == PAGE_SIZE:
-                cls.insert_insights_into_db(
-                    results_requested,
-                    level,
-                    insights_slice,
-                    ad_account_id,
-                    requested_fields,
-                    mongo_repository,
-                )
-                insights_slice = []
-
-        cls.insert_insights_into_db(
-            results_requested,
-            level,
-            insights_slice,
-            ad_account_id,
-            requested_fields,
-            mongo_repository,
-        )
-
-        return
-
-    @classmethod
-    def insert_insights_into_db(
-        cls,
-        results_requested: bool,
-        level: str,
-        insights_data: List[Dict],
-        ad_account_id: str,
-        requested_fields: List[FieldsMetadata],
-        mongo_repository: TuringMongoRepository,
-    ):
-
-        if results_requested:
-            cls.add_results_to_response(level, insights_data, ad_account_id)
-        insights_response = (
-            GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
-            if insights_data
-            else []
-        )
-
-        response = mongo_adapter.filter_null_values_from_documents(insights_response)
-        mongo_repository.add_many(response)
-
-    @classmethod
     def get_insights_base(
         cls,
         permanent_token: str = None,
@@ -192,7 +123,7 @@ class GraphAPIInsightsHandler:
                 insights.params = parameters
 
             if results_requested:
-                cls.add_results_to_response(level, insights_data, ad_account_id)
+                add_results_to_response(level, insights_data, ad_account_id)
             insights_response = (
                 GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
                 if insights_data
@@ -233,7 +164,7 @@ class GraphAPIInsightsHandler:
                 ]
             )
             if results_requested:
-                cls.add_results_to_response(level, response, ad_account_id)
+                add_results_to_response(level, response, ad_account_id)
             insights_response = GraphAPIInsightsMapper().map(requested_fields, response) if response else []
 
             if not summary and not insights_response:
@@ -279,35 +210,6 @@ class GraphAPIInsightsHandler:
             return structures_response
         except Exception as e:
             raise e
-
-    @classmethod
-    def __join_insights_and_structure_results(
-        cls,
-        structure_key: str = None,
-        insight_response: List = None,
-        structure_results: List = None,
-    ) -> List:
-        for insight in insight_response:
-            possible_objective = []
-            for structure in structure_results:
-                if insight[structure_key] == structure[structure_key]:
-                    if (
-                        GraphAPIInsightsFields.custom_event_type in structure
-                        and structure[GraphAPIInsightsFields.custom_event_type]
-                    ):
-                        if structure[GraphAPIInsightsFields.custom_event_type] not in possible_objective:
-                            possible_objective.append(structure[GraphAPIInsightsFields.custom_event_type])
-                    elif (
-                        GraphAPIInsightsFields.optimization_goal in structure
-                        and structure[GraphAPIInsightsFields.optimization_goal]
-                    ):
-                        if structure[GraphAPIInsightsFields.optimization_goal] not in possible_objective:
-                            possible_objective.append(structure[GraphAPIInsightsFields.optimization_goal])
-                    if len(possible_objective) > 1:
-                        insight.update({FieldsMetadata.result_type.name: "multiple_conversion_types"})
-                        break
-                    insight.update(structure)
-        return insight_response
 
     @classmethod
     def get_structures_base(
@@ -381,44 +283,6 @@ class GraphAPIInsightsHandler:
 
         except Exception as e:
             raise e
-
-    @classmethod
-    def add_results_to_response(cls, level: str, response: List, account_id: str):
-        if not response:
-            return
-
-        structure_key = ""
-        if level == Level.CAMPAIGN.value or level == Level.ADSET.value:
-            structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(level.upper()).value
-        elif level == Level.AD.value:
-            structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(Level.ADSET.value.upper()).value
-        structure_ids = list({x[structure_key] for x in response if structure_key in x})
-
-        params = {
-            "filtering": [
-                json.dumps(
-                    create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids)
-                )
-            ]
-        }
-        fields = [GraphAPIInsightsFields.promoted_object, structure_key, GraphAPIInsightsFields.optimization_goal]
-        structure_results = AdAccount(account_id).get_ad_sets(fields=fields, params=params)
-
-        mapped_structures = []
-        for structure in structure_results:
-            structure[structure_key] = structure.pop("id")
-
-            promoted_event = structure.pop(GraphAPIInsightsFields.promoted_object, None)
-            if promoted_event:
-                if "pixel_id" in promoted_event:
-                    structure[GraphAPIInsightsFields.custom_event_type] = promoted_event.get(
-                        GraphAPIInsightsFields.custom_event_type, None
-                    )
-            mapped_structures.append(structure)
-
-        cls.__join_insights_and_structure_results(
-            structure_key=structure_key, insight_response=response, structure_results=mapped_structures
-        )
 
     @classmethod
     def get_ag_grid_insights(

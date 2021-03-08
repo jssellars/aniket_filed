@@ -3,23 +3,27 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import ClassVar, Dict, List, Optional
 
-from Core.constants import DEFAULT_DATETIME
-from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
-from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from Core.mongo_adapter import MongoRepositoryBase
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.targeting import Targeting
 from facebook_business.adobjects.targetingsearch import TargetingSearch
 
+from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
+from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from Core.Web.FacebookGraphAPI.Tools import Tools
+from Core.constants import DEFAULT_DATETIME
+from Core.mongo_adapter import MongoRepositoryBase
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData, get_max_number_of_days
+from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
+    BreakdownGroupedData,
+    get_max_number_of_days,
+    get_max_number_of_days_from_bucket,
+)
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import TrendEnum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
@@ -130,7 +134,7 @@ class AudienceSizeStrategy(DexterStrategyBase):
                             business_owner, account_id, structure, level, metric_name, breakdown
                         )
 
-                        reference_time = get_max_number_of_days(grouped_data, metric_name)
+                        reference_time = get_max_number_of_days_from_bucket(grouped_data, metric_name)
                         if not reference_time:
                             continue
 
@@ -139,7 +143,7 @@ class AudienceSizeStrategy(DexterStrategyBase):
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
                             datetime.now(),
-                            reference_time,
+                            get_max_number_of_days(grouped_data, metric_name),
                             ChannelEnum.FACEBOOK.value,
                             get_audience_size_priority(variance),
                             structure_data,

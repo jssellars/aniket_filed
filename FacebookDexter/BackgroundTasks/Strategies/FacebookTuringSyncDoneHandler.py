@@ -1,7 +1,6 @@
-import logging
 import json
+import logging
 from dataclasses import dataclass
-
 from typing import Any
 
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import DexterEngineRunJournalEnum
@@ -9,11 +8,9 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums impor
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
 from Core.mongo_adapter import MongoOperator
+from FacebookDexter.BackgroundTasks.startup import config, fixtures
 from FacebookDexter.BackgroundTasks.Strategies.EmailNotificationsSystem import send_email
-
-from FacebookDexter.BackgroundTasks.Strategies.StrategyMaster import DexterStrategyMaster, DexterStrategiesEnum
-from FacebookDexter.BackgroundTasks.startup import config
-
+from FacebookDexter.BackgroundTasks.Strategies.StrategyMaster import DexterStrategiesEnum, DexterStrategyMaster
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
     FacebookTuringDataSyncCompletedEvent,
 )
@@ -22,7 +19,6 @@ from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompl
 )
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyDataMongoRepository import StrategyDataMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import StrategyJournalMongoRepository
-
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +40,22 @@ class FacebookTuringSyncDoneHandler:
             query = {
                 MongoOperator.AND.value: [
                     {"account_id": {MongoOperator.IN.value: account_ids}},
-                    {DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value: {MongoOperator.EQUALS.value: business_owner.business_owner_facebook_id}},
-                    {RecommendationField.STATUS.value: {MongoOperator.NOTEQUAL.value: RecommendationStatusEnum.APPLIED.value}}
+                    {
+                        DexterEngineRunJournalEnum.BUSINESS_OWNER_ID.value: {
+                            MongoOperator.EQUALS.value: business_owner.business_owner_facebook_id
+                        }
+                    },
+                    {
+                        RecommendationField.STATUS.value: {
+                            MongoOperator.NOTEQUAL.value: RecommendationStatusEnum.APPLIED.value
+                        }
+                    },
                 ]
             }
 
             self.recommendations_repository.delete_many(query)
+
+            fixtures.business_owner_repository.get_permanent_token(business_owner.business_owner_facebook_id)
 
             for strategy in DexterStrategiesEnum:
                 dexter_strategy_master = DexterStrategyMaster(

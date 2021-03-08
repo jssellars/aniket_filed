@@ -183,7 +183,6 @@ class Orchestrator:
             MongoOperator.AND.value: [
                 {
                     MongoOperator.OR.value: [
-                        {FacebookMiscFields.insights_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value},
                         {FacebookMiscFields.structures_sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value},
                         {FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.IN_PROGRESS.value},
                     ]
@@ -197,7 +196,6 @@ class Orchestrator:
 
         query = {
             MongoOperator.SET.value: {
-                FacebookMiscFields.insights_sync_status: AdAccountSyncStatusEnum.PENDING.value,
                 FacebookMiscFields.structures_sync_status: AdAccountSyncStatusEnum.PENDING.value,
                 FacebookMiscFields.sync_status: AdAccountSyncStatusEnum.PENDING.value,
                 FacebookMiscFields.last_synced_on: datetime.now() - timedelta(days=config.days_to_sync),

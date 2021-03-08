@@ -7,11 +7,11 @@ from typing import ClassVar, Dict, List, Optional, Tuple
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from Core.mongo_adapter import MongoRepositoryBase
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
+from FacebookDexter.BackgroundTasks.startup import config, fixtures
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters
 from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
@@ -19,6 +19,7 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGro
     BreakdownGroupedData,
     get_group_data_from_list,
     get_max_number_of_days,
+    get_max_number_of_days_from_bucket,
 )
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTimeBucket import (
     CauseMetricBase,
@@ -86,7 +87,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                 if not trend or not variance:
                     continue
 
-                reference_time = get_max_number_of_days(grouped_data, metric_name)
+                reference_time = get_max_number_of_days_from_bucket(grouped_data, metric_name)
                 if not reference_time:
                     continue
 
@@ -142,7 +143,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
                             datetime.now(),
-                            reference_time,
+                            get_max_number_of_days(grouped_data, metric_name),
                             ChannelEnum.FACEBOOK.value,
                             dexter_recommendation.priority.value,
                             structure_data,
@@ -208,7 +209,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
         self, grouped_data: List[BreakdownGroupedData], current_time: int, metric_name: str
     ) -> (float, float):
 
-        reference_time = get_max_number_of_days(grouped_data, metric_name)
+        reference_time = get_max_number_of_days_from_bucket(grouped_data, metric_name)
         if not reference_time:
             return None, None
 

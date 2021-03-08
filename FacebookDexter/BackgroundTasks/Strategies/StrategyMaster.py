@@ -1,23 +1,37 @@
+import concurrent.futures
 import logging
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Set, Union
+
+from bson import BSON
 
 from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import RunStatusDexterEngineJournal
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.mongo_adapter import MongoRepositoryBase
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
+    create_facebook_filter,
+    get_dexter_insights,
+    get_sdk_structures,
+)
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import EffectiveStatusEnum
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     AdSetOptimizationToResult,
     PixelCustomEventTypeToResult,
 )
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
+from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
-from FacebookDexter.BackgroundTasks.startup import config
+from FacebookDexter.BackgroundTasks.startup import config, fixtures
 from FacebookDexter.BackgroundTasks.Strategies.AudienceSizeStrategy import AudienceSizeStrategy
 from FacebookDexter.BackgroundTasks.Strategies.BreakdownStrategy import BreakdownAverageStrategy
 from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import OverTimeTrendStrategy
@@ -101,7 +115,7 @@ class DexterStrategyMaster:
         self.journal_repository.update_journal_entry(
             business_owner,
             account_id,
-            RunStatusDexterEngineJournal.PENDING,
+            RunStatusDexterEngineJournal.IN_PROGRESS,
             ChannelEnum.FACEBOOK,
             self.dexter_strategy.ALGORITHM,
             start_time=datetime.now(),
@@ -114,40 +128,45 @@ class DexterStrategyMaster:
                 for action_breakdown in self.dexter_strategy.action_breakdowns:
 
                     self.data_repository.set_structures_collection(level, config)
-                    structure_key = LevelIdKeyEnum[level.value.upper()].value
-                    structures = self.data_repository.get_structures_by_key(
-                        key=LevelIdKeyEnum.ACCOUNT.value, key_value=account_id, level=level, structure_key=structure_key
+
+                    filtering = create_facebook_filter(
+                        FieldsMetadata.effective_status.name,
+                        AgGridFacebookOperator.IN,
+                        [EffectiveStatusEnum.ACTIVE.value],
                     )
+
+                    sdk_structures = get_sdk_structures(
+                        f"act_{account_id}",
+                        Level[level.value.upper()],
+                        fields=StructureFields.get(level.value).get_structure_fields(),
+                        params={"filtering": [filtering]},
+                    )
+
+                    structures = []
+
+                    for structure in sdk_structures:
+                        mapping = StructureMapping.get(level.value)
+                        updated_structure = mapping.load(structure.export_all_data())
+                        updated_structure = asdict(updated_structure)
+                        updated_structure[FacebookMiscFields.details] = BSON.decode(
+                            updated_structure.get(FacebookMiscFields.details)
+                        )
+                        structures.append(updated_structure)
+
                     self.data_repository.set_insights_collection(level, breakdown, action_breakdown, config)
 
-                    for structure in structures:
-                        try:
-                            results = self.data_repository.read_metrics_data(
-                                key_value=structure[structure_key],
-                                metrics=required_metrics,
-                                level=level,
-                                breakdown=breakdown,
-                            )
-                            if not results:
-                                continue
-
-                            grouped_data = self.get_grouped_data(results, level, breakdown)
-                            if not grouped_data:
-                                continue
-
-                            self.dexter_strategy.generate_recommendation(
-                                grouped_data,
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        for structure in structures:
+                            executor.submit(
+                                self.get_recommendation_for_structure,
+                                required_metrics,
                                 level,
                                 breakdown,
-                                business_owner,
+                                action_breakdown,
                                 account_id,
                                 structure,
-                                self.recommendations_repository,
+                                business_owner,
                             )
-
-                        except Exception as e:
-                            logger.exception(f"Dexter could not run for structure id || {repr(e)}")
-                            has_errors = True
 
         status = RunStatusDexterEngineJournal.FAILED if has_errors else RunStatusDexterEngineJournal.COMPLETED
 
@@ -160,8 +179,58 @@ class DexterStrategyMaster:
             end_time=datetime.now(),
         )
 
+    def get_recommendation_for_structure(
+        self,
+        required_metrics: List,
+        level: LevelEnum,
+        breakdown: Field,
+        action_breakdown: Field,
+        account_id: str,
+        structure: Dict,
+        business_owner: str,
+    ):
+        try:
+            on_metrics = required_metrics + [
+                FieldsMetadata.result_type.name,
+                FieldsMetadata.date_start.name,
+                FieldsMetadata.date_stop.name,
+                LevelIdKeyEnum[level.value.upper()].value,
+            ]
+            if breakdown != FieldsMetadata.breakdown_none:
+                on_metrics.append(breakdown.name)
+
+            results = get_dexter_insights(
+                f"act_{account_id}",
+                Level[level.value.upper()],
+                breakdown,
+                action_breakdown,
+                config.days_to_sync,
+                on_metrics,
+                structure,
+            )
+            if not results:
+                return
+
+            grouped_data = self.get_grouped_data(results, level, breakdown)
+            if not grouped_data:
+                return
+
+            self.dexter_strategy.generate_recommendation(
+                grouped_data,
+                level,
+                breakdown,
+                business_owner,
+                account_id,
+                structure,
+                self.recommendations_repository,
+            )
+
+        except Exception as e:
+            logger.exception(f"Dexter could not run for structure id || {repr(e)}")
+            has_errors = True
+
     def get_grouped_data(
-        self, metrics_data: List[Dict], level: LevelEnum, breakdown: FieldsMetadata
+        self, metrics_data: List[Dict], level: LevelEnum, breakdown: Field
     ) -> List[BreakdownGroupedData]:
 
         result = []
@@ -189,9 +258,7 @@ class DexterStrategyMaster:
         return result
 
 
-def get_data_after_end_date(
-    end_date: datetime, metric: FacebookField, metrics_data: List[Dict], breakdown: FieldsMetadata
-) -> List[Dict]:
+def get_data_after_end_date(end_date: datetime, metric: FacebookField, metrics_data: List[Dict]) -> List[Dict]:
     result = []
     for metric_day in metrics_data:
         metric_end_date = datetime.strptime(metric_day[FieldsMetricStructureMetadata.date_stop.name], DEFAULT_DATETIME)
@@ -217,7 +284,7 @@ def get_metric_group_data(
     time_bucket: StrategyTimeBucket,
     metric: Union[MetricClause, CauseMetricBase],
     metrics_data: List[Dict],
-    breakdown: FieldsMetadata,
+    breakdown: Field,
     all_grouped_data: List[BreakdownGroupedData],
 ) -> None:
     end_date = datetime.now() - timedelta(time_bucket.no_of_days + 1)
@@ -236,7 +303,7 @@ def add_missing_metric_to_group(
     time_bucket: StrategyTimeBucket,
     metric_field: FacebookField,
     metrics_data: List[Dict],
-    breakdown: FieldsMetadata,
+    breakdown: Field,
     all_grouped_data: List[BreakdownGroupedData],
     end_date: datetime,
 ):
@@ -248,7 +315,7 @@ def add_missing_metric_to_group(
     if existing_metric:
         return
 
-    bucket_data = get_data_after_end_date(end_date, metric_field, metrics_data, breakdown)
+    bucket_data = get_data_after_end_date(end_date, metric_field, metrics_data)
 
     if len(bucket_data) < time_bucket.minimum_days_of_data:
         return
