@@ -7,11 +7,11 @@ from typing import ClassVar, Dict, List, Optional, Tuple
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
+from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.mongo_adapter import MongoRepositoryBase
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters
 from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message
@@ -92,7 +92,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                     continue
 
                 if trend == trigger_metric.trigger.trend and variance >= trigger_metric.trigger.variance_percentage:
-                    (dexter_output, cause_benchmark, cause_current,) = self.check_causes(
+                    (dexter_output, cause_benchmark, cause_current) = self.check_causes(
                         trigger_metric.cause_metrics,
                         grouped_data,
                         time_bucket.no_of_days,

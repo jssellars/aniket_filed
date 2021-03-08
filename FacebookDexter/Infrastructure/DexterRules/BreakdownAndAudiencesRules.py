@@ -75,7 +75,7 @@ REACH_AUDIENCE_SIZE_RULE = [
         trigger=MetricClause(
             FieldsMetadata.reach,
             TrendEnum.INCREASING,
-            variance_percentage=75,
+            variance_percentage=65,
             is_divided_by_no_breakdowns=True,
         ),
         cause_metrics=[

@@ -17,6 +17,7 @@ class DexterCustomFields:
     # Dexter only used fields
     result_type = Field(
         name="result_type",
+        field_type=FieldType.CUSTOM_INSIGHTS_METRIC,
     )
 
     landing_page_conversion_rate = Field(

@@ -196,6 +196,9 @@ class DexterStrategyMaster:
                 LevelIdKeyEnum[level.value.upper()].value,
             ]
 
+            if FieldsMetadata.results.name not in dexter_insights_metrics:
+                dexter_insights_metrics.append(FieldsMetadata.results.name)
+
             if breakdown != FieldsMetadata.breakdown_none:
                 dexter_insights_metrics.append(breakdown.name)
 

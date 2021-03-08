@@ -8,17 +8,17 @@ from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.targeting import Targeting
 from facebook_business.adobjects.targetingsearch import TargetingSearch
 
+from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
+from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from Core.constants import DEFAULT_DATETIME
-from Core.mongo_adapter import MongoRepositoryBase
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
     BreakdownGroupedData,
     get_max_number_of_days,
@@ -76,11 +76,6 @@ class AudienceSizeStrategy(DexterStrategyBase):
         recommendations_repository: MongoRepositoryBase,
     ):
         structure_key = LevelIdKeyEnum[level.value.upper()].value
-
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner)
-
-        # initialize GraphAPI SDK
-        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         reach_cursor = AdSet(structure[structure_key]).get_insights(
             fields=[FieldsMetadata.reach.name],

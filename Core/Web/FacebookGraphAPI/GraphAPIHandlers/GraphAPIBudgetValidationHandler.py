@@ -1,10 +1,9 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.minimumbudget import MinimumBudget
 from forex_python.converter import CurrencyCodes
 
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationFields import GraphAPIBudgetValidationField
 
 

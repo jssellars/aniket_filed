@@ -18,31 +18,6 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, Level
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
-DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS = [
-    FieldsMetadata.amount_spent,
-    FieldsMetadata.reach,
-    FieldsMetadata.link_clicks,
-    FieldsMetadata.page_likes,
-    FieldsMetadata.impressions,
-    FieldsMetadata.purchases_total,
-    FieldsMetadata.conversions,
-    FieldsMetadata.unique_ctr_all,
-    FieldsMetadata.landing_page_views_total,
-    FieldsMetadata.leads_total,
-    FieldsMetadata.results,
-    FieldsMetadata.date_start,
-    FieldsMetadata.date_stop,
-    FieldsMetadata.frequency,
-    FieldsMetadata.unique_clicks_all,
-    FieldsMetadata.objective,
-    FieldsMetadata.cpc_all,
-    FieldsMetadata.ctr_all,
-    FieldsMetadata.clicks_all,
-    FieldsMetadata.cpm,
-    FieldsMetadata.results,
-    FieldsMetadata.cost_per_result,
-]
-
 LEVEL_TO_STRUCTURE_FIELDS = {
     Level.CAMPAIGN.value: [
         FieldsMetadata.account_name,
@@ -213,12 +188,12 @@ def get_dexter_insights(ad_account_id: str, level: Level, breakdown: Field, fiel
     ad_account = AdAccount(ad_account_id)
 
     # TODO: change how fields param is constructed to avoid using this requested_fb_fields
-    requested_fb_fields = DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS + LEVEL_TO_STRUCTURE_FIELDS[level.value]
+    fields.extend([x.name for x in LEVEL_TO_STRUCTURE_FIELDS[level.value]])
 
     if breakdown != FieldsMetadata.breakdown_none:
-        requested_fb_fields.append(breakdown)
+        fields.append(breakdown.name)
 
-    insights = ad_account.get_insights(fields=get_insights_metrics(requested_fb_fields), params=parameters)
+    insights = ad_account.get_insights(fields=get_insights_metrics(fields), params=parameters)
 
     insights = [insight.export_all_data() for insight in insights]
 
@@ -229,7 +204,9 @@ def get_dexter_insights(ad_account_id: str, level: Level, breakdown: Field, fiel
     if results_requested:
         add_results_to_response(level.value, insights, ad_account_id)
     insights_response = (
-        GraphAPIInsightsMapper().map(requested_fields=requested_fb_fields, response=insights) if insights else []
+        GraphAPIInsightsMapper().map(requested_fields=get_fieldsmetadata_from_str_list(fields), response=insights)
+        if insights
+        else []
     )
 
     for entry in insights_response:
@@ -239,11 +216,28 @@ def get_dexter_insights(ad_account_id: str, level: Level, breakdown: Field, fiel
     return insights_response
 
 
-def get_insights_metrics(requested_fields: List[Field]):
-    fields = [
-        field.facebook_fields
-        for field in requested_fields
-        if field.field_type == FieldType.INSIGHT or field.field_type == FieldType.ACTION_INSIGHT
-    ]
-    fields = functools.reduce(operator.iconcat, fields, [])
+def get_insights_metrics(requested_fields: List[str]):
+
+    fb_fields = []
+    for field in requested_fields:
+        entry = getattr(FieldsMetadata, field, None)
+
+        if not entry:
+            continue
+
+        if entry.field_type == FieldType.INSIGHT or entry.field_type == FieldType.ACTION_INSIGHT:
+            fb_fields.append(entry.facebook_fields)
+
+    fields = functools.reduce(operator.iconcat, fb_fields, [])
     return list(set(fields))
+
+
+def get_fieldsmetadata_from_str_list(required_fields: List[str]):
+    fields_metadata_list = []
+    for field in required_fields:
+        entry = getattr(FieldsMetadata, field, None)
+
+        if entry:
+            fields_metadata_list.append(entry)
+
+    return fields_metadata_list

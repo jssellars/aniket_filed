@@ -8,7 +8,7 @@ class OverTimeTrendTemplate(Enum):
     CR_DOWN_CTR_DOWN_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed your cost is increasing and people are less interested in your ads. This is a trend we’ve seen"
-            " over the {no_of_days} days and it's becoming more expensive to run ads by {trigger_variance:.2f}%."
+            " over the last {no_of_days} days and it's becoming more expensive to run ads by {trigger_variance:.2f}%."
         ),
         RecommendationPriority.HIGH,
         "Improve Ad Copy & Creatives",
@@ -80,7 +80,7 @@ class OverTimeTrendTemplate(Enum):
     RESULTS_DOWN_CR_DOWN_CPR_UP = DexterRecommendationOutput(
         (
             "We’ve noticed your results, conversion rate and cost per result are all moving in the wrong direction over"
-            " {no_of_days} days. Dexter thinks your message isn’t resonating with your interest targeting. "
+            " the last {no_of_days} days. Dexter thinks your message isn’t resonating with your interest targeting. "
         ),
         RecommendationPriority.HIGH,
         "New Interest Targeting",
@@ -122,7 +122,7 @@ class OverTimeTrendTemplate(Enum):
     RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP = DexterRecommendationOutput(
         (
             "Following your recent budget increase, the cost of running your ads has increased and results are falling"
-            " by {trigger_variance:.2f}%  over {no_of_days} days as a result. "
+            " by {trigger_variance:.2f}% over the last {no_of_days} days as a result. "
         ),
         RecommendationPriority.HIGH,
         "Decrease Budget",
@@ -134,7 +134,7 @@ class OverTimeTrendTemplate(Enum):
     RESULTS_DOWN_CPR_UP_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed that it’s becoming increasingly more expensive to keep your ads running. Your results are more"
-            " expensive, your CPCs have increased and results have decreased by {trigger_variance:.2f}% over"
+            " expensive, your CPCs have increased and results have decreased by {trigger_variance:.2f}% over the last"
             " {no_of_days} days."
         ),
         RecommendationPriority.HIGH,
@@ -206,7 +206,7 @@ class OverTimeTrendTemplate(Enum):
     CTR_DOWN_CPM_UP_CPC_UP = DexterRecommendationOutput(
         (
             "Dexter wants you to be aware, It's getting more competitive to run your ads in the marketplace and your"
-            " CTR has decreased by {trigger_variance:.2f}% in {no_of_days} days. "
+            " CTR has decreased by {trigger_variance:.2f}% in the last {no_of_days} days. "
         ),
         RecommendationPriority.MEDIUM,
         "New Interest Targeting",
@@ -217,7 +217,7 @@ class OverTimeTrendTemplate(Enum):
     CTR_UP_CPM_DOWN_CPC_DOWN = DexterRecommendationOutput(
         (
             "Your campaign is performing really well. Dexter has noticed that your CTR has increased by"
-            " {trigger_variance:.2f}% in {no_of_days} days. Your CPMs and CPCs have also both decreased during this period,"
+            " {trigger_variance:.2f}% in the last {no_of_days} days. Your CPMs and CPCs have also both decreased during this period,"
             " which is great. "
         ),
         RecommendationPriority.HIGH,
@@ -239,8 +239,8 @@ class OverTimeTrendTemplate(Enum):
     CPM_UP_RESULTS_DOWN_CTR_UP = DexterRecommendationOutput(
         (
             "We’ve noticed that it’s increasingly becoming more competitive to run your ad right now, your CPMs have"
-            " increased by {trigger_variance:.2f}%. There’s also less interest in your ads over {no_of_days} days as your"
-            " CTR has fallen. "
+            " increased by {trigger_variance:.2f}%. There’s also less interest in your ads over the last {no_of_days}"
+            " days as your CTR has fallen. "
         ),
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
@@ -251,7 +251,8 @@ class OverTimeTrendTemplate(Enum):
     CPM_UP_RESULTS_DOWN_CPR_UP = DexterRecommendationOutput(
         (
             "We’ve noticed your cost per result has increased and your CPMs have increased by {trigger_variance:.2f}%"
-            " over {no_of_days} days. There’s also less interest in your ads over {no_of_days} days as your results have fallen. "
+            " over the last {no_of_days} days. There’s also less interest in your ads over the last {no_of_days} days"
+            " as your results have fallen. "
         ),
         RecommendationPriority.MEDIUM,
         "Decrease Budget",

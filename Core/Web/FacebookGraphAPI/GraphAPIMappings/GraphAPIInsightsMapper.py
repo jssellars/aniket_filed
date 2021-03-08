@@ -64,6 +64,7 @@ class GraphAPIInsightsMapper:
                 if (
                     requested_fields[index].name == FieldsMetadata.results.name
                     or requested_fields[index].name == FieldsMetadata.cost_per_result.name
+                    or requested_fields[index].name == FieldsMetadata.result_type.name
                 ):
                     cls.__get_results_from_data(
                         data=data, mapped_fields=mapped_fields, requested_field=requested_fields[index]
@@ -122,7 +123,9 @@ class GraphAPIInsightsMapper:
         if facebook_results_field_value:
             result_value = facebook_results_field_value.mapper.map(data, facebook_results_field_value)
             mapped_fields.append([{requested_field.name: result_value[0].get(facebook_results_field_value.name)}])
-            mapped_fields.append([{FieldsMetadata.result_type.name: facebook_results_field_value.name}])
+
+            if requested_field.name == FieldsMetadata.results.name:
+                mapped_fields.append([{FieldsMetadata.result_type.name: facebook_results_field_value.name}])
 
 
 def change_fields_from_upper_case(mapped_data: List, required_fields_to_change: List):
