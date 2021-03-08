@@ -55,7 +55,7 @@ class QueryBuilderRequestMapper:
 
     __structure_columns = []
 
-    def __init__(self, query_builder_request: typing.Dict = None, table_name: EnumerationBase = None):
+    def __init__(self, query_builder_request, table_name):
         # get table name
         self.TableName = query_builder_request['TableName']
 

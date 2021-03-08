@@ -297,7 +297,7 @@ class AdsManagerInsightsWithTotals(Resource):
                 business_owner_google_id=business_owner_google_id,
             )
 
-            return response
+            return response, 200
 
         except Exception as e:
             abort(400, message=f"Failed to process your insights request. {repr(e)}")

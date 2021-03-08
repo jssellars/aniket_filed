@@ -24,7 +24,7 @@ class AdsManagerInsightsCommandHandler(GoogleTokenGetter):
             response = AdWordsAPIInsightsHandler.get_insights(config=config,
                                                               permanent_token=business_owner_permanent_token,
                                                               query_builder_request_parser=query_builder_request_parser)
-            return response, 200
+            return response
         else:
             return make_response(jsonify(error_message="Google account not found"), 404)
 
@@ -37,6 +37,6 @@ class AdsManagerInsightsCommandHandler(GoogleTokenGetter):
                 config=config,
                 permanent_token=business_owner_permanent_token,
                 query_builder_request_parser=query_builder_request_parser)
-            return response, 200
+            return response
         else:
             return make_response(jsonify(error_message="Google account not found"), 404)

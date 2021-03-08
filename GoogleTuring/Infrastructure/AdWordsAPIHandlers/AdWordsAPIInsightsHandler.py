@@ -24,10 +24,16 @@ class AdWordsAPIInsightsHandler(AdWordsAPIBaseHandler):
         filtering = query_builder_request_parser.filtering
 
         adwords_client = cls._build_client(config, client_customer_id, permanent_token)
-        return adwords_client.get_insights(report_name=report_name, status_field=status_field,
-                                           fields=fields, start_date=start_date, end_date=end_date,
-                                           time_increment=time_increment,
-                                           filtering=filtering, level=level)
+        return adwords_client.get_insights(
+            report_name=report_name,
+            status_field=status_field,
+            fields=fields,
+            start_date=start_date,
+            end_date=end_date,
+            time_increment=time_increment,
+            filtering=filtering,
+            level=level,
+        )
 
     @classmethod
     def get_insights_with_totals(cls, config, permanent_token, query_builder_request_parser):
@@ -43,7 +49,13 @@ class AdWordsAPIInsightsHandler(AdWordsAPIBaseHandler):
         filtering = query_builder_request_parser.filtering
 
         adwords_client = cls._build_client(config, client_customer_id, permanent_token)
-        return adwords_client.get_insights_with_totals(report_name=report_name, status_field=status_field,
-                                                       fields=fields, start_date=start_date, end_date=end_date,
-                                                       time_increment=time_increment,
-                                                       filtering=filtering, level=level)
+        return adwords_client.get_insights_with_totals(
+            report_name=report_name,
+            status_field=status_field,
+            fields=fields,
+            start_date=start_date,
+            end_date=end_date,
+            time_increment=time_increment,
+            filtering=filtering,
+            level=level,
+        )
