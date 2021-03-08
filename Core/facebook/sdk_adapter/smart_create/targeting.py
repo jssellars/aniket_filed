@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.constants import FB_MAX_AGE, FB_MIN_AGE
+from Core.facebook.sdk_adapter.smart_create.constants import FB_MAX_AGE, FB_MIN_AGE
 
 
 @dataclass

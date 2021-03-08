@@ -5,13 +5,13 @@ from typing import Dict, List, Optional, Tuple
 
 from facebook_business.adobjects.adset import AdSet
 
-from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement, Platform, Position
+from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement, Platform
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.constants import (
+from Core.facebook.sdk_adapter.smart_create.constants import (
     FB_MAX_AGE,
 )
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
+from Core.facebook.sdk_adapter.smart_create.targeting import (
     AgeGroup,
     CustomAudience,
     FlexibleTargeting,

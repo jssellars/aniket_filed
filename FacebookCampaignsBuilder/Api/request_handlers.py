@@ -6,6 +6,9 @@ from datetime import datetime
 from typing import Dict, List, Union
 
 import humps
+from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder
+from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
+from Core.facebook.sdk_adapter.smart_create.targeting import Location
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -16,13 +19,6 @@ from facebook_business.adobjects.campaign import Campaign
 from facebook_business.exceptions import FacebookRequestError
 from FacebookCampaignsBuilder.Api import dtos, mappings
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import (
-    ad_builder,
-    adset_builder,
-    campaign_builder,
-)
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.structures import CampaignSplit
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import Location
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
     CampaignCreatedEvent,
     CampaignCreatedEventMapping,
@@ -273,9 +269,7 @@ class SmartCreatePublish:
         query = {"user_filed_id": {MongoOperator.EQUALS.value: user_filed_id}}
         sort_query = [(date_key, -1)]
 
-        feedback_docs = SmartCreatePublish.feedback_repository.get_sorted(
-            query=query, sort_query=sort_query
-        )
+        feedback_docs = SmartCreatePublish.feedback_repository.get_sorted(query=query, sort_query=sort_query)
         if not feedback_docs:
             return
 

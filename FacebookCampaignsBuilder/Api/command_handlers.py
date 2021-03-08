@@ -4,10 +4,11 @@ from typing import Any, Dict, Optional
 
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
+from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder
+from Core.facebook.sdk_adapter.smart_create.targeting import FlexibleTargeting, Location, Targeting
 from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
-    Level, LevelToGraphAPIStructure)
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
@@ -15,10 +16,6 @@ from facebook_business.adobjects.adset import AdSet
 from FacebookCampaignsBuilder.Api import commands
 from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish
 from FacebookCampaignsBuilder.Api.startup import config
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create import (
-    ad_builder, adset_builder)
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import (
-    FlexibleTargeting, Location, Targeting)
 from werkzeug.datastructures import FileStorage
 
 logger = logging.getLogger(__name__)

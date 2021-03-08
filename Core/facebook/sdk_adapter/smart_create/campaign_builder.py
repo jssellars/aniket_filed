@@ -7,8 +7,8 @@ from facebook_business.adobjects.reachfrequencyprediction import ReachFrequencyP
 from Core.facebook.sdk_adapter.ad_objects.campaign import Objective, BidStrategy
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.structures import CampaignSplit
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import Location
+from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
+from Core.facebook.sdk_adapter.smart_create.targeting import Location
 
 
 def build_campaigns(step_one, step_two, step_four) -> List[CampaignSplit]:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Optional, List
 
-from FacebookCampaignsBuilder.Infrastructure.GraphAPIHandlers.smart_create.targeting import Location
+from Core.facebook.sdk_adapter.smart_create.targeting import Location
 
 
 @dataclass
