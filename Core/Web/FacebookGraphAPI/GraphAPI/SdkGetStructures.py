@@ -2,7 +2,6 @@ import functools
 import json
 import operator
 import urllib.parse as urlparse
-from datetime import datetime, timedelta
 from time import sleep
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs
@@ -11,7 +10,6 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.api import Cursor
 
-from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
@@ -136,8 +134,7 @@ def get_next_page_cursor(cursor: Cursor) -> Optional[str]:
 
 
 def are_structures_filtered(filtering: List) -> bool:
-    filters = json.loads(filtering)
-    for current_filter in filters:
+    for current_filter in filtering:
         if current_filter["field"].replace(".", "_") in [key.value for key in LevelIdKeyEnum]:
             return True
 
@@ -211,45 +208,11 @@ def __join_insights_and_structure_results(
     return insight_response
 
 
-def get_dexter_insights(
-    ad_account_id: str,
-    level: Level,
-    breakdown: Field,
-    action_breakdown: Field,
-    days_to_sync: int,
-    fields: List[str],
-    structure: Dict,
-):
+def get_dexter_insights(ad_account_id: str, level: Level, breakdown: Field, fields: List[str], parameters: Dict):
 
     ad_account = AdAccount(ad_account_id)
 
-    time_interval = {
-        GraphAPIInsightsFields.since: datetime.strftime(
-            datetime.now() - timedelta(days=days_to_sync), DEFAULT_DATETIME
-        ),
-        GraphAPIInsightsFields.until: datetime.strftime(datetime.now(), DEFAULT_DATETIME),
-    }
-
-    structure_key = LevelToFacebookIdKeyMapping[level.value.upper()].value
-
-    parameters = {
-        "level": level.value,
-        "breakdowns": breakdown.facebook_fields,
-        # For now this will be default on action_type
-        "action_breakdowns": "action_type",
-        "time_increment": FieldsMetadata.day.facebook_value,
-        "time_range": time_interval,
-        "limit": 50,
-        "filtering": json.dumps(
-            [
-                create_facebook_filter(
-                    structure_key.replace("_", "."), AgGridFacebookOperator.EQUAL, structure[structure_key]
-                )
-            ]
-        ),
-        "sort": "date_start",
-    }
-
+    # TODO: change how fields param is constructed to avoid using this requested_fb_fields
     requested_fb_fields = DEXTER_INSIGHTS_SYNCHRONIZER_FIELDS + LEVEL_TO_STRUCTURE_FIELDS[level.value]
 
     if breakdown != FieldsMetadata.breakdown_none:

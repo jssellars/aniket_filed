@@ -21,7 +21,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import EffectiveStatusEnum
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     AdSetOptimizationToResult,
     PixelCustomEventTypeToResult,
@@ -148,12 +148,11 @@ class DexterStrategyMaster:
                         mapping = StructureMapping.get(level.value)
                         updated_structure = mapping.load(structure.export_all_data())
                         updated_structure = asdict(updated_structure)
+                        # TODO: Remove the BSON encoding (legacy from MongoDB)
                         updated_structure[FacebookMiscFields.details] = BSON.decode(
                             updated_structure.get(FacebookMiscFields.details)
                         )
                         structures.append(updated_structure)
-
-                    self.data_repository.set_insights_collection(level, breakdown, action_breakdown, config)
 
                     with concurrent.futures.ThreadPoolExecutor() as executor:
                         for structure in structures:
@@ -190,23 +189,22 @@ class DexterStrategyMaster:
         business_owner: str,
     ):
         try:
-            on_metrics = required_metrics + [
+            dexter_insights_metrics = required_metrics + [
                 FieldsMetadata.result_type.name,
                 FieldsMetadata.date_start.name,
                 FieldsMetadata.date_stop.name,
                 LevelIdKeyEnum[level.value.upper()].value,
             ]
+
             if breakdown != FieldsMetadata.breakdown_none:
-                on_metrics.append(breakdown.name)
+                dexter_insights_metrics.append(breakdown.name)
 
             results = get_dexter_insights(
                 f"act_{account_id}",
                 Level[level.value.upper()],
                 breakdown,
-                action_breakdown,
-                config.days_to_sync,
-                on_metrics,
-                structure,
+                dexter_insights_metrics,
+                get_fb_request_parameters(level, breakdown, action_breakdown, structure),
             )
             if not results:
                 return
@@ -343,3 +341,24 @@ def add_missing_metric_to_group(
             return
 
     all_grouped_data.append(grouped_data)
+
+
+def get_fb_request_parameters(level: LevelEnum, breakdown: Field, action_breakdown: Field, structure: Dict) -> Dict:
+
+    structure_key = LevelToFacebookIdKeyMapping[level.value.upper()].value
+
+    return {
+        "level": level.value,
+        "breakdowns": breakdown.facebook_fields,
+        # For now this will be default on action_type
+        "action_breakdowns": "action_type",
+        "time_increment": FieldsMetadata.day.facebook_value,
+        "time_range": config.days_to_sync,
+        "limit": 50,
+        "filtering": [
+            create_facebook_filter(
+                structure_key.replace("_", "."), AgGridFacebookOperator.EQUAL, structure[structure_key]
+            )
+        ],
+        "sort": "date_start",
+    }
