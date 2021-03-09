@@ -9,7 +9,6 @@ class Default:
         core.Default.mongo,
         recommendations_collection_name="recommendations",
         recommendations_database_name="{env}_dexter_recommendations",
-        structures_database="{env}_facebook_turing_structures"
     )
     rabbitmq = core.replace_in_class(
         core.Default.rabbitmq,
@@ -21,5 +20,5 @@ class Default:
                     name="{env}.{app_domain}.turing.outbound", key="{env}.{app_domain}.turing.outbound.key"
                 ),
             )
-        ]
+        ],
     )

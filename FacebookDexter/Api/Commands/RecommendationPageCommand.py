@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List, Optional
 
-from marshmallow import fields, INCLUDE
+from marshmallow import INCLUDE, fields
 from marshmallow.validate import Range
-from typing import Optional, List
 
 from Core.mapper import MapperBase
 
@@ -13,6 +13,7 @@ class RecommendationPageCommandMapping(MapperBase):
     page_size = fields.Integer(required=True, validate=Range(min=1))
     level = fields.String(required=False)
     priorities = fields.List(fields.String(), required=False)
+    structure_ids = fields.List(fields.String(), required=False)
 
     class Meta:
         # Include unknown fields in the deserialized output
@@ -26,12 +27,14 @@ class RecommendationPageCommand:
     page_size: int
     level: Optional[str] = None
     priorities: Optional[List[str]] = None
+    structure_ids: Optional[List[str]] = field(default_factory=list)
 
 
 class NumberOfPagesCommandMapping(MapperBase):
     ad_account_id = fields.String(required=True)
     level = fields.String(required=False)
     priorities = fields.List(fields.String(), required=False)
+    structure_ids = fields.List(fields.String(), required=False)
     page_size = fields.Integer(required=True, validate=Range(min=1))
 
     class Meta:
@@ -45,3 +48,4 @@ class NumberOfPagesCommand:
     page_size: int
     level: Optional[str] = None
     priorities: Optional[List[str]] = None
+    structure_ids: Optional[List[str]] = field(default_factory=list)

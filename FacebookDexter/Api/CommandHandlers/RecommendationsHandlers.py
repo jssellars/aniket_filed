@@ -222,8 +222,11 @@ def _get_recommendations_query(
     }
 
     if command.level:
+        query[MongoOperator.AND.value].append({RecommendationField.LEVEL.value: command.level})
+
+    if command.structure_ids:
         query[MongoOperator.AND.value].append(
-            {RecommendationField.LEVEL.value: {MongoOperator.EQUALS.value: command.level}}
+            {RecommendationField.STRUCTURE_ID.value: {MongoOperator.IN.value: command.structure_ids}}
         )
 
     return query
