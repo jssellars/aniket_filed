@@ -423,6 +423,8 @@ class GraphAPIInsightsHandler:
 
             structures_response.append(current_structure)
 
+        structures_response = GraphAPIInsightsMapper().map(requested_structure_fields, structures)
+
         structure_ids = [x["id"] for x in structures_response if "id" in x]
         next_page_cursor = get_next_page_cursor(structures)
 
