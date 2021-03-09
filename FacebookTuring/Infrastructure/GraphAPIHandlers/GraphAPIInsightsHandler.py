@@ -12,7 +12,6 @@ from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuild
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
     add_results_to_response,
     create_facebook_filter,
@@ -83,30 +82,19 @@ class GraphAPIInsightsHandler:
     @classmethod
     def get_insights_base(
         cls,
-        permanent_token: str = None,
         ad_account_id: str = None,
         fields: List[str] = None,
         parameters: Dict = None,
         requested_fields: List[FieldsMetadata] = None,
-        add_totals: bool = False,
-        thread: Union[str, int] = None,
         level: str = None,
-    ) -> Dict:
+    ) -> List[Dict]:
 
         try:
-            graph_api_client = GraphAPIClientBase(permanent_token)
-            graph_api_client.config = cls.build_get_insights_config(
-                permanent_token=permanent_token,
-                ad_account_id=ad_account_id,
-                fields=fields,
-                params=parameters,
-                add_totals=add_totals,
-            )
             ad_account = AdAccount(ad_account_id)
             insights = ad_account.get_insights(fields=fields, params=parameters)
 
             if not insights:
-                return {}
+                return []
 
             summary = insights.summary() if parameters["default_summary"] else None
 
@@ -138,7 +126,11 @@ class GraphAPIInsightsHandler:
             # insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
             # summary_response = list(map(dict, set(tuple(x.items()) for x in summary_response)))
 
-            return copy.deepcopy({thread: (insights_response, summary_response)})
+            if not insights_response:
+                return []
+
+            return insights_response
+
         except Exception as e:
             raise e
 
@@ -288,12 +280,9 @@ class GraphAPIInsightsHandler:
     def get_ag_grid_insights(
         cls,
         config,
-        permanent_token: str = None,
         level: str = None,
         query: QueryBuilderFacebookRequestParser = None,
     ) -> Dict:
-
-        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
         ad_account_id = query.facebook_id
         fields = query.fields
@@ -457,33 +446,6 @@ class GraphAPIInsightsHandler:
         )
 
         return insight_response, structures_response, next_page_cursor, summary
-
-    @classmethod
-    def get_reports_insights(
-        cls,
-        config,
-        permanent_token: str = None,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        parameters: Dict = None,
-        requested_fields: List[FieldsMetadata] = None,
-        level: str = None,
-    ) -> List[Dict]:
-        report_insights_thread = 1
-        insights_response = cls.get_insights_base(
-            permanent_token=permanent_token,
-            ad_account_id=ad_account_id,
-            fields=fields,
-            parameters=parameters,
-            requested_fields=requested_fields,
-            thread=report_insights_thread,
-            level=level,
-        )
-
-        if not insights_response:
-            return []
-
-        return insights_response[report_insights_thread][0]
 
     @classmethod
     def right_join_insights_and_structures(

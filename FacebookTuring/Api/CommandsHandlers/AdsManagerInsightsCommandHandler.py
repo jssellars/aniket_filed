@@ -1,31 +1,22 @@
 import logging
 import typing
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Dict, List
 
-from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.constants import DEFAULT_DATETIME
-from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import \
-    Placement
+from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement
 from Core.facebook.sdk_adapter.validations import PLACEMENT_X_OBJECTIVE
 from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
-from Core.Tools.QueryBuilder.QueryBuilder import (AgGridInsightsRequest,
-                                                  AgGridTrendRequest,
-                                                  QueryBuilderRequestMapper)
-from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import \
-    QueryBuilderFacebookRequestParser
+from Core.Tools.QueryBuilder.QueryBuilder import AgGridInsightsRequest, AgGridTrendRequest, QueryBuilderRequestMapper
+from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import \
-    AdsManagerInsightsCommandEnum
-from FacebookTuring.Api.startup import config, fixtures
-from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import \
-    FiledFacebookInsightsTableEnum
-from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import \
-    GraphAPIInsightsHandler
-from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import \
-    TuringMongoRepository
+from FacebookTuring.Api.startup import config
+from FacebookTuring.Infrastructure.Domain.FiledFacebookInsightsTableEnum import FiledFacebookInsightsTableEnum
+from FacebookTuring.Infrastructure.GraphAPIHandlers.GraphAPIInsightsHandler import GraphAPIInsightsHandler
+from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import TuringMongoRepository
 
 logger = logging.getLogger(__name__)
 
@@ -56,146 +47,108 @@ DEFAULT_PLACEMENT_POSITIONS = {
 }
 
 
-class AdsManagerInsightsCommandHandler:
+class AdsManagerInsightsCommandHandler(ABC):
+    def __init__(self):
+        self.query = QueryBuilderFacebookRequestParser()
 
-    @classmethod
-    def handle(cls,
-               handler_type: AdsManagerInsightsCommandEnum = None,
-               query_json: typing.Dict = None,
-               business_owner_id: typing.AnyStr = None,
-               level: typing.AnyStr = None) -> typing.List[typing.Dict]:
-        handlers = {
-            AdsManagerInsightsCommandEnum.REPORTS: cls.get_reports_insights,
-            AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS: cls.get_ag_grid_insights,
-            AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS_TREND: cls.get_ag_grid_trend,
-            AdsManagerInsightsCommandEnum.AG_GRID_ADD_AN_ADSET_AD_PARENT: cls.get_ag_grid_popup
-        }
-        handler = handlers.get(handler_type, None)
-        if handler is None:
-            raise ValueError('Invalid insights handler: %s' % handler_type.value)
+    @abstractmethod
+    def handle(self, query_json: Dict = None, business_owner_id: str = None, level: str = None):
+        pass
 
-        return handler(query_json=query_json, business_owner_id=business_owner_id, level=level)
+    @abstractmethod
+    def map_query(self, query_json: typing.Dict = None, level: typing.AnyStr = None, has_breakdowns: bool = True):
+        pass
 
-    @classmethod
-    def map_query(cls, query: typing.Dict = None, has_breakdowns: bool = True) -> QueryBuilderFacebookRequestParser:
-        query_builder_request = QueryBuilderRequestMapper(query, FiledFacebookInsightsTableEnum)
-        query = QueryBuilderFacebookRequestParser()
-        query.parse(query_builder_request, parse_breakdowns=has_breakdowns)
-        return query
 
-    @classmethod
-    def map_ag_grid_insights_query(cls, query: typing.Dict = None,
-                                   level: typing.AnyStr = None,
-                                   has_breakdowns: bool = True) -> QueryBuilderFacebookRequestParser:
-        query_builder_request = AgGridInsightsRequest(query_builder_request=query)
-        query = QueryBuilderFacebookRequestParser()
-        query.parse_ag_grid_insights_query(query_builder_request, level, parse_breakdowns=has_breakdowns)
-        return query
+class AdsManagerInsightsReports(AdsManagerInsightsCommandHandler):
+    def handle(
+        self, query_json: typing.Dict = None, business_owner_id: typing.AnyStr = None, level: typing.AnyStr = None
+    ) -> typing.List[typing.Dict]:
+        self.map_query(query_json=query_json, has_breakdowns=True)
 
-    @classmethod
-    def map_ag_grid_trend_query(cls, query: typing.Dict = None,
-                                level: typing.AnyStr = None,
-                                has_breakdowns: bool = True) -> QueryBuilderFacebookRequestParser:
-        query_builder_request = AgGridTrendRequest(query)
-        query = QueryBuilderFacebookRequestParser()
-        query.parse_ag_grid_trend_query(query_builder_request, level, parse_breakdowns=has_breakdowns)
-        return query
+        response = GraphAPIInsightsHandler.get_insights_base(
+            ad_account_id=self.query.facebook_id,
+            fields=self.query.fields,
+            parameters=self.query.parameters,
+            requested_fields=self.query.requested_columns,
+            level=level,
+        )
+        return response
 
-    @classmethod
-    def get_ag_grid_insights(cls,
-                             query_json: Dict = None,
-                             business_owner_id: str = None,
-                             level: str = None) -> Dict:
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-        query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
+    def map_query(self, query_json: typing.Dict = None, level: typing.AnyStr = None, has_breakdowns: bool = True):
+        query_builder_request = QueryBuilderRequestMapper(query_json, FiledFacebookInsightsTableEnum)
+        self.query.parse(query_builder_request, parse_breakdowns=has_breakdowns)
+
+
+class AdsManagerInsightsAgGridInsights(AdsManagerInsightsCommandHandler):
+    def handle(self, query_json: Dict = None, business_owner_id: str = None, level: str = None) -> Dict:
+        self.map_query(query_json=query_json, level=level, has_breakdowns=True)
 
         return GraphAPIInsightsHandler.get_ag_grid_insights(
             config,
-            permanent_token=permanent_token,
             level=level,
-            query=query,
+            query=self.query,
         )
 
-    @classmethod
-    def get_ag_grid_popup(cls,
-                          query_json: Dict = None,
-                          business_owner_id: str = None,
-                          level: str = None) -> Dict:
+    def map_query(self, query_json: typing.Dict = None, level: typing.AnyStr = None, has_breakdowns: bool = True):
+        query_builder_request = AgGridInsightsRequest(query_builder_request=query_json)
+        self.query.parse_ag_grid_insights_query(query_builder_request, level, parse_breakdowns=has_breakdowns)
 
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-        _ = GraphAPISdkBase(config.facebook, permanent_token)
-        popup_fields = []
 
-        if level == Level.CAMPAIGN.value:
-            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.campaign_name.name])
-            placements = query_json.get("placements")
-            if placements:
-                validation_keys = [placement["platformKey"] for placement in placements]
-                campaign_ids = cls.get_valid_campaign_ids(validation_keys, query_json)
-                query_json['filterModel'].update({
-                    "campaign_id": {
-                        "filter": campaign_ids,
-                        "filterType": "campaign_id",
-                        "type": "inValues"
-                    }
-                })
-        else:
-            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.adset_name.name])
+class AdsManagerInsightsAgGridTrend(AdsManagerInsightsCommandHandler):
+    def handle(
+        self, query_json: typing.Dict = None, business_owner_id: typing.AnyStr = None, level: typing.AnyStr = None
+    ) -> Dict:
+        self.map_query(query_json=query_json, level=level, has_breakdowns=True)
 
-        query_json['agColumns'] = ",".join(popup_fields)
-        query = cls.map_ag_grid_insights_query(query_json, level, has_breakdowns=True)
-
-        insight_response, next_page_cursor, summary = GraphAPIInsightsHandler.get_insights_page(
-            config,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
-            requested_fields=query.requested_columns,
-            level=level,
-        )
-
-        return {"nextPageCursor": next_page_cursor, "data": insight_response, "summary": summary}
-
-    @classmethod
-    def get_ag_grid_trend(cls,
-                          query_json: typing.Dict = None,
-                          business_owner_id: typing.AnyStr = None,
-                          level: typing.AnyStr = None) -> Dict:
-
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-        _ = GraphAPISdkBase(config.facebook, permanent_token)
-        query = cls.map_ag_grid_trend_query(query_json, level, has_breakdowns=True)
-
-        requested_columns = query.requested_columns
+        requested_columns = self.query.requested_columns
         if len(requested_columns) > 1:
             logger.exception("The ag grid trend endpoint should receive only one column.")
             raise Exception("The ag grid trend endpoint should receive only one column.")
 
-        _, _, result = GraphAPIInsightsHandler.get_insights_page(
+        summary = self.get_summary(level, requested_columns)
+        past_period_summary = self.get_past_period_summary(level, requested_columns)
+
+        response = AdsManagerInsightsAgGridTrend.get_response(summary, past_period_summary, requested_columns)
+        return response
+
+    def map_query(self, query_json: typing.Dict = None, level: typing.AnyStr = None, has_breakdowns: bool = True):
+        query_builder_request = AgGridTrendRequest(query_json)
+        self.query.parse_ag_grid_trend_query(query_builder_request, level, parse_breakdowns=has_breakdowns)
+
+    def get_summary(self, level: typing.AnyStr = None, requested_columns: List = None) -> List:
+        _, _, summary = GraphAPIInsightsHandler.get_insights_page(
             config,
             level=level,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
+            ad_account_id=self.query.facebook_id,
+            fields=self.query.fields,
+            parameters=self.query.parameters,
             requested_fields=requested_columns,
         )
 
-        since_date = datetime.strptime(query.time_range["since"], DEFAULT_DATETIME)
-        until_date = datetime.strptime(query.time_range["until"], DEFAULT_DATETIME)
+        return summary
+
+    def get_past_period_summary(self, level: typing.AnyStr = None, requested_columns: List = None) -> List:
+        since_date = datetime.strptime(self.query.time_range["since"], DEFAULT_DATETIME)
+        until_date = datetime.strptime(self.query.time_range["until"], DEFAULT_DATETIME)
         time_interval_in_days = (until_date - since_date).days + 1
 
-        query.time_range["since"] = (since_date - timedelta(days=time_interval_in_days)).date().isoformat()
-        query.time_range["until"] = (until_date - timedelta(days=time_interval_in_days)).date().isoformat()
+        self.query.time_range["since"] = (since_date - timedelta(days=time_interval_in_days)).date().isoformat()
+        self.query.time_range["until"] = (until_date - timedelta(days=time_interval_in_days)).date().isoformat()
 
-        _, _, past_period_result = GraphAPIInsightsHandler.get_insights_page(
+        _, _, past_period_summary = GraphAPIInsightsHandler.get_insights_page(
             config,
             level=level,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
+            ad_account_id=self.query.facebook_id,
+            fields=self.query.fields,
+            parameters=self.query.parameters,
             requested_fields=requested_columns,
         )
 
+        return past_period_summary
+
+    @staticmethod
+    def get_response(result: List = None, past_period_result: List = None, requested_columns: List = None) -> Dict:
         required_metric = requested_columns[0].name
         positive_effect_trend_direction = requested_columns[0].positive_effect_trend_direction
 
@@ -219,32 +172,48 @@ class AdsManagerInsightsCommandHandler:
 
         return {required_metric: metric_result, PERCENTAGE_DIFFERENCE_KEY: percentage_difference, TREND_KEY: trend}
 
-    @classmethod
-    def get_reports_insights(
-            cls,
-            query_json: typing.Dict = None,
-            business_owner_id: typing.AnyStr = None,
-            level: typing.AnyStr = None
-    ) -> typing.List[typing.Dict]:
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-        _ = GraphAPISdkBase(config.facebook, permanent_token)
 
-        query = cls.map_query(query_json, has_breakdowns=True)
-        response = GraphAPIInsightsHandler.get_reports_insights(
+class AdsManagerInsightsAgGridPopup(AdsManagerInsightsCommandHandler):
+    def handle(self, query_json: Dict = None, business_owner_id: str = None, level: str = None) -> Dict:
+        popup_fields = AdsManagerInsightsAgGridPopup.get_popup_fields(level, query_json)
+        query_json["agColumns"] = ",".join(popup_fields)
+        self.map_query(query_json=query_json, level=level, has_breakdowns=True)
+
+        insight_response, next_page_cursor, summary = GraphAPIInsightsHandler.get_insights_page(
             config,
-            permanent_token=permanent_token,
-            ad_account_id=query.facebook_id,
-            fields=query.fields,
-            parameters=query.parameters,
-            requested_fields=query.requested_columns,
-            level=query.level
+            ad_account_id=self.query.facebook_id,
+            fields=self.query.fields,
+            parameters=self.query.parameters,
+            requested_fields=self.query.requested_columns,
+            level=level,
         )
-        return response
 
-    @classmethod
-    def get_valid_campaign_ids(cls,
-                               validation_keys: List,
-                               query_json: Dict) -> List:
+        return {"nextPageCursor": next_page_cursor, "data": insight_response, "summary": summary}
+
+    def map_query(self, query_json: typing.Dict = None, level: typing.AnyStr = None, has_breakdowns: bool = True):
+        query_builder_request = AgGridInsightsRequest(query_builder_request=query_json)
+        self.query.parse_ag_grid_insights_query(query_builder_request, level, parse_breakdowns=has_breakdowns)
+
+    @staticmethod
+    def get_popup_fields(query_json: typing.Dict = None, level: typing.AnyStr = None) -> List:
+        popup_fields = []
+
+        if level == Level.CAMPAIGN.value:
+            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.campaign_name.name])
+            placements = query_json.get("placements")
+            if placements:
+                validation_keys = [placement["platformKey"] for placement in placements]
+                campaign_ids = AdsManagerInsightsAgGridPopup.get_valid_campaign_ids(validation_keys, query_json)
+                query_json["filterModel"].update(
+                    {"campaign_id": {"filter": campaign_ids, "filterType": "campaign_id", "type": "inValues"}}
+                )
+        else:
+            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.adset_name.name])
+
+        return popup_fields
+
+    @staticmethod
+    def get_valid_campaign_ids(validation_keys: List, query_json: Dict) -> List:
 
         mapped_keys = []
         for validation_key in validation_keys:

@@ -20,7 +20,6 @@ from Core.Web.Security.Permissions import (
 )
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
 from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
-from FacebookTuring.Api.Commands.AdsManagerInsightsCommand import AdsManagerInsightsCommandEnum
 from FacebookTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import (
     AdsManagerDeleteStructureCommandHandler,
@@ -32,7 +31,12 @@ from FacebookTuring.Api.CommandsHandlers.AdsManagerDuplicateStructureCommandHand
 from FacebookTuring.Api.CommandsHandlers.AdsManagerFilteredStructuresCommandHandler import (
     AdsManagerFilteredStructuresCommandHandler,
 )
-from FacebookTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import AdsManagerInsightsCommandHandler
+from FacebookTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import (
+    AdsManagerInsightsAgGridInsights,
+    AdsManagerInsightsAgGridPopup,
+    AdsManagerInsightsAgGridTrend,
+    AdsManagerInsightsReports,
+)
 from FacebookTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
     AdsManagerUpdateStructureCommandHandler,
 )
@@ -164,8 +168,8 @@ class AdsManagerAgGridStructuresPerformance(Resource):
 
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
-            response = AdsManagerInsightsCommandHandler.handle(
-                handler_type=AdsManagerInsightsCommandEnum.AG_GRID_ADD_AN_ADSET_AD_PARENT,
+            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            response = AdsManagerInsightsAgGridPopup().handle(
                 query_json=request_json,
                 business_owner_id=business_owner_id,
                 level=level,
@@ -424,8 +428,8 @@ class AdsManagerAgGridInsights(Resource):
         try:
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
-            response = AdsManagerInsightsCommandHandler.handle(
-                handler_type=AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS,
+            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            response = AdsManagerInsightsAgGridInsights().handle(
                 query_json=request_json,
                 business_owner_id=business_owner_id,
                 level=level,
@@ -458,8 +462,8 @@ class AgGridTrendHandler:
         try:
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
-            response = AdsManagerInsightsCommandHandler.handle(
-                handler_type=AdsManagerInsightsCommandEnum.AG_GRID_INSIGHTS_TREND,
+            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            response = AdsManagerInsightsAgGridTrend().handle(
                 query_json=request_json,
                 business_owner_id=business_owner_id,
                 level=level,
@@ -479,8 +483,8 @@ class GetInsightsHandler:
         try:
             request_json = request.get_json(force=True)
             business_owner_id = extract_business_owner_facebook_id()
-            response = AdsManagerInsightsCommandHandler.handle(
-                handler_type=AdsManagerInsightsCommandEnum.REPORTS,
+            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            response = AdsManagerInsightsReports().handle(
                 query_json=request_json,
                 business_owner_id=business_owner_id,
             )

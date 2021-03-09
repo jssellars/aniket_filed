@@ -24,7 +24,7 @@ class QueryBuilderCondition:
     Operator: typing.AnyStr = None
     Value: typing.Union[typing.AnyStr, int, float] = None
 
-    __keys = ['ColumnName', 'Operator', 'Value']
+    __keys = ["ColumnName", "Operator", "Value"]
 
     @classmethod
     def has_same_parameters(cls, other: typing.Any) -> bool:
@@ -57,21 +57,23 @@ class QueryBuilderRequestMapper:
 
     def __init__(self, query_builder_request, table_name):
         # get table name
-        self.TableName = query_builder_request['TableName']
+        self.TableName = query_builder_request["TableName"]
 
         # get requested columns
-        self.Columns = [QueryBuilderColumn(**column) for column in query_builder_request['Columns']]
+        self.Columns = [QueryBuilderColumn(**column) for column in query_builder_request["Columns"]]
 
         # get requested dimensions
-        self.Dimensions = [QueryBuilderDimension(**dimension) for dimension in query_builder_request['Dimensions']]
+        self.Dimensions = [QueryBuilderDimension(**dimension) for dimension in query_builder_request["Dimensions"]]
 
         # get request conditions and filters
-        self.Conditions = self.find_all_where_conditions(query_builder_request['Where'])
+        self.Conditions = self.find_all_where_conditions(query_builder_request["Where"])
 
         # get sort parameters
-        if 'Sort' in query_builder_request:
-            self.Sort = QueryBuilderSortCondition(Dimension=query_builder_request['Sort']['Dimension'],
-                                                  Order=QueryBuilderSortEnum(query_builder_request['Sort']['Order']))
+        if "Sort" in query_builder_request:
+            self.Sort = QueryBuilderSortCondition(
+                Dimension=query_builder_request["Sort"]["Dimension"],
+                Order=QueryBuilderSortEnum(query_builder_request["Sort"]["Order"]),
+            )
         else:
             self.Sort = QueryBuilderSortCondition()
 
@@ -87,7 +89,7 @@ class QueryBuilderRequestMapper:
             has_structure_field = self.__has_structure_fields()
             if not has_structure_field:
                 # this string literal should be removed and extracted into a generic level enum
-                level = 'account'
+                level = "account"
         return level
 
     def __has_structure_fields(self):
@@ -150,16 +152,16 @@ class AgGridInsightsRequest:
     __structure_columns = []
 
     def __init__(self, query_builder_request: Dict):
-        self.ag_columns = query_builder_request['agColumns'].split(", ")
-        self.next_page_cursor = query_builder_request['nextPageCursor']
-        self.filter_model = query_builder_request['filterModel']
-        self.sort_model = query_builder_request['sortModel']
-        self.time_range = query_builder_request['timeRange']
-        self.facebook_account_id = query_builder_request['facebookAccountId']
-        self.page_size = query_builder_request['pageSize']
-        self.has_delivery = query_builder_request.get('hasDelivery', True)
-        self.start_row = query_builder_request['startRow']
-        self.end_row = query_builder_request['endRow']
+        self.ag_columns = query_builder_request["agColumns"].split(", ")
+        self.next_page_cursor = query_builder_request["nextPageCursor"]
+        self.filter_model = query_builder_request["filterModel"]
+        self.sort_model = query_builder_request["sortModel"]
+        self.time_range = query_builder_request["timeRange"]
+        self.facebook_account_id = query_builder_request["facebookAccountId"]
+        self.page_size = query_builder_request["pageSize"]
+        self.has_delivery = query_builder_request.get("hasDelivery", True)
+        self.start_row = query_builder_request["startRow"]
+        self.end_row = query_builder_request["endRow"]
 
 
 class AgGridTrendRequest:
@@ -167,7 +169,7 @@ class AgGridTrendRequest:
     __structure_columns = []
 
     def __init__(self, query_builder_request: Dict):
-        self.ag_columns = query_builder_request['agColumns'].split(", ")
-        self.filter_model = query_builder_request['filterModel']
-        self.time_range = query_builder_request['timeRange']
-        self.facebook_account_id = query_builder_request['facebookAccountId']
+        self.ag_columns = query_builder_request["agColumns"].split(", ")
+        self.filter_model = query_builder_request["filterModel"]
+        self.time_range = query_builder_request["timeRange"]
+        self.facebook_account_id = query_builder_request["facebookAccountId"]
