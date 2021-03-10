@@ -16,7 +16,7 @@ class Audience:
     size: int = None
     details: MutableMapping = None
     pixel_id: str = None
-    audience_state: str = AudienceStateEnum.INACTIVE.value
+    state: int = AudienceStateEnum.INACTIVE.value
     locations: List[Dict] = field(default_factory=list)
     languages: List[Dict] = field(default_factory=list)
     interests: List[Dict] = field(default_factory=list)

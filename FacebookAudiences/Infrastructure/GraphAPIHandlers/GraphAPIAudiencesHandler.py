@@ -103,7 +103,7 @@ class GraphAPIAudiencesHandler:
         audience.date_created = saved_audience.time_created
         audience.size = saved_audience.approximate_count
         audience.details = copy.deepcopy(object_to_json(saved_audience))
-        audience.audience_state = saved_audience.run_status
+        audience.state = AudienceStateEnum[saved_audience.run_status].value
         audience.locations = saved_audience.locations
         audience.languages = saved_audience.languages
         audience.interests = saved_audience.interests
@@ -131,7 +131,7 @@ class GraphAPIAudiencesHandler:
         audience.size = custom_audience.approximate_count
         audience.details = copy.deepcopy(object_to_json(custom_audience))
         audience.pixel_id = custom_audience.pixel_id
-        audience.audience_state = cls.__map_delivery_status(custom_audience.delivery_status)
+        audience.state = cls.__map_delivery_status(custom_audience.delivery_status)
 
         last_updated = cls.__timestamp_to_datetime(custom_audience.time_updated)
         audience.last_updated = last_updated if last_updated else datetime.now().strftime(cls.__datetime_format)
