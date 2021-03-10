@@ -169,7 +169,7 @@ class ViewFieldsMetricPerformanceMetadata:
     )
     purchase_roas = ViewColumn(
         Autoincrement.hex_string("purchase_roas"),
-        display_name="Purcahse ROAS",
+        display_name="Purchase ROAS",
         primary_value=FieldsMetadata.purchase_roas,
         type_id=ViewColumnType.NUMBER.value,
         category_id=ViewColumnCategory.PERFORMANCE.value,
