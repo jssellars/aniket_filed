@@ -11,7 +11,7 @@ class AdSetModelFields(StructureModelFieldBase):
 
     structure_fields = [
         FieldsMetadata.ad_account_structure_id,
-        FieldsMetadata.campaign_structure_name,
+        # FieldsMetadata.campaign_structure_name,
         FieldsMetadata.campaign_id,
         FieldsMetadata.name,
         FieldsMetadata.id,
@@ -57,7 +57,7 @@ class AdSetModelFields(StructureModelFieldBase):
         FieldsMetadata.use_new_app_click,
         FieldsMetadata.lifetime_min_spend_target,
         # FieldsMetadata.ad_rules_governed,
-        FieldsMetadata.targetingsentencelines,
+        # FieldsMetadata.targetingsentencelines,
         FieldsMetadata.recommendations,
         FieldsMetadata.learning_stage_info,
     ]

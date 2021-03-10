@@ -11,9 +11,9 @@ class AdModelFields(StructureModelFieldBase):
 
     structure_fields = [
         FieldsMetadata.account_id,
-        FieldsMetadata.campaign_structure_name,
+        # FieldsMetadata.campaign_structure_name,
         FieldsMetadata.campaign_id,
-        FieldsMetadata.adset_structure_name,
+        # FieldsMetadata.adset_structure_name,
         FieldsMetadata.adset_id,
         FieldsMetadata.name,
         FieldsMetadata.id,
@@ -27,7 +27,7 @@ class AdModelFields(StructureModelFieldBase):
         FieldsMetadata.recommendations,
         FieldsMetadata.source_ad,
         FieldsMetadata.source_ad_id,
-        FieldsMetadata.targetingsentencelines,
+        # FieldsMetadata.targetingsentencelines,
         # FieldsMetadata.ad_creatives,
         FieldsMetadata.updated_time,
         FieldsMetadata.tracking_specs,
