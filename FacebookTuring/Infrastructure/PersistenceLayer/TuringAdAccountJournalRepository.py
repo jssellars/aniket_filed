@@ -208,3 +208,11 @@ class TuringAdAccountJournalRepository(MongoRepositoryBase):
             query[MongoOperator.SET.value][FacebookMiscFields.structures_sync_end_date] = end_date
 
         self.update_one(query_filter, query)
+
+    def save_sync_report(self, report: List[SyncStatusReport] = None, created_at: datetime = None) -> None:
+        self.collection = self.config.accounts_journal_sync_reports_collection_name
+        document = {
+            FacebookMiscFields.created_at: created_at,
+            FacebookMiscFields.report: [object_to_json(entry) for entry in report],
+        }
+        self.add_one(document)
