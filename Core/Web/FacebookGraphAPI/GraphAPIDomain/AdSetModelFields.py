@@ -11,7 +11,7 @@ class AdSetModelFields(StructureModelFieldBase):
 
     structure_fields = [
         FieldsMetadata.ad_account_structure_id,
-        # FieldsMetadata.campaign_structure_name,
+        FieldsMetadata.campaign_structure_name,
         FieldsMetadata.campaign_id,
         FieldsMetadata.name,
         FieldsMetadata.id,

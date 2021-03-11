@@ -118,8 +118,6 @@ class StructuresSyncronizer:
 
     def map_and_insert_structures(self, level: Level, structures: List[Dict]):
 
-        structure_ids = list({structure["id"] for structure in structures})
-
         # Map Facebook structure to domain model
         mapping = StructureMapping.get(level.value)
 
@@ -131,7 +129,7 @@ class StructuresSyncronizer:
         structures = [structure for structure in structures if self.__is_complete_structure(structure, self.level)]
 
         # insert structures
-        self.__mongo_repository.add_updated_structures(self.level, structure_ids, structures)
+        self.__mongo_repository.add_updated_structures(self.level, structures)
 
     def build_get_structure_config(
         self,

@@ -390,9 +390,8 @@ class TuringMongoRepository(MongoRepositoryBase):
                 structures[index][FacebookMiscFields.details] = {}
         return structures
 
-    def add_updated_structures(self, level, account_id: str, structures: List[Dict]) -> None:
+    def add_updated_structures(self, level, structures: List[Dict]) -> None:
         self.collection = level.value
-        self.delete_many({FacebookMiscFields.account_id: account_id})
         self.add_many(structures)
 
     def add_structure(
