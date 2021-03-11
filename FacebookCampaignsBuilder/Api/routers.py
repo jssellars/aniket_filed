@@ -15,7 +15,7 @@ from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extra
 from Core.Web.Security.Permissions import AdsManagerPermissions, CampaignBuilderPermissions
 from FacebookCampaignsBuilder.Api import command_handlers, commands, mappings, queries
 from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure
-from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish
+from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish, SmartEditPublish
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 
 logger = logging.getLogger(__name__)
@@ -371,3 +371,22 @@ class SmartEditCampaignTreesStructure(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Could not retrieve tree for {structure_ids}"}, 400
+
+
+class SmartEditPublishStructures(Resource):
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    def post(self):
+        try:
+            request_json = humps.decamelize(request.get_json(force=True))
+            business_owner_id = extract_business_owner_facebook_id()
+            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            campaigns = SmartEditPublish.handle(
+                request=request_json,
+                permanent_token=permanent_token,
+            )
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return Tools.create_error(e, code="BadRequest_PublishSmartCreateEndpoint"), 400
+
+        return object_to_camelized_dict(campaigns), 200

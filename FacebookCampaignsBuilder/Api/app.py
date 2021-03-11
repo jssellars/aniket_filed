@@ -69,6 +69,7 @@ router_route_pairs = (
         routers.SmartEditCampaignTreesStructure,
         "campaign-trees-structure/<string:account_id>/<string:level>/<string:structure_ids>",
     ),
+    (routers.SmartEditPublishStructures, "smart-edit/publish"),
 )
 
 scheduler = BackgroundScheduler()

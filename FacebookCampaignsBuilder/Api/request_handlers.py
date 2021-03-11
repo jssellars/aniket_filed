@@ -436,5 +436,61 @@ class SmartCreatePublish:
         return device, location
 
 
+class SmartEditPublish:
+    @staticmethod
+    def handle(request: Dict, permanent_token: str) -> List[Dict]:
+        GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=config.facebook)
+
+        campaign_tree = []
+        campaign_response = {"facebook_id": None, "name": None, "ad_sets": []}
+
+        campaigns = request.get("campaigns")
+        # TODO add logic for creating adsets and ads to existing campaign
+        adsets = request.get("adsets")
+        ads = request.get("ads")
+        ad_account = AdAccount(fbid=request["ad_account_id"])
+
+        for campaign_index, campaign in enumerate(campaigns):
+            try:
+                additional_adsets = campaign.pop("adsets", {})
+                additional_ads = additional_adsets.pop("ads", None)
+
+                facebook_campaign = SmartEditPublish.update_campaign(campaign)
+
+                # Add updated campaign to response
+                campaign_facebook_id = facebook_campaign.get_id()
+                campaign_name = campaign.get("campaign_name")
+                campaign_tree.append(deepcopy(campaign_response))
+                campaign_tree[campaign_index]["facebook_id"] = campaign_facebook_id
+                campaign_tree[campaign_index]["name"] = campaign_name
+            except FacebookRequestError as e:
+                raise e
+            except Exception:
+                raise
+
+        return campaign_tree
+
+    @staticmethod
+    def update_campaign(campaign: Dict) -> Campaign:
+        special_ad_categories = []
+        params = {
+            Campaign.Field.name: campaign.get("campaign_name"),
+            Campaign.Field.buying_type: campaign.get(Campaign.Field.buying_type),
+            Campaign.Field.objective: campaign.get(Campaign.Field.objective),
+            Campaign.Field.special_ad_categories: special_ad_categories.append(
+                campaign.get(Campaign.Field.special_ad_category)
+            ),
+        }
+
+        budget = campaign.get("campaign_budget_optimization")
+        if budget:
+            campaign_builder.set_budget_optimization(params, budget)
+
+        facebook_campaign = Campaign(fbid=campaign.get("campaign_id"))
+        facebook_campaign.api_update(params=params)
+
+        return facebook_campaign
+
+
 class HandlersEnum(EnumerationBase):
     SMART_CREATE_PUBLISH_REQUEST = SmartCreatePublish
