@@ -97,13 +97,14 @@ def create_facebook_filter(field: str, operator: AgGridFacebookOperator, value: 
 
 
 def get_next_page_cursor(cursor: Cursor) -> Optional[str]:
-    cursor.params["default_summary"] = True
 
-    if cursor.load_next_page():
-        parsed = urlparse.urlparse(cursor._path)
-        after_token = parse_qs(parsed.query).get("after")
-        if after_token:
-            return after_token[0]
+    if cursor._finished_iteration:
+        return None
+
+    parsed = urlparse.urlparse(cursor._path)
+    after_token = parse_qs(parsed.query).get("after")
+    if after_token:
+        return after_token[0]
 
     return None
 

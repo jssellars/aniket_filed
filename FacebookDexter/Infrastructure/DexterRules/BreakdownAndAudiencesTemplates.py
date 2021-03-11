@@ -15,7 +15,7 @@ class BreakdownRecommendationTemplate(Enum):
         ),
         RecommendationPriority.MEDIUM,
         "Change Your Breakdown ",
-        "You age or gender is not performing ",
+        "Your age or gender is not performing ",
         "Dexter suggests changing your age and gender breakdown to help lower your cost per result. ",
         apply_action_type=ApplyActionType.AGE_GENDER_BREAKDOWN_SPLIT,
     )
