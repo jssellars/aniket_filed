@@ -9,6 +9,7 @@ from urllib.parse import parse_qs
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.api import Cursor
+from facebook_business.exceptions import FacebookUnavailablePropertyException
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
@@ -80,7 +81,13 @@ def get_sdk_insights_page(
     if not insights:
         return None, None, None
 
-    summary = insights.summary() if parameters["default_summary"] else None
+    try:
+        summary = insights.summary() if parameters["default_summary"] else None
+    except FacebookUnavailablePropertyException:
+        summary = {}
+
+    if summary:
+        summary = json.loads(summary[10:])
 
     # iterate like this to avoid swapping page on the iterator
     insights_response = []
@@ -89,7 +96,7 @@ def get_sdk_insights_page(
 
     next_page_cursor = get_next_page_cursor(insights)
 
-    return insights_response, next_page_cursor, json.loads(summary[10:])
+    return insights_response, next_page_cursor, summary
 
 
 def create_facebook_filter(field: str, operator: AgGridFacebookOperator, value: Any) -> Dict:
