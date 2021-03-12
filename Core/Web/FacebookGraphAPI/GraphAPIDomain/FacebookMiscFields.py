@@ -52,3 +52,8 @@ class Gender(Enum):
 class FacebookGender(Enum):
     MEN = 1
     WOMEN = 2
+
+
+class FacebookBreakdownGender(Enum):
+    MALE = 1
+    FEMALE = 2

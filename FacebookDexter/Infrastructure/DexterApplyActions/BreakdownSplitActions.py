@@ -5,16 +5,17 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
-from bson import BSON
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 
 from Core.constants import DEFAULT_DATETIME_ISO
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.mongo_adapter import MongoOperator, MongoRepositoryStatus
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, FacebookMiscFields
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_and_map_structures
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookBreakdownGender, FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import GraphAPIBudgetValidationHandler
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
@@ -54,25 +55,33 @@ class AgeGenderBreakdownSplit(RecommendationAction):
 
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
         level = recommendation.get(RecommendationField.LEVEL.value)
-        mongo_structure = self._get_db_structure(level, facebook_id)
+        account_id = recommendation.get(RecommendationField.ACCOUNT_ID.value)
 
-        if not mongo_structure:
+        structure_key = LevelIdKeyEnum[level.upper()].value
+
+        filtering = create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.EQUAL, facebook_id)
+
+        structures_as_dict = get_and_map_structures(account_id, LevelEnum[level.upper()], filtering)
+
+        if not structures_as_dict or len(structures_as_dict) > 1:
             raise Exception(
                 f"Could not retrieve structure {recommendation.get(RecommendationField.STRUCTURE_ID.value)}"
             )
 
-        structure = LevelToGraphAPIStructure.get(level, facebook_id)
+        structure_as_dict = structures_as_dict[0]
 
         apply_parameters = recommendation[RecommendationField.APPLY_PARAMETERS.value][
             RecommendationField.ADSETS_SPLITS.value
         ]
-        targeting = dict(BSON.decode(mongo_structure[0][FacebookMiscFields.details]))[FacebookMiscFields.targeting]
+        targeting = structure_as_dict[FacebookMiscFields.details][FacebookMiscFields.targeting]
+
+        fb_structure = LevelToGraphAPIStructure.get(level, facebook_id)
 
         new_created_structures = []
         for gender in apply_parameters:
             for split in apply_parameters[gender]:
                 facebook_id = AgeGenderBreakdownSplit._create_and_update_split(
-                    split, targeting, structure, gender, recommendation
+                    split, targeting, fb_structure, gender, recommendation
                 )
                 new_created_structures.append(
                     NewCreatedStructureKeys(
@@ -86,7 +95,6 @@ class AgeGenderBreakdownSplit(RecommendationAction):
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         existing_breakdowns = defaultdict(list)
-        removed_cpr = 0
 
         breakdown_grouped_data = get_group_data_from_list(
             apply_parameters.existing_breakdowns, apply_parameters.metric_name, apply_parameters.no_of_days
@@ -212,7 +220,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
 
         current_targeting[FacebookMiscFields.age_min] = adset_split.min_age
         current_targeting[FacebookMiscFields.age_max] = adset_split.max_age
-        current_targeting[FacebookMiscFields.genders] = [FacebookGender[gender.upper()].value]
+        current_targeting[FacebookMiscFields.genders] = [FacebookBreakdownGender[gender.upper()].value]
 
         if adset_split.max_age == 65:
             adset_split.max_age = str(adset_split.max_age) + "+"

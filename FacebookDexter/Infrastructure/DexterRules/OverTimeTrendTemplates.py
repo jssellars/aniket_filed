@@ -84,9 +84,9 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.HIGH,
         "New Interest Targeting",
-        "Results, conversion rate and cost per result are all decreasing. ",
+        "Results and conversion rate are decreasing while cost per result is increasing. ",
         (
-            " Dexter suggests finding 3 new interests and creating a new adset for each of them to see which one"
+            "Dexter suggests finding 3 new interests and creating a new adset for each of them to see which one"
             " performs the best."
         ),
     )
@@ -98,7 +98,7 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.MEDIUM,
         "Launch AB Testing",
-        "Your results and click-through rate are both falling.",
+        "Your results are falling while your CTR is increasing. ",
         (
             "Dexter suggests you check the landing page and run some A/B testing of your copy and creative elements"
             " within the landing page to find what works best and helps keep your results up."
@@ -121,12 +121,12 @@ class OverTimeTrendTemplate(Enum):
 
     RESULTS_DOWN_AMOUNT_SPENT_UP_CPC_UP = DexterRecommendationOutput(
         (
-            "Following your recent budget increase, the cost of running your ads has increased and results are falling"
-            " by {trigger_variance:.2f}% over the last {no_of_days} days as a result. "
+            "Following your recent increase in the amount spent, the cost of running your ads has increased and results"
+            " are falling by {trigger_variance:.2f}% over the last {no_of_days} days as a result. "
         ),
         RecommendationPriority.HIGH,
         "Decrease Budget",
-        "Following your recent budget increase, the cost has increased and results are falling.",
+        "Following your recent increase in the amount spent, the cost has increased and results are falling.",
         "Dexter suggests lowering your budget by 20%. ",
         apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
@@ -186,7 +186,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_AMOUNT_SPENT_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Following your budget increase, your ads are performing well. ",
+        "Following your increase in the amount spent, your ads are performing well. ",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -214,6 +214,15 @@ class OverTimeTrendTemplate(Enum):
         "Have you considered running new interest targeting? ",
     )
 
+    CTR_DOWN_CPR_UP_CPM_UP = DexterRecommendationOutput(
+        ("We've noticed that your adset is fatiguing. Consider recreating the adset. "),
+        RecommendationPriority.HIGH,
+        "Recreate adset",
+        "Looks like your adset if fatiguing",
+        "Dexter suggests you to recreate the adset",
+        apply_action_type=ApplyActionType.DUPLICATE_AND_PAUSE_STRUCTURE,
+    )
+
     CTR_UP_CPM_DOWN_CPC_DOWN = DexterRecommendationOutput(
         (
             "Your campaign is performing really well. Dexter has noticed that your CTR has increased by"
@@ -225,15 +234,6 @@ class OverTimeTrendTemplate(Enum):
         "Your campaign is performing really well, consider increasing the budget!",
         "Increase your budget by 20%. ",
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
-    )
-
-    CTR_DOWN_CPR_UP_CPM_UP = DexterRecommendationOutput(
-        ("We've noticed that your adset is fatiguing. Consider recreating the adset. "),
-        RecommendationPriority.HIGH,
-        "Recreate adset",
-        "Looks like your adset if fatiguing",
-        "Dexter suggests you to recreate the adset",
-        apply_action_type=ApplyActionType.DUPLICATE_AND_PAUSE_STRUCTURE,
     )
 
     CPM_UP_RESULTS_DOWN_CTR_UP = DexterRecommendationOutput(
@@ -269,7 +269,7 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
         "Less people are clicking on your ads and the cost per click has increased.",
-        " Consider pausing your campaign or targeting some new interests. ",
+        "Consider pausing your campaign or targeting some new interests. ",
     )
 
     CLICKS_DOWN_CPM_UP = DexterRecommendationOutput(

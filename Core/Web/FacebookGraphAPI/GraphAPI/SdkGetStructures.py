@@ -2,20 +2,24 @@ import functools
 import json
 import operator
 import urllib.parse as urlparse
+from dataclasses import asdict
 from time import sleep
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs
 
+from bson import BSON
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.api import Cursor
 from facebook_business.exceptions import FacebookUnavailablePropertyException
 
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
 from Core.Web.FacebookGraphAPI.Models.Field import Field, FieldType
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 
@@ -104,7 +108,6 @@ def create_facebook_filter(field: str, operator: AgGridFacebookOperator, value: 
 
 
 def get_next_page_cursor(cursor: Cursor) -> Optional[str]:
-
     if cursor._finished_iteration:
         return None
 
@@ -192,7 +195,6 @@ def __join_insights_and_structure_results(
 
 
 def get_dexter_insights(ad_account_id: str, level: Level, breakdown: Field, fields: List[str], parameters: Dict):
-
     ad_account = AdAccount(ad_account_id)
 
     # TODO: change how fields param is constructed to avoid using this requested_fb_fields
@@ -225,7 +227,6 @@ def get_dexter_insights(ad_account_id: str, level: Level, breakdown: Field, fiel
 
 
 def get_insights_metrics(requested_fields: List[str]):
-
     fb_fields = []
     for field in requested_fields:
         entry = getattr(FieldsMetadata, field, None)
@@ -249,3 +250,24 @@ def get_fieldsmetadata_from_str_list(required_fields: List[str]):
             fields_metadata_list.append(entry)
 
     return fields_metadata_list
+
+
+def get_and_map_structures(ad_account_id: str, level: LevelEnum, filtering: Optional[Dict]) -> Optional[List]:
+    sdk_structures = get_sdk_structures(
+        ad_account_id,
+        Level[level.value.upper()],
+        fields=StructureFields.get(level.value).get_structure_fields(),
+        params={"filtering": [filtering]},
+    )
+
+    structures = []
+
+    for structure in sdk_structures:
+        mapping = StructureMapping.get(level.value)
+        updated_structure = mapping.load(structure.export_all_data())
+        updated_structure = asdict(updated_structure)
+        # TODO: Remove the BSON encoding (legacy from MongoDB)
+        updated_structure[FacebookMiscFields.details] = BSON.decode(updated_structure.get(FacebookMiscFields.details))
+        structures.append(updated_structure)
+
+    return structures

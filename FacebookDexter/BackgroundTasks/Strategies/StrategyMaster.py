@@ -1,11 +1,9 @@
 import concurrent.futures
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Set, Union
-
-from bson import BSON
 
 from Core.constants import DEFAULT_DATETIME
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
@@ -15,10 +13,9 @@ from Core.mongo_adapter import MongoRepositoryBase
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
     create_facebook_filter,
+    get_and_map_structures,
     get_dexter_insights,
-    get_sdk_structures,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import EffectiveStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
@@ -26,12 +23,11 @@ from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import 
     AdSetOptimizationToResult,
     PixelCustomEventTypeToResult,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields, StructureMapping
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.Field import Field as FacebookField
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Models.FieldsMetricStructureMetadata import FieldsMetricStructureMetadata
-from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.startup import config
 from FacebookDexter.BackgroundTasks.Strategies.AudienceSizeStrategy import AudienceSizeStrategy
 from FacebookDexter.BackgroundTasks.Strategies.BreakdownStrategy import BreakdownAverageStrategy
 from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import OverTimeTrendStrategy
@@ -135,24 +131,7 @@ class DexterStrategyMaster:
                         [EffectiveStatusEnum.ACTIVE.value],
                     )
 
-                    sdk_structures = get_sdk_structures(
-                        f"act_{account_id}",
-                        Level[level.value.upper()],
-                        fields=StructureFields.get(level.value).get_structure_fields(),
-                        params={"filtering": [filtering]},
-                    )
-
-                    structures = []
-
-                    for structure in sdk_structures:
-                        mapping = StructureMapping.get(level.value)
-                        updated_structure = mapping.load(structure.export_all_data())
-                        updated_structure = asdict(updated_structure)
-                        # TODO: Remove the BSON encoding (legacy from MongoDB)
-                        updated_structure[FacebookMiscFields.details] = BSON.decode(
-                            updated_structure.get(FacebookMiscFields.details)
-                        )
-                        structures.append(updated_structure)
+                    structures = get_and_map_structures(f"act_{account_id}", level, filtering)
 
                     with concurrent.futures.ThreadPoolExecutor() as executor:
                         for structure in structures:
@@ -347,7 +326,6 @@ def add_missing_metric_to_group(
 
 
 def get_fb_request_parameters(level: LevelEnum, breakdown: Field, action_breakdown: Field, structure: Dict) -> Dict:
-
     structure_key = LevelToFacebookIdKeyMapping[level.value.upper()].value
 
     return {
