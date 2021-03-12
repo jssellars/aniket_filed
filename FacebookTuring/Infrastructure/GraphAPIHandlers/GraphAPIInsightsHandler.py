@@ -19,6 +19,8 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
     get_sdk_insights_page,
     get_sdk_structures,
 )
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
     FacebookLevelPlural,
@@ -435,6 +437,8 @@ class GraphAPIInsightsHandler:
             level=level,
         )
 
+        parameters["filtering"] = []
+
         # Get collective summary (without filtering)
         _, _, summary = cls.get_insights_page(
             config,
@@ -510,7 +514,16 @@ class GraphAPIInsightsHandler:
 
         for insight in insights:
             if insight[insight_id_key] in insights_only_ids:
-                result.append({**empty_structure_dict, **insight})
+                orphan_insight = {**empty_structure_dict, **insight}
+                # If the id is present in insights but not in structures, that means that the structures was removed
+                # since the insights API take a bit longer to remove deleted structures
+                if FacebookMiscFields.status in orphan_insight:
+                    orphan_insight[FacebookMiscFields.status] = StructureStatusEnum.REMOVED.name
+
+                if FacebookMiscFields.effective_status in orphan_insight:
+                    orphan_insight[FacebookMiscFields.effective_status] = StructureStatusEnum.REMOVED.name
+
+                result.append(orphan_insight)
                 continue
 
             for structure in structures:
