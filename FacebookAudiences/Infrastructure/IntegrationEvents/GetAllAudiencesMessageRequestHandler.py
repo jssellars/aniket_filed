@@ -1,7 +1,5 @@
 import json
 import logging
-import humps
-from dataclasses import asdict
 
 from FacebookAudiences.Infrastructure.GraphAPIHandlers.GraphAPIAudiencesHandler import GraphAPIAudiencesHandler
 from FacebookAudiences.Infrastructure.IntegrationEvents.GetAllAudiencesMessageRequest import (
@@ -36,7 +34,7 @@ class GetAllAudiencesMessageRequestHandler:
                 business_owner_facebook_id=message.business_owner_facebook_id,
                 ad_account_id=message.ad_account_id,
                 business_id=message.business_id,
-                audiences=[humps.camelize(asdict(audience)) for audience in audiences],
+                audiences=audiences,
                 errors=errors,
             )
 
