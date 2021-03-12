@@ -518,10 +518,10 @@ class GraphAPIInsightsHandler:
                 # If the id is present in insights but not in structures, that means that the structures was removed
                 # since the insights API take a bit longer to remove deleted structures
                 if FacebookMiscFields.status in orphan_insight:
-                    orphan_insight[FacebookMiscFields.status] = StructureStatusEnum.REMOVED.name
+                    orphan_insight[FacebookMiscFields.status] = StructureStatusEnum.REMOVED.name.title()
 
                 if FacebookMiscFields.effective_status in orphan_insight:
-                    orphan_insight[FacebookMiscFields.effective_status] = StructureStatusEnum.REMOVED.name
+                    orphan_insight[FacebookMiscFields.effective_status] = StructureStatusEnum.REMOVED.name.title()
 
                 result.append(orphan_insight)
                 continue
