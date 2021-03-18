@@ -147,7 +147,14 @@ class AdCreativeAssetsVideos(AdCreativeAssetsBase):
         try:
             ad_account = AdAccount(fbid=ad_account_id)
             ad_account_videos_raw = ad_account.get_ad_videos(fields=self.__ad_videos_minimal_fields)
-            ad_account_videos = [Tools.convert_to_json(entry) for entry in ad_account_videos_raw]
+            ad_account_videos = []
+            for raw_video in ad_account_videos_raw:
+                thumbnails = raw_video.get_thumbnails()
+                thumbnail = next(filter(lambda x: x.export_all_data()["is_preferred"], thumbnails)).export_all_data()  # Get single thumbnail where "is_preferred" key is True.
+                video_data = Tools.convert_to_json(raw_video)
+                video_data.update({"thumbnail": thumbnail})
+                ad_account_videos.append(video_data)
+
             for index, ad_video in enumerate(ad_account_videos):
                 ad_account_videos[index]["permalink_url"] = (
                     self.__base_permalink_url + ad_account_videos[index]["permalink_url"]
