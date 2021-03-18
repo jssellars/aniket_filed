@@ -3,13 +3,11 @@ import json
 import operator
 import urllib.parse as urlparse
 from dataclasses import asdict
-from time import sleep
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs
 
 from bson import BSON
 from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.api import Cursor
 from facebook_business.exceptions import FacebookUnavailablePropertyException
 
@@ -69,21 +67,9 @@ def get_sdk_insights_page(
 ) -> Tuple[Optional[List], Optional[Dict], Optional[str]]:
     ad_account = AdAccount(ad_account_id)
 
-    if level == Level.AD and not are_structures_filtered(parameters["filtering"]):
-        insights_report = ad_account.get_insights_async(fields=fields, params=parameters)
-        insights_report.api_get()
+    structure_ids, next_page_cursor = get_structure_ids_and_page_cursor_for_page(level, parameters, ad_account)
 
-        while insights_report[AdReportRun.Field.async_status] != "Job Completed":
-            sleep(1)
-            insights_report.api_get()
-
-        insights = insights_report.get_insights(params=parameters)
-
-    else:
-        insights = ad_account.get_insights(fields=fields, params=parameters)
-
-    if not insights:
-        return None, None, None
+    insights = ad_account.get_insights(fields=fields, params=parameters)
 
     try:
         summary = insights.summary() if parameters["default_summary"] else None
@@ -98,9 +84,33 @@ def get_sdk_insights_page(
     for i in range(0, len(insights)):
         insights_response.append(insights[i])
 
+    return insights_response, next_page_cursor, summary
+
+
+def get_structure_ids_and_page_cursor_for_page(
+    level: Level, parameters: Dict, ad_account: AdAccount
+) -> Tuple[Optional[List[str]], Optional[str]]:
+    structure_key = LevelIdKeyEnum[level.value.upper()].value
+
+    insights = ad_account.get_insights(fields=[structure_key], params=parameters)
+
+    if not insights:
+        return None, None
+
+    structure_ids = []
+    for i in range(0, len(insights)):
+        structure_ids.append(insights[i][structure_key])
+
     next_page_cursor = get_next_page_cursor(insights)
 
-    return insights_response, next_page_cursor, summary
+    parameters["filtering"] = [
+        create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids)
+    ]
+
+    # Return the next cursor for the structure ids data, not for the insights
+    parameters.pop("after", None)
+
+    return structure_ids, next_page_cursor
 
 
 def create_facebook_filter(field: str, operator: AgGridFacebookOperator, value: Any) -> Dict:

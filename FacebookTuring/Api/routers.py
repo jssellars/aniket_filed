@@ -445,19 +445,19 @@ class AdsManagerAgGridInsights(Resource):
 
 class AdsManagerAgGridTrend(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
-    def post(self, level):
-        return AgGridTrendHandler.post(level)
+    def post(self):
+        return AgGridTrendHandler.post()
 
 
 class AccountsAgGridTrend(Resource):
     @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
-    def post(self, level):
-        return AgGridTrendHandler.post(level)
+    def post(self):
+        return AgGridTrendHandler.post()
 
 
 class AgGridTrendHandler:
     @staticmethod
-    def post(level):
+    def post():
 
         try:
             request_json = request.get_json(force=True)
@@ -466,7 +466,7 @@ class AgGridTrendHandler:
             response = AdsManagerInsightsAgGridTrend().handle(
                 query_json=request_json,
                 business_owner_id=business_owner_id,
-                level=level,
+                level=Level.ACCOUNT.value,
             )
 
             return response, 200

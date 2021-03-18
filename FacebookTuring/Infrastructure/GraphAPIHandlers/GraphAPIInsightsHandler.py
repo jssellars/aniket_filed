@@ -139,7 +139,6 @@ class GraphAPIInsightsHandler:
     @classmethod
     def get_insights_page(
         cls,
-        config,
         ad_account_id: str = None,
         fields: List[str] = None,
         parameters: Dict = None,
@@ -351,7 +350,6 @@ class GraphAPIInsightsHandler:
     ) -> Tuple:
 
         insight_response, next_page_cursor, summary = cls.get_insights_page(
-            config,
             ad_account_id=ad_account_id,
             fields=fields,
             parameters=parameters,
@@ -428,20 +426,7 @@ class GraphAPIInsightsHandler:
         # The after cursor is valid only for structures, not insights on this flow
         parameters.pop("after", None)
 
-        insight_response, _, _ = cls.get_insights_page(
-            config,
-            ad_account_id=ad_account_id,
-            fields=fields,
-            parameters=parameters,
-            requested_fields=requested_fields,
-            level=level,
-        )
-
-        parameters["filtering"] = []
-
-        # Get collective summary (without filtering)
-        _, _, summary = cls.get_insights_page(
-            config,
+        insight_response, _, summary = cls.get_insights_page(
             ad_account_id=ad_account_id,
             fields=fields,
             parameters=parameters,

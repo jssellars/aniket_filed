@@ -118,7 +118,6 @@ class AdsManagerInsightsAgGridTrend(AdsManagerInsightsCommandHandler):
 
     def get_summary(self, level: typing.AnyStr = None, requested_columns: List = None) -> List:
         _, _, summary = GraphAPIInsightsHandler.get_insights_page(
-            config,
             level=level,
             ad_account_id=self.query.facebook_id,
             fields=self.query.fields,
@@ -137,7 +136,6 @@ class AdsManagerInsightsAgGridTrend(AdsManagerInsightsCommandHandler):
         self.query.time_range["until"] = (until_date - timedelta(days=time_interval_in_days)).date().isoformat()
 
         _, _, past_period_summary = GraphAPIInsightsHandler.get_insights_page(
-            config,
             level=level,
             ad_account_id=self.query.facebook_id,
             fields=self.query.fields,
@@ -180,7 +178,6 @@ class AdsManagerInsightsAgGridPopup(AdsManagerInsightsCommandHandler):
         self.map_query(query_json=query_json, level=level, has_breakdowns=True)
 
         insight_response, next_page_cursor, summary = GraphAPIInsightsHandler.get_insights_page(
-            config,
             ad_account_id=self.query.facebook_id,
             fields=self.query.fields,
             parameters=self.query.parameters,

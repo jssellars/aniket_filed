@@ -20,6 +20,15 @@ from FacebookTuring.Infrastructure.PersistenceLayer.TuringMongoRepository import
 class AdsManagerDeleteStructureCommandHandler:
     @classmethod
     def handle(cls, level, facebook_id, business_owner_facebook_id):
+
+        # get business owner permanent Facebook token
+        business_owner_permanent_token = fixtures.business_owner_repository.get_permanent_token(
+            business_owner_facebook_id
+        )
+        _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
+
+        fb_structure = LevelToGraphAPIStructure.get(level, facebook_id)
+
         repository = TuringMongoRepository(
             config=config.mongo,
             database_name=config.mongo.structures_database_name,
@@ -27,8 +36,11 @@ class AdsManagerDeleteStructureCommandHandler:
         )
 
         deleted_structure = repository.get_structure_details(level=Level(level), key_value=facebook_id)
+
+        # If the structure is not in db, just delete it from Facebook Graph API
         if not deleted_structure:
-            return False
+            fb_structure.api_delete()
+            return
 
         if not allow_structure_changes(deleted_structure["account_id"], config):
             raise AccountEnvNotAllowedException
@@ -47,16 +59,7 @@ class AdsManagerDeleteStructureCommandHandler:
 
         to_be_deleted_structures.append(deleted_structure)
 
-        # get business owner permanent Facebook token
-        business_owner_permanent_token = fixtures.business_owner_repository.get_permanent_token(
-            business_owner_facebook_id
-        )
-
-        # create an instance of the Graph API SDK. This is required to authenticate user requests to FB.
-        _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
-
-        structure = LevelToGraphAPIStructure.get(level, facebook_id)
-        structure.api_delete()
+        fb_structure.api_delete()
 
         # Update structure to REMOVED in our DB
         for structure in to_be_deleted_structures:

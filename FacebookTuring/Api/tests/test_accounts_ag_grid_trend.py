@@ -1,5 +1,7 @@
-import pytest
 import json
+
+import pytest
+
 from Core.test_config import ACCOUNT_ID
 
 
@@ -14,7 +16,7 @@ class TestAccountsAgGridTrend:
 
     @pytest.fixture(scope="session")
     def response(self, client, config):
-        url = f"/api/v1/accounts/ag-grid-insights-trend/account"
+        url = f"/api/v1/accounts/ag-grid-insights-trend/"
         return client.post(url, json=self.post_data, headers=config["headers"])
 
     @pytest.fixture(scope="session")

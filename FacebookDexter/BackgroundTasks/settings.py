@@ -12,7 +12,7 @@ class Default:
         logs_database="{env}_facebook_dexter_logs",
         recommendations_collection_name="recommendations",
         recommendations_database_name="{env}_dexter_recommendations",
-        structures_database="{env}_facebook_turing_structures"
+        structures_database="{env}_facebook_turing_structures",
     )
     dexter = core.Dexter(
         min_results=50,
@@ -23,3 +23,4 @@ class Default:
         minimum_number_of_data_points=core.MinimumNumberOfDataPoints.parse_obj({"3": 2, "7": 4, "14": 9, "30": 20}),
     )
     port = 47301
+    days_to_sync = 60
