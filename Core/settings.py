@@ -5,23 +5,11 @@ from types import ModuleType
 from typing import Dict, Type
 
 from Core.pydantic_extensions import replace_in_class
-
 # WARNING: keep all imports, they are imported from this file downstream
 from Core.settings_models import (
-    Dexter,
-    Exchange,
-    ExternalServices,
-    Facebook,
-    Google,
-    MinimumNumberOfDataPoints,
-    Model,
-    Mongo,
-    Name,
-    Queue,
-    RabbitMq,
-    SqlServer,
-    TechnicalUser,
-)
+    Dexter, Exchange, ExternalServices, Facebook, Google,
+    MinimumNumberOfDataPoints, Model, Mongo, Name, Queue, RabbitMq, SqlServer,
+    TechnicalUser)
 
 
 class Default:
@@ -137,29 +125,7 @@ class Dev2:
 
 
 class Dev3:
-    sql_server = replace_in_class(
-        Default.sql_server,
-        host="stage1.ctonnmgtbe2i.eu-west-1.rds.amazonaws.com",
-        port=1433,
-        username="filed_admin",
-        password="dvserv3#rathena",
-        name="{Env}.Filed.Facebook.Accounts",
-    )
-    mongo = replace_in_class(
-        Default.mongo,
-        ssh_tunnel=False,
-        mongo_username="",
-        mongo_password="",
-        mongo_host_external="ec2-18-202-26-213.eu-west-1.compute.amazonaws.com",
-        mongo_host_internal="18.202.26.213",
-        ssh_host="",
-        mongo_port=27017,
-        ssh_username="",
-        ssh_password="",
-        retry_writes=False,
-        logs_database="{env}_app_logs",
-        logs_collection_name="logs",
-    )
+    environment = "dev3"
 
 
 class Stage:
