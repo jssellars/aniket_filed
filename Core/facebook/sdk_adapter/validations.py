@@ -16,7 +16,7 @@ from Core.facebook.sdk_adapter.ad_objects.campaign import (
     Objective,
     ObjectiveWithDestination,
 )
-from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement
+from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement, Platform
 from Core.facebook.sdk_adapter.ad_objects.reach_frequency_prediction import BuyingType
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum
@@ -1047,6 +1047,32 @@ OBJECTIVE_X_OPTIMIZATION_GOAL_X_ACTION_ATTRIBUTION_WINDOW_CLICK_X_ACTION_ATTRIBU
             ActionAttributionWindowClick.VALUE_7D: [ActionAttributionWindowView.NONE],
         },
     },
+}
+
+# TODO discuss placements that do not have representation
+# Reference: https://developers.facebook.com/docs/marketing-api/audiences/reference/placement-targeting
+UNUSED = "UNUSED"
+PLATFORM_X_POSITIONS = {
+    Platform.FACEBOOK: {
+        Placement.FACEBOOK_FEED: "feed",
+        Placement.FACEBOOK_RIGHT_COLUMN: "right_hand_column",
+        Placement.FACEBOOK_INSTANT_ARTICLES: "instant_article",
+        Placement.FACEBOOK_MARKETPLACE: "marketplace",
+        Placement.FACEBOOK_VIDEO_FEEDS: "video_feeds",
+        Placement.FACEBOOK_STORIES: "story",
+        Placement.FACEBOOK_SEARCH_RESULTS: "search",
+    },
+    Platform.INSTAGRAM: {
+        UNUSED: "stream",
+        Placement.INSTAGRAM_STORIES: "story",
+        Placement.INSTAGRAM_EXPLORE: "explore",
+    },
+    Platform.AUDIENCE_NETWORK: {
+        Placement.AUDIENCE_NETWORK_NATIVE_BANNER_AND_INTERSTITIAL: "classic",
+        UNUSED: "instream_video",
+        Placement.AUDIENCE_NETWORK_REWARDED_VIDEO: "rewarded_video",
+    },
+    Platform.MESSENGER: {UNUSED: ["messenger_home", "sponsored_messages"], Placement.MESSENGER_STORIES: "story"},
 }
 
 JOINT_CATS = dict(

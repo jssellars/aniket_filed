@@ -86,3 +86,5 @@ class Targeting:
     instagram_positions: Optional[List[str]] = field(default_factory=list)
     audience_network_positions: Optional[List[str]] = field(default_factory=list)
     publisher_platforms: Optional[List[str]] = field(default_factory=list)
+    user_device: Optional[List[str]] = field(default_factory=list)
+    user_os: Optional[List[str]] = field(default_factory=list)

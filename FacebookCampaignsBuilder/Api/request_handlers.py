@@ -1,14 +1,23 @@
+import concurrent.futures
 import json
 import logging
 from collections import defaultdict
 from copy import deepcopy
+from dataclasses import asdict
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import AnyStr, Dict, List, Optional, Tuple, Union
 
 import humps
-from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder
+from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
+from Core.facebook.sdk_adapter.catalog_models import Contexts
+from Core.facebook.sdk_adapter.smart_create import (ad_builder, adset_builder,
+                                                    campaign_builder)
+from Core.facebook.sdk_adapter.smart_create.ad_builder import (
+    get_ad_creative_id, get_tracking_specs)
 from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
-from Core.facebook.sdk_adapter.smart_create.targeting import Location
+from Core.facebook.sdk_adapter.smart_create.targeting import (
+    FlexibleTargeting, Location, Targeting)
+from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -20,11 +29,12 @@ from facebook_business.exceptions import FacebookRequestError
 from FacebookCampaignsBuilder.Api import dtos, mappings
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
-    CampaignCreatedEvent,
-    CampaignCreatedEventMapping,
-    SmartCreatePublishResponseEvent,
-)
-from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
+    CampaignCreatedEvent, CampaignCreatedEventMapping,
+    SmartCreatePublishResponseEvent)
+from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
+    PublishStatus
+from FacebookCampaignsBuilder.Infrastructure.Mappings.SmartEditField import \
+    FacebookEditField
 
 logger = logging.getLogger(__name__)
 # TODO: Add the rest of location options into keys
@@ -441,34 +451,199 @@ class SmartEditPublish:
     def handle(request: Dict, permanent_token: str) -> List[Dict]:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=config.facebook)
 
-        campaign_tree = []
-        campaign_response = {"facebook_id": None, "name": None, "ad_sets": []}
-
         campaigns = request.get("campaigns")
-        # TODO add logic for creating adsets and ads to existing campaign
         adsets = request.get("adsets")
         ads = request.get("ads")
-        ad_account = AdAccount(fbid=request["ad_account_id"])
 
-        for campaign_index, campaign in enumerate(campaigns):
-            try:
-                additional_adsets = campaign.pop("adsets", {})
-                additional_ads = additional_adsets.pop("ads", None)
+        campaign_tree = SmartEditPublish.process_structures_concurrently(SmartEditPublish.edit_campaigns, campaigns)
+        adset_tree = SmartEditPublish.process_structures_concurrently(SmartEditPublish.edit_adsets, adsets)
+        ad_tree = SmartEditPublish.update_ads(ads, request["ad_account_id"])
 
-                facebook_campaign = SmartEditPublish.update_campaign(campaign)
+        response = list()
+        response.append({"campaigns": campaign_tree})
+        response.append({"ad_sets": adset_tree})
+        response.append({"ads": ad_tree})
 
-                # Add updated campaign to response
-                campaign_facebook_id = facebook_campaign.get_id()
-                campaign_name = campaign.get("campaign_name")
-                campaign_tree.append(deepcopy(campaign_response))
-                campaign_tree[campaign_index]["facebook_id"] = campaign_facebook_id
-                campaign_tree[campaign_index]["name"] = campaign_name
-            except FacebookRequestError as e:
-                raise e
-            except Exception:
-                raise
+        return response
 
-        return campaign_tree
+    @staticmethod
+    def process_structures_concurrently(function, structures):
+        structure_tree = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(function, structure): structure for structure in structures}
+
+            for future in concurrent.futures.as_completed(futures):
+                structure_tree.append(future.result())
+        return structure_tree
+
+    @staticmethod
+    def edit_adsets(adset: Dict) -> Dict:
+        adset_response = {"ad_set_id": None, "ads": []}
+
+        try:
+            # TODO add logic for creating ads to existing adsets
+            additional_ads = adset.pop("ads", None)
+
+            facebook_adset = SmartEditPublish.update_adset(adset)
+            # Add updated adset to response
+            adset_facebook_id = facebook_adset.get_id()
+            adset_response["ad_set_id"] = adset_facebook_id
+        except FacebookRequestError as e:
+            raise e
+        except Exception:
+            raise
+
+        return adset_response
+
+    @staticmethod
+    def update_adset(adset: Dict) -> AdSet:
+        params = {
+            AdSet.Field.name: adset.get("ad_set_name"),
+        }
+        opt_and_delivery = adset.get("optimization_and_delivery")
+        if opt_and_delivery:
+            params[AdSet.Field.optimization_goal] = opt_and_delivery["optimization_goal"]
+            params[AdSet.Field.billing_event] = opt_and_delivery["billing_event"]
+
+        date = adset.get("date")
+        if date:
+            # TODO discuss with FE about not being able to edit start date when it's already passed
+            params[AdSet.Field.start_time] = date.get("start_date")
+            params[AdSet.Field.end_time] = date.get("end_date")
+
+        SmartEditPublish.set_adset_budget(adset, params)
+        SmartEditPublish.set_targeting(adset, params)
+
+        facebook_adset = AdSet(fbid=adset.get("ad_set_id"))
+        facebook_adset.api_update(params=params)
+
+        return facebook_adset
+
+    @staticmethod
+    def set_adset_budget(adset: Dict, params: Dict):
+        budget_opt = adset.get("budget_optimization")
+        if not budget_opt:
+            return
+
+        amount = int(budget_opt["amount"]) * 100
+        if budget_opt["budget_allocated_type_id"] == 0:
+            params[AdSet.Field.lifetime_budget] = amount
+        else:
+            params[AdSet.Field.daily_budget] = amount
+
+        # TODO discuss with FE regarding bid control not allowed with LOWEST_COST_WITHOUT_CAP bid strategy
+        params[AdSet.Field.bid_amount] = budget_opt.get("bid_control")
+        params[AdSet.Field.bid_strategy] = budget_opt.get("bid_strategy")
+        params[AdSet.Field.pacing_type] = [budget_opt.get("delivery_type")]
+
+    @staticmethod
+    def set_targeting(adset: Dict, params: Dict):
+        targeting_request = adset.get("targeting")
+        if not targeting_request:
+            return
+
+        languages = targeting_request.get("languages", [])
+        if languages:
+            languages = [language["key"] for language in languages]
+
+        included_interests, excluded_interests, narrow_interests = adset_builder.extract_interests(targeting_request)
+        included_custom_audiences, excluded_custom_audiences = adset_builder.extract_custom_audiences(targeting_request)
+
+        flexible_spec = [FlexibleTargeting(included_interests)]
+        adset_targeting = Targeting(
+            flexible_spec,
+            custom_audiences=included_custom_audiences,
+            excluded_custom_audiences=excluded_custom_audiences,
+            exclusions=FlexibleTargeting(interests=excluded_interests),
+            locales=languages,
+        )
+        age_range = targeting_request.get("age_range")
+        if age_range:
+            adset_targeting.age_min = age_range["min_age"]
+            adset_targeting.age_max = age_range["max_age"]
+
+        gender = targeting_request.get("gender")
+        if gender:
+            adset_targeting.genders = [gender]
+
+        geo_locations = targeting_request.get("locations")
+        if geo_locations:
+            location_objects = []
+            for geo_location in geo_locations:
+                location_objects.append(Location(**geo_location))
+
+            adset_targeting.geo_locations = dict(SmartCreatePublish.process_geo_location(location_objects))
+
+        devices = adset.get("devices")
+        if devices:
+            request_device_platforms = list(map(str.lower, devices.get("device_platforms")))
+            request_user_os = devices.get("user_os")
+            request_user_device = devices.get("user_device")
+            if request_device_platforms:
+                device_platforms = [
+                    x.name_sdk
+                    for x in DevicePlatform.contexts[Contexts.SMART_CREATE].items
+                    if x.name_sdk in request_device_platforms
+                ]
+                adset_targeting.device_platforms = device_platforms
+            if request_user_os:
+                adset_targeting.user_os = request_user_os
+            if request_user_device:
+                adset_targeting.user_device = request_user_device
+
+        publisher_platforms, positions = SmartEditPublish.get_platform_positions(adset)
+
+        adset_targeting.publisher_platforms = publisher_platforms
+
+        if positions:
+            for key, value in positions.items():
+                adset_targeting.__setattr__(key, value)
+
+        params[AdSet.Field.targeting] = asdict(adset_targeting)
+
+    @staticmethod
+    def get_platform_positions(adset: Dict) -> Optional[Tuple[List[str], Dict]]:
+        placements = adset.get("placements")
+        result_positions = defaultdict(list)
+        publisher_platforms = []
+        if not placements:
+            return
+        for placement in placements:
+            for platform, positions in PLATFORM_X_POSITIONS.items():
+                if placement["name"] != platform.name:
+                    continue
+                publisher_platforms.append(platform.value.name_sdk.lower())
+                request_positions = placement.get("positions")
+                if not request_positions:
+                    continue
+                for request_position in request_positions:
+                    for key, value in positions.items():
+                        if isinstance(key, str):
+                            continue
+                        if request_position == key.name:
+                            result_positions[f"{platform.name.lower()}_positions"].append(value)
+        return publisher_platforms, result_positions
+
+    @staticmethod
+    def edit_campaigns(campaign: Dict) -> Dict:
+        campaign_response = {"campaign_id": None, "ad_sets": [], "ads": []}
+
+        try:
+            # TODO add logic for creating adsets and ads to existing campaign
+            additional_adsets = campaign.pop("adsets", {})
+            additional_ads = additional_adsets.pop("ads", None)
+
+            facebook_campaign = SmartEditPublish.update_campaign(campaign)
+
+            # Add updated campaign to response
+            campaign_facebook_id = facebook_campaign.get_id()
+            campaign_response["campaign_id"] = campaign_facebook_id
+        except FacebookRequestError as e:
+            raise e
+        except Exception:
+            raise
+
+        return campaign_response
 
     @staticmethod
     def update_campaign(campaign: Dict) -> Campaign:
@@ -490,6 +665,38 @@ class SmartEditPublish:
         facebook_campaign.api_update(params=params)
 
         return facebook_campaign
+
+    @staticmethod
+    def update_ads(ads: Dict, ad_account_id: AnyStr) -> List[Dict]:
+        updated_ads = []
+
+        for ad in ads:
+            param = {}
+            updated_ad = {}
+            ad_id = ad.pop("ad_id")
+            for key in ad:
+                if key in FacebookEditField.Ad.__members__:
+                    param[FacebookEditField.Ad[key].value] = ad[key]
+
+            if "adverts" in ad:
+                ad_creative_id = get_ad_creative_id(
+                    ad_creative_type=int(ad["ad_format_type"]),
+                    ad_account_id=ad_account_id,
+                    step_two=ad,
+                    step_three=ad,
+                    objective=Optional[None],
+                )
+                param[FacebookEditField.Ad.ad_creative.value] = {"creative_id": ad_creative_id}
+
+            if "pixel_id" in ad or "pixel_app_event_id" in ad:
+                param[FacebookEditField.Ad.tracking_specs.value] = get_tracking_specs(ad)
+
+            facebook_ads = Ad(ad_id)
+            facebook_ads.api_update(params=param)
+            updated_ad["ad_id"] = ad_id
+            updated_ads.append(updated_ad)
+
+        return updated_ads
 
 
 class HandlersEnum(EnumerationBase):

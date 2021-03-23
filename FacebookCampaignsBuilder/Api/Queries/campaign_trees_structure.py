@@ -212,8 +212,8 @@ class CampaignTreeBuilder:
             ]
 
             adset.set_budget_opt(
-                daily_budget=raw_adset[GraphAPIInsightsFields.daily_budget],
-                lifetime_budget=raw_adset[GraphAPIInsightsFields.lifetime_budget],
+                daily_budget=raw_adset.get(GraphAPIInsightsFields.daily_budget),
+                lifetime_budget=raw_adset.get(GraphAPIInsightsFields.lifetime_budget),
             )
             adset.set_mobile_fields(
                 user_os=targeting.get(Targeting.Field.user_os, []),
