@@ -103,9 +103,10 @@ def get_structure_ids_and_page_cursor_for_page(
 
     next_page_cursor = get_next_page_cursor(insights)
 
-    parameters["filtering"] = [
-        create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids)
-    ]
+    if level != Level.ACCOUNT:
+        parameters["filtering"] = [
+            create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids)
+        ]
 
     # Return the next cursor for the structure ids data, not for the insights
     parameters.pop("after", None)
