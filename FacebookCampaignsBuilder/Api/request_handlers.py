@@ -5,18 +5,19 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import asdict
 from datetime import datetime
-from typing import AnyStr, Dict, List, Optional, Tuple, Union
+from queue import Queue
+from threading import Thread
+from typing import AnyStr, Dict, List, Optional, Tuple, Union, Callable
 
 import humps
+
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
-from Core.facebook.sdk_adapter.smart_create import (ad_builder, adset_builder,
-                                                    campaign_builder)
-from Core.facebook.sdk_adapter.smart_create.ad_builder import (
-    get_ad_creative_id, get_tracking_specs)
+from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder
+from Core.facebook.sdk_adapter.smart_create.ad_builder import get_ad_creative_id, get_tracking_specs
 from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
-from Core.facebook.sdk_adapter.smart_create.targeting import (
-    FlexibleTargeting, Location, Targeting)
+from Core.facebook.sdk_adapter.smart_create.targeting import FlexibleTargeting, Location, Targeting
 from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
@@ -29,12 +30,12 @@ from facebook_business.exceptions import FacebookRequestError
 from FacebookCampaignsBuilder.Api import dtos, mappings
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
-    CampaignCreatedEvent, CampaignCreatedEventMapping,
-    SmartCreatePublishResponseEvent)
-from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
-    PublishStatus
-from FacebookCampaignsBuilder.Infrastructure.Mappings.SmartEditField import \
-    FacebookEditField
+    CampaignCreatedEvent,
+    CampaignCreatedEventMapping,
+    SmartCreatePublishResponseEvent,
+)
+from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
+from FacebookCampaignsBuilder.Infrastructure.Mappings.SmartEditField import FacebookEditField
 
 logger = logging.getLogger(__name__)
 # TODO: Add the rest of location options into keys
@@ -447,17 +448,49 @@ class SmartCreatePublish:
 
 
 class SmartEditPublish:
+    feedback_repository = MongoRepositoryBase(
+        config=config.mongo,
+        database_name=config.mongo.publish_feedback_database_name,
+        collection_name=config.mongo.publish_feedback_collection_name,
+    )
+    feedback_data = dict()
+    queue = Queue()
+
     @staticmethod
     def handle(request: Dict, permanent_token: str) -> List[Dict]:
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=config.facebook)
+
+        ad_account = request["ad_account_id"]
 
         campaigns = request.get("campaigns")
         adsets = request.get("adsets")
         ads = request.get("ads")
 
-        campaign_tree = SmartEditPublish.process_structures_concurrently(SmartEditPublish.edit_campaigns, campaigns)
-        adset_tree = SmartEditPublish.process_structures_concurrently(SmartEditPublish.edit_adsets, adsets)
-        ad_tree = SmartEditPublish.update_ads(ads, request["ad_account_id"])
+        SmartEditPublish.feedback_data = dict(
+            user_filed_id=request["user_filed_id"],
+            start_date=datetime.now(),
+            ad_account=ad_account,
+            publish_status=PublishStatus.IN_PROGRESS.value,
+            published_structures=0,
+            published_campaigns=0,
+            published_adsets=0,
+            published_ads=0,
+            # TODO: this might change if we add the publish children part
+            total_structures=len(campaigns) + len(adsets) + len(ads),
+        )
+
+        SmartEditPublish.feedback_repository.add_one(SmartEditPublish.feedback_data)
+
+        db_updater_thread = Thread(target=SmartEditPublish.update_db, args=())
+        db_updater_thread.start()
+
+        campaign_tree = SmartEditPublish.process_structures_concurrently(
+            SmartEditPublish.edit_campaigns, campaigns, Level.CAMPAIGN.value
+        )
+        adset_tree = SmartEditPublish.process_structures_concurrently(
+            SmartEditPublish.edit_adsets, adsets, Level.ADSET.value
+        )
+        ad_tree = SmartEditPublish.update_ads(ads, ad_account)
 
         response = list()
         response.append({"campaigns": campaign_tree})
@@ -467,13 +500,14 @@ class SmartEditPublish:
         return response
 
     @staticmethod
-    def process_structures_concurrently(function, structures):
+    def process_structures_concurrently(function: Callable, structures: List, level: str):
         structure_tree = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(function, structure): structure for structure in structures}
 
             for future in concurrent.futures.as_completed(futures):
                 structure_tree.append(future.result())
+                SmartEditPublish.add_feedback_to_queue(level)
         return structure_tree
 
     @staticmethod
@@ -697,6 +731,52 @@ class SmartEditPublish:
             updated_ads.append(updated_ad)
 
         return updated_ads
+
+    @staticmethod
+    def add_feedback_to_queue(level: str):
+        feedback_data_list = list(SmartEditPublish.queue.queue)
+        if len(feedback_data_list) == 0:
+            feedback_data = deepcopy(SmartEditPublish.feedback_data)
+        else:
+            feedback_data = deepcopy(feedback_data_list[-1])
+
+        feedback_data["published_structures"] += 1
+
+        if level == Level.AD.value:
+            feedback_data["published_ads"] += 1
+        elif level == Level.ADSET.value:
+            feedback_data["published_adsets"] += 1
+        elif level == Level.CAMPAIGN.value:
+            feedback_data["published_campaigns"] += 1
+
+        if feedback_data["total_structures"] == feedback_data["published_structures"]:
+            feedback_data["publish_status"] = PublishStatus.SUCCESS.value
+
+        SmartEditPublish.queue.put(feedback_data)
+        SmartEditPublish.feedback_data = feedback_data
+
+    @staticmethod
+    def update_db():
+        while True:
+            feedback_data = SmartEditPublish.queue.get()
+            if feedback_data:
+                SmartEditPublish.update_feedback_database(feedback_data)
+                if feedback_data["publish_status"] != PublishStatus.IN_PROGRESS.value:
+                    return
+
+    @staticmethod
+    def update_feedback_database(feedback_data):
+        update_fields = {
+            "published_structures": feedback_data.get("published_structures", 0),
+            "published_campaigns": feedback_data.get("published_campaigns", 0),
+            "published_adsets": feedback_data.get("published_adsets", 0),
+            "published_ads": feedback_data.get("published_ads", 0),
+            "publish_status": feedback_data.get("publish_status"),
+        }
+
+        query = {MongoOperator.SET.value: update_fields}
+
+        SmartEditPublish.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
 
 class HandlersEnum(EnumerationBase):
