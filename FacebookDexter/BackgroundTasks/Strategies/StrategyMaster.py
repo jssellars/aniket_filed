@@ -334,7 +334,10 @@ def get_fb_request_parameters(level: LevelEnum, breakdown: Field, action_breakdo
         # For now this will be default on action_type
         "action_breakdowns": "action_type",
         "time_increment": FieldsMetadata.day.facebook_value,
-        "time_range": config.days_to_sync,
+        "time_range": {
+            "since": (datetime.now() - timedelta(days=config.days_to_sync)).strftime(DEFAULT_DATETIME),
+            "until": datetime.now().strftime(DEFAULT_DATETIME),
+        },
         "limit": 50,
         "filtering": [
             create_facebook_filter(

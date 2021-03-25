@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field, Extra, root_validator
+from pydantic import BaseModel, Extra, Field, root_validator
 
 from Core.pydantic_extensions import format_templates_recursive
 
@@ -103,17 +103,22 @@ class Mongo(BaseModel):
 
     @property
     def connection_string_internal(self):
-        return (
-            f"mongodb://{self.mongo_username}:{self.mongo_password}"
-            f"@{self.mongo_host_internal}:{self.mongo_port}/?authSource=admin"
-        )
+        if self.mongo_username and self.mongo_password:
+            return (
+                f"mongodb://{self.mongo_username}:{self.mongo_password}"
+                f"@{self.mongo_host_internal}:{self.mongo_port}/?authSource=admin"
+            )
+        return f"{self.mongo_host_internal}:{self.mongo_port}/?authSource=admin"
 
     @property
     def connection_string_external(self):
-        return (
-            f"mongodb://{self.mongo_username}:{self.mongo_password}"
-            f"@{self.mongo_host_external}:{self.mongo_port}/?authSource=admin"
-        )
+        if self.mongo_username and self.mongo_password:
+            return (
+                f"mongodb://{self.mongo_username}:{self.mongo_password}"
+                f"@{self.mongo_host_external}:{self.mongo_port}/?authSource=admin"
+            )
+
+        return f"{self.mongo_host_external}:{self.mongo_port}"
 
 
 class ExternalServices(BaseModel):

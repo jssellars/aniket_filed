@@ -1,4 +1,7 @@
 from Core import settings as core
+from Core.settings import get_env_model
+
+env = core.get_environment()
 
 
 class Default:
@@ -6,13 +9,13 @@ class Default:
     name = core.Name(domain="facebook", name="dexter", kind="api")
     port = 47300
     mongo = core.replace_in_class(
-        core.Default.mongo,
+        get_env_model(env, "mongo"),
         recommendations_collection_name="recommendations",
         recommendations_database_name="{env}_dexter_recommendations",
         structures_database="{env}_facebook_turing_structures",
     )
     rabbitmq = core.replace_in_class(
-        core.Default.rabbitmq,
+        get_env_model(env, "rabbitmq"),
         exchanges=[
             core.Exchange(
                 name="{env}.direct",

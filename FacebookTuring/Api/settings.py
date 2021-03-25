@@ -1,4 +1,7 @@
 from Core import settings as core
+from Core.settings import get_env_model
+
+env = core.get_environment()
 
 
 class Default:
@@ -6,7 +9,7 @@ class Default:
     name = core.Name(domain="facebook", name="turing", kind="api")
     port = 47350
     mongo = core.replace_in_class(
-        core.Default.mongo,
+        get_env_model(env, "mongo"),
         insights_database_name="{env}_facebook_turing_insights",
-        structures_database_name="{env}_facebook_turing_structures"
+        structures_database_name="{env}_facebook_turing_structures",
     )

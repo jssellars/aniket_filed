@@ -1,11 +1,14 @@
 from Core import settings as core
+from Core.settings import get_env_model
+
+env = core.get_environment()
 
 
 class Default:
     # WARNING: this must not inherit BaseModel and must be name "Default"
     name = core.Name(domain="google", name="dexter", kind="bt")
     mongo = core.replace_in_class(
-        core.Default.mongo,
+        get_env_model(env, "mongo"),
         accounts_collection_name="google_accounts",
         accounts_database="{env}_google_turing_accounts",
         insights_database="{env}_google_turing_insights",
@@ -14,7 +17,7 @@ class Default:
         logs_database="{env}_google_dexter_logs",
         recommendations_collection_name="recommendations",
         recommendations_database_name="{env}_google_dexter_fuzzy_inference_recommendations",
-        structures_database="{env}_google_turing_structures"
+        structures_database="{env}_google_turing_structures",
     )
     dexter = core.Dexter(
         min_results=1,
@@ -27,7 +30,4 @@ class Default:
 
 
 class Prod:
-    dexter = core.replace_in_class(
-        Default.dexter,
-        min_results=50
-    )
+    dexter = core.replace_in_class(get_env_model(env, "dexter"), min_results=50)

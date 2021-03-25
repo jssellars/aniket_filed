@@ -40,7 +40,7 @@ class AdsManagerDeleteStructureCommandHandler:
         # If the structure is not in db, just delete it from Facebook Graph API
         if not deleted_structure:
             fb_structure.api_delete()
-            return
+            return True
 
         if not allow_structure_changes(deleted_structure["account_id"], config):
             raise AccountEnvNotAllowedException

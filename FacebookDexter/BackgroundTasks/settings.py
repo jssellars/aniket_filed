@@ -1,11 +1,14 @@
 from Core import settings as core
+from Core.settings import get_env_model
+
+env = core.get_environment()
 
 
 class Default:
     # WARNING: this must not inherit BaseModel and must be name "Default"
     name = core.Name(domain="facebook", name="dexter", kind="bt")
     mongo = core.replace_in_class(
-        core.Default.mongo,
+        get_env_model(env, "mongo"),
         insights_database="{env}_facebook_turing_insights",
         journal_collection_name="dexter_journal",
         journal_database_name="{env}_dexter_engine_run_journal",

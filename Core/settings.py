@@ -1,15 +1,31 @@
 from __future__ import annotations
 
+import inspect
 import os
+import sys
 from types import ModuleType
 from typing import Dict, Type
 
+from pydantic.main import BaseModel
+
 from Core.pydantic_extensions import replace_in_class
+
 # WARNING: keep all imports, they are imported from this file downstream
 from Core.settings_models import (
-    Dexter, Exchange, ExternalServices, Facebook, Google,
-    MinimumNumberOfDataPoints, Model, Mongo, Name, Queue, RabbitMq, SqlServer,
-    TechnicalUser)
+    Dexter,
+    Exchange,
+    ExternalServices,
+    Facebook,
+    Google,
+    MinimumNumberOfDataPoints,
+    Model,
+    Mongo,
+    Name,
+    Queue,
+    RabbitMq,
+    SqlServer,
+    TechnicalUser,
+)
 
 
 class Default:
@@ -127,6 +143,29 @@ class Dev2:
 class Dev3:
     environment = "dev3"
 
+    sql_server = SqlServer(
+        host="stage1.ctonnmgtbe2i.eu-west-1.rds.amazonaws.com",
+        port=1433,
+        username="filed_admin",
+        password="dvserv3#rathena",
+        name="{Env}.Filed.Facebook.Accounts",
+    )
+
+    mongo = Mongo(
+        ssh_tunnel=False,
+        mongo_username="",
+        mongo_password="",
+        mongo_host_external="ec2-18-202-26-213.eu-west-1.compute.amazonaws.com",
+        mongo_host_internal="18.202.26.213",
+        ssh_host="",
+        mongo_port=27017,
+        ssh_username="",
+        ssh_password="=",
+        retry_writes=False,
+        logs_database="{env}_app_logs",
+        logs_collection_name="logs",
+    )
+
 
 class Stage:
     environment = "stage"
@@ -221,3 +260,15 @@ def get_settings(module: ModuleType, environment: str) -> Model:
 
 def get_mro_vars(cls: Type) -> Dict:
     return {k: v for c in reversed(cls.__mro__) for k, v in vars(c).items() if not k.startswith("_")}
+
+
+def get_env_model(env: str, property: str):
+    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+
+    env_model = Default
+
+    for cls in clsmembers:
+        if hasattr(cls[1], "environment") and cls[1].environment == env:
+            env_model = cls[1]
+
+    return getattr(env_model, property, getattr(Default, property, {}))
