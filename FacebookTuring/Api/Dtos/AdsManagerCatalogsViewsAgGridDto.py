@@ -3,6 +3,7 @@ from Core.Metadata.Views.ViewBase import AgGridView
 from Core.Tools.Misc import AgGridConstants
 from Core.Tools.Misc.AgGridFilter import AgGridFilter
 from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list, object_to_json
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.Field import Field
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
@@ -21,7 +22,11 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewEngagement import (
     ViewAdSetEngagement,
     ViewCampaignEngagement,
 )
-from FacebookTuring.Api.Catalogs.BusinessViews.ViewOfflineConversions import ViewAdOfflineConversions, ViewAdSetOfflineConversions, ViewCampaignOfflineConversions
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewOfflineConversions import (
+    ViewAdOfflineConversions,
+    ViewAdSetOfflineConversions,
+    ViewCampaignOfflineConversions,
+)
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewPerformance import (
     ViewAdPerformance,
     ViewAdSetPerformance,
@@ -32,8 +37,12 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewPerformanceAndClicks import (
     ViewAdSetPerformanceAndClicks,
     ViewCampaignPerformanceAndClicks,
 )
-from FacebookTuring.Api.Catalogs.BusinessViews.ViewQuickScan import ViewCampaignQuickScan, ViewAdSetQuickScan, ViewAdQuickScan
-from FacebookTuring.Api.Catalogs.BusinessViews.ViewResults import ViewCampaignResults, ViewAdsetResults, ViewAdResults
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewQuickScan import (
+    ViewAdQuickScan,
+    ViewAdSetQuickScan,
+    ViewCampaignQuickScan,
+)
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewResults import ViewAdResults, ViewAdsetResults, ViewCampaignResults
 from FacebookTuring.Api.Catalogs.BusinessViews.ViewTargetingAndCreative import (
     ViewAdSetTargetingAndCreative,
     ViewAdTargetingAndCreative,
@@ -47,7 +56,6 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewVideoEngagement import (
 from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumn import ViewColumn
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import View
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 
 class AdsManagerCatalogsViewsAgGridDto:
@@ -159,7 +167,7 @@ class AdsManagerCatalogsViewsAgGridDto:
             column_mapping[AgGridConstants.NUMBER_OF_DECIMALS] = column.no_of_decimals
 
         if column.is_filterable:
-            filter_property = AgGridFilter[FieldDataTypeEnum.get_by_value(field_value.type_id)]
+            filter_property = AgGridFilter[ViewColumnType(column.type_id).name]
             if filter_property:
                 column_mapping[AgGridConstants.FILTER] = filter_property.value
 

@@ -30,4 +30,10 @@ class Default:
 
 
 class Prod:
-    dexter = core.replace_in_class(get_env_model(env, "dexter"), min_results=50)
+    dexter = core.Dexter(
+        min_results=50,
+        days_since_last_change=3,
+        recommendation_days_last_updated=3,
+        time_intervals=[3, 7, 14, 30],
+        date_stop=None,
+    )

@@ -62,7 +62,7 @@ def get_view_columns():
         if column.is_hidden:
             column_property[AgGridConstants.SUPPRESS_COLUMNS_TOOL_PANEL] = True
 
-        column_type = FieldDataTypeEnum.get_by_value(column.primary_value.type_id)
+        column_type = column_property[AgGridConstants.COLUMN_TYPE]
         if column_type in AgGridFilter.__members__:
             filter_property = AgGridFilter[column_type]
             column_property[AgGridConstants.FILTER] = filter_property.value

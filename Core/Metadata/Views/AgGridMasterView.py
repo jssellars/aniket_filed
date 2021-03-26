@@ -38,7 +38,7 @@ ACCOUNT_COLUMNS_DEFINITION = {
     CURRENCY: ViewColumn(
         display_name="Currency",
         primary_value=FieldsMetadata.currency,
-        type_id=ViewColumnType.CURRENCY.value,
+        type_id=ViewColumnType.TEXT.value,
     ),
     BUSINESS_ID: ViewColumn(
         display_name="Business ID",
@@ -97,4 +97,3 @@ ACCOUNT_COLUMNS_DEFINITION = {
         type_id=ViewColumnType.NUMBER.value,
     ),
 }
-

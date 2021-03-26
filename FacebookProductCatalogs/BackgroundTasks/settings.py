@@ -9,7 +9,7 @@ class Default:
     name = core.Name(domain="facebook", name="productcatalogs", kind="bt")
 
     rabbitmq = core.replace_in_class(
-        get_env_model(env, "mongo"),
+        get_env_model(env, "rabbitmq"),
         exchanges=[
             core.Exchange(
                 name="{env}.direct",
