@@ -14,6 +14,7 @@ DESCRIPTION = "description"
 COLUMN_TYPE = "column_type"
 IS_TOGGLE = "is_toggle"
 IS_NAME_CLICKABLE = "is_name_clickable"
+FILTER_OBJECTIVE = "filter_objective"
 
 
 class PinnedDirection(Enum):

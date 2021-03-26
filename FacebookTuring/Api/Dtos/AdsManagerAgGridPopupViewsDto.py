@@ -2,9 +2,9 @@ from Core.Metadata.Views.ViewBase import AgGridView
 from Core.Tools.Misc import AgGridConstants
 from Core.Tools.Misc.AgGridFilter import AgGridFilter
 from Core.Tools.Misc.ObjectSerializers import object_to_json
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.FieldDataTypeEnum import FieldDataTypeEnum
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 
 BASE_VIEW_COLUMNS = [
     ViewColumnsMaster.reach,
@@ -12,6 +12,7 @@ BASE_VIEW_COLUMNS = [
     ViewColumnsMaster.ctr_all,
     ViewColumnsMaster.cpc_all,
     ViewColumnsMaster.unique_link_clicks,
+    ViewColumnsMaster.objective_structure,
 ]
 
 
@@ -47,6 +48,12 @@ def get_view_columns(view_columns):
 
         if column.no_of_decimals:
             column_property[AgGridConstants.NUMBER_OF_DECIMALS] = column.no_of_decimals
+
+        if column.hidden:
+            column_property[AgGridConstants.SUPPRESS_COLUMNS_TOOL_PANEL] = True
+
+        if column.objective_filtering:
+            column_property[AgGridConstants.FILTER_OBJECTIVE] = True
 
         column_type = FieldDataTypeEnum.get_by_value(column.primary_value.type_id)
         if column_type in AgGridFilter.__members__:

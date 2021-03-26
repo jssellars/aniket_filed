@@ -324,7 +324,7 @@ class QueryBuilderFacebookRequestParser:
             parse_breakdowns=parse_breakdowns,
             request_columns=request_columns,
         )
-        self.parse_filter_model(request.filter_model)
+        self.parse_filter_model(request.filter_model, request.filter_objective)
         self.parse_sort_condition(request.sort_model)
 
     def parse_ag_grid_trend_query(self, request, level=None, parse_breakdowns=True):
@@ -341,7 +341,7 @@ class QueryBuilderFacebookRequestParser:
         self.parse_filter_model(request.filter_model)
         self.parse_sort_condition()
 
-    def parse_filter_model(self, filter_model=None):
+    def parse_filter_model(self, filter_model=None, filter_objective: List = None):
         if filter_model is None:
             return
 
@@ -352,15 +352,15 @@ class QueryBuilderFacebookRequestParser:
                 "action_type", AgGridFacebookOperator.IN, self.action_filtering
             )
 
-        if not self.has_delivery and not filter_model:
-            return
-
         for column_name, filter_val in filter_model.items():
             facebook_filter_name = self.retrieve_filter_property_name(column_name)
             if facebook_filter_name:
                 filter_operator = AgGridFacebookOperator(filter_val["type"])
                 filter_value = filter_val["filter"]
                 filter_objects.append(create_facebook_filter(facebook_filter_name, filter_operator, filter_value))
+
+        if filter_objective and not self.has_delivery:
+            filter_objects.append(create_facebook_filter("objective", AgGridFacebookOperator.IN, filter_objective))
 
         self.filtering = filter_objects
 

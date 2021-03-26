@@ -26,6 +26,7 @@ class ViewColumn:
         pinned: Optional[PinnedDirection] = None,
         description: Optional[str] = None,
         is_toggle: Optional[bool] = False,
+        objective_filtering: Optional[bool] = False,
     ):
         self.id = id
         self.display_name = display_name
@@ -45,3 +46,4 @@ class ViewColumn:
         self.pinned = pinned
         self.description = description
         self.is_toggle = is_toggle
+        self.objective_filtering = objective_filtering

@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender
 from Core.facebook.sdk_adapter.smart_create.constants import FB_MAX_AGE, FB_MIN_AGE
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender
 
 
 @dataclass
@@ -84,6 +84,8 @@ class Targeting:
     targeting_optimization: Optional[str] = None
     facebook_positions: Optional[List[str]] = field(default_factory=list)
     instagram_positions: Optional[List[str]] = field(default_factory=list)
+    user_device: Optional[List[str]] = field(default_factory=list)
+    user_os: Optional[List[str]] = field(default_factory=list)
     audience_network_positions: Optional[List[str]] = field(default_factory=list)
     publisher_platforms: Optional[List[str]] = field(default_factory=list)
     user_device: Optional[List[str]] = field(default_factory=list)

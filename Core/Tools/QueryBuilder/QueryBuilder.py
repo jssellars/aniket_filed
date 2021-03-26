@@ -155,6 +155,7 @@ class AgGridInsightsRequest:
         self.ag_columns = query_builder_request["agColumns"].split(", ")
         self.next_page_cursor = query_builder_request["nextPageCursor"]
         self.filter_model = query_builder_request["filterModel"]
+        self.filter_objective = query_builder_request.get("FilterObjective")
         self.sort_model = query_builder_request["sortModel"]
         self.time_range = query_builder_request["timeRange"]
         self.facebook_account_id = query_builder_request["facebookAccountId"]

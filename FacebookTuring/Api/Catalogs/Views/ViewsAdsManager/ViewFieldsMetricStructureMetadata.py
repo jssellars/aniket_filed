@@ -1,9 +1,9 @@
+from Core.Metadata.Columns.ViewColumns.ViewColumnCategory import ViewColumnCategory
+from Core.Metadata.Columns.ViewColumns.ViewColumnType import ViewColumnType
 from Core.Tools.Misc.AgGridConstants import PinnedDirection
 from Core.Tools.Misc.Autoincrement import Autoincrement
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumn import ViewColumn
-from Core.Metadata.Columns.ViewColumns.ViewColumnCategory import ViewColumnCategory
-from Core.Metadata.Columns.ViewColumns.ViewColumnType import ViewColumnType
 
 
 class ViewFieldsMetricStructureMetadata:
@@ -103,6 +103,18 @@ class ViewFieldsMetricStructureMetadata:
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=False,
     )
+
+    objective_structure = ViewColumn(
+        Autoincrement.hex_string("objective_structure"),
+        display_name="Objective structure",
+        primary_value=FieldsMetadata.objective_structure,
+        type_id=ViewColumnType.TEXT.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        is_fixed=False,
+        hidden=True,
+        objective_filtering=True,
+    )
+
     date_start = ViewColumn(
         Autoincrement.hex_string("date_start"),
         display_name="Date start",

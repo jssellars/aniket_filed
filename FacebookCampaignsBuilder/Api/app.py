@@ -63,11 +63,15 @@ router_route_pairs = (
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
     (routers.SmartCreateAccountAdvertisableApps, "smart-create/account-advertisable-apps/<string:account_id>"),
     (routers.AdsManagerAccountAdvertisableApps, "ads-manager/account-advertisable-apps/<string:account_id>"),
-    (routers.AdsManagerAddStructuresToParent, "add-structures-to-parent/<string:level>"),
+    (routers.AdsManagerAddStructuresToParent, "add-structures-to-parent"),
     (routers.SmartCreatePublishProgress, "smart-create/publish-progress"),
     (
         routers.SmartEditCampaignTreesStructure,
         "campaign-trees-structure/<string:account_id>/<string:level>/<string:structure_ids>",
+    ),
+    (
+        routers.AddAnAdAdsetGetStructure,
+        "get-structure/<string:account_id>/<string:level>/<string:structure_ids>",
     ),
     (routers.SmartEditPublishStructures, "smart-edit/publish"),
 )

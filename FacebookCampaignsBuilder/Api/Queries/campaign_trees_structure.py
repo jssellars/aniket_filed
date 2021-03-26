@@ -42,6 +42,15 @@ class CampaignTreesStructure:
         return result
 
 
+class GetStructure:
+    @staticmethod
+    def get(account_id, level, structure_ids, business_owner_facebook_id):
+        level_enum = Level(level)
+        get_structure = CampaignTreeBuilder(account_id, level_enum, structure_ids, business_owner_facebook_id)
+
+        return get_structure.get_exact_structure()
+
+
 class CampaignTreeBuilder:
     languages = None
     countries = None
@@ -72,6 +81,25 @@ class CampaignTreeBuilder:
             }
 
         return CampaignTreeBuilder.countries
+
+    def get_exact_structure(self):
+        # get structure id key
+        if self.level == Level.AD:
+            structure_id_key = LevelToFacebookIdKeyMapping.AD.value.replace("_", ".")
+            map_structure = self.__map_ads
+        elif self.level == Level.ADSET:
+            structure_id_key = LevelToFacebookIdKeyMapping.ADSET.value.replace("_", ".")
+            map_structure = self.__map_adsets
+        else:
+            raise ValueError("Incorrect level provided!")
+        # map the structure
+        structures = []
+        for structure_id in self.structure_ids:
+            raw_structures = self.__get_raw_structures_by_id(self.level, structure_id_key, structure_id)
+            [mapped_structure] = map_structure(raw_structures)
+            structures.append(asdict(mapped_structure))
+
+        return structures
 
     def create_campaign_trees(self):
         if self.level == Level.CAMPAIGN:

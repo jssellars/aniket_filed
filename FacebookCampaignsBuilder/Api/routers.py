@@ -14,7 +14,7 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extract_user_filed_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, CampaignBuilderPermissions
 from FacebookCampaignsBuilder.Api import command_handlers, commands, mappings, queries
-from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure
+from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure, GetStructure
 from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish, SmartEditPublish
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 
@@ -320,16 +320,20 @@ class AdsManagerAccountAdvertisableApps(Resource):
 
 class AdsManagerAddStructuresToParent(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
-    def post(self, level):
+    def post(self):
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
             business_owner_facebook_id = extract_business_owner_facebook_id()
+            user_filed_id = extract_user_filed_id()
             permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
             response = command_handlers.AddStructuresToParent.publish_structures_to_parent(
-                level=level, request=raw_request, permanent_token=permanent_token, facebook_config=config.facebook
+                request=raw_request,
+                permanent_token=permanent_token,
+                user_filed_id=user_filed_id,
+                facebook_config=config.facebook,
             )
 
-            return response, 200
+            return humps.camelize(response), 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
@@ -371,6 +375,21 @@ class SmartEditCampaignTreesStructure(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Could not retrieve tree for {structure_ids}"}, 400
+
+
+class AddAnAdAdsetGetStructure(Resource):
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    def get(self, account_id, level, structure_ids):
+        try:
+            structure_ids = structure_ids.split(",")
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            return (
+                humps.camelize(GetStructure.get(account_id, level, structure_ids, business_owner_facebook_id)),
+                200,
+            )
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": f"Could not retrieve structure for {structure_ids}"}, 400
 
 
 class SmartEditPublishStructures(Resource):

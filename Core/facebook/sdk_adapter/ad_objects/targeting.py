@@ -2,7 +2,7 @@ from enum import Enum
 
 from facebook_business.adobjects.targeting import Targeting
 
-from Core.facebook.sdk_adapter.catalog_models import Cat, cat_enum, Contexts
+from Core.facebook.sdk_adapter.catalog_models import Cat, Contexts, cat_enum
 
 # TODO: add documentation link(s)
 
