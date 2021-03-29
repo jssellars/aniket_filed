@@ -7,14 +7,12 @@ from dataclasses import asdict
 from datetime import datetime
 from queue import Queue
 from threading import Thread
-from typing import AnyStr, Dict, List, Optional, Tuple, Union, Callable
+from typing import AnyStr, Callable, Dict, List, Optional, Tuple, Union
 
 import humps
-
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
-from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder
+from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder, mappings
 from Core.facebook.sdk_adapter.smart_create.ad_builder import get_ad_creative_id, get_tracking_specs
 from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
 from Core.facebook.sdk_adapter.smart_create.targeting import FlexibleTargeting, Location, Targeting
@@ -22,17 +20,21 @@ from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.exceptions import FacebookRequestError
-from FacebookCampaignsBuilder.Api import dtos, mappings
-from FacebookCampaignsBuilder.Api.startup import config, fixtures
+from FacebookCampaignsBuilder.BackgroundTasks import dtos
+from FacebookCampaignsBuilder.BackgroundTasks.startup import config, fixtures
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
     CampaignCreatedEvent,
     CampaignCreatedEventMapping,
     SmartCreatePublishResponseEvent,
+    SmartEditPublishResponseEvent,
+    StructureEditedEvent,
+    StructureEditedEventMapping,
 )
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
 from FacebookCampaignsBuilder.Infrastructure.Mappings.SmartEditField import FacebookEditField
@@ -275,25 +277,6 @@ class SmartCreatePublish:
         SmartCreatePublish.feedback_repository.update_many({"template_id": template_id}, query)
 
     @staticmethod
-    def get_publish_feedback(user_filed_id: int):
-        date_key = "start_date"
-        query = {"user_filed_id": {MongoOperator.EQUALS.value: user_filed_id}}
-        sort_query = [(date_key, -1)]
-
-        feedback_docs = SmartCreatePublish.feedback_repository.get_sorted(query=query, sort_query=sort_query)
-        if not feedback_docs:
-            return
-
-        feedback = feedback_docs[0]
-        if feedback["publish_status"] != PublishStatus.IN_PROGRESS.value:
-            SmartCreatePublish.feedback_repository.delete_many({"user_filed_id": user_filed_id})
-
-        feedback[date_key] = feedback[date_key].isoformat()
-        feedback.pop("_id")
-
-        return feedback
-
-    @staticmethod
     def build_campaign_hierarchy(request: dtos.SmartCreatePublishRequest):
         destination_type = request.step_one_details.get("destination_type")
         is_using_conversions = request.step_one_details["objective"] == "CONVERSIONS"
@@ -457,17 +440,25 @@ class SmartEditPublish:
     queue = Queue()
 
     @staticmethod
-    def handle(request: Dict, permanent_token: str) -> List[Dict]:
+    def handle(message_body: Union[str, bytes]) -> List[Dict]:
+        body = humps.decamelize(json.loads(message_body))
+        request_mapper = mappings.SmartEditPublishRequest(dtos.SmartEditPublishRequest)
+        request = request_mapper.load(body)
+
+        business_owner_id = request.business_owner_facebook_id
+        permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+
         GraphAPISdkBase(business_owner_permanent_token=permanent_token, facebook_config=config.facebook)
+        publish_response = SmartEditPublishResponseEvent()
 
-        ad_account = request["ad_account_id"]
+        ad_account = request.ad_account_id
 
-        campaigns = request.get("campaigns")
-        adsets = request.get("adsets")
-        ads = request.get("ads")
+        campaigns = request.campaigns
+        adsets = request.adsets
+        ads = request.ads
 
         SmartEditPublish.feedback_data = dict(
-            user_filed_id=request["user_filed_id"],
+            user_filed_id=request.user_filed_id,
             start_date=datetime.now(),
             ad_account=ad_account,
             publish_status=PublishStatus.IN_PROGRESS.value,
@@ -496,6 +487,9 @@ class SmartEditPublish:
         response.append({"campaigns": campaign_tree})
         response.append({"ad_sets": adset_tree})
         response.append({"ads": ad_tree})
+
+        edit_event = SmartEditPublish.build_edit_event(request.ad_account_id, business_owner_id, campaign_tree)
+        SmartCreateOperations.publish(publish_response, edit_event)
 
         return response
 
@@ -778,6 +772,15 @@ class SmartEditPublish:
 
         SmartEditPublish.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
+    @staticmethod
+    def build_edit_event(ad_account_id, business_owner_id, structure_tree):
+        mapper = StructureEditedEventMapping(target=StructureEditedEvent)
+        response = mapper.load(structure_tree)
+        response.business_owner_id = business_owner_id
+        response.account_id = ad_account_id
+        return response
+
 
 class HandlersEnum(EnumerationBase):
     SMART_CREATE_PUBLISH_REQUEST = SmartCreatePublish
+    SMART_EDIT_PUBLISH_REQUEST = SmartEditPublish

@@ -18,7 +18,8 @@ PROJECTS := \
 	FacebookProductCatalogs/BackgroundTasks \
 	FacebookTuring/BackgroundTasks \
 	GoogleDexter/BackgroundTasks \
-	GoogleTuring/BackgroundTasks
+	GoogleTuring/BackgroundTasks \
+	FacebookCampaignsBuilder/BackgroundTasks
 
 
 .PHONY: .all

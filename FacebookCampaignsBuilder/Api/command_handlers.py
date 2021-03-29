@@ -7,26 +7,31 @@ from queue import Queue
 from threading import Thread
 from typing import Any, Dict, Optional
 
-from facebook_business.adobjects.ad import Ad
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.adset import AdSet
-from werkzeug.datastructures import FileStorage
-
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
 from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder
-from Core.facebook.sdk_adapter.smart_create.targeting import FlexibleTargeting, Location, Targeting
+from Core.facebook.sdk_adapter.smart_create.targeting import (
+    FlexibleTargeting, Location, Targeting)
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import get_sdk_structures
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import \
+    get_sdk_structures
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
+    Level, LevelToGraphAPIStructure)
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adset import AdSet
 from FacebookCampaignsBuilder.Api import commands
-from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish
 from FacebookCampaignsBuilder.Api.startup import config
-from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
+# TODO move AddStructuresToParent Class to BackgroundTasks
+from FacebookCampaignsBuilder.BackgroundTasks.request_handlers import \
+    SmartCreatePublish
+from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
+    PublishStatus
+from werkzeug.datastructures import FileStorage
 
 logger = logging.getLogger(__name__)
 
@@ -461,3 +466,30 @@ class AddStructuresToParent:
         locations = targeting_request.get("locations")
         all_locations = [Location(**location) for location in locations]
         ad_set_template["targeting"]["geo_locations"] = SmartCreatePublish.process_geo_location(all_locations)
+
+
+class PublishProgress:
+    feedback_repository = MongoRepositoryBase(
+        config=config.mongo,
+        database_name=config.mongo.publish_feedback_database_name,
+        collection_name=config.mongo.publish_feedback_collection_name,
+    )
+
+    @staticmethod
+    def get_publish_feedback(user_filed_id: int):
+        date_key = "start_date"
+        query = {"user_filed_id": {MongoOperator.EQUALS.value: user_filed_id}}
+        sort_query = [(date_key, -1)]
+
+        feedback_docs = PublishProgress.feedback_repository.get_sorted(query=query, sort_query=sort_query)
+        if not feedback_docs:
+            return
+
+        feedback = feedback_docs[0]
+        if feedback["publish_status"] != PublishStatus.IN_PROGRESS.value:
+            PublishProgress.feedback_repository.delete_many({"user_filed_id": user_filed_id})
+
+        feedback[date_key] = feedback[date_key].isoformat()
+        feedback.pop("_id")
+
+        return feedback

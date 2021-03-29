@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
-from FacebookCampaignsBuilder.Api.startup import config
+from FacebookCampaignsBuilder.BackgroundTasks.startup import config
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
     PublishStatus
 

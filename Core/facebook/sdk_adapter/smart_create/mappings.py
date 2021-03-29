@@ -39,3 +39,15 @@ class SmartCreatePublishRequest(MapperBase):
 
     class Meta:
         unknown = EXCLUDE
+
+
+class SmartEditPublishRequest(MapperBase):
+    user_filed_id = fields.Int()
+    business_owner_facebook_id = fields.String()
+    ad_account_id = fields.String()
+    campaigns = fields.List(fields.Dict())
+    adsets = fields.List(fields.Dict())
+    ads = fields.List(fields.Dict())
+
+    class Meta:
+        unknown = EXCLUDE

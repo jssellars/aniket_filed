@@ -5,18 +5,18 @@ from distutils.util import strtobool
 
 import flask_restful
 import humps
-from flask import request
-
+from Core.facebook.sdk_adapter.smart_create import mappings
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extract_user_filed_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, CampaignBuilderPermissions
-from FacebookCampaignsBuilder.Api import command_handlers, commands, mappings, queries
+from FacebookCampaignsBuilder.Api import command_handlers, commands, queries
+from FacebookCampaignsBuilder.Api.command_handlers import PublishProgress
 from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure, GetStructure
-from FacebookCampaignsBuilder.Api.request_handlers import SmartCreatePublish, SmartEditPublish
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
+from flask import request
 
 logger = logging.getLogger(__name__)
 
@@ -345,7 +345,7 @@ class SmartCreatePublishProgress(Resource):
     def get(self):
         try:
             user_filed_id = extract_user_filed_id()
-            response = SmartCreatePublish.get_publish_feedback(int(user_filed_id))
+            response = PublishProgress.get_publish_feedback(int(user_filed_id))
 
             if response:
                 return object_to_camelized_dict(response), 200
@@ -390,22 +390,3 @@ class AddAnAdAdsetGetStructure(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
             return {"message": f"Could not retrieve structure for {structure_ids}"}, 400
-
-
-class SmartEditPublishStructures(Resource):
-    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
-    def post(self):
-        try:
-            request_json = humps.decamelize(request.get_json(force=True))
-            business_owner_id = extract_business_owner_facebook_id()
-            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
-            campaigns = SmartEditPublish.handle(
-                request=request_json,
-                permanent_token=permanent_token,
-            )
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-
-            return Tools.create_error(e, code="BadRequest_PublishSmartCreateEndpoint"), 400
-
-        return object_to_camelized_dict(campaigns), 200
