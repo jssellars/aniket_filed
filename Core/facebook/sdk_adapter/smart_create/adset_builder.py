@@ -88,7 +88,9 @@ def set_statuses(ad_set_template):
 
 
 def set_date_interval(ad_set_template, step_one, step_two):
-    date_interval = step_two["date"] if "date" in step_two else step_one["date"]
+    date_interval = step_two.get("date")
+    if not date_interval:
+        date_interval = step_one.get("date")
     ad_set_template[AdSet.Field.start_time] = date_interval["start_date"]
     if "end_date" in date_interval and date_interval["end_date"]:
         ad_set_template[AdSet.Field.end_time] = date_interval["end_date"]
