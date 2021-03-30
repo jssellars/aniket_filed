@@ -318,28 +318,6 @@ class AdsManagerAccountAdvertisableApps(Resource):
         return AccountAdvertisableApps.get(account_id)
 
 
-class AdsManagerAddStructuresToParent(Resource):
-    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.SMART_CREATE_VIEW)
-    def post(self):
-        try:
-            raw_request = humps.decamelize(request.get_json(force=True))
-            business_owner_facebook_id = extract_business_owner_facebook_id()
-            user_filed_id = extract_user_filed_id()
-            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
-            response = command_handlers.AddStructuresToParent.publish_structures_to_parent(
-                request=raw_request,
-                permanent_token=permanent_token,
-                user_filed_id=user_filed_id,
-                facebook_config=config.facebook,
-            )
-
-            return humps.camelize(response), 200
-
-        except Exception as e:
-            logger.exception(repr(e), extra=request_as_log_dict(request))
-            return {"message": "Failed to process request."}, 400
-
-
 class SmartCreatePublishProgress(Resource):
     @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
     def get(self):

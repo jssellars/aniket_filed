@@ -9,6 +9,13 @@ from marshmallow import EXCLUDE, fields, pre_load
 
 
 @dataclass
+class AddAdsetAdTree:
+    facebook_id: AnyStr = None
+    adsets: List[Dict] = field(default_factory=list)
+    ads: List[AnyStr] = field(default_factory=list)
+
+
+@dataclass
 class AdSetTree:
     facebook_id: AnyStr = None
     ads: List[AnyStr] = field(default_factory=list)
@@ -38,6 +45,14 @@ class CampaignCreatedEvent:
 @dataclass
 class StructureEditedEvent:
     message_type = "StructureEditedEvent"
+    business_owner_id: AnyStr = None
+    account_id: AnyStr = None
+    structure_tree: List[Dict] = field(default_factory=list)
+
+
+@dataclass
+class AddAdsetAdEvent:
+    message_type = "AddAdsetAdEvent"
     business_owner_id: AnyStr = None
     account_id: AnyStr = None
     structure_tree: List[Dict] = field(default_factory=list)
@@ -77,14 +92,33 @@ class StructureEditedEventMapping(MapperBase):
         unknown = EXCLUDE
 
 
+class AddAdsetAdEventMapping(MapperBase):
+    business_owner_id = fields.String()
+    account_id = fields.String()
+    structure_tree = MapperNestedField(target=AddAdsetAdTree, many=True)
+
+    @pre_load
+    def convert(self, data: Any, **kwargs):
+        if isinstance(data, list):
+            data = {
+                'edited_structure_tree': data
+            }
+        return data
+
+    class Meta:
+        unknown = EXCLUDE
+
+
 class RequestTypeEnum(EnumerationBase):
     SMART_CREATE_PUBLISH_REQUEST = "SmartCreatePublishRequestEvent"
     SMART_EDIT_PUBLISH_REQUEST = "SmartEditPublishRequestEvent"
+    AAA_PUBLISH_REQUEST = "AddAdsetAdPublishRequestEvent"
 
 
 class ResponseTypeEnum(EnumerationBase):
     SMART_CREATE_PUBLISH_RESPONSE = "SmartCreatePublishResponseEvent"
     SMART_EDIT_PUBLISH_RESPONSE = "SmartEditPublishResponseEvent"
+    AAA_PUBLISH_RESPONSE = "AddAdsetAdPublishResponseEvent"
 
 
 @dataclass
@@ -97,4 +131,10 @@ class SmartCreatePublishResponseEvent:
 @dataclass
 class SmartEditPublishResponseEvent:
     message_type: str = ResponseTypeEnum.SMART_EDIT_PUBLISH_RESPONSE.value
+    publish_status_id: int = PublishStatus.SUCCESS.value
+
+
+@dataclass
+class AddAdsetAdPublishResponseEvent:
+    message_type: str = ResponseTypeEnum.AAA_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value

@@ -46,7 +46,6 @@ router_route_pairs = (
     (routers.SmartCreateCatalogs, "smart-create/catalogs"),
     (routers.SmartCreateAccountAdvertisableApps, "smart-create/account-advertisable-apps/<string:account_id>"),
     (routers.AdsManagerAccountAdvertisableApps, "ads-manager/account-advertisable-apps/<string:account_id>"),
-    (routers.AdsManagerAddStructuresToParent, "add-structures-to-parent"),
     (routers.SmartCreatePublishProgress, "smart-create/publish-progress"),
     (
         routers.SmartEditCampaignTreesStructure,
