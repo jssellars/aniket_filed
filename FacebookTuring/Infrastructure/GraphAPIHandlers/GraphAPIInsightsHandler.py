@@ -19,7 +19,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
     get_sdk_insights_page,
     get_sdk_structures,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields, FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import (
@@ -192,7 +192,9 @@ class GraphAPIInsightsHandler:
             facebook_structure_key = LevelToFacebookIdKeyMapping[level.upper()].value.replace("_", ".")
 
             structures_filter = {
-                "filtering": [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, insight_ids)]
+                FacebookParametersStrings.filtering: [
+                    create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, insight_ids)
+                ]
             }
             structures = get_sdk_structures(
                 ad_account_id, Level[level.upper()], facebook_structure_fields, structures_filter
@@ -395,7 +397,7 @@ class GraphAPIInsightsHandler:
         structures_filter = {
             "after": next_page_cursor,
             "limit": page_size,
-            "filtering": parameters.get("filtering", []),
+            FacebookParametersStrings.filtering: parameters.get(FacebookParametersStrings.filtering, []),
         }
 
         structures = get_sdk_structures(
@@ -421,7 +423,7 @@ class GraphAPIInsightsHandler:
         filtering = [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, structure_ids)]
         if insights_actions_filtering:
             filtering.append(insights_actions_filtering)
-        parameters["filtering"] = filtering
+        parameters[FacebookParametersStrings.filtering] = filtering
 
         # The after cursor is valid only for structures, not insights on this flow
         parameters.pop("after", None)

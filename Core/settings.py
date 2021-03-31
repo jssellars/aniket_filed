@@ -170,6 +170,29 @@ class Dev3:
 class Stage:
     environment = "stage"
 
+    sql_server = SqlServer(
+        host="stage1.ctonnmgtbe2i.eu-west-1.rds.amazonaws.com",
+        port=1433,
+        username="filed_admin",
+        password="dvserv3#rathena",
+        name="{Env}.Filed.Facebook.Accounts",
+    )
+
+    mongo = Mongo(
+        ssh_tunnel=False,
+        mongo_username="",
+        mongo_password="",
+        mongo_host_external="ec2-18-202-26-213.eu-west-1.compute.amazonaws.com",
+        mongo_host_internal="18.202.26.213",
+        ssh_host="",
+        mongo_port=27017,
+        ssh_username="",
+        ssh_password="=",
+        retry_writes=False,
+        logs_database="{env}_app_logs",
+        logs_collection_name="logs",
+    )
+
 
 class Staging:
     environment = "staging"

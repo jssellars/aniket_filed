@@ -636,6 +636,7 @@ SEVEN_DAYS_BUCKET = [
     SEVEN_DAYS_CLICKS_DOWN,
     SEVEN_DAYS_CLICKS_UP,
 ]
+
 # FOURTEEN DAYS BUCKETS
 FOURTEEN_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
     trigger=MetricClause(
@@ -727,6 +728,12 @@ FOURTEEN_DAYS_RESULTS_DOWN = TriggerMetric(
 FOURTEEN_DAYS_RESULTS_UP = TriggerMetric(
     trigger=MetricClause(FieldsMetadata.results, TrendEnum.INCREASING, variance_percentage=20),
     cause_metrics=[
+        CauseMetricBase(
+            metric_clauses=[
+                MetricClause(FieldsMetadata.unique_clicks_all, TrendEnum.INCREASING, variance_percentage=20),
+            ],
+            output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CLICKS_UP,
+        ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
             output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CTR_DOWN,
@@ -964,6 +971,7 @@ FOURTEEN_DAYS_BUCKET = [
     FOURTEEN_DAYS_CLICKS_DOWN,
     FOURTEEN_DAYS_CLICKS_UP,
 ]
+
 # THIRTY DAYS BUCKETS
 THIRTY_DAYS_CONVERSION_RATE_DOWN = TriggerMetric(
     trigger=MetricClause(
@@ -1055,6 +1063,12 @@ THIRTY_DAYS_RESULTS_DOWN = TriggerMetric(
 THIRTY_DAYS_RESULTS_UP = TriggerMetric(
     trigger=MetricClause(FieldsMetadata.results, TrendEnum.INCREASING, variance_percentage=20),
     cause_metrics=[
+        CauseMetricBase(
+            metric_clauses=[
+                MetricClause(FieldsMetadata.unique_clicks_all, TrendEnum.INCREASING, variance_percentage=20),
+            ],
+            output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CLICKS_UP,
+        ),
         CauseMetricBase(
             metric_clauses=[MetricClause(FieldsMetadata.unique_ctr_all, TrendEnum.DECREASING, variance_percentage=20)],
             output=OverTimeTrendTemplate.RESULTS_UP_UNIQUE_CTR_DOWN,

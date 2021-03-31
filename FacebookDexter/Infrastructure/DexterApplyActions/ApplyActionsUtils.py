@@ -1,10 +1,20 @@
-from typing import Dict, Optional, Tuple
+from dataclasses import asdict
+from typing import Any, Dict, Optional, Tuple
 
 import requests
+from facebook_business.adobjects.adset import AdSet
 
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.settings_models import Model
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import RecommendationAction
 from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import FacebookBudgetTypeEnum
+from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresHandler import (
+    DexterCreatedEventMapping,
+    DexterNewCreatedStructureEvent,
+    NewCreatedStructureKeys,
+)
 
 INVALID_METRIC_VALUE = -1
 TOTAL_KEY = "total"
@@ -42,7 +52,7 @@ def _get_budget_value_and_type(
     return budget, budget_type
 
 
-def _update_turing_structure(config: Model, recommendation: Dict, headers: str):
+def update_turing_structure(config: Model, recommendation: Dict, headers: str):
     url = config.external_services.facebook_auto_apply.format(
         level=recommendation.get(RecommendationField.LEVEL.value),
         structureId=recommendation.get(RecommendationField.STRUCTURE_ID.value),
@@ -55,3 +65,33 @@ def _update_turing_structure(config: Model, recommendation: Dict, headers: str):
 
     if apply_request.status_code != 200:
         raise Exception(f"Could not update structure {recommendation.get(RecommendationField.STRUCTURE_ID.value)}")
+
+
+def duplicate_fb_adset(recommendation: Dict, fixtures: Any) -> str:
+    structure = LevelToGraphAPIStructure.get(
+        recommendation[RecommendationField.LEVEL.value], recommendation[RecommendationField.STRUCTURE_ID.value]
+    )
+
+    new_structure = structure.create_copy(
+        params={
+            "campaign_id": recommendation.get(RecommendationField.CAMPAIGN_ID.value),
+            "deep_copy": True,
+            "status_option": AdSet.StatusOption.inherited_from_source,
+            "rename_options": {"rename_suffix": " - Duplicate"},
+        }
+    )
+    new_created_structures_event = DexterNewCreatedStructureEvent(
+        recommendation.get(RecommendationField.BUSINESS_OWNER_ID.value),
+        [
+            NewCreatedStructureKeys(
+                recommendation.get(RecommendationField.LEVEL.value),
+                recommendation.get(RecommendationField.ACCOUNT_ID.value),
+                new_structure[FacebookMiscFields.copied_adset_id],
+            )
+        ],
+    )
+    mapper = DexterCreatedEventMapping(target=DexterNewCreatedStructureEvent)
+    response = mapper.load(asdict(new_created_structures_event))
+    RecommendationAction.publish_response(response, fixtures)
+
+    return new_structure[FacebookMiscFields.copied_adset_id]

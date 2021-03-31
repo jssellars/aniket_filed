@@ -13,7 +13,7 @@ from facebook_business.exceptions import FacebookUnavailablePropertyException
 
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields, FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.GraphAPIInsightsMapper import GraphAPIInsightsMapper
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
@@ -104,7 +104,7 @@ def get_structure_ids_and_page_cursor_for_page(
     next_page_cursor = get_next_page_cursor(insights)
 
     if level != Level.ACCOUNT:
-        parameters["filtering"] = [
+        parameters[FacebookParametersStrings.filtering] = [
             create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids)
         ]
 
@@ -142,7 +142,7 @@ def add_results_to_response(level: str, response: List, account_id: str):
     if not response:
         return
 
-    structure_key = ""
+    structure_key = LevelToFacebookIdKeyMapping.ADSET.value
     if level == Level.CAMPAIGN.value or level == Level.ADSET.value:
         structure_key = LevelToFacebookIdKeyMapping.get_enum_by_name(level.upper()).value
     elif level == Level.AD.value:
@@ -150,7 +150,7 @@ def add_results_to_response(level: str, response: List, account_id: str):
     structure_ids = list({x[structure_key] for x in response if structure_key in x})
 
     params = {
-        "filtering": [
+        FacebookParametersStrings.filtering: [
             json.dumps(
                 create_facebook_filter(structure_key.replace("_", "."), AgGridFacebookOperator.IN, structure_ids)
             )
@@ -268,7 +268,7 @@ def get_and_map_structures(ad_account_id: str, level: LevelEnum, filtering: Opti
         ad_account_id,
         Level[level.value.upper()],
         fields=StructureFields.get(level.value).get_structure_fields(),
-        params={"filtering": [filtering]},
+        params={FacebookParametersStrings.filtering: [filtering]},
     )
 
     structures = []

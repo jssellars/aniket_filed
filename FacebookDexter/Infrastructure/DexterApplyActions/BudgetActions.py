@@ -4,7 +4,7 @@ from typing import Dict, Optional
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     _does_budget_exist,
     _get_budget_value_and_type,
-    _update_turing_structure,
+    update_turing_structure,
 )
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyParameters,
@@ -15,7 +15,7 @@ from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions
 @dataclass
 class BudgetAlterAction(RecommendationAction):
     def process_action(self, recommendation: Dict, headers: str):
-        _update_turing_structure(self.config, recommendation, headers)
+        update_turing_structure(self.config, recommendation, headers)
         return
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:

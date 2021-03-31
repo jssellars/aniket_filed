@@ -13,7 +13,12 @@ from facebook_business.adobjects.targeting import Targeting
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_sdk_structures
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, FacebookMiscFields, Gender
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import (
+    FacebookGender,
+    FacebookMiscFields,
+    FacebookParametersStrings,
+    Gender,
+)
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.StructureMapping import StructureFields
@@ -137,7 +142,9 @@ class CampaignTreeBuilder:
     def __get_campaigns(self, campaign_ids):
         facebook_structure_key = LevelToFacebookIdKeyMapping.CAMPAIGN.value.replace("_", ".")
         structures_filter = {
-            "filtering": [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, campaign_ids)]
+            FacebookParametersStrings.filtering: [
+                create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, campaign_ids)
+            ]
         }
         structure_fields = StructureFields.get(Level.CAMPAIGN.value).structure_fields
         fields = [field.facebook_fields[0] for field in structure_fields]
@@ -147,7 +154,9 @@ class CampaignTreeBuilder:
     def __get_structures_campaign_ids(self):
         facebook_structure_key = LevelToFacebookIdKeyMapping[self.level.value.upper()].value.replace("_", ".")
         structures_filter = {
-            "filtering": [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, self.structure_ids)]
+            FacebookParametersStrings.filtering: [
+                create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, self.structure_ids)
+            ]
         }
         fields = [Level.CAMPAIGN.value]
         response = get_sdk_structures(self.account_id, self.level, fields=fields, params=structures_filter)
@@ -156,7 +165,9 @@ class CampaignTreeBuilder:
 
     def __get_raw_structures_by_id(self, level, structure_key, structure_id):
         structures_filter = {
-            "filtering": [create_facebook_filter(structure_key, AgGridFacebookOperator.EQUAL, structure_id)]
+            FacebookParametersStrings.filtering: [
+                create_facebook_filter(structure_key, AgGridFacebookOperator.EQUAL, structure_id)
+            ]
         }
         structure_fields = StructureFields.get(level.value).structure_fields
         fields = [field.facebook_fields[0] for field in structure_fields]

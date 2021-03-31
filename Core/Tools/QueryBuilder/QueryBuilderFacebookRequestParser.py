@@ -7,6 +7,7 @@ from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderDimension
 from Core.Tools.QueryBuilder.QueryBuilderFilter import QueryBuilderFilter
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToFacebookIdKeyMapping
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.ObjectiveToResultsMapper import (
     AdSetOptimizationToCostPerResult,
@@ -73,14 +74,14 @@ class QueryBuilderFacebookRequestParser:
     @property
     def parameters(self):
         parameters = {
-            "level": self.level,
-            "breakdowns": self.breakdowns,
-            "time_increment": self.time_increment,
-            "time_range": self.time_range,
-            "filtering": self.filtering,
-            "sort": self.__sort,
-            "limit": self.page_size,
-            "default_summary": True,
+            FacebookParametersStrings.level: self.level,
+            FacebookParametersStrings.breakdowns: self.breakdowns,
+            FacebookParametersStrings.time_increment: self.time_increment,
+            FacebookParametersStrings.time_range: self.time_range,
+            FacebookParametersStrings.filtering: self.filtering,
+            FacebookParametersStrings.sort: self.__sort,
+            FacebookParametersStrings.limit: self.page_size,
+            FacebookParametersStrings.default_summary: True,
         }
 
         if self.next_page_cursor:

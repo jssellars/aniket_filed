@@ -16,6 +16,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
     get_and_map_structures,
     get_dexter_insights,
 )
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields, FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import EffectiveStatusEnum
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToFacebookIdKeyMapping
@@ -123,8 +124,6 @@ class DexterStrategyMaster:
             for breakdown in self.dexter_strategy.breakdowns:
                 for action_breakdown in self.dexter_strategy.action_breakdowns:
 
-                    self.data_repository.set_structures_collection(level, config)
-
                     filtering = create_facebook_filter(
                         FieldsMetadata.effective_status.name,
                         AgGridFacebookOperator.IN,
@@ -168,24 +167,12 @@ class DexterStrategyMaster:
         business_owner: str,
     ):
         try:
-            dexter_insights_metrics = required_metrics + [
-                FieldsMetadata.result_type.name,
-                FieldsMetadata.date_start.name,
-                FieldsMetadata.date_stop.name,
-                LevelIdKeyEnum[level.value.upper()].value,
-            ]
-
-            if FieldsMetadata.results.name not in dexter_insights_metrics:
-                dexter_insights_metrics.append(FieldsMetadata.results.name)
-
-            if breakdown != FieldsMetadata.breakdown_none:
-                dexter_insights_metrics.append(breakdown.name)
 
             results = get_dexter_insights(
                 f"act_{account_id}",
                 Level[level.value.upper()],
                 breakdown,
-                dexter_insights_metrics,
+                add_missing_fields(required_metrics, level, breakdown),
                 get_fb_request_parameters(level, breakdown, action_breakdown, structure),
             )
             if not results:
@@ -325,24 +312,43 @@ def add_missing_metric_to_group(
     all_grouped_data.append(grouped_data)
 
 
+def add_missing_fields(required_metrics: List, level: LevelEnum, breakdown: Field) -> List[str]:
+    dexter_insights_metrics = required_metrics + [
+        FieldsMetadata.result_type.name,
+        FieldsMetadata.date_start.name,
+        FieldsMetadata.date_stop.name,
+        LevelIdKeyEnum[level.value.upper()].value,
+    ]
+
+    if FieldsMetadata.results.name not in dexter_insights_metrics:
+        dexter_insights_metrics.append(FieldsMetadata.results.name)
+
+    if breakdown != FieldsMetadata.breakdown_none:
+        dexter_insights_metrics.append(breakdown.name)
+
+    return dexter_insights_metrics
+
+
 def get_fb_request_parameters(level: LevelEnum, breakdown: Field, action_breakdown: Field, structure: Dict) -> Dict:
     structure_key = LevelToFacebookIdKeyMapping[level.value.upper()].value
 
     return {
-        "level": level.value,
-        "breakdowns": breakdown.facebook_fields,
+        FacebookParametersStrings.level: level.value,
+        FacebookParametersStrings.breakdowns: breakdown.facebook_fields,
         # For now this will be default on action_type
-        "action_breakdowns": "action_type",
-        "time_increment": FieldsMetadata.day.facebook_value,
-        "time_range": {
-            "since": (datetime.now() - timedelta(days=config.days_to_sync)).strftime(DEFAULT_DATETIME),
-            "until": datetime.now().strftime(DEFAULT_DATETIME),
+        FacebookParametersStrings.action_breakdowns: "action_type",
+        FacebookParametersStrings.time_increment: FieldsMetadata.day.facebook_value,
+        FacebookParametersStrings.time_range: {
+            FacebookParametersStrings.since: (datetime.now() - timedelta(days=config.days_to_sync)).strftime(
+                DEFAULT_DATETIME
+            ),
+            FacebookParametersStrings.until: datetime.now().strftime(DEFAULT_DATETIME),
         },
-        "limit": 50,
-        "filtering": [
+        FacebookParametersStrings.limit: 50,
+        FacebookParametersStrings.filtering: [
             create_facebook_filter(
                 structure_key.replace("_", "."), AgGridFacebookOperator.EQUAL, structure[structure_key]
             )
         ],
-        "sort": "date_start",
+        FacebookParametersStrings.sort: "date_start",
     }

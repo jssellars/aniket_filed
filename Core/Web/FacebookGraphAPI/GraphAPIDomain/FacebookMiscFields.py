@@ -43,6 +43,20 @@ class FacebookMiscFields:
     business = "business"
 
 
+class FacebookParametersStrings:
+    level = "level"
+    breakdowns = "breakdowns"
+    action_breakdowns = "action_breakdowns"
+    time_increment = "time_increment"
+    time_range = "time_range"
+    since = "since"
+    until = "until"
+    limit = "limit"
+    filtering = "filtering"
+    sort = "sort"
+    default_summary = "default_summary"
+
+
 class Gender(Enum):
     ALL = 0
     WOMEN = 1

@@ -5,6 +5,7 @@ from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecomme
 
 
 class OverTimeTrendTemplate(Enum):
+
     CR_DOWN_CTR_DOWN_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed your cost is increasing and people are less interested in your ads. This is a trend we’ve seen"
@@ -142,6 +143,15 @@ class OverTimeTrendTemplate(Enum):
         "Your results are getting expensive and results have decreased over time.",
         "Dexter suggests lowering your budget by 20% to see if that helps bring your cost down. ",
         apply_action_type=ApplyActionType.BUDGET_DECREASE,
+    )
+
+    RESULTS_UP_UNIQUE_CLICKS_UP = DexterRecommendationOutput(
+        "Your campaign is performing well, you should create a lookalike audience ",
+        RecommendationPriority.HIGH,
+        "Create a lookalike audience",
+        "Your campaign is performing really well, consider creating a lookalike audience",
+        "Dexter suggests creating a lookalike audience to get even more results. ",
+        apply_action_type=ApplyActionType.CREATE_LOOKALIKE,
     )
 
     RESULTS_UP_UNIQUE_CTR_DOWN = DexterRecommendationOutput(
