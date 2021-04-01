@@ -39,10 +39,11 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
     AddAdsetAdPublishResponseEvent,
     CampaignCreatedEvent,
     CampaignCreatedEventMapping,
+    PublishResponseEvent,
     SmartCreatePublishResponseEvent,
     SmartEditPublishResponseEvent,
     StructureEditedEvent,
-    StructureEditedEventMapping, PublishResponseEvent,
+    StructureEditedEventMapping,
 )
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
 from FacebookCampaignsBuilder.Infrastructure.Mappings.SmartEditField import FacebookEditField
@@ -121,12 +122,12 @@ class SmartCreatePublish:
         ad_account = AdAccount(fbid=request.ad_account_id)
 
         is_campaign_using_cbo = (
-                "campaign_budget_optimization" in request.step_one_details
-                and request.step_one_details["campaign_budget_optimization"] is not None
+            "campaign_budget_optimization" in request.step_one_details
+            and request.step_one_details["campaign_budget_optimization"] is not None
         )
         is_adset_using_cbo = (
-                "budget_optimization" in request.step_two_details
-                and request.step_two_details["budget_optimization"] is not None
+            "budget_optimization" in request.step_two_details
+            and request.step_two_details["budget_optimization"] is not None
         )
         is_budget_split_evenly = request.step_four_details.get("is_budget_split_evenly")
         budget_allocation = request.step_four_details.get("budget_allocation", {})
@@ -262,7 +263,13 @@ class SmartCreatePublish:
         return campaign_tree
 
     @staticmethod
-    def clean_and_publish_response(campaign_tree: List[Dict], error_message: str, feedback_data: Dict, publish_response: PublishResponseEvent, template_id: str) -> None:
+    def clean_and_publish_response(
+        campaign_tree: List[Dict],
+        error_message: str,
+        feedback_data: Dict,
+        publish_response: PublishResponseEvent,
+        template_id: str,
+    ) -> None:
         SmartCreatePublish.update_feedback_database(
             feedback_data, template_id, PublishStatus.FAILED.value, error=error_message
         )
@@ -271,7 +278,9 @@ class SmartCreatePublish:
         SmartCreateOperations.publish(publish_response)
 
     @staticmethod
-    def build_campaign_event(ad_account_id: str, business_owner_id: str, campaign_tree: List[Dict]) -> Union[List, Dict]:
+    def build_campaign_event(
+        ad_account_id: str, business_owner_id: str, campaign_tree: List[Dict]
+    ) -> Union[List, Dict]:
         mapper = CampaignCreatedEventMapping(target=CampaignCreatedEvent)
         response = mapper.load(campaign_tree)
         response.business_owner_id = business_owner_id
@@ -279,7 +288,9 @@ class SmartCreatePublish:
         return response
 
     @staticmethod
-    def update_feedback_database(feedback_data: Dict, template_id: str, status: PublishStatus, error: str = None) -> None:
+    def update_feedback_database(
+        feedback_data: Dict, template_id: str, status: PublishStatus, error: str = None
+    ) -> None:
         update_fields = {
             "published_structures": feedback_data.get("published_structures", 0),
             "published_campaigns": feedback_data.get("published_campaigns", 0),
@@ -300,8 +311,8 @@ class SmartCreatePublish:
         destination_type = request.step_one_details.get("destination_type")
         is_using_conversions = request.step_one_details["objective"] == "CONVERSIONS"
         is_using_cbo = (
-                "campaign_budget_optimization" in request.step_one_details
-                and request.step_one_details["campaign_budget_optimization"] is not None
+            "campaign_budget_optimization" in request.step_one_details
+            and request.step_one_details["campaign_budget_optimization"] is not None
         )
 
         # Build campaigns
@@ -359,9 +370,9 @@ class SmartCreatePublish:
 
     @staticmethod
     def allocate_adset_budget(
-            adset_create_template: Dict,
-            adset_budget_allocation: Dict,
-            step_four: Dict,
+        adset_create_template: Dict,
+        adset_budget_allocation: Dict,
+        step_four: Dict,
     ) -> None:
         targeting = adset_create_template["targeting"]
 
@@ -934,7 +945,9 @@ class AddStructuresToParent:
         AddStructuresToParent.feedback_data = feedback_data
 
     @staticmethod
-    def _publish_structures_from_ids(parent_level: Level, child_level: Level, child_ids: List[str], parent_ids: List[str]) -> List[str]:
+    def _publish_structures_from_ids(
+        parent_level: Level, child_level: Level, child_ids: List[str], parent_ids: List[str]
+    ) -> List[str]:
         results = []
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -958,7 +971,9 @@ class AddStructuresToParent:
         return results
 
     @staticmethod
-    def _duplicate_structure_on_facebook(parent_level: Level, child_level: Level, facebook_id: str, parent_id: str = None) -> str:
+    def _duplicate_structure_on_facebook(
+        parent_level: Level, child_level: Level, facebook_id: str, parent_id: str = None
+    ) -> str:
         structure = LevelToGraphAPIStructure.get(child_level, facebook_id)
         params = AddStructuresToParent._create_duplicate_parameters(parent_level, child_level, parent_id)
         new_structure_id = structure.create_copy(params=params)
@@ -1008,7 +1023,9 @@ class AddStructuresToParent:
         AddStructuresToParent.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
     @staticmethod
-    def _publish_children_to_parents(callback: Callable, ad_account_id: str, requests: List, parent_ids: List, child_level: Level) -> List:
+    def _publish_children_to_parents(
+        callback: Callable, ad_account_id: str, requests: List, parent_ids: List, child_level: Level
+    ) -> List:
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -1073,8 +1090,8 @@ class AddStructuresToParent:
             fields=[FieldsMetadata.daily_budget.name, FieldsMetadata.lifetime_budget.name]
         )
         parent_campaign_not_has_cbo = not (
-                parent_campaign_cbo_info.get(FieldsMetadata.daily_budget.name)
-                or parent_campaign_cbo_info.get(FieldsMetadata.lifetime_budget.name)
+            parent_campaign_cbo_info.get(FieldsMetadata.daily_budget.name)
+            or parent_campaign_cbo_info.get(FieldsMetadata.lifetime_budget.name)
         )
 
         # If Parent Campaign has CBO, then don't add adset budget
@@ -1193,7 +1210,9 @@ class AddStructuresToParent:
         ad_set_template["targeting"]["geo_locations"] = SmartCreatePublish.process_geo_location(all_locations)
 
     @staticmethod
-    def build_add_adset_ad_event(ad_account_id: str, business_owner_id: str, structure_tree: List[Dict]) -> Union[List, Dict]:
+    def build_add_adset_ad_event(
+        ad_account_id: str, business_owner_id: str, structure_tree: List[Dict]
+    ) -> Union[List, Dict]:
         mapper = AddAdsetAdEventMapping(target=AddAdsetAdEvent)
         response = mapper.load(structure_tree)
         response.business_owner_id = business_owner_id
