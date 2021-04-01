@@ -8,9 +8,7 @@ from facebook_business.adobjects.adset import AdSet
 from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement, Platform
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
-from Core.facebook.sdk_adapter.smart_create.constants import (
-    FB_MAX_AGE,
-)
+from Core.facebook.sdk_adapter.smart_create.constants import FB_MAX_AGE
 from Core.facebook.sdk_adapter.smart_create.targeting import (
     AgeGroup,
     CustomAudience,
@@ -19,7 +17,7 @@ from Core.facebook.sdk_adapter.smart_create.targeting import (
     Interest,
     Targeting,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import Gender, FacebookGender
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, Gender
 
 FACEBOOK_DEFAULT_KEY = "FACEBOOK"
 INSTAGRAM_DEFAULT_KEY = "INSTAGRAM"
@@ -62,7 +60,7 @@ def build_base_ad_sets(
 
     set_statuses(ad_set_template)
     set_date_interval(ad_set_template, step_one, step_two)
-    set_promoted_object(ad_set_template, is_using_conversions, step_three, step_two)
+    ad_set_template[AdSet.Field.promoted_object] = set_promoted_object(is_using_conversions, step_three, step_two)
 
     opt_and_delivery = step_two["optimization_and_delivery"]
     ad_set_template[AdSet.Field.optimization_goal] = opt_and_delivery["optimization_goal"]
@@ -96,23 +94,36 @@ def set_date_interval(ad_set_template, step_one, step_two):
         ad_set_template[AdSet.Field.end_time] = date_interval["end_date"]
 
 
-def set_promoted_object(ad_set_template, is_using_conversions, step_three, step_two):
+def set_statuses_dto(ad_set_template):
+    # Temporary functions till we integrate CreateAdSet to Smart Create and Smart Edit
+    # TODO: Paused just for testing purposes
+    ad_set_template.effective_status = AdSet.EffectiveStatus.paused
+    ad_set_template.status = AdSet.Status.paused
+
+
+def set_date_interval_dto(ad_set_template, date_interval):
+    # Temporary functions till we integrate CreateAdSet to Smart Create and Smart Edit
+    ad_set_template.start_time = date_interval["start_date"]
+    ad_set_template.end_time = date_interval["end_date"]
+
+
+def set_promoted_object(is_using_conversions, step_three, step_two):
     if is_using_conversions:
+        # If you provide "pixel_id", then you MUST provide "custom_event_type"
+        # See https://developers.facebook.com/docs/marketing-api/reference/ad-promoted-object/
         promoted_object = dict(pixel_id=step_three["pixel_id"])
+        promoted_object["custom_event_type"] = step_three["custom_event_type"]
 
-        if "custom_event_type" in step_three:
-            promoted_object["custom_event_type"] = step_three["custom_event_type"]
+        pixel_rule = step_three.get("pixel_rule")
 
-        if "pixel_rule" in step_three and step_three["pixel_rule"]:
-            pixel_rule = step_three["pixel_rule"]
-            if isinstance(pixel_rule, str):
-                pixel_rule = json.loads(pixel_rule.replace("\\", ""))
+        if isinstance(pixel_rule, str):
+            pixel_rule = json.loads(pixel_rule.replace("\\", ""))
 
-            promoted_object["pixel_rule"] = pixel_rule
-
-        ad_set_template[AdSet.Field.promoted_object] = promoted_object
+        promoted_object["pixel_rule"] = pixel_rule
     else:
-        ad_set_template[AdSet.Field.promoted_object] = dict(page_id=step_two["facebook_page_id"])
+        promoted_object = dict(page_id=step_two["facebook_page_id"])
+
+    return promoted_object
 
 
 def split_ad_sets(ad_set_template, step_two, step_four):

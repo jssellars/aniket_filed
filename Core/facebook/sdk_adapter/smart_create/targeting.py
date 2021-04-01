@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from Core.facebook.sdk_adapter.smart_create.constants import FB_MAX_AGE, FB_MIN_AGE
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender
@@ -79,7 +79,7 @@ class Targeting:
     genders: Optional[List[int]] = field(default_factory=list)
     exclusions: Optional[FlexibleTargeting] = None
     locales: Optional[List[str]] = field(default_factory=list)
-    geo_locations: Optional[GeoLocations] = field(default_factory=list)
+    geo_locations: Optional[Dict] = field(default_factory=dict)
     device_platforms: Optional[List[str]] = field(default_factory=list)
     targeting_optimization: Optional[str] = None
     facebook_positions: Optional[List[str]] = field(default_factory=list)
@@ -88,5 +88,3 @@ class Targeting:
     user_os: Optional[List[str]] = field(default_factory=list)
     audience_network_positions: Optional[List[str]] = field(default_factory=list)
     publisher_platforms: Optional[List[str]] = field(default_factory=list)
-    user_device: Optional[List[str]] = field(default_factory=list)
-    user_os: Optional[List[str]] = field(default_factory=list)
