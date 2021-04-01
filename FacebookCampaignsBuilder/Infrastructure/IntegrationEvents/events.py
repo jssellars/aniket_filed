@@ -1,6 +1,6 @@
+from abc import ABC
 from dataclasses import dataclass, field
 from typing import Any, AnyStr, List, Dict
-
 from Core.mapper import MapperBase, MapperNestedField
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
@@ -121,20 +121,24 @@ class ResponseTypeEnum(EnumerationBase):
     AAA_PUBLISH_RESPONSE = "AddAdsetAdPublishResponseEvent"
 
 
+class PublishResponseEvent(ABC):
+    pass
+
+
 @dataclass
-class SmartCreatePublishResponseEvent:
+class SmartCreatePublishResponseEvent(PublishResponseEvent):
     template_id: int
     message_type: str = ResponseTypeEnum.SMART_CREATE_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value
 
 
 @dataclass
-class SmartEditPublishResponseEvent:
+class SmartEditPublishResponseEvent(PublishResponseEvent):
     message_type: str = ResponseTypeEnum.SMART_EDIT_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value
 
 
 @dataclass
-class AddAdsetAdPublishResponseEvent:
+class AddAdsetAdPublishResponseEvent(PublishResponseEvent):
     message_type: str = ResponseTypeEnum.AAA_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value
