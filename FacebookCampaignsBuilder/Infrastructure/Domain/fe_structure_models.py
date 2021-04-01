@@ -80,6 +80,60 @@ class CarouselAdvert:
 
 
 @dataclass
+class TrackingSpecs:
+    action_type: str
+    fb_pixel: Optional[str] = None
+    application: Optional[str] = None
+
+
+@dataclass
+class CreateAds:
+    name: str
+    creative: dict
+    status: str
+    effective_status: str
+    tracking_specs: Optional[List[TrackingSpecs]] = None
+
+    @classmethod
+    def build_ad_param(cls, name: str, creative: dict, status: str, effective_status: str, request: dict):
+        tracking_specs = cls.get_tracking_specs(request)
+        return cls(
+            name=name,
+            creative=creative,
+            status=status,
+            effective_status=effective_status,
+            tracking_specs=tracking_specs,
+        )
+
+    @classmethod
+    def get_tracking_specs(cls, request):
+        # Actions prepended by app_custom_event come from mobile app events and actions
+        # prepended by offsite_conversion come from the Facebook Pixel.
+        # Source: https://developers.facebook.com/docs/marketing-api/reference/ads-action-stats/
+        tracking_specs = []
+        pixel_id = request.get("pixel_id")
+        pixel_app_event_id = request.get("pixel_app_event_id")
+
+        if pixel_id:
+            tracking_specs.append(
+                TrackingSpecs(
+                    action_type="offsite_conversion",
+                    fb_pixel=pixel_id,
+                )
+            )
+
+        if pixel_app_event_id:
+            tracking_specs.append(
+                TrackingSpecs(
+                    action_type="app_custom_event",
+                    application=pixel_app_event_id,
+                )
+            )
+
+        return tracking_specs
+
+
+@dataclass
 class Ad:
     id: str
     name: str

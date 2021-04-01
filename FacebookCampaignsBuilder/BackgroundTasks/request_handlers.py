@@ -10,10 +10,16 @@ from threading import Thread
 from typing import AnyStr, Callable, Dict, List, Optional, Tuple, Union
 
 import humps
+from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.campaign import Campaign
+from facebook_business.exceptions import FacebookRequestError
+
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
 from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder, mappings
-from Core.facebook.sdk_adapter.smart_create.ad_builder import get_ad_creative_id, get_tracking_specs
+from Core.facebook.sdk_adapter.smart_create.ad_builder import get_ad_creative_id
 from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
 from Core.facebook.sdk_adapter.smart_create.targeting import FlexibleTargeting, Location, Targeting
 from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
@@ -24,13 +30,9 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import get_sdk_structur
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from facebook_business.adobjects.ad import Ad
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.adset import AdSet
-from facebook_business.adobjects.campaign import Campaign
-from facebook_business.exceptions import FacebookRequestError
 from FacebookCampaignsBuilder.BackgroundTasks import dtos
 from FacebookCampaignsBuilder.BackgroundTasks.startup import config, fixtures
+from FacebookCampaignsBuilder.Infrastructure.Domain.fe_structure_models import CreateAds
 from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
     AddAdsetAdEvent,
     AddAdsetAdEventMapping,
@@ -198,6 +200,17 @@ class SmartCreatePublish:
                     campaign_tree[campaign_index]["ad_sets"].append(deepcopy(ad_set_response))
 
                     for ad_index, ad in enumerate(ads):
+                        ad = asdict(ad)
+                        [
+                            tracking_spec.update({"action.type": tracking_spec.pop("action_type")})
+                            for tracking_spec in ad["tracking_specs"]
+                        ]
+
+                        ad["tracking_specs"] = [
+                            {k: v for k, v in tracking_spec.items() if v is not None}
+                            for tracking_spec in ad["tracking_specs"]
+                        ]
+
                         ad.update({Ad.Field.adset_id: ad_set_facebook_id, Ad.Field.adset: ad_set_facebook_id})
                         ad = ad_account.create_ad(params=ad)
                         ad_facebook_id = ad.get_id()
@@ -723,7 +736,14 @@ class SmartEditPublish:
                 param[FacebookEditField.Ad.ad_creative.value] = {"creative_id": ad_creative_id}
 
             if "pixel_id" in ad or "pixel_app_event_id" in ad:
-                param[FacebookEditField.Ad.tracking_specs.value] = get_tracking_specs(ad)
+                ad = [asdict(tracking_spec) for tracking_spec in CreateAds.get_tracking_specs(ad)]
+
+                # Facebook requires "action.type" instead of "action_type"
+                [tracking_spec.update({"action.type": tracking_spec.pop("action_type")}) for tracking_spec in ad]
+                # Removing null fields
+                ad = [{k: v for k, v in tracking_spec.items() if v is not None} for tracking_spec in ad]
+
+                param[FacebookEditField.Ad.tracking_specs.value] = ad
 
             facebook_ads = Ad(ad_id)
             facebook_ads.api_update(params=param)
@@ -798,7 +818,7 @@ class AddStructuresToParent:
     feedback_data = dict()
 
     @staticmethod
-    def handle(message_body: Union[str, bytes]) -> List[Union[Dict, str]]:
+    def handle(message_body: Union[str, bytes]) -> Dict[str, List]:
         body = humps.decamelize(json.loads(message_body))
         request_mapper = mappings.AddAdsetAdPublishRequest(dtos.AddAdsetAdPublishRequest)
         request = request_mapper.load(body)
@@ -1093,6 +1113,17 @@ class AddStructuresToParent:
         ads = ad_builder.build_ads(ad_account_id, ad_request, ad_request)
 
         for ad in ads:
+            ad = asdict(ad)
+
+            [
+                tracking_spec.update({"action.type": tracking_spec.pop("action_type")})
+                for tracking_spec in ad["tracking_specs"]
+            ]
+
+            ad["tracking_specs"] = [
+                {k: v for k, v in tracking_spec.items() if v is not None} for tracking_spec in ad["tracking_specs"]
+            ]
+
             ad.update({Ad.Field.adset_id: adset_id, Ad.Field.adset: adset_id})
             ad = ad_account.create_ad(params=ad)
             return ad.get_id()
