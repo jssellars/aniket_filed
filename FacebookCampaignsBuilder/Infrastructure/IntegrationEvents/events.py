@@ -1,11 +1,12 @@
+from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, AnyStr, List, Dict
+from typing import Any, AnyStr, Dict, List
+
+from marshmallow import EXCLUDE, fields, pre_load
 
 from Core.mapper import MapperBase, MapperNestedField
 from Core.Tools.Misc.EnumerationBase import EnumerationBase
-from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
-    PublishStatus
-from marshmallow import EXCLUDE, fields, pre_load
+from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
 
 
 @dataclass
@@ -66,9 +67,7 @@ class CampaignCreatedEventMapping(MapperBase):
     @pre_load
     def convert(self, data: Any, **kwargs):
         if isinstance(data, list):
-            data = {
-                'campaign_tree': data
-            }
+            data = {"campaign_tree": data}
         return data
 
     class Meta:
@@ -83,9 +82,7 @@ class StructureEditedEventMapping(MapperBase):
     @pre_load
     def convert(self, data: Any, **kwargs):
         if isinstance(data, list):
-            data = {
-                'edited_structure_tree': data
-            }
+            data = {"edited_structure_tree": data}
         return data
 
     class Meta:
@@ -100,9 +97,7 @@ class AddAdsetAdEventMapping(MapperBase):
     @pre_load
     def convert(self, data: Any, **kwargs):
         if isinstance(data, list):
-            data = {
-                'edited_structure_tree': data
-            }
+            data = {"edited_structure_tree": data}
         return data
 
     class Meta:
@@ -121,20 +116,33 @@ class ResponseTypeEnum(EnumerationBase):
     AAA_PUBLISH_RESPONSE = "AddAdsetAdPublishResponseEvent"
 
 
+class PublishResponseEvent(ABC):
+    """
+    Abstract Base Class for the below:
+    SmartCreatePublishResponseEvent,
+    SmartEditPublishResponseEvent,
+    AddAdsetAdPublishResponseEvent
+    or any future Publish Response Event to RabbitMQ dataclasses extend
+    to enforce type checking and type hints
+    """
+
+    pass
+
+
 @dataclass
-class SmartCreatePublishResponseEvent:
+class SmartCreatePublishResponseEvent(PublishResponseEvent):
     template_id: int
     message_type: str = ResponseTypeEnum.SMART_CREATE_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value
 
 
 @dataclass
-class SmartEditPublishResponseEvent:
+class SmartEditPublishResponseEvent(PublishResponseEvent):
     message_type: str = ResponseTypeEnum.SMART_EDIT_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value
 
 
 @dataclass
-class AddAdsetAdPublishResponseEvent:
+class AddAdsetAdPublishResponseEvent(PublishResponseEvent):
     message_type: str = ResponseTypeEnum.AAA_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value

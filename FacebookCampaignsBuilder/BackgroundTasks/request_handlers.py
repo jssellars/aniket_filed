@@ -39,6 +39,7 @@ from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
     AddAdsetAdPublishResponseEvent,
     CampaignCreatedEvent,
     CampaignCreatedEventMapping,
+    PublishResponseEvent,
     SmartCreatePublishResponseEvent,
     SmartEditPublishResponseEvent,
     StructureEditedEvent,
@@ -54,7 +55,7 @@ LOCATION_OPTIONS = dict(city="cities", country="countries", geo_market="geo_mark
 
 class SmartCreateOperations:
     @staticmethod
-    def delete_incomplete_campaigns(campaign_tree):
+    def delete_incomplete_campaigns(campaign_tree: List[Dict]) -> None:
         for campaign in campaign_tree:
             SmartCreateOperations.delete_campaign(campaign["facebook_id"])
             for ad_set in campaign["ad_sets"]:
@@ -63,7 +64,7 @@ class SmartCreateOperations:
                     SmartCreateOperations.delete_ad(ad_facebook_id)
 
     @staticmethod
-    def delete_campaign(facebook_id):
+    def delete_campaign(facebook_id: str) -> None:
         try:
             campaign = Campaign(fbid=facebook_id)
             campaign.api_delete()
@@ -71,7 +72,7 @@ class SmartCreateOperations:
             raise e
 
     @staticmethod
-    def delete_ad_set(facebook_id):
+    def delete_ad_set(facebook_id: str) -> None:
         try:
             ad_set = AdSet(fbid=facebook_id)
             ad_set.api_delete()
@@ -79,7 +80,7 @@ class SmartCreateOperations:
             raise e
 
     @staticmethod
-    def delete_ad(facebook_id):
+    def delete_ad(facebook_id: str) -> None:
         try:
             ad = Ad(fbid=facebook_id)
             ad.api_delete()
@@ -87,7 +88,7 @@ class SmartCreateOperations:
             raise e
 
     @classmethod
-    def publish(cls, publish_finished_event, sync_campaign_event=None):
+    def publish(cls, publish_finished_event: PublishResponseEvent, sync_campaign_event: Union[List, Dict] = None):
         rabbitmq_adapter = fixtures.rabbitmq_adapter
         rabbitmq_adapter.publish(publish_finished_event)
         logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(publish_finished_event)})
@@ -262,7 +263,13 @@ class SmartCreatePublish:
         return campaign_tree
 
     @staticmethod
-    def clean_and_publish_response(campaign_tree, error_message, feedback_data, publish_response, template_id):
+    def clean_and_publish_response(
+        campaign_tree: List[Dict],
+        error_message: str,
+        feedback_data: Dict,
+        publish_response: PublishResponseEvent,
+        template_id: str,
+    ) -> None:
         SmartCreatePublish.update_feedback_database(
             feedback_data, template_id, PublishStatus.FAILED.value, error=error_message
         )
@@ -271,7 +278,9 @@ class SmartCreatePublish:
         SmartCreateOperations.publish(publish_response)
 
     @staticmethod
-    def build_campaign_event(ad_account_id, business_owner_id, campaign_tree):
+    def build_campaign_event(
+        ad_account_id: str, business_owner_id: str, campaign_tree: List[Dict]
+    ) -> Union[List, Dict]:
         mapper = CampaignCreatedEventMapping(target=CampaignCreatedEvent)
         response = mapper.load(campaign_tree)
         response.business_owner_id = business_owner_id
@@ -279,7 +288,9 @@ class SmartCreatePublish:
         return response
 
     @staticmethod
-    def update_feedback_database(feedback_data, template_id, status, error=None):
+    def update_feedback_database(
+        feedback_data: Dict, template_id: str, status: PublishStatus, error: str = None
+    ) -> None:
         update_fields = {
             "published_structures": feedback_data.get("published_structures", 0),
             "published_campaigns": feedback_data.get("published_campaigns", 0),
@@ -296,7 +307,7 @@ class SmartCreatePublish:
         SmartCreatePublish.feedback_repository.update_many({"template_id": template_id}, query)
 
     @staticmethod
-    def build_campaign_hierarchy(request: dtos.SmartCreatePublishRequest):
+    def build_campaign_hierarchy(request: dtos.SmartCreatePublishRequest) -> Tuple[List, List, List]:
         destination_type = request.step_one_details.get("destination_type")
         is_using_conversions = request.step_one_details["objective"] == "CONVERSIONS"
         is_using_cbo = (
@@ -333,7 +344,7 @@ class SmartCreatePublish:
         return campaigns, ad_sets, ads
 
     @staticmethod
-    def populate_missing_adset_fields(campaign_facebook_id: str, ad_set: Dict, parent_campaign: CampaignSplit):
+    def populate_missing_adset_fields(campaign_facebook_id: str, ad_set: Dict, parent_campaign: CampaignSplit) -> None:
         ad_set["campaign_id"] = campaign_facebook_id
         if parent_campaign.location:
             ad_set["targeting"]["geo_locations"] = SmartCreatePublish.process_geo_location([parent_campaign.location])
@@ -362,7 +373,7 @@ class SmartCreatePublish:
         adset_create_template: Dict,
         adset_budget_allocation: Dict,
         step_four: Dict,
-    ):
+    ) -> None:
         targeting = adset_create_template["targeting"]
 
         device, location = SmartCreatePublish.get_location_device(step_four, targeting)
@@ -395,7 +406,7 @@ class SmartCreatePublish:
                         adset_allocation.setdefault("budget", budget)
 
     @staticmethod
-    def get_gender_age_split(step_four: Dict, targeting: Dict):
+    def get_gender_age_split(step_four: Dict, targeting: Dict) -> Tuple[Dict, str]:
         # FE will send gender:null if adsets aren't split by genders
         targeting_genders = targeting["genders"]
         gender = targeting_genders if step_four.get("is_split_by_gender_selected") else None
@@ -415,7 +426,7 @@ class SmartCreatePublish:
         return age_split, gender
 
     @staticmethod
-    def get_location_device(step_four: Dict, targeting: Dict):
+    def get_location_device(step_four: Dict, targeting: Dict) -> Tuple[Optional[str], List]:
         # Refer to SmartCreate.process_geo_location for how location is encoded inside targeting
         location = []
         if step_four.get("is_split_by_location"):
@@ -513,7 +524,7 @@ class SmartEditPublish:
         return response
 
     @staticmethod
-    def process_structures_concurrently(function: Callable, structures: List, level: str):
+    def process_structures_concurrently(function: Callable, structures: List, level: str) -> List[Dict]:
         structure_tree = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(function, structure): structure for structure in structures}
@@ -567,7 +578,7 @@ class SmartEditPublish:
         return facebook_adset
 
     @staticmethod
-    def set_adset_budget(adset: Dict, params: Dict):
+    def set_adset_budget(adset: Dict, params: Dict) -> None:
         budget_opt = adset.get("budget_optimization")
         if not budget_opt:
             return
@@ -584,7 +595,7 @@ class SmartEditPublish:
         params[AdSet.Field.pacing_type] = [budget_opt.get("delivery_type")]
 
     @staticmethod
-    def set_targeting(adset: Dict, params: Dict):
+    def set_targeting(adset: Dict, params: Dict) -> None:
         targeting_request = adset.get("targeting")
         if not targeting_request:
             return
@@ -714,7 +725,7 @@ class SmartEditPublish:
         return facebook_campaign
 
     @staticmethod
-    def update_ads(ads: Dict, ad_account_id: AnyStr) -> List[Dict]:
+    def update_ads(ads: Dict, ad_account_id: str) -> List[Dict]:
         updated_ads = []
 
         for ad in ads:
@@ -753,7 +764,7 @@ class SmartEditPublish:
         return updated_ads
 
     @staticmethod
-    def add_feedback_to_queue(level: str):
+    def add_feedback_to_queue(level: str) -> None:
         feedback_data_list = list(SmartEditPublish.queue.queue)
         if len(feedback_data_list) == 0:
             feedback_data = deepcopy(SmartEditPublish.feedback_data)
@@ -776,7 +787,7 @@ class SmartEditPublish:
         SmartEditPublish.feedback_data = feedback_data
 
     @staticmethod
-    def update_db():
+    def update_db() -> None:
         while True:
             feedback_data = SmartEditPublish.queue.get()
             if feedback_data:
@@ -785,7 +796,7 @@ class SmartEditPublish:
                     return
 
     @staticmethod
-    def update_feedback_database(feedback_data):
+    def update_feedback_database(feedback_data: Dict) -> None:
         update_fields = {
             "published_structures": feedback_data.get("published_structures", 0),
             "published_campaigns": feedback_data.get("published_campaigns", 0),
@@ -799,7 +810,7 @@ class SmartEditPublish:
         SmartEditPublish.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
     @staticmethod
-    def build_edit_event(ad_account_id, business_owner_id, structure_tree):
+    def build_edit_event(ad_account_id: str, business_owner_id: str, structure_tree: Dict) -> Dict:
         mapper = StructureEditedEventMapping(target=StructureEditedEvent)
         response = mapper.load(structure_tree)
         response.business_owner_id = business_owner_id
@@ -878,7 +889,7 @@ class AddStructuresToParent:
         return {child_level: new_structures}
 
     @staticmethod
-    def get_number_of_parent_and_child(parent_ids, child_ids, request):
+    def get_number_of_parent_and_child(parent_ids, child_ids, request: Dict) -> Tuple[int, int]:
         if len(child_ids) > 0:
             return len(parent_ids), len(child_ids)
         elif "ads" in request and len(request["ads"]) > 0:
@@ -891,7 +902,7 @@ class AddStructuresToParent:
             return len(parent_ids), n_child
 
     @staticmethod
-    def update_db():
+    def update_db() -> None:
         while True:
             feedback_data = AddStructuresToParent.que.get()
             if feedback_data:
@@ -900,7 +911,7 @@ class AddStructuresToParent:
                     return
 
     @staticmethod
-    def get_all_adsets_from_campaign(account_id, campaign_ids):
+    def get_all_adsets_from_campaign(account_id: str, campaign_ids: List[str]) -> Tuple[Level, List[str]]:
         adset_parent_ids = []
         fields = [FieldsMetadata.id.name, FieldsMetadata.campaign_id.name]
         response = get_sdk_structures(account_id, Level.ADSET, fields)
@@ -913,7 +924,7 @@ class AddStructuresToParent:
         return Level.ADSET.value, adset_parent_ids
 
     @staticmethod
-    def create_queue(child_level):
+    def create_queue(child_level: Level) -> None:
         feedback_data_list = list(AddStructuresToParent.que.queue)
         if len(feedback_data_list) == 0:
             feedback_data = deepcopy(AddStructuresToParent.feedback_data)
@@ -934,7 +945,9 @@ class AddStructuresToParent:
         AddStructuresToParent.feedback_data = feedback_data
 
     @staticmethod
-    def _publish_structures_from_ids(parent_level, child_level, child_ids, parent_ids):
+    def _publish_structures_from_ids(
+        parent_level: Level, child_level: Level, child_ids: List[str], parent_ids: List[str]
+    ) -> List[str]:
         results = []
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -958,7 +971,9 @@ class AddStructuresToParent:
         return results
 
     @staticmethod
-    def _duplicate_structure_on_facebook(parent_level, child_level, facebook_id, parent_id=None):
+    def _duplicate_structure_on_facebook(
+        parent_level: Level, child_level: Level, facebook_id: str, parent_id: str = None
+    ) -> str:
         structure = LevelToGraphAPIStructure.get(child_level, facebook_id)
         params = AddStructuresToParent._create_duplicate_parameters(parent_level, child_level, parent_id)
         new_structure_id = structure.create_copy(params=params)
@@ -971,7 +986,7 @@ class AddStructuresToParent:
             raise ValueError("Invalid duplicated structure id.")
 
     @staticmethod
-    def _create_duplicate_parameters(parent_level, child_level, parent_id=None):
+    def _create_duplicate_parameters(parent_level: Level, child_level: Level, parent_id: str = None) -> Dict:
         if parent_level == Level.CAMPAIGN.value and child_level == Level.ADSET.value:
             return AddStructuresToParent._duplicate_adset_parameters(parent_id)
         elif parent_level == Level.ADSET.value and child_level == Level.AD.value:
@@ -980,7 +995,7 @@ class AddStructuresToParent:
             raise ValueError(f"Unknown child_level supplied: {child_level}. Please try again using adset or ad")
 
     @staticmethod
-    def _duplicate_adset_parameters(parent_id):
+    def _duplicate_adset_parameters(parent_id: str) -> Dict:
         parameters = {
             "campaign_id": parent_id,
             "deep_copy": False,
@@ -989,12 +1004,12 @@ class AddStructuresToParent:
         return parameters
 
     @staticmethod
-    def _duplicate_ad_parameters(parent_id):
+    def _duplicate_ad_parameters(parent_id: str) -> Dict:
         parameters = {"adset_id": parent_id, "status_option": Ad.StatusOption.paused}
         return parameters
 
     @staticmethod
-    def update_feedback_database(feedback_data):
+    def update_feedback_database(feedback_data: Dict) -> None:
         update_fields = {
             "published_structures": feedback_data.get("published_structures", 0),
             "published_campaigns": feedback_data.get("published_campaigns", 0),
@@ -1008,7 +1023,9 @@ class AddStructuresToParent:
         AddStructuresToParent.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
     @staticmethod
-    def _publish_children_to_parents(callback, ad_account_id, requests, parent_ids, child_level):
+    def _publish_children_to_parents(
+        callback: Callable, ad_account_id: str, requests: List, parent_ids: List, child_level: Level
+    ) -> List:
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -1023,7 +1040,7 @@ class AddStructuresToParent:
         return results
 
     @staticmethod
-    def _publish_adset_to_campaigns(ad_account_id, adset_requests, parent_ids):
+    def _publish_adset_to_campaigns(ad_account_id: str, adset_requests: List, parent_ids: List) -> List:
         """
         Take a list of adsets and publish them for the provided list of campaign ids.
         """
@@ -1037,7 +1054,7 @@ class AddStructuresToParent:
         return results
 
     @staticmethod
-    def _publish_ad_to_adsets(ad_account_id, ad_requests, parent_ids):
+    def _publish_ad_to_adsets(ad_account_id: str, ad_requests: List, parent_ids: List) -> List:
         """
         Take a list of ads and publish them for the provided list of adset ids.
         """
@@ -1047,7 +1064,7 @@ class AddStructuresToParent:
         return results
 
     @staticmethod
-    def _create_adset_for_campaign(ad_account_id, adset_request, campaign_id):
+    def _create_adset_for_campaign(ad_account_id: str, adset_request: List, campaign_id: str) -> Dict:
         """
         Take a list of adSets from request, and for each adSet, create an ad set in the parent campaign.
         Finally return the list of created ad sets.
@@ -1105,7 +1122,7 @@ class AddStructuresToParent:
         }
 
     @staticmethod
-    def _create_ad_for_adset(ad_account_id, ad_request, adset_id):
+    def _create_ad_for_adset(ad_account_id: str, ad_request: Dict, adset_id: str) -> str:
         ad_account = AdAccount(fbid=ad_account_id)
         # TODO: Modify build_ads function to accept a single argument for necessary fields
         #  as opposed to per step fields
@@ -1129,7 +1146,7 @@ class AddStructuresToParent:
             return ad.get_id()
 
     @staticmethod
-    def _set_targeting(ad_set_template, request, targeting_request):
+    def _set_targeting(ad_set_template: str, request: Dict, targeting_request: Dict) -> None:
         languages = targeting_request.get("languages", [])
 
         if languages:
@@ -1193,7 +1210,9 @@ class AddStructuresToParent:
         ad_set_template["targeting"]["geo_locations"] = SmartCreatePublish.process_geo_location(all_locations)
 
     @staticmethod
-    def build_add_adset_ad_event(ad_account_id, business_owner_id, structure_tree):
+    def build_add_adset_ad_event(
+        ad_account_id: str, business_owner_id: str, structure_tree: List[Dict]
+    ) -> Union[List, Dict]:
         mapper = AddAdsetAdEventMapping(target=AddAdsetAdEvent)
         response = mapper.load(structure_tree)
         response.business_owner_id = business_owner_id
