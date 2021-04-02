@@ -1028,7 +1028,7 @@ class AddStructuresToParent:
         Take a list of adsets and publish them for the provided list of campaign ids.
         """
         results = AddStructuresToParent._publish_children_to_parents(
-            AddStructuresToParent._create_adset_for_campaign_dto,
+            AddStructuresToParent._create_adset_for_campaign,
             ad_account_id,
             adset_requests,
             parent_ids,
@@ -1047,67 +1047,7 @@ class AddStructuresToParent:
         return results
 
     @staticmethod
-    def _create_adset_for_campaign(ad_account_id, adset_request, campaign_id):
-        """
-        Take a list of adSets from request, and for each adSet, create an ad set in the parent campaign.
-        Finally return the list of created ad sets.
-        NOTE: If Parent Campaign CBO is on, Adset budget will not be set.
-        """
-        ad_account = AdAccount(fbid=ad_account_id)
-        ad_set_template = {
-            AdSet.Field.tune_for_category: adset_request.get(AdSet.Field.tune_for_category, AdSet.TuneForCategory.none),
-            AdSet.Field.name: adset_request.get("ad_set_name"),
-            AdSet.Field.billing_event: adset_request["optimization_and_delivery"].get("billing_event"),
-            AdSet.Field.optimization_goal: adset_request["optimization_and_delivery"].get("optimization_goal"),
-            AdSet.Field.campaign_id: campaign_id,
-        }
-
-        adset_builder.set_statuses(ad_set_template)
-        adset_builder.set_date_interval(ad_set_template, adset_request, adset_request)
-        # TODO: Check if conversions is required here!
-        is_using_conversions = adset_request.get("objective") == "CONVERSIONS"
-        ad_set_template[AdSet.Field.promoted_object] = adset_builder.set_promoted_object(
-            is_using_conversions, adset_request, adset_request
-        )
-
-        # Fetch Parent Campaign CBO information to check
-        parent_campaign_cbo_info = LevelToGraphAPIStructure.get(Level.CAMPAIGN.value, campaign_id).api_get(
-            fields=[FieldsMetadata.daily_budget.name, FieldsMetadata.lifetime_budget.name]
-        )
-        parent_campaign_not_has_cbo = not (
-            parent_campaign_cbo_info.get(FieldsMetadata.daily_budget.name)
-            or parent_campaign_cbo_info.get(FieldsMetadata.lifetime_budget.name)
-        )
-
-        # If Parent Campaign has CBO, then don't add adset budget
-        if parent_campaign_not_has_cbo and ("budget_optimization" in adset_request):
-            budget_opt = adset_request.get("budget_optimization")
-            # TODO: Discuss proper mapping of bidAmount and bidControl wit FE
-            # TODO: Validate Bid Strategy and Bid Control Pairing
-            ad_set_template[AdSet.Field.bid_amount] = int(budget_opt.get("bid_control", 0))
-            ad_set_template[AdSet.Field.bid_strategy] = budget_opt.get("bid_strategy")
-
-            amount = int(budget_opt["amount"]) * 100
-            if budget_opt["budget_allocated_type_id"] == 0:
-                ad_set_template[AdSet.Field.lifetime_budget] = amount
-            else:
-                ad_set_template[AdSet.Field.daily_budget] = amount
-
-        targeting_request = adset_request.get("targeting")
-        AddStructuresToParent._set_targeting(ad_set_template, adset_request, targeting_request)
-        facebook_ad_set = ad_account.create_ad_set(params=ad_set_template)
-
-        return {
-            "adset_id": facebook_ad_set.get_id(),
-            "ad_ids": AddStructuresToParent._publish_ad_to_adsets(
-                ad_account_id, adset_request["ads"], [facebook_ad_set.get_id()]
-            )
-            if "ads" in adset_request
-            else [],
-        }
-
-    @staticmethod
-    def _create_adset_for_campaign_dto(ad_account_id, adset_request, campaign_id):
+    def _create_adset_for_campaign(ad_account_id: str, adset_request: dict, campaign_id: str) -> dict:
         """
         Take a list of adSets from request, and for each adSet, create an ad set in the parent campaign.
         Finally return the list of created ad sets.
@@ -1150,7 +1090,7 @@ class AddStructuresToParent:
             ad_set_template.set_budget_opt(budget_opt["amount"], budget_opt["budget_allocated_type_id"])
 
         targeting_request = adset_request.get("targeting")
-        AddStructuresToParent._set_targeting(ad_set_template, adset_request, targeting_request)
+        ad_set_template.targeting = AddStructuresToParent._set_targeting(adset_request, targeting_request)
         ad_set_template = asdict(ad_set_template)
         facebook_ad_set = ad_account.create_ad_set(params=ad_set_template)
 
@@ -1188,14 +1128,14 @@ class AddStructuresToParent:
             return ad.get_id()
 
     @staticmethod
-    def _set_targeting(ad_set_template, request, targeting_request):
+    def _set_targeting(request: dict, targeting_request: dict) -> dict:
         languages = targeting_request.get("languages", [])
         if languages:
             languages = [language["key"] for language in languages]
 
         locations = targeting_request.get("locations")
         if locations:
-            all_locations = [Location(**location) for location in locations]
+            locations = [Location(**location) for location in locations]
 
         included_interests, excluded_interests, narrow_interests = adset_builder.extract_interests(targeting_request)
         included_custom_audiences, excluded_custom_audiences = adset_builder.extract_custom_audiences(targeting_request)
@@ -1238,7 +1178,7 @@ class AddStructuresToParent:
             excluded_custom_audiences=excluded_custom_audiences,
             genders=[targeting_request.get("gender", None)],
             exclusions=FlexibleTargeting(interests=excluded_interests),
-            geo_locations=dict(SmartCreatePublish.process_geo_location(all_locations)),
+            geo_locations=dict(SmartCreatePublish.process_geo_location(locations)),
             locales=languages,
             facebook_positions=facebook_positions,
             instagram_positions=instagram_positions,
@@ -1249,10 +1189,7 @@ class AddStructuresToParent:
             user_os=user_os,
         )
 
-        try:
-            ad_set_template["targeting"] = asdict(targeting)
-        except TypeError:
-            ad_set_template.targeting = asdict(targeting)
+        return asdict(targeting)
 
     @staticmethod
     def build_add_adset_ad_event(ad_account_id, business_owner_id, structure_tree):

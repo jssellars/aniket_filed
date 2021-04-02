@@ -260,8 +260,8 @@ class Ad:
 class BaseAdSet:
     id: str = None
     name: str = None
-    status: int = None
-    effective_status = None
+    status: str = None
+    effective_status: str = None
     destination_type: str = None
 
     optimization_goal: str = None
