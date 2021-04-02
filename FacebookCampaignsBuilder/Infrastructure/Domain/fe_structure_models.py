@@ -12,6 +12,7 @@ from facebook_business.adobjects.adpromotedobject import AdPromotedObject
 from facebook_business.adobjects.conversionactionquery import ConversionActionQuery
 
 from Core.facebook.sdk_adapter.ad_objects.ad_set import OSWithMobileDeviceGroup
+from Core.facebook.sdk_adapter.smart_create.targeting import Targeting
 from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import Gender
 
@@ -30,6 +31,18 @@ _promoted_object = AdPromotedObject.Field
 class BudgetOptimization:
     amount: float
     budget_allocated_type_id: int
+
+
+@dataclass
+class AdPromotedObject:
+    """For Sending to Facebook Graph API
+    See https://developers.facebook.com/docs/marketing-api/reference/ad-promoted-object/
+    """
+
+    page_id: Optional[str] = None
+    pixel_id: Optional[str] = None
+    pixel_rule: Optional[dict] = None
+    custom_event_type: Optional[str] = None
 
 
 @dataclass
@@ -241,6 +254,153 @@ class Ad:
             )
 
         return advert
+
+
+@dataclass
+class BaseAdSet:
+    id: str = None
+    name: str = None
+    status: str = None
+    effective_status: str = None
+    destination_type: str = None
+
+    optimization_goal: str = None
+    billing_event: str = None
+
+    start_time: str = None
+    end_time: Optional[str] = None
+
+    ads: Optional[List[Ad]] = field(default_factory=list)
+
+    # METHODS HERE
+    def set_budget_opt(self, *args):
+        pass
+
+    def set_promoted_object_fields(self, promoted_object: dict):
+        pass
+
+
+@dataclass
+class CreateAdSet(BaseAdSet):
+    tune_for_category: str = None
+    campaign_id: str = None
+
+    # budget optimization
+    bid_amount: Optional[float] = None
+    bid_strategy: str = None
+    daily_budget: int = None
+    lifetime_budget: int = None
+
+    # Promoted Object is mandatory for creating adsets
+    promoted_object: Union[AdPromotedObject, dict] = field(default_factory=dict)
+
+    # We need a targeting object
+    targeting: Union[Targeting, dict] = field(default_factory=dict)
+
+    # TODO: For Ads, we are implementing this but we need better separation later on
+    ads: Optional[List[CreateAds]] = field(default_factory=list)
+
+    def set_budget_opt(self, amount: str, budget_allocated_type_id: int):
+        """
+        We receive the budget in integer but we have to reduce it to lower currencies.
+        Then we set either lifetime or daily budget as allocated.
+        """
+        if budget_allocated_type_id == 1:
+            self.daily_budget = int(amount) * 100
+        else:
+            self.lifetime_budget = int(amount) * 100
+
+    def set_promoted_object_fields(self, promoted_object: dict):
+        """
+        Promoted Object is converted into Dataclass and sent to Facebook API.
+        """
+        # TODO: Port the entire setting logic here.
+        self.promoted_object = AdPromotedObject(**promoted_object)
+
+
+@dataclass
+class ReadAdSet(BaseAdSet):
+    # This class should replace the following AdSet class
+    page_id: Optional[str] = None
+    pixel_id: Optional[str] = None
+    custom_event_type: Optional[str] = None
+
+    bid_control: Optional[float] = None
+    adset_budget_optimization: Optional[BudgetOptimization] = None
+
+    min_age: int = None
+    max_age: int = None
+    publisher_platforms: List[str] = None
+
+    interests: Optional[List[Interest]] = field(default_factory=list)
+    excluded_interests: Optional[List[Interest]] = field(default_factory=list)
+    narrow_interests: Optional[List[Interest]] = field(default_factory=list)
+    gender: Optional[int] = Gender.ALL.value
+    locations: Optional[List[Dict]] = field(default_factory=list)
+    languages: Optional[List[Dict]] = field(default_factory=list)
+    custom_audiences: Optional[List[str]] = field(default_factory=list)
+    excluded_custom_audiences: Optional[List[str]] = field(default_factory=list)
+
+    facebook_positions: Optional[List[str]] = field(default_factory=list)
+    instagram_positions: Optional[List[str]] = field(default_factory=list)
+    audience_network_positions: Optional[List[str]] = field(default_factory=list)
+
+    device_platforms: Optional[List[str]] = field(default_factory=list)
+    mobile_os: Optional[str] = OSWithMobileDeviceGroup.ALL.name
+    mobile_devices: Optional[List[str]] = field(default_factory=list)
+
+    def set_budget_opt(self, daily_budget: str, lifetime_budget: str):
+        """
+        The budget comes in lowest integer value so we make it user friendly here
+        """
+        if lifetime_budget is not None and lifetime_budget is not "0":
+            self.adset_budget_optimization = BudgetOptimization(
+                amount=float(lifetime_budget) / 100, budget_allocated_type_id=0
+            )
+        elif daily_budget is not None and daily_budget is not "0":
+            self.adset_budget_optimization = BudgetOptimization(
+                amount=float(daily_budget) / 100, budget_allocated_type_id=1
+            )
+
+    def set_mobile_fields(self, user_os, user_device):
+        # TODO: Can we do a better job than this if-else hell?
+        if user_os:
+            android = OSWithMobileDeviceGroup.ANDROID
+            ios = OSWithMobileDeviceGroup.IOS
+            if android.value.name_sdk in user_os:
+                self.mobile_os = android.name
+                if not user_device:
+                    # default to all options checked
+                    self.mobile_devices = [device.name for device in OSWithMobileDeviceGroup.ANDROID.value.items]
+                else:
+                    for device in user_device:
+                        for android_device in OSWithMobileDeviceGroup.ANDROID.value.items:
+                            if device == android_device.name_sdk:
+                                self.mobile_devices.append(android_device.name)
+
+            elif ios.value.name_sdk in user_os:
+                self.mobile_os = ios.name
+
+                if not user_device:
+                    # default to all options checked
+                    self.mobile_devices = [device.name for device in OSWithMobileDeviceGroup.IOS.value.items]
+
+                else:
+                    for device in user_device:
+                        for ios_device in OSWithMobileDeviceGroup.IOS.value.items:
+                            if device == ios_device.name_sdk:
+                                self.mobile_devices.append(ios_device.name)
+
+    def set_promoted_object_fields(self, promoted_object: dict):
+        """
+        Promoted Object is unpacked and sent to Front End for display.
+        """
+        if _promoted_object.page_id in promoted_object:
+            self.page_id = promoted_object[_promoted_object.page_id]
+
+        elif _promoted_object.pixel_id in promoted_object:
+            self.pixel_id = promoted_object[_promoted_object.pixel_id]
+            self.custom_event_type = promoted_object[_promoted_object.custom_event_type]
 
 
 @dataclass
