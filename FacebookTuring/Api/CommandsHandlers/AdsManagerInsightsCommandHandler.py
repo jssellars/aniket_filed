@@ -71,7 +71,7 @@ class AdsManagerInsightsReports(AdsManagerInsightsCommandHandler):
             fields=self.query.fields,
             parameters=self.query.parameters,
             requested_fields=self.query.requested_columns,
-            level=level,
+            level=self.query.level,
         )
         return response
 
