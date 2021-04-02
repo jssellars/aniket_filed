@@ -119,7 +119,7 @@ def set_promoted_object(is_using_conversions, step_three, step_two):
         if isinstance(pixel_rule, str):
             pixel_rule = json.loads(pixel_rule.replace("\\", ""))
 
-        promoted_object["pixel_rule"] = pixel_rule
+            promoted_object["pixel_rule"] = pixel_rule
     else:
         promoted_object = dict(page_id=step_two["facebook_page_id"])
 
