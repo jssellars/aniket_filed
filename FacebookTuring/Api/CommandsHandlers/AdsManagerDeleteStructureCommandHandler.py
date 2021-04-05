@@ -42,7 +42,7 @@ class AdsManagerDeleteStructureCommandHandler:
             fb_structure.api_delete()
             return True
 
-        if not allow_structure_changes(deleted_structure["account_id"], config):
+        if not allow_structure_changes(deleted_structure["account_id"].replace("act_", ""), config):
             raise AccountEnvNotAllowedException
 
         if level == Level.CAMPAIGN.value and config.environment != Prod.environment:
