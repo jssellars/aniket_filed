@@ -36,11 +36,20 @@ class Default:
         app_id="174014546372191",
         app_secret="718ab2ca9cc128cf4b1b7793ecc116cb",
     )
+    # TODO discuss with FE about redirect_uri
     google = Google(
         client_config_path="googleads.yaml",
         developer_token="JcuH_-cVSK9CBVpRz3ZIIg",
         client_id="17118844476-ff344s34figbe2sfjmqa5qg7msrjta7m.apps.googleusercontent.com",
         client_secret="bk0Gae3BgAkbbf63GD5kU4jq",
+        redirect_uri="http://localhost:8000/",  # should be registered on google cloud console credentials
+        token_url="https://accounts.google.com/o/oauth2/token",
+        scopes=[
+            "openid",
+            "https://www.googleapis.com/auth/adwords",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email",
+        ],
     )
     technical_user = TechnicalUser(email="technical_account@{domain}", password="Fil3ed-Adm1n")
 

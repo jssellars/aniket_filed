@@ -148,6 +148,10 @@ class Google(BaseModel):
     developer_token: str
     client_id: str
     client_secret: str
+    client_secret: str
+    redirect_uri: str
+    token_url: str
+    scopes: List[str]
 
 
 class MinimumNumberOfDataPoints(BaseModel):
