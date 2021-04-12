@@ -162,8 +162,8 @@ class Dev3:
 
     mongo = Mongo(
         ssh_tunnel=False,
-        mongo_username="",
-        mongo_password="",
+        mongo_username="filed_admin",
+        mongo_password="dvserv3#rathena",
         mongo_host_external="ng-dev-zone-mongo.filed.com",
         mongo_host_internal="10.0.30.151",
         ssh_host="",
@@ -189,8 +189,8 @@ class Stage:
 
     mongo = Mongo(
         ssh_tunnel=False,
-        mongo_username="",
-        mongo_password="",
+        mongo_username="filed_admin",
+        mongo_password="dvserv3#rathena",
         mongo_host_external="ng-dev-zone-mongo.filed.com",
         mongo_host_internal="10.0.30.151",
         ssh_host="",
