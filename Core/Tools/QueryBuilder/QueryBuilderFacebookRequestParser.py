@@ -356,8 +356,13 @@ class QueryBuilderFacebookRequestParser:
         for column_name, filter_val in filter_model.items():
             facebook_filter_name = self.retrieve_filter_property_name(column_name)
             if facebook_filter_name:
-                filter_operator = AgGridFacebookOperator(filter_val["type"])
-                filter_value = filter_val["filter"]
+                filter_operator = AgGridFacebookOperator(filter_val.get("type"))
+                filter_value = filter_val.get("filter")
+                if (
+                    filter_operator == AgGridFacebookOperator.IN_RANGE
+                    or filter_operator == AgGridFacebookOperator.NOT_IN_RANGE
+                ):
+                    filter_value = [filter_value, filter_val.get("filterTo")]
                 filter_objects.append(create_facebook_filter(facebook_filter_name, filter_operator, filter_value))
 
         if filter_objective and not self.has_delivery:
