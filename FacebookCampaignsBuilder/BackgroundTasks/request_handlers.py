@@ -7,7 +7,7 @@ from dataclasses import asdict
 from datetime import datetime
 from queue import Queue
 from threading import Thread
-from typing import AnyStr, Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import humps
 from facebook_business.adobjects.ad import Ad
@@ -373,7 +373,7 @@ class SmartCreatePublish:
         adset_create_template: Dict,
         adset_budget_allocation: Dict,
         step_four: Dict,
-    ) -> None:
+    ) -> Union[int, float]:
         targeting = adset_create_template["targeting"]
 
         device, location = SmartCreatePublish.get_location_device(step_four, targeting)
@@ -810,7 +810,7 @@ class SmartEditPublish:
         SmartEditPublish.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
     @staticmethod
-    def build_edit_event(ad_account_id: str, business_owner_id: str, structure_tree: Dict) -> Dict:
+    def build_edit_event(ad_account_id: str, business_owner_id: str, structure_tree: List[Dict]) -> Dict:
         mapper = StructureEditedEventMapping(target=StructureEditedEvent)
         response = mapper.load(structure_tree)
         response.business_owner_id = business_owner_id
@@ -924,7 +924,7 @@ class AddStructuresToParent:
         return Level.ADSET.value, adset_parent_ids
 
     @staticmethod
-    def create_queue(child_level: Level) -> None:
+    def create_queue(child_level: str) -> None:
         feedback_data_list = list(AddStructuresToParent.que.queue)
         if len(feedback_data_list) == 0:
             feedback_data = deepcopy(AddStructuresToParent.feedback_data)
@@ -946,10 +946,47 @@ class AddStructuresToParent:
 
     @staticmethod
     def _publish_structures_from_ids(
-        parent_level: Level, child_level: Level, child_ids: List[str], parent_ids: List[str]
-    ) -> List[str]:
+        parent_level: str, child_level: str, child_ids: List[str], parent_ids: List[str]
+    ) -> List[Dict]:
         results = []
 
+        if (parent_level, child_level) == (Level.CAMPAIGN.value, Level.ADSET.value):
+            clones_map = {}
+            for campaign_id in parent_ids:
+                for adset_id in child_ids:
+                    new_adset_id = AddStructuresToParent._duplicate_structure_on_facebook(
+                        parent_level, child_level, adset_id, campaign_id
+                    )
+
+                    orig_fb_adset = AdSet(fbid=adset_id)
+                    ad_ids = [ad.get_id() for ad in (orig_fb_adset.get_ads(fields=["id"]))]
+                    clones_map[new_adset_id] = ad_ids
+                    # Update feedback data and database
+                    AddStructuresToParent.create_queue(child_level)
+                    AddStructuresToParent.feedback_data["total_structures"] += len(ad_ids)
+                    AddStructuresToParent.que.put(AddStructuresToParent.feedback_data)
+                    AddStructuresToParent.update_feedback_database(AddStructuresToParent.feedback_data)
+
+            for new_adset_id, ad_ids in clones_map.items():
+                if not ad_ids:
+                    continue
+                new_ad_ids = AddStructuresToParent.make_copies(
+                    ad_ids, Level.AD.value, [new_adset_id], Level.ADSET.value
+                )
+
+                results.append(
+                    {
+                        new_adset_id: new_ad_ids,
+                    }
+                )
+        else:
+            results.append(AddStructuresToParent.make_copies(child_ids, child_level, parent_ids, parent_level))
+
+        return results
+
+    @staticmethod
+    def make_copies(child_ids: List, child_level: str, parent_ids: List, parent_level: str):
+        new_copies = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             for parent_id in parent_ids:
@@ -965,19 +1002,18 @@ class AddStructuresToParent:
                     )
 
             for future in concurrent.futures.as_completed(futures):
-                results.append(future.result())
+                new_copies.append(future.result())
                 AddStructuresToParent.create_queue(child_level)
 
-        return results
+            return new_copies
 
     @staticmethod
-    def _duplicate_structure_on_facebook(
-        parent_level: Level, child_level: Level, facebook_id: str, parent_id: str = None
-    ) -> str:
+    def _duplicate_structure_on_facebook(parent_level: str, child_level: str, facebook_id: str, parent_id: str) -> str:
         structure = LevelToGraphAPIStructure.get(child_level, facebook_id)
         params = AddStructuresToParent._create_duplicate_parameters(parent_level, child_level, parent_id)
         new_structure_id = structure.create_copy(params=params)
         new_structure_id = Tools.convert_to_json(new_structure_id)
+        # Reference https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/copies/#async
         if "ad_object_ids" in new_structure_id:
             return new_structure_id["ad_object_ids"][0]["copied_id"]
         elif "copied_ad_id" in new_structure_id:
@@ -986,7 +1022,7 @@ class AddStructuresToParent:
             raise ValueError("Invalid duplicated structure id.")
 
     @staticmethod
-    def _create_duplicate_parameters(parent_level: Level, child_level: Level, parent_id: str = None) -> Dict:
+    def _create_duplicate_parameters(parent_level: str, child_level: str, parent_id: str) -> Dict:
         if parent_level == Level.CAMPAIGN.value and child_level == Level.ADSET.value:
             return AddStructuresToParent._duplicate_adset_parameters(parent_id)
         elif parent_level == Level.ADSET.value and child_level == Level.AD.value:
@@ -1016,6 +1052,7 @@ class AddStructuresToParent:
             "published_adsets": feedback_data.get("published_adsets", 0),
             "published_ads": feedback_data.get("published_ads", 0),
             "publish_status": feedback_data.get("publish_status"),
+            "total_structures": feedback_data.get("total_structures"),
         }
 
         query = {MongoOperator.SET.value: update_fields}
@@ -1024,7 +1061,7 @@ class AddStructuresToParent:
 
     @staticmethod
     def _publish_children_to_parents(
-        callback: Callable, ad_account_id: str, requests: List, parent_ids: List, child_level: Level
+        callback: Callable, ad_account_id: str, requests: List, parent_ids: List, child_level: str
     ) -> List:
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
