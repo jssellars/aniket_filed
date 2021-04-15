@@ -4,20 +4,14 @@ import flask_restful
 import humps
 from flask import request
 
-import FacebookAccounts.Api.mappings
 import GoogleAccounts.Api.mappings
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
-from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
-from Core.Web.Security.Permissions import (
-    AccountsPermissions,
-    CampaignBuilderPermissions,
-    MiscellaneousPermissions,
-    SettingsPermissions,
-)
+from GoogleAccounts.Api import dtos
 from GoogleAccounts.Api.command_handlers import GetAccountsTreeCommandHandler
-from GoogleAccounts.Api.commands import GetAccountsCommand
+from GoogleAccounts.Api.commands import AdAccountInsightsCommand, GetAccountsCommand
 from GoogleAccounts.Api.startup import config
+from GoogleAccounts.CommandsHandlers.AdAccountInsightsCommandHandler import AdAccountInsightsCommandHandler
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +43,41 @@ class GetAccountsTree(Resource):
 
         try:
             response = GetAccountsTreeCommandHandler.handle(command)
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": f"Failed to get account tree. Error {repr(e)}"}, 400
+
+
+class AdAccountsView(Resource):
+    def get(self):
+        try:
+            response = dtos.get_view()
+            response = humps.camelize(response)
+
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to retrieve ag grid views on Accounts."}, 400
+
+
+class AdAccountInsights(Resource):
+    def post(self, manager_id):
+        try:
+            raw_request = humps.decamelize(request.get_json(force=True))
+            mapping = GoogleAccounts.Api.mappings.AdAccountInsightsCommandMapping(AdAccountInsightsCommand)
+            command = mapping.load(raw_request)
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": f"Failed to process request. Error {repr(e)}"}, 400
+
+        try:
+            response = AdAccountInsightsCommandHandler.handle(config.google, command, manager_id)
             return response, 200
 
         except Exception as e:

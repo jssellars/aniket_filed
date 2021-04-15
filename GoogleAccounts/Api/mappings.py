@@ -14,3 +14,8 @@ class GoogleHeadersMapping(MapperBase):
     refresh_token: fields.String(required=True)
     scopes: fields.String(required=True)
     token_uri: fields.String(required=True)
+
+
+class AdAccountInsightsCommandMapping(MapperBase):
+    from_date = fields.String(required=True)
+    to_date = fields.String(required=True)

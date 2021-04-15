@@ -1,19 +1,10 @@
-import json
 import logging
 import os
-import sys
-from typing import Dict, List
 
-import google.oauth2.credentials
 import google_auth_oauthlib.flow
-import httplib2
-import requests
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
-from oauth2client import GOOGLE_TOKEN_URI, client
-from requests_oauthlib import OAuth2Session
 
-import GoogleAccounts.Api.mappings
 from Core.settings import Default
 from GoogleAccounts.Api.commands import GoogleHeaders
 
@@ -130,8 +121,6 @@ class GetAccountsTreeCommandHandler:
         customer_ids = [str(id_) for id_ in customer_ids]
 
         for customer_id in customer_ids:
-            # Performs a breadth-first search to build a Dictionary that maps
-            # managers to their child accounts (customerIdsToChildAccounts).
             unprocessed_customer_ids = [customer_id]
             customer_ids_to_child_accounts = dict()
             root_customer_client = None

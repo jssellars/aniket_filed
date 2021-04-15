@@ -23,6 +23,8 @@ router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
     (routers.Version, "version"),
     (routers.GetAccountsTree, "managed-customer/connect-to-google-account"),
+    (routers.AdAccountInsights, "google-accounts-insights/<string:manager_id>"),
+    (routers.AdAccountsView, "google-accounts-view"),
 )
 
 for router, route in router_route_pairs:

@@ -1,10 +1,16 @@
-import typing
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class GetAccountsCommand:
     authorization_code: str = None
+
+
+@dataclass
+class AdAccountInsightsCommand:
+    from_date: str = None
+    to_date: str = None
 
 
 @dataclass
