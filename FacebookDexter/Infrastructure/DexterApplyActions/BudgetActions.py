@@ -11,6 +11,9 @@ from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions
     RecommendationAction,
 )
 
+BUDGET_INCREASE_PERCENTAGE = 0.20
+BUDGET_DECREASE_PERCENTAGE = 0.20
+
 
 @dataclass
 class BudgetAlterAction(RecommendationAction):
@@ -24,6 +27,10 @@ class BudgetAlterAction(RecommendationAction):
 
 @dataclass
 class BudgetIncreaseAction(BudgetAlterAction):
+    APPLY_TOOLTIP = (
+        f"Selecting apply will increase the budget for this {{level}} by " f"{BUDGET_INCREASE_PERCENTAGE * 100}%"
+    )
+
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         if not apply_parameters:
             return None
@@ -44,6 +51,10 @@ class BudgetIncreaseAction(BudgetAlterAction):
 
 @dataclass
 class BudgetDecreaseAction(BudgetAlterAction):
+    APPLY_TOOLTIP = (
+        f"Selecting apply will decrease the budget for this {{level}} by" f" {BUDGET_DECREASE_PERCENTAGE * 100}%"
+    )
+
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         if not apply_parameters:
             return None

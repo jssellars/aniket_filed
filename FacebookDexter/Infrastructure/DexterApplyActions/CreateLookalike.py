@@ -18,6 +18,8 @@ from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions
 
 @dataclass
 class CreateLookalike(RecommendationAction):
+    APPLY_TOOLTIP = "Selecting apply with create a new adset with a new lookalike audience as custom audience"
+
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         """
         Save the db context needed to apply recommendation

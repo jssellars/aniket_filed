@@ -13,6 +13,10 @@ from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
+from FacebookDexter.Infrastructure.DexterApplyActions.BudgetActions import (
+    BUDGET_DECREASE_PERCENTAGE,
+    BUDGET_INCREASE_PERCENTAGE,
+)
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import (
     BreakdownGroupedData,
@@ -28,9 +32,6 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTime
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
-
-BUDGET_INCREASE_PERCENTAGE = 0.20
-BUDGET_DECREASE_PERCENTAGE = 0.20
 
 
 @dataclass

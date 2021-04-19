@@ -51,6 +51,11 @@ class AdSetBreakdownSplit:
 
 @dataclass
 class AgeGenderBreakdownSplit(RecommendationAction):
+    APPLY_TOOLTIP = (
+        "Selecting apply will create a custom number of new adsets with different targeting in such a way "
+        "that the under-performing age/gender combinations will be avoided"
+    )
+
     def process_action(self, recommendation: Dict, headers: str):
 
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)

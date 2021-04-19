@@ -188,6 +188,11 @@ def _convert_db_entry_to_recommendation(entry: Dict) -> Dict:
     entry[RecommendationField.RECOMMENDATION_ID.value] = str(entry[RecommendationField.OBJECT_ID.value])
     entry[RecommendationField.IS_APPLICABLE.value] = RecommendationField.APPLY_PARAMETERS.value in entry
 
+    if output_value.apply_action_type:
+        entry[RecommendationField.APPLY_TOOLTIP.value] = output_value.apply_action_type.value.APPLY_TOOLTIP.format(
+            level=entry[RecommendationField.LEVEL.value]
+        )
+
     hidden_interests = entry.get(RecommendationField.HIDDEN_INTERESTS.value)
     if hidden_interests:
         entry[RecommendationField.QUOTE.value] = entry[

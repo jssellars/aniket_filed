@@ -23,6 +23,8 @@ class RecommendationAction:
     config: Any
     fixtures: Any
 
+    APPLY_TOOLTIP: Optional[str]
+
     def process_action(self, recommendation: Dict, headers: str):
         raise NotImplementedError
 

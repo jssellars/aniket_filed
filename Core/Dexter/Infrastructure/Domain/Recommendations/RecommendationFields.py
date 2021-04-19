@@ -44,10 +44,10 @@ class RecommendationField(Enum):
     APPLY_PARAMETERS = "apply_parameters"
     IS_APPLICABLE = "is_applicable"
     ADSETS_SPLITS = "adsets_splits"
+    APPLY_TOOLTIP = "apply_tooltip"
 
 
 class RecommendationFieldInsidersEnum(Enum):
     DISPLAY_NAME = "display_name"
     NAME = "name"
     VALUE = "value"
-

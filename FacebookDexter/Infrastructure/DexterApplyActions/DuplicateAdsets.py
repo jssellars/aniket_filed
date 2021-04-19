@@ -1,11 +1,6 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Dict, Optional
 
-from facebook_business.adobjects.adset import AdSet
-
-from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     duplicate_fb_adset,
@@ -15,15 +10,12 @@ from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions
     ApplyParameters,
     RecommendationAction,
 )
-from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresHandler import (
-    DexterCreatedEventMapping,
-    DexterNewCreatedStructureEvent,
-    NewCreatedStructureKeys,
-)
 
 
 @dataclass
 class DuplicateAdset(RecommendationAction):
+    APPLY_TOOLTIP = "Selecting apply will create a new duplicate for the selected adset"
+
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
 
         action_details = {"details": {FieldsMetadata.status.name: "PAUSED"}}
