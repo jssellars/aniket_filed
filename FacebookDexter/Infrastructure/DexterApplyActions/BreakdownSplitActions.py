@@ -2,7 +2,7 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
 import requests
 from facebook_business.adobjects.ad import Ad
@@ -51,7 +51,7 @@ class AdSetBreakdownSplit:
 
 @dataclass
 class AgeGenderBreakdownSplit(RecommendationAction):
-    APPLY_TOOLTIP = (
+    APPLY_TOOLTIP: ClassVar[str] = (
         "Selecting apply will create a custom number of new adsets with different targeting in such a way "
         "that the under-performing age/gender combinations will be avoided"
     )

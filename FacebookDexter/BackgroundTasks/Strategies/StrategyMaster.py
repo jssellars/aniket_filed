@@ -1,4 +1,5 @@
 import concurrent.futures
+import functools
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -33,6 +34,7 @@ from FacebookDexter.BackgroundTasks.Strategies.AudienceSizeStrategy import Audie
 from FacebookDexter.BackgroundTasks.Strategies.BreakdownStrategy import BreakdownAverageStrategy
 from FacebookDexter.BackgroundTasks.Strategies.OverTimeTrendStrategy import OverTimeTrendStrategy
 from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import ApplyActionType
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesRules import (
     AGE_GENDER_BREAKDOWN_BUCKET,
     AUDIENCE_SIZE_BUCKET,
@@ -49,6 +51,7 @@ from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.StrategyTime
     CauseMetricBase,
     MetricClause,
     StrategyTimeBucket,
+    TriggerMetric,
 )
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyDataMongoRepository import StrategyDataMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import StrategyJournalMongoRepository
@@ -87,6 +90,8 @@ class DexterStrategyMaster:
     journal_repository: StrategyJournalMongoRepository
 
     def analyze_data_for_business_owner(self, business_owner: str, account_ids: List):
+
+        sort_dexter_triggers(self.dexter_strategy.time_buckets)
         required_fields = self.get_required_fields()
 
         for account_id in account_ids:
@@ -352,3 +357,38 @@ def get_fb_request_parameters(level: LevelEnum, breakdown: Field, action_breakdo
         ],
         FacebookParametersStrings.sort: "date_start",
     }
+
+
+def sort_dexter_triggers(time_buckets: List[StrategyTimeBucket]):
+
+    for time_bucket in time_buckets:
+        sorted_triggers = []
+        for trigger_metric in time_bucket.triggers:
+            for cause_metric in trigger_metric.cause_metrics:
+                sorted_triggers.append(TriggerMetric(trigger_metric.trigger, [cause_metric], trigger_metric.breakdown))
+
+        sorted_triggers.sort(key=functools.cmp_to_key(trigger_compare))
+        time_bucket.triggers = sorted_triggers
+
+
+# Highest should be budget_increase, then any other action, then no action, then budget_decrease
+ACTION_TYPE_PRIORITY = {
+    ApplyActionType.BUDGET_INCREASE.name: 0,
+    ApplyActionType.AGE_GENDER_BREAKDOWN_SPLIT.name: 2,
+    ApplyActionType.DUPLICATE_AND_PAUSE_STRUCTURE.name: 2,
+    ApplyActionType.CREATE_LOOKALIKE.name: 2,
+    "NONE": 3,
+    ApplyActionType.BUDGET_DECREASE.name: 4,
+}
+
+
+def trigger_compare(trigger1: TriggerMetric, trigger2: TriggerMetric):
+    dexter_output1 = trigger1.cause_metrics[0].output.value
+    dexter_output2 = trigger2.cause_metrics[0].output.value
+    if dexter_output1.priority.value != dexter_output2.priority.value:
+        return dexter_output1.priority.value < dexter_output2.priority.value
+
+    dexter_apply_action1 = dexter_output1.apply_action_type.name if dexter_output1.apply_action_type else "NONE"
+    dexter_apply_action2 = dexter_output2.apply_action_type.name if dexter_output2.apply_action_type else "NONE"
+
+    return ACTION_TYPE_PRIORITY[dexter_apply_action1] < ACTION_TYPE_PRIORITY[dexter_apply_action2]

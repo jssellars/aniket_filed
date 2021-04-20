@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import ClassVar, Dict, Optional
 
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
@@ -14,7 +14,7 @@ from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions
 
 @dataclass
 class DuplicateAdset(RecommendationAction):
-    APPLY_TOOLTIP = "Selecting apply will create a new duplicate for the selected adset"
+    APPLY_TOOLTIP: ClassVar[str] = "Selecting apply will create a new duplicate for the selected adset"
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
 

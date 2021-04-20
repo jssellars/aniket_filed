@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import ClassVar, Dict, Optional
 
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     _does_budget_exist,
@@ -27,7 +27,7 @@ class BudgetAlterAction(RecommendationAction):
 
 @dataclass
 class BudgetIncreaseAction(BudgetAlterAction):
-    APPLY_TOOLTIP = (
+    APPLY_TOOLTIP: ClassVar[str] = (
         f"Selecting apply will increase the budget for this {{level}} by " f"{BUDGET_INCREASE_PERCENTAGE * 100}%"
     )
 

@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData
 
@@ -23,7 +23,7 @@ class RecommendationAction:
     config: Any
     fixtures: Any
 
-    APPLY_TOOLTIP: Optional[str]
+    APPLY_TOOLTIP: ClassVar[str] = ""
 
     def process_action(self, recommendation: Dict, headers: str):
         raise NotImplementedError

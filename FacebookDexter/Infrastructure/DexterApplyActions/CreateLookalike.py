@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import ClassVar, Dict, Optional
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
@@ -18,7 +18,9 @@ from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions
 
 @dataclass
 class CreateLookalike(RecommendationAction):
-    APPLY_TOOLTIP = "Selecting apply with create a new adset with a new lookalike audience as custom audience"
+    APPLY_TOOLTIP: ClassVar[
+        str
+    ] = "Selecting apply with create a new adset with a new lookalike audience as custom audience"
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         """
