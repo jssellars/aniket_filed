@@ -6,10 +6,10 @@ from GoogleTuring.Infrastructure.Domain.SpecificFields import AD_GROUP_FIELDS
 
 
 class Level(Enum):
-    CAMPAIGN = 'campaign'
-    AD_GROUP = 'adgroup'
-    AD = 'ad'
-    KEYWORDS = 'keywords'
+    CAMPAIGN = "campaign"
+    AD_GROUP = "ad_group"
+    AD = "ad"
+    KEYWORDS = "keywords"
 
 
 LEVEL_TO_FIELDS = {
@@ -21,5 +21,5 @@ LEVEL_TO_IDENTIFIER = {
     Level.CAMPAIGN: GoogleFieldsMetadata.campaign_id,
     Level.AD_GROUP: GoogleFieldsMetadata.ad_group_id,
     Level.AD: GoogleFieldsMetadata.ad_id,
-    Level.KEYWORDS: GoogleFieldsMetadata.keywords_id
+    Level.KEYWORDS: GoogleFieldsMetadata.keywords_id,
 }

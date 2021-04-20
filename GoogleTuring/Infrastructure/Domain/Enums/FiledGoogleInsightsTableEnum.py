@@ -21,24 +21,32 @@ PERFORMANCE_REPORT_TO_INFO = {
     CampaignReportEnum.CAMPAIGN_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.CAMPAIGN, Level.CAMPAIGN),
     CampaignReportEnum.CAMPAIGN_GENDER_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.GENDER, Level.CAMPAIGN),
     CampaignReportEnum.CAMPAIGN_AGE_RANGE_PERFORMANCE_REPORT.value: (
-        FiledGoogleInsightsTableEnum.AGE_RANGE, Level.CAMPAIGN),
+        FiledGoogleInsightsTableEnum.AGE_RANGE,
+        Level.CAMPAIGN,
+    ),
     CampaignReportEnum.CAMPAIGN_GEO_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.GEO, Level.CAMPAIGN),
     CampaignReportEnum.CAMPAIGN_KEYWORDS_PERFORMANCE_REPORT.value: (
-        FiledGoogleInsightsTableEnum.KEYWORDS, Level.CAMPAIGN),
+        FiledGoogleInsightsTableEnum.KEYWORDS,
+        Level.CAMPAIGN,
+    ),
     AdGroupReportEnum.AD_GROUP_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.AD_GROUP, Level.AD_GROUP),
     AdGroupReportEnum.AD_GROUP_GENDER_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.GENDER, Level.AD_GROUP),
     AdGroupReportEnum.AD_GROUP_AGE_RANGE_PERFORMANCE_REPORT.value: (
-        FiledGoogleInsightsTableEnum.AGE_RANGE, Level.AD_GROUP),
+        FiledGoogleInsightsTableEnum.AGE_RANGE,
+        Level.AD_GROUP,
+    ),
     AdGroupReportEnum.AD_GROUP_GEO_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.GEO, Level.AD_GROUP),
     AdGroupReportEnum.AD_GROUP_KEYWORDS_PERFORMANCE_REPORT.value: (
-        FiledGoogleInsightsTableEnum.KEYWORDS, Level.CAMPAIGN.AD_GROUP),
-    AdReportEnum.AD_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.AD, Level.AD)
+        FiledGoogleInsightsTableEnum.KEYWORDS,
+        Level.CAMPAIGN.AD_GROUP,
+    ),
+    AdReportEnum.AD_PERFORMANCE_REPORT.value: (FiledGoogleInsightsTableEnum.AD, Level.AD),
 }
 
 LEVEL_TO_STATUS_FIELD = {
-    Level.CAMPAIGN: GoogleFieldsMetadata.campaign_status,
-    Level.AD_GROUP: GoogleFieldsMetadata.ad_group_status,
-    Level.AD: GoogleFieldsMetadata.status
+    Level.CAMPAIGN.value: GoogleFieldsMetadata.campaign_status,
+    Level.AD_GROUP.value: GoogleFieldsMetadata.ad_group_status,
+    Level.AD.value: GoogleFieldsMetadata.status,
 }
 
 REPORT_TO_LEVEL = {
@@ -48,5 +56,5 @@ REPORT_TO_LEVEL = {
     FiledGoogleInsightsTableEnum.GENDER: Level.AD_GROUP,
     FiledGoogleInsightsTableEnum.AGE_RANGE: Level.AD_GROUP,
     FiledGoogleInsightsTableEnum.GEO: Level.AD_GROUP,
-    FiledGoogleInsightsTableEnum.KEYWORDS: Level.KEYWORDS
+    FiledGoogleInsightsTableEnum.KEYWORDS: Level.KEYWORDS,
 }

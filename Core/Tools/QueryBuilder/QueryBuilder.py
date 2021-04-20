@@ -158,7 +158,8 @@ class AgGridInsightsRequest:
         self.filter_objective = query_builder_request.get("FilterObjective")
         self.sort_model = query_builder_request["sortModel"]
         self.time_range = query_builder_request["timeRange"]
-        self.facebook_account_id = query_builder_request["facebookAccountId"]
+        self.facebook_account_id = query_builder_request.get("facebookAccountId")
+        self.google_account_id = query_builder_request.get("googleAccountId")
         self.page_size = query_builder_request["pageSize"]
         self.has_delivery = query_builder_request.get("hasDelivery", True)
         self.start_row = query_builder_request["startRow"]

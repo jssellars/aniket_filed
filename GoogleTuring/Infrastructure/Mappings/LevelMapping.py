@@ -4,9 +4,9 @@ from Core.Tools.Misc.EnumerationBase import EnumerationBase
 class Level(EnumerationBase):
     ACCOUNT = "account"
     CAMPAIGN = "campaign"
-    ADGROUP = "adgroup"
+    ADGROUP = "ad_group"
     AD = "ad"
-    KEYWORDS = "keywords"
+    KEYWORDS = "keyword_view"
 
 
 class LevelManyToMongoCollectionEnum(EnumerationBase):

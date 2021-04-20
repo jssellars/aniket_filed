@@ -14,6 +14,17 @@ class GoogleFieldsMetadata:
         resource_type=GoogleResourceType.CUSTOMER,
     )
 
+    name = GoogleField(
+        name="name", field_name="name", field_type=GoogleFieldType.ATTRIBUTE, resource_type=GoogleResourceType.CAMPAIGN
+    )
+
+    resource_name = GoogleField(
+        name="resource_name",
+        field_name="resource_name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.KEYWORD_VIEW,
+    )
+
     currency_code = GoogleField(
         name="currency",
         field_name="currency_code",
@@ -41,6 +52,27 @@ class GoogleFieldsMetadata:
 
     cost_per_conversion = GoogleField(
         name="cost_per_conversion", field_name="cost_per_conversion", field_type=GoogleFieldType.METRIC
+    )
+
+    criterion_id = GoogleField(
+        name="criterion_id",
+        field_name="criterion_id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    keyword_match_type = GoogleField(
+        name="keyword_match_type",
+        field_name="keyword.match_type",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    keyword_text = GoogleField(
+        name="keyword_text",
+        field_name="keyword.text",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
     )
 
     date = GoogleField(name="date", field_name="date", field_type=GoogleFieldType.SEGMENT)

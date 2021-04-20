@@ -69,11 +69,9 @@ class AdAccountInsightsClient(AdsBaseClient):
         for googleads_row in customer_clients:
             customer_client = googleads_row.customer_client
             customer_client_id = str(customer_client.id)
-            if str(customer_client_id) == manager_id:
-                manager_name = customer_client.descriptive_name
 
             try:
-                results = self.search(report_query, str(customer_client_id))
+                results = self.search(report_query, customer_client_id)
                 customer_info = next(iter(results))
 
                 insights = AdAccountInsightsResponse(

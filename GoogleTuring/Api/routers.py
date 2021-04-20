@@ -6,29 +6,32 @@ import humps
 from flask import request
 from flask_restful import abort
 
+from Core.flask_extensions import log_request
+from Core.logging_config import request_as_log_dict
+from Core.utils import snake_to_camelcase
 from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
 from Core.Web.Security.Permissions import (
     AccountsPermissions,
     AdsManagerPermissions,
     OptimizePermissions,
-    ReportsPermissions
+    ReportsPermissions,
 )
-from Core.flask_extensions import log_request
-from Core.logging_config import request_as_log_dict
-from Core.utils import snake_to_camelcase
 from GoogleTuring.Api.Commands.AdAccountInsightsCommand import AdAccountInsightsCommand
 from GoogleTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from GoogleTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
 from GoogleTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import (
-    AdsManagerDeleteStructureCommandHandler
+    AdsManagerDeleteStructureCommandHandler,
 )
 from GoogleTuring.Api.CommandsHandlers.AdsManagerFilteredStructuresCommandHandler import (
-    AdsManagerFilteredStructuresCommandHandler
+    AdsManagerFilteredStructuresCommandHandler,
 )
-from GoogleTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import AdsManagerInsightsCommandHandler
+from GoogleTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import (
+    AdsManagerInsightsCommandHandler,
+    AdsManagerInsightsPerformance,
+)
 from GoogleTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
-    AdsManagerUpdateStructureCommandHandler
+    AdsManagerUpdateStructureCommandHandler,
 )
 from GoogleTuring.Api.CommandsHandlers.GoogleAdAccountInsightsHandler import GoogleAdAccountInsightsHandler
 from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogReportsDto
@@ -37,12 +40,13 @@ from GoogleTuring.Api.Dtos.AdsManagerCatalogsDimensionsDto import AdsManagerCata
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsMetricsDto import AdsManagerCatalogsMetricsDto
 from GoogleTuring.Api.Mappings.AdAccountInsightsCommandMapping import AdAccountInsightsCommandMapping
 from GoogleTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import (
-    AdsManagerFilteredStructuresCommandMapping
+    AdsManagerFilteredStructuresCommandMapping,
 )
 from GoogleTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import AdsManagerUpdateStructureCommandMapping
 from GoogleTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
 from GoogleTuring.Api.startup import config, fixtures
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
+from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level
 
 logger = logging.getLogger(__name__)
 
@@ -329,3 +333,23 @@ class ReportsReportInsights(Resource):
     def post(self):
 
         return GetInsightsHandler().handle(), 200
+
+
+class AdsManagerAgGridStructuresPerformance(Resource):
+    def post(self, level):
+        logger.info(request_as_log_dict(request))
+
+        try:
+            if level not in [Level.CAMPAIGN.value, Level.ADGROUP.value, Level.KEYWORDS.value]:
+                raise ValueError
+
+            request_json = request.get_json(force=True)
+            response = AdsManagerInsightsPerformance.get_performance_insights(
+                config=config.google, query_json=request_json, level=level
+            )
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to process request."}, 400
