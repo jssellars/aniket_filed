@@ -59,14 +59,11 @@ class AdsManagerInsightsPerformance:
         return query_builder_request_parser
 
     @classmethod
-    def get_performance_insights(cls, config, query_json, level):
-        REFRESH_TOKEN = (
-            "1//0cgG4P2mKtjsMCgYIARAAGAwSNwF-L9Ir0Vl_1PxJPDAfNBcJerYGQEtxvAPuVoecfoJpsm3zedWUdyPRkG-NJk5i-iOFW5uaKaE"
-        )
+    def get_performance_insights(cls, refresh_token, config, query_json, level):
         try:
             query_builder_request_parser = cls.__map_query(query_json, level)
             return AdsAPIPerformanceInsightsHandler.get_performance_insights(
-                config=config, refresh_token=REFRESH_TOKEN, query_builder_request_parser=query_builder_request_parser
+                config=config, refresh_token=refresh_token, query_builder_request_parser=query_builder_request_parser
             )
         except GoogleAdsException as ex:
             logger.exception(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")

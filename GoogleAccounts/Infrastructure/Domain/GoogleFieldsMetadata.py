@@ -7,11 +7,25 @@ class GoogleFieldsMetadata:
         name="id", field_name="id", field_type=GoogleFieldType.ATTRIBUTE, resource_type=GoogleResourceType.CUSTOMER
     )
 
+    customer_client_id = GoogleField(
+        name="id",
+        field_name="id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER_CLIENT,
+    )
+
     descriptive_name = GoogleField(
         name="name",
         field_name="descriptive_name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER,
+    )
+
+    client_descriptive_name = GoogleField(
+        name="name",
+        field_name="descriptive_name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER_CLIENT,
     )
 
     name = GoogleField(
@@ -80,6 +94,27 @@ class GoogleFieldsMetadata:
     level = GoogleField(
         name="level",
         field_name="level",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER_CLIENT,
+    )
+
+    manager = GoogleField(
+        name="manager",
+        field_name="manager",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER_CLIENT,
+    )
+
+    client_customer = GoogleField(
+        name="client_customer",
+        field_name="client_customer",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER_CLIENT,
+    )
+
+    time_zone = GoogleField(
+        name="time_zone",
+        field_name="time_zone",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER_CLIENT,
     )

@@ -1,113 +1,60 @@
 import logging
 import os
+from dataclasses import asdict
 
 import google_auth_oauthlib.flow
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
 
 from Core.settings import Default
-from GoogleAccounts.Api.commands import GoogleHeaders
+from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from GoogleAccounts.Api.Commands.commands import GoogleHeaders
+from GoogleAccounts.Infrastructure.Domain.GoogleAdAccountInsightsResponse import AdAccountInsightsResponse
+from GoogleAccounts.Infrastructure.Domain.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
+from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleFieldType, GoogleResourceType
+from GoogleAccounts.Infrastructure.Domain.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
+from GoogleAccounts.Infrastructure.Domain.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
+
+logger = logging.getLogger(__name__)
 
 # Oauth2 requires SSL which is not present in local testing, so disable SSl check
 # https://stackoverflow.com/questions/27785375/testing-flask-oauthlib-locally-without-https
 # TODO disable check only in development configuration not in production
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-logger = logging.getLogger(__name__)
 
+class AdAccountsTreeClient(AdsBaseClient):
+    __ACCOUNT_FIELDS = [
+        GoogleAttributeFieldsMetadata.customer_client_id,
+        GoogleAttributeFieldsMetadata.client_descriptive_name,
+        GoogleAttributeFieldsMetadata.client_customer,
+        GoogleAttributeFieldsMetadata.level,
+        GoogleAttributeFieldsMetadata.manager,
+        GoogleAttributeFieldsMetadata.time_zone,
+        GoogleAttributeFieldsMetadata.currency_code,
+    ]
 
-class GetAccountsTreeCommandHandler:
-    @classmethod
-    def handle(cls, command):
-        headers = cls.get_refresh_token(command)
-        token = cls.get_token_from_refresh_token(headers.refresh_token)
-        headers.token = token["access_token"]
+    def get_ad_account_tree(self):
+        pass
 
-        google_ads_client = GoogleAdsClient.load_from_storage(path="googleads.yaml", version="v6")
-        try:
-            return cls.get_account_tree(google_ads_client)
-        except GoogleAdsException as ex:
-            logger.error(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")
-            raise Exception(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")
+    def get_account_tree(self):
+        field_names = [field.resource_type.value + "." + field.field_name for field in self.__ACCOUNT_FIELDS]
 
-    @classmethod
-    def get_refresh_token(cls, command):
-        # TODO get info from config (Core.Default.Google) instead of .json
-        google_config = Default.google
-        refresh_token = (
-            "1//0cgG4P2mKtjsMCgYIARAAGAwSNwF-L9Ir0Vl_1PxJPDAfNBcJerYGQEtxvAPuVoecfoJpsm3zedWUdyPRkG-NJk5i-iOFW5uaKaE"
-        )
-
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            "client_secret.json", scopes=google_config.scopes, redirect_uri=google_config.redirect_uri
-        )
-
-        try:
-            flow.fetch_token(code=command.authorization_code)
-            credentials = flow.credentials
-
-            headers = GoogleHeaders(
-                client_id=credentials.client_id,
-                client_secret=credentials.client_secret,
-                token=credentials.token,
-                refresh_token=credentials.refresh_token,
-                scopes=credentials.scopes,
-            )
-            return headers
-
-        except Exception as e:
-            logger.exception(f"Failed to get refresh_token. Error {repr(e)}")
-            # TODO remove this hardcoded logic later when 2fa is sorted out
-
-            headers = GoogleHeaders(
-                client_id=google_config.client_id,
-                client_secret=google_config.client_secret,
-                token="access_token",
-                refresh_token=refresh_token,
-                scopes=google_config.scopes,
-            )
-
-            return headers
-
-    @classmethod
-    def get_token_from_refresh_token(cls, refresh_token):
-        google_config = Default.google
-
-        # if scopes are not known, pass scopes=None
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            "client_secret.json", scopes=google_config.scopes, redirect_uri=google_config.redirect_uri
-        )
-
-        token = flow.oauth2session.refresh_token(
-            token_url=google_config.token_url,
-            refresh_token=refresh_token,
-            client_id=google_config.client_id,
-            client_secret=google_config.client_secret,
-        )
-        return token
-
-    @classmethod
-    def get_account_tree(cls, google_ads_client):
         response = list()
 
-        googleads_service = google_ads_client.get_service("GoogleAdsService")
-        customer_service = google_ads_client.get_service("CustomerService")
+        googleads_service = self.get_ad_service()
+        customer_service = self.get_customer_service()
 
         # A collection of customer IDs to handle.
         customer_ids = []
 
         # query to retrieve all child accounts of a manager account.
-        query = """
-                   SELECT
-                     customer_client.client_customer,
-                     customer_client.level,
-                     customer_client.manager,
-                     customer_client.descriptive_name,
-                     customer_client.currency_code,
-                     customer_client.time_zone,
-                     customer_client.id
-                   FROM customer_client
-                   WHERE customer_client.level <= 1"""
+        query = f"""
+                       SELECT {','.join(field for field in field_names)}
+                       FROM {GoogleResourceType.CUSTOMER_CLIENT.value}
+                       WHERE {GoogleAttributeFieldsMetadata.level.resource_type.value + "." +
+                              GoogleAttributeFieldsMetadata.level.field_name} <= 1
+                """
 
         customer_resource_names = customer_service.list_accessible_customers().resource_names
 
@@ -158,7 +105,7 @@ class GetAccountsTreeCommandHandler:
 
             if root_customer_client is not None:
                 result = list()
-                cls.create_account_hierarchy(result, root_customer_client, customer_ids_to_child_accounts, 0)
+                self.create_account_hierarchy(result, root_customer_client, customer_ids_to_child_accounts, 0)
                 response.extend(result)
             else:
                 raise UserWarning(
@@ -167,8 +114,7 @@ class GetAccountsTreeCommandHandler:
 
         return response
 
-    @classmethod
-    def create_account_hierarchy(cls, response, customer_client, customer_ids_to_child_accounts, depth):
+    def create_account_hierarchy(self, response, customer_client, customer_ids_to_child_accounts, depth):
         customer_id = str(customer_client.id)
 
         customer_info = {
@@ -185,6 +131,6 @@ class GetAccountsTreeCommandHandler:
         # Recursively call this function for all child accounts of customer_client.
         if customer_id in customer_ids_to_child_accounts:
             for child_account in customer_ids_to_child_accounts[customer_id]:
-                cls.create_account_hierarchy(
+                self.create_account_hierarchy(
                     response[-1]["children"], child_account, customer_ids_to_child_accounts, depth + 1
                 )

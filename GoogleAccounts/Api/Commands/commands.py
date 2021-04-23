@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -15,6 +14,7 @@ class AdAccountInsightsCommand:
 
 @dataclass
 class GoogleHeaders:
+    business_owner_google_id: str
     client_id: str
     client_secret: str
     token: str

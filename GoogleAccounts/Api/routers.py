@@ -4,14 +4,14 @@ import flask_restful
 import humps
 from flask import request
 
-import GoogleAccounts.Api.mappings
+import GoogleAccounts.Api.Mappings.mappings
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
-from GoogleAccounts.Api import dtos
-from GoogleAccounts.Api.command_handlers import GetAccountsTreeCommandHandler
-from GoogleAccounts.Api.commands import AdAccountInsightsCommand, GetAccountsCommand
-from GoogleAccounts.Api.startup import config
-from GoogleAccounts.CommandsHandlers.AdAccountInsightsCommandHandler import AdAccountInsightsCommandHandler
+from GoogleAccounts.Api.Commands.commands import AdAccountInsightsCommand, GetAccountsCommand
+from GoogleAccounts.Api.CommandsHandlers.AdAccountInsightsCommandHandler import AdAccountInsightsCommandHandler
+from GoogleAccounts.Api.CommandsHandlers.GetAdAccountsTreeCommandHandler import GetAdAccountsTreeCommandHandler
+from GoogleAccounts.Api.Dtos import dtos
+from GoogleAccounts.Api.startup import config, fixtures
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class GetAccountsTree(Resource):
     def post(self):
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
-            mapping = GoogleAccounts.Api.mappings.GetAccountsCommandMapping(GetAccountsCommand)
+            mapping = GoogleAccounts.Api.Mappings.mappings.GetAccountsCommandMapping(GetAccountsCommand)
             command = mapping.load(raw_request)
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
@@ -42,7 +42,7 @@ class GetAccountsTree(Resource):
             return {"message": f"Failed to process request. Error {repr(e)}"}, 400
 
         try:
-            response = GetAccountsTreeCommandHandler.handle(command)
+            response = GetAdAccountsTreeCommandHandler.handle(config.google, command)
             return response, 200
 
         except Exception as e:
@@ -69,7 +69,7 @@ class AdAccountInsights(Resource):
     def post(self, manager_id):
         try:
             raw_request = humps.decamelize(request.get_json(force=True))
-            mapping = GoogleAccounts.Api.mappings.AdAccountInsightsCommandMapping(AdAccountInsightsCommand)
+            mapping = GoogleAccounts.Api.Mappings.mappings.AdAccountInsightsCommandMapping(AdAccountInsightsCommand)
             command = mapping.load(raw_request)
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
@@ -77,7 +77,9 @@ class AdAccountInsights(Resource):
             return {"message": f"Failed to process request. Error {repr(e)}"}, 400
 
         try:
-            response = AdAccountInsightsCommandHandler.handle(config.google, command, manager_id)
+            # TODO get business_owner_id from Bearer token
+            refresh_token = fixtures.google_business_owner_repository.get_refresh_token("andrew@filed.com")
+            response = AdAccountInsightsCommandHandler.handle(refresh_token, config.google, command, manager_id)
             return response, 200
 
         except Exception as e:

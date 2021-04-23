@@ -18,11 +18,8 @@ class AdAccountInsightsCommandHandler:
         return ad_account_insights_client
 
     @classmethod
-    def handle(cls, google_config, command, manager_id):
-        REFRESH_TOKEN = (
-            "1//0cgG4P2mKtjsMCgYIARAAGAwSNwF-L9Ir0Vl_1PxJPDAfNBcJerYGQEtxvAPuVoecfoJpsm3zedWUdyPRkG-NJk5i-iOFW5uaKaE"
-        )
-        ad_account_insights_client = cls._build_client(google_config, manager_id, REFRESH_TOKEN)
+    def handle(cls, refresh_token, google_config, command, manager_id):
+        ad_account_insights_client = cls._build_client(google_config, manager_id, refresh_token)
 
         try:
             return ad_account_insights_client.get_account_insights(command, manager_id)

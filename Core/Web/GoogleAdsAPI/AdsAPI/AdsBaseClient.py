@@ -8,8 +8,6 @@ from Core.Web.GoogleAdsAPI.AdsAPI.Enums.AdsServiceType import AdsServiceType
 
 
 class AdsBaseClient:
-    _CHUNK_SIZE = 16 * 1024
-
     def __init__(self, config, refresh_token=None, manager_id=None):
         self._config = config
         self._refresh_token = refresh_token
@@ -36,6 +34,9 @@ class AdsBaseClient:
 
     def get_budget_service(self):
         return self._client.get_service(AdsServiceType.BUDGET_SERVICE.value)
+
+    def get_customer_service(self):
+        return self._client.get_service(AdsServiceType.CUSTOMER_SERVICE.value)
 
     def get_campaign_service(self):
         return self._client.get_service(AdsServiceType.CAMPAIGN_SERVICE.value)

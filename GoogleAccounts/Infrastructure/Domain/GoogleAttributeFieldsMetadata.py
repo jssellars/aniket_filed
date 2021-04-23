@@ -4,7 +4,11 @@ from GoogleAccounts.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFiel
 class GoogleAttributeFieldsMetadata:
     id = GoogleFieldsMetadata.id
 
+    customer_client_id = GoogleFieldsMetadata.customer_client_id
+
     descriptive_name = GoogleFieldsMetadata.descriptive_name
+
+    client_descriptive_name = GoogleFieldsMetadata.client_descriptive_name
 
     name = GoogleFieldsMetadata.name
 
@@ -19,3 +23,9 @@ class GoogleAttributeFieldsMetadata:
     keyword_text = GoogleFieldsMetadata.keyword_text
 
     keyword_match_type = GoogleFieldsMetadata.keyword_match_type
+
+    client_customer = GoogleFieldsMetadata.client_customer
+
+    manager = GoogleFieldsMetadata.manager
+
+    time_zone = GoogleFieldsMetadata.time_zone

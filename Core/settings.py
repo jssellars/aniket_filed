@@ -138,6 +138,22 @@ class Local:
         name="Dev.Filed.Facebook.Accounts",
     )
 
+    mongo = replace_in_class(
+        Default.mongo,
+        ssh_tunnel=False,
+        mongo_username="",
+        mongo_password="",
+        mongo_host_external="localhost",
+        mongo_host_internal="localhost",
+        ssh_host="",
+        mongo_port=27017,
+        ssh_username="",
+        ssh_password="=",
+        retry_writes=False,
+        logs_database="{env}_app_logs",
+        logs_collection_name="logs",
+    )
+
     es_host = "localhost"
 
 

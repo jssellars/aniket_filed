@@ -2,16 +2,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Core import settings
-from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
-from Core.Web.Security.Authorization import (
-    authorize_permission,
-    fake_authorize_permission,
-    fake_authorize_jwt,
-    authorize_jwt,
-)
-from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 from Core.mongo_adapter import MongoAdapter
 from Core.rabbitmq_adapter import RabbitMqAdapter
+from Core.Web.BusinessOwnerRepository.BusinessOwnerRepository import BusinessOwnerRepository
+from Core.Web.BusinessOwnerRepository.GoogleBusinessOwnerRepository import GoogleBusinessOwnerRepository
+from Core.Web.Security.Authorization import (
+    authorize_jwt,
+    authorize_permission,
+    fake_authorize_jwt,
+    fake_authorize_permission,
+)
+from Core.Web.Security.TechnicalTokenManager import TechnicalTokenManager
 
 
 class Fixtures:
@@ -85,6 +86,17 @@ class Fixtures:
     def business_owner_repository(self):
         if self._business_owner_repository is None:
             self._business_owner_repository = BusinessOwnerRepository(self.config.facebook, self.sql_db_session)
+
+        return self._business_owner_repository
+
+    @property
+    def google_business_owner_repository(self):
+        if self._business_owner_repository is None:
+            self._business_owner_repository = GoogleBusinessOwnerRepository(
+                client=self.mongo_adapter.client,
+                database_name=self.config.mongo.google_accounts_database_name,
+                collection_name=self.config.mongo.accounts_collection_name,
+            )
 
         return self._business_owner_repository
 

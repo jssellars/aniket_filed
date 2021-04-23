@@ -3,6 +3,7 @@ from enum import Enum
 
 class AdsServiceType(Enum):
     LOCATION_CRITERION_SERVICE = "LocationCriterionService"
+    CUSTOMER_SERVICE = "CustomerService"
     CAMPAIGN_SERVICE = "CampaignService"
     AD_GROUP_SERVICE = "AdGroupService"
     AD_GROUP_AD_SERVICE = "AdGroupAdService"
