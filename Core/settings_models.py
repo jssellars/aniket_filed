@@ -85,6 +85,7 @@ class Mongo(BaseModel):
     google_accounts_database_name: Optional[str]
     google_insights_database_name: Optional[str]
     google_structures_database_name: Optional[str]
+    customers_collection_name: Optional[str]
     insights_database: Optional[str]
     insights_database_name: Optional[str]
     journal_collection_name: Optional[str]

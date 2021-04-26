@@ -10,6 +10,7 @@ from Core.logging_config import request_as_log_dict
 from GoogleAccounts.Api.Commands.commands import AdAccountInsightsCommand, GetAccountsCommand
 from GoogleAccounts.Api.CommandsHandlers.AdAccountInsightsCommandHandler import AdAccountInsightsCommandHandler
 from GoogleAccounts.Api.CommandsHandlers.GetAdAccountsTreeCommandHandler import GetAdAccountsTreeCommandHandler
+from GoogleAccounts.Api.CommandsHandlers.GetCustomerAccountsCommandHandler import GetCustomerAccountsCommandHandler
 from GoogleAccounts.Api.Dtos import dtos
 from GoogleAccounts.Api.startup import config, fixtures
 
@@ -42,8 +43,9 @@ class GetAccountsTree(Resource):
             return {"message": f"Failed to process request. Error {repr(e)}"}, 400
 
         try:
-            response = GetAdAccountsTreeCommandHandler.handle(config.google, command)
-            return response, 200
+            # TODO get business_owner_id from Bearer token
+            GetAdAccountsTreeCommandHandler.handle(config.google, command)
+            return {"message": "successfully connected to Google"}, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
@@ -78,7 +80,8 @@ class AdAccountInsights(Resource):
 
         try:
             # TODO get business_owner_id from Bearer token
-            refresh_token = fixtures.google_business_owner_repository.get_refresh_token("andrew@filed.com")
+            google_business_owner_id = "andrew@filed.com"
+            refresh_token = fixtures.google_business_owner_repository.get_refresh_token(google_business_owner_id)
             response = AdAccountInsightsCommandHandler.handle(refresh_token, config.google, command, manager_id)
             return response, 200
 
@@ -86,3 +89,18 @@ class AdAccountInsights(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Failed to get account tree. Error {repr(e)}"}, 400
+
+
+class GetCustomers(Resource):
+    def get(self):
+        try:
+            # TODO get business_owner_id from Bearer token
+            google_business_owner_id = "andrew@filed.com"
+            response = GetCustomerAccountsCommandHandler.handle(google_business_owner_id)
+            response = humps.camelize(response)
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to retrieve customer list."}, 400

@@ -1,19 +1,11 @@
 import logging
 import os
-from dataclasses import asdict
 
-import google_auth_oauthlib.flow
-from google.ads.googleads.client import GoogleAdsClient
-from google.ads.googleads.errors import GoogleAdsException
-
-from Core.settings import Default
+from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
-from GoogleAccounts.Api.Commands.commands import GoogleHeaders
-from GoogleAccounts.Infrastructure.Domain.GoogleAdAccountInsightsResponse import AdAccountInsightsResponse
+from GoogleAccounts.Api.startup import config
 from GoogleAccounts.Infrastructure.Domain.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleFieldType, GoogleResourceType
-from GoogleAccounts.Infrastructure.Domain.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
+from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleResourceType
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +16,12 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
 class AdAccountsTreeClient(AdsBaseClient):
+    accounts_tree_repository = MongoRepositoryBase(
+        config=config.mongo,
+        database_name=config.mongo.google_accounts_database_name,
+        collection_name=config.mongo.customers_collection_name,
+    )
+
     __ACCOUNT_FIELDS = [
         GoogleAttributeFieldsMetadata.customer_client_id,
         GoogleAttributeFieldsMetadata.client_descriptive_name,
@@ -33,9 +31,6 @@ class AdAccountsTreeClient(AdsBaseClient):
         GoogleAttributeFieldsMetadata.time_zone,
         GoogleAttributeFieldsMetadata.currency_code,
     ]
-
-    def get_ad_account_tree(self):
-        pass
 
     def get_account_tree(self):
         field_names = [field.resource_type.value + "." + field.field_name for field in self.__ACCOUNT_FIELDS]
@@ -112,7 +107,11 @@ class AdAccountsTreeClient(AdsBaseClient):
                     "CustomerID is likely a test account, so its customer client information cannot be retrieved."
                 )
 
-        return response
+        customer_info = {"google_business_owner_id": "andrew@filed.com", "customers": response}
+        try:
+            AdAccountsTreeClient.accounts_tree_repository.add_one(customer_info)
+        except Exception as e:
+            logger.exception(f"Unable to add to database, {repr(e)}")
 
     def create_account_hierarchy(self, response, customer_client, customer_ids_to_child_accounts, depth):
         customer_id = str(customer_client.id)

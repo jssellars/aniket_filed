@@ -39,7 +39,7 @@ class GetAdAccountsTreeCommandHandler:
         ad_account_tree_client = cls._build_client(google_config, refresh_token)
 
         try:
-            return ad_account_tree_client.get_account_tree()
+            ad_account_tree_client.get_account_tree()
         except GoogleAdsException as ex:
             logger.exception(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")
 
