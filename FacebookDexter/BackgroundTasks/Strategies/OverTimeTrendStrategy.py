@@ -127,7 +127,7 @@ class OverTimeTrendStrategy(DexterStrategyBase):
                             dexter_output.name,
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
-                            datetime.now(),
+                            datetime.now().isoformat(),
                             get_max_number_of_days(grouped_data, metric_name),
                             ChannelEnum.FACEBOOK.value,
                             dexter_recommendation.priority.value,

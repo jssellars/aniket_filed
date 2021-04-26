@@ -7,12 +7,12 @@ from typing import ClassVar, Dict, List, Optional, Tuple
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
+from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.DexterCustomMetricMapper import CUSTOM_DEXTER_METRICS
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.mongo_adapter import MongoRepositoryBase
-from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
+from FacebookDexter.BackgroundTasks.Strategies.StrategyBase import DexterStrategyBase
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import INVALID_METRIC_VALUE, TOTAL_KEY
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyParameters
@@ -91,6 +91,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             dexter_breakdown_recommendation = None
             variance = None
             cause_variance = None
+            cause_metric_name = None
 
             if time_bucket.level != level or time_bucket.breakdown != breakdown:
                 continue
@@ -160,10 +161,10 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                     continue
 
             structure_data, reports_data = DexterStrategyBase.get_structure_and_reports_data(
-                business_owner, account_id, structure, level, metric_name, breakdown
+                business_owner, account_id, structure, level, cause_metric_name, breakdown
             )
 
-            reference_time = get_max_number_of_days_from_bucket(grouped_data, metric_name)
+            reference_time = get_max_number_of_days_from_bucket(grouped_data, cause_metric_name)
             if not reference_time:
                 continue
 
@@ -171,8 +172,8 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                 dexter_breakdown_recommendation.name,
                 RecommendationStatusEnum.ACTIVE.value,
                 variance,
-                datetime.now(),
-                get_max_number_of_days(grouped_data, metric_name),
+                datetime.now().isoformat(),
+                get_max_number_of_days(grouped_data, cause_metric_name),
                 ChannelEnum.FACEBOOK.value,
                 get_breakdown_priority(cause_variance),
                 structure_data,

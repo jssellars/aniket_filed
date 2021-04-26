@@ -137,7 +137,7 @@ class AudienceSizeStrategy(DexterStrategyBase):
                             template_key,
                             RecommendationStatusEnum.ACTIVE.value,
                             variance,
-                            datetime.now(),
+                            datetime.now().isoformat(),
                             get_max_number_of_days(grouped_data, metric_name),
                             ChannelEnum.FACEBOOK.value,
                             get_audience_size_priority(variance),

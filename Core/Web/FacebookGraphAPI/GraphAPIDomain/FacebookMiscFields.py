@@ -55,6 +55,7 @@ class FacebookParametersStrings:
     filtering = "filtering"
     sort = "sort"
     default_summary = "default_summary"
+    average = "average"
 
 
 class Gender(Enum):

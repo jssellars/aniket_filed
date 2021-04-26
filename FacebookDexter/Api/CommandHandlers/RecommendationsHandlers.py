@@ -41,7 +41,6 @@ UNUSED_FE_FIELDS = [
     RecommendationField.TRIGGER_VARIANCE,
     RecommendationField.ACCOUNT_ID,
     RecommendationField.OBJECT_ID,
-    RecommendationField.UNDERPERFORMING_BREAKDOWNS,
     RecommendationField.HIDDEN_INTERESTS,
     RecommendationField.APPLY_PARAMETERS,
 ]

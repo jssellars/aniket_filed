@@ -70,6 +70,7 @@ class QueryBuilderFacebookRequestParser:
         self.start_row = 0
         self.end_row = 200
         self.action_filtering = []
+        self.__breakdown_request_field = None
 
     @property
     def parameters(self):
@@ -100,6 +101,10 @@ class QueryBuilderFacebookRequestParser:
     @property
     def breakdowns(self):
         return list(set(self.__breakdowns))
+
+    @property
+    def breakdown_request_field(self):
+        return self.__breakdown_request_field
 
     @property
     def action_breakdowns(self):
@@ -235,9 +240,10 @@ class QueryBuilderFacebookRequestParser:
                 self.__fields += mapped_entry.facebook_fields
 
             if parse_breakdowns:
-                self.__breakdowns += (
-                    mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
-                )
+
+                if mapped_entry.field_type == FieldType.BREAKDOWN:
+                    self.__breakdowns += mapped_entry.facebook_fields
+                    self.__breakdown_request_field = mapped_entry.name
 
                 self.__action_breakdowns += (
                     mapped_entry.action_breakdowns

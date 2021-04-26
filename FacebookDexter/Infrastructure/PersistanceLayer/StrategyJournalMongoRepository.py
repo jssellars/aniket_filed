@@ -76,7 +76,7 @@ class RecommendationEntryModel:
     template: str
     status: str
     trigger_variance: float
-    created_at: datetime
+    created_at: str
     time_interval: int
     channel: str
     priority: int

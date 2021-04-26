@@ -91,50 +91,36 @@ class GraphAPIInsightsHandler:
         level: str = None,
     ) -> List[Dict]:
 
-        try:
-            ad_account = AdAccount(ad_account_id)
-            insights = ad_account.get_insights(fields=fields, params=parameters)
+        ad_account = AdAccount(ad_account_id)
+        insights = ad_account.get_insights(fields=fields, params=parameters)
 
-            if not insights:
-                return []
+        if not insights:
+            return []
 
-            summary = insights.summary() if parameters["default_summary"] else None
+        results_requested = any(
+            [
+                FieldsMetadata.results.name == x.name or FieldsMetadata.cost_per_result.name == x.name
+                for x in requested_fields
+            ]
+        )
 
-            results_requested = any(
-                [
-                    FieldsMetadata.results.name == x.name or FieldsMetadata.cost_per_result.name == x.name
-                    for x in requested_fields
-                ]
-            )
+        insights_data = []
+        for insight in insights:
+            insights_data.append(insight.export_all_data())
+            insights.params = parameters
 
-            insights_data = []
-            for insight in insights:
-                insights_data.append(insight.export_all_data())
-                insights.params = parameters
+        if results_requested:
+            add_results_to_response(level, insights_data, ad_account_id)
+        insights_response = (
+            GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
+            if insights_data
+            else []
+        )
 
-            if results_requested:
-                add_results_to_response(level, insights_data, ad_account_id)
-            insights_response = (
-                GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
-                if insights_data
-                else []
-            )
-            summary_response = (
-                GraphAPIInsightsMapper().map(requested_fields, [json.loads(summary[10:])]) if summary else []
-            )
+        if not insights_response:
+            return []
 
-            # Warning: These mappings might need to be reactivated after extensive testing
-            # It looks like it messes up the order of the items in the response
-            # insights_response = list(map(dict, set(tuple(x.items()) for x in insights_response)))
-            # summary_response = list(map(dict, set(tuple(x.items()) for x in summary_response)))
-
-            if not insights_response:
-                return []
-
-            return insights_response
-
-        except Exception as e:
-            raise e
+        return insights_response
 
     @classmethod
     def get_insights_page(

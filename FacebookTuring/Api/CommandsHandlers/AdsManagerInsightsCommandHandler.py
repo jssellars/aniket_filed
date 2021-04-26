@@ -1,6 +1,7 @@
 import logging
 import typing
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Dict, List
@@ -11,6 +12,7 @@ from Core.facebook.sdk_adapter.validations import PLACEMENT_X_OBJECTIVE
 from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
 from Core.Tools.QueryBuilder.QueryBuilder import AgGridInsightsRequest, AgGridTrendRequest, QueryBuilderRequestMapper
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.startup import config
@@ -73,6 +75,27 @@ class AdsManagerInsightsReports(AdsManagerInsightsCommandHandler):
             requested_fields=self.query.requested_columns,
             level=self.query.level,
         )
+
+        if self.query.breakdown_request_field:
+            average_parameters = deepcopy(self.query.parameters)
+            average_parameters.pop(FacebookParametersStrings.breakdowns)
+            average_result = GraphAPIInsightsHandler.get_insights_base(
+                ad_account_id=self.query.facebook_id,
+                fields=self.query.fields,
+                parameters=average_parameters,
+                requested_fields=self.query.requested_columns,
+                level=self.query.level,
+            )
+
+            if not average_result:
+                return response
+
+            for entry in average_result:
+                entry[self.query.breakdown_request_field] = FacebookParametersStrings.average.title()
+
+            response = response + average_result
+            response = sorted(response, key=lambda k: k["date_start"])
+
         return response
 
     def map_query(self, query_json: typing.Dict = None, level: typing.AnyStr = None, has_breakdowns: bool = True):
