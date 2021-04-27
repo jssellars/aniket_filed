@@ -32,6 +32,7 @@ BASE_POPUP_FIELDS = [
     FieldsMetadata.cpc_all.name,
     FieldsMetadata.campaign_id.name,
     FieldsMetadata.adset_id.name,
+    FieldsMetadata.campaign_name.name,
 ]
 # TODO: Discuss with FE on structure of placements in request for ag_grid_popup
 DEFAULT_PLACEMENT_POSITIONS = {
@@ -219,7 +220,6 @@ class AdsManagerInsightsAgGridPopup(AdsManagerInsightsCommandHandler):
         popup_fields = []
 
         if level == Level.CAMPAIGN.value:
-            popup_fields.extend([*BASE_POPUP_FIELDS, FieldsMetadata.campaign_name.name])
             placements = query_json.get("placements")
             if placements:
                 validation_keys = [placement["platformKey"] for placement in placements]
