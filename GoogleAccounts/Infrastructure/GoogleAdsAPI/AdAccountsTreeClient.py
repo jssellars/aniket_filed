@@ -1,11 +1,13 @@
 import logging
 import os
 
+
 from Core.mongo_adapter import MongoRepositoryBase
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
 from GoogleAccounts.Api.startup import config
-from GoogleAccounts.Infrastructure.Domain.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleResourceType
+from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
+from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleResourceType
+
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,13 @@
-import logging
 from dataclasses import asdict
 
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
-from GoogleAccounts.Infrastructure.Domain.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleFieldType
-from GoogleAccounts.Infrastructure.Domain.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
+from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
+from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
+from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType
+from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.Structures.GooglePerformanceInsightsResponse import (
     GooglePerformanceInsightsResponse,
 )
-from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level
 
 
 class PerformanceInsightsClient(AdsBaseClient):
@@ -58,6 +56,7 @@ class PerformanceInsightsClient(AdsBaseClient):
 
         query = f"""
                     SELECT {','.join(field for field in field_names)}
+
                     FROM {level}
                 """
 
@@ -77,7 +76,7 @@ class PerformanceInsightsClient(AdsBaseClient):
                     impressions=row.metrics.impressions,
                     unique_link_clicks=row.metrics.clicks,
                     ctr_all=row.metrics.ctr,
-                    cpc_all=None,
+                    cpc_all=row.metrics.average_cpc,
                     reach=None,
                 )
 

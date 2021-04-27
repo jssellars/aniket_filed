@@ -4,8 +4,11 @@ from marshmallow import fields, pre_load
 
 from Core.mapper import MapperBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from GoogleTuring.Infrastructure.Mappings.LevelMapping import LevelToGoogleNameKeyMapping, \
-    LevelToGoogleRequiredIdsKeyMapping, LevelToGoogleDeleteNamesKeyMapping
+from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import (
+    LevelToGoogleDeleteNamesKeyMapping,
+    LevelToGoogleNameKeyMapping,
+    LevelToGoogleRequiredIdsKeyMapping,
+)
 
 
 class ReportsStructureMinimalMapping(MapperBase):
@@ -24,7 +27,7 @@ class ReportsStructureMinimalMapping(MapperBase):
 
         id_field_keys = LevelToGoogleRequiredIdsKeyMapping.get_by_name(self.__level)
 
-        data['keys'] = {}
+        data["keys"] = {}
         for id_field_key in id_field_keys:
             data["keys"][id_field_key] = data.pop(id_field_key)
 

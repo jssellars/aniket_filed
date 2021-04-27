@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleFieldType, GoogleResourceType
+from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType, GoogleResourceType
 
 
 @dataclass

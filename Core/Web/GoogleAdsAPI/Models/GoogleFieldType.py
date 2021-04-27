@@ -12,5 +12,7 @@ class GoogleResourceType(Enum):
     CUSTOMER_CLIENT = "customer_client"
     CAMPAIGN = "CAMPAIGN"
     ADGROUP = "ADGROUP"
-    AD_GROUP_CRITERION = "ad_group_criterion"
+    Ad = "AD"
     KEYWORD_VIEW = "keyword_view"
+    AD_GROUP_CRITERION = "ad_group_criterion"
+    BIDDING_STRATEGY = "bidding_strategy"

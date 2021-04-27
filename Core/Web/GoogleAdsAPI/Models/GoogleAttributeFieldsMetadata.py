@@ -1,4 +1,4 @@
-from GoogleAccounts.Infrastructure.Domain.GoogleFieldsMetadata import GoogleFieldsMetadata
+from Core.Web.GoogleAdsAPI.Models.GoogleFieldsMetadata import GoogleFieldsMetadata
 
 
 class GoogleAttributeFieldsMetadata:

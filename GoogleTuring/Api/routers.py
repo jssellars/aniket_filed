@@ -10,6 +10,7 @@ from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Core.utils import snake_to_camelcase
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
 from Core.Web.Security.Permissions import (
     AccountsPermissions,
@@ -38,6 +39,7 @@ from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogR
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsBreakdownsDto import AdsManagerCatalogsBreakdownsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsDimensionsDto import AdsManagerCatalogsDimensionsDto
 from GoogleTuring.Api.Dtos.AdsManagerCatalogsMetricsDto import AdsManagerCatalogsMetricsDto
+from GoogleTuring.Api.Dtos.AdsManagerCatalogsViewsAgDridDto import AdsManagerCatalogsViewsAgGridDto
 from GoogleTuring.Api.Mappings.AdAccountInsightsCommandMapping import AdAccountInsightsCommandMapping
 from GoogleTuring.Api.Mappings.AdsManagerFilteredStructuresCommandMapping import (
     AdsManagerFilteredStructuresCommandMapping,
@@ -46,7 +48,6 @@ from GoogleTuring.Api.Mappings.AdsManagerUpdateStructureCommandMapping import Ad
 from GoogleTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
 from GoogleTuring.Api.startup import config, fixtures
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import StructureType
-from GoogleTuring.Infrastructure.Mappings.LevelMapping import Level
 
 logger = logging.getLogger(__name__)
 
@@ -354,3 +355,14 @@ class AdsManagerAgGridStructuresPerformance(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": "Failed to process request."}, 400
+
+
+class AdsManagerCatalogsViewsAgGrid(Resource):
+    def get(self, level):
+        try:
+            return humps.camelize(AdsManagerCatalogsViewsAgGridDto.get(level)), 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to retrieve ag grid views by level."}, 400

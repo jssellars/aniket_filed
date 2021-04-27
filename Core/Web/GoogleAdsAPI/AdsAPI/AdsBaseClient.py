@@ -1,8 +1,5 @@
-from io import StringIO
-
 from google.ads.googleads.client import GoogleAdsClient
-from google.ads.googleads.errors import GoogleAdsException
-from yaml import dump, safe_load
+from yaml import dump
 
 from Core.Web.GoogleAdsAPI.AdsAPI.Enums.AdsServiceType import AdsServiceType
 

@@ -2,11 +2,11 @@ import logging
 from dataclasses import asdict
 
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
+from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType, GoogleResourceType
+from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
+from Core.Web.GoogleAdsAPI.Models.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
 from GoogleAccounts.Infrastructure.Domain.GoogleAdAccountInsightsResponse import AdAccountInsightsResponse
-from GoogleAccounts.Infrastructure.Domain.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleFieldType import GoogleFieldType, GoogleResourceType
-from GoogleAccounts.Infrastructure.Domain.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
-from GoogleAccounts.Infrastructure.Domain.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
 
 logger = logging.getLogger(__name__)
 

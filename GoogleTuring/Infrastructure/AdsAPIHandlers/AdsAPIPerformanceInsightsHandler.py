@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class AdsAPIPerformanceInsightsHandler:
     @classmethod
     def _build_client(cls, config, refresh_token):
-        client = PerformanceInsightsClient(config=config, refresh_token=refresh_token)
+        client = PerformanceInsightsClient(config=config, refresh_token=refresh_token, manager_id="5428845364")
         # TODO look into setting login_customer_id method in ads API
         # ads_client.set_client_customer_id(int(manager_id))
         return client

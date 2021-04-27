@@ -4,8 +4,7 @@ from marshmallow import fields, pre_load
 
 from Core.mapper import MapperBase
 from Core.Tools.Misc.ObjectSerializers import object_to_json
-from GoogleTuring.Infrastructure.Mappings.LevelMapping import LevelToGoogleNameKeyMapping, \
-    LevelToGoogleIdKeyMapping
+from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import LevelToGoogleIdKeyMapping, LevelToGoogleNameKeyMapping
 
 
 class AdsManagerStructureMinimalMapping(MapperBase):
