@@ -21,8 +21,10 @@ class AdsBaseClient:
             "developer_token": self._config.developer_token,
             "client_id": self._config.client_id,
             "client_secret": self._config.client_secret,
-            "login_customer_id": self._manager_id,
         }
+
+        if self._manager_id:
+            config_yaml.update({"login_customer_id": self._manager_id})
 
         return GoogleAdsClient.load_from_string(dump(config_yaml))
 

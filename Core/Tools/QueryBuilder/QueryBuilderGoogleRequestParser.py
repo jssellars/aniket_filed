@@ -30,6 +30,7 @@ class QueryBuilderGoogleRequestParser:
         super().__init__()
         self.__google_fields = []
         self.__google_id = None
+        self.__manager_id = None
         self.time_increment = 0
         self.__time_range = {}
         self.filtering = []
@@ -52,6 +53,10 @@ class QueryBuilderGoogleRequestParser:
     @property
     def google_id(self):
         return self.__google_id
+
+    @property
+    def manager_id(self):
+        return self.__manager_id
 
     @property
     def start_date(self):
@@ -134,6 +139,7 @@ class QueryBuilderGoogleRequestParser:
 
     def parse_ag_grid_insights_query(self, request, level=None):
         self.__google_id = request.google_account_id
+        self.__manager_id = request.google_manager_id
         self.__level = level
         self.__google_fields = request.ag_columns
         self.filtering = None

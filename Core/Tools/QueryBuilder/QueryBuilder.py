@@ -160,6 +160,7 @@ class AgGridInsightsRequest:
         self.time_range = query_builder_request["timeRange"]
         self.facebook_account_id = query_builder_request.get("facebookAccountId")
         self.google_account_id = query_builder_request.get("googleAccountId")
+        self.google_manager_id = query_builder_request.get("googleManagerId")
         self.page_size = query_builder_request["pageSize"]
         self.has_delivery = query_builder_request.get("hasDelivery", True)
         self.start_row = query_builder_request["startRow"]

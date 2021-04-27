@@ -345,7 +345,9 @@ class AdsManagerAgGridStructuresPerformance(Resource):
                 raise ValueError
 
             request_json = request.get_json(force=True)
-            refresh_token = fixtures.google_business_owner_repository.get_refresh_token("andrew@filed.com")
+
+            google_business_owner_id = "andrew@filed.com"
+            refresh_token = fixtures.google_business_owner_repository.get_refresh_token(google_business_owner_id)
             response = AdsManagerInsightsPerformance.get_performance_insights(
                 refresh_token=refresh_token, config=config.google, query_json=request_json, level=level
             )
