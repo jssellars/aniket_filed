@@ -13,6 +13,7 @@ BASE_VIEW_COLUMNS = [
     ViewColumnsMaster.cpc_all,
     ViewColumnsMaster.unique_link_clicks,
     ViewColumnsMaster.objective_structure,
+    ViewColumnsMaster.campaign_name,
 ]
 
 
@@ -21,7 +22,7 @@ def get_view(level):
     view_columns = []
     if level == Level.CAMPAIGN.value:
         view_name = "Campaigns Table"
-        view_columns.extend([*BASE_VIEW_COLUMNS, ViewColumnsMaster.campaign_name, ViewColumnsMaster.campaign_id])
+        view_columns.extend([*BASE_VIEW_COLUMNS, ViewColumnsMaster.campaign_id])
     else:
         view_name = "Adsets Table"
         view_columns.extend([*BASE_VIEW_COLUMNS, ViewColumnsMaster.adset_name, ViewColumnsMaster.ad_id])
