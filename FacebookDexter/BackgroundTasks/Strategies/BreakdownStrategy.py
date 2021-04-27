@@ -173,7 +173,8 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                 RecommendationStatusEnum.ACTIVE.value,
                 variance,
                 datetime.now().isoformat(),
-                get_max_number_of_days(grouped_data, cause_metric_name),
+                # The number of days with CPR is equal to the number of days with results
+                get_max_number_of_days(grouped_data, FieldsMetadata.results.name),
                 ChannelEnum.FACEBOOK.value,
                 get_breakdown_priority(cause_variance),
                 structure_data,
