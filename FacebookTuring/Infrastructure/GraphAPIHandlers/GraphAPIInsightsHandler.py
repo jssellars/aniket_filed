@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
+from facebook_business.adobjects.campaign import Campaign
 
 from Core import mongo_adapter
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
@@ -322,6 +323,15 @@ class GraphAPIInsightsHandler:
             insights=insights,
             structures=structures,
         )
+
+        if level == FieldsMetadata.adset.name and FieldsMetadata.campaign_name.name in structure_fields:
+            for data in response:
+                campaign_id = data.get("campaign_id")
+                if not campaign_id:
+                    break
+                fb_campaign = Campaign(campaign_id)
+                fb_campaign.api_get(fields=["name"])
+                data[FieldsMetadata.campaign_name.name] = fb_campaign._json["name"]
 
         return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
 
