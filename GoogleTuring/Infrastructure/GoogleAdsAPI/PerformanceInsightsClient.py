@@ -1,9 +1,9 @@
 from dataclasses import asdict
 
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
 from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
-from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType
 from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.Structures.GooglePerformanceInsightsResponse import (
     GooglePerformanceInsightsResponse,
@@ -18,51 +18,60 @@ class PerformanceInsightsClient(AdsBaseClient):
         GoogleMetricFieldsMetadata.clicks,  # TODO find unique_clicks and reach in google ads API if available
     ]
 
-    __ATTRIBUTE_FIELDS = [
-        GoogleAttributeFieldsMetadata.id,
-        GoogleAttributeFieldsMetadata.name,
-    ]
-
-    __KEYWORD_FIELDS = [
-        GoogleAttributeFieldsMetadata.resource_name,
-        GoogleAttributeFieldsMetadata.criterion_id,
-        GoogleAttributeFieldsMetadata.keyword_text,
-        GoogleAttributeFieldsMetadata.keyword_match_type,
-    ]
-
-    def get_performance_insights(self, client_customer_id, filtering, level):
-        field_names = [
-            level + "." + field.field_name
-            if field.field_type.value == GoogleFieldType.ATTRIBUTE.value
-            else field.field_type.value + "." + field.field_name
-            for field in self.__PERFORMANCE_FIELDS
-        ]
+    def get_performance_insights(self, client_customer_id, filtering, sorting, level):
+        field_names = []
+        field_names.extend(self.__PERFORMANCE_FIELDS)
 
         if level == Level.CAMPAIGN.value:
-            Campaign_attributes = [Level.CAMPAIGN.value + "." + field.field_name for field in self.__ATTRIBUTE_FIELDS]
-            field_names.extend(Campaign_attributes)
+            campaign_attributes = [
+                GoogleAttributeFieldsMetadata.campaign_id,
+                GoogleAttributeFieldsMetadata.campaign_name,
+            ]
+
+            field_names.extend(campaign_attributes)
 
         elif level == Level.ADGROUP.value:
-            Campaign_attributes = [Level.CAMPAIGN.value + "." + field.field_name for field in self.__ATTRIBUTE_FIELDS]
-            Adgroup_attributes = [Level.ADGROUP.value + "." + field.field_name for field in self.__ATTRIBUTE_FIELDS]
-            field_names.extend([*Adgroup_attributes, *Campaign_attributes])
+            campaign_attributes = [
+                GoogleAttributeFieldsMetadata.campaign_id,
+                GoogleAttributeFieldsMetadata.campaign_name,
+            ]
+
+            adgroup_attributes = [
+                GoogleAttributeFieldsMetadata.adgroup_id,
+                GoogleAttributeFieldsMetadata.adgroup_name,
+            ]
+
+            field_names.extend([*adgroup_attributes, *campaign_attributes])
 
         elif level == Level.KEYWORDS.value:
-            Campaign_attributes = [Level.CAMPAIGN.value + "." + field.field_name for field in self.__ATTRIBUTE_FIELDS]
-            Adgroup_attributes = [Level.ADGROUP.value + "." + field.field_name for field in self.__ATTRIBUTE_FIELDS]
-            keyword_attributes = [field.resource_type.value + "." + field.field_name for field in self.__KEYWORD_FIELDS]
+            campaign_attributes = [
+                GoogleAttributeFieldsMetadata.campaign_id,
+                GoogleAttributeFieldsMetadata.campaign_name,
+            ]
 
-            field_names.extend([*Adgroup_attributes, *Campaign_attributes, *keyword_attributes])
+            adgroup_attributes = [
+                GoogleAttributeFieldsMetadata.adgroup_id,
+                GoogleAttributeFieldsMetadata.adgroup_name,
+            ]
 
-        query = f"""
-                    SELECT {','.join(field for field in field_names)}
+            keyword_attributes = [
+                GoogleAttributeFieldsMetadata.resource_name,
+                GoogleAttributeFieldsMetadata.keyword_id,
+                GoogleAttributeFieldsMetadata.keyword_text,
+                GoogleAttributeFieldsMetadata.keyword_match_type,
+            ]
 
-                    FROM {level}
-                """
+            field_names.extend([*adgroup_attributes, *campaign_attributes, *keyword_attributes])
+
+        query = GAQLBuilder().select_(field_names).from_(level)
 
         if len(filtering) > 0:
-            filters = " AND ".join(filters for filters in filtering)
-            query += "WHERE " + filters
+            query = query.where_(filtering)
+
+        if sorting:
+            query = query.order_by_(sorting.field, sorting.ascending)
+
+        query = query.build_()
 
         ga_service = self.get_ad_service()
         query_response = ga_service.search_stream(customer_id=client_customer_id, query=query)

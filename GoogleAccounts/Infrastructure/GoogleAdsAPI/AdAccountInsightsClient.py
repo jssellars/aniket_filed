@@ -1,7 +1,10 @@
 import logging
 from dataclasses import asdict
 
+from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import QueryBuilderGoogleFilters
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType, GoogleResourceType
 from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
@@ -13,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class AdAccountInsightsClient(AdsBaseClient):
     __ACCOUNT_FIELDS = [
-        GoogleAttributeFieldsMetadata.id,
+        GoogleAttributeFieldsMetadata.customer_id,
         GoogleAttributeFieldsMetadata.descriptive_name,
         GoogleAttributeFieldsMetadata.currency_code,
         # direct manager
@@ -30,31 +33,47 @@ class AdAccountInsightsClient(AdsBaseClient):
         GoogleMetricFieldsMetadata.cost_per_conversion,
     ]
 
-    def get_account_insights(self, command, manager_id):
-        field_names = [
-            field.resource_type.value + "." + field.field_name
-            if field.field_type.value == GoogleFieldType.ATTRIBUTE.value
-            else field.field_type.value + "." + field.field_name
-            for field in self.__ACCOUNT_FIELDS
-        ]
-        child_query = f"""
-                       SELECT {GoogleResourceType.CUSTOMER_CLIENT.value + "." +
-                               GoogleAttributeFieldsMetadata.id.field_name},
-                               {GoogleResourceType.CUSTOMER_CLIENT.value + "." +
-                               GoogleAttributeFieldsMetadata.descriptive_name.field_name}
-                       FROM {GoogleResourceType.CUSTOMER_CLIENT.value}
-                       WHERE {GoogleAttributeFieldsMetadata.level.resource_type.value + "." +
-                              GoogleAttributeFieldsMetadata.level.field_name} <= 1
-                   """
+    __CHILD_FIELDS = [
+        GoogleAttributeFieldsMetadata.customer_client_id,
+        GoogleAttributeFieldsMetadata.client_descriptive_name,
+    ]
 
-        report_query = f"""
-                        SELECT {','.join(field for field in field_names)}
-                        FROM {GoogleResourceType.CUSTOMER.value}
-                        WHERE {GoogleSegmentFieldsMetadata.date.field_type.value + "." +
-                               GoogleSegmentFieldsMetadata.date.field_name}
-                        BETWEEN '{command.from_date}' AND '{command.to_date}'
-                        LIMIT 100
-                    """
+    def get_account_insights(self, command, manager_id):
+
+        child_where_conditions = [
+            QueryBuilderGoogleFilters(
+                GoogleAttributeFieldsMetadata.level.resource_type.value
+                + "."
+                + GoogleAttributeFieldsMetadata.level.field_name,
+                AgGridGoogleOperator.LESS_THAN_OR_EQUAL,
+                1,
+            ),
+        ]
+
+        child_query = (
+            GAQLBuilder()
+            .select_(self.__CHILD_FIELDS)
+            .from_(GoogleResourceType.CUSTOMER_CLIENT)
+            .where_(child_where_conditions)
+            .build_()
+        )
+
+        report_where_conditions = [
+            QueryBuilderGoogleFilters(
+                GoogleSegmentFieldsMetadata.date.field_type.value + "." + GoogleSegmentFieldsMetadata.date.field_name,
+                AgGridGoogleOperator.BETWEEN,
+                [command.from_date, command.to_date],
+            ),
+        ]
+
+        report_query = (
+            GAQLBuilder()
+            .select_(self.__ACCOUNT_FIELDS)
+            .from_(GoogleResourceType.CUSTOMER)
+            .where_(report_where_conditions)
+            .limit_(100)
+            .build_()
+        )
 
         customer_clients = self.search(child_query, manager_id)
 

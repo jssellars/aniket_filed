@@ -3,8 +3,13 @@ from enum import Enum
 
 from Cython.Utils import OrderedSet
 
-from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import QueryBuilderGoogleFilter
+from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import (
+    QueryBuilderGoogleFilter,
+    QueryBuilderGoogleFilters,
+    QueryBuilderGoogleSort,
+)
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator
+from Core.Web.GoogleAdsAPI.Models.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
 from GoogleTuring.Infrastructure.Constants import DEFAULT_DATETIME
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import PERFORMANCE_REPORT_TO_INFO
 from GoogleTuring.Infrastructure.Domain.GoogleConditionFieldsMetadata import GoogleConditionFieldsMetadata
@@ -35,6 +40,7 @@ class QueryBuilderGoogleRequestParser:
         self.__time_range = {}
         self.filtering = []
         self.filters = []
+        self.sorting = None
         self.__report = None
         self.__level = None
 
@@ -123,13 +129,19 @@ class QueryBuilderGoogleRequestParser:
     def __parse_filter_model(self, filter_model, filter_objects):
         for column_name, filter_val in filter_model.items():
             google_filter_name = column_name
-            filter_operator = AgGridGoogleOperator.operators[filter_val.get("type")]
+            filter_operator = getattr(AgGridGoogleOperator, filter_val.get("type"))
             filter_value = filter_val["filter"]
-            filter_objects.append(self.create_google_filter(google_filter_name, filter_operator, str(filter_value)))
+            filter_objects.append(QueryBuilderGoogleFilters(google_filter_name, filter_operator, filter_value))
 
     def __parse_time_range(self, time_range, where_conditions):
-        condition = f"segments.date BETWEEN '{time_range['since']}' AND '{time_range['until']}'"
-        where_conditions.append(condition)
+        where_field = (
+            GoogleSegmentFieldsMetadata.date.field_type.value + "." + GoogleSegmentFieldsMetadata.date.field_name
+        )
+        where_conditions.append(
+            QueryBuilderGoogleFilters(
+                where_field, AgGridGoogleOperator.BETWEEN, [time_range["since"], time_range["until"]]
+            )
+        )
 
     def __parse_where_conditions(self, filter_model, time_range):
         where_conditions = []
@@ -137,12 +149,13 @@ class QueryBuilderGoogleRequestParser:
         self.__parse_time_range(time_range, where_conditions)
         self.filters = where_conditions
 
+    def __parse_sort_model(self, sort_model):
+        self.sorting = QueryBuilderGoogleSort(sort_model.get("field"), sort_model.get("ascending"))
+
     def parse_ag_grid_insights_query(self, request, level=None):
         self.__google_id = request.google_account_id
         self.__manager_id = request.google_manager_id
         self.__level = level
         self.__google_fields = request.ag_columns
-        self.filtering = None
-
         self.__parse_where_conditions(request.filter_model, request.time_range)
-        # TODO parse sort conditions
+        self.__parse_sort_model(request.sort_model)

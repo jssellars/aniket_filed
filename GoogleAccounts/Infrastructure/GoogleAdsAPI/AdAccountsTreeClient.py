@@ -1,13 +1,14 @@
 import logging
 import os
 
-
 from Core.mongo_adapter import MongoRepositoryBase
+from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import QueryBuilderGoogleFilters
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
-from GoogleAccounts.Api.startup import config
+from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleResourceType
-
+from GoogleAccounts.Api.startup import config
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,8 @@ class AdAccountsTreeClient(AdsBaseClient):
     ]
 
     def get_account_tree(self):
-        field_names = [field.resource_type.value + "." + field.field_name for field in self.__ACCOUNT_FIELDS]
+        field_names = []
+        field_names.extend(self.__ACCOUNT_FIELDS)
 
         response = list()
 
@@ -46,12 +48,20 @@ class AdAccountsTreeClient(AdsBaseClient):
         customer_ids = []
 
         # query to retrieve all child accounts of a manager account.
-        query = f"""
-                       SELECT {','.join(field for field in field_names)}
-                       FROM {GoogleResourceType.CUSTOMER_CLIENT.value}
-                       WHERE {GoogleAttributeFieldsMetadata.level.resource_type.value + "." +
-                              GoogleAttributeFieldsMetadata.level.field_name} <= 1
-                """
+        where_field = (
+            GoogleAttributeFieldsMetadata.level.resource_type.value
+            + "."
+            + GoogleAttributeFieldsMetadata.level.field_name
+        )
+        where_condition = [QueryBuilderGoogleFilters(where_field, AgGridGoogleOperator.LESS_THAN_OR_EQUAL, 1)]
+
+        query = (
+            GAQLBuilder()
+            .select_(field_names)
+            .from_(GoogleResourceType.CUSTOMER_CLIENT)
+            .where_(where_condition)
+            .build_()
+        )
 
         customer_resource_names = customer_service.list_accessible_customers().resource_names
 

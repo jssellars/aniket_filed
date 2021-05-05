@@ -3,7 +3,7 @@ from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType, Google
 
 
 class GoogleFieldsMetadata:
-    id = GoogleField(
+    customer_id = GoogleField(
         name="id",
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
@@ -68,28 +68,28 @@ class GoogleFieldsMetadata:
 
     adgroup_id = GoogleField(
         name="Ad Group ID",
-        field_name="adgroup_id",
+        field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
     )
 
     adgroup_name = GoogleField(
         name="Ad Group Name",
-        field_name="adgroup_name",
+        field_name="name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
     )
 
     campaign_id = GoogleField(
         name="Campaign ID",
-        field_name="campaign_id",
+        field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
     )
 
     campaign_name = GoogleField(
         name="Campaign Name",
-        field_name="campaign_name",
+        field_name="name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
     )

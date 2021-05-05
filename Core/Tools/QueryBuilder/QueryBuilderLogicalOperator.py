@@ -29,15 +29,13 @@ class AgGridFacebookOperator(Enum):
     NOT_IN = "notIn"
 
 
-class AgGridGoogleOperator:
-    operators = {
-        "EQUAL": "=",
-        "NOT_EQUAL": "!=",
-        "LESS_THAN": "<",
-        "LESS_THAN_OR_EQUAL": "<=",
-        "GREATER_THAN": ">",
-        "GREATER_THAN_OR_EQUAL": ">=",
-        "IN": "IN",
-        "NOT_IN": "NOT IN",
-        "BETWEEN": "BETWEEN",
-    }
+class AgGridGoogleOperator(Enum):
+    EQUAL = "="
+    NOT_EQUAL = "!="
+    LESS_THAN = "<"
+    LESS_THAN_OR_EQUAL = "<="
+    GREATER_THAN = ">"
+    GREATER_THAN_OR_EQUAL = ">="
+    IN = "IN"
+    NOT_IN = "NOT IN"
+    BETWEEN = "BETWEEN"

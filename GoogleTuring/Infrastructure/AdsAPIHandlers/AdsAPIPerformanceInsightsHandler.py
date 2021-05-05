@@ -21,6 +21,7 @@ class AdsAPIPerformanceInsightsHandler:
         client_manager_id = query_builder_request_parser.manager_id
         level = query_builder_request_parser.level
         filtering = query_builder_request_parser.filters
+        sorting = query_builder_request_parser.sorting
 
         performance_insights_client = cls._build_client(config, refresh_token, client_manager_id)
 
@@ -28,6 +29,7 @@ class AdsAPIPerformanceInsightsHandler:
             return performance_insights_client.get_performance_insights(
                 client_customer_id=client_customer_id,
                 filtering=filtering,
+                sorting=sorting,
                 level=level,
             )
         except GoogleAdsException as ex:

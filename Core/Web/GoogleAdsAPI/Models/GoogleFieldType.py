@@ -10,9 +10,9 @@ class GoogleFieldType(Enum):
 class GoogleResourceType(Enum):
     CUSTOMER = "customer"
     CUSTOMER_CLIENT = "customer_client"
-    CAMPAIGN = "CAMPAIGN"
-    ADGROUP = "ADGROUP"
-    Ad = "AD"
+    CAMPAIGN = "campaign"
+    ADGROUP = "ad_group"
+    Ad = "ad"
     KEYWORD_VIEW = "keyword_view"
     AD_GROUP_CRITERION = "ad_group_criterion"
     BIDDING_STRATEGY = "bidding_strategy"
