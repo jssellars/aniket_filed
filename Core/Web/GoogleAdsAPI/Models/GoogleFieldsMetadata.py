@@ -3,6 +3,20 @@ from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType, Google
 
 
 class GoogleFieldsMetadata:
+    google_account_id = GoogleField(
+        name="google_account_id",
+        field_name="google_account_id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER,
+    )
+
+    google_manager_id = GoogleField(
+        name="google_manager_id",
+        field_name="google_manager_id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOMER,
+    )
+
     customer_id = GoogleField(
         name="id",
         field_name="id",
@@ -331,6 +345,12 @@ class GoogleFieldsMetadata:
     date = GoogleField(
         name="date",
         field_name="date",
+        field_type=GoogleFieldType.SEGMENT,
+    )
+
+    device = GoogleField(
+        name="device",
+        field_name="device",
         field_type=GoogleFieldType.SEGMENT,
     )
 

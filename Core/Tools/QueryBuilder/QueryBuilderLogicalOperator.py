@@ -39,3 +39,4 @@ class AgGridGoogleOperator(Enum):
     IN = "IN"
     NOT_IN = "NOT IN"
     BETWEEN = "BETWEEN"
+    DURING = "DURING"

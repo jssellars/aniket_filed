@@ -13,6 +13,8 @@ class GooglePerformanceInsightsResponse:
     reach: Optional[int] = None
     adgroup_id: Optional[str] = None
     adgroup_name: Optional[str] = None
-    criterion_id: Optional[str] = None
+    keyword_id: Optional[str] = None
     keyword_text: Optional[str] = None
     keyword_match_type: Optional[str] = None
+    date: Optional[str] = None
+    device: Optional[str] = None

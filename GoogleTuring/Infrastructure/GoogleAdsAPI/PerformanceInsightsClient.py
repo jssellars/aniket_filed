@@ -96,7 +96,7 @@ class PerformanceInsightsClient(AdsBaseClient):
                 elif level == Level.KEYWORDS.value:
                     insights.adgroup_id = str(row.ad_group.id)
                     insights.adgroup_name = row.ad_group.name
-                    insights.criterion_id = str(row.ad_group_criterion.criterion_id)
+                    insights.keyword_id = str(row.ad_group_criterion.criterion_id)
                     insights.keyword_text = row.ad_group_criterion.keyword.text
                     insights.keyword_match_type = row.ad_group_criterion.keyword.match_type.name
 

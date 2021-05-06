@@ -30,6 +30,7 @@ router_route_pairs = (
     (routers.AccountsReportInsights, "accounts/reports"),
     (routers.OptimizeReportInsights, "optimize/reports"),
     (routers.AdsManagerReportInsights, "ads-manager/reports"),
+    (routers.AdsManagerReportInsightsAdsAPI, "ads-manager-ads-api/reports"),
     (routers.ReportsReportInsights, "reports/reports"),
     (routers.AdsManagerInsightsWithTotals, "insights-with-totals"),
     (routers.AdsManagerGetStructures, "ads-manager/<string:level>s/<string:account_id>"),

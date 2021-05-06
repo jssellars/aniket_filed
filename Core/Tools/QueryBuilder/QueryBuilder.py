@@ -79,6 +79,8 @@ class QueryBuilderRequestMapper:
 
         self.table_name = table_name
 
+        self.Google_breakdown = query_builder_request.get("Breakdown")
+
     def set_structure_columns(self, structure_columns: typing.List[typing.AnyStr] = None):
         self.__structure_columns = structure_columns
         return self

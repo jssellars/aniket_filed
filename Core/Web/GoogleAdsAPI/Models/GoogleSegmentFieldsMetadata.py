@@ -3,3 +3,5 @@ from Core.Web.GoogleAdsAPI.Models.GoogleFieldsMetadata import GoogleFieldsMetada
 
 class GoogleSegmentFieldsMetadata:
     date = GoogleFieldsMetadata.date
+
+    device = GoogleFieldsMetadata.device

@@ -3,12 +3,14 @@ from enum import Enum
 
 from Cython.Utils import OrderedSet
 
+from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderSortEnum
 from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import (
     QueryBuilderGoogleFilter,
     QueryBuilderGoogleFilters,
     QueryBuilderGoogleSort,
 )
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator
+from Core.Web.GoogleAdsAPI.Models.GoogleFieldsMetadata import GoogleFieldsMetadata as GoogleFieldsMetadataAdsAPI
 from Core.Web.GoogleAdsAPI.Models.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
 from GoogleTuring.Infrastructure.Constants import DEFAULT_DATETIME
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import PERFORMANCE_REPORT_TO_INFO
@@ -41,8 +43,10 @@ class QueryBuilderGoogleRequestParser:
         self.filtering = []
         self.filters = []
         self.sorting = None
+        self.g_fields = []
         self.__report = None
         self.__level = None
+        self.breakdown_column = None
 
     @property
     def report(self):
@@ -159,3 +163,61 @@ class QueryBuilderGoogleRequestParser:
         self.__google_fields = request.ag_columns
         self.__parse_where_conditions(request.filter_model, request.time_range)
         self.__parse_sort_model(request.sort_model)
+
+    def map__(self, name):
+        return getattr(GoogleFieldsMetadataAdsAPI, name, None)
+
+    def parse_structure_columns(self, query_columns, column_type=None):
+        for entry in query_columns:
+            mapped_entry = self.map__(getattr(entry, column_type.value))
+            if not mapped_entry:
+                continue
+
+            self.g_fields.append(mapped_entry)
+
+    def parse_query_conditions(self, query_conditions):
+        for entry in query_conditions:
+            mapped_condition = self.map__(entry.ColumnName)
+            if entry.ColumnName == self.TimeIntervalEnum.DATE_START.value:
+                self.__time_range[self.TimeRangeEnum.SINCE.value] = entry.Value
+
+            elif entry.ColumnName == self.TimeIntervalEnum.DATE_STOP.value:
+                self.__time_range[self.TimeRangeEnum.UNTIL.value] = entry.Value
+
+            elif mapped_condition and (mapped_condition.name == GoogleFieldsMetadataAdsAPI.google_account_id.name):
+                self.__google_id = entry.Value
+
+            elif mapped_condition and (mapped_condition.name == GoogleFieldsMetadataAdsAPI.google_manager_id.name):
+                self.__manager_id = entry.Value
+
+            elif entry.ColumnName == self.TimeIntervalEnum.TIME_INCREMENT.value:
+                self.time_increment = entry.Value
+
+        where_conditions = []
+        self.__parse_time_range(self.__time_range, where_conditions)
+        self.filters = where_conditions
+
+    def parse_report_query(self, request):
+        self.__level = request.TableName
+
+        self.parse_structure_columns(
+            request.Columns,
+            column_type=self.QueryBuilderColumnName.COLUMN,
+        )
+        self.parse_structure_columns(
+            request.Dimensions,
+            column_type=self.QueryBuilderColumnName.DIMENSION,
+        )
+        self.parse_query_conditions(request.Conditions)
+
+        self.breakdown_column = request.Google_breakdown
+
+        if request.Sort:
+            mapped_entry = self.map__(request.Sort.Dimension)
+            is_ascending = True if request.Sort.Order == QueryBuilderSortEnum.ASCENDING else False
+            self.__parse_sort_model(
+                {"field": mapped_entry.field_type.value + "." + mapped_entry.field_name, "ascending": is_ascending}
+            )
+        else:
+            sort_model = {"field": "segments.date", "ascending": True}
+            self.__parse_sort_model(sort_model)

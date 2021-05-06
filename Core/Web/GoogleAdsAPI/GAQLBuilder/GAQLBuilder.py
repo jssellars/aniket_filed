@@ -64,7 +64,7 @@ class WhereBuilder:
         return f"{self.field} {self.operator} '{self.value[0]}' AND '{self.value[1]}'"
 
     def during(self):
-        return f"{self.field} {self.value}"
+        return f"{self.field} {self.operator} {self.value}"
 
     def _parse_single_value_condition(self):
         if isinstance(self.value, list):

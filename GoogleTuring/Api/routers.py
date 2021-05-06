@@ -30,6 +30,7 @@ from GoogleTuring.Api.CommandsHandlers.AdsManagerFilteredStructuresCommandHandle
 from GoogleTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import (
     AdsManagerInsightsCommandHandler,
     AdsManagerInsightsPerformance,
+    AdsManagerInsightsReports,
 )
 from GoogleTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
     AdsManagerUpdateStructureCommandHandler,
@@ -289,6 +290,25 @@ class GetInsightsHandler:
             abort(400, message=f"Failed to process your insights request. {repr(e)}")
 
 
+class GetInsightsHandlerAdsAPI:
+    @staticmethod
+    def handle():
+        request_json = request.get_json(force=True)
+
+        try:
+            google_business_owner_id = "andrew@filed.com"
+            refresh_token = fixtures.google_business_owner_repository.get_refresh_token(google_business_owner_id)
+
+            response = AdsManagerInsightsReports.get_report_insights(
+                refresh_token=refresh_token, config=config.google, query_json=request_json
+            )
+
+            return response
+
+        except Exception as e:
+            abort(400, message=f"Failed to process your insights request. {repr(e)}")
+
+
 class AdsManagerInsightsWithTotals(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.CAN_ACCESS_ADS_MANAGER)
     def post(self):
@@ -327,6 +347,11 @@ class AdsManagerReportInsights(Resource):
     def post(self):
 
         return GetInsightsHandler().handle(), 200
+
+
+class AdsManagerReportInsightsAdsAPI(Resource):
+    def post(self):
+        return GetInsightsHandlerAdsAPI().handle(), 200
 
 
 class ReportsReportInsights(Resource):

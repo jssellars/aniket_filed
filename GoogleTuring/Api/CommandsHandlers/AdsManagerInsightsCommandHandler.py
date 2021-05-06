@@ -6,6 +6,7 @@ from google.ads.googleads.errors import GoogleAdsException
 from Core.Tools.QueryBuilder.QueryBuilder import AgGridInsightsRequest, QueryBuilderRequestMapper
 from Core.Tools.QueryBuilder.QueryBuilderGoogleRequestParser import QueryBuilderGoogleRequestParser
 from GoogleTuring.Api.CommandsHandlers.GoogleTokenGetter import GoogleTokenGetter
+from GoogleTuring.Infrastructure.AdsAPIHandlers.AdsAPIInsightsReportHandler import AdsAPIInsightsReportHandler
 from GoogleTuring.Infrastructure.AdsAPIHandlers.AdsAPIPerformanceInsightsHandler import AdsAPIPerformanceInsightsHandler
 from GoogleTuring.Infrastructure.AdWordsAPIHandlers.AdWordsAPIInsightsHandler import AdWordsAPIInsightsHandler
 from GoogleTuring.Infrastructure.Domain.Enums.FiledGoogleInsightsTableEnum import FiledGoogleInsightsTableEnum
@@ -63,6 +64,25 @@ class AdsManagerInsightsPerformance:
         try:
             query_builder_request_parser = cls.__map_query(query_json, level)
             return AdsAPIPerformanceInsightsHandler.get_performance_insights(
+                config=config, refresh_token=refresh_token, query_builder_request_parser=query_builder_request_parser
+            )
+        except GoogleAdsException as ex:
+            logger.exception(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")
+
+
+class AdsManagerInsightsReports:
+    @classmethod
+    def __map_query(cls, query_builder_request_parser):
+        query_builder_request = QueryBuilderRequestMapper(query_builder_request_parser, FiledGoogleInsightsTableEnum)
+        query_builder_request_parser = QueryBuilderGoogleRequestParser()
+        query_builder_request_parser.parse_report_query(query_builder_request)
+        return query_builder_request_parser
+
+    @classmethod
+    def get_report_insights(cls, refresh_token, config, query_json):
+        try:
+            query_builder_request_parser = cls.__map_query(query_json)
+            return AdsAPIInsightsReportHandler.get_report_insights(
                 config=config, refresh_token=refresh_token, query_builder_request_parser=query_builder_request_parser
             )
         except GoogleAdsException as ex:
