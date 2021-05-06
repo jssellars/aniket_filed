@@ -7,7 +7,8 @@ from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from facebook_business.adobjects.adaccount import AdAccount
 from FacebookCampaignsBuilder.Api import commands
-from FacebookCampaignsBuilder.Api.startup import config
+from FacebookCampaignsBuilder.Api.startup import config, fixtures
+from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import PublishAddAdsetAdEvent
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
     PublishStatus
 from werkzeug.datastructures import FileStorage
@@ -105,3 +106,12 @@ class PublishProgress:
         feedback.pop("_id")
 
         return feedback
+
+
+class PublishAddAdAdsetRequest:
+
+    @staticmethod
+    def publish(add_ad_adset_request: PublishAddAdsetAdEvent):
+        rabbitmq_adapter = fixtures.rabbitmq_adapter
+        rabbitmq_adapter.publish(add_ad_adset_request)
+        logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(add_ad_adset_request)})

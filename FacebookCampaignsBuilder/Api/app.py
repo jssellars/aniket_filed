@@ -55,6 +55,7 @@ router_route_pairs = (
         routers.AddAnAdAdsetGetStructure,
         "get-structure/<string:account_id>/<string:level>/<string:structure_ids>",
     ),
+    (routers.AddAnAdAdsetPublishStructure, "add-structures-to-parent"),
 )
 
 for router, route in router_route_pairs:

@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, AnyStr, Dict, List
+from typing import Any, AnyStr, Dict, List, Optional
 
 from marshmallow import EXCLUDE, fields, pre_load
 
@@ -146,3 +146,16 @@ class SmartEditPublishResponseEvent(PublishResponseEvent):
 class AddAdsetAdPublishResponseEvent(PublishResponseEvent):
     message_type: str = ResponseTypeEnum.AAA_PUBLISH_RESPONSE.value
     publish_status_id: int = PublishStatus.SUCCESS.value
+
+
+@dataclass
+class PublishAddAdsetAdEvent:
+    message_type = RequestTypeEnum.AAA_PUBLISH_REQUEST.value
+    ad_account_id: str
+    parent_level: str
+    child_level: str
+    user_filed_id: str
+    parent_ids: List[str]
+    child_ids: List[str]
+    adsets: Optional[List[Dict]] = field(default_factory=list)
+    ads: Optional[List[Dict]] = field(default_factory=list)
