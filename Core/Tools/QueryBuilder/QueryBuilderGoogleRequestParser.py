@@ -154,7 +154,8 @@ class QueryBuilderGoogleRequestParser:
         self.filters = where_conditions
 
     def __parse_sort_model(self, sort_model):
-        self.sorting = QueryBuilderGoogleSort(sort_model.get("field"), sort_model.get("ascending"))
+        if sort_model:
+            self.sorting = QueryBuilderGoogleSort(sort_model.get("field"), sort_model.get("ascending"))
 
     def parse_ag_grid_insights_query(self, request, level=None):
         self.__google_id = request.google_account_id
