@@ -26,6 +26,8 @@ class Version(Resource):
 
 class InfluencerProfiles(Resource):
     def get(self):
-        search_param = request.args.get("search")
-        response = InfluencerProfilesHandler.get_profiles(search_param=search_param)
+        influencer_id = request.args.get("influencer_id")
+        response = InfluencerProfilesHandler.get_profiles(
+            influencer_id=influencer_id,
+        )
         return response, 200
