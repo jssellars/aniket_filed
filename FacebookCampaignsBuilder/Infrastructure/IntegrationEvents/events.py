@@ -151,6 +151,7 @@ class AddAdsetAdPublishResponseEvent(PublishResponseEvent):
 @dataclass
 class PublishAddAdsetAdEvent:
     message_type = RequestTypeEnum.AAA_PUBLISH_REQUEST.value
+    business_owner_facebook_id: str
     ad_account_id: str
     parent_level: str
     child_level: str
