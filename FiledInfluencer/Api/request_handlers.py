@@ -21,8 +21,7 @@ class InfluencerProfilesHandler:
             ProfilePicture=details['profile_pic_url'],
             CategoryName=details['category_name'],
         )
-        json_string = pydantic_influencer.json()
-        return humps.camelize(json.loads(json_string))
+        return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
     def get_profiles(cls, last_influencer_id: int, page_size: int):
