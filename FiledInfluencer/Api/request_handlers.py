@@ -2,7 +2,6 @@ import json
 
 import humps
 
-from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
 from FiledInfluencer.Api.models import Influencers
 from FiledInfluencer.Api.schemas import InfluencersResponse
 from FiledInfluencer.Api.startup import session_scope
