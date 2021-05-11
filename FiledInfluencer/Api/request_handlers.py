@@ -1,18 +1,30 @@
+import json
+
 from FiledInfluencer.Api.models import Influencers
-from FiledInfluencer.Api.schemas import InfluencersPydantic
+from FiledInfluencer.Api.schemas import InfluencersResponse
 from FiledInfluencer.Api.startup import session_scope
 
 
 class InfluencerProfilesHandler:
     @staticmethod
-    def convert_to_json(influencer):
-        pydantic_influencer = InfluencersPydantic.from_orm(influencer)
+    def convert_to_json(influencer: Influencers):
+        details = json.loads(influencer.Details)
+
+        pydantic_influencer = InfluencersResponse(
+            Id=influencer.Id,
+            Name=influencer.Name,
+            Biography=influencer.Biography,
+            Engagement=influencer.Engagement,
+            ProfilePicture=details['profile_pic_url'],
+            CategoryName=details['category_name'],
+        )
         return pydantic_influencer.json()
 
     @classmethod
     def get_profiles(cls, last_influencer_id: int, page_size: int):
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
+
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient

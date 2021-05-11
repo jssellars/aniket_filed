@@ -1,11 +1,10 @@
 from typing import Optional
 
-from pydantic import BaseModel, Json
-from pydantic.schema import datetime
+from pydantic import BaseModel, AnyUrl
 
 
 # https://pydantic-docs.helpmanual.io/usage/schema/#json-schema-types
-class InfluencersPydantic(BaseModel):
+class InfluencersResponse(BaseModel):
     """
     Convert SQLAlchemy model to Pydantic Model
 
@@ -13,20 +12,11 @@ class InfluencersPydantic(BaseModel):
     And pydantic models are required for serialization of data
     """
     Id: int
-    UpdatedAt: Optional[datetime]
-    UpdatedById: Optional[int]
-    UpdatedByFirstName: Optional[str]
-    UpdatedByLastName: Optional[str]
-    CreatedAt: Optional[datetime]
-    CreatedById: int
-    CreatedByFirstName: Optional[str]
-    CreatedByLastName: Optional[str]
     Name: str
     Biography: str
     Engagement: str
-    Details: Json
-    PlatformId: int
-    InfluencersCategoriesId: Optional[int]
+    ProfilePicture: AnyUrl
+    CategoryName: Optional[str]
 
     class Config:
         orm_mode = True
