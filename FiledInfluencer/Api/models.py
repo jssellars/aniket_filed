@@ -50,8 +50,8 @@ class InfluencerPost:
 Base = declarative_base()
 
 
-class FiledInfluencers(Base):
-    __tablename__ = 'FiledInfluencers'
+class Influencers(Base):
+    __tablename__ = 'Influencers'
 
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
@@ -72,7 +72,7 @@ class FiledInfluencers(Base):
     Engagement = Column(NVARCHAR())
     Details = Column(NVARCHAR())
 
-    FiledPlatformId = Column(BIGINT)
+    PlatformId = Column(BIGINT)
     InfluencersCategoriesId = Column(BIGINT)
 
     def __repr__(self):

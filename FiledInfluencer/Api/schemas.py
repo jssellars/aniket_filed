@@ -5,7 +5,7 @@ from pydantic.schema import datetime
 
 
 # https://pydantic-docs.helpmanual.io/usage/schema/#json-schema-types
-class FiledInfluencersPydantic(BaseModel):
+class InfluencersPydantic(BaseModel):
     """
     Convert SQLAlchemy model to Pydantic Model
 
@@ -25,7 +25,7 @@ class FiledInfluencersPydantic(BaseModel):
     Biography: str
     Engagement: str
     Details: Json
-    FiledPlatformId: int
+    PlatformId: int
     InfluencersCategoriesId: Optional[int]
 
     class Config:

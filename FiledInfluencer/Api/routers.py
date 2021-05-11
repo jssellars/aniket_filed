@@ -26,8 +26,10 @@ class Version(Resource):
 
 class InfluencerProfiles(Resource):
     def get(self):
-        influencer_id = request.args.get("influencer_id")
+        last_influencer_id = int(request.args.get("last_influencer_id", 0))
+        page_size = int(request.args.get("page_size", 100))
         response = InfluencerProfilesHandler.get_profiles(
-            influencer_id=influencer_id,
+            last_influencer_id=last_influencer_id,
+            page_size=page_size,
         )
         return response, 200
