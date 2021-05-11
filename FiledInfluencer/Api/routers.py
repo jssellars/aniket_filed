@@ -25,9 +25,14 @@ class Version(Resource):
 
 
 class InfluencerProfiles(Resource):
+    @staticmethod
+    def extract_param_or_default(request, param_name, default) -> int:
+        response = request.args.get(param_name) or default
+        return int(response)
+
     def get(self):
-        last_influencer_id = int(request.args.get("last_influencer_id", 0))
-        page_size = int(request.args.get("page_size", 100))
+        last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
+        page_size = self.extract_param_or_default(request, "page_size", 100)
         response = InfluencerProfilesHandler.get_profiles(
             last_influencer_id=last_influencer_id,
             page_size=page_size,
