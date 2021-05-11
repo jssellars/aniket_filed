@@ -1,5 +1,8 @@
 import json
 
+import humps
+
+from Core.Tools.Misc.ObjectSerializers import object_to_camelized_dict
 from FiledInfluencer.Api.models import Influencers
 from FiledInfluencer.Api.schemas import InfluencersResponse
 from FiledInfluencer.Api.startup import session_scope
@@ -18,7 +21,8 @@ class InfluencerProfilesHandler:
             ProfilePicture=details['profile_pic_url'],
             CategoryName=details['category_name'],
         )
-        return pydantic_influencer.json()
+        json_string = pydantic_influencer.json()
+        return humps.camelize(json.loads(json_string))
 
     @classmethod
     def get_profiles(cls, last_influencer_id: int, page_size: int):
