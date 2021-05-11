@@ -912,14 +912,11 @@ class AddStructuresToParent:
 
     @staticmethod
     def get_all_adsets_from_campaign(account_id: str, campaign_ids: List[str]) -> Tuple[Level, List[str]]:
-        adset_parent_ids = []
         fields = [FieldsMetadata.id.name, FieldsMetadata.campaign_id.name]
         response = get_sdk_structures(account_id, Level.ADSET, fields)
         response = [entry.export_all_data() for entry in response]
 
-        for campaign_id in campaign_ids:
-            adset_ids = [adset["id"] for adset in response if int(adset["campaign_id"]) == campaign_id]
-            adset_parent_ids.extend(adset_ids)
+        adset_parent_ids = [adset["id"] for adset in response if adset["campaign_id"] in campaign_ids]
 
         return Level.ADSET.value, adset_parent_ids
 
