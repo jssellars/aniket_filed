@@ -64,10 +64,9 @@ class InsightsReportClient(AdsBaseClient):
                     campaign_id=str(row.campaign.id),
                     campaign_name=row.campaign.name,
                     impressions=row.metrics.impressions,
-                    unique_link_clicks=row.metrics.clicks,
-                    ctr_all=row.metrics.ctr,
-                    cpc_all=row.metrics.average_cpc,
-                    reach=None,
+                    clicks=row.metrics.clicks,
+                    ctr=row.metrics.ctr,
+                    average_cpc=row.metrics.average_cpc,
                 )
 
                 if level == Level.ADGROUP.value:

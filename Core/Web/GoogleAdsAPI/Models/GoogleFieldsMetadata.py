@@ -81,14 +81,14 @@ class GoogleFieldsMetadata:
     )
 
     adgroup_id = GoogleField(
-        name="ad_group_id",
+        name="adgroup_id",
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
     )
 
     adgroup_name = GoogleField(
-        name="ad_group_name",
+        name="adgroup_name",
         field_name="name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
@@ -109,7 +109,7 @@ class GoogleFieldsMetadata:
     )
 
     criterion_id = GoogleField(
-        name="criterion_id",
+        name="keyword_id",
         field_name="criterion_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.AD_GROUP_CRITERION,
