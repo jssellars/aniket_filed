@@ -16,7 +16,7 @@ class InfluencersResponse(BaseModel):
     Biography: str
     Engagement: str
     ProfilePicture: AnyUrl
-    CategoryName: Optional[str]
+    CategoryName: Optional[str] = None
 
     class Config:
         orm_mode = True
