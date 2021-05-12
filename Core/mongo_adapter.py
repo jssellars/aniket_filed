@@ -251,8 +251,10 @@ class MongoRepositoryBase:
 
     @retry(AutoReconnect, tries=RETRY_COUNT, delay=1)
     def get_data_slice(
-        self, query: Dict = None, projection: Dict = None, limit: int = None, skip: int = None, sort_query: List = None
+        self, query: Dict = None, projection: Dict = None, limit: int = 0, skip: int = 0, sort_query: List = None
     ) -> typing.List[typing.Dict]:
+        if sort_query is None:
+            sort_query = [("created_time", -1)]
         start = datetime.now()
 
         try:
