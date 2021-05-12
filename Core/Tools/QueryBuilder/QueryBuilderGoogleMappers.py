@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator, QueryBuilderLogicalOperator
 
@@ -22,3 +22,12 @@ class QueryBuilderGoogleFilters:
 class QueryBuilderGoogleSort:
     field: str
     ascending: bool = True
+
+
+@dataclass
+class QueryBuilderGoogleUpdateInfo:
+    field: str
+    value: Any
+    campaign_id: Optional[str] = None
+    ad_group_id: Optional[str] = None
+    keyword_id: Optional[str] = None

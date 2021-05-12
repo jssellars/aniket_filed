@@ -4,7 +4,7 @@ from enum import Enum
 from Cython.Utils import OrderedSet
 
 from Core.Tools.QueryBuilder.QueryBuilder import QueryBuilderSortEnum
-from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import (
+from Core.Tools.QueryBuilder.QueryBuilderGoogleMappers import (
     QueryBuilderGoogleFilter,
     QueryBuilderGoogleFilters,
     QueryBuilderGoogleSort,

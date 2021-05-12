@@ -8,6 +8,7 @@ class ViewCampaignPerformance(View):
     type = "Business"
     columns = [
         ViewColumnsMaster.campaign_name,
+        ViewColumnsMaster.campaign_budget,
         ViewColumnsMaster.clicks,
         ViewColumnsMaster.cost,
         ViewColumnsMaster.impressions,

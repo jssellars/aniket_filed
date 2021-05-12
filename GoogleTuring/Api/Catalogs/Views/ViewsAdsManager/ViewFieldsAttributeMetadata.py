@@ -102,6 +102,20 @@ class ViewFieldsAttributeMetadata:
         type_id=ViewColumnType.LINK.value,
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=True,
+        is_editable=False,
+        pinned=PinnedDirection.LEFT,
+        is_sortable=True,
+        is_filterable=True,
+    )
+
+    campaign_budget = ViewColumn(
+        Autoincrement.hex_string("campaign_budget"),
+        display_name="Campaign Name",
+        primary_value=GoogleFieldsMetadata.campaign_budget,
+        secondary_value=GoogleFieldsMetadata.currency_code,
+        type_id=ViewColumnType.CURRENCY.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        is_fixed=True,
         is_editable=True,
         pinned=PinnedDirection.LEFT,
         is_sortable=True,

@@ -40,6 +40,9 @@ class AdsBaseClient:
     def get_campaign_service(self):
         return self._client.get_service(AdsServiceType.CAMPAIGN_SERVICE.value)
 
+    def get_campaign_budget_service(self):
+        return self._client.get_service(AdsServiceType.CAMPAIGN_BUDGET_SERVICE.value)
+
     def get_ad_group_service(self):
         return self._client.get_service(AdsServiceType.AD_GROUP_SERVICE.value)
 
@@ -57,6 +60,30 @@ class AdsBaseClient:
 
     def get_search_google_ads_request_type(self):
         return self._client.get_type(AdsServiceType.SEARCH_GOOGLE_ADS_REQUEST.value)
+
+    def get_campaign_operation_type(self):
+        return self._client.get_type(AdsServiceType.CAMPAIGN_OPERATION.value)
+
+    def get_campaign_budget_operation_type(self):
+        return self._client.get_type(AdsServiceType.CAMPAIGN_BUDGET_OPERATION.value)
+
+    def get_ad_group_operation_type(self):
+        return self._client.get_type(AdsServiceType.AD_GROUP_OPERATION.value)
+
+    def get_ad_group_criterion_operation_type(self):
+        return self._client.get_type(AdsServiceType.AD_GROUP_CRITERION_OPERATION.value)
+
+    def get_campaign_status_enum_type(self):
+        return self._client.get_type(AdsServiceType.CAMPAIGN_STATUS_ENUM.value)
+
+    def get_ad_group_status_enum_type(self):
+        return self._client.get_type(AdsServiceType.CAMPAIGN_STATUS_ENUM.value)
+
+    def get_ad_group_criterion_status_enum_type(self):
+        return self._client.get_type(AdsServiceType.CAMPAIGN_STATUS_ENUM.value)
+
+    def get_ad_group_criterion_keyword_match_enum_type(self):
+        return self._client.get_type(AdsServiceType.KEYWORD_MATCH_TYPE_ENUM.value)
 
     # def set_client_customer_id(self, client_customer_id):
     #     self._client.set_login_customer(client_customer_id)

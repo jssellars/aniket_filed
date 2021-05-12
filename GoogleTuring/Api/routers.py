@@ -34,6 +34,7 @@ from GoogleTuring.Api.CommandsHandlers.AdsManagerInsightsCommandHandler import (
 )
 from GoogleTuring.Api.CommandsHandlers.AdsManagerUpdateStructureCommandHandler import (
     AdsManagerUpdateStructureCommandHandler,
+    AdsManagerUpdateStructureCommandHandlerAdsAPI,
 )
 from GoogleTuring.Api.CommandsHandlers.GoogleAdAccountInsightsHandler import GoogleAdAccountInsightsHandler
 from GoogleTuring.Api.Dtos.AdsManagerCatalogReportsDto import AdsManagerCatalogReportsDto
@@ -59,13 +60,11 @@ class Resource(flask_restful.Resource):
 
 class HealthCheck(Resource):
     def get(self):
-
         return None, 200
 
 
 class Version(Resource):
     def get(self):
-
         return config.version_endpoint_payload, 200
 
 
@@ -138,7 +137,6 @@ class AdsManagerMetrics(Resource):
         try:
             args = request.args
             if REPORT_KEY not in args or DIMENSION_KEY not in args or len(args) != 2:
-
                 return {"error_message": "Wrong parameters"}, 400
 
             report = args[REPORT_KEY]
@@ -231,14 +229,12 @@ class GetStructuresHandler:
 class AdsManagerGetStructures(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def get(self, level, account_id):
-
         return GetStructuresHandler.handle(level, account_id)
 
 
 class OptimizeGetStructures(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def get(self, level, account_id):
-
         return GetStructuresHandler.handle(level, account_id)
 
 
@@ -259,7 +255,6 @@ class AdsManagerFilteredStructures(Resource):
         try:
             response = AdsManagerFilteredStructuresCommandHandler.handle(level=level, command=command)
             if not response:
-
                 return {"error_message": "Structures not found!"}, 404
 
             response = humps.camelize(response)
@@ -331,21 +326,18 @@ class AdsManagerInsightsWithTotals(Resource):
 class AccountsReportInsights(Resource):
     @fixtures.authorize_permission(permission=AccountsPermissions.ACCOUNTS_CAN_ACCESS_REPORTS_DATA)
     def post(self):
-
         return GetInsightsHandler().handle(), 200
 
 
 class OptimizeReportInsights(Resource):
     @fixtures.authorize_permission(permission=OptimizePermissions.CAN_ACCESS_OPTIMIZE)
     def post(self):
-
         return GetInsightsHandler().handle(), 200
 
 
 class AdsManagerReportInsights(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_CAN_ACCESS_REPORTS_DATA)
     def post(self):
-
         return GetInsightsHandler().handle(), 200
 
 
@@ -357,7 +349,6 @@ class AdsManagerReportInsightsAdsAPI(Resource):
 class ReportsReportInsights(Resource):
     @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CAN_ACCESS_REPORTS_DATA)
     def post(self):
-
         return GetInsightsHandler().handle(), 200
 
 
@@ -393,3 +384,33 @@ class AdsManagerCatalogsViewsAgGrid(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": "Failed to retrieve ag grid views by level."}, 400
+
+
+class InLineEdits(Resource):
+    def post(self, level):
+        logger.info(request_as_log_dict(request))
+
+        try:
+            if level not in [Level.CAMPAIGN.value, Level.ADGROUP.value, Level.KEYWORDS.value]:
+                raise ValueError("Invalid level provided")
+
+            request_json = humps.decamelize(request.get_json(force=True))
+
+            google_business_owner_id = "andrew@filed.com"
+            refresh_token = fixtures.google_business_owner_repository.get_refresh_token(google_business_owner_id)
+
+            mapping = AdsManagerUpdateStructureCommandMapping(target=AdsManagerUpdateStructureCommand)
+            command = mapping.load(request_json)
+
+            response = AdsManagerUpdateStructureCommandHandlerAdsAPI.handle(
+                refresh_token=refresh_token,
+                google_config=config.google,
+                command=command,
+                level=level,
+            )
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to process request."}, 400

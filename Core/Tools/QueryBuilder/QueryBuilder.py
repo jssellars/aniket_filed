@@ -150,7 +150,6 @@ class QueryBuilderRequestMapper:
 
 
 class AgGridInsightsRequest:
-
     __structure_columns = []
 
     def __init__(self, query_builder_request: Dict):
@@ -170,7 +169,6 @@ class AgGridInsightsRequest:
 
 
 class AgGridTrendRequest:
-
     __structure_columns = []
 
     def __init__(self, query_builder_request: Dict):

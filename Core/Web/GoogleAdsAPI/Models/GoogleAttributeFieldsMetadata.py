@@ -28,6 +28,8 @@ class GoogleAttributeFieldsMetadata:
 
     resource_name = GoogleFieldsMetadata.resource_name
 
+    campaign_budget = GoogleFieldsMetadata.campaign_budget
+
     currency_code = GoogleFieldsMetadata.currency_code
 
     level = GoogleFieldsMetadata.level

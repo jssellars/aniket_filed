@@ -39,6 +39,7 @@ router_route_pairs = (
     (routers.AdsManager, "<int:account_id>/<string:level>/<int:structure_id>"),
     (routers.AdsManagerAgGridStructuresPerformance, "ag-grid-structures-performance/<string:level>"),
     (routers.AdsManagerCatalogsViewsAgGrid, "ag-grid-views/<string:level>"),
+    (routers.InLineEdits, "in-line-edit/<string:level>"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")

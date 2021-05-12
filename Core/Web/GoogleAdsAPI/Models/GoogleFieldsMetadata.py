@@ -53,56 +53,56 @@ class GoogleFieldsMetadata:
     )
 
     bidding_strategy_id = GoogleField(
-        name="Bidding strategy ID",
+        name="bidding_strategy_id",
         field_name="id",
         field_type=GoogleFieldType.METRIC,
         resource_type=GoogleResourceType.BIDDING_STRATEGY,
     )
 
     bidding_strategy_name = GoogleField(
-        name="Bidding strategy name",
-        field_name="bidding_strategy_id",
+        name="bidding_strategy_name",
+        field_name="bidding_strategy_name",
         field_type=GoogleFieldType.METRIC,
         resource_type=GoogleResourceType.BIDDING_STRATEGY,
     )
 
     ad_id = GoogleField(
-        name="Ad ID",
+        name="ad_id",
         field_name="ad_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.Ad,
     )
 
     ad_name = GoogleField(
-        name="Ad Name",
+        name="ad_name",
         field_name="ad_name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.Ad,
     )
 
     adgroup_id = GoogleField(
-        name="Ad Group ID",
+        name="ad_group_id",
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
     )
 
     adgroup_name = GoogleField(
-        name="Ad Group Name",
+        name="ad_group_name",
         field_name="name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
     )
 
     campaign_id = GoogleField(
-        name="Campaign ID",
+        name="campaign_id",
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
     )
 
     campaign_name = GoogleField(
-        name="Campaign Name",
+        name="campaign_name",
         field_name="name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
@@ -136,6 +136,13 @@ class GoogleFieldsMetadata:
         resource_type=GoogleResourceType.KEYWORD_VIEW,
     )
 
+    campaign_budget = GoogleField(
+        name="campaign_budget",
+        field_name="campaign_budget",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CAMPAIGN,
+    )
+
     currency_code = GoogleField(
         name="currency",
         field_name="currency_code",
@@ -158,21 +165,21 @@ class GoogleFieldsMetadata:
     )
 
     maximize_conversion_value_target_roas = GoogleField(
-        name="Target ROAS",
+        name="target_roas",
         field_name="maximize_conversion_value.target_roas",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
     )
 
     optimization_score = GoogleField(
-        name="Optimization score",
+        name="optimization_score",
         field_name="optimization_score",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
     )
 
     target_cpa = GoogleField(
-        name="Target CPA",
+        name="target_cpa",
         field_name="maximize_conversions.target_cpa",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
@@ -383,43 +390,43 @@ class GoogleFieldsMetadata:
     )
 
     viewable_impressions = GoogleField(
-        name="viewable impressions",
+        name="viewable_impressions",
         field_name="active_view_impressions",
         field_type=GoogleFieldType.METRIC,
     )
 
     measurable_impressions = GoogleField(
-        name="Measurable impressions",
+        name="measurable_impressions",
         field_name="active_view_measurable_impressions",
         field_type=GoogleFieldType.METRIC,
     )
 
     measurable_cost = GoogleField(
-        name="Measurable cost ",
+        name="measurable_cost ",
         field_name="active_view_measurable_cost_micros",
         field_type=GoogleFieldType.METRIC,
     )
 
     Mmesurable_rate = GoogleField(
-        name="Measurable rate ",
+        name="measurable_rate ",
         field_name="active_view_measurability",
         field_type=GoogleFieldType.METRIC,
     )
 
     average_viewable_cpm = GoogleField(
-        name="Average viewable CPM",
+        name="average_viewable_cpm",
         field_name="active_view_cpm",
         field_type=GoogleFieldType.METRIC,
     )
 
     viewable_ctr = GoogleField(
-        name="Viewable CTR",
+        name="viewable_ctr",
         field_name="active_view_ctr",
         field_type=GoogleFieldType.METRIC,
     )
 
     viewable_rate = GoogleField(
-        name="Viewable Rate ",
+        name="viewable_rate ",
         field_name="active_view_viewability",
         field_type=GoogleFieldType.METRIC,
     )
@@ -431,37 +438,37 @@ class GoogleFieldsMetadata:
     )
 
     cost_per_conversion = GoogleField(
-        name="Cost Per Conversion",
+        name="cost_per_conversion",
         field_name="cost_per_conversion",
         field_type=GoogleFieldType.METRIC,
     )
 
     conversion_rate = GoogleField(
-        name="Conversion Rate",
+        name="conversion_rate",
         field_name="conversion_rate",
         field_type=GoogleFieldType.METRIC,
     )
 
     conversions_value = GoogleField(
-        name="Conversion value",
+        name="conversion_value",
         field_name="conversions_value",
         field_type=GoogleFieldType.METRIC,
     )
 
     conversions_value_per_cost = GoogleField(
-        name="Conversion value per cost",
+        name="conversion_value_per_cost",
         field_name="conversions_value_per_cost",
         field_type=GoogleFieldType.METRIC,
     )
 
     value_per_conversion = GoogleField(
-        name="Value per conversion",
+        name="value_per_conversion",
         field_name="value_per_conversion ",
         field_type=GoogleFieldType.METRIC,
     )
 
     conversions_by_conversion_date = GoogleField(
-        name="Conversions (by conv. time)",
+        name="conversions_by_conv_time",
         field_name="conversions_by_conversion_date",
         field_type=GoogleFieldType.METRIC,
     )

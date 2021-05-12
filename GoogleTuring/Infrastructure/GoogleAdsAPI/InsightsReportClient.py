@@ -57,7 +57,6 @@ class InsightsReportClient(AdsBaseClient):
         response = []
         for batch in query_response:
             for row in batch.results:
-                print(row)
                 breakdown_metric = InsightsReportClient.__get_breakdown_metric(row, breakdown_column)
                 insights = GooglePerformanceInsightsResponse(
                     date=row.segments.date,

@@ -1,7 +1,7 @@
 import logging
 from dataclasses import asdict
 
-from Core.Tools.QueryBuilder.QueryBuilderGoogleFilter import QueryBuilderGoogleFilters
+from Core.Tools.QueryBuilder.QueryBuilderGoogleMappers import QueryBuilderGoogleFilters
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
 from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
