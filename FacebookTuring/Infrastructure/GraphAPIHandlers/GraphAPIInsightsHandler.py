@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Tuple, Union
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.adobjects.campaign import Campaign
+from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adcreative import AdCreative
 
 from Core import mongo_adapter
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
@@ -332,6 +334,27 @@ class GraphAPIInsightsHandler:
                 fb_campaign = Campaign(campaign_id)
                 fb_campaign.api_get(fields=["name"])
                 data[FieldsMetadata.campaign_name.name] = fb_campaign._json["name"]
+
+        if level == FieldsMetadata.ad.name:
+
+            for data in response:
+                ad_id = data.get("ad_id")
+                if not ad_id:
+                    break
+                fb_ad = Ad(ad_id)
+                ad_creatives = fb_ad.get_ad_creatives(fields=[AdCreative.Field.image_hash, AdCreative.Field.image_url])
+
+                ad_creative = ad_creatives.get_one()
+                try:
+                    data["image_url"] = ad_creative[AdCreative.Field.image_url]
+                except KeyError:
+                    fields = [AdCreative.Field.thumbnail_url]
+                    params = {
+                        'thumbnail_width': 150,
+                        'thumbnail_height': 120,
+                    }
+                    ad_creative.remote_read(fields=fields, params=params)
+                    data["image_url"] = ad_creative[AdCreative.Field.thumbnail_url]
 
         return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
 

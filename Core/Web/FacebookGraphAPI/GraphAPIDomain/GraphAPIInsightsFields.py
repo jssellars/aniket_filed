@@ -247,6 +247,7 @@ class GraphAPIInsightsFields:
     lifetime_min_spend_target = "lifetime_min_spend_target"
     targetingsentencelines = "targetingsentencelines"
     daily_spend_cap = "daily_spend_cap"
+    ad = "ad"
     adset = "adset"
     creative = "creative"
     last_updated_by_app_id = "last_updated_by_app_id"

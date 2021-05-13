@@ -397,6 +397,12 @@ class FieldsStructureMetadata:
                             facebook_fields=[GraphAPIInsightsFields.daily_spend_cap],
                             mapper=OneToOneFieldMapper(),
                             field_type=FieldType.STRUCTURE)
+    ad = Field(name="ad",
+                  facebook_fields=[GraphAPIInsightsFields.ad],
+                  mapper=OneToOneFieldMapper(),
+                  field_type=FieldType.STRUCTURE,
+                  data_type_id=FieldDataTypeEnum.TEXT.value,
+                  aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
     adset = Field(name="adset",
                   facebook_fields=[GraphAPIInsightsFields.adset],
                   mapper=OneToOneFieldMapper(),
