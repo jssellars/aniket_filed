@@ -73,7 +73,7 @@ class Influencers(Base):
     Details = Column(NVARCHAR())
 
     PlatformId = Column(BIGINT)
-    InfluencersCategoriesId = Column(BIGINT)
+    InfluencerCategoryId = Column(BIGINT)
 
     def __repr__(self):
         return f"<User(name={self.Name}')>"
