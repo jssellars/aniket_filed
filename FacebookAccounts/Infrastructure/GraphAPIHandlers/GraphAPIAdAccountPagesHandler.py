@@ -49,7 +49,10 @@ class GraphAPIAdAccountPagesHandler:
         )
 
         # get promoted pages
-        promote_pages = account.get_promote_pages()
+        # Note: We filter valid pages if they have an associated business field
+        # But the existence of business field might not necessarily be the determining factor
+        raw_promote_pages = account.get_promote_pages(fields=["name", "id", "business"])
+        promote_pages = [page for page in raw_promote_pages if page.pop("business", None) is not None]
 
         all_pages = chain(db_pages_result, promote_pages)
 
