@@ -26,7 +26,7 @@ class Version(Resource):
 
 class InfluencerProfiles(Resource):
     @staticmethod
-    def extract_param_or_default(request, param_name, default) -> int:
+    def extract_param_or_default(request, param_name: str, default: int) -> int:
         """
         Extract params from request
 
@@ -34,8 +34,13 @@ class InfluencerProfiles(Resource):
         or a value for parameter is not provided
         return default
         """
-        response = request.args.get(param_name) or default
-        return int(response)
+        try:
+            response = request.args.get(param_name) or default
+            response = int(response)
+        except (TypeError, ValueError) as _:
+            response = default
+        finally:
+            return response
 
     def get(self):
         last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
