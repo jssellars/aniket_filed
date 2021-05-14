@@ -1,4 +1,7 @@
 from contextlib import contextmanager
+from typing import ContextManager
+
+from sqlalchemy.orm import Session
 
 from Core import fixtures
 from Core import logging_config
@@ -12,7 +15,13 @@ logger.info("Configuration details", extra=logging_config.app_config_as_log_dict
 
 
 @contextmanager
-def session_scope():
+def session_scope() -> ContextManager[Session]:
+    """
+    Context manager to gracefully handle sessions
+
+    Copied from documentation
+    https://docs.sqlalchemy.org/en/13/orm/session_basics.html#when-do-i-construct-a-session-when-do-i-commit-it-and-when-do-i-close-it
+    """
     session = fixtures.sql_db_session()
 
     try:

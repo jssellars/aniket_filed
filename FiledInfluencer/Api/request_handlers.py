@@ -1,4 +1,5 @@
 import json
+from typing import Dict, List
 
 import humps
 
@@ -9,7 +10,12 @@ from FiledInfluencer.Api.startup import session_scope
 
 class InfluencerProfilesHandler:
     @staticmethod
-    def convert_to_json(influencer: Influencers):
+    def convert_to_json(influencer: Influencers) -> Dict[str, str]:
+        """
+        Convert a sqlalchemy model to pydantic schema camelized json
+
+        :returns: camelized dictionary keys
+        """
         details = json.loads(influencer.Details)
 
         pydantic_influencer = InfluencersResponse(
@@ -23,7 +29,7 @@ class InfluencerProfilesHandler:
         return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
-    def get_profiles(cls, last_influencer_id: int, page_size: int):
+    def get_profiles(cls, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
 

@@ -27,6 +27,13 @@ class Version(Resource):
 class InfluencerProfiles(Resource):
     @staticmethod
     def extract_param_or_default(request, param_name, default) -> int:
+        """
+        Extract params from request
+
+        If parameter is not present,
+        or a value for parameter is not provided
+        return default
+        """
         response = request.args.get(param_name) or default
         return int(response)
 
