@@ -40,6 +40,14 @@ class ViewFieldsMetricStructureMetadata:
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=False,
     )
+    ad_image = ViewColumn(
+        Autoincrement.hex_string("ad_image"),
+        display_name="Ad Image",
+        primary_value=FieldsMetadata.ad_image,
+        type_id=ViewColumnType.IMAGE.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        is_fixed=False,
+    )
     ad_name = ViewColumn(
         Autoincrement.hex_string("ad_name"),
         display_name="Ad name",

@@ -53,6 +53,9 @@ from FacebookTuring.Api.Catalogs.BusinessViews.ViewVideoEngagement import (
     ViewAdVideoEngagement,
     ViewCampaignVideoEngagement,
 )
+from FacebookTuring.Api.Catalogs.BusinessViews.ViewAdCreateNew import (
+    ViewAdCreateNew,
+)
 from FacebookTuring.Api.Catalogs.Columns.ViewColumns.ViewColumn import ViewColumn
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewBase import View
 from FacebookTuring.Api.Catalogs.Views.ViewsAdsManager.ViewColumnsMaster import ViewColumnsMaster
@@ -73,6 +76,7 @@ class AdsManagerCatalogsViewsAgGridDto:
             ViewCampaignTargetingAndCreative(),
             ViewCampaignBiddingAndOptimization(),
             ViewCampaignQuickScan(),
+
         ]
     }
 
@@ -103,6 +107,7 @@ class AdsManagerCatalogsViewsAgGridDto:
             ViewAdTargetingAndCreative(),
             ViewAdBiddingAndOptimization(),
             ViewAdQuickScan(),
+            ViewAdCreateNew(),
         ]
     }
 

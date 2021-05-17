@@ -12,3 +12,4 @@ class ViewColumnType(Enum):
     BUTTON = 7
     DATE = 8
     BUDGET = 9
+    IMAGE = 10

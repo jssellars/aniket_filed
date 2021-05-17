@@ -250,6 +250,7 @@ class GraphAPIInsightsFields:
     ad = "ad"
     adset = "adset"
     creative = "creative"
+    image_url = "image_url"
     last_updated_by_app_id = "last_updated_by_app_id"
     source_ad = "source_ad"
     source_ad_id = "source_ad_id"
