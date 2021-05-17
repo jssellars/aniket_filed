@@ -59,9 +59,15 @@ class SqlServer(BaseModel):
     username: str
     password: str
     name: str
+    driver: Optional[str] = None
 
     @property
     def connection_string(self):
+
+        # use driver if available to connect on windows
+        if self.driver:
+            return f"mssql://{self.username}:{self.password}@{self.host}/{self.name}?driver={self.driver}"
+
         return f"mssql+pymssql://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
 
 
