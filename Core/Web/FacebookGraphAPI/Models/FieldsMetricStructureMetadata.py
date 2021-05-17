@@ -30,6 +30,12 @@ class FieldsMetricStructureMetadata:
                     field_type=FieldType.INSIGHT,
                     data_type_id=FieldDataTypeEnum.TEXT.value,
                     aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
+    ad_image = Field(name="ad_image",
+                    facebook_fields=[GraphAPIInsightsFields.image_url],
+                    mapper=OneToOneFieldMapper(),
+                    field_type=FieldType.STRUCTURE,
+                    data_type_id=FieldDataTypeEnum.TEXT.value,
+                    aggregation_type_id=FieldAggregationTypeEnum.NULL.value)
     adset_id = Field(name="adset_id",
                      facebook_fields=[GraphAPIInsightsFields.adset_id],
                      mapper=OneToOneFieldMapper(),
