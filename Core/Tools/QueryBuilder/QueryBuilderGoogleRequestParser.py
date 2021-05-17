@@ -47,6 +47,8 @@ class QueryBuilderGoogleRequestParser:
         self.__report = None
         self.__level = None
         self.breakdown_column = None
+        self.__next_page_cursor = None
+        self.__page_size = None
 
     @property
     def report(self):
@@ -67,6 +69,14 @@ class QueryBuilderGoogleRequestParser:
     @property
     def manager_id(self):
         return self.__manager_id
+
+    @property
+    def next_page_cursor(self):
+        return self.__next_page_cursor
+
+    @property
+    def page_size(self):
+        return self.__page_size
 
     @property
     def start_date(self):
@@ -162,6 +172,8 @@ class QueryBuilderGoogleRequestParser:
         self.__manager_id = request.google_manager_id
         self.__level = level
         self.__google_fields = request.ag_columns
+        self.__next_page_cursor = request.next_page_cursor
+        self.__page_size = request.page_size
         self.__parse_where_conditions(request.filter_model, request.time_range)
         self.__parse_sort_model(request.sort_model)
 

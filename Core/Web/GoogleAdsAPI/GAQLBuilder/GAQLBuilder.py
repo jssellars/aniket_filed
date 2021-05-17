@@ -139,7 +139,9 @@ class GAQLBuilder:
     def build_(self):
         parts = ["SELECT ", (", ".join(self.select_fields))]
         parts.extend([" FROM ", self.from_resource])
-        parts.append(f" WHERE {' AND '.join([clause for clause in self.where_builders])}")
+
+        if len(self.where_builders) > 0:
+            parts.append(f" WHERE {' AND '.join([clause for clause in self.where_builders])}")
 
         if self.order:
             parts.append(self.order)

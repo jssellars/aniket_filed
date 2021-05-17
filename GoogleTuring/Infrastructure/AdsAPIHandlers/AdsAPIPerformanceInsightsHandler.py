@@ -22,6 +22,8 @@ class AdsAPIPerformanceInsightsHandler:
         level = query_builder_request_parser.level
         filtering = query_builder_request_parser.filters
         sorting = query_builder_request_parser.sorting
+        page_size = query_builder_request_parser.page_size
+        next_page_token = query_builder_request_parser.next_page_cursor
 
         performance_insights_client = cls._build_client(config, refresh_token, client_manager_id)
 
@@ -31,6 +33,8 @@ class AdsAPIPerformanceInsightsHandler:
                 filtering=filtering,
                 sorting=sorting,
                 level=level,
+                page_size=page_size,
+                next_page_token=next_page_token,
             )
         except GoogleAdsException as ex:
             logger.exception(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")

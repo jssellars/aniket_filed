@@ -63,9 +63,12 @@ class AdsManagerInsightsPerformance:
     def get_performance_insights(cls, refresh_token, config, query_json, level):
         try:
             query_builder_request_parser = cls.__map_query(query_json, level)
-            return AdsAPIPerformanceInsightsHandler.get_performance_insights(
+            next_page_token, data, summary = AdsAPIPerformanceInsightsHandler.get_performance_insights(
                 config=config, refresh_token=refresh_token, query_builder_request_parser=query_builder_request_parser
             )
+
+            return {"nextPageCursor": next_page_token, "data": data, "summary": summary}
+
         except GoogleAdsException as ex:
             logger.exception(f"Request with ID '{ex.request_id}' failed with status {ex.error.code().name}")
 

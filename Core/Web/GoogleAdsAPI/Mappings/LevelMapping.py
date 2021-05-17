@@ -54,3 +54,11 @@ class LevelToGoogleDeleteNamesKeyMapping:
     ADGROUP = ["campaign_name"]
     AD = ["campaign_name", "adgroup_name"]
     KEYWORDS = ["campaign_name", "adgroup_name"]
+
+
+class GoogleLevelPlural(EnumerationBase):
+    ACCOUNT = "accounts"
+    CAMPAIGN = "campaigns"
+    AD_GROUP = "ad groups"
+    AD = "ads"
+    KEYWORD_VIEW = "keywords"
