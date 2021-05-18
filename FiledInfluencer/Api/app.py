@@ -24,7 +24,6 @@ router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
     (routers.Version, "version"),
     (routers.InfluencerProfiles, "influencer-profiles"),
-    # (routers.EmailTemplates, "email-templates"),
     (routers.EmailTemplates, "email-templates/<string:user_id>"),
 )
 for router, route in router_route_pairs:

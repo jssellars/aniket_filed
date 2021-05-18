@@ -9,14 +9,14 @@ class Default:
     name = core.Name(domain="filed", name="influencer", kind="api")
     port = 47850
 
-    # sql_server = core.replace_in_class(
-    #     get_env_model(env, "sql_server"),
-    #     host="dev-zone.ctonnmgtbe2i.eu-west-1.rds.amazonaws.com",
-    #     username="filed_admin",
-    #     password="dvserv3#rathena",
-    #     name="Dev3.Filed.SMI.Influencers",
-    #     port=1433,
-    # )
+    sql_server = core.replace_in_class(
+        get_env_model(env, "sql_server"),
+        host="dev-zone.ctonnmgtbe2i.eu-west-1.rds.amazonaws.com",
+        username="filed_admin",
+        password="dvserv3#rathena",
+        name="Dev3.Filed.SMI.Influencers",
+        port=1433,
+    )
 
     # Local Testing
     # sql_server = core.replace_in_class(
@@ -29,12 +29,12 @@ class Default:
     # )
 
     # Local Testing 2
-    sql_server = core.replace_in_class(
-        get_env_model(env, "sql_server"),
-        host="DESKTOP-JDD3RNF",
-        username="sa",
-        password="123456",
-        name="local3.Filed.SMI.Influencers",
-        port=1433,
-        driver="SQL Server Native Client 11.0",
-    )
+    # sql_server = core.replace_in_class(
+    #     get_env_model(env, "sql_server"),
+    #     host="DESKTOP-JDD3RNF",
+    #     username="sa",
+    #     password="123456",
+    #     name="local3.Filed.SMI.Influencers",
+    #     port=1433,
+    #     driver="SQL Server Native Client 11.0",
+    # )
