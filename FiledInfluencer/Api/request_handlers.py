@@ -46,6 +46,7 @@ class InfluencerProfilesHandler:
 
 class EmailTemplateHandler:
     blank_field_error_msg = "This field cannot be left blank"
+
     @classmethod
     def email_template_parser(cls):
         """
@@ -53,23 +54,27 @@ class EmailTemplateHandler:
         """
 
         parser = reqparse.RequestParser()
-        parser.add_argument('name',
-                            type=str,
-                            required=False,
-                            )
-        parser.add_argument('subject',
-                            type=str,
-                            required=False,
-                            )
-        parser.add_argument('body',
-                            type=str,
-                            required=False,
-                            )
-        parser.add_argument('campaign',
-                            type=int,
-                            required=True,
-                            help=cls.blank_field_error_msg
-                            )
+        parser.add_argument(
+            'name',
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            'subject',
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            'body',
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            'campaign',
+            type=int,
+            required=True,
+            help=cls.blank_field_error_msg
+        )
         return parser
 
     @staticmethod
@@ -87,7 +92,6 @@ class EmailTemplateHandler:
 
     @classmethod
     def get_email_templates(cls, user_id) -> List[Dict[str, str]]:
-
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient

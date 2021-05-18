@@ -1,8 +1,7 @@
-from pydantic.fields import Any
-from typing import Optional
-
 from datetime import datetime
+
 from pydantic import BaseModel, AnyUrl
+from typing import Optional
 
 
 # https://pydantic-docs.helpmanual.io/usage/schema/#json-schema-types
