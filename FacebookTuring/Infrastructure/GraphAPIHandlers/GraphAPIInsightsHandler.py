@@ -331,9 +331,7 @@ class GraphAPIInsightsHandler:
                 campaign_id = data.get("campaign_id")
                 if not campaign_id:
                     break
-                fb_campaign = Campaign(campaign_id)
-                fb_campaign.api_get(fields=["name"])
-                data[FieldsMetadata.campaign_name.name] = fb_campaign._json["name"]
+                data[FieldsMetadata.campaign_name.name] = cls._get_campaign_name(campaign_id)
 
         if level == FieldsMetadata.ad.name:
 
@@ -341,22 +339,52 @@ class GraphAPIInsightsHandler:
                 ad_id = data.get("ad_id")
                 if not ad_id:
                     break
-                fb_ad = Ad(ad_id)
-                ad_creatives = fb_ad.get_ad_creatives(fields=[AdCreative.Field.image_hash, AdCreative.Field.image_url])
-
-                ad_creative = ad_creatives.get_one()
-                try:
-                    data["image_url"] = ad_creative[AdCreative.Field.image_url]
-                except KeyError:
-                    fields = [AdCreative.Field.thumbnail_url]
-                    params = {
-                        'thumbnail_width': 150,
-                        'thumbnail_height': 120,
-                    }
-                    ad_creative.remote_read(fields=fields, params=params)
-                    data["image_url"] = ad_creative[AdCreative.Field.thumbnail_url]
+                data[FieldsMetadata.ad_image.name] = cls._get_image_url_ad(ad_id)
 
         return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
+
+    @classmethod
+    def _get_image_url_ad(
+            cls,
+            ad_id: str
+    ) -> str:
+        fb_ad = Ad(ad_id)
+        ad_creatives = fb_ad.get_ad_creatives(fields=[AdCreative.Field.image_hash, AdCreative.Field.image_url])
+
+        ad_creative = ad_creatives.get_one()
+        try:
+            """
+            Image URL is preferred because that is already obtained when creating creative and has better quality
+            But all creatives don't have image_url so replaced with thumbnail_url (requires extra call)
+            """
+            return ad_creative[AdCreative.Field.image_url]
+        except KeyError:
+
+            return cls._get_thumbnail_url(ad_creative)
+
+    @classmethod
+    def _get_thumbnail_url(
+            cls,
+            ad_creative: AdCreative
+    ) -> str:
+        fields = [AdCreative.Field.thumbnail_url]
+        params = {
+            'thumbnail_width': 150,
+            'thumbnail_height': 120,
+        }
+        ad_creative.api_get(fields=fields, params=params)
+        return ad_creative[AdCreative.Field.thumbnail_url]
+
+    @classmethod
+    def _get_campaign_name(
+            cls,
+            campaign_id: str
+    ) -> str:
+        if not campaign_id:
+            return ""
+        fb_campaign = Campaign(campaign_id)
+        fb_campaign.api_get(fields=[Campaign.Field.name])
+        return fb_campaign._json[Campaign.Field.name]
 
     @classmethod
     def _get_insights_master_data(
