@@ -1,7 +1,7 @@
 import json
-from typing import Dict, List
 
 import humps
+from typing import Dict, List
 
 from FiledInfluencer.Api.models import Influencers
 from FiledInfluencer.Api.schemas import InfluencersResponse
@@ -29,13 +29,18 @@ class InfluencerProfilesHandler:
         return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
-    def get_profiles(cls, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
+    def get_profiles(cls, name: str, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
 
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient
-            results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id).limit(page_size)
+            if name:
+                search = "%{}%".format(name)
+                results = session.query(Influencers).filter(
+                    Influencers.Id >= last_influencer_id, Influencers.Name.like(search)).limit(page_size)
+            else:
+                results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id).limit(page_size)
 
         return [cls.convert_to_json(result) for result in results]

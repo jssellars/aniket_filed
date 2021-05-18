@@ -2,6 +2,7 @@ import logging
 
 import flask_restful
 from flask import request
+from pydantic.fields import Any
 
 from Core.flask_extensions import log_request
 from FiledInfluencer.Api.request_handlers import InfluencerProfilesHandler
@@ -26,7 +27,7 @@ class Version(Resource):
 
 class InfluencerProfiles(Resource):
     @staticmethod
-    def extract_param_or_default(request, param_name: str, default: int) -> int:
+    def extract_param_or_default(request, param_name: str, default: Any) -> int:
         """
         Extract params from request
 
@@ -36,16 +37,19 @@ class InfluencerProfiles(Resource):
         """
         try:
             response = request.args.get(param_name) or default
-            response = int(response)
+            if param_name != 'name':
+                response = int(response)
         except (TypeError, ValueError) as _:
             response = default
         finally:
             return response
 
     def get(self):
+        name = self.extract_param_or_default(request, "name", None)
         last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
         page_size = self.extract_param_or_default(request, "page_size", 100)
         response = InfluencerProfilesHandler.get_profiles(
+            name=name,
             last_influencer_id=last_influencer_id,
             page_size=page_size,
         )

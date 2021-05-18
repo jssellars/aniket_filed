@@ -33,8 +33,8 @@ class Default:
     #     get_env_model(env, "sql_server"),
     #     host="DESKTOP-JDD3RNF",
     #     username="sa",
-    #     password="",
-    #     name="filed",
+    #     password="123456",
+    #     name="local3.Filed.SMI.Influencers",
     #     port=1433,
     #     driver="SQL Server Native Client 11.0",
     # )
