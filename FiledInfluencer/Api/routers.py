@@ -1,10 +1,11 @@
 import logging
 
 import flask_restful
+from flask_restful import reqparse, inputs
 from flask import request
 
 from Core.flask_extensions import log_request
-from FiledInfluencer.Api.request_handlers import InfluencerProfilesHandler
+from FiledInfluencer.Api.request_handlers import InfluencerProfilesHandler, EmailTemplateHandler
 from FiledInfluencer.Api.startup import config
 
 logger = logging.getLogger(__name__)
@@ -50,3 +51,23 @@ class InfluencerProfiles(Resource):
             page_size=page_size,
         )
         return response, 200
+
+
+class EmailTemplates(Resource):
+    parser = EmailTemplateHandler.email_template_parser()
+
+    def get(self, user_id):
+        response = EmailTemplateHandler.get_email_templates(user_id)
+        if response:
+            return response, 200
+        return {'Message': 'Not Found'}, 400
+
+    def post(self, user_id):
+        data = EmailTemplates.parser.parse_args()
+        data["created_by"] = user_id
+        try:
+            email_template = EmailTemplateHandler.write_to_db(data)
+        except:
+            return {"message": "An error occurred while inserting the item."}, 500
+
+        return email_template, 200

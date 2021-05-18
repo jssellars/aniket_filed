@@ -87,3 +87,18 @@ class InfluencersCategories(Base):
 
     def __repr__(self):
         return f"<User(name={self.Name})>"
+
+
+class EmailTemplates(Base):
+    __tablename__ = 'EmailTemplates'
+
+    Id = Column(BIGINT, primary_key=True)
+    Name = Column(NVARCHAR(length=50))
+    Subject = Column(NVARCHAR(length=50))
+    Body = Column(NVARCHAR())
+    CampaignId = Column(BIGINT)
+    CreatedById = Column(BIGINT)
+    CreatedAt = Column(DATETIME2(precision=7))
+
+    def __repr__(self):
+        return f"<EmailTemplate(name={self.Name})>"
