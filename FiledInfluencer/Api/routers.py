@@ -1,8 +1,8 @@
 import logging
+from typing import Any
 
 import flask_restful
 from flask import request
-from pydantic.fields import Any
 
 from Core.flask_extensions import log_request
 from FiledInfluencer.Api.request_handlers import InfluencerProfilesHandler

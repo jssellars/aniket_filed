@@ -37,7 +37,7 @@ class InfluencerProfilesHandler:
             # for infinite scrolling
             # offset queries are inefficient
             if name:
-                search = "%{}%".format(name)
+                search = f"%{name}%"
                 results = session.query(Influencers).filter(
                     Influencers.Id >= last_influencer_id, Influencers.Name.like(search)).limit(page_size)
             else:
