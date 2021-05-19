@@ -1135,9 +1135,9 @@ class AddStructuresToParent:
         if parent_campaign_not_has_cbo and ("budget_optimization" in adset_request):
             budget_opt = adset_request.get("budget_optimization")
             # TODO: Discuss proper mapping of bidAmount and bidControl wit FE
-            # TODO: Validate Bid Strategy and Bid Control Pairing
             ad_set_template.bid_amount = int(budget_opt.get("bid_control", 0)) * 100
-            ad_set_template.bid_strategy = budget_opt.get("bid_strategy")
+            # Bid Strategy set to default for FE
+            ad_set_template.bid_strategy = Campaign.BidStrategy.lowest_cost_without_cap;
             ad_set_template.set_budget_opt(budget_opt["amount"], budget_opt["budget_allocated_type_id"])
 
         targeting_request = adset_request.get("targeting")
