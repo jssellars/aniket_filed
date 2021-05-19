@@ -26,6 +26,8 @@ class Version(Resource):
 
 
 class InfluencerProfiles(Resource):
+    #  Todo : Use parser here.
+
     @staticmethod
     def extract_param_or_default(request, param_name: str, default: Any) -> int:
         """
