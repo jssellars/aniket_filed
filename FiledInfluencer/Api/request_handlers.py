@@ -1,10 +1,13 @@
 import json
 
+from datetime import datetime
+from flask_restful import reqparse, inputs
+
 import humps
 from typing import Dict, List
 
-from FiledInfluencer.Api.models import Influencers
-from FiledInfluencer.Api.schemas import InfluencersResponse
+from FiledInfluencer.Api.models import Influencers, EmailTemplates
+from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
 from FiledInfluencer.Api.startup import session_scope
 
 
@@ -44,3 +47,79 @@ class InfluencerProfilesHandler:
                 results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id).limit(page_size)
 
         return [cls.convert_to_json(result) for result in results]
+
+
+class EmailTemplateHandler:
+    blank_field_error_msg = "This field cannot be left blank"
+
+    @classmethod
+    def email_template_parser(cls):
+        """
+        Parser the fields coming from the request
+        """
+
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'name',
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            'subject',
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            'body',
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            'campaign',
+            type=int,
+            required=True,
+            help=cls.blank_field_error_msg
+        )
+        return parser
+
+    @staticmethod
+    def convert_to_json(email_template: EmailTemplates) -> Dict[str, str]:
+        """
+        Convert a sqlalchemy model to pydantic schema camelized json
+
+        :returns: camelized dictionary keys
+        """
+
+        pydantic_email_template = EmailTemplateResponse.from_orm(email_template)
+        # Datetime is not JSON serializable
+        json_email_template = pydantic_email_template.json()
+        return humps.camelize(json.loads(json_email_template))
+
+    @classmethod
+    def get_email_templates(cls, user_id) -> List[Dict[str, str]]:
+        with session_scope() as session:
+            # for infinite scrolling
+            # offset queries are inefficient
+            results = session.query(EmailTemplates).filter(EmailTemplates.CreatedById == user_id)
+
+        return [cls.convert_to_json(result) for result in results]
+
+    @classmethod
+    def populate_model(cls, data):
+        email_template = EmailTemplates(
+            Name=data['name'],
+            Subject=data['subject'],
+            Body=data['body'],
+            CampaignId=data['campaign'],
+            CreatedById=data['created_by'],
+            CreatedAt=datetime.utcnow(),
+        )
+        return email_template
+
+    @classmethod
+    def write_to_db(cls, data):
+        value = cls.populate_model(data)
+        with session_scope() as session:
+            session.add(value)
+        value = cls.convert_to_json(value)
+        return value

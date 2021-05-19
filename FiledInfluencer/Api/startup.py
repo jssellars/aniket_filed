@@ -26,6 +26,9 @@ def session_scope() -> ContextManager[Session]:
 
     try:
         yield session
+        # The objects within the session are expired upon commit,
+        # set expire_on_commit to false to keep using them
+        session.expire_on_commit = False
         session.commit()
 
     # intentional wide scope to rollback session
