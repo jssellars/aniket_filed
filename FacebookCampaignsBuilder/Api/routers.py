@@ -13,12 +13,12 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extract_user_filed_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, CampaignBuilderPermissions
 from FacebookCampaignsBuilder.Api import command_handlers, commands, queries
-from FacebookCampaignsBuilder.Api.command_handlers import PublishProgress, PublishAddAdAdsetRequest
+from FacebookCampaignsBuilder.Api.command_handlers import PublishProgress, PublishRequestToMessageQueue
 from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure, GetStructure
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from flask import request
 
-from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import PublishAddAdsetAdEvent
+from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import PublishAddAdsetAdEvent, PublishSmartEditEvent
 
 logger = logging.getLogger(__name__)
 
@@ -378,7 +378,7 @@ class AddAnAdAdsetPublishStructure(Resource):
         try:
             request_json = humps.depascalize(request.get_json(force=True))
             publish_request = PublishAddAdsetAdEvent(**request_json)
-            PublishAddAdAdsetRequest.publish(publish_request)
+            PublishRequestToMessageQueue.publish(publish_request)
 
             return None, 200
 
@@ -386,3 +386,19 @@ class AddAnAdAdsetPublishStructure(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return Tools.create_error(e, "AddAnAdAdsetEndpoint"), 400
+
+
+class SmartEditPublishStructure(Resource):
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    def post(self):
+        try:
+            request_json = humps.depascalize(request.get_json(force=True))
+            publish_request = PublishSmartEditEvent(**request_json)
+            PublishRequestToMessageQueue.publish(publish_request)
+
+            return None, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return Tools.create_error(e, "SmartEditPublishEndpoint"), 400

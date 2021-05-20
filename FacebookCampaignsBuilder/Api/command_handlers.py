@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from Core.facebook.sdk_adapter.smart_create import ad_builder
 from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
@@ -8,7 +8,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from facebook_business.adobjects.adaccount import AdAccount
 from FacebookCampaignsBuilder.Api import commands
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
-from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import PublishAddAdsetAdEvent
+from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import PublishAddAdsetAdEvent, PublishSmartEditEvent
 from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
     PublishStatus
 from werkzeug.datastructures import FileStorage
@@ -108,10 +108,10 @@ class PublishProgress:
         return feedback
 
 
-class PublishAddAdAdsetRequest:
+class PublishRequestToMessageQueue:
 
     @staticmethod
-    def publish(add_ad_adset_request: PublishAddAdsetAdEvent):
+    def publish(publish_request: Union[PublishAddAdsetAdEvent, PublishSmartEditEvent]):
         rabbitmq_adapter = fixtures.rabbitmq_adapter
-        rabbitmq_adapter.publish(add_ad_adset_request)
-        logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(add_ad_adset_request)})
+        rabbitmq_adapter.publish(publish_request)
+        logger.info({"rabbitmq": rabbitmq_adapter.serialize_message(publish_request)})

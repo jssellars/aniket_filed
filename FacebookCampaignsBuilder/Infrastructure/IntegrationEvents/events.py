@@ -160,3 +160,14 @@ class PublishAddAdsetAdEvent:
     child_ids: List[str]
     adsets: Optional[List[Dict]] = field(default_factory=list)
     ads: Optional[List[Dict]] = field(default_factory=list)
+
+
+@dataclass
+class PublishSmartEditEvent:
+    message_type = RequestTypeEnum.SMART_EDIT_PUBLISH_REQUEST.value
+    business_owner_facebook_id: str
+    ad_account_id: str
+    user_filed_id: str
+    campaigns: Optional[List[Dict]] = field(default_factory=list)
+    adsets: Optional[List[Dict]] = field(default_factory=list)
+    ads: Optional[List[Dict]] = field(default_factory=list)

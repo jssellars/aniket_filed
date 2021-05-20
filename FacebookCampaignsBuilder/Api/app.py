@@ -56,6 +56,7 @@ router_route_pairs = (
         "get-structure/<string:account_id>/<string:level>/<string:structure_ids>",
     ),
     (routers.AddAnAdAdsetPublishStructure, "add-structures-to-parent"),
+    (routers.SmartEditPublishStructure, "smart-edit-publish"),
 )
 
 for router, route in router_route_pairs:
