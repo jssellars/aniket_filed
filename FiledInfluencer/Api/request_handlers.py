@@ -32,19 +32,28 @@ class InfluencerProfilesHandler:
         return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
-    def get_profiles(cls, name: str, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
+    def get_profiles(cls, name: str, engagement: Dict, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
 
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient
+            Engagement_filters = (
+                Influencers.Engagement > engagement["min_count"],
+                Influencers.Engagement < engagement["max_count"],
+            )
+
             if name:
                 search = f"%{name}%"
+
                 results = session.query(Influencers).filter(
-                    Influencers.Id >= last_influencer_id, Influencers.Name.like(search)).limit(page_size)
+                    Influencers.Id >= last_influencer_id,
+                    Influencers.Name.like(search),
+                    *Engagement_filters).limit(page_size)
+
             else:
-                results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id).limit(page_size)
+                results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id, *Engagement_filters).limit(page_size)
 
         return [cls.convert_to_json(result) for result in results]
 
