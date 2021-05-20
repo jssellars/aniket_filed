@@ -54,6 +54,10 @@ class InfluencerProfiles(Resource):
         engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
         last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
         page_size = self.extract_param_or_default(request, "page_size", 100)
+
+        if engagement_min_count > engagement_max_count:
+            return {'Message': 'Followers range out of bounds'}, 400
+
         engagement = {
             'min_count': engagement_min_count,
             'max_count': engagement_max_count
