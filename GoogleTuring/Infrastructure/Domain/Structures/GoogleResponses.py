@@ -17,3 +17,18 @@ class GooglePerformanceInsightsResponse:
     keyword_match_type: Optional[str] = None
     date: Optional[str] = None
     device: Optional[str] = None
+
+
+@dataclass
+class GoogleAudienceResponse:
+    campaign_id: str
+    campaign_name: str
+    adgroup_id: str
+    adgroup_name: str
+    criterion_id: str
+    impressions: int
+    clicks: int
+    ctr: float
+    average_cpc: Optional[float] = None
+    audience: Optional[str] = None
+    audience_type: Optional[str] = None

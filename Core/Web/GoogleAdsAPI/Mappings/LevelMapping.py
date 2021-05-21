@@ -7,6 +7,7 @@ class Level(EnumerationBase):
     ADGROUP = "ad_group"
     AD = "ad"
     KEYWORDS = "keyword_view"
+    AUDIENCE = "ad_group_audience_view"
 
 
 class LevelManyToMongoCollectionEnum(EnumerationBase):
@@ -62,3 +63,4 @@ class GoogleLevelPlural(EnumerationBase):
     AD_GROUP = "ad groups"
     AD = "ads"
     KEYWORD_VIEW = "keywords"
+    AD_GROUP_AUDIENCE_VIEW = "audiences"

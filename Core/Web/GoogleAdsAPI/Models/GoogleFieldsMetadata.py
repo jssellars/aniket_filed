@@ -115,6 +115,13 @@ class GoogleFieldsMetadata:
         resource_type=GoogleResourceType.AD_GROUP_CRITERION,
     )
 
+    ad_group_criterion_id = GoogleField(
+        name="criterion_id",
+        field_name="criterion_id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
     keyword_match_type = GoogleField(
         name="keyword_match_type",
         field_name="keyword.match_type",
@@ -134,6 +141,13 @@ class GoogleFieldsMetadata:
         field_name="resource_name",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.KEYWORD_VIEW,
+    )
+
+    ad_group_criterion_resource_name = GoogleField(
+        name="resource_name",
+        field_name="resource_name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
     )
 
     campaign_budget = GoogleField(
@@ -669,4 +683,116 @@ class GoogleFieldsMetadata:
         name="Gmail clicks to website ",
         field_name="gmail_secondary_clicks",
         field_type=GoogleFieldType.METRIC,
+    )
+
+    ad_group_criterion_type = GoogleField(
+        name="type",
+        field_name="type",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    user_interest = GoogleField(
+        name="user_interest",
+        field_name="user_interest.user_interest_category",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    custom_intent = GoogleField(
+        name="custom_intent",
+        field_name="custom_intent.custom_intent",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    ad_group_criterion_status = GoogleField(
+        name="status",
+        field_name="status",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    user_interest_id = GoogleField(
+        name="user_interest_id",
+        field_name="user_interest_id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.USER_INTEREST,
+    )
+
+    user_interest_name = GoogleField(
+        name="name",
+        field_name="name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.USER_INTEREST,
+    )
+
+    user_interest_resource_name = GoogleField(
+        name="resource_name",
+        field_name="resource_name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.USER_INTEREST,
+    )
+
+    user_interest_taxonomy_type = GoogleField(
+        name="taxonomy_type",
+        field_name="taxonomy_type",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.USER_INTEREST,
+    )
+
+    user_interest_parent = GoogleField(
+        name="user_interest_parent",
+        field_name="user_interest_parent",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.USER_INTEREST,
+    )
+
+    custom_interest_id = GoogleField(
+        name="id",
+        field_name="id",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    custom_interest_name = GoogleField(
+        name="name",
+        field_name="name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    custom_interest_resource_name = GoogleField(
+        name="resource_name",
+        field_name="resource_name",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    custom_interest_status = GoogleField(
+        name="status",
+        field_name="status",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    custom_interest_type = GoogleField(
+        name="type",
+        field_name="type",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    custom_interest_members = GoogleField(
+        name="members",
+        field_name="members",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    custom_interest_description = GoogleField(
+        name="description",
+        field_name="description",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CUSTOM_INTEREST,
     )

@@ -6,9 +6,7 @@ from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata
-from GoogleTuring.Infrastructure.Domain.Structures.GooglePerformanceInsightsResponse import (
-    GooglePerformanceInsightsResponse,
-)
+from GoogleTuring.Infrastructure.Domain.Structures.GoogleResponses import GooglePerformanceInsightsResponse
 
 
 class InsightsReportClient(AdsBaseClient):

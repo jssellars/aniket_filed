@@ -352,18 +352,20 @@ class ReportsReportInsights(Resource):
         return GetInsightsHandler().handle(), 200
 
 
-class AdsManagerAgGridStructuresPerformance(Resource):
-    def post(self, level):
+class AdsManagerInsights:
+    @staticmethod
+    def handle(level):
         logger.info(request_as_log_dict(request))
 
         try:
-            if level not in [Level.CAMPAIGN.value, Level.ADGROUP.value, Level.KEYWORDS.value]:
+            if level not in [Level.CAMPAIGN.value, Level.ADGROUP.value, Level.KEYWORDS.value, Level.AUDIENCE.value]:
                 raise ValueError
 
             request_json = request.get_json(force=True)
 
             google_business_owner_id = "andrew@filed.com"
             refresh_token = fixtures.google_business_owner_repository.get_refresh_token(google_business_owner_id)
+
             response = AdsManagerInsightsPerformance.get_performance_insights(
                 refresh_token=refresh_token, config=config.google, query_json=request_json, level=level
             )
@@ -371,8 +373,17 @@ class AdsManagerAgGridStructuresPerformance(Resource):
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
-
             return {"message": "Failed to process request."}, 400
+
+
+class AdsManagerAgGridStructuresPerformance(Resource):
+    def post(self, level):
+        return AdsManagerInsights.handle(level)
+
+
+class GetAudiences(Resource):
+    def post(self):
+        return AdsManagerInsights.handle(Level.AUDIENCE.value)
 
 
 class AdsManagerCatalogsViewsAgGrid(Resource):

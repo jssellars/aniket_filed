@@ -16,3 +16,5 @@ class GoogleResourceType(Enum):
     KEYWORD_VIEW = "keyword_view"
     AD_GROUP_CRITERION = "ad_group_criterion"
     BIDDING_STRATEGY = "bidding_strategy"
+    USER_INTEREST = "user_interest"
+    CUSTOM_INTEREST = "custom_interest"
