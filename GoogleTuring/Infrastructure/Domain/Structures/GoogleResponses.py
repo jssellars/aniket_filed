@@ -26,9 +26,11 @@ class GoogleAudienceResponse:
     adgroup_id: str
     adgroup_name: str
     criterion_id: str
+    campaign_status: str
+    adgroup_status: str
     impressions: int
     clicks: int
     ctr: float
     average_cpc: Optional[float] = None
     audience: Optional[str] = None
-    audience_type: Optional[str] = None
+    type: Optional[str] = None

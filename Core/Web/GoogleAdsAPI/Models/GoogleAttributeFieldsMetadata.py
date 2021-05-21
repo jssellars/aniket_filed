@@ -81,3 +81,7 @@ class GoogleAttributeFieldsMetadata:
     custom_interest_members = GoogleFieldsMetadata.custom_interest_members
 
     custom_interest_description = GoogleFieldsMetadata.custom_interest_description
+
+    campaign_status = GoogleFieldsMetadata.campaign_status
+
+    adgroup_status = GoogleFieldsMetadata.adgroup_status

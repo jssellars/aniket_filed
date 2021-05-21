@@ -134,6 +134,45 @@ class ViewKeywordPerformance(View):
     ]
 
 
+class ViewAudiencePerformance(View):
+    name = "Performance"
+    table_name = "vAudienceInsights"
+    type = "Business"
+    columns = [
+        ViewColumnsMaster.audience_id,
+        ViewColumnsMaster.audience,
+        ViewColumnsMaster.audience_category,
+        ViewColumnsMaster.audience_type,
+        ViewColumnsMaster.campaign_id,
+        ViewColumnsMaster.campaign_name,
+        ViewColumnsMaster.adgroup_id,
+        ViewColumnsMaster.adgroup_name,
+        ViewColumnsMaster.clicks,
+        ViewColumnsMaster.cost,
+        ViewColumnsMaster.impressions,
+        ViewColumnsMaster.ctr,
+        ViewColumnsMaster.interactions,
+        ViewColumnsMaster.interaction_rate,
+        ViewColumnsMaster.engagements,
+        ViewColumnsMaster.engagement_rate,
+        ViewColumnsMaster.average_cpc,
+        ViewColumnsMaster.average_cost,
+        ViewColumnsMaster.average_cpe,
+        ViewColumnsMaster.average_cpm,
+        ViewColumnsMaster.average_cpv,
+        ViewColumnsMaster.average_target_cpa,
+        ViewColumnsMaster.average_target_roas,
+        ViewColumnsMaster.views,
+        ViewColumnsMaster.view_rate,
+        ViewColumnsMaster.video_p_25,
+        ViewColumnsMaster.video_p_50,
+        ViewColumnsMaster.video_p_75,
+        ViewColumnsMaster.video_p_100,
+        ViewColumnsMaster.absolute_top_impression_percentage,
+        ViewColumnsMaster.top_impression_percentage,
+    ]
+
+
 class ViewCampaignFallback(ViewCampaignPerformance):
     name = "Filed default view"
     type = "Fallback"

@@ -121,3 +121,48 @@ class ViewFieldsAttributeMetadata:
         is_sortable=True,
         is_filterable=True,
     )
+
+    audience_id = ViewColumn(
+        Autoincrement.hex_string("audience_id"),
+        display_name="Audience ID",
+        primary_value=GoogleFieldsMetadata.ad_group_criterion_id,
+        type_id=ViewColumnType.TEXT.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        is_fixed=False,
+    )
+
+    audience = ViewColumn(
+        Autoincrement.hex_string("audience"),
+        display_name="Audience",
+        primary_value=GoogleFieldsMetadata.audience,
+        type_id=ViewColumnType.LINK.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        pinned=PinnedDirection.LEFT,
+    )
+
+    audience_category = ViewColumn(
+        Autoincrement.hex_string("audience_category"),
+        display_name="Category",
+        primary_value=GoogleFieldsMetadata.audience_category,
+        type_id=ViewColumnType.TEXT.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        pinned=PinnedDirection.LEFT,
+    )
+
+    audience_type = ViewColumn(
+        Autoincrement.hex_string("audience_type"),
+        display_name="Type",
+        primary_value=GoogleFieldsMetadata.ad_group_criterion_type,
+        type_id=ViewColumnType.TEXT.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        pinned=PinnedDirection.LEFT,
+    )
+
+    level = ViewColumn(
+        Autoincrement.hex_string("level"),
+        display_name="Level",
+        primary_value=GoogleFieldsMetadata.level,
+        type_id=ViewColumnType.LINK.value,
+        category_id=ViewColumnCategory.SETTINGS.value,
+        pinned=PinnedDirection.LEFT,
+    )

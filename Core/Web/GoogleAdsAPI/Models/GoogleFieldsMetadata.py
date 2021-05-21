@@ -376,7 +376,7 @@ class GoogleFieldsMetadata:
     )
 
     level = GoogleField(
-        name="level",
+        name="Level",
         field_name="level",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER_CLIENT,
@@ -421,7 +421,7 @@ class GoogleFieldsMetadata:
         field_type=GoogleFieldType.METRIC,
     )
 
-    Mmesurable_rate = GoogleField(
+    measurable_rate = GoogleField(
         name="measurable_rate ",
         field_name="active_view_measurability",
         field_type=GoogleFieldType.METRIC,
@@ -795,4 +795,32 @@ class GoogleFieldsMetadata:
         field_name="description",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOM_INTEREST,
+    )
+
+    audience = GoogleField(
+        name="audience",
+        field_name="audience",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    audience_category = GoogleField(
+        name="audience_category",
+        field_name="audience_category",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+    )
+
+    campaign_status = GoogleField(
+        name="campaign_status",
+        field_name="status",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CAMPAIGN,
+    )
+
+    adgroup_status = GoogleField(
+        name="adgroup_status",
+        field_name="status",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.ADGROUP,
     )

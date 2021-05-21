@@ -7,6 +7,7 @@ from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import GoogleLevelPlural, Level
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleResourceType
 from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
+from GoogleTuring.Infrastructure.Domain.Enums.AudienceTypeEnum import AudienceTypeEnum
 from GoogleTuring.Infrastructure.Domain.Structures.GoogleInsightsSummaryResponse import GoogleInsightsSummaryResponse
 from GoogleTuring.Infrastructure.Domain.Structures.GoogleResponses import (
     GoogleAudienceResponse,
@@ -85,6 +86,8 @@ class PerformanceInsightsClient(AdsBaseClient):
                 GoogleAttributeFieldsMetadata.user_interest,
                 GoogleAttributeFieldsMetadata.custom_intent,
                 GoogleAttributeFieldsMetadata.ad_group_criterion_status,
+                GoogleAttributeFieldsMetadata.campaign_status,
+                GoogleAttributeFieldsMetadata.adgroup_status,
             ]
 
             field_names.extend([*adgroup_attributes, *campaign_attributes, *audience_attributes])
@@ -156,7 +159,9 @@ class PerformanceInsightsClient(AdsBaseClient):
                 campaign_name=row.campaign.name,
                 adgroup_id=str(row.ad_group.id),
                 adgroup_name=row.ad_group.name,
-                criterion_id=row.ad_group_criterion.criterion_id,
+                criterion_id=str(row.ad_group_criterion.criterion_id),
+                campaign_status=row.campaign.status.name,
+                adgroup_status=row.ad_group.status.name,
                 impressions=row.metrics.impressions,
                 clicks=row.metrics.clicks,
                 ctr=row.metrics.ctr,
@@ -164,7 +169,7 @@ class PerformanceInsightsClient(AdsBaseClient):
                 audience=row.ad_group_criterion.user_interest.user_interest_category
                 if row.ad_group_criterion.user_interest.user_interest_category != ""
                 else row.ad_group_criterion.custom_intent.custom_intent,
-                audience_type=row.ad_group_criterion.type_.name,
+                type=getattr(AudienceTypeEnum, row.ad_group_criterion.type_.name).name.replace("_", " ").capitalize(),
             )
 
             insights = {k: v for k, v in asdict(insights).items() if v is not None}
@@ -226,7 +231,8 @@ class PerformanceInsightsClient(AdsBaseClient):
 
         # replacing audience resource name with audience details
         for row in response:
-            row["audience"] = results.get(row["audience"], row["audience"])
+            # row["audience"] = results.get(row["audience"], row["audience"])
+            row.update(results.get(row["audience"], row["audience"]))
 
         return response
 
@@ -249,20 +255,22 @@ class PerformanceInsightsClient(AdsBaseClient):
             user_interest_response.update(
                 {
                     row.user_interest.resource_name: {
-                        "name": row.user_interest.name,
-                        "category": row.user_interest.user_interest_parent,
-                        "taxonomy_type": row.user_interest.taxonomy_type.name,
+                        "audience": row.user_interest.name,
+                        "audience_category": row.user_interest.user_interest_parent,
+                        "type": AudienceTypeEnum(row.user_interest.taxonomy_type).name.replace("_", " ").capitalize(),
                     }
                 }
             )
 
         # getting details for category (parent name)
         for row in user_interest_response:
-            user_interest_response[row]["category"] = user_interest_response.get(
-                user_interest_response[row]["category"], user_interest_response[row]["category"]
+            user_interest_response[row]["audience_category"] = user_interest_response.get(
+                user_interest_response[row]["audience_category"], user_interest_response[row]["audience_category"]
             )
-            if type(user_interest_response[row]["category"]) is dict:
-                user_interest_response[row]["category"] = user_interest_response[row]["category"].get("name")
+            if type(user_interest_response[row]["audience_category"]) is dict:
+                user_interest_response[row]["audience_category"] = user_interest_response[row]["audience_category"].get(
+                    "audience"
+                )
 
         return user_interest_response
 
@@ -282,7 +290,7 @@ class PerformanceInsightsClient(AdsBaseClient):
         query_response = self.perform_search(query, client_customer_id)
 
         # generating resource_name, audience detail dict from query response
-        # TODO optimize
+        # TODO optimize and clean this section
         custom_interest_response = {}
         for row in query_response:
             members = [
@@ -304,7 +312,8 @@ class PerformanceInsightsClient(AdsBaseClient):
             custom_interest_response.update(
                 {
                     row.custom_interest.resource_name: {
-                        "name": row.custom_interest.name,
+                        "audience": row.custom_interest.name,
+                        "audience_category": "Custom audience",
                         "description": row.custom_interest.description,
                         "members": member_list,
                     }

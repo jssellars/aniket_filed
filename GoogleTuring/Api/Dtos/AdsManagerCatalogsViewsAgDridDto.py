@@ -9,6 +9,7 @@ from Core.Web.GoogleAdsAPI.Models.GoogleFieldsMetadata import GoogleFieldsMetada
 from GoogleTuring.Api.Catalogs.BusinessViews.ViewPerformance import (
     ViewAdGroupPerformance,
     ViewAdPerformance,
+    ViewAudiencePerformance,
     ViewCampaignPerformance,
     ViewKeywordPerformance,
 )
@@ -41,6 +42,12 @@ class AdsManagerCatalogsViewsAgGridDto:
     keyword_view = {
         "views": [
             ViewKeywordPerformance(),
+        ]
+    }
+
+    audience_view = {
+        "views": [
+            ViewAudiencePerformance(),
         ]
     }
 
