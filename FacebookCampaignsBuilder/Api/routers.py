@@ -13,7 +13,7 @@ from Core.Web.FacebookGraphAPI.Tools import Tools
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id, extract_user_filed_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, CampaignBuilderPermissions
 from FacebookCampaignsBuilder.Api import command_handlers, commands, queries
-from FacebookCampaignsBuilder.Api.command_handlers import PublishProgress, PublishRequestToMessageQueue
+from FacebookCampaignsBuilder.Api.command_handlers import PublishProgress, PublishRequestToMessageQueue, DeliveryEstimateHandler
 from FacebookCampaignsBuilder.Api.Queries.campaign_trees_structure import CampaignTreesStructure, GetStructure
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
 from flask import request
@@ -402,3 +402,20 @@ class SmartEditPublishStructure(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return Tools.create_error(e, "SmartEditPublishEndpoint"), 400
+
+
+class DeliveryEstimate(Resource):
+    @fixtures.authorize_permission(permission=CampaignBuilderPermissions.CAN_ACCESS_CAMPAIGN_BUILDER)
+    def post(self):
+        try:
+            request_json = humps.depascalize(request.get_json(force=True))
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_facebook_id)
+            response = DeliveryEstimateHandler.handle(request_json, permanent_token)
+
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return Tools.create_error(e, "DeliveryEstimateEndpoint"), 400

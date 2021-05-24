@@ -47,6 +47,7 @@ router_route_pairs = (
     (routers.SmartCreateAccountAdvertisableApps, "smart-create/account-advertisable-apps/<string:account_id>"),
     (routers.AdsManagerAccountAdvertisableApps, "ads-manager/account-advertisable-apps/<string:account_id>"),
     (routers.SmartCreatePublishProgress, "smart-create/publish-progress"),
+    (routers.DeliveryEstimate, "delivery-estimate"),
     (
         routers.SmartEditCampaignTreesStructure,
         "campaign-trees-structure/<string:account_id>/<string:level>/<string:structure_ids>",

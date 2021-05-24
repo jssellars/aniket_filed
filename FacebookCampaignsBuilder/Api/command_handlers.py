@@ -1,17 +1,21 @@
 import logging
 from typing import Any, Dict, Optional, Union
 
-from Core.facebook.sdk_adapter.smart_create import ad_builder
-from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
+from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.adset import AdSet
+
 from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
-from facebook_business.adobjects.adaccount import AdAccount
+from Core.facebook.sdk_adapter.smart_create import ad_builder
+from Core.mongo_adapter import MongoOperator, MongoRepositoryBase
 from FacebookCampaignsBuilder.Api import commands
 from FacebookCampaignsBuilder.Api.startup import config, fixtures
-from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import PublishAddAdsetAdEvent, PublishSmartEditEvent
-from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import \
-    PublishStatus
+from FacebookCampaignsBuilder.Infrastructure.IntegrationEvents.events import (
+    PublishAddAdsetAdEvent,
+    PublishSmartEditEvent,
+)
 from werkzeug.datastructures import FileStorage
+from FacebookCampaignsBuilder.Infrastructure.Mappings.PublishStatus import PublishStatus
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +85,38 @@ class AudienceSize:
         return audience_size_estimate
 
 
+class DeliveryEstimateHandler:
+    @classmethod
+    def handle(cls, request: Dict, permanent_token: str) -> Dict:
+        """Return Delivery Estimate from AdAccount Id, Optimization Goal and Targeting Spec
+        OR Adset Id, and Optional: Optimization Goal and Targeting Spec
+        Reference: https://developers.facebook.com/docs/marketing-api/audiences/reference/estimated-daily-results
+        """
+        GraphAPISdkBase(config.facebook, permanent_token)
+
+        ad_account_id = request.pop("ad_account_id", None)
+        ad_set_id = request.pop("ad_set_id", None)
+
+        delivery_handler: Union[AdAccount, AdSet]
+
+        if ad_account_id:
+            delivery_handler = AdAccount(fbid=ad_account_id)
+        else:
+            delivery_handler = AdSet(fbid=ad_set_id)
+
+        try:
+            response = delivery_handler.get_delivery_estimate(params=request)
+        except Exception as e:
+            raise e
+
+        if isinstance(response, Exception):
+            raise response
+
+        # response is an fb Cursor but with only one object response
+        (delivery_estimate,) = [data.export_data() for data in response]
+        return delivery_estimate
+
+
 class PublishProgress:
     feedback_repository = MongoRepositoryBase(
         config=config.mongo,
@@ -109,7 +145,6 @@ class PublishProgress:
 
 
 class PublishRequestToMessageQueue:
-
     @staticmethod
     def publish(publish_request: Union[PublishAddAdsetAdEvent, PublishSmartEditEvent]):
         rabbitmq_adapter = fixtures.rabbitmq_adapter
