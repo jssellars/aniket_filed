@@ -1194,11 +1194,9 @@ class AddStructuresToParent:
         included_custom_audiences, excluded_custom_audiences = adset_builder.extract_custom_audiences(targeting_request)
 
         (
-            facebook_positions,
-            instagram_positions,
-            audience_network_positions,
             publisher_platforms,
-        ) = adset_builder.add_placement_positions(request)
+            positions,
+        ) = SmartEditPublish.get_platform_positions(request)
 
         flexible_spec = [FlexibleTargeting(included_interests)]
         # TODO: check if this is valid, maybe we should include the narrow interests into the
@@ -1213,6 +1211,7 @@ class AddStructuresToParent:
 
         if devices:
             request_device_platforms = list(map(str.lower, devices.get("device_platforms")))
+
             if request_device_platforms:
                 device_platforms = [
                     x.name_sdk
@@ -1222,6 +1221,8 @@ class AddStructuresToParent:
 
             user_device = devices.get("user_device", [])
             user_os = devices.get("user_os", [])
+
+        publisher_platforms,
 
         targeting = Targeting(
             flexible_spec,
@@ -1233,14 +1234,18 @@ class AddStructuresToParent:
             exclusions=FlexibleTargeting(interests=excluded_interests),
             geo_locations=dict(SmartCreatePublish.process_geo_location(locations)),
             locales=languages,
-            facebook_positions=facebook_positions,
-            instagram_positions=instagram_positions,
-            audience_network_positions=audience_network_positions,
+            # facebook_positions=result_positions["facebook_positions"],
+            # instagram_positions=result_positions["instagram_positions"],
+            # audience_network_positions=result_positions["audience_network_positions"],
             publisher_platforms=publisher_platforms,
             device_platforms=device_platforms,
             user_device=user_device,
             user_os=user_os,
         )
+
+        if positions:
+            for key, value in positions.items():
+                targeting.__setattr__(key, value)
 
         return asdict(targeting)
 
