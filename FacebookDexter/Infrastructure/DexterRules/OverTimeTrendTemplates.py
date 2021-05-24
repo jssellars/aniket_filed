@@ -85,7 +85,7 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.HIGH,
         "New Interest Targeting",
-        "Results and conversion rate are decreasing while cost per result is increasing. ",
+        "Your results and conversion rate are decreasing while cost per result is increasing.",
         (
             "Dexter suggests finding 3 new interests and creating a new adset for each of them to see which one"
             " performs the best."
