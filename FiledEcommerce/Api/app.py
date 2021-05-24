@@ -21,13 +21,8 @@ api = flask_restful.Api(app)
 
 
 router_route_pairs = (
-    (routers.ShopifyPrivateApp, "/"),
-    (routers.SetHeader, "/sets_header"),
-    (routers.ProductHeader, "/product_header"),
-    (routers.VariableHeader, "/variable_header"),
-    (routers.FiledSets, "/sets"),
-    (routers.FiledProducts, "/products"),
-    (routers.FiledVariables, "/variables"),
+    (routers.ImportIntegrationModel, "/model/<string:platform>"),
+    (routers.ImportIntegrationMapping, "/mapping/<string:platform>"),
 )
 
 for router, route in router_route_pairs:
