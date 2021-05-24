@@ -5,7 +5,6 @@ from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecomme
 
 
 class OverTimeTrendTemplate(Enum):
-
     CR_DOWN_CTR_DOWN_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed your cost is increasing and people are less interested in your ads. This is a trend we’ve seen"
@@ -283,7 +282,10 @@ class OverTimeTrendTemplate(Enum):
     )
 
     CLICKS_DOWN_CPM_UP = DexterRecommendationOutput(
-        "Dexter noticed your clicks are decreasing and getting more expensive to run your ads. ",
+        (
+            "Dexter wants you to be aware, It's getting more expensive to run your ads in the marketplace and your "
+            "Clicks have decreased by {trigger_variance:.2f}% in the last {no_of_days} days."
+         ),
         RecommendationPriority.MEDIUM,
         "New Interest Targeting",
         "Your clicks are decreasing and it’s getting more expensive to run your ads.",
