@@ -6,10 +6,9 @@ class ViewAdCreateNew(View):
     table_name = "vAdInsights"
     type = "Business"
     columns = [
-        ViewColumnsMaster.ad_id,
         ViewColumnsMaster.status,
-        ViewColumnsMaster.ad_image,
         ViewColumnsMaster.ad_name,
+        ViewColumnsMaster.ad_image,
         ViewColumnsMaster.reach,
         ViewColumnsMaster.impressions,
         ViewColumnsMaster.results,

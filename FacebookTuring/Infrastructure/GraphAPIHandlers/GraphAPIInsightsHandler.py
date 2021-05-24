@@ -352,15 +352,7 @@ class GraphAPIInsightsHandler:
         ad_creatives = fb_ad.get_ad_creatives(fields=[AdCreative.Field.image_hash, AdCreative.Field.image_url])
 
         ad_creative = ad_creatives.get_one()
-        try:
-            """
-            Image URL is preferred because that is already obtained when creating creative and has better quality
-            But all creatives don't have image_url so replaced with thumbnail_url (requires extra call)
-            """
-            return ad_creative[AdCreative.Field.image_url]
-        except KeyError:
-
-            return cls._get_thumbnail_url(ad_creative)
+        return cls._get_thumbnail_url(ad_creative)
 
     @classmethod
     def _get_thumbnail_url(
@@ -369,8 +361,8 @@ class GraphAPIInsightsHandler:
     ) -> str:
         fields = [AdCreative.Field.thumbnail_url]
         params = {
-            'thumbnail_width': 150,
-            'thumbnail_height': 120,
+            'thumbnail_width': 50,
+            'thumbnail_height': 50,
         }
         ad_creative.api_get(fields=fields, params=params)
         return ad_creative[AdCreative.Field.thumbnail_url]
