@@ -168,7 +168,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPC_DOWN_CTR_UP = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -177,7 +177,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -186,7 +186,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -204,7 +204,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPR_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -293,7 +293,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget",
         RecommendationPriority.LOW,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -362,7 +362,7 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.HIGH,
         "Increase Budget",
-        "Your amount spent and cost per result are decreasing. ",
+        "Your amount spent and cost per result are decreasing.",
         (
             "Dexter suggests increasing your budget by  20% and keep a close eye on performance to ensure your cost per"
             " result doesn’t increase over time."
