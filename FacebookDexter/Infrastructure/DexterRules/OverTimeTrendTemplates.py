@@ -5,7 +5,6 @@ from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecomme
 
 
 class OverTimeTrendTemplate(Enum):
-
     CR_DOWN_CTR_DOWN_CPC_UP = DexterRecommendationOutput(
         (
             "We noticed your cost is increasing and people are less interested in your ads. This is a trend we’ve seen"
@@ -85,7 +84,7 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.HIGH,
         "New Interest Targeting",
-        "Results and conversion rate are decreasing while cost per result is increasing. ",
+        "Your results and conversion rate are decreasing while cost per result is increasing.",
         (
             "Dexter suggests finding 3 new interests and creating a new adset for each of them to see which one"
             " performs the best."
@@ -169,7 +168,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPC_DOWN_CTR_UP = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -178,7 +177,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -187,7 +186,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPC_DOWN_CTR_UP_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -205,7 +204,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_CPR_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -283,7 +282,10 @@ class OverTimeTrendTemplate(Enum):
     )
 
     CLICKS_DOWN_CPM_UP = DexterRecommendationOutput(
-        "Dexter noticed your clicks are decreasing and getting more expensive to run your ads. ",
+        (
+            "Dexter wants you to be aware, It's getting more expensive to run your ads in the marketplace and your "
+            "Clicks have decreased by {trigger_variance:.2f}% in the last {no_of_days} days."
+         ),
         RecommendationPriority.MEDIUM,
         "New Interest Targeting",
         "Your clicks are decreasing and it’s getting more expensive to run your ads.",
@@ -291,7 +293,7 @@ class OverTimeTrendTemplate(Enum):
     )
 
     CLICK_UP_CTR_UP_CPC_DOWN_CPM_DOWN = DexterRecommendationOutput(
-        "Your campaign is performing well, don't touch it. ",
+        "Your campaign is performing really well, consider increasing the budget",
         RecommendationPriority.LOW,
         "Increase Budget",
         "Your campaign is performing really well, consider increasing the budget!",
@@ -360,7 +362,7 @@ class OverTimeTrendTemplate(Enum):
         ),
         RecommendationPriority.HIGH,
         "Increase Budget",
-        "Your amount spent and cost per result are decreasing. ",
+        "Your amount spent and cost per result are decreasing.",
         (
             "Dexter suggests increasing your budget by  20% and keep a close eye on performance to ensure your cost per"
             " result doesn’t increase over time."
