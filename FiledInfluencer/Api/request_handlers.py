@@ -4,7 +4,7 @@ from datetime import datetime
 from flask_restful import reqparse, inputs
 
 import humps
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from FiledInfluencer.Api.models import Influencers, EmailTemplates
 from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
@@ -32,29 +32,46 @@ class InfluencerProfilesHandler:
         return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
-    def get_profiles(cls, name: str, engagement: Dict, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
+    def get_profiles(
+            cls,
+            name: str,
+            engagement: Dict,
+            last_influencer_id: int,
+            page_size: int,
+            total_count: bool,
+
+    ) -> Union[List[Dict[str, str]], Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
+
+        Engagement_filters = (
+            Influencers.Engagement > engagement["min_count"],
+            Influencers.Engagement < engagement["max_count"],
+        )
 
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient
-            Engagement_filters = (
-                Influencers.Engagement > engagement["min_count"],
-                Influencers.Engagement < engagement["max_count"],
-            )
+            if total_count is True:
+                count = session.query(Influencers).count()
+                results = {'count': count}
 
-            if name:
+            elif name:
                 search = f"%{name}%"
-
                 results = session.query(Influencers).filter(
                     Influencers.Id >= last_influencer_id,
                     Influencers.Name.like(search),
                     *Engagement_filters).limit(page_size)
 
             else:
-                results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id, *Engagement_filters).limit(page_size)
+                results = session.query(Influencers).\
+                    filter(
+                        Influencers.Id >= last_influencer_id,
+                        *Engagement_filters
+                    ).limit(page_size)
 
+        if isinstance(results, dict):
+            return results
         return [cls.convert_to_json(result) for result in results]
 
 

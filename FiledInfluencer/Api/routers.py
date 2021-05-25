@@ -30,7 +30,7 @@ class InfluencerProfiles(Resource):
     #  Todo : Use parser here.
 
     @staticmethod
-    def extract_param_or_default(request, param_name: str, default: Any) -> int:
+    def extract_param_or_default(request, param_name: str, default: Any) -> Any:
         """
         Extract params from request
 
@@ -40,7 +40,9 @@ class InfluencerProfiles(Resource):
         """
         try:
             response = request.args.get(param_name) or default
-            if param_name != 'name':
+            if param_name == 'total_count':
+                response = response == 'true'
+            elif param_name != 'name':
                 response = int(response)
         except (TypeError, ValueError) as _:
             response = default
@@ -54,6 +56,7 @@ class InfluencerProfiles(Resource):
         engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
         last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
         page_size = self.extract_param_or_default(request, "page_size", 100)
+        total_count = self.extract_param_or_default(request, "total_count", False)
 
         if engagement_min_count > engagement_max_count:
             return {'Message': 'Followers range out of bounds'}, 400
@@ -67,6 +70,7 @@ class InfluencerProfiles(Resource):
             engagement=engagement,
             last_influencer_id=last_influencer_id,
             page_size=page_size,
+            total_count=total_count,
         )
         return response, 200
 
