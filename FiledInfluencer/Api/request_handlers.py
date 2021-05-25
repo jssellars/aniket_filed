@@ -26,20 +26,19 @@ class InfluencerProfilesHandler:
             Name=influencer.Name,
             Biography=influencer.Biography,
             Engagement=influencer.Engagement,
-            ProfilePicture=details['profile_pic_url'],
-            CategoryName=details['category_name'],
+            ProfilePicture=details["profile_pic_url"],
+            CategoryName=details["category_name"],
         )
         return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
     def get_profiles(
-            cls,
-            name: str,
-            engagement: Dict,
-            last_influencer_id: int,
-            page_size: int,
-            total_count: bool,
-
+        cls,
+        name: str,
+        engagement: Dict,
+        last_influencer_id: int,
+        page_size: int,
+        total_count: bool,
     ) -> Union[List[Dict[str, str]], Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
@@ -54,21 +53,22 @@ class InfluencerProfilesHandler:
             # offset queries are inefficient
             if total_count is True:
                 count = session.query(Influencers).count()
-                results = {'count': count}
+                results = {"count": count}
 
             elif name:
                 search = f"%{name}%"
-                results = session.query(Influencers).filter(
-                    Influencers.Id >= last_influencer_id,
-                    Influencers.Name.like(search),
-                    *Engagement_filters).limit(page_size)
+                results = (
+                    session.query(Influencers)
+                    .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Engagement_filters)
+                    .limit(page_size)
+                )
 
             else:
-                results = session.query(Influencers).\
-                    filter(
-                        Influencers.Id >= last_influencer_id,
-                        *Engagement_filters
-                    ).limit(page_size)
+                results = (
+                    session.query(Influencers)
+                    .filter(Influencers.Id >= last_influencer_id, *Engagement_filters)
+                    .limit(page_size)
+                )
 
         if isinstance(results, dict):
             return results
@@ -86,26 +86,21 @@ class EmailTemplateHandler:
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'name',
+            "name",
             type=str,
             required=False,
         )
         parser.add_argument(
-            'subject',
+            "subject",
             type=str,
             required=False,
         )
         parser.add_argument(
-            'body',
+            "body",
             type=str,
             required=False,
         )
-        parser.add_argument(
-            'campaign',
-            type=int,
-            required=True,
-            help=cls.blank_field_error_msg
-        )
+        parser.add_argument("campaign", type=int, required=True, help=cls.blank_field_error_msg)
         return parser
 
     @staticmethod
@@ -133,11 +128,11 @@ class EmailTemplateHandler:
     @classmethod
     def populate_model(cls, data):
         email_template = EmailTemplates(
-            Name=data['name'],
-            Subject=data['subject'],
-            Body=data['body'],
-            CampaignId=data['campaign'],
-            CreatedById=data['created_by'],
+            Name=data["name"],
+            Subject=data["subject"],
+            Body=data["body"],
+            CampaignId=data["campaign"],
+            CreatedById=data["created_by"],
             CreatedAt=datetime.utcnow(),
         )
         return email_template
