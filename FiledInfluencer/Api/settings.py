@@ -34,7 +34,7 @@ class Default:
     #     host="DESKTOP-JDD3RNF",
     #     username="sa",
     #     password="123456",
-    #     name="local3.Filed.SMI.Influencers",
+    #     name="Filed.SMI.Influencers",
     #     port=1433,
     #     driver="SQL Server Native Client 11.0",
     # )

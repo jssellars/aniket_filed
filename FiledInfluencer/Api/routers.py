@@ -49,28 +49,60 @@ class InfluencerProfiles(Resource):
         finally:
             return response
 
-    def get(self):
-        name = self.extract_param_or_default(request, "name", None)
-        engagement_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
-        # Todo: Need to define default value for engagement_max_count
-        engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
-        last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
-        page_size = self.extract_param_or_default(request, "page_size", 100)
-        get_total_count = self.extract_param_or_default(request, "get_total_count", False)
+    @staticmethod
+    def range_checker(max_value, min_value, param_name):
+        """
+        Check if max value is not less than min value while filtering
+        """
+        if max_value is None and min_value is not None:
+            return {'Message': f'Please provide max_value for {param_name}'}, False
+        if min_value is None and max_value is not None:
+            return {'Message': f'Please provide min_value for {param_name}'}, False
+        if max_value < min_value:
+            return {'Message': f'{param_name} range is out of bounds'}, False
+        else:
+            return None, True
 
-        if engagement_min_count > engagement_max_count:
-            return {'Message': 'Followers range out of bounds'}, 400
+    def get(self):
+        page_size = self.extract_param_or_default(request, "page_size", 100)
+        last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
+        name = self.extract_param_or_default(request, "name", None)
+        get_total_count = self.extract_param_or_default(request, "get_total_count", False)
+        engagement_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
+        engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
+        post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
+        #  Todo: define default Max value for engagements
+        post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
+
+        if engagement_min_count > 0:
+            msg, engagement_check = self.range_checker(engagement_max_count, engagement_min_count, "Followers")
+            if not engagement_check:
+                return msg, 400
+
+        post_engagement = None
+        if post_engagement_min_count is not None or post_engagement_max_count is not None:
+            msg, post_engagement_check = self.range_checker(post_engagement_max_count, post_engagement_min_count, "Engagements")
+
+            if not post_engagement_check:
+                return msg, 400
+
+            post_engagement = {
+                'min_count': post_engagement_min_count,
+                'max_count': post_engagement_max_count
+            }
 
         engagement = {
             'min_count': engagement_min_count,
             'max_count': engagement_max_count
         }
+
         response = InfluencerProfilesHandler.get_profiles(
             name=name,
             engagement=engagement,
             last_influencer_id=last_influencer_id,
             page_size=page_size,
             get_total_count=get_total_count,
+            post_engagement=post_engagement,
         )
         return response, 200
 

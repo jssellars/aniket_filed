@@ -3,7 +3,7 @@ from typing import Optional, Dict, List, Union
 
 from sqlalchemy import Column
 from sqlalchemy.dialects.mssql import BIGINT, \
-    DATETIME2, NVARCHAR
+    DATETIME2, NVARCHAR, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -41,7 +41,7 @@ class Platform:
 @dataclass
 class InfluencerPost:
     post_content: str
-    posted_at: str
+    created_at: str
     filed_platform_id: Optional[int] = None
     influencer_id: Optional[int] = None
     engagement: Optional[int] = None
@@ -102,3 +102,19 @@ class EmailTemplates(Base):
 
     def __repr__(self):
         return f"<EmailTemplate(name={self.Name})>"
+
+
+class InfluencerPosts(Base):
+    __tablename__ = 'InfluencerPosts'
+
+    Id = Column(BIGINT, primary_key=True)
+    PostContent = Column(NVARCHAR())
+    Engagement = Column(NVARCHAR())
+    InfluencerId = Column(BIGINT)
+
+    PlatformId = Column(BIGINT)
+    CreatedAt = Column(DATETIME2(precision=7))
+    PostedAt = Column(DECIMAL(precision=2))
+
+    def __repr__(self):
+        return f"<InfluencerPost(name={self.PostContent})>"
