@@ -1,10 +1,9 @@
 import json
-
 from datetime import datetime
-from flask_restful import reqparse, inputs
+from typing import Dict, List, Union
 
 import humps
-from typing import Dict, List
+from flask_restful import reqparse
 
 from FiledInfluencer.Api.models import Influencers, EmailTemplates
 from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
@@ -26,35 +25,52 @@ class InfluencerProfilesHandler:
             Name=influencer.Name,
             Biography=influencer.Biography,
             Engagement=influencer.Engagement,
-            ProfilePicture=details['profile_pic_url'],
-            CategoryName=details['category_name'],
+            ProfilePicture=details["profile_pic_url"],
+            CategoryName=details["category_name"],
         )
         return humps.camelize(pydantic_influencer.dict())
 
     @classmethod
-    def get_profiles(cls, name: str, engagement: Dict, last_influencer_id: int, page_size: int) -> List[Dict[str, str]]:
+    def get_profiles(
+        cls,
+        name: str,
+        engagement: Dict,
+        last_influencer_id: int,
+        page_size: int,
+        get_total_count: bool,
+    ) -> Union[List[Dict[str, str]], Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
+
+        Engagement_filters = (
+            Influencers.Engagement > engagement["min_count"],
+            Influencers.Engagement < engagement["max_count"],
+        )
 
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient
-            Engagement_filters = (
-                Influencers.Engagement > engagement["min_count"],
-                Influencers.Engagement < engagement["max_count"],
-            )
+            if get_total_count:
+                count = session.query(Influencers).count()
+                results = {"count": count}
 
-            if name:
+            elif name:
                 search = f"%{name}%"
-
-                results = session.query(Influencers).filter(
-                    Influencers.Id >= last_influencer_id,
-                    Influencers.Name.like(search),
-                    *Engagement_filters).limit(page_size)
+                results = (
+                    session.query(Influencers)
+                    .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Engagement_filters)
+                    .limit(page_size)
+                )
 
             else:
-                results = session.query(Influencers).filter(Influencers.Id >= last_influencer_id, *Engagement_filters).limit(page_size)
+                results = (
+                    session.query(Influencers)
+                    .filter(Influencers.Id >= last_influencer_id, *Engagement_filters)
+                    .limit(page_size)
+                )
 
+        if isinstance(results, dict):
+            return results
         return [cls.convert_to_json(result) for result in results]
 
 
@@ -69,26 +85,21 @@ class EmailTemplateHandler:
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'name',
+            "name",
             type=str,
             required=False,
         )
         parser.add_argument(
-            'subject',
+            "subject",
             type=str,
             required=False,
         )
         parser.add_argument(
-            'body',
+            "body",
             type=str,
             required=False,
         )
-        parser.add_argument(
-            'campaign',
-            type=int,
-            required=True,
-            help=cls.blank_field_error_msg
-        )
+        parser.add_argument("campaign", type=int, required=True, help=cls.blank_field_error_msg)
         return parser
 
     @staticmethod
@@ -116,11 +127,11 @@ class EmailTemplateHandler:
     @classmethod
     def populate_model(cls, data):
         email_template = EmailTemplates(
-            Name=data['name'],
-            Subject=data['subject'],
-            Body=data['body'],
-            CampaignId=data['campaign'],
-            CreatedById=data['created_by'],
+            Name=data["name"],
+            Subject=data["subject"],
+            Body=data["body"],
+            CampaignId=data["campaign"],
+            CreatedById=data["created_by"],
             CreatedAt=datetime.utcnow(),
         )
         return email_template
