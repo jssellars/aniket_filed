@@ -10,7 +10,7 @@ from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from Core.utils import snake_to_camelcase
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import Level
 from Core.Web.Security.JWTTools import extract_business_owner_google_id
 from Core.Web.Security.Permissions import (
     AccountsPermissions,

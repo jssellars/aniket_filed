@@ -3,7 +3,7 @@ from Core.Metadata.Views.ViewBase import AgGridView
 from Core.Tools.Misc import AgGridConstants
 from Core.Tools.Misc.AgGridFilter import AgGridFilter
 from Core.Tools.Misc.ObjectSerializers import object_to_attribute_values_list, object_to_json
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.Models.GoogleField import GoogleField
 from Core.Web.GoogleAdsAPI.Models.GoogleFieldsMetadata import GoogleFieldsMetadata
 from GoogleTuring.Api.Catalogs.BusinessViews.ViewPerformance import (

@@ -2,8 +2,9 @@ import concurrent.futures
 from dataclasses import asdict
 
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.AdsAPIInsightsMapper import AdsAPIInsightsMapper
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import GoogleLevelPlural, Level
 from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import GoogleLevelPlural, Level
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleResourceType
 from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
@@ -23,74 +24,18 @@ class PerformanceInsightsClient(AdsBaseClient):
         GoogleMetricFieldsMetadata.clicks,
     ]
 
-    def get_performance_insights(self, client_customer_id, filtering, sorting, level, page_size, next_page_token=None):
-        field_names = []
-        field_names.extend(self.__PERFORMANCE_FIELDS)
+    def get_performance_insights(
+        self, client_customer_id, fields, filtering, sorting, level, page_size, next_page_token=None
+    ):
+        field_names = fields
 
-        if level == Level.CAMPAIGN.value:
-            campaign_attributes = [
-                GoogleAttributeFieldsMetadata.campaign_id,
-                GoogleAttributeFieldsMetadata.campaign_name,
-            ]
-
-            field_names.extend(campaign_attributes)
-
-        elif level == Level.ADGROUP.value:
-            campaign_attributes = [
-                GoogleAttributeFieldsMetadata.campaign_id,
-                GoogleAttributeFieldsMetadata.campaign_name,
-            ]
-
-            adgroup_attributes = [
-                GoogleAttributeFieldsMetadata.adgroup_id,
-                GoogleAttributeFieldsMetadata.adgroup_name,
-            ]
-
-            field_names.extend([*adgroup_attributes, *campaign_attributes])
-
-        elif level == Level.KEYWORDS.value:
-            campaign_attributes = [
-                GoogleAttributeFieldsMetadata.campaign_id,
-                GoogleAttributeFieldsMetadata.campaign_name,
-            ]
-
-            adgroup_attributes = [
-                GoogleAttributeFieldsMetadata.adgroup_id,
-                GoogleAttributeFieldsMetadata.adgroup_name,
-            ]
-
-            keyword_attributes = [
-                GoogleAttributeFieldsMetadata.resource_name,
-                GoogleAttributeFieldsMetadata.keyword_id,
-                GoogleAttributeFieldsMetadata.keyword_text,
-                GoogleAttributeFieldsMetadata.keyword_match_type,
-            ]
-
-            field_names.extend([*adgroup_attributes, *campaign_attributes, *keyword_attributes])
-
-        elif level == Level.AUDIENCE.value:
-            campaign_attributes = [
-                GoogleAttributeFieldsMetadata.campaign_id,
-                GoogleAttributeFieldsMetadata.campaign_name,
-            ]
-
-            adgroup_attributes = [
-                GoogleAttributeFieldsMetadata.adgroup_id,
-                GoogleAttributeFieldsMetadata.adgroup_name,
-            ]
-
+        if level == Level.AUDIENCE.value:
             audience_attributes = [
-                GoogleAttributeFieldsMetadata.ad_group_criterion_resource_name,
-                GoogleAttributeFieldsMetadata.ad_group_criterion_id,
-                GoogleAttributeFieldsMetadata.ad_group_criterion_type,
                 GoogleAttributeFieldsMetadata.user_interest,
                 GoogleAttributeFieldsMetadata.custom_intent,
-                GoogleAttributeFieldsMetadata.ad_group_criterion_status,
-                GoogleAttributeFieldsMetadata.campaign_status,
-                GoogleAttributeFieldsMetadata.adgroup_status,
             ]
 
-            field_names.extend([*adgroup_attributes, *campaign_attributes, *audience_attributes])
+            field_names.extend([*audience_attributes])
 
         query = GAQLBuilder().select_(field_names).from_(level)
 
@@ -102,78 +47,61 @@ class PerformanceInsightsClient(AdsBaseClient):
 
         query = query.build_()
 
+        budgets = None
+        if level == Level.CAMPAIGN.value:
+            budgets = self.get_campaign_budgets(client_customer_id)
+
         query_response = self.perform_search(query, client_customer_id, page_size, next_page_token)
 
         next_page_token = query_response.next_page_token if query_response.next_page_token != "" else None
 
         if level == Level.AUDIENCE.value:
             return self.parse_audience_query_response(
-                query_response, page_size, next_page_token, client_customer_id, level
+                query_response, page_size, next_page_token, client_customer_id, fields, level
             )
         else:
             return self.parse_level_query_response(
-                query_response, page_size, next_page_token, client_customer_id, level
+                fields, query_response, page_size, next_page_token, client_customer_id, level, budgets
             )
 
-    def parse_level_query_response(self, query_response, page_size, next_page_token, client_customer_id, level):
+    def parse_level_query_response(
+        self, fields, query_response, page_size, next_page_token, client_customer_id, level, budgets=None
+    ):
         response = []
         for row in query_response:
             if len(response) == page_size:
                 return next_page_token, response, self.get_summary(client_customer_id, level)
 
-            insights = GooglePerformanceInsightsResponse(
-                campaign_id=str(row.campaign.id),
-                campaign_name=row.campaign.name,
-                impressions=row.metrics.impressions,
-                clicks=row.metrics.clicks,
-                ctr=row.metrics.ctr,
-                average_cpc=row.metrics.average_cpc / 10 ** 4,
-            )
-
-            if level == Level.ADGROUP.value:
-                insights.adgroup_id = str(row.ad_group.id)
-                insights.adgroup_name = row.ad_group.name
-
-            elif level == Level.KEYWORDS.value:
-                insights.adgroup_id = str(row.ad_group.id)
-                insights.adgroup_name = row.ad_group.name
-                insights.keyword_id = str(row.ad_group_criterion.criterion_id)
-                insights.keyword_text = row.ad_group_criterion.keyword.text
-                insights.keyword_match_type = row.ad_group_criterion.keyword.match_type.name
-
-            insights = {k: v for k, v in asdict(insights).items() if v is not None}
+            insights = AdsAPIInsightsMapper().map(fields, row)
+            if insights.get("campaign_budget") and budgets:
+                insights["campaign_budget"] = budgets[row.campaign.campaign_budget]
 
             response.append(insights)
 
         return next_page_token, response, self.get_summary(client_customer_id, level)
 
-    def parse_audience_query_response(self, query_response, page_size, next_page_token, client_customer_id, level):
+    def parse_audience_query_response(
+        self, query_response, page_size, next_page_token, client_customer_id, fields, level
+    ):
         response = []
         for row in query_response:
             if len(response) == page_size:
                 response = self.process_audience_data(response, client_customer_id)
                 return next_page_token, response, self.get_summary(client_customer_id, level)
 
-            insights = GoogleAudienceResponse(
-                campaign_id=str(row.campaign.id),
-                campaign_name=row.campaign.name,
-                adgroup_id=str(row.ad_group.id),
-                adgroup_name=row.ad_group.name,
-                criterion_id=str(row.ad_group_criterion.criterion_id),
-                campaign_status=row.campaign.status.name,
-                adgroup_status=row.ad_group.status.name,
-                impressions=row.metrics.impressions,
-                clicks=row.metrics.clicks,
-                ctr=row.metrics.ctr,
-                average_cpc=row.metrics.average_cpc / 10 ** 4,
-                audience=row.ad_group_criterion.user_interest.user_interest_category
-                if row.ad_group_criterion.user_interest.user_interest_category != ""
-                else row.ad_group_criterion.custom_intent.custom_intent,
-                type=getattr(AudienceTypeEnum, row.ad_group_criterion.type_.name).name.replace("_", " ").capitalize(),
+            insights = AdsAPIInsightsMapper().map(fields, row)
+
+            # TODO clean + implement postprocessing function
+            insights.update(
+                {
+                    "audience": row.ad_group_criterion.user_interest.user_interest_category
+                    if row.ad_group_criterion.user_interest.user_interest_category != ""
+                    else row.ad_group_criterion.custom_intent.custom_intent,
+                    "type": getattr(AudienceTypeEnum, row.ad_group_criterion.type_.name)
+                    .name.replace("_", " ")
+                    .capitalize(),
+                }
             )
-
-            insights = {k: v for k, v in asdict(insights).items() if v is not None}
-
             response.append(insights)
 
         response = self.process_audience_data(response, client_customer_id)
@@ -321,3 +249,19 @@ class PerformanceInsightsClient(AdsBaseClient):
             )
 
         return custom_interest_response
+
+    def get_campaign_budgets(self, client_customer_id):
+        budget_query = (
+            GAQLBuilder()
+            .select_([GoogleAttributeFieldsMetadata.campaign_budget_amount_micros])
+            .from_(GoogleResourceType.CAMPAIGN_BUDGET)
+            .build_()
+        )
+
+        query_response = self.perform_search(budget_query, client_customer_id)
+
+        budgets = {}
+        for row in query_response:
+            budgets.update({row.campaign_budget.resource_name: round(row.campaign_budget.amount_micros / 10 ** 6, 2)})
+
+        return budgets

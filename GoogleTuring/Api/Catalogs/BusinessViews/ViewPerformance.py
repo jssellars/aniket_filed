@@ -28,8 +28,6 @@ class ViewCampaignPerformance(View):
         ViewColumnsMaster.average_target_roas,
         ViewColumnsMaster.views,
         ViewColumnsMaster.view_rate,
-        ViewColumnsMaster.watch_time,
-        ViewColumnsMaster.average_watch_time,
         ViewColumnsMaster.video_p_25,
         ViewColumnsMaster.video_p_50,
         ViewColumnsMaster.video_p_75,
@@ -106,7 +104,7 @@ class ViewKeywordPerformance(View):
     table_name = "vKeywordInsights"
     type = "Business"
     columns = [
-        ViewColumnsMaster.keyword_name,
+        ViewColumnsMaster.keyword_text,
         ViewColumnsMaster.keyword_match_type,
         ViewColumnsMaster.clicks,
         ViewColumnsMaster.cost,
@@ -168,8 +166,6 @@ class ViewAudiencePerformance(View):
         ViewColumnsMaster.video_p_50,
         ViewColumnsMaster.video_p_75,
         ViewColumnsMaster.video_p_100,
-        ViewColumnsMaster.absolute_top_impression_percentage,
-        ViewColumnsMaster.top_impression_percentage,
     ]
 
 

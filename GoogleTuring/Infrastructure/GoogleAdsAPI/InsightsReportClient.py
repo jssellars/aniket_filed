@@ -1,8 +1,8 @@
 from dataclasses import asdict
 
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleMetricFieldsMetadata import GoogleMetricFieldsMetadata
 from Core.Web.GoogleAdsAPI.Models.GoogleSegmentFieldsMetadata import GoogleSegmentFieldsMetadata

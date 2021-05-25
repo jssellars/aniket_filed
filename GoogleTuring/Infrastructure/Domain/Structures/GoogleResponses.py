@@ -6,6 +6,7 @@ from typing import Optional
 class GooglePerformanceInsightsResponse:
     campaign_id: str
     campaign_name: str
+    budget: float
     impressions: int
     clicks: int
     ctr: float

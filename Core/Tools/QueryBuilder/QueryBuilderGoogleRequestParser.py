@@ -176,9 +176,14 @@ class QueryBuilderGoogleRequestParser:
         self.__page_size = request.page_size
         self.__parse_where_conditions(request.filter_model, request.time_range)
         self.__parse_sort_model(request.sort_model)
+        self.parse_ag_columns(request.ag_columns)
 
     def map__(self, name):
         return getattr(GoogleFieldsMetadataAdsAPI, name, None)
+
+    def parse_ag_columns(self, ag_columns):
+        self.g_fields = [self.map__(column) for column in ag_columns]
+        self.g_fields = [field for field in self.g_fields if field is not None]
 
     def parse_structure_columns(self, query_columns, column_type=None):
         for entry in query_columns:

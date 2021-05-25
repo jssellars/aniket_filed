@@ -1,6 +1,6 @@
 import typing
 
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import Level
 from GoogleTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from GoogleTuring.Api.Mappings.ReportsStructureMinimalMapping import ReportsStructureMinimalMapping
 from GoogleTuring.Api.startup import config

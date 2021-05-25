@@ -31,7 +31,7 @@ class ViewFieldsAttributeMetadata:
     )
 
     adgroup_id = ViewColumn(
-        Autoincrement.hex_string("adset_id"),
+        Autoincrement.hex_string("adgroup_id"),
         display_name="Ad Group ID",
         primary_value=GoogleFieldsMetadata.adgroup_id,
         type_id=ViewColumnType.TEXT.value,
@@ -40,7 +40,7 @@ class ViewFieldsAttributeMetadata:
     )
 
     adgroup_name = ViewColumn(
-        Autoincrement.hex_string("adset_name"),
+        Autoincrement.hex_string("adgroup_name"),
         display_name="Ad Group name",
         primary_value=GoogleFieldsMetadata.adgroup_name,
         secondary_value=GoogleFieldsMetadata.adgroup_id,
@@ -88,13 +88,13 @@ class ViewFieldsAttributeMetadata:
     keyword_match_type = ViewColumn(
         Autoincrement.hex_string("keyword_id"),
         display_name="Keyword ID",
-        primary_value=GoogleFieldsMetadata.criterion_id,
+        primary_value=GoogleFieldsMetadata.keyword_match_type,
         type_id=ViewColumnType.TEXT.value,
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=False,
     )
 
-    keyword_name = ViewColumn(
+    keyword_text = ViewColumn(
         Autoincrement.hex_string("keyword_name"),
         display_name="Keyword Name",
         primary_value=GoogleFieldsMetadata.keyword_text,
@@ -125,7 +125,7 @@ class ViewFieldsAttributeMetadata:
     audience_id = ViewColumn(
         Autoincrement.hex_string("audience_id"),
         display_name="Audience ID",
-        primary_value=GoogleFieldsMetadata.ad_group_criterion_id,
+        primary_value=GoogleFieldsMetadata.audience_id,
         type_id=ViewColumnType.TEXT.value,
         category_id=ViewColumnCategory.SETTINGS.value,
         is_fixed=False,
@@ -152,7 +152,7 @@ class ViewFieldsAttributeMetadata:
     audience_type = ViewColumn(
         Autoincrement.hex_string("audience_type"),
         display_name="Type",
-        primary_value=GoogleFieldsMetadata.ad_group_criterion_type,
+        primary_value=GoogleFieldsMetadata.audience_type,
         type_id=ViewColumnType.TEXT.value,
         category_id=ViewColumnCategory.SETTINGS.value,
         pinned=PinnedDirection.LEFT,

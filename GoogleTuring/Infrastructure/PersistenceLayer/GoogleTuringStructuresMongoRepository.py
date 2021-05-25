@@ -5,7 +5,11 @@ from copy import deepcopy
 from bson import BSON
 
 from Core.mongo_adapter import MongoOperator, MongoProjectionState
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level, LevelToGoogleIdKeyMapping, LevelToGoogleNameKeyMapping
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import (
+    Level,
+    LevelToGoogleIdKeyMapping,
+    LevelToGoogleNameKeyMapping,
+)
 from GoogleTuring.Infrastructure.Domain.MiscFieldsEnum import MiscFieldsEnum
 from GoogleTuring.Infrastructure.Domain.Structures.StructureType import LEVEL_TO_ID
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum

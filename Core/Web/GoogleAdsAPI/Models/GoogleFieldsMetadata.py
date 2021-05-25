@@ -115,7 +115,7 @@ class GoogleFieldsMetadata:
         resource_type=GoogleResourceType.AD_GROUP_CRITERION,
     )
 
-    ad_group_criterion_id = GoogleField(
+    audience_id = GoogleField(
         name="criterion_id",
         field_name="criterion_id",
         field_type=GoogleFieldType.ATTRIBUTE,
@@ -155,6 +155,13 @@ class GoogleFieldsMetadata:
         field_name="campaign_budget",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+    )
+
+    campaign_budget_amount_micros = GoogleField(
+        name="campaign_budget_amount_micros",
+        field_name="amount_micros",
+        field_type=GoogleFieldType.ATTRIBUTE,
+        resource_type=GoogleResourceType.CAMPAIGN_BUDGET,
     )
 
     currency_code = GoogleField(
@@ -207,7 +214,7 @@ class GoogleFieldsMetadata:
 
     cost = GoogleField(
         name="cost",
-        field_name="cost",
+        field_name="cost_micros",
         field_type=GoogleFieldType.METRIC,
     )
 
@@ -305,13 +312,13 @@ class GoogleFieldsMetadata:
 
     views = GoogleField(
         name="views",
-        field_name="views",
+        field_name="video_views",
         field_type=GoogleFieldType.METRIC,
     )
 
     view_rate = GoogleField(
         name="view_rate",
-        field_name="view_rate",
+        field_name="video_view_rate",
         field_type=GoogleFieldType.METRIC,
     )
 
@@ -329,25 +336,25 @@ class GoogleFieldsMetadata:
 
     video_p_25 = GoogleField(
         name="video_p_25",
-        field_name="video_p_25",
+        field_name="video_quartile_p25_rate",
         field_type=GoogleFieldType.METRIC,
     )
 
     video_p_50 = GoogleField(
         name="video_p_50",
-        field_name="video_p_50",
+        field_name="video_quartile_p50_rate",
         field_type=GoogleFieldType.METRIC,
     )
 
     video_p_75 = GoogleField(
         name="video_p_75",
-        field_name="video_p_75",
+        field_name="video_quartile_p75_rate",
         field_type=GoogleFieldType.METRIC,
     )
 
     video_p_100 = GoogleField(
         name="video_p_100",
-        field_name="video_p_100",
+        field_name="video_quartile_p100_rate",
         field_type=GoogleFieldType.METRIC,
     )
 
@@ -631,12 +638,6 @@ class GoogleFieldsMetadata:
         field_type=GoogleFieldType.METRIC,
     )
 
-    views = GoogleField(
-        name="Phone calls",
-        field_name="phone_calls",
-        field_type=GoogleFieldType.METRIC,
-    )
-
     phone_impressions = GoogleField(
         name="Phone impressions ",
         field_name="phone_impressions",
@@ -685,7 +686,7 @@ class GoogleFieldsMetadata:
         field_type=GoogleFieldType.METRIC,
     )
 
-    ad_group_criterion_type = GoogleField(
+    audience_type = GoogleField(
         name="type",
         field_name="type",
         field_type=GoogleFieldType.ATTRIBUTE,

@@ -32,13 +32,15 @@ class GoogleAttributeFieldsMetadata:
 
     campaign_budget = GoogleFieldsMetadata.campaign_budget
 
+    campaign_budget_amount_micros = GoogleFieldsMetadata.campaign_budget_amount_micros
+
     currency_code = GoogleFieldsMetadata.currency_code
 
     level = GoogleFieldsMetadata.level
 
     criterion_id = GoogleFieldsMetadata.criterion_id
 
-    ad_group_criterion_id = GoogleFieldsMetadata.ad_group_criterion_id
+    ad_group_criterion_id = GoogleFieldsMetadata.audience_id
 
     keyword_text = GoogleFieldsMetadata.keyword_text
 
@@ -50,7 +52,7 @@ class GoogleAttributeFieldsMetadata:
 
     time_zone = GoogleFieldsMetadata.time_zone
 
-    ad_group_criterion_type = GoogleFieldsMetadata.ad_group_criterion_type
+    ad_group_criterion_type = GoogleFieldsMetadata.audience_type
 
     user_interest = GoogleFieldsMetadata.user_interest
 

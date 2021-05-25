@@ -1,4 +1,4 @@
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import Level
 from GoogleTuring.Api.Mappings.AdsManagerStructureMapping import AdsManagerStructureMapping
 from GoogleTuring.Api.Mappings.AdsManagerStructureMinimalMapping import AdsManagerStructureMinimalMapping
 from GoogleTuring.Api.startup import config

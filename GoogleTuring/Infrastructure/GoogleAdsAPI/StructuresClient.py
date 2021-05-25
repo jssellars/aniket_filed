@@ -3,9 +3,9 @@ from google.api_core import protobuf_helpers
 from Core.Tools.QueryBuilder.QueryBuilderGoogleMappers import QueryBuilderGoogleFilters
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridGoogleOperator
 from Core.Web.GoogleAdsAPI.AdsAPI.AdsBaseClient import AdsBaseClient
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.EditFieldMapping import EditFieldMapping
+from Core.Web.GoogleAdsAPI.AdsAPIMappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.GAQLBuilder.GAQLBuilder import GAQLBuilder
-from Core.Web.GoogleAdsAPI.Mappings.EditFieldMapping import EditFieldMapping
-from Core.Web.GoogleAdsAPI.Mappings.LevelMapping import Level
 from Core.Web.GoogleAdsAPI.Models.GoogleAttributeFieldsMetadata import GoogleAttributeFieldsMetadata
 from GoogleTuring.Infrastructure.Domain.StructureStatusEnum import StructureStatusEnum
 
