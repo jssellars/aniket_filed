@@ -274,7 +274,10 @@ class OverTimeTrendTemplate(Enum):
     )
 
     CLICKS_DOWN_CPC_UP = DexterRecommendationOutput(
-        "Dexter noticed your clicks are decreasing and getting more expensive to run your ads. ",
+        (
+            "Dexter wants you to be aware, It's getting more expensive to run your ads in the marketplace and your "
+            "Clicks have decreased by {trigger_variance:.2f}% in the last {no_of_days} days."
+         ),
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
         "Less people are clicking on your ads and the cost per click has increased.",
