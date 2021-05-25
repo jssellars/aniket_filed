@@ -304,6 +304,21 @@ class GraphAPIInsightsHandler:
                 structure_fields=structure_fields,
             )
 
+            if level == FieldsMetadata.adset.name and FieldsMetadata.campaign_name.name in structure_fields:
+                for data in response:
+                    campaign_id = data.get("campaign_id")
+                    if not campaign_id:
+                        break
+                    data[FieldsMetadata.campaign_name.name] = cls._get_campaign_name(campaign_id)
+
+            if level == FieldsMetadata.ad.name:
+
+                for data in response:
+                    ad_id = data.get("ad_id")
+                    if not ad_id:
+                        break
+                    data[FieldsMetadata.ad_image.name] = cls._get_image_url_ad(ad_id)
+
             return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
 
         insights, structures, next_page_cursor, summary = cls._get_structure_master_data(
@@ -325,21 +340,6 @@ class GraphAPIInsightsHandler:
             insights=insights,
             structures=structures,
         )
-
-        if level == FieldsMetadata.adset.name and FieldsMetadata.campaign_name.name in structure_fields:
-            for data in response:
-                campaign_id = data.get("campaign_id")
-                if not campaign_id:
-                    break
-                data[FieldsMetadata.campaign_name.name] = cls._get_campaign_name(campaign_id)
-
-        if level == FieldsMetadata.ad.name:
-
-            for data in response:
-                ad_id = data.get("ad_id")
-                if not ad_id:
-                    break
-                data[FieldsMetadata.ad_image.name] = cls._get_image_url_ad(ad_id)
 
         return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
 
