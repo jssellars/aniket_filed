@@ -1,10 +1,9 @@
 import json
-
 from datetime import datetime
-from flask_restful import reqparse, inputs
+from typing import Dict, List, Union
 
 import humps
-from typing import Dict, List, Union
+from flask_restful import reqparse
 
 from FiledInfluencer.Api.models import Influencers, EmailTemplates
 from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
@@ -38,7 +37,7 @@ class InfluencerProfilesHandler:
         engagement: Dict,
         last_influencer_id: int,
         page_size: int,
-        total_count: bool,
+        get_total_count: bool,
     ) -> Union[List[Dict[str, str]], Dict[str, str]]:
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
@@ -51,7 +50,7 @@ class InfluencerProfilesHandler:
         with session_scope() as session:
             # for infinite scrolling
             # offset queries are inefficient
-            if total_count is True:
+            if get_total_count:
                 count = session.query(Influencers).count()
                 results = {"count": count}
 
