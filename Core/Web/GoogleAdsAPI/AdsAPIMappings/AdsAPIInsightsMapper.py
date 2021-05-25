@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class AdsAPIInsightsMapper:
     def map(self, requested_fields=None, response=None):
         if not response:
-            return []
+            return {}
         return self.map_response(requested_fields=requested_fields, data=response)
 
     @classmethod
@@ -25,6 +25,9 @@ class AdsAPIInsightsMapper:
             mapped_field_value = resource_level
             for attribute in field_name:
                 mapped_field_value = cls.get_mapped_field(mapped_field_value, attribute)
+
+            if field.conversion_function:
+                mapped_field_value = field.conversion_function(mapped_field_value)
 
             mapped_response.update({field.name: mapped_field_value})
 

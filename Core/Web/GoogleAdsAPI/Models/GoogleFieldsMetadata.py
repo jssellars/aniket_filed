@@ -1,5 +1,12 @@
 from Core.Web.GoogleAdsAPI.Models.GoogleField import GoogleField
 from Core.Web.GoogleAdsAPI.Models.GoogleFieldType import GoogleFieldType, GoogleResourceType
+from Core.Web.GoogleAdsAPI.Models.GoogleMetricsConversionFunctions import (
+    enum_to_string,
+    float_to_percentage,
+    id_to_string,
+    money_conversion,
+    round_float,
+)
 
 
 class GoogleFieldsMetadata:
@@ -8,6 +15,7 @@ class GoogleFieldsMetadata:
         field_name="google_account_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER,
+        conversion_function=id_to_string,
     )
 
     google_manager_id = GoogleField(
@@ -15,6 +23,7 @@ class GoogleFieldsMetadata:
         field_name="google_manager_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER,
+        conversion_function=id_to_string,
     )
 
     customer_id = GoogleField(
@@ -22,6 +31,7 @@ class GoogleFieldsMetadata:
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER,
+        conversion_function=id_to_string,
     )
 
     customer_client_id = GoogleField(
@@ -29,6 +39,7 @@ class GoogleFieldsMetadata:
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CUSTOMER_CLIENT,
+        conversion_function=id_to_string,
     )
 
     descriptive_name = GoogleField(
@@ -57,6 +68,7 @@ class GoogleFieldsMetadata:
         field_name="id",
         field_type=GoogleFieldType.METRIC,
         resource_type=GoogleResourceType.BIDDING_STRATEGY,
+        conversion_function=id_to_string,
     )
 
     bidding_strategy_name = GoogleField(
@@ -71,6 +83,7 @@ class GoogleFieldsMetadata:
         field_name="ad_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.Ad,
+        conversion_function=id_to_string,
     )
 
     ad_name = GoogleField(
@@ -85,6 +98,7 @@ class GoogleFieldsMetadata:
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.ADGROUP,
+        conversion_function=id_to_string,
     )
 
     adgroup_name = GoogleField(
@@ -99,6 +113,7 @@ class GoogleFieldsMetadata:
         field_name="id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=id_to_string,
     )
 
     campaign_name = GoogleField(
@@ -113,6 +128,7 @@ class GoogleFieldsMetadata:
         field_name="criterion_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+        conversion_function=id_to_string,
     )
 
     audience_id = GoogleField(
@@ -120,6 +136,7 @@ class GoogleFieldsMetadata:
         field_name="criterion_id",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+        conversion_function=id_to_string,
     )
 
     keyword_match_type = GoogleField(
@@ -127,6 +144,7 @@ class GoogleFieldsMetadata:
         field_name="keyword.match_type",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.AD_GROUP_CRITERION,
+        conversion_function=enum_to_string,
     )
 
     keyword_text = GoogleField(
@@ -155,6 +173,7 @@ class GoogleFieldsMetadata:
         field_name="campaign_budget",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=money_conversion,
     )
 
     campaign_budget_amount_micros = GoogleField(
@@ -176,6 +195,7 @@ class GoogleFieldsMetadata:
         field_name="target_impression_share.cpc_bid_ceiling_micros",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=money_conversion,
     )
 
     target_impression_share_location = GoogleField(
@@ -183,6 +203,7 @@ class GoogleFieldsMetadata:
         field_name="target_impression_share.location",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=enum_to_string,
     )
 
     maximize_conversion_value_target_roas = GoogleField(
@@ -190,6 +211,7 @@ class GoogleFieldsMetadata:
         field_name="maximize_conversion_value.target_roas",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=float_to_percentage,
     )
 
     optimization_score = GoogleField(
@@ -216,6 +238,7 @@ class GoogleFieldsMetadata:
         name="cost",
         field_name="cost_micros",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     impressions = GoogleField(
@@ -234,6 +257,7 @@ class GoogleFieldsMetadata:
         name="interaction_rate",
         field_name="interaction_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     engagements = GoogleField(
@@ -246,6 +270,7 @@ class GoogleFieldsMetadata:
         name="engagement_rate",
         field_name="engagement_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     invalid_clicks = GoogleField(
@@ -258,24 +283,28 @@ class GoogleFieldsMetadata:
         name="invalid_click_rate",
         field_name="invalid_click_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     average_cpc = GoogleField(
         name="average_cpc",
         field_name="average_cpc",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     ctr = GoogleField(
         name="ctr",
         field_name="ctr",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     average_cost = GoogleField(
         name="average_cost",
         field_name="average_cost",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     average_cpe = GoogleField(
@@ -288,12 +317,14 @@ class GoogleFieldsMetadata:
         name="average_cpm",
         field_name="average_cpm",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     average_cpv = GoogleField(
         name="average_cpv",
         field_name="average_cpv",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     average_target_cpa = GoogleField(
@@ -301,6 +332,7 @@ class GoogleFieldsMetadata:
         field_name="maximize_conversions.target_cpa",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=money_conversion,
     )
 
     average_target_roas = GoogleField(
@@ -308,6 +340,7 @@ class GoogleFieldsMetadata:
         field_name="target_roas.target_roas",
         field_type=GoogleFieldType.ATTRIBUTE,
         resource_type=GoogleResourceType.CAMPAIGN,
+        conversion_function=money_conversion,
     )
 
     views = GoogleField(
@@ -320,6 +353,7 @@ class GoogleFieldsMetadata:
         name="view_rate",
         field_name="video_view_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     watch_time = GoogleField(
@@ -338,36 +372,42 @@ class GoogleFieldsMetadata:
         name="video_p_25",
         field_name="video_quartile_p25_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     video_p_50 = GoogleField(
         name="video_p_50",
         field_name="video_quartile_p50_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     video_p_75 = GoogleField(
         name="video_p_75",
         field_name="video_quartile_p75_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     video_p_100 = GoogleField(
         name="video_p_100",
         field_name="video_quartile_p100_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     absolute_top_impression_percentage = GoogleField(
         name="absolute_top_impression_percentage",
         field_name="absolute_top_impression_percentage",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     top_impression_percentage = GoogleField(
         name="top_impression_percentage",
         field_name="top_impression_percentage",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     date = GoogleField(
@@ -414,42 +454,49 @@ class GoogleFieldsMetadata:
         name="viewable_impressions",
         field_name="active_view_impressions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     measurable_impressions = GoogleField(
         name="measurable_impressions",
         field_name="active_view_measurable_impressions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     measurable_cost = GoogleField(
         name="measurable_cost ",
         field_name="active_view_measurable_cost_micros",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     measurable_rate = GoogleField(
         name="measurable_rate ",
         field_name="active_view_measurability",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     average_viewable_cpm = GoogleField(
         name="average_viewable_cpm",
         field_name="active_view_cpm",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     viewable_ctr = GoogleField(
         name="viewable_ctr",
         field_name="active_view_ctr",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     viewable_rate = GoogleField(
         name="viewable_rate ",
         field_name="active_view_viewability",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     conversions = GoogleField(
@@ -462,156 +509,182 @@ class GoogleFieldsMetadata:
         name="cost_per_conversion",
         field_name="cost_per_conversion",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     conversion_rate = GoogleField(
         name="conversion_rate",
         field_name="conversion_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     conversions_value = GoogleField(
         name="conversion_value",
         field_name="conversions_value",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     conversions_value_per_cost = GoogleField(
         name="conversion_value_per_cost",
         field_name="conversions_value_per_cost",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     value_per_conversion = GoogleField(
         name="value_per_conversion",
         field_name="value_per_conversion ",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     conversions_by_conversion_date = GoogleField(
         name="conversions_by_conv_time",
         field_name="conversions_by_conversion_date",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     conversions_value_by_conversion_date = GoogleField(
         name="Conv. value (by conv. time)",
         field_name="conversions_value_by_conversion_date",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     value_per_conversions_by_conversion_date = GoogleField(
         name="Value / conv. (by conv. time)",
         field_name="value_per_conversions_by_conversion_date",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     all_conversions = GoogleField(
         name="All conversions",
         field_name="all_conversions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     cost_per_all_conversions = GoogleField(
         name="Cost per all conversions",
         field_name="cost_per_all_conversions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     all_conversions_from_interactions_rate = GoogleField(
         name="All conversion rate ",
         field_name="all_conversions_from_interactions_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     all_conversions_value = GoogleField(
         name="All conversion value",
         field_name="all_conversions_value",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     all_conversions_value_per_cost = GoogleField(
         name="All conversion value per cost",
         field_name="all_conversions_value_per_cost",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     value_per_all_conversions = GoogleField(
         name="Value per all conversions",
         field_name="value_per_all_conversions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     all_conversions_by_conversion_date = GoogleField(
         name="All conv. (by conv. time)",
         field_name="all_conversions_by_conversion_date",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     value_per_all_conversions_by_conversion_date = GoogleField(
         name="Value / all conv. (by conv. time) ",
         field_name="value_per_all_conversions_by_conversion_date",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     cross_device_conversions = GoogleField(
         name="Cross-device conversions",
         field_name="cross_device_conversions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     view_through_conversions = GoogleField(
         name="View-through conversions",
         field_name="view_through_conversions",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=money_conversion,
     )
 
     search_impression_share = GoogleField(
         name="Search Impression Share",
         field_name="search_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_top_impression_share = GoogleField(
         name="Search top impression share (IS)",
         field_name="search_top_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_absolute_top_impression_share = GoogleField(
         name="Search absolute top impression share",
         field_name="search_absolute_top_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_rank_lost_impression_share = GoogleField(
         name="Search lost impression share (rank)",
         field_name="search_rank_lost_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_rank_lost_top_impression_share = GoogleField(
         name="Search lost top impression share (rank)",
         field_name="search_rank_lost_top_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_budget_lost_impression_share = GoogleField(
         name="Search lost impression share (budget)",
         field_name="search_budget_lost_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_exact_match_impression_share = GoogleField(
         name="Search exact match impression share (IS)",
         field_name="search_exact_match_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     content_impression_share = GoogleField(
         name="Display impression share",
         field_name="content_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     content_rank_lost_impression_share = GoogleField(
@@ -624,18 +697,21 @@ class GoogleFieldsMetadata:
         name="Display Lost impression share (budget)",
         field_name="content_budget_lost_impression_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     search_click_share = GoogleField(
         name="Click share",
         field_name="search_click_share",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=round_float,
     )
 
     relative_ctr = GoogleField(
         name="Relative CTR ",
         field_name="relative_ctr",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     phone_impressions = GoogleField(
@@ -648,6 +724,7 @@ class GoogleFieldsMetadata:
         name="Phone through rate (PTR)",
         field_name="phone_through_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     message_chats = GoogleField(
@@ -666,6 +743,7 @@ class GoogleFieldsMetadata:
         name="Message chat rate",
         field_name="message_chat_rate",
         field_type=GoogleFieldType.METRIC,
+        conversion_function=float_to_percentage,
     )
 
     gmail_forwards = GoogleField(
