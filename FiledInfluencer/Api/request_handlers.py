@@ -56,7 +56,7 @@ class InfluencerProfilesHandler:
                 count = session.query(Influencers).count()
                 results = {"count": count}
 
-            if name and post_engagement:
+            elif name and post_engagement:
                 search = f"%{name}%"
                 results = (
                     session.query(Influencers)
