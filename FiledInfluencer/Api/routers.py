@@ -71,7 +71,6 @@ class InfluencerProfiles(Resource):
         engagement_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
         engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
         post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
-        #  Todo: define default Max value for engagements
         post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
 
         if engagement_min_count > 0:

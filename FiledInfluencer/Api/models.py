@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+
 from typing import Optional, Dict, List, Union
 
 from sqlalchemy import Column
@@ -41,7 +43,7 @@ class Platform:
 @dataclass
 class InfluencerPost:
     post_content: str
-    created_at: str
+    created_at: datetime
     filed_platform_id: Optional[int] = None
     influencer_id: Optional[int] = None
     engagement: Optional[int] = None
