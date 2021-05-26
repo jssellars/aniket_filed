@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 import humps
 from flask_restful import reqparse
 
-from FiledInfluencer.Api.models import Influencers, EmailTemplates
+from FiledInfluencer.Api.models import Influencers, EmailTemplates, InfluencerPosts
 from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
 from FiledInfluencer.Api.startup import session_scope
 
@@ -38,7 +38,9 @@ class InfluencerProfilesHandler:
         last_influencer_id: int,
         page_size: int,
         get_total_count: bool,
+        post_engagement: Dict,
     ) -> Union[List[Dict[str, str]], Dict[str, str]]:
+
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
 
@@ -53,6 +55,26 @@ class InfluencerProfilesHandler:
             if get_total_count:
                 count = session.query(Influencers).count()
                 results = {"count": count}
+
+            if name and post_engagement:
+                search = f"%{name}%"
+                results = (
+                    session.query(Influencers)
+                    .distinct()
+                    .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
+                    .filter(InfluencerPosts.Engagement > post_engagement['min_count'], InfluencerPosts.Engagement < post_engagement['max_count'])
+                    .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Engagement_filters)
+                    .limit(page_size)
+                )
+
+            elif post_engagement:
+                results = (
+                    session.query(Influencers)
+                    .distinct()
+                    .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
+                    .filter(InfluencerPosts.Engagement > post_engagement['min_count'], InfluencerPosts.Engagement < post_engagement['max_count'])
+                    .limit(page_size)
+                )
 
             elif name:
                 search = f"%{name}%"
