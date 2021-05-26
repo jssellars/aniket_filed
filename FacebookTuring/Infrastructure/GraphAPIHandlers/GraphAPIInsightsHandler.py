@@ -8,6 +8,7 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.adcreative import AdCreative
 
 from Core import mongo_adapter
@@ -284,6 +285,7 @@ class GraphAPIInsightsHandler:
         next_page_cursor = query.next_page_cursor
         page_size = query.page_size
         has_delivery = query.has_delivery
+        adset_not_null = query.adset_not_null
 
         if has_delivery:
             insights, structures, next_page_cursor, summary = cls._get_insights_master_data(
@@ -321,18 +323,32 @@ class GraphAPIInsightsHandler:
 
             return {"nextPageCursor": next_page_cursor, "data": response, "summary": summary}
 
-        insights, structures, next_page_cursor, summary = cls._get_structure_master_data(
-            config,
-            level=level,
-            ad_account_id=ad_account_id,
-            fields=fields,
-            parameters=parameters,
-            structure_fields=structure_fields,
-            requested_fields=requested_fields,
-            page_size=page_size,
-            next_page_cursor=next_page_cursor,
-            insights_actions_filtering=query.action_filtering,
-        )
+        if adset_not_null:
+            insights, structures, next_page_cursor, summary = cls._get_structure_master_data_adset(
+                config,
+                level=level,
+                ad_account_id=ad_account_id,
+                fields=fields,
+                parameters=parameters,
+                structure_fields=structure_fields,
+                requested_fields=requested_fields,
+                page_size=page_size,
+                next_page_cursor=next_page_cursor,
+                insights_actions_filtering=query.action_filtering,
+            )
+        else:
+            insights, structures, next_page_cursor, summary = cls._get_structure_master_data(
+                config,
+                level=level,
+                ad_account_id=ad_account_id,
+                fields=fields,
+                parameters=parameters,
+                structure_fields=structure_fields,
+                requested_fields=requested_fields,
+                page_size=page_size,
+                next_page_cursor=next_page_cursor,
+                insights_actions_filtering=query.action_filtering,
+            )
 
         response = cls.right_join_insights_and_structures(
             level=level,
@@ -410,6 +426,90 @@ class GraphAPIInsightsHandler:
             level,
             insight_ids,
             requested_structure_fields,
+        )
+
+        return insight_response, structures_response, next_page_cursor, summary
+
+    """
+    This is same as _get_structure_master_data() except
+    this only returns campaigns with adsets
+    """
+    @classmethod
+    def _get_structure_master_data_adset(
+        cls,
+        config,
+        level: str = None,
+        ad_account_id: str = None,
+        fields: List[str] = None,
+        parameters: Dict = None,
+        structure_fields: List[str] = None,
+        requested_fields: List[FieldsMetadata] = None,
+        page_size: int = 200,
+        next_page_cursor: str = None,
+        insights_actions_filtering: Dict = None,
+    ):
+        requested_structure_fields = [
+            getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
+        ]
+        facebook_structure_fields = [structure_field.facebook_fields for structure_field in requested_structure_fields]
+        facebook_structure_fields = list(itertools.chain(*facebook_structure_fields))
+        structures_filter = {
+            "after": next_page_cursor,
+            "limit": page_size,
+            FacebookParametersStrings.filtering: parameters.get(FacebookParametersStrings.filtering, []),
+        }
+
+        structures = get_sdk_structures(
+            ad_account_id, Level[level.upper()], facebook_structure_fields, structures_filter
+        )
+
+        structures_response = []
+        if level == Level.CAMPAIGN.value:
+            adsets = get_sdk_structures(
+                ad_account_id, Level.ADSET, [AdSet.Field.campaign_id], None
+            )
+            campaign_ids = set()
+            for adset in adsets:
+                if adset[AdSet.Field.campaign_id] not in campaign_ids:
+                    campaign_ids.add(adset[AdSet.Field.campaign_id])
+            while len(structures_response) < len(structures):
+                current_structure = structures.next().export_all_data()
+                for field in facebook_structure_fields:
+                    if field not in current_structure:
+                        current_structure[field] = None
+
+                if current_structure[Campaign.Field.id] in campaign_ids:
+                    structures_response.append(current_structure)
+        else:
+            # iterate like this to avoid swapping page on the iterator
+            for i in range(0, len(structures)):
+                current_structure = structures[i].export_all_data()
+                for field in facebook_structure_fields:
+                    if field not in current_structure:
+                        current_structure[field] = None
+
+                structures_response.append(current_structure)
+
+        structures_response = GraphAPIInsightsMapper().map(requested_structure_fields, structures_response)
+
+        structure_ids = [x["id"] for x in structures_response if "id" in x]
+        next_page_cursor = get_next_page_cursor(structures)
+
+        facebook_structure_key = LevelToFacebookIdKeyMapping[level.upper()].value.replace("_", ".")
+        filtering = [create_facebook_filter(facebook_structure_key, AgGridFacebookOperator.IN, structure_ids)]
+        if insights_actions_filtering:
+            filtering.append(insights_actions_filtering)
+        parameters[FacebookParametersStrings.filtering] = filtering
+
+        # The after cursor is valid only for structures, not insights on this flow
+        parameters.pop("after", None)
+
+        insight_response, _, summary = cls.get_insights_page(
+            ad_account_id=ad_account_id,
+            fields=fields,
+            parameters=parameters,
+            requested_fields=requested_fields,
+            level=level,
         )
 
         return insight_response, structures_response, next_page_cursor, summary

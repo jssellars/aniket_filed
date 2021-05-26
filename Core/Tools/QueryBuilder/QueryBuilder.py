@@ -166,6 +166,7 @@ class AgGridInsightsRequest:
         self.has_delivery = query_builder_request.get("hasDelivery", True)
         self.start_row = query_builder_request["startRow"]
         self.end_row = query_builder_request["endRow"]
+        self.adset_not_null = query_builder_request.get("adsetNotNull", False)
 
 
 class AgGridTrendRequest:

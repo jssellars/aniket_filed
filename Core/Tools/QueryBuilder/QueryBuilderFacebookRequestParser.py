@@ -71,6 +71,7 @@ class QueryBuilderFacebookRequestParser:
         self.end_row = 200
         self.action_filtering = []
         self.__breakdown_request_field = None
+        self.adset_not_null = False
 
     @property
     def parameters(self):
@@ -322,6 +323,7 @@ class QueryBuilderFacebookRequestParser:
         self.has_delivery = request.has_delivery
         self.start_row = request.start_row
         self.end_row = request.end_row
+        self.adset_not_null = request.adset_not_null
 
         request_columns = request.ag_columns[0].split(",")
         if LevelToFacebookIdKeyMapping[self.level.upper()].value not in request_columns:
