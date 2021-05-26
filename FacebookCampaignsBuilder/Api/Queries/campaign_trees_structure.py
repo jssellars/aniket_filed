@@ -259,6 +259,8 @@ class CampaignTreeBuilder:
                 user_device=targeting.get(Targeting.Field.user_device, []),
             )
 
+            adset = self.__get_ads(adset)
+
             adsets.append(adset)
 
         return adsets
