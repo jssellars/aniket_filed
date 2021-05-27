@@ -373,7 +373,7 @@ class QueryBuilderFacebookRequestParser:
                     filter_value = [filter_value, filter_val.get("filterTo")]
                 filter_objects.append(create_facebook_filter(facebook_filter_name, filter_operator, filter_value))
 
-        if filter_objective and not self.has_delivery:
+        if filter_objective:
             filter_objects.append(create_facebook_filter("objective", AgGridFacebookOperator.IN, filter_objective))
 
         self.filtering = filter_objects
