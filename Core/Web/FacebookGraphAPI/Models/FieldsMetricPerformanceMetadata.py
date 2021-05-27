@@ -53,7 +53,8 @@ class FieldsMetricPerformanceMetadata:
     cpc_all = Field(name="cpc_all",
                     facebook_fields=[GraphAPIInsightsFields.cpc],
                     mapper=OneToOneFieldMapper(),
-                    field_type=FieldType.INSIGHT)
+                    field_type=FieldType.INSIGHT,
+                    positive_effect_trend_direction=PositiveEffectTrendDirection.DECREASING)
     ctr_all = Field(name="ctr_all",
                     facebook_fields=[GraphAPIInsightsFields.ctr],
                     mapper=OneToOneFieldMapper(),
