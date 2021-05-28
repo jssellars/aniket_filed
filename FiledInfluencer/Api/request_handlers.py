@@ -1,10 +1,12 @@
 import json
 from datetime import datetime
 from typing import Dict, List, Union
+from sqlalchemy import or_
 
 import humps
 from flask_restful import reqparse
 
+from FiledInfluencer.Api.db_query import InfluencerProfileQuery
 from FiledInfluencer.Api.models import Influencers, EmailTemplates, InfluencerPosts
 from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
 from FiledInfluencer.Api.startup import session_scope
@@ -27,6 +29,7 @@ class InfluencerProfilesHandler:
             Engagement=influencer.Engagement,
             ProfilePicture=details["profile_pic_url"],
             CategoryName=details["category_name"],
+            AccountType=influencer.AccountType,
         )
         return humps.camelize(pydantic_influencer.dict())
 
@@ -39,57 +42,73 @@ class InfluencerProfilesHandler:
         page_size: int,
         get_total_count: bool,
         post_engagement: Dict,
+        account_type: int,
     ) -> Union[List[Dict[str, str]], Dict[str, str]]:
 
         # last_influencer_id was already sent in previous request
         last_influencer_id += 1
+        global account_type_enum1
+        global account_type_enum2
 
         Engagement_filters = (
             Influencers.Engagement > engagement["min_count"],
             Influencers.Engagement < engagement["max_count"],
         )
 
-        with session_scope() as session:
-            # for infinite scrolling
-            # offset queries are inefficient
-            if get_total_count:
-                count = session.query(Influencers).count()
-                results = {"count": count}
+        if account_type is not None:
+            if account_type == 0:
+                account_type_enum1, account_type_enum2 = 0, 2
+            elif account_type == 1:
+                account_type_enum1, account_type_enum2 = 1, 2
+            elif account_type == 3:
+                account_type_enum1 = 3
 
-            elif name and post_engagement:
-                search = f"%{name}%"
-                results = (
-                    session.query(Influencers)
-                    .distinct()
-                    .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                    .filter(InfluencerPosts.Engagement > post_engagement['min_count'], InfluencerPosts.Engagement < post_engagement['max_count'])
-                    .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Engagement_filters)
-                    .limit(page_size)
-                )
+        # Initializing session to execute query
+        query = InfluencerProfileQuery()
 
-            elif post_engagement:
-                results = (
-                    session.query(Influencers)
-                    .distinct()
-                    .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                    .filter(InfluencerPosts.Engagement > post_engagement['min_count'], InfluencerPosts.Engagement < post_engagement['max_count'])
-                    .limit(page_size)
-                )
+        # for infinite scrolling
+        # offset queries are inefficient
+        if get_total_count:
+            results = query.get_total_count_query()
 
-            elif name:
-                search = f"%{name}%"
-                results = (
-                    session.query(Influencers)
-                    .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Engagement_filters)
-                    .limit(page_size)
-                )
+        elif name and post_engagement and account_type is not None:
+            results = query.get_name_postengagement_accountype_query(
+                                        name, post_engagement, account_type, account_type_enum1, account_type_enum2,
+                                        Engagement_filters, last_influencer_id, page_size)
 
-            else:
-                results = (
-                    session.query(Influencers)
-                    .filter(Influencers.Id >= last_influencer_id, *Engagement_filters)
-                    .limit(page_size)
-                )
+        elif post_engagement and account_type is not None:
+            results = query.get_postengagement_accountype_query(
+                                        post_engagement, account_type, account_type_enum1, account_type_enum2,
+                                        Engagement_filters, last_influencer_id, page_size)
+
+        elif name and account_type is not None:
+            results = query.get_name_accounttype_query(
+                                        name, account_type, account_type_enum1, account_type_enum2,
+                                        Engagement_filters, last_influencer_id, page_size)
+
+        elif name and post_engagement:
+            results = query.get_name_postengagement_query(
+                                        name, post_engagement,
+                                        Engagement_filters, last_influencer_id, page_size)
+
+        elif post_engagement:
+            results = query.get_postengagement_query(
+                                        post_engagement,
+                                        Engagement_filters, last_influencer_id, page_size)
+
+        elif name:
+            results = query.get_name_query(
+                                        name,
+                                        Engagement_filters, last_influencer_id, page_size)
+
+        elif account_type is not None:
+            results = query.get_accounttype_query(
+                                        account_type, account_type_enum1, account_type_enum2,
+                                        Engagement_filters, last_influencer_id, page_size)
+
+        else:
+            results = query.get_default_query(
+                                        Engagement_filters, last_influencer_id, page_size)
 
         if isinstance(results, dict):
             return results

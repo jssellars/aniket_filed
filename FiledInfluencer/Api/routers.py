@@ -72,6 +72,7 @@ class InfluencerProfiles(Resource):
         engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
         post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
         post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
+        account_type = self.extract_param_or_default(request, "account_type", None)
 
         if engagement_min_count > 0:
             msg, engagement_check = self.range_checker(engagement_max_count, engagement_min_count, "Followers")
@@ -102,6 +103,7 @@ class InfluencerProfiles(Resource):
             page_size=page_size,
             get_total_count=get_total_count,
             post_engagement=post_engagement,
+            account_type=account_type,
         )
         return response, 200
 

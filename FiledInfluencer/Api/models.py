@@ -73,6 +73,7 @@ class Influencers(Base):
     Biography = Column(NVARCHAR())
     Engagement = Column(NVARCHAR())
     Details = Column(NVARCHAR())
+    AccountType = Column(NVARCHAR(128))
 
     PlatformId = Column(BIGINT)
     InfluencerCategoryId = Column(BIGINT)

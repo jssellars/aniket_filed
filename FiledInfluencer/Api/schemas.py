@@ -18,6 +18,7 @@ class InfluencersResponse(BaseModel):
     Engagement: str
     ProfilePicture: AnyUrl
     CategoryName: Optional[str] = None
+    AccountType: int
 
     class Config:
         orm_mode = True
