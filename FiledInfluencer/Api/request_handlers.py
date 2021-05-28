@@ -1,15 +1,15 @@
 import json
 from datetime import datetime
 from typing import Dict, List, Union
-from sqlalchemy import or_
 
 import humps
 from flask_restful import reqparse
 
 from FiledInfluencer.Api.db_query import InfluencerProfileQuery
-from FiledInfluencer.Api.models import Influencers, EmailTemplates, InfluencerPosts
+from FiledInfluencer.Api.models import Influencers, EmailTemplates
 from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
 from FiledInfluencer.Api.startup import session_scope
+from FiledInfluencer.enum import AccountTypeEnum
 
 
 class InfluencerProfilesHandler:
@@ -56,12 +56,16 @@ class InfluencerProfilesHandler:
         )
 
         if account_type is not None:
-            if account_type == 0:
-                account_type_enum1, account_type_enum2 = 0, 2
-            elif account_type == 1:
-                account_type_enum1, account_type_enum2 = 1, 2
-            elif account_type == 3:
-                account_type_enum1 = 3
+            if account_type == AccountTypeEnum.BUSINESS.value:
+                account_type_enum1 = 'Business'
+                account_type_enum2 = 'Business, Professional'
+
+            elif account_type == AccountTypeEnum.PROFESSIONAL.value:
+                account_type_enum1 = 'Professional'
+                account_type_enum2 = 'Business, Professional'
+
+            elif account_type == AccountTypeEnum.PERSONAL.value:
+                account_type_enum1 = 'Personal'
 
         # Initializing session to execute query
         query = InfluencerProfileQuery()

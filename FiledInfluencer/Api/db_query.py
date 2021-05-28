@@ -2,6 +2,7 @@ from sqlalchemy import or_
 
 from FiledInfluencer.Api.models import Influencers, InfluencerPosts
 from FiledInfluencer.Api.startup import session_scope
+from FiledInfluencer.enum import AccountTypeEnum
 
 
 class InfluencerProfileQuery:
@@ -18,7 +19,7 @@ class InfluencerProfileQuery:
                                 self, name, post_engagement, account_type, account_type_enum1, account_type_enum2,
                                 Engagement_filters, last_influencer_id, page_size):
         search = f"%{name}%"
-        if account_type == 3:
+        if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
                 .distinct()
@@ -45,7 +46,7 @@ class InfluencerProfileQuery:
     def get_postengagement_accountype_query(
                                     self, post_engagement, account_type, account_type_enum1, account_type_enum2,
                                     Engagement_filters, last_influencer_id, page_size):
-        if account_type == 3:
+        if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
                 .distinct()
@@ -71,7 +72,7 @@ class InfluencerProfileQuery:
     def get_name_accounttype_query(self, name, account_type, account_type_enum1, account_type_enum2,
                                    Engagement_filters, last_influencer_id, page_size):
         search = f"%{name}%"
-        if account_type == 3:
+        if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
                 .filter(Influencers.AccountType == account_type_enum1)
@@ -126,7 +127,7 @@ class InfluencerProfileQuery:
 
     def get_accounttype_query(self, account_type, account_type_enum1, account_type_enum2,
                               Engagement_filters, last_influencer_id, page_size):
-        if account_type == 3:
+        if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
                 .filter(Influencers.AccountType == account_type_enum1)
