@@ -15,17 +15,14 @@ class InfluencerProfileQuery:
         results = {"count": count}
         return results
 
-    def get_name_postengagement_isverified_accountype_query(
-                                self, name, post_engagement, account_type, account_type_enum1, account_type_enum2,
+    def get_name_engagementperpost_isverified_accountype_query(
+                                self, name, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
                                 is_verified, Followers_filters, last_influencer_id, page_size):
         search = f"%{name}%"
         if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Followers_filters)
                 .filter(Influencers.IsVerified == is_verified)
                 .filter(Influencers.AccountType == account_type_enum1)
@@ -34,10 +31,7 @@ class InfluencerProfileQuery:
         else:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Followers_filters)
                 .filter(Influencers.IsVerified == is_verified)
                 .filter(or_(Influencers.AccountType == account_type_enum1, Influencers.AccountType == account_type_enum2))
@@ -45,17 +39,14 @@ class InfluencerProfileQuery:
             )
         return results
 
-    def get_name_postengagement_accountype_query(
-                                self, name, post_engagement, account_type, account_type_enum1, account_type_enum2,
+    def get_name_engagementperpost_accountype_query(
+                                self, name, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
                                 Followers_filters, last_influencer_id, page_size):
         search = f"%{name}%"
         if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Followers_filters)
                 .filter(Influencers.AccountType == account_type_enum1)
                 .limit(page_size)
@@ -63,26 +54,20 @@ class InfluencerProfileQuery:
         else:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Followers_filters)
                 .filter(or_(Influencers.AccountType == account_type_enum1, Influencers.AccountType == account_type_enum2))
                 .limit(page_size)
             )
         return results
 
-    def get_name_postengagement_isverified_query(
-                                self, name, post_engagement, is_verified,
+    def get_name_engagementperpost_isverified_query(
+                                self, name, EngagementPerPost_filters, is_verified,
                                 Followers_filters, last_influencer_id, page_size):
         search = f"%{name}%"
         results = (
             self.session.query(Influencers)
-            .distinct()
-            .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-            .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                    InfluencerPosts.Engagement < post_engagement['max_count'])
+            .filter(*EngagementPerPost_filters)
             .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Followers_filters)
             .filter(Influencers.IsVerified == is_verified)
             .limit(page_size)
@@ -111,16 +96,13 @@ class InfluencerProfileQuery:
             )
         return results
 
-    def get_isverified_postengagement_accountype_query(
-                                self, is_verified, post_engagement, account_type, account_type_enum1, account_type_enum2,
+    def get_isverified_engagementperpost_accountype_query(
+                                self, is_verified, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
                                 Followers_filters, last_influencer_id, page_size):
         if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, *Followers_filters)
                 .filter(Influencers.IsVerified == is_verified)
                 .filter(Influencers.AccountType == account_type_enum1)
@@ -129,10 +111,7 @@ class InfluencerProfileQuery:
         else:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, *Followers_filters)
                 .filter(Influencers.IsVerified == is_verified)
                 .filter(or_(Influencers.AccountType == account_type_enum1, Influencers.AccountType == account_type_enum2))
@@ -140,15 +119,13 @@ class InfluencerProfileQuery:
             )
         return results
 
-    def get_postengagement_accountype_query(
-                                    self, post_engagement, account_type, account_type_enum1, account_type_enum2,
+    def get_engagementperpost_accountype_query(
+                                    self, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
                                     Followers_filters, last_influencer_id, page_size):
         if account_type == AccountTypeEnum.PERSONAL.value:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'], InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, *Followers_filters)
                 .filter(Influencers.AccountType == account_type_enum1)
                 .limit(page_size)
@@ -156,10 +133,7 @@ class InfluencerProfileQuery:
         else:
             results = (
                 self.session.query(Influencers)
-                .distinct()
-                .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-                .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                        InfluencerPosts.Engagement < post_engagement['max_count'])
+                .filter(*EngagementPerPost_filters)
                 .filter(Influencers.Id >= last_influencer_id, *Followers_filters)
                 .filter(or_(Influencers.AccountType == account_type_enum1, Influencers.AccountType == account_type_enum2))
                 .limit(page_size)
@@ -185,28 +159,22 @@ class InfluencerProfileQuery:
             )
         return results
 
-    def get_name_postengagement_query(self, name, post_engagement,
+    def get_name_engagementperpost_query(self, name, EngagementPerPost_filters,
                                       Followers_filters, last_influencer_id, page_size):
         search = f"%{name}%"
         results = (
             self.session.query(Influencers)
-            .distinct()
-            .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-            .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                    InfluencerPosts.Engagement < post_engagement['max_count'])
+            .filter(*EngagementPerPost_filters)
             .filter(Influencers.Id >= last_influencer_id, Influencers.Name.like(search), *Followers_filters)
             .limit(page_size)
         )
         return results
 
-    def get_postengagement_isverified_query(self, post_engagement, is_verified,
+    def get_engagementperpost_isverified_query(self, EngagementPerPost_filters, is_verified,
                                       Followers_filters, last_influencer_id, page_size):
         results = (
             self.session.query(Influencers)
-            .distinct()
-            .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-            .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                    InfluencerPosts.Engagement < post_engagement['max_count'])
+            .filter(*EngagementPerPost_filters)
             .filter(Influencers.Id >= last_influencer_id, *Followers_filters)
             .filter(Influencers.IsVerified == is_verified)
             .limit(page_size)
@@ -244,14 +212,11 @@ class InfluencerProfileQuery:
         )
         return results
 
-    def get_postengagement_query(self, post_engagement,
+    def get_engagementperpost_query(self, EngagementPerPost_filters,
                                 Followers_filters, last_influencer_id, page_size):
         results = (
             self.session.query(Influencers)
-            .distinct()
-            .join(InfluencerPosts, InfluencerPosts.InfluencerId == Influencers.Id, isouter=True)
-            .filter(InfluencerPosts.Engagement > post_engagement['min_count'],
-                    InfluencerPosts.Engagement < post_engagement['max_count'])
+            .filter(*EngagementPerPost_filters)
             .filter(Influencers.Id >= last_influencer_id, *Followers_filters)
             .limit(page_size)
         )

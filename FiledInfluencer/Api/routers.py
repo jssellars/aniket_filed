@@ -75,8 +75,8 @@ class InfluencerProfiles(Resource):
         get_total_count = self.extract_param_or_default(request, "get_total_count", False)
         followers_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
         followers_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
-        post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
-        post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
+        engagements_per_post_min_count = self.extract_param_or_default(request, "engagements_per_post_min_count", None)
+        engagements_per_post_max_count = self.extract_param_or_default(request, "engagements_per_post_max_count", None)
         account_type = self.extract_param_or_default(request, "account_type", None)
         is_verified = self.extract_param_or_default(request, "is_verified", None)
 
@@ -85,16 +85,16 @@ class InfluencerProfiles(Resource):
             if not engagement_check:
                 return msg, 400
 
-        post_engagement = None
-        if post_engagement_min_count is not None or post_engagement_max_count is not None:
-            msg, post_engagement_check = self.range_checker(post_engagement_max_count, post_engagement_min_count, "Engagements")
+        engagement_per_post = None
+        if engagements_per_post_min_count is not None or engagements_per_post_max_count is not None:
+            msg, post_engagement_check = self.range_checker(engagements_per_post_max_count, engagements_per_post_min_count, "Engagements")
 
             if not post_engagement_check:
                 return msg, 400
 
-            post_engagement = {
-                'min_count': post_engagement_min_count,
-                'max_count': post_engagement_max_count
+            engagement_per_post = {
+                'min_count': engagements_per_post_min_count,
+                'max_count': engagements_per_post_max_count
             }
 
         followers = {
@@ -110,7 +110,7 @@ class InfluencerProfiles(Resource):
             last_influencer_id=last_influencer_id,
             page_size=page_size,
             get_total_count=get_total_count,
-            post_engagement=post_engagement,
+            engagement_per_post=engagement_per_post,
             account_type=account_type,
             is_verified=is_verified,
             followers=followers,

@@ -79,6 +79,8 @@ class Influencers(Base):
 
     PlatformId = Column(BIGINT)
     InfluencerCategoryId = Column(BIGINT)
+    MinEngagementPerPost = Column(INTEGER)
+    MaxEngagementPerPost = Column(INTEGER)
 
     def __repr__(self):
         return f"<User(name={self.Name}')>"
