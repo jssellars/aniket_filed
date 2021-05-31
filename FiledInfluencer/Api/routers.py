@@ -42,6 +42,11 @@ class InfluencerProfiles(Resource):
             response = request.args.get(param_name) or default
             if param_name == 'get_total_count':
                 response = response == 'true'
+            elif param_name == 'is_verified':
+                if param_name == 'true':
+                    response = True
+                elif param_name == 'false':
+                    response = False
             elif param_name != 'name':
                 response = int(response)
         except (TypeError, ValueError) as _:
@@ -73,6 +78,7 @@ class InfluencerProfiles(Resource):
         post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
         post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
         account_type = self.extract_param_or_default(request, "account_type", None)
+        is_verified = self.extract_param_or_default(request, "is_verified", None)
 
         if engagement_min_count > 0:
             msg, engagement_check = self.range_checker(engagement_max_count, engagement_min_count, "Followers")
@@ -96,6 +102,9 @@ class InfluencerProfiles(Resource):
             'max_count': engagement_max_count
         }
 
+        if is_verified == 'both':
+            is_verified = None
+
         response = InfluencerProfilesHandler.get_profiles(
             name=name,
             engagement=engagement,
@@ -104,6 +113,7 @@ class InfluencerProfiles(Resource):
             get_total_count=get_total_count,
             post_engagement=post_engagement,
             account_type=account_type,
+            is_verified=is_verified,
         )
         return response, 200
 

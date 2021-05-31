@@ -74,6 +74,7 @@ class Influencers(Base):
     Engagement = Column(NVARCHAR())
     Details = Column(NVARCHAR())
     AccountType = Column(NVARCHAR(128))
+    IsVerified = Column(INTEGER)
 
     PlatformId = Column(BIGINT)
     InfluencerCategoryId = Column(BIGINT)

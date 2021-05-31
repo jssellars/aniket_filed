@@ -19,6 +19,7 @@ class InfluencersResponse(BaseModel):
     ProfilePicture: AnyUrl
     CategoryName: Optional[str] = None
     AccountType: str
+    IsVerified: str
 
     class Config:
         orm_mode = True
