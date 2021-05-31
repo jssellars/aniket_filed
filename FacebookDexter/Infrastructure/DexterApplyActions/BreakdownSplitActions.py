@@ -1,3 +1,5 @@
+import concurrent.futures
+import logging
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import asdict, dataclass
@@ -17,8 +19,9 @@ from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOp
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_and_map_structures
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookBreakdownGender, FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import GraphAPIBudgetValidationHandler
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     INVALID_METRIC_VALUE,
     TOTAL_KEY,
@@ -38,6 +41,8 @@ from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresH
     NewCreatedStructureKeys,
 )
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyDataMongoRepository import StrategyDataMongoRepository
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -82,21 +87,82 @@ class AgeGenderBreakdownSplit(RecommendationAction):
 
         fb_structure = LevelToGraphAPIStructure.get(level, facebook_id)
 
-        new_created_structures = []
-        for gender in apply_parameters:
-            for split in apply_parameters[gender]:
-                facebook_id = AgeGenderBreakdownSplit._create_and_update_split(
-                    split, targeting, fb_structure, gender, recommendation
-                )
-                new_created_structures.append(
-                    NewCreatedStructureKeys(
-                        level,
-                        recommendation.get(RecommendationField.ACCOUNT_ID.value),
-                        facebook_id,
+        # create all adsets with breakdowns and no ads of original adset
+        new_adset_ids = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for gender in apply_parameters:
+                for split in apply_parameters[gender]:
+                    futures.append(
+                        executor.submit(
+                            AgeGenderBreakdownSplit._create_and_update_split,
+                            split,
+                            targeting,
+                            fb_structure,
+                            gender,
+                            recommendation,
+                        )
                     )
-                )
+            for future in concurrent.futures.as_completed(futures):
+                new_adset_ids.append(future.result())
+
+        # get all the ads from the original adset
+        orig_fb_adset = AdSet(fbid=facebook_id)
+        ad_ids = [ad.get_id() for ad in (orig_fb_adset.get_ads(fields=["id"]))]
+
+        # publish copies of ads to all new adsets
+        new_ad_ids = AgeGenderBreakdownSplit.make_copies(ad_ids, new_adset_ids)
+
+        new_created_structures = [
+            NewCreatedStructureKeys(level, recommendation.get(RecommendationField.ACCOUNT_ID.value), new_adset_id)
+            for new_adset_id in new_adset_ids
+        ]
 
         self._publish_message_and_pause_structure(new_created_structures, recommendation, headers)
+
+    @staticmethod
+    def make_copies(ad_ids: List, adset_ids: List):
+        new_copies = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for adset_id in adset_ids:
+                for ad_id in ad_ids:
+                    futures.append(
+                        executor.submit(
+                            AgeGenderBreakdownSplit._duplicate_ads_on_adset,
+                            ad_id,
+                            adset_id,
+                        )
+                    )
+
+            for future in concurrent.futures.as_completed(futures):
+                new_copies.append(future.result())
+
+            return new_copies
+
+    @staticmethod
+    def _duplicate_ads_on_adset(ad_id, adset_id, retry=0):
+        ad = Ad(fbid=ad_id)
+        parameters = {"adset_id": adset_id, "status_option": Ad.StatusOption.inherited_from_source}
+        try:
+            new_ad_id = ad.create_copy(params=parameters)
+            new_ad_id = Tools.convert_to_json(new_ad_id)
+
+            if "copied_ad_id" in new_ad_id:
+                return new_ad_id["copied_ad_id"]
+            else:
+                raise ValueError("Invalid duplicated Ad id.")
+
+        except Exception as e:
+            # retrying ad copy request if there is "unexpected error" from FB
+            if e.api_error_code() == 2 and retry < 3:
+                logger.exception(
+                    f"Unable to copy and publish ad {ad_id} to adset {adset_id} || {repr(e)} || retry count: {retry}"
+                )
+                return AgeGenderBreakdownSplit._duplicate_ads_on_adset(ad_id, adset_id, retry + 1)
+
+            logger.exception(f"Unable to copy and publish ad {ad_id} to adset {adset_id} || {repr(e)}")
+            return None
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         existing_breakdowns = defaultdict(list)
@@ -233,7 +299,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         copy_result = structure.create_copy(
             params={
                 "campaign_id": recommendation.get(RecommendationField.CAMPAIGN_ID.value),
-                "deep_copy": True,
+                "deep_copy": False,
                 "status_option": AdSet.StatusOption.inherited_from_source,
                 "rename_options": {"rename_suffix": f"{adset_split.min_age}-{adset_split.max_age} - {gender}"},
             }
