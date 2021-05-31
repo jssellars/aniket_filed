@@ -75,6 +75,7 @@ class Influencers(Base):
     Details = Column(NVARCHAR())
     AccountType = Column(NVARCHAR(128))
     IsVerified = Column(INTEGER)
+    Followers = Column(BIGINT)
 
     PlatformId = Column(BIGINT)
     InfluencerCategoryId = Column(BIGINT)

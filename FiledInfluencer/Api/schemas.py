@@ -20,6 +20,7 @@ class InfluencersResponse(BaseModel):
     CategoryName: Optional[str] = None
     AccountType: str
     IsVerified: str
+    Followers: int
 
     class Config:
         orm_mode = True

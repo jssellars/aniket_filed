@@ -73,15 +73,15 @@ class InfluencerProfiles(Resource):
         last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
         name = self.extract_param_or_default(request, "name", None)
         get_total_count = self.extract_param_or_default(request, "get_total_count", False)
-        engagement_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
-        engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
+        followers_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
+        followers_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
         post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
         post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
         account_type = self.extract_param_or_default(request, "account_type", None)
         is_verified = self.extract_param_or_default(request, "is_verified", None)
 
-        if engagement_min_count > 0:
-            msg, engagement_check = self.range_checker(engagement_max_count, engagement_min_count, "Followers")
+        if followers_min_count > 0:
+            msg, engagement_check = self.range_checker(followers_max_count, followers_min_count, "Followers")
             if not engagement_check:
                 return msg, 400
 
@@ -97,9 +97,9 @@ class InfluencerProfiles(Resource):
                 'max_count': post_engagement_max_count
             }
 
-        engagement = {
-            'min_count': engagement_min_count,
-            'max_count': engagement_max_count
+        followers = {
+            'min_count': followers_min_count,
+            'max_count': followers_max_count
         }
 
         if is_verified == 'both':
@@ -107,13 +107,13 @@ class InfluencerProfiles(Resource):
 
         response = InfluencerProfilesHandler.get_profiles(
             name=name,
-            engagement=engagement,
             last_influencer_id=last_influencer_id,
             page_size=page_size,
             get_total_count=get_total_count,
             post_engagement=post_engagement,
             account_type=account_type,
             is_verified=is_verified,
+            followers=followers,
         )
         return response, 200
 
