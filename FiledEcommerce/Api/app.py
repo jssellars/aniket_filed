@@ -23,6 +23,7 @@ api = flask_restful.Api(app)
 router_route_pairs = (
     (routers.ImportIntegrationModel, "/model/<string:platform>"),
     (routers.ImportIntegrationMapping, "/mapping/<string:platform>"),
+    (routers.OAuth, "/oauth/<string:platform>/<string:action>"),
 )
 
 for router, route in router_route_pairs:

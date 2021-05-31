@@ -1,13 +1,13 @@
-import json
 import logging
 
 import flask_restful
-from flask import Response, jsonify, request
+from flask import redirect, request
 
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
 from FiledEcommerce.Api.Dtos.ImportIntegrationMappingDto import ImportIntegrationMappingDto
 from FiledEcommerce.Api.Dtos.ImportIntegrationModelDto import ImportIntegrationModelDto
+from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider import ImportIntegrationProvider
 
 logger = logging.getLogger(__name__)
 
@@ -35,5 +35,20 @@ class ImportIntegrationMapping(Resource):
 
 
 class OAuth(Resource):
-    def get(self):
-        pass
+    def get(self, platform, action):
+        store = ImportIntegrationProvider.get_instance(platform)
+        if action == "preinstall":
+            url = store.pre_install()
+        elif action == "install":
+            url = store.app_install()
+        elif action == "load":
+            url = store.app_load()
+        elif action == "uninstall":
+            url = store.app_uninstall()
+        else:
+            url = "Invalid action"  # Redirect to error page
+
+        if action == "preinstall":
+            return {"url": url}
+        else:
+            return redirect(url)
