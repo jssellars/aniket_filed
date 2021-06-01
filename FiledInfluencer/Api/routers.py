@@ -42,6 +42,11 @@ class InfluencerProfiles(Resource):
             response = request.args.get(param_name) or default
             if param_name == 'get_total_count':
                 response = response == 'true'
+            elif param_name == 'is_verified':
+                if param_name == 'true':
+                    response = True
+                elif param_name == 'false':
+                    response = False
             elif param_name != 'name':
                 response = int(response)
         except (TypeError, ValueError) as _:
@@ -68,40 +73,60 @@ class InfluencerProfiles(Resource):
         last_influencer_id = self.extract_param_or_default(request, "last_influencer_id", 0)
         name = self.extract_param_or_default(request, "name", None)
         get_total_count = self.extract_param_or_default(request, "get_total_count", False)
-        engagement_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
-        engagement_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
-        post_engagement_min_count = self.extract_param_or_default(request, "engagements_min_count", None)
-        post_engagement_max_count = self.extract_param_or_default(request, "engagements_max_count", None)
+        followers_min_count = self.extract_param_or_default(request, "followers_min_count", 0)
+        followers_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
+        engagements_per_post_min_count = self.extract_param_or_default(request, "engagements_per_post_min_count", None)
+        engagements_per_post_max_count = self.extract_param_or_default(request, "engagements_per_post_max_count", None)
+        engagement_rate_min_count = self.extract_param_or_default(request, 'engagement_rate_min_count', 0)
+        engagement_rate_max_count = self.extract_param_or_default(request, 'engagement_rate_max_count', 100)
+        account_type = self.extract_param_or_default(request, "account_type", None)
+        is_verified = self.extract_param_or_default(request, "is_verified", None)
 
-        if engagement_min_count > 0:
-            msg, engagement_check = self.range_checker(engagement_max_count, engagement_min_count, "Followers")
-            if not engagement_check:
+        if followers_min_count > 0:
+            msg, followers_check = self.range_checker(followers_max_count, followers_min_count, "Followers")
+            if not followers_check:
                 return msg, 400
 
-        post_engagement = None
-        if post_engagement_min_count is not None or post_engagement_max_count is not None:
-            msg, post_engagement_check = self.range_checker(post_engagement_max_count, post_engagement_min_count, "Engagements")
+        followers = {
+            'min_count': followers_min_count,
+            'max_count': followers_max_count
+        }
+
+        engagement_per_post = None
+        if engagements_per_post_min_count is not None or engagements_per_post_max_count is not None:
+            msg, post_engagement_check = self.range_checker(engagements_per_post_max_count, engagements_per_post_min_count, "Engagements Per Post")
 
             if not post_engagement_check:
                 return msg, 400
 
-            post_engagement = {
-                'min_count': post_engagement_min_count,
-                'max_count': post_engagement_max_count
+            engagement_per_post = {
+                'min_count': engagements_per_post_min_count,
+                'max_count': engagements_per_post_max_count
             }
 
-        engagement = {
-            'min_count': engagement_min_count,
-            'max_count': engagement_max_count
+        if engagement_rate_min_count > 0:
+            msg, engagement_rate_check = self.range_checker(engagement_rate_max_count, engagement_rate_min_count, "Engagement Rate")
+            if not engagement_rate_check:
+                return msg, 400
+
+        engagement_rate = {
+            'min_count': engagement_rate_min_count,
+            'max_count': engagement_rate_max_count
         }
+
+        if is_verified == 'both':
+            is_verified = None
 
         response = InfluencerProfilesHandler.get_profiles(
             name=name,
-            engagement=engagement,
             last_influencer_id=last_influencer_id,
+            engagement_rate=engagement_rate,
             page_size=page_size,
             get_total_count=get_total_count,
-            post_engagement=post_engagement,
+            engagement_per_post=engagement_per_post,
+            account_type=account_type,
+            is_verified=is_verified,
+            followers=followers,
         )
         return response, 200
 

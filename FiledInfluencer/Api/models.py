@@ -5,7 +5,7 @@ from typing import Optional, Dict, List, Union
 
 from sqlalchemy import Column
 from sqlalchemy.dialects.mssql import BIGINT, \
-    DATETIME2, NVARCHAR, DECIMAL
+    DATETIME2, NVARCHAR, DECIMAL, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -73,9 +73,14 @@ class Influencers(Base):
     Biography = Column(NVARCHAR())
     Engagement = Column(NVARCHAR())
     Details = Column(NVARCHAR())
+    AccountType = Column(NVARCHAR(128))
+    IsVerified = Column(INTEGER)
+    Followers = Column(BIGINT)
 
     PlatformId = Column(BIGINT)
     InfluencerCategoryId = Column(BIGINT)
+    MinEngagementPerPost = Column(INTEGER)
+    MaxEngagementPerPost = Column(INTEGER)
 
     def __repr__(self):
         return f"<User(name={self.Name}')>"
