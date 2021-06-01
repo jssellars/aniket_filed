@@ -77,17 +77,24 @@ class InfluencerProfiles(Resource):
         followers_max_count = self.extract_param_or_default(request, "followers_max_count", 100000000)
         engagements_per_post_min_count = self.extract_param_or_default(request, "engagements_per_post_min_count", None)
         engagements_per_post_max_count = self.extract_param_or_default(request, "engagements_per_post_max_count", None)
+        engagement_rate_min_count = self.extract_param_or_default(request, 'engagement_rate_min_count', 0)
+        engagement_rate_max_count = self.extract_param_or_default(request, 'engagement_rate_max_count', 100)
         account_type = self.extract_param_or_default(request, "account_type", None)
         is_verified = self.extract_param_or_default(request, "is_verified", None)
 
         if followers_min_count > 0:
-            msg, engagement_check = self.range_checker(followers_max_count, followers_min_count, "Followers")
-            if not engagement_check:
+            msg, followers_check = self.range_checker(followers_max_count, followers_min_count, "Followers")
+            if not followers_check:
                 return msg, 400
+
+        followers = {
+            'min_count': followers_min_count,
+            'max_count': followers_max_count
+        }
 
         engagement_per_post = None
         if engagements_per_post_min_count is not None or engagements_per_post_max_count is not None:
-            msg, post_engagement_check = self.range_checker(engagements_per_post_max_count, engagements_per_post_min_count, "Engagements")
+            msg, post_engagement_check = self.range_checker(engagements_per_post_max_count, engagements_per_post_min_count, "Engagements Per Post")
 
             if not post_engagement_check:
                 return msg, 400
@@ -97,9 +104,14 @@ class InfluencerProfiles(Resource):
                 'max_count': engagements_per_post_max_count
             }
 
-        followers = {
-            'min_count': followers_min_count,
-            'max_count': followers_max_count
+        if engagement_rate_min_count > 0:
+            msg, engagement_rate_check = self.range_checker(engagement_rate_max_count, engagement_rate_min_count, "Engagement Rate")
+            if not engagement_rate_check:
+                return msg, 400
+
+        engagement_rate = {
+            'min_count': engagement_rate_min_count,
+            'max_count': engagement_rate_max_count
         }
 
         if is_verified == 'both':
@@ -108,6 +120,7 @@ class InfluencerProfiles(Resource):
         response = InfluencerProfilesHandler.get_profiles(
             name=name,
             last_influencer_id=last_influencer_id,
+            engagement_rate=engagement_rate,
             page_size=page_size,
             get_total_count=get_total_count,
             engagement_per_post=engagement_per_post,
