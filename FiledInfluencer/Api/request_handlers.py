@@ -57,8 +57,8 @@ class InfluencerProfilesHandler:
         global account_type_enum1, account_type_enum2, EngagementPerPost_filters
 
         Followers_filters = (
-            Influencers.Followers > followers["min_count"],
-            Influencers.Followers < followers["max_count"],
+            Influencers.Followers >= followers["min_count"],
+            Influencers.Followers <= followers["max_count"],
         )
 
         if engagement_per_post is not None:
@@ -68,8 +68,8 @@ class InfluencerProfilesHandler:
             )
 
         Engagement_filters = (
-            Influencers.Engagement > engagement_rate["min_count"],
-            Influencers.Engagement < engagement_rate["max_count"],
+            Influencers.Engagement >= engagement_rate["min_count"],
+            Influencers.Engagement <= engagement_rate["max_count"],
         )
 
         if account_type is not None:
