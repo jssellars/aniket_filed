@@ -5,7 +5,7 @@ from FiledEcommerce.Api.startup import config
 class EcommerceMongoRepository(MongoRepositoryBase):
     def __init__(self):
         super(EcommerceMongoRepository, self).__init__(
-            database_name=config.mongo.ecommerce_database_name, collection_name="oauth"
+            config=config.mongo, database_name=config.mongo.ecommerce_database_name, collection_name="oauth"
         )
 
     def add_oauth_creds(self, data):

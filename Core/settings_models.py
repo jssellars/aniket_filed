@@ -109,6 +109,7 @@ class Mongo(BaseModel):
     publish_feedback_collection_name: Optional[str]
     influencer_profiles_collection_name: Optional[str]
     influencer_database_name: Optional[str]
+    ecommerce_database_name: Optional[str]
 
     @property
     def connection_string_internal(self):
