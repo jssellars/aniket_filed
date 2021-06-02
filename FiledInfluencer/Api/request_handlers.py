@@ -1,16 +1,15 @@
 import json
 from datetime import datetime
-
 from typing import Dict, List, Union
 
 import humps
 from flask_restful import reqparse
 
 from FiledInfluencer.Api.db_query import InfluencerProfileQuery
-from FiledInfluencer.Api.models import Influencers, EmailTemplates
-from FiledInfluencer.Api.schemas import InfluencersResponse, EmailTemplateResponse
+from FiledInfluencer.Api.models import EmailTemplates, Influencers
+from FiledInfluencer.Api.schemas import EmailTemplateResponse, InfluencersResponse
 from FiledInfluencer.Api.startup import session_scope
-from FiledInfluencer.enum import AccountTypeEnum
+from FiledInfluencer.influencer_enum import AccountTypeEnum
 
 
 class InfluencerProfilesHandler:
@@ -74,16 +73,16 @@ class InfluencerProfilesHandler:
 
         if account_type is not None:
             if account_type == AccountTypeEnum.BUSINESS.value:
-                account_type_enum1 = 'Business'
-                account_type_enum2 = 'Business, Professional'
+                account_type_enum1 = "Business"
+                account_type_enum2 = "Business, Professional"
 
             elif account_type == AccountTypeEnum.PROFESSIONAL.value:
-                account_type_enum1 = 'Professional'
-                account_type_enum2 = 'Business, Professional'
+                account_type_enum1 = "Professional"
+                account_type_enum2 = "Business, Professional"
 
             elif account_type == AccountTypeEnum.PERSONAL.value:
-                account_type_enum1 = 'Personal'
-                account_type_enum2 = 'Personal'
+                account_type_enum1 = "Personal"
+                account_type_enum2 = "Personal"
 
         # Initializing session to execute query
         query = InfluencerProfileQuery()
@@ -95,82 +94,150 @@ class InfluencerProfilesHandler:
 
         elif name and engagement_per_post and is_verified and account_type is not None:
             results = query.get_name_engagementperpost_isverified_accountype_query(
-                                name, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
-                                is_verified, Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                name,
+                EngagementPerPost_filters,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                is_verified,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif name and engagement_per_post and account_type is not None:
             results = query.get_name_engagementperpost_accountype_query(
-                                name, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                name,
+                EngagementPerPost_filters,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif name and engagement_per_post and is_verified is not None:
             results = query.get_name_engagementperpost_isverified_query(
-                                name, EngagementPerPost_filters, is_verified,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                name,
+                EngagementPerPost_filters,
+                is_verified,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif name and is_verified and account_type is not None:
             results = query.get_name_isverified_accountype_query(
-                                name, is_verified, account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                name,
+                is_verified,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif is_verified and engagement_per_post and account_type is not None:
             results = query.get_isverified_engagementperpost_accountype_query(
-                                is_verified, EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                is_verified,
+                EngagementPerPost_filters,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif engagement_per_post and account_type is not None:
             results = query.get_engagementperpost_accountype_query(
-                                EngagementPerPost_filters, account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                EngagementPerPost_filters,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif name and account_type is not None:
             results = query.get_name_accounttype_query(
-                                name, account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                name,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif name and engagement_per_post:
             results = query.get_name_engagementperpost_query(
-                                name, EngagementPerPost_filters,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                name, EngagementPerPost_filters, Followers_filters, last_influencer_id, page_size, Engagement_filters
+            )
 
         elif engagement_per_post and is_verified is not None:
             results = query.get_engagementperpost_isverified_query(
-                                EngagementPerPost_filters, is_verified,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                EngagementPerPost_filters,
+                is_verified,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif is_verified and account_type is not None:
             results = query.get_isverified_accountype_query(
-                                is_verified, account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                is_verified,
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif is_verified and name is not None:
             results = query.get_isverified_name_query(
-                                is_verified, name,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                is_verified, name, Followers_filters, last_influencer_id, page_size, Engagement_filters
+            )
 
         elif engagement_per_post:
             results = query.get_engagementperpost_query(
-                                EngagementPerPost_filters,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                EngagementPerPost_filters, Followers_filters, last_influencer_id, page_size, Engagement_filters
+            )
 
         elif name:
-            results = query.get_name_query(
-                                name,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+            results = query.get_name_query(name, Followers_filters, last_influencer_id, page_size, Engagement_filters)
 
         elif account_type is not None:
             results = query.get_accounttype_query(
-                                account_type, account_type_enum1, account_type_enum2,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                account_type,
+                account_type_enum1,
+                account_type_enum2,
+                Followers_filters,
+                last_influencer_id,
+                page_size,
+                Engagement_filters,
+            )
 
         elif is_verified:
             results = query.get_isverified_query(
-                                is_verified,
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+                is_verified, Followers_filters, last_influencer_id, page_size, Engagement_filters
+            )
 
         else:
-            results = query.get_default_query(
-                                Followers_filters, last_influencer_id, page_size, Engagement_filters)
+            results = query.get_default_query(Followers_filters, last_influencer_id, page_size, Engagement_filters)
 
         if isinstance(results, dict):
             return results
