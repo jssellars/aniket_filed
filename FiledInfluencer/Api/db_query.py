@@ -1,8 +1,8 @@
 from sqlalchemy import or_
 
+from FiledInfluencer.Api.influencer_enum import AccountTypeEnum
 from FiledInfluencer.Api.models import InfluencerPosts, Influencers
 from FiledInfluencer.Api.startup import session_scope
-from FiledInfluencer.influencer_enum import AccountTypeEnum
 
 
 class InfluencerProfileQuery:

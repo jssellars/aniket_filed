@@ -6,10 +6,10 @@ import humps
 from flask_restful import reqparse
 
 from FiledInfluencer.Api.db_query import InfluencerProfileQuery
+from FiledInfluencer.Api.influencer_enum import AccountTypeEnum
 from FiledInfluencer.Api.models import EmailTemplates, Influencers
 from FiledInfluencer.Api.schemas import EmailTemplateResponse, InfluencersResponse
 from FiledInfluencer.Api.startup import session_scope
-from FiledInfluencer.influencer_enum import AccountTypeEnum
 
 
 class InfluencerProfilesHandler:
