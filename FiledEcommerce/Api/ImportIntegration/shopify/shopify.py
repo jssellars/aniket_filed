@@ -30,6 +30,7 @@ class Shopify(Ecommerce):
     SHOPIFY_API_SECRET = "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"
     SHOPIFY_APP_URL = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1"
 
+
     # private props
     __base_url = ""
     __access_token = "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"
