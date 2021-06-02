@@ -93,7 +93,7 @@ class WooCommerce(Ecommerce):
         key_permissions = data.get("key_permissions")
 
         mongo_db = EcommerceMongoRepository()
-        data = mongo_db.get_first_by_key({"shop": shop_url})
+        data = mongo_db.get_first_by_key("shop", shop_url)
 
         details = {
             "shop": shop_url,
@@ -104,10 +104,20 @@ class WooCommerce(Ecommerce):
         }
 
         with session_scope() as cursor:
+            cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
+            user_name = cursor.fetchval()
+        temp_nl = user_name.split(" ", 1)
+        if len(temp_nl) == 2:
+            user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+        else:
+            user_first_name, user_last_name = temp_nl[0], ""
+        cursor.close()
+
+        with session_scope() as cursor:
             cursor.execute(
                 "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName," +
                 " FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
-                datetime.now(), user_id, "John", "Doe", user_id, 6, json.dumps(details)
+                datetime.now(), user_id, user_first_name, user_last_name, user_id, 6, json.dumps(details)
             )
             cursor.commit()
 
