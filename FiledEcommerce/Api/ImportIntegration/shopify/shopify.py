@@ -28,7 +28,7 @@ class Shopify(Ecommerce):
     # ENVIRONMENT Constants
     SHOPIFY_API_KEY = "5cab30a1fb0bd39a4704a39dbca7dce3"
     SHOPIFY_API_SECRET = "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"
-    SHOPIFY_APP_URL = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/"
+    SHOPIFY_APP_URL = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1"
 
     # private props
     __base_url = ""
