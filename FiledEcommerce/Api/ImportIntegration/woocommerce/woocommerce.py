@@ -1,17 +1,15 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from urllib.parse import urlencode
-from flask import request
-import requests
 
-from woocommerce import API
+import requests
+from flask import request
 
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import session_scope
-
 
 
 class WooCommerce(Ecommerce):
@@ -28,7 +26,7 @@ class WooCommerce(Ecommerce):
     __callback_url = "https://httpbin.org/anything"
     __install_endpoint = "/wc-auth/v1/authorize"
     __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop",
-    __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress",
+    __load_redirect_url = "https://82940f3e58e4.ngrok.io/wordpress",
     __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
 
     @staticmethod
@@ -38,8 +36,8 @@ class WooCommerce(Ecommerce):
         @param shop: store/shop URL
         @return:
         """
-        request = requests.get(shop)
-        if request.status_code == 200:
+        req = requests.get(shop)
+        if req.status_code == 200:
             return {"msg": "OK"}
         else:
             return {"error": "Invalid shop URL"}
@@ -138,9 +136,8 @@ class WooCommerce(Ecommerce):
             return cls.RESPONSE_ERROR_MESSAGE
 
     @classmethod
-    def app_uninstall(cls, data):
+    def app_uninstall(cls):
         pass
-
 
     @staticmethod
     def read_credentials_from_db(user_id):
