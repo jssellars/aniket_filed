@@ -45,7 +45,7 @@ class WooCommerce(Ecommerce):
             return {"error": "Invalid shop URL"}
 
     @classmethod
-    def pre_install(cls, data):
+    def pre_install(cls):
         """
         Receive data from FE, check if shop is valid.
         Then provide necessary details, save to DB and connect to store.
@@ -53,10 +53,12 @@ class WooCommerce(Ecommerce):
         @return: redirect_url. e.g:
         http://localhost/wordpress/wc-auth/v1/authorize?app_name=Filed&scope=read_write&user_id=204&return_url=http%3A%2F%2Flocalhost%2Fwordpress&callback_url=https%3A%2F%2F4b0919d9af56.ngrok.io%2Fwoo_commerce
         """
-        shop: str = data["shop"]
+        token_data = decode_jwt_from_headers()
+        data = request.args
+        shop: str = data.get("shop")
         if not cls.is_valid_shop(shop):
             return cls.RESPONSE_ERROR_MESSAGE
-        user_id = data["user_id"]
+        user_id = token_data["user_filed_id"]
         email = data.get("email")
         params = {
             "app_name": "Filed",
@@ -68,13 +70,13 @@ class WooCommerce(Ecommerce):
         query_string = urlencode(params)
         redirect_url = f"{shop}{cls.__install_endpoint}?{query_string}"
 
-        mongo_db = MongoManager.oauth_collection()
-        mongo_db.insert_one({"email": email, "userId": user_id, "shop": shop})
+        mongo_db = EcommerceMongoRepository()
+        mongo_db.add_one({"email": email, "userId": user_id, "shop": shop})
 
         return redirect_url
 
     @classmethod
-    def app_install(cls, data) -> str:
+    def app_install(cls):
         """
         Get credentials from the redirect_url, save credentials to db,
         then redirect user to the Ecommerce page.
@@ -82,14 +84,16 @@ class WooCommerce(Ecommerce):
         @param data:
         @return: Ecommerce URL
         """
-        shop_url = data["shop"]
-        user_id = data["user_id"]
-        consumer_key = data["consumer_key"]
-        consumer_secret = data["consumer_secret"]
-        key_permissions = data["read-write"]
+        data = request.args
+        token_data = decode_jwt_from_headers()
+        shop_url = data.get("shop")
+        user_id = token_data["user_filed_id"]
+        consumer_key = data.get("consumer_key")
+        consumer_secret = data.get("consumer_secret")
+        key_permissions = data.get("key_permissions")
 
-        mongo_db = MongoManager.oauth_collection()
-        data = mongo_db.find_one({"shop": shop_url})
+        mongo_db = EcommerceMongoRepository()
+        data = mongo_db.get_first_by_key({"shop": shop_url})
 
         details = {
             "shop": shop_url,
@@ -98,18 +102,26 @@ class WooCommerce(Ecommerce):
             "consumer_secret": consumer_secret,
             "key_permissions": key_permissions,
         }
-        cls.write_details_to_db(details, data)
+
+        with session_scope() as cursor:
+            cursor.execute(
+                "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName," +
+                " FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
+                datetime.now(), user_id, "John", "Doe", user_id, 6, json.dumps(details)
+            )
+            cursor.commit()
 
         return cls.__install_redirect_url
 
     @classmethod
-    def app_load(cls, data):
+    def app_load(cls):
         """
         Redirect users to Filed's authentication page
         @param data:
         @return: authentication page URL
         """
-        user_id = data["user_id"]
+        token_data = decode_jwt_from_headers()
+        user_id = token_data["user_filed_id"]
         if cls.read_credentials_from_db(user_id) != "":
             return cls.__load_redirect_url
         else:
@@ -127,7 +139,7 @@ class WooCommerce(Ecommerce):
         @param user_id:
         @return:
         """
-        with SqlManager() as cursor:
+        with session_scope() as cursor:
             cursor.execute(
                 f"SELECT Details FROM ExternalPlatforms WHERE FiledBusinessOwnerId = {user_id} AND PlatformId = 6"
             )
@@ -136,45 +148,3 @@ class WooCommerce(Ecommerce):
             return ""
         else:
             return row
-
-    @staticmethod
-    def write_details_to_db(details, data):
-        """
-        Helper function to write details/credentials to DB
-        @param details: credentials to save
-        @param data:
-        @return:
-        """
-        user_id = data["userId"]
-        with SqlManager() as cursor:
-            cursor.execute(
-                "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName," +
-                " FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
-                datetime.now(), user_id, "John", "Doe", user_id, 6, json.dumps(details)
-            )
-            cursor.commit()
-
-    @classmethod
-    def get_product_variants(cls, body, p_id):
-        """
-        Helper function to get product variants from woocommerce
-        https://woocommerce.github.io/woocommerce-rest-api-docs/#list-all-product-variations
-        @param body:
-        @param p_id: product ID
-        @return: list of product variations
-        """
-        user_id = body["user_id"]
-        credentials = cls.read_credentials_from_db(user_id)
-        data = json.loads(credentials)
-        shop_url = data["shop"]
-        consumer_key = data["consumer_key"]
-        consumer_secret = data["consumer_secret"]
-        wcapi = API(
-            url=shop_url,
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            version=cls.WOOCOMMERCE_API_VERSION
-        )
-        variants_lst = wcapi.get("products/%s/variations" % p_id).json()
-
-        return variants_lst
