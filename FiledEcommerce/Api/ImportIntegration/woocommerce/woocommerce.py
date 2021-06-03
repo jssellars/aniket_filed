@@ -9,7 +9,6 @@ from flask import request
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import session_scope
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import SqlManager
 
 
@@ -26,9 +25,9 @@ class WooCommerce(Ecommerce):
     # endpoints
     __callback_url = "https://httpbin.org/anything"
     __install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop",
-    __load_redirect_url = "https://82940f3e58e4.ngrok.io/wordpress",
-    __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
+    __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop"
+    __load_redirect_url = "https://005f22fd530c.ngrok.io/wordpress"
+    __install_redirect_url = "https://dev3.filed.com/#/catalog/ecommerce"
 
     @staticmethod
     def is_valid_shop(shop: str):
@@ -58,7 +57,6 @@ class WooCommerce(Ecommerce):
         if not cls.is_valid_shop(shop):
             return cls.RESPONSE_ERROR_MESSAGE
         user_id = token_data["user_filed_id"]
-        email = data.get("email")
         params = {
             "app_name": "Filed",
             "scope": cls.WOOCOMMERCE_API_SCOPES,
@@ -67,10 +65,10 @@ class WooCommerce(Ecommerce):
             "callback_url": cls.__callback_url
         }
         query_string = urlencode(params)
-        redirect_url = f"{shop}{cls.__install_endpoint}?{query_string}"
+        redirect_url = "%s%s?%s" % (shop, cls.__install_endpoint, query_string)
 
         mongo_db = EcommerceMongoRepository()
-        mongo_db.add_one({"email": email, "userId": user_id, "shop": shop})
+        mongo_db.add_one({"userId": user_id, "shop": shop})
 
         return redirect_url
 
@@ -131,7 +129,7 @@ class WooCommerce(Ecommerce):
         token_data = decode_jwt_from_headers()
         user_id = token_data["user_filed_id"]
         if cls.read_credentials_from_db(user_id) != "":
-            return cls.__load_redirect_url
+            return cls.__install_redirect_url
         else:
             return cls.RESPONSE_ERROR_MESSAGE
 
