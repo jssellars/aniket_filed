@@ -10,6 +10,7 @@ from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import session_scope
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import SqlManager
 
 
 class WooCommerce(Ecommerce):
@@ -101,7 +102,7 @@ class WooCommerce(Ecommerce):
             "key_permissions": key_permissions,
         }
 
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
             user_name = cursor.fetchval()
         temp_nl = user_name.split(" ", 1)
@@ -109,9 +110,8 @@ class WooCommerce(Ecommerce):
             user_first_name, user_last_name = temp_nl[0], temp_nl[1]
         else:
             user_first_name, user_last_name = temp_nl[0], ""
-        cursor.close()
 
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute(
                 "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName," +
                 " FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
@@ -146,7 +146,7 @@ class WooCommerce(Ecommerce):
         @param user_id:
         @return:
         """
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute(
                 f"SELECT Details FROM ExternalPlatforms WHERE FiledBusinessOwnerId = {user_id} AND PlatformId = 6"
             )
