@@ -7,7 +7,7 @@ from flask import request
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import session_scope
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import SqlManager
 
 
 class BigCommerce(Ecommerce):
@@ -64,7 +64,7 @@ class BigCommerce(Ecommerce):
             "store_email": email,
         }
 
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
             user_name = cursor.fetchval()
         temp_nl = user_name.split(" ", 1)
@@ -72,9 +72,9 @@ class BigCommerce(Ecommerce):
             user_first_name, user_last_name = temp_nl[0], temp_nl[1]
         else:
             user_first_name, user_last_name = temp_nl[0], ""
-        cursor.close()
+        
 
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute(
                 "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName, FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
                 datetime.now(),

@@ -7,8 +7,7 @@ import jwt
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import session_scope
-
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import SqlManager
 
 class Magento(Ecommerce):
     RESPONSE_ERROR_MESSAGE = {"error": "Something went wrong!"}
@@ -26,11 +25,11 @@ class Magento(Ecommerce):
                 "You already have this app", 202
         """
         body = request.args
-        token_data = cls.decode_jwt_from_headers()
+        token_data = decode_jwt_from_headers()
         user_id = token_data["user_filed_id"]
         try:
             if cls.read_token_from_db(user_id) != "":
-                return __filed_ecom_url
+                return cls.__filed_ecom_url
         except Exception as e:
             raise e
 
@@ -89,7 +88,7 @@ class Magento(Ecommerce):
     def app_install(cls):
         """ Install the app and calls get_token, store_info_resolver, write_token_to_db
             Args:
-                body (dict): Holds value for host_url, username, password.
+                body (dict): Holds value for host_url, username, password. 
             Calls:
                 get_token(host_url, username, password) : To get the Admin Access Token as str.
                 store_info_resolver(host_url, token) : To get the store information for the given host_url.
@@ -181,7 +180,7 @@ class Magento(Ecommerce):
             Returns:
                 returns row of db as json 
         """
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute("SELECT Details FROM ExternalPlatforms WHERE FiledBusinessOwnerId = ? AND PlatformId = ?", user_id, 5)
             row = cursor.fetchval()
         if not json.loads(row):
@@ -202,7 +201,7 @@ class Magento(Ecommerce):
                 None
         """
         user_id = data.get("user_id")
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
             user_name = cursor.fetchval()
         temp_nl = user_name.split(" ", 1)
@@ -210,9 +209,9 @@ class Magento(Ecommerce):
             user_first_name, user_last_name = temp_nl[0], temp_nl[1]
         else:
             user_first_name, user_last_name = temp_nl[0], ""
-        cursor.close()
+        
 
-        with session_scope() as cursor:
+        with SqlManager() as cursor:
             cursor.execute(
                 "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName, FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
                 datetime.now(),
