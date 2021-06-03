@@ -1,7 +1,6 @@
 import logging
 import typing
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import reduce
 from typing import Dict, List
@@ -12,7 +11,6 @@ from Core.facebook.sdk_adapter.validations import PLACEMENT_X_OBJECTIVE
 from Core.Tools.Misc.AgGridConstants import PositiveEffectTrendDirection, Trend
 from Core.Tools.QueryBuilder.QueryBuilder import AgGridInsightsRequest, AgGridTrendRequest, QueryBuilderRequestMapper
 from Core.Tools.QueryBuilder.QueryBuilderFacebookRequestParser import QueryBuilderFacebookRequestParser
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from FacebookTuring.Api.startup import config
@@ -65,10 +63,11 @@ class AdsManagerInsightsCommandHandler(ABC):
 
 class AdsManagerInsightsReports(AdsManagerInsightsCommandHandler):
     def handle(
-        self, query_json: typing.Dict = None, business_owner_id: typing.AnyStr = None, level: typing.AnyStr = None
+            self, query_json: typing.Dict = None, business_owner_id: typing.AnyStr = None, level: typing.AnyStr = None
     ) -> typing.List[typing.Dict]:
         self.map_query(query_json=query_json, has_breakdowns=True)
 
+        # Get insights from the facebook graph api.
         response = GraphAPIInsightsHandler.get_insights_base(
             ad_account_id=self.query.facebook_id,
             fields=self.query.fields,
@@ -77,25 +76,50 @@ class AdsManagerInsightsReports(AdsManagerInsightsCommandHandler):
             level=self.query.level,
         )
 
-        if self.query.breakdown_request_field:
-            average_parameters = deepcopy(self.query.parameters)
-            average_parameters.pop(FacebookParametersStrings.breakdowns)
-            average_result = GraphAPIInsightsHandler.get_insights_base(
-                ad_account_id=self.query.facebook_id,
-                fields=self.query.fields,
-                parameters=average_parameters,
-                requested_fields=self.query.requested_columns,
-                level=self.query.level,
-            )
+        # If age_gender breakdown is requested only then.
+        if self.query.breakdowns == ['age', 'gender']:
+            # Remove all the Null values.
+            response_without_null = []
+            for each_response in response:
+                if each_response["cost_per_result"] is not None:
+                    response_without_null.append(each_response)
 
-            if not average_result:
-                return response
+            # Compute Average value of each breakdown.
+            response_with_average = []
+            all_age_gender = []
 
-            for entry in average_result:
-                entry[self.query.breakdown_request_field] = FacebookParametersStrings.average.title()
+            # Grab all the age_gender breakdowns available.
+            for each_response in response_without_null:
+                if each_response["age_gender"] not in all_age_gender:
+                    all_age_gender.append(each_response["age_gender"])
 
-            response = response + average_result
-            response = sorted(response, key=lambda k: k["date_start"])
+            # Find age_gender in all responses.
+            for age_gender in all_age_gender:
+                total_cost_per_result = []
+                for each_response in response_without_null:
+                    if age_gender == each_response["age_gender"]:
+                        total_cost_per_result.append(each_response["cost_per_result"])
+                    else:
+                        continue
+
+                # Compute Cost per result average.
+                try:
+                    cost_per_result_average = sum(total_cost_per_result) / len(total_cost_per_result)
+                    cost_per_result_average = round(cost_per_result_average, 4)
+                except ZeroDivisionError:
+                    logger.debug("Failed to Calculate Cost Per Result Average")
+
+                # Add each response average.
+                each_response_average = {
+                    "adset_id": each_response["adset_id"],
+                    "adset_name": each_response["adset_name"],
+                    "age_gender": age_gender,
+                    "cost_per_result": cost_per_result_average,
+                    "date_start": None
+                }
+                response_with_average.append(each_response_average)
+
+            return response_with_average
 
         return response
 
@@ -121,7 +145,7 @@ class AdsManagerInsightsAgGridInsights(AdsManagerInsightsCommandHandler):
 
 class AdsManagerInsightsAgGridTrend(AdsManagerInsightsCommandHandler):
     def handle(
-        self, query_json: typing.Dict = None, business_owner_id: typing.AnyStr = None, level: typing.AnyStr = None
+            self, query_json: typing.Dict = None, business_owner_id: typing.AnyStr = None, level: typing.AnyStr = None
     ) -> Dict:
         self.map_query(query_json=query_json, level=level, has_breakdowns=True)
 

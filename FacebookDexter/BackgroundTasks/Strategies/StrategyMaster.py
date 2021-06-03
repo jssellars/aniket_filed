@@ -129,12 +129,14 @@ class DexterStrategyMaster:
             for breakdown in self.dexter_strategy.breakdowns:
                 for action_breakdown in self.dexter_strategy.action_breakdowns:
 
+                    # Filter that have active status only.
                     filtering = create_facebook_filter(
                         FieldsMetadata.effective_status.name,
                         AgGridFacebookOperator.IN,
                         [EffectiveStatusEnum.ACTIVE.value],
                     )
 
+                    # Structure is each campaign, each adset and each ad related to the ad_account.
                     structures = get_and_map_structures(f"act_{account_id}", level, filtering)
 
                     with concurrent.futures.ThreadPoolExecutor() as executor:
