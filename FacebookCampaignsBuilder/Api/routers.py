@@ -377,6 +377,8 @@ class AddAnAdAdsetPublishStructure(Resource):
     def post(self):
         try:
             request_json = humps.depascalize(request.get_json(force=True))
+            request_json["business_owner_facebook_id"] = extract_business_owner_facebook_id()
+            request_json["user_filed_id"] = extract_user_filed_id()
             publish_request = PublishAddAdsetAdEvent(**request_json)
             PublishRequestToMessageQueue.publish(publish_request)
 
@@ -393,6 +395,8 @@ class SmartEditPublishStructure(Resource):
     def post(self):
         try:
             request_json = humps.depascalize(request.get_json(force=True))
+            request_json["business_owner_facebook_id"] = extract_business_owner_facebook_id()
+            request_json["user_filed_id"] = extract_user_filed_id()
             publish_request = PublishSmartEditEvent(**request_json)
             PublishRequestToMessageQueue.publish(publish_request)
 
