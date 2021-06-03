@@ -77,7 +77,7 @@ class AdsManagerInsightsReports(AdsManagerInsightsCommandHandler):
         )
 
         # If age_gender breakdown is requested only then.
-        if self.query.breakdowns == ['age', 'gender']:
+        if self.query.breakdowns in [['age', 'gender'], ['gender', 'age']]:
             # Remove all the Null values.
             response_without_null = []
             for each_response in response:
