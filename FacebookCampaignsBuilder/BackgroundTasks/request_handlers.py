@@ -1005,18 +1005,31 @@ class AddStructuresToParent:
             return new_copies
 
     @staticmethod
-    def _duplicate_structure_on_facebook(parent_level: str, child_level: str, facebook_id: str, parent_id: str) -> str:
-        structure = LevelToGraphAPIStructure.get(child_level, facebook_id)
-        params = AddStructuresToParent._create_duplicate_parameters(parent_level, child_level, parent_id)
-        new_structure_id = structure.create_copy(params=params)
-        new_structure_id = Tools.convert_to_json(new_structure_id)
-        # Reference https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/copies/#async
-        if "ad_object_ids" in new_structure_id:
-            return new_structure_id["ad_object_ids"][0]["copied_id"]
-        elif "copied_ad_id" in new_structure_id:
-            return new_structure_id["copied_ad_id"]
-        else:
-            raise ValueError("Invalid duplicated structure id.")
+    def _duplicate_structure_on_facebook(parent_level: str, child_level: str, facebook_id: str, parent_id: str) -> dict:
+        structure_ids = {
+            f"{child_level}_ids": []
+        }
+        try:
+            structure = LevelToGraphAPIStructure.get(child_level, facebook_id)
+            params = AddStructuresToParent._create_duplicate_parameters(parent_level, child_level, parent_id)
+            new_structure_id = structure.create_copy(params=params)
+            new_structure_id = Tools.convert_to_json(new_structure_id)
+            # Reference https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/copies/#async
+            if "ad_object_ids" in new_structure_id:
+                structure_ids[f"{child_level}_ids"].append(new_structure_id["ad_object_ids"][0]["copied_id"])
+            elif "copied_ad_id" in new_structure_id:
+                structure_ids[f"{child_level}_ids"].append(new_structure_id["copied_ad_id"])
+            else:
+                raise ValueError("Invalid duplicated structure id.")
+        except FacebookRequestError as e:
+            error_message = e.body().get("error", {}).get("error_user_msg") or e.get_message()
+            structure_ids["error_message"] = error_message
+            AddStructuresToParent.feedback_data["error"] = error_message
+            AddStructuresToParent.feedback_data["publish_status"] = PublishStatus.FAILED.value
+            AddStructuresToParent.que.put(AddStructuresToParent.feedback_data)
+            AddStructuresToParent.update_feedback_database(AddStructuresToParent.feedback_data)
+
+        return structure_ids
 
     @staticmethod
     def _create_duplicate_parameters(parent_level: str, child_level: str, parent_id: str) -> Dict:
@@ -1051,6 +1064,9 @@ class AddStructuresToParent:
             "publish_status": feedback_data.get("publish_status"),
             "total_structures": feedback_data.get("total_structures"),
         }
+
+        if "error" in feedback_data:
+            update_fields["error"] = feedback_data.get("error")
 
         query = {MongoOperator.SET.value: update_fields}
 
@@ -1106,79 +1122,105 @@ class AddStructuresToParent:
         """
         ad_account = AdAccount(fbid=ad_account_id)
 
-        ad_set_template = CreateAdSet(
-            tune_for_category=adset_request.get(AdSet.Field.tune_for_category, AdSet.TuneForCategory.none),
-            name=adset_request.get("ad_set_name"),
-            billing_event=adset_request["optimization_and_delivery"].get("billing_event"),
-            optimization_goal=adset_request["optimization_and_delivery"].get("optimization_goal"),
-            campaign_id=campaign_id,
-        )
+        structure_ids = {}
 
-        adset_builder.set_statuses_dto(ad_set_template)
-        adset_builder.set_date_interval_dto(ad_set_template, adset_request["date"])
-        # TODO: Check if conversions is required here!
-        is_using_conversions = adset_request.get("objective") == "CONVERSIONS"
-        ad_set_template.set_promoted_object_fields(
-            adset_builder.set_promoted_object(is_using_conversions, adset_request, adset_request)
-        )
-
-        # Fetch Parent Campaign CBO information to check
-        parent_campaign_cbo_info = LevelToGraphAPIStructure.get(Level.CAMPAIGN.value, campaign_id).api_get(
-            fields=[FieldsMetadata.daily_budget.name, FieldsMetadata.lifetime_budget.name]
-        )
-        parent_campaign_not_has_cbo = not (
-            parent_campaign_cbo_info.get(FieldsMetadata.daily_budget.name)
-            or parent_campaign_cbo_info.get(FieldsMetadata.lifetime_budget.name)
-        )
-
-        # If Parent Campaign has CBO, then don't add adset budget
-        if parent_campaign_not_has_cbo and ("budget_optimization" in adset_request):
-            budget_opt = adset_request.get("budget_optimization")
-            bid_control = int(budget_opt.get("bid_control", 0))
-            if bid_control:
-                ad_set_template.bid_amount = bid_control * 100
-                ad_set_template.bid_strategy = Campaign.BidStrategy.lowest_cost_with_bid_cap
-            else:
-                ad_set_template.bid_strategy = Campaign.BidStrategy.lowest_cost_without_cap
-            ad_set_template.set_budget_opt(budget_opt["amount"], budget_opt["budget_allocated_type_id"])
-
-        targeting_request = adset_request.get("targeting")
-        ad_set_template.targeting = AddStructuresToParent._set_targeting(adset_request, targeting_request)
-        ad_set_template = asdict(ad_set_template)
-        facebook_ad_set = ad_account.create_ad_set(params=ad_set_template)
-
-        return {
-            "adset_id": facebook_ad_set.get_id(),
-            "ad_ids": AddStructuresToParent._publish_ad_to_adsets(
-                ad_account_id, adset_request["ads"], [facebook_ad_set.get_id()]
+        try:
+            ad_set_template = CreateAdSet(
+                tune_for_category=adset_request.get(AdSet.Field.tune_for_category, AdSet.TuneForCategory.none),
+                name=adset_request.get("ad_set_name"),
+                billing_event=adset_request["optimization_and_delivery"].get("billing_event"),
+                optimization_goal=adset_request["optimization_and_delivery"].get("optimization_goal"),
+                campaign_id=campaign_id,
             )
-            if "ads" in adset_request
-            else [],
-        }
+
+            adset_builder.set_statuses_dto(ad_set_template)
+            adset_builder.set_date_interval_dto(ad_set_template, adset_request["date"])
+            # TODO: Check if conversions is required here!
+            is_using_conversions = adset_request.get("objective") == "CONVERSIONS"
+            ad_set_template.set_promoted_object_fields(
+                adset_builder.set_promoted_object(is_using_conversions, adset_request, adset_request)
+            )
+
+            # Fetch Parent Campaign CBO information to check
+            parent_campaign_cbo_info = LevelToGraphAPIStructure.get(Level.CAMPAIGN.value, campaign_id).api_get(
+                fields=[FieldsMetadata.daily_budget.name, FieldsMetadata.lifetime_budget.name]
+            )
+            parent_campaign_not_has_cbo = not (
+                parent_campaign_cbo_info.get(FieldsMetadata.daily_budget.name)
+                or parent_campaign_cbo_info.get(FieldsMetadata.lifetime_budget.name)
+            )
+
+            # If Parent Campaign has CBO, then don't add adset budget
+            if parent_campaign_not_has_cbo and ("budget_optimization" in adset_request):
+                budget_opt = adset_request.get("budget_optimization")
+                bid_control = int(budget_opt.get("bid_control", 0))
+                if bid_control:
+                    ad_set_template.bid_amount = bid_control * 100
+                    ad_set_template.bid_strategy = Campaign.BidStrategy.lowest_cost_with_bid_cap
+                else:
+                    ad_set_template.bid_strategy = Campaign.BidStrategy.lowest_cost_without_cap
+                ad_set_template.set_budget_opt(budget_opt["amount"], budget_opt["budget_allocated_type_id"])
+
+            targeting_request = adset_request.get("targeting")
+            ad_set_template.targeting = AddStructuresToParent._set_targeting(adset_request, targeting_request)
+            ad_set_template = asdict(ad_set_template)
+
+            facebook_ad_set = ad_account.create_ad_set(params=ad_set_template)
+            structure_ids = {
+                "adset_id": facebook_ad_set.get_id(),
+                "ad_ids": AddStructuresToParent._publish_ad_to_adsets(
+                    ad_account_id, adset_request["ads"], [facebook_ad_set.get_id()]
+                )
+                if "ads" in adset_request
+                else [],
+            }
+        except FacebookRequestError as e:
+            error_message = e.body().get("error", {}).get("error_user_msg") or e.get_message()
+            structure_ids["error_message"] = error_message
+            AddStructuresToParent.feedback_data["error"] = error_message
+            AddStructuresToParent.feedback_data["publish_status"] = PublishStatus.FAILED.value
+            AddStructuresToParent.que.put(AddStructuresToParent.feedback_data)
+            AddStructuresToParent.update_feedback_database(AddStructuresToParent.feedback_data)
+
+        return structure_ids
 
     @staticmethod
-    def _create_ad_for_adset(ad_account_id: str, ad_request: Dict, adset_id: str) -> str:
+    def _create_ad_for_adset(ad_account_id: str, ad_request: Dict, adset_id: str) -> dict:
         ad_account = AdAccount(fbid=ad_account_id)
         # TODO: Modify build_ads function to accept a single argument for necessary fields
         #  as opposed to per step fields
 
         ads = ad_builder.build_ads(ad_account_id, ad_request, ad_request)
 
+        structure_ids = {
+            "ad_ids": []
+        }
         for ad in ads:
-            ad = asdict(ad)
+            try:
+                ad = asdict(ad)
 
-            [
-                tracking_spec.update({"action.type": tracking_spec.pop("action_type")})
-                for tracking_spec in ad["tracking_specs"]
-            ]
+                [
+                    tracking_spec.update({"action.type": tracking_spec.pop("action_type")})
+                    for tracking_spec in ad["tracking_specs"]
+                ]
 
-            ad["tracking_specs"] = [
-                {k: v for k, v in tracking_spec.items() if v is not None} for tracking_spec in ad["tracking_specs"]
-            ]
+                ad["tracking_specs"] = [
+                    {k: v for k, v in tracking_spec.items() if v is not None} for tracking_spec in ad["tracking_specs"]
+                ]
 
-            ad.update({Ad.Field.adset_id: adset_id, Ad.Field.adset: adset_id})
-            ad = ad_account.create_ad(params=ad)
-            return ad.get_id()
+                ad.update({Ad.Field.adset_id: adset_id, Ad.Field.adset: adset_id})
+                ad = ad_account.create_ad(params=ad)
+                structure_ids["ad_ids"].append(ad.get_id())
+
+            except FacebookRequestError as e:
+                error_message = e.body().get("error", {}).get("error_user_msg") or e.get_message()
+                structure_ids["error_message"] = error_message
+                AddStructuresToParent.feedback_data["error"] = error_message
+                AddStructuresToParent.feedback_data["publish_status"] = PublishStatus.FAILED.value
+                AddStructuresToParent.que.put(AddStructuresToParent.feedback_data)
+                AddStructuresToParent.update_feedback_database(AddStructuresToParent.feedback_data)
+
+            return structure_ids
 
     @staticmethod
     def _set_targeting(request: dict, targeting_request: dict) -> dict:
@@ -1221,8 +1263,6 @@ class AddStructuresToParent:
 
             user_device = devices.get("user_device", [])
             user_os = devices.get("user_os", [])
-
-        publisher_platforms,
 
         targeting = Targeting(
             flexible_spec,

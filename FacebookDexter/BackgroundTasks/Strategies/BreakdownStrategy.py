@@ -33,6 +33,9 @@ from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoReposito
 
 logger = logging.getLogger(__name__)
 
+# Set a Default Time Interval to 60 Days when DB entry.
+DEFAULT_TIME_INTERVAL = 60
+
 
 def get_breakdown_priority(variance: float) -> int:
     if variance is None:
@@ -60,12 +63,9 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         except Exception as e:
             logger.exception(f"Trend calculation error || {repr(e)}")
 
-    def variance(
-        self, reference_data: float, current_data: float, trend: Optional[TrendEnum] = None
-    ) -> Optional[float]:
+    def variance(self, reference_data: float, current_data: float, trend: Optional[TrendEnum] = None) -> Optional[float]:
         try:
             variance = ((current_data / reference_data) - 1) * 100
-
             return variance
 
         except ArithmeticError as e:
@@ -82,11 +82,12 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         structure: Dict,
         recommendations_repository: MongoRepositoryBase,
     ):
-
+        # Add total to each group.
         self.aggregate_grouped_data(grouped_data)
 
         for time_bucket in self.time_buckets:
 
+            # Finding Under performing breakdowns.
             underperforming_breakdowns = []
             dexter_breakdown_recommendation = None
             variance = None
@@ -115,8 +116,10 @@ class BreakdownAverageStrategy(DexterStrategyBase):
             if grouped_metric_data.get_breakdown_datapoints(TOTAL_KEY) is None:
                 continue
 
+            # Total Amount Spent/no_of_breakdowns.
             reference_data = grouped_metric_data.get_breakdown_total(TOTAL_KEY) / no_of_breakdowns
 
+            # For Each Breakdown check, if trend & variance of amount spent (data points each) with reference data (data points overall)
             for breakdown_data in grouped_metric_data.breakdown_data:
 
                 if breakdown_data.breakdown_key == TOTAL_KEY:
@@ -126,12 +129,15 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                 variance = self.variance(reference_data, breakdown_data.total, trend)
 
                 if variance >= trigger.variance_percentage:
+                    # Dexter Output if the check point to trigger or not.
                     dexter_output, cause_variance, cause_metric = self.check_causes(
                         trigger_metric.cause_metrics,
                         grouped_data,
                         time_bucket.no_of_days,
                         breakdown_data.breakdown_key,
                     )
+
+                    # If there's dexter output, trigger.
                     if dexter_output:
                         underperforming_breakdowns.append(breakdown_data.breakdown_key)
                         dexter_breakdown_recommendation = dexter_output
@@ -173,8 +179,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
                 RecommendationStatusEnum.ACTIVE.value,
                 variance,
                 datetime.now().isoformat(),
-                # The number of days with CPR is equal to the number of days with results
-                get_max_number_of_days(grouped_data, FieldsMetadata.results.name),
+                DEFAULT_TIME_INTERVAL,
                 ChannelEnum.FACEBOOK.value,
                 get_breakdown_priority(cause_variance),
                 structure_data,
@@ -196,6 +201,16 @@ class BreakdownAverageStrategy(DexterStrategyBase):
         no_of_days: int,
         breakdown: str,
     ) -> Tuple[Optional[recommendation_enums_union], Optional[float], Optional[str]]:
+        """
+        Check Causes and return output, variance, metric_name.
+
+        Returns
+        -------
+        output: Templates Class.
+        variance: Variance Computed.
+        metric_name: Metric Name.
+
+        """
 
         # TODO extract this logic to a method and use twice
         for cause_metric in cause_metrics:
@@ -204,12 +219,12 @@ class BreakdownAverageStrategy(DexterStrategyBase):
 
                 metric_data = get_group_data_from_list(grouped_data, metric_name, no_of_days)
 
+                # When Cost Per Result is None.
                 if metric_data is None:
                     return None, None, None
 
                 no_of_breakdowns = 1
                 if metric_clause.is_divided_by_no_breakdowns:
-                    # Remove the total key
                     no_of_breakdowns = len({s for s in metric_data.get_breakdowns()}) - 1
 
                 if metric_data.get_breakdown_datapoints(TOTAL_KEY) is None:
@@ -219,7 +234,7 @@ class BreakdownAverageStrategy(DexterStrategyBase):
 
                 current_data = metric_data.get_breakdown_total(breakdown)
                 if current_data == INVALID_METRIC_VALUE:
-                    return cause_metric.output, None, metric_name
+                    return None, None, None
 
                 trend = self.trend(reference_data, current_data)
                 variance = self.variance(reference_data, current_data, trend)

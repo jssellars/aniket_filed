@@ -87,20 +87,24 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_insights_base(
-        cls,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        parameters: Dict = None,
-        requested_fields: List[FieldsMetadata] = None,
-        level: str = None,
+            cls,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            requested_fields: List[FieldsMetadata] = None,
+            level: str = None,
     ) -> List[Dict]:
 
+        # Initiate AdAccount Class.
         ad_account = AdAccount(ad_account_id)
+        # Get Insights.
         insights = ad_account.get_insights(fields=fields, params=parameters)
 
+        # If there are no insights.
         if not insights:
             return []
 
+        # Sanity Check on Requested Fields.
         results_requested = any(
             [
                 FieldsMetadata.results.name == x.name or FieldsMetadata.cost_per_result.name == x.name
@@ -115,25 +119,24 @@ class GraphAPIInsightsHandler:
 
         if results_requested:
             add_results_to_response(level, insights_data, ad_account_id)
-        insights_response = (
-            GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
-            if insights_data
-            else []
-        )
 
-        if not insights_response:
+        if insights_data:
+            insights_response = (
+                GraphAPIInsightsMapper().map(requested_fields=requested_fields, response=insights_data)
+            )
+        else:
             return []
 
         return insights_response
 
     @classmethod
     def get_insights_page(
-        cls,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        parameters: Dict = None,
-        requested_fields: List[FieldsMetadata] = None,
-        level: str = None,
+            cls,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            requested_fields: List[FieldsMetadata] = None,
+            level: str = None,
     ) -> Tuple:
 
         try:
@@ -168,11 +171,11 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_structures_for_insights(
-        cls,
-        ad_account_id: str,
-        level: str,
-        insight_ids: List[str],
-        structure_fields: List[FacebookField],
+            cls,
+            ad_account_id: str,
+            level: str,
+            insight_ids: List[str],
+            structure_fields: List[FacebookField],
     ) -> List:
         try:
 
@@ -198,15 +201,15 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_structures_base(
-        cls,
-        config,
-        permanent_token: str = None,
-        ad_account_id: str = None,
-        level: str = None,
-        fields: List[str] = None,
-        filter_params: List[Dict] = None,
-        structure_fields: List[FieldsMetadata] = None,
-        thread: Union[str, int] = None,
+            cls,
+            config,
+            permanent_token: str = None,
+            ad_account_id: str = None,
+            level: str = None,
+            fields: List[str] = None,
+            filter_params: List[Dict] = None,
+            structure_fields: List[FieldsMetadata] = None,
+            thread: Union[str, int] = None,
     ) -> Dict:
         graph_api_client = GraphAPIClientBase(permanent_token)
         graph_api_client.config = cls.build_get_structure_config(
@@ -233,14 +236,14 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_structures_page(
-        cls,
-        config,
-        ad_account_id: str,
-        structure_fields: List[FieldsMetadata],
-        level: str,
-        parameter: Dict = None,
-        start_row: int = 0,
-        end_row: int = 200,
+            cls,
+            config,
+            ad_account_id: str,
+            structure_fields: List[FieldsMetadata],
+            level: str,
+            parameter: Dict = None,
+            start_row: int = 0,
+            end_row: int = 200,
     ) -> List:
         try:
             repository = TuringMongoRepository(
@@ -271,10 +274,10 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def get_ag_grid_insights(
-        cls,
-        config,
-        level: str = None,
-        query: QueryBuilderFacebookRequestParser = None,
+            cls,
+            config,
+            level: str = None,
+            query: QueryBuilderFacebookRequestParser = None,
     ) -> Dict:
 
         ad_account_id = query.facebook_id
@@ -396,14 +399,14 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def _get_insights_master_data(
-        cls,
-        config,
-        level: str = None,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        parameters: Dict = None,
-        structure_fields: List[str] = None,
-        requested_fields: List[FieldsMetadata] = None,
+            cls,
+            config,
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            structure_fields: List[str] = None,
+            requested_fields: List[FieldsMetadata] = None,
     ) -> Tuple:
 
         insight_response, next_page_cursor, summary = cls.get_insights_page(
@@ -434,19 +437,20 @@ class GraphAPIInsightsHandler:
     This is same as _get_structure_master_data() except
     this only returns campaigns with adsets
     """
+
     @classmethod
     def _get_structure_master_data_adset(
-        cls,
-        config,
-        level: str = None,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        parameters: Dict = None,
-        structure_fields: List[str] = None,
-        requested_fields: List[FieldsMetadata] = None,
-        page_size: int = 200,
-        next_page_cursor: str = None,
-        insights_actions_filtering: Dict = None,
+            cls,
+            config,
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            structure_fields: List[str] = None,
+            requested_fields: List[FieldsMetadata] = None,
+            page_size: int = 200,
+            next_page_cursor: str = None,
+            insights_actions_filtering: Dict = None,
     ):
         requested_structure_fields = [
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
@@ -516,17 +520,17 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def _get_structure_master_data(
-        cls,
-        config,
-        level: str = None,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        parameters: Dict = None,
-        structure_fields: List[str] = None,
-        requested_fields: List[FieldsMetadata] = None,
-        page_size: int = 200,
-        next_page_cursor: str = None,
-        insights_actions_filtering: Dict = None,
+            cls,
+            config,
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            parameters: Dict = None,
+            structure_fields: List[str] = None,
+            requested_fields: List[FieldsMetadata] = None,
+            page_size: int = 200,
+            next_page_cursor: str = None,
+            insights_actions_filtering: Dict = None,
     ):
         requested_structure_fields = [
             getattr(FieldsMetadata, entry) for entry in structure_fields if hasattr(FieldsMetadata, entry)
@@ -579,11 +583,11 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def right_join_insights_and_structures(
-        cls,
-        level: str = None,
-        requested_fields: List[FieldsMetadata] = None,
-        insights: List[Dict] = None,
-        structures: List[Dict] = None,
+            cls,
+            level: str = None,
+            requested_fields: List[FieldsMetadata] = None,
+            insights: List[Dict] = None,
+            structures: List[Dict] = None,
     ) -> List[Dict]:
         requested_fields_names = [field.name for field in requested_fields]
         if FieldsMetadata.result_type.name not in requested_fields_names:
@@ -616,12 +620,12 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def left_join_insights_and_structures(
-        cls,
-        level: str = None,
-        requested_fields: List[FieldsMetadata] = None,
-        structure_fields: List[str] = None,
-        insights: List[Dict] = None,
-        structures: List[Dict] = None,
+            cls,
+            level: str = None,
+            requested_fields: List[FieldsMetadata] = None,
+            structure_fields: List[str] = None,
+            insights: List[Dict] = None,
+            structures: List[Dict] = None,
     ) -> List[Dict]:
         structure_id_key = cls.__ids_keymap[level]["structure"]
         insight_id_key = cls.__ids_keymap[level]["insight"]
@@ -660,10 +664,10 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def map_to_requested_fields(
-        cls,
-        level: str = None,
-        requested_fields: List[FieldsMetadata] = None,
-        response: List[Dict] = None,
+            cls,
+            level: str = None,
+            requested_fields: List[FieldsMetadata] = None,
+            response: List[Dict] = None,
     ) -> List[Dict]:
         sorted_fields = sorted([field.name for field in requested_fields])
 
@@ -694,12 +698,12 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def build_get_structure_config(
-        cls,
-        permanent_token: str = None,
-        level: str = None,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        filter_params: List[Dict] = None,
+            cls,
+            permanent_token: str = None,
+            level: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            filter_params: List[Dict] = None,
     ) -> GraphAPIClientBaseConfig:
         api_config = GraphAPIClientBaseConfig()
         api_config.try_partial_requests = True
@@ -717,14 +721,14 @@ class GraphAPIInsightsHandler:
 
     @classmethod
     def build_get_insights_config(
-        cls,
-        permanent_token: str = None,
-        ad_account_id: str = None,
-        fields: List[str] = None,
-        params: Dict = None,
-        add_totals: bool = False,
-        next_page_cursor: str = None,
-        page_size: int = 200,
+            cls,
+            permanent_token: str = None,
+            ad_account_id: str = None,
+            fields: List[str] = None,
+            params: Dict = None,
+            add_totals: bool = False,
+            next_page_cursor: str = None,
+            page_size: int = 200,
     ) -> GraphAPIClientBaseConfig:
         params["default_summary"] = add_totals
 

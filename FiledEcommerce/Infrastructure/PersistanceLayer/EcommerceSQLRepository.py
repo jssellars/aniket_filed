@@ -4,28 +4,38 @@ from typing import ContextManager
 from sqlalchemy.orm import Session
 
 from FiledEcommerce.Api.startup import fixtures
+import pyodbc
+import os
+
+SQL_CONNECTION = None
 
 
-@contextmanager
-def session_scope() -> ContextManager[Session]:
-    """
-    Context manager to gracefully handle sessions
+class SqlManager:
+    __cursor = None
+    __server: str = "stage1.ctonnmgtbe2i.eu-west-1.rds.amazonaws.com"
+    __port: str = "1433"
+    __username: str = "filed_admin"
+    __password: str = "dvserv3#rathena"
+    __database: str = "Dev3.Filed.ProductCatalogs2"
+    __driver: str = "{ODBC Driver 17 for SQL Server}"
 
-    Copied from documentation
-    https://docs.sqlalchemy.org/en/13/orm/session_basics.html#when-do-i-construct-a-session-when-do-i-commit-it-and-when-do-i-close-it
-    """
-    session = fixtures.sql_db_session()
+    @classmethod
+    def __connection_string(cls):
+        return f"DRIVER={cls.__driver};" \
+               f"SERVER={cls.__server},{cls.__port};" \
+               f"DATABASE={cls.__database};" \
+               f"UID={cls.__username};" \
+               f"PWD={cls.__password}"
 
-    try:
-        yield session
-        # The objects within the session are expired upon commit,
-        # set expire_on_commit to false to keep using them
-        session.expire_on_commit = False
-        session.commit()
+    @classmethod
+    def __enter__(cls):
+        global SQL_CONNECTION
+        if SQL_CONNECTION is None:
+            SQL_CONNECTION = pyodbc.connect(cls.__connection_string())
 
-    # intentional wide scope to rollback session
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+        cls.__cursor = SQL_CONNECTION.cursor()
+        return cls.__cursor
+
+    @classmethod
+    def __exit__(cls, exc_type, exc_val, exc_tb):
+        cls.__cursor.close()

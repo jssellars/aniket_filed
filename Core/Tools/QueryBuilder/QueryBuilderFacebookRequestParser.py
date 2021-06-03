@@ -241,10 +241,9 @@ class QueryBuilderFacebookRequestParser:
                 self.__fields += mapped_entry.facebook_fields
 
             if parse_breakdowns:
-
-                if mapped_entry.field_type == FieldType.BREAKDOWN:
-                    self.__breakdowns += mapped_entry.facebook_fields
-                    self.__breakdown_request_field = mapped_entry.name
+                self.__breakdowns += (
+                    mapped_entry.facebook_fields if mapped_entry.field_type == FieldType.BREAKDOWN else []
+                )
 
                 self.__action_breakdowns += (
                     mapped_entry.action_breakdowns
@@ -282,8 +281,8 @@ class QueryBuilderFacebookRequestParser:
                 self.time_range[self.TimeRangeEnum.UNTIL.value] = entry.Value
 
             elif mapped_condition and (
-                mapped_condition.name == FieldsMetadata.account_id.name
-                or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name
+                    mapped_condition.name == FieldsMetadata.account_id.name
+                    or mapped_condition.name == FieldsMetadata.ad_account_structure_id.name
             ):
                 self.facebook_id = entry.Value
 
@@ -367,8 +366,8 @@ class QueryBuilderFacebookRequestParser:
                 filter_operator = AgGridFacebookOperator(filter_val.get("type"))
                 filter_value = filter_val.get("filter")
                 if (
-                    filter_operator == AgGridFacebookOperator.IN_RANGE
-                    or filter_operator == AgGridFacebookOperator.NOT_IN_RANGE
+                        filter_operator == AgGridFacebookOperator.IN_RANGE
+                        or filter_operator == AgGridFacebookOperator.NOT_IN_RANGE
                 ):
                     filter_value = [filter_value, filter_val.get("filterTo")]
                 filter_objects.append(create_facebook_filter(facebook_filter_name, filter_operator, filter_value))
