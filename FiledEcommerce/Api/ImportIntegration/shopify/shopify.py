@@ -178,7 +178,7 @@ class Shopify(Ecommerce):
         # Shopify passes our NONCE as the `state` parameter and we need to ensure it matches!
         mongo_db = EcommerceMongoRepository()
         # if a record exists, state is valid
-        record = mongo_db.get_first_by_key({"shop": shop, "nonce": state})
+        record = mongo_db.get_first_by_key("nonce",state)
         if not record:
             logging.error(f"Invalid state received: \n\tstate {state}")
             return "Invalid `state` received"
@@ -199,13 +199,23 @@ class Shopify(Ecommerce):
         print(details)
 
         with session_scope() as cursor:
+            cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
+            user_name = cursor.fetchval()
+        temp_nl = user_name.split(" ", 1)
+        if len(temp_nl) == 2:
+            user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+        else:
+            user_first_name, user_last_name = temp_nl[0], ""
+        cursor.close()
+        
+        with session_scope() as cursor:
             cursor.execute(
                 "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName, "
                 + "FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
                 cls.generate_utc_aware_datestring(),
                 user_id,
-                "Sandeepan",
-                "B",
+                user_first_name,
+                user_last_name,
                 user_id,
                 2,
                 json.dumps(details),

@@ -52,7 +52,7 @@ class BigCommerce(Ecommerce):
         print(storefront_token)
 
         mongo_db = EcommerceMongoRepository()
-        data = mongo_db.get_first_by_key({"email": email})
+        data = mongo_db.get_first_by_key("email", email)
         print(data)
 
         user_id = data.get("userId")
@@ -65,12 +65,22 @@ class BigCommerce(Ecommerce):
         }
 
         with session_scope() as cursor:
+            cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
+            user_name = cursor.fetchval()
+        temp_nl = user_name.split(" ", 1)
+        if len(temp_nl) == 2:
+            user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+        else:
+            user_first_name, user_last_name = temp_nl[0], ""
+        cursor.close()
+
+        with session_scope() as cursor:
             cursor.execute(
                 "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName, FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
                 datetime.now(),
                 user_id,
-                "Luke",
-                "Skywalker",
+                user_first_name,
+                user_last_name,
                 user_id,
                 4,
                 json.dumps(deets),
