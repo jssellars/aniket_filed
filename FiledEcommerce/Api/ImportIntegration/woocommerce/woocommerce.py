@@ -25,9 +25,9 @@ class WooCommerce(Ecommerce):
     # endpoints
     __callback_url = "https://httpbin.org/anything"
     __install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop"
+    __install_return_url = "https://localhost:4200/#/catalog/ecommerce"
     __load_redirect_url = "https://005f22fd530c.ngrok.io/wordpress"
-    __install_redirect_url = "https://dev3.filed.com/#/catalog/ecommerce"
+    __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
 
     @staticmethod
     def is_valid_shop(shop: str):

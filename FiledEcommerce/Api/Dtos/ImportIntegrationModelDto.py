@@ -1,6 +1,8 @@
 from FiledEcommerce.Api.Models.bigcommerce_model import BigCommerceProduct, BigCommerceVariant
 from FiledEcommerce.Api.Models.filed_model import FiledProduct, FiledVariant
+from FiledEcommerce.Api.Models.magento_model import MagentoProduct, MagentoProductVariant
 from FiledEcommerce.Api.Models.shopify_model import ShopifyProduct, ShopifyVariant
+from FiledEcommerce.Api.Models.woocommerce_model import WoocommerceProduct, WoocommerceVariant
 
 
 class ImportIntegrationModelDto:
@@ -18,6 +20,14 @@ class ImportIntegrationModelDto:
             "shopify": {
                 "product": list(ShopifyProduct.__annotations__.keys()),
                 "variant": list(ShopifyVariant.__annotations__.keys()),
+            },
+            "magento": {
+                "product": list(MagentoProduct.__annotations__.keys()),
+                "variant": list(MagentoProductVariant.__annotations__.keys()),
+            },
+            "woocommerce": {
+                "product": list(WoocommerceProduct.__annotations__.keys()),
+                "variant": list(WoocommerceVariant.__annotations__.keys()),
             },
         }
         return {"model": model[platform]}
