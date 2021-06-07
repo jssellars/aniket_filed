@@ -7,10 +7,11 @@ import jwt
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import SqlManager
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 
 class Magento(Ecommerce):
     RESPONSE_ERROR_MESSAGE = {"error": "Something went wrong!"}
+    RESPONSE_ERROR_MESSAGE_NOT_FOUND = {"error": "No Record Found"}
     __filed_ecom_url = "https://dev3.filed.com/#/catalog/ecommerce"
 
     @classmethod
@@ -180,13 +181,25 @@ class Magento(Ecommerce):
             Returns:
                 returns row of db as json 
         """
-        with SqlManager() as cursor:
-            cursor.execute("SELECT Details FROM ExternalPlatforms WHERE FiledBusinessOwnerId = ? AND PlatformId = ?", user_id, 5)
-            row = cursor.fetchval()
-        if not json.loads(row):
-            return ""
+        flag = 0
+        with engine.connect() as conn:
+            query = (
+                select([ext_plat_cols.Details])
+                        .where(ext_plat_cols.FiledBusinessOwnerId==user_id)
+                        .where(ext_plat_cols.PlatformId==5)
+                        .limit(1)        
+            )
+            for row in conn.execute(query):
+                try:
+                    details = json.loads(row["Details"])
+                    token = details.get("token") 
+                    flag = 1
+                except Exception as e:
+                    raise e
+        if flag == 1:
+            return token
         else:
-            return json.loads(row)
+            return ""
 
 
     @staticmethod
@@ -201,25 +214,34 @@ class Magento(Ecommerce):
                 None
         """
         user_id = data.get("user_id")
-        with SqlManager() as cursor:
-            cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
-            user_name = cursor.fetchval()
-        temp_nl = user_name.split(" ", 1)
-        if len(temp_nl) == 2:
-            user_first_name, user_last_name = temp_nl[0], temp_nl[1]
-        else:
-            user_first_name, user_last_name = temp_nl[0], ""
-        
-
-        with SqlManager() as cursor:
-            cursor.execute(
-                "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName, FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
-                datetime.now(),
-                user_id,
-                user_first_name,
-                user_last_name,
-                user_id,
-                5,
-                json.dumps(deets)
+        flag = 0
+        with engine.connect() as conn:
+            query = (
+                select([cols.Name])
+                        .where(cols.FiledBusinessOwnerId==user_id)
+                        .limit(1)        
             )
-            cursor.commit()
+            for row in conn.execute(query):
+                try:
+                    user_name = row[0]
+                    flag = 1
+                except Exception as e:
+                    raise e
+        if flag == 1:
+            temp_nl = user_name.split(" ", 1)
+            if len(temp_nl) == 2:
+                user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+            else:
+                user_first_name, user_last_name = temp_nl[0], ""
+
+        with engine.connect() as conn:
+            ins = external_platforms.insert().values(
+                CreatedAt=datetime.now(),
+                CreatedById=user_id,
+                CreatedByFirstName=user_first_name,
+                CreatedByLastName=user_last_name,
+                FiledBusinessOwnerId=user_id,
+                PlatformId=5,
+                Details=json.dumps(deets)
+                )
+            result = conn.execute(ins)

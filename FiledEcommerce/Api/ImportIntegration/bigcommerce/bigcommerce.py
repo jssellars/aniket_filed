@@ -7,8 +7,7 @@ from flask import request
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQLRepository import SqlManager
-
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 
 class BigCommerce(Ecommerce):
     client_id = "gzmqgnkolrpn1ymywjzrsbr9z8jnbxw"
@@ -63,29 +62,37 @@ class BigCommerce(Ecommerce):
             "scope": scope,
             "store_email": email,
         }
-
-        with SqlManager() as cursor:
-            cursor.execute("SELECT Name FROM FiledBusinessOwners WHERE FiledBusinessOwnerId = ?", user_id)
-            user_name = cursor.fetchval()
-        temp_nl = user_name.split(" ", 1)
-        if len(temp_nl) == 2:
-            user_first_name, user_last_name = temp_nl[0], temp_nl[1]
-        else:
-            user_first_name, user_last_name = temp_nl[0], ""
-        
-
-        with SqlManager() as cursor:
-            cursor.execute(
-                "INSERT INTO ExternalPlatforms(CreatedAt, CreatedById, CreatedByFirstName, CreatedByLastName, FiledBusinessOwnerId, PlatformId, Details) VALUES(?, ?, ?, ?, ?, ?, ?)",
-                datetime.now(),
-                user_id,
-                user_first_name,
-                user_last_name,
-                user_id,
-                4,
-                json.dumps(deets),
+        flag = 0
+        with engine.connect() as conn:
+            query = (
+                select([cols.Name])
+                        .where(cols.FiledBusinessOwnerId==user_id)
+                        .limit(1)        
             )
-            cursor.commit()
+            for row in conn.execute(query):
+                try:
+                    user_name = row[0]
+                    flag = 1
+                except Exception as e:
+                    raise e
+        if flag == 1:
+            temp_nl = user_name.split(" ", 1)
+            if len(temp_nl) == 2:
+                user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+            else:
+                user_first_name, user_last_name = temp_nl[0], ""
+
+        with engine.connect() as conn:
+            ins = external_platforms.insert().values(
+                CreatedAt=datetime.now(),
+                CreatedById=user_id,
+                CreatedByFirstName=user_first_name,
+                CreatedByLastName=user_last_name,
+                FiledBusinessOwnerId=user_id,
+                PlatformId=4,
+                Details=json.dumps(deets)
+                )
+            result = conn.execute(ins)
 
         return cls.__filed_ecom_url
 
