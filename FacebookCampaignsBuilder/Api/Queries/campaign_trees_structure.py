@@ -95,6 +95,8 @@ class CampaignTreeBuilder:
         elif self.level == Level.ADSET:
             structure_id_key = LevelToFacebookIdKeyMapping.ADSET.value.replace("_", ".")
             map_structure = self.__map_adsets
+        elif self.level == Level.CAMPAIGN:
+            return self.create_campaign_trees()
         else:
             raise ValueError("Incorrect level provided!")
         # map the structure
