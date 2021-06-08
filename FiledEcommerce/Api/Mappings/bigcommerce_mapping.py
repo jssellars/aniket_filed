@@ -44,7 +44,7 @@ bigcommerce_mapping = {
                 "disabled": False,
             },
             {"name": "Tags", "filedKey": "tags", "mappedTo": "tags", "type": "string", "disabled": False},
-            {"name": "Price", "filedKey": "price", "mappedTo": "price", "type": "string", "disabled": False},
+            {"name": "Price", "filedKey": "price", "mappedTo": "prices", "type": "string", "disabled": False},
             {
                 "name": "Compare At Price",
                 "filedKey": "compare_at_price",

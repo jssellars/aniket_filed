@@ -55,6 +55,9 @@ class OAuth(Resource):
         else:
             return redirect(url)
 
+    def post(self, platform, action):
+        return self.get(platform, action)
+
 
 class Receiver(Resource):
     def post(self, platform):
