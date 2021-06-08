@@ -264,7 +264,7 @@ class WooCommerce(Ecommerce):
                 filed_product.variants.append(filed_variant.__dict__)
         filed_product_list.append(filed_product.__dict__)
 
-        return {"products": "filed_product_list"}
+        return {"products": filed_product_list}
 
     @classmethod
     def get_products(cls, body):
@@ -280,7 +280,7 @@ class WooCommerce(Ecommerce):
         consumer_key = data[1]
         consumer_secret = data[2]
         wcapi = API(
-            url="https://filedwoocommerce.000webhostapp.com",
+            url=shop_url,
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             wp_api=True,
