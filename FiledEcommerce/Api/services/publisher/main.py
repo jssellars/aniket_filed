@@ -32,6 +32,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 UpdatedAt=product.updated_at,
                 CreatedAt=product.created_at,
                 ImportedAt=product.imported_at,
+                CreatedById=user_id,
                 CreatedByFirstName=user_first_name,
                 CreatedByLastName=user_last_name,
                 ImageUrl=product.image_url,
@@ -45,7 +46,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 Availability=product.availability,
                 Brand=product.brand,
                 StateId=default_state,
-                FiledProductCatalogId=filed_product_catalog_id,
+                FiledProductCatalogId=filed_product_catalog_id[0],
             )
             result = conn.execute(fp_ins)
             filed_product_id = result.inserted_primary_key
@@ -67,6 +68,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                     ImportedAt=variant.imported_at,
                     CreatedByFirstName=user_first_name,
                     CreatedByLastName=user_last_name,
+                    CreatedById=user_id,
                     ImageUrl=variant.image_url,
                     Name=variant.display_name,
                     FiledProductId=variant.filed_product_id,
@@ -85,7 +87,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                     Size=variant.size,
                     CurrencyId=18,  # TODO: Currencies Mapping
                     StateId=default_state,
-                    FiledProductCatalogId=filed_product_catalog_id,
+                    FiledProductCatalogId=filed_product_catalog_id[0],
                 )
                 fv_result = conn.execute(fv_ins)
 

@@ -4,22 +4,20 @@ bigcommerce_mapping = {
             {"name": "ID", "filedKey": "product_id", "mappedTo": "entity_id", "type": "string", "disabled": True},
             {"name": "Title", "filedKey": "title", "mappedTo": "name", "type": "string", "disabled": True},
             {"name": "SKU", "filedKey": "sku", "mappedTo": "sku", "type": "string", "disabled": True},
-            {"name": "Vendor", "filedKey": "vendor", "mappedTo": "vendor", "type": "string", "disabled": False},
             {
                 "name": "Product Type",
                 "filedKey": "product_type",
-                "mappedTo": "product_type",
+                "mappedTo": "type",
                 "type": "string",
                 "disabled": False,
             },
             {
                 "name": "Description",
                 "filedKey": "description",
-                "mappedTo": "plainTextDescription",
+                "mappedTo": "plain_text_description",
                 "type": "string",
                 "disabled": False,
             },
-            {"name": "Title", "filedKey": "title", "mappedTo": "title", "type": "string", "disabled": False},
             {"name": "Tags", "filedKey": "tags", "mappedTo": "tags", "type": "string", "disabled": False},
         ],
         "variant": [
@@ -41,7 +39,7 @@ bigcommerce_mapping = {
             {
                 "name": "Description",
                 "filedKey": "description",
-                "mappedTo": "plainTextDescription",
+                "mappedTo": "plain_text_description",
                 "type": "string",
                 "disabled": False,
             },
@@ -50,7 +48,7 @@ bigcommerce_mapping = {
             {
                 "name": "Compare At Price",
                 "filedKey": "compare_at_price",
-                "mappedTo": "compare_at_price",
+                "mappedTo": "prices",
                 "type": "string",
                 "disabled": False,
             },
@@ -61,7 +59,6 @@ bigcommerce_mapping = {
                 "type": "string",
                 "disabled": False,
             },
-            {"name": "URL", "filedKey": "url", "mappedTo": "online_store_url", "type": "string", "disabled": False},
             {"name": "SKU", "filedKey": "sku", "mappedTo": "sku", "type": "string", "disabled": False},
         ],
     }

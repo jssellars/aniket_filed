@@ -1,9 +1,9 @@
-import http.client
 import json
 from dataclasses import asdict
 from datetime import datetime, timezone
 
 import humps
+import requests
 from flask import request
 from sgqlc.operation import Operation
 
@@ -18,7 +18,8 @@ from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model impor
 class BigCommerce(Ecommerce):
     client_id = "gzmqgnkolrpn1ymywjzrsbr9z8jnbxw"
     client_secret = "75ff5362495a9a720f4de0e737092cd5be4aaf2efdf1751c263c73cb8bcc5bb9"
-    callback_url = "http://localhost:3000/oauth/bigcommerce/install"
+    # callback_url = "http://localhost:47650/api/v1/oauth/bigcommerce/install"
+    callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/bigcommerce/install"
 
     __marketplace_url = "https://store-pzuk9w46gs.mybigcommerce.com/manage/marketplace/apps/my-apps/drafts"
     __filed_ecom_url = "https://localhost:4200/#/catalog/ecommerce"
@@ -31,7 +32,7 @@ class BigCommerce(Ecommerce):
         user_id = token_data.get("user_filed_id")
 
         mongo_db = EcommerceMongoRepository()
-        mongo_db.add_one({"email": email, "userId": user_id})
+        mongo_db.add_one({"email": email, "user_id": user_id})
 
         return cls.__marketplace_url
 
@@ -42,25 +43,18 @@ class BigCommerce(Ecommerce):
         context = body.get("context")
         scope = body.get("scope")
 
-        print(code)
-        print(context)
-        print(scope)
-
         store_hash = context.split("/")[1]
         token_response = cls.get_access_token(code=code, context=context, scope=scope)
-        print(token_response)
 
         access_token = token_response.get("access_token")
         user = token_response.get("user")
         email = user.get("email")
         storefront_token = cls.get_storefront_token(access_token=access_token, store_hash=store_hash)
-        print(storefront_token)
 
         mongo_db = EcommerceMongoRepository()
         data = mongo_db.get_first_by_key("email", email)
-        print(data)
 
-        user_id = data.get("userId")
+        user_id = data.get("user_id")
         deets = {
             "access_token": access_token,
             "storefront_token": storefront_token,
@@ -108,9 +102,9 @@ class BigCommerce(Ecommerce):
 
     @classmethod
     def get_access_token(cls, code, context, scope):
-        conn = http.client.HTTPSConnection("login.bigcommerce.com")
+        url = "https://login.bigcommerce.com/oauth2/token"
 
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = {
             "client_id": cls.client_id,
             "client_secret": cls.client_secret,
@@ -121,29 +115,17 @@ class BigCommerce(Ecommerce):
             "redirect_uri": cls.callback_url,
         }
 
-        conn.request("POST", "/oauth2/token", json.dumps(payload), headers)
-
-        raw_data = conn.getresponse()
-        data = raw_data.read()
-        response = json.loads(data.decode("utf-8"))
-
-        return response
+        data = requests.post(url, data=payload, headers=headers)
+        return data.json()
 
     @classmethod
     def get_storefront_token(cls, access_token, store_hash):
-        conn = http.client.HTTPSConnection("api.bigcommerce.com")
+        url = f"https://api.bigcommerce.com/stores/{store_hash}/v3/storefront/api-token"
+        headers = {"Content-Type": "application/json", "X-Auth-Token": access_token}
+        payload = {"channel_id": 1, "expires_at": 1624127400, "allowed_cors_origins": ["http://localhost:4200"]}
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json", "X-Auth-Token": access_token}
-
-        payload = {"channel_id": 1, "expires_at": 1643622707}
-
-        conn.request("POST", f"/stores/{store_hash}/v3/storefront/api-token", json.dumps(payload), headers)
-
-        raw_data = conn.getresponse()
-        data = raw_data.read()
-        response = json.loads(data.decode("utf-8"))
-
-        return response["data"]["token"]
+        data = requests.post(url, data=json.dumps(payload), headers=headers)
+        return data.json()["data"]["token"]
 
     @classmethod
     def get_query(cls, after: str):
@@ -187,18 +169,15 @@ class BigCommerce(Ecommerce):
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
         after = None
-        conn = http.client.HTTPSConnection(f"store-{store_hash}.mybigcommerce.com")
+        url = f"https://store-{store_hash}.mybigcommerce.com/graphql"
 
         while True:
             query = cls.get_query(after=after)
             payload = {"query": str(query)}
 
-            conn.request("POST", "/graphql", json.dumps(payload), headers)
-            res = conn.getresponse()
-            data = res.read()
+            data = requests.post(url, data=json.dumps(payload), headers=headers)
 
-            json_data = json.loads(data.decode("utf-8"))
-            print(json_data)
+            json_data = data.json()
             if not json_data["data"]["site"]["products"]["pageInfo"]["hasNextPage"]:
                 break
 
@@ -216,6 +195,8 @@ class BigCommerce(Ecommerce):
             df = {}
             node = product["node"]
             for _map in mapping.get("product"):
+                if _map["filed_key"] == "tags":
+                    continue
                 if _map["filed_key"] in FiledProduct.__annotations__:
                     df[_map["filed_key"]] = node[_map["mapped_to"]]
 
@@ -227,7 +208,7 @@ class BigCommerce(Ecommerce):
                 description=node["plain_text_description"],
                 tags=",".join([tag["node"]["name"] for tag in node["categories"]["edges"]]),
                 sku=node["sku"],
-                brand=node["brand"],
+                brand=node["brand"]["name"] if node["brand"] is not None else None,
                 availability=True,
                 image_url=node["default_image"]["url"],
                 created_at=imported_at,
@@ -240,10 +221,17 @@ class BigCommerce(Ecommerce):
                 vdf = {"custom_fields": {}}
                 vnode = variant["node"]
                 for _map in mapping.get("variant"):
-                    if _map["filed_key"] in FiledProduct.__annotations__:
-                        vdf[_map["filed_key"]] = node[_map["mapped_to"]]
+                    if (
+                        _map["filed_key"] == "tags"
+                        or _map["filed_key"] == "display_name"
+                        or _map["filed_key"] == "description"
+                        or _map["filed_key"] == "url"
+                    ):
+                        continue
+                    if _map["filed_key"] in FiledVariant.__annotations__:
+                        vdf[_map["filed_key"]] = vnode[_map["mapped_to"]]
                     else:
-                        custom = {_map["filed_key"]: node.get(_map["mapped_to"])}
+                        custom = {_map["filed_key"]: vnode.get(_map["mapped_to"])}
                         vdf["custom_fields"].update(custom)
 
                 vr = FiledVariant(
