@@ -1,5 +1,4 @@
 import json
-import os
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 
@@ -27,7 +26,7 @@ class WooCommerce(Ecommerce):
     # endpoints
     __callback_url = "https://httpbin.org/anything"
     __install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop"
+    __install_return_url = "https://ecommerce.filed.com/#/catalog/ecommerce"
     __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress"
     __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
 
@@ -197,7 +196,7 @@ class WooCommerce(Ecommerce):
         product_id = []
         df = {}
         # process the mapping to get only mapped products
-        for p_map in mapping["mapping"]["product"]:
+        for p_map in mapping["product"]:
             df[p_map["mapped_to"]] = data[p_map["name"]]
             df[p_map["filed_key"]] = df[p_map["mapped_to"]]
 
@@ -231,7 +230,7 @@ class WooCommerce(Ecommerce):
                     "custom_fields": {}
                 }
                 # process the mapping to get only mapped products
-                for v_map in mapping["mapping"]["variant"]:
+                for v_map in mapping["variant"]:
                     if v_map["filed_key"] in FiledVariant.__annotations__:
                         variant_map[v_map["mapped_to"]] = variant[v_map["name"]]
                         variant_map[v_map["filed_key"]] = variant_map[v_map["mapped_to"]]
@@ -265,7 +264,7 @@ class WooCommerce(Ecommerce):
                 filed_product.variants.append(filed_variant.__dict__)
         filed_product_list.append(filed_product.__dict__)
 
-        return filed_product_list
+        return {"products": filed_product_list}
 
     @classmethod
     def get_products(cls, body):
@@ -276,15 +275,15 @@ class WooCommerce(Ecommerce):
         @return: list of WC products
         """
         user_id = body.get("user_filed_id")
-        credentials = cls.read_credentials_from_db(user_id)
-        data = json.loads(credentials)
-        shop_url = data["shop"]
-        consumer_key = data["consumer_key"]
-        consumer_secret = data["consumer_secret"]
+        data = cls.read_credentials_from_db(user_id)
+        shop_url = data[0]
+        consumer_key = data[1]
+        consumer_secret = data[2]
         wcapi = API(
             url=shop_url,
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
+            wp_api=True,
             version=cls.WOOCOMMERCE_API_VERSION
         )
         json_data = wcapi.get("products").json()
@@ -298,7 +297,6 @@ class WooCommerce(Ecommerce):
         @param user_id:
         @return:
         """
-        flag = 0
         with engine.connect() as conn:
             query = (
                 select([ext_plat_cols.Details])
@@ -306,10 +304,11 @@ class WooCommerce(Ecommerce):
                     .where(ext_plat_cols.PlatformId == 6)
                     .limit(1)
             )
-            for row in conn.execute(query):
-                if not row:
-                    return ""
-            return row
+            for record in conn.execute(query):
+                row = record["Details"]
+
+            details = json.loads(row)
+            return details["shop"], details["consumer_key"], details["consumer_secret"]
 
     @classmethod
     def get_product_variants(cls, body, p_id):
@@ -321,11 +320,10 @@ class WooCommerce(Ecommerce):
         @return: list of product variations
         """
         user_id = body.get("user_filed_id")
-        credentials = cls.read_credentials_from_db(user_id)
-        data = json.loads(credentials)
-        shop_url = data["shop"]
-        consumer_key = data["consumer_key"]
-        consumer_secret = data["consumer_secret"]
+        data = cls.read_credentials_from_db(user_id)
+        shop_url = data[0]
+        consumer_key = data[1]
+        consumer_secret = data[2]
         wcapi = API(
             url=shop_url,
             consumer_key=consumer_key,

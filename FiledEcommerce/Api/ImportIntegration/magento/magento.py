@@ -41,7 +41,7 @@ from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model impor
 class Magento(Ecommerce):
     RESPONSE_ERROR_MESSAGE = {"error": "Something went wrong!"}
     RESPONSE_ERROR_MESSAGE_NOT_FOUND = {"error": "No Record Found"}
-    __filed_ecom_url = "http://localhost:4200/#/catalog/ecommerce"
+    __filed_ecom_url = "https://localhost:4200/#/catalog/ecommerce"
 
     @classmethod
     def app_load(cls):
