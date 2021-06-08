@@ -70,7 +70,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                     ImageUrl=variant.image_url,
                     Name=variant.display_name,
                     FiledProductId=variant.filed_product_id,
-                    ShortDescription=variant.description,
+                    ShortDescription=variant.description[128:] + "...,
                     InventoryQuantity=variant.inventory_quantity or 0,
                     Sku=variant.sku or 0,
                     Url=variant.url,
