@@ -282,7 +282,7 @@ class Magento(Ecommerce):
                 filed_ob_list (List[FiledProduct]): list of data as FiledProduct.
         """
         user_id = body.get("user_filed_id")
-        details = cls.read_token_from_db(user_id)
+        details = cls.read_details_from_db(user_id)
         host_url = details["host_url"]
         store_code = details["store_code"]
         token = details["token"]
@@ -438,3 +438,25 @@ class Magento(Ecommerce):
                     pr.variants.append(vr)
             filed_product_list.append(pr.__dict__)
         return filed_product_list
+
+    @staticmethod
+    def read_details_from_db(user_id):
+        """ Reads the token from the db
+            Args:
+                user_id: user_id
+            Calls:
+                None
+            Returns:
+                returns row of db as json 
+        """
+        with engine.connect() as conn:
+            query = (
+                select([ext_plat_cols.Details])
+                        .where(ext_plat_cols.FiledBusinessOwnerId==user_id)
+                        .where(ext_plat_cols.PlatformId==5)
+                        .limit(1)        
+            )
+            for row in conn.execute(query):
+                if not row:
+                    return ""
+            return json.loads(row["Details"])
