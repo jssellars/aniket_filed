@@ -10,7 +10,7 @@ from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import engine, ext_plat_cols, cols, external_platforms
 
 class WooCommerce(Ecommerce):
     # Runtime Constants
@@ -213,6 +213,8 @@ class WooCommerce(Ecommerce):
             updated_at=data["date_modified"],
             imported_at=imported_at,
             variants=[],
+            brand="",
+            availability=True
         )
 
         if len(data.get("variations")) != 0:
@@ -252,7 +254,6 @@ class WooCommerce(Ecommerce):
                     imported_at=imported_at,
                     material="",
                     condition="",
-                    brand="",
                     color="",
                     size="",
                     custom_props=FiledCustomProperties(

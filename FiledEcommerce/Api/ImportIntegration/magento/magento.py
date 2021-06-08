@@ -7,14 +7,14 @@ from urllib.parse import urlparse
 from flask import request
 import requests
 import jwt
-from sgqlc.types import *
-from FiledEcommerce.Api.utils.models.filed_model import *
+from sgqlc.types import Enum, non_null, Arg, String, Float, Type, Int, Field, list_of, Boolean, ArgDict ,Interface, Union, Input, Schema
+from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant, FiledCustomProperties
 from requests.exceptions import HTTPError
 from sgqlc.operation import Operation
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import engine, ext_plat_cols, cols, external_platforms
 from FiledEcommerce.Api.ImportIntegration.magento.graphql import MagentoQuery
 from FiledEcommerce.Api.ImportIntegration.magento.graphql import ConfigurableProduct
 
@@ -393,6 +393,8 @@ class Magento(Ecommerce):
                 created_at=item["created_at"],
                 updated_at=item["updated_at"],
                 imported_at=imported_at,
+                brand="",
+                availability=True if item["stock_status"] == "IN_STOCK" else False,
                 variants=[]               
             )
 
@@ -427,7 +429,6 @@ class Magento(Ecommerce):
                         imported_at=imported_at,
                         material="",
                         condition="",
-                        brand="",
                         color="",
                         size="",
                         custom_props=FiledCustomProperties(

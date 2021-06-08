@@ -45,7 +45,7 @@ class ImportCsv(Ecommerce):
                          "compare_at_price", "availability", "url", "image_url",
                          "sku", "barcode", "inventory_quantity", "tags",
                          "description", "created_at", "updated_at", "imported_at",
-                         "material", "condition", "brand", "color", "size"]
+                         "material", "condition", "color", "size"]
         # get a list of custom properties
         custom_fields = [
             attr
@@ -67,6 +67,8 @@ class ImportCsv(Ecommerce):
                 created_at=getattr(row, 'created_at', imported_at),
                 updated_at="",
                 imported_at=imported_at,
+                brand=getattr(row, 'brand', ""),
+                availability=True,
                 variants=[]
             )
 
@@ -89,7 +91,6 @@ class ImportCsv(Ecommerce):
                 imported_at=imported_at,
                 material=getattr(row, 'material', ""),
                 condition=getattr(row, 'condition', ""),
-                brand=getattr(row, 'brand', ""),
                 color=getattr(row, 'color', ""),
                 size=getattr(row, 'size', ""),
                 custom_props=FiledCustomProperties(
