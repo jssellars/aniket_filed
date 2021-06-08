@@ -1,4 +1,5 @@
 import json
+import ssl
 from typing import List
 
 from sendgrid import SendGridAPIClient
@@ -18,6 +19,10 @@ class SendGridMailer:
         html_content: str = None,
         from_user: str = "login@filed.com",
     ) -> dict:
+        # UNSAFE: opt out of ssl check
+        tempfunc = ssl._create_default_https_context
+        ssl._create_default_https_context = ssl._create_unverified_context
+
         sg = SendGridAPIClient(cls.SENDGRID_API_KEY)
         message = Mail(
             from_email=from_user,
@@ -31,6 +36,10 @@ class SendGridMailer:
             message.add_cc([Cc(cc) for cc in cc_emails])
 
         response = sg.send(message)
+
+        # Restore ssl check after task is done
+        ssl._create_default_https_context = ssl._create_default_https_context
+
         return {
             "status_code": response.status_code,
             "body": json.loads(response.body) if response.body else None,
