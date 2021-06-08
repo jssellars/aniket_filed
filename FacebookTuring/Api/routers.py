@@ -64,6 +64,12 @@ from FacebookTuring.Api.Queries.AdsManagerCampaignTreeStructureQuery import AdsM
 from FacebookTuring.Api.Queries.AdsManagerGetStructuresQuery import AdsManagerGetStructuresQuery
 from FacebookTuring.Api.startup import config, fixtures
 
+# Dexter Lab Imports.
+from FacebookTuring.Api.CommandsHandlers.LabsHiddenInterests.LabsHiddenInterestsCommandHandlers import (
+    GetInterestsHandler,
+    GetAudienceOverlapHandler
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -519,3 +525,79 @@ class ReportsReportInsights(Resource):
     @fixtures.authorize_permission(permission=ReportsPermissions.REPORT_CAN_ACCESS_REPORTS_DATA)
     def post(self):
         return GetInsightsHandler.handle()
+
+
+class GetInterests:
+    @staticmethod
+    def handle(ad_account_id: str, adset_id: str):
+        """
+        Handle Requests from /labs/hidden-interests/<string:ad_account_id>/<string:adset_id>
+        Parameters
+        ----------
+        ad_account_id: str
+            Ad Account ID for Hidden Interests.
+        adset_id: str
+            Adset ID for Hidden Interests.
+        """
+        try:
+            business_owner_id = extract_business_owner_facebook_id()
+            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            ad_account_id = f"act_{ad_account_id}"
+            response = GetInterestsHandler().handle(
+                ad_account_id=ad_account_id,
+                adset_id=adset_id
+            )
+
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to process request."}, 400
+
+
+class GetAudienceOverlap:
+    @staticmethod
+    def handle(ad_account_id: str, adset_id: str):
+        """
+        Handle Requests from /labs/hidden-interests/<string:ad_account_id>/<string:adset_id>
+        Parameters
+        ----------
+        ad_account_id: str
+            Ad Account ID for Hidden Interests.
+        adset_id: str
+            Adset ID for Hidden Interests.
+        """
+        try:
+            request_json = request.get_json(force=True)
+            business_owner_id = extract_business_owner_facebook_id()
+            fixtures.business_owner_repository.get_permanent_token(business_owner_id)
+            response = GetAudienceOverlapHandler().handle(
+                query_json=request_json,
+
+            )
+
+            return response, 200
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": "Failed to process request."}, 400
+
+
+class LabsHiddenInterestsBase(Resource):
+    """
+    Base for Labs Hidden Interests CRUD Operations.
+    """
+
+    def get(self, ad_account_id, adset_id):
+        """
+        Returns Response for GET.
+        """
+        return GetInterests.handle(ad_account_id, adset_id)
+
+    def post(self, ad_account_id, adset_id):
+        """
+        Returns Response for POST.
+        """
+        return None, 200

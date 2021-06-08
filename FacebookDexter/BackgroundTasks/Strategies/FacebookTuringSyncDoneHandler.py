@@ -10,6 +10,10 @@ from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import De
 from Core.mongo_adapter import MongoOperator
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
 from FacebookDexter.BackgroundTasks.Strategies.EmailNotificationsSystem import send_email
+from FacebookDexter.BackgroundTasks.Strategies.LabsStrategyMaster import (
+    DexterLabsStrategiesEnum,
+    DexterLabsStrategyMaster,
+)
 from FacebookDexter.BackgroundTasks.Strategies.StrategyMaster import DexterStrategiesEnum, DexterStrategyMaster
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
     FacebookTuringDataSyncCompletedEvent,
@@ -59,6 +63,22 @@ class FacebookTuringSyncDoneHandler:
 
             for strategy in DexterStrategiesEnum:
                 dexter_strategy_master = DexterStrategyMaster(
+                    strategy.value,
+                    StrategyDataMongoRepository(
+                        config=config.mongo,
+                        database_name=config.mongo.insights_database,
+                    ),
+                    self.recommendations_repository,
+                    self.journal_repository,
+                )
+
+                dexter_strategy_master.analyze_data_for_business_owner(
+                    business_owner.business_owner_facebook_id,
+                    business_owner.ad_account_ids,
+                )
+
+            for strategy in DexterLabsStrategiesEnum:
+                dexter_strategy_master = DexterLabsStrategyMaster(
                     strategy.value,
                     StrategyDataMongoRepository(
                         config=config.mongo,

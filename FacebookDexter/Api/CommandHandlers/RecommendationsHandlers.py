@@ -34,6 +34,8 @@ RECOMMENDATION_FIELDS = [
     RecommendationField.UNDERPERFORMING_BREAKDOWNS,
     RecommendationField.HIDDEN_INTERESTS,
     RecommendationField.APPLY_PARAMETERS,
+    RecommendationField.IS_LABS,
+    RecommendationField.PIXEL_ID,
 ]
 
 UNUSED_FE_FIELDS = [
@@ -174,6 +176,8 @@ def _convert_db_entry_to_recommendation(entry: Dict) -> Dict:
         trigger_variance=entry.get(RecommendationField.TRIGGER_VARIANCE.value),
         no_of_days=entry.get(RecommendationField.TIME_INTERVAL.value),
         underperforming_breakdowns=entry.get(RecommendationField.UNDERPERFORMING_BREAKDOWNS.value),
+        pixel_id=entry.get(RecommendationField.PIXEL_ID.value),
+        structure_name=entry.get(RecommendationField.STRUCTURE_NAME.value),
     )
 
     entry[RecommendationField.PRIORITY.value] = RecommendationPriority(
@@ -222,6 +226,7 @@ def _get_recommendations_query(
             {RecommendationField.PRIORITY.value: {MongoOperator.IN.value: priorities}},
             {RecommendationField.STATUS.value: RecommendationStatusEnum.ACTIVE.value},
             {RecommendationField.BUSINESS_OWNER_ID.value: business_owner_id},
+            {RecommendationField.IS_LABS.value: command.is_labs},
         ]
     }
 

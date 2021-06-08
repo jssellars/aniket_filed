@@ -28,6 +28,7 @@ from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     UNKNOWN_KEY,
     _does_budget_exist,
     _get_budget_value_and_type,
+    make_ad_copies,
 )
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyParameters,
@@ -111,7 +112,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         ad_ids = [ad.get_id() for ad in (orig_fb_adset.get_ads(fields=["id"]))]
 
         # publish copies of ads to all new adsets
-        new_ad_ids = AgeGenderBreakdownSplit.make_copies(ad_ids, new_adset_ids)
+        new_ad_ids = make_ad_copies(ad_ids, new_adset_ids)
 
         new_created_structures = [
             NewCreatedStructureKeys(level, recommendation.get(RecommendationField.ACCOUNT_ID.value), new_adset_id)
@@ -119,50 +120,6 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         ]
 
         self._publish_message_and_pause_structure(new_created_structures, recommendation, headers)
-
-    @staticmethod
-    def make_copies(ad_ids: List, adset_ids: List):
-        new_copies = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = []
-            for adset_id in adset_ids:
-                for ad_id in ad_ids:
-                    futures.append(
-                        executor.submit(
-                            AgeGenderBreakdownSplit._duplicate_ads_on_adset,
-                            ad_id,
-                            adset_id,
-                        )
-                    )
-
-            for future in concurrent.futures.as_completed(futures):
-                new_copies.append(future.result())
-
-            return new_copies
-
-    @staticmethod
-    def _duplicate_ads_on_adset(ad_id, adset_id, retry=0):
-        ad = Ad(fbid=ad_id)
-        parameters = {"adset_id": adset_id, "status_option": Ad.StatusOption.inherited_from_source}
-        try:
-            new_ad_id = ad.create_copy(params=parameters)
-            new_ad_id = Tools.convert_to_json(new_ad_id)
-
-            if "copied_ad_id" in new_ad_id:
-                return new_ad_id["copied_ad_id"]
-            else:
-                raise ValueError("Invalid duplicated Ad id.")
-
-        except Exception as e:
-            # retrying ad copy request if there is "unexpected error" from FB
-            if e.api_error_code() == 2 and retry < 3:
-                logger.exception(
-                    f"Unable to copy and publish ad {ad_id} to adset {adset_id} || {repr(e)} || retry count: {retry}"
-                )
-                return AgeGenderBreakdownSplit._duplicate_ads_on_adset(ad_id, adset_id, retry + 1)
-
-            logger.exception(f"Unable to copy and publish ad {ad_id} to adset {adset_id} || {repr(e)}")
-            return None
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         existing_breakdowns = defaultdict(list)

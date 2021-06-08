@@ -45,6 +45,8 @@ class RecommendationField(Enum):
     IS_APPLICABLE = "is_applicable"
     ADSETS_SPLITS = "adsets_splits"
     APPLY_TOOLTIP = "apply_tooltip"
+    IS_LABS = "is_labs"
+    PIXEL_ID = "pixel_id"
 
 
 class RecommendationFieldInsidersEnum(Enum):

@@ -1,13 +1,17 @@
+import concurrent.futures
+import logging
 from dataclasses import asdict
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
+from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adset import AdSet
 
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
+from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import RecommendationAction
 from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import FacebookBudgetTypeEnum
 from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresHandler import (
@@ -15,6 +19,9 @@ from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresH
     DexterNewCreatedStructureEvent,
     NewCreatedStructureKeys,
 )
+
+logger = logging.getLogger(__name__)
+
 
 INVALID_METRIC_VALUE = -1
 TOTAL_KEY = "total"
@@ -67,26 +74,80 @@ def update_turing_structure(config: Model, recommendation: Dict, headers: str):
         raise Exception(f"Could not update structure {recommendation.get(RecommendationField.STRUCTURE_ID.value)}")
 
 
+def make_ad_copies(ad_ids: List, adset_ids: List):
+    new_copies = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for adset_id in adset_ids:
+            for ad_id in ad_ids:
+                futures.append(
+                    executor.submit(
+                        _duplicate_ads_on_adset,
+                        ad_id,
+                        adset_id,
+                    )
+                )
+
+        for future in concurrent.futures.as_completed(futures):
+            new_copies.append(future.result())
+
+        return new_copies
+
+
+def _duplicate_ads_on_adset(ad_id, adset_id, retry=0):
+    ad = Ad(fbid=ad_id)
+    parameters = {"adset_id": adset_id, "status_option": Ad.StatusOption.inherited_from_source}
+    try:
+        new_ad_id = ad.create_copy(params=parameters)
+        new_ad_id = Tools.convert_to_json(new_ad_id)
+
+        if "copied_ad_id" in new_ad_id:
+            return new_ad_id["copied_ad_id"]
+        else:
+            raise ValueError("Invalid duplicated Ad id.")
+
+    except Exception as e:
+        # retrying ad copy request if there is "unexpected error" from FB
+        if e.api_error_code() == 2 and retry < 3:
+            logger.exception(
+                f"Unable to copy and publish ad {ad_id} to adset {adset_id} || {repr(e)} || retry count: {retry}"
+            )
+            return _duplicate_ads_on_adset(ad_id, adset_id, retry + 1)
+
+        logger.exception(f"Unable to copy and publish ad {ad_id} to adset {adset_id} || {repr(e)}")
+        return None
+
+
 def duplicate_fb_adset(recommendation: Dict, fixtures: Any) -> str:
-    structure = LevelToGraphAPIStructure.get(
-        recommendation[RecommendationField.LEVEL.value], recommendation[RecommendationField.STRUCTURE_ID.value]
-    )
+    facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
+    level = recommendation.get(RecommendationField.LEVEL.value)
+    structure = LevelToGraphAPIStructure.get(level, facebook_id)
 
     new_structure = structure.create_copy(
         params={
             "campaign_id": recommendation.get(RecommendationField.CAMPAIGN_ID.value),
-            "deep_copy": True,
+            "deep_copy": False,
             "status_option": AdSet.StatusOption.inherited_from_source,
             "rename_options": {"rename_suffix": " - Duplicate"},
         }
     )
+
+    new_adset_id = new_structure[FacebookMiscFields.copied_adset_id]
+
+    # get all the ads from the original adset
+    orig_fb_adset = AdSet(fbid=facebook_id)
+    ad_ids = [ad.get_id() for ad in (orig_fb_adset.get_ads(fields=["id"]))]
+
+    # publish copies of ads to all new adsets
+    new_ad_ids = make_ad_copies(ad_ids, [new_adset_id])
+
     new_created_structures_event = DexterNewCreatedStructureEvent(
         recommendation.get(RecommendationField.BUSINESS_OWNER_ID.value),
         [
             NewCreatedStructureKeys(
                 recommendation.get(RecommendationField.LEVEL.value),
                 recommendation.get(RecommendationField.ACCOUNT_ID.value),
-                new_structure[FacebookMiscFields.copied_adset_id],
+                new_adset_id,
             )
         ],
     )
@@ -94,4 +155,4 @@ def duplicate_fb_adset(recommendation: Dict, fixtures: Any) -> str:
     response = mapper.load(asdict(new_created_structures_event))
     RecommendationAction.publish_response(response, fixtures)
 
-    return new_structure[FacebookMiscFields.copied_adset_id]
+    return new_adset_id

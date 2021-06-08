@@ -63,6 +63,7 @@ class StructureRecommendationModel:
     campaign_id: str
     campaign_name: str
     level: str
+    pixel_id: Optional[str] = None
 
 
 @dataclass
@@ -87,6 +88,7 @@ class RecommendationEntryModel:
     hidden_interests: Optional[str] = None
     debug_msg: Optional[str] = None
     apply_parameters: Optional[Dict] = None
+    is_labs: Optional[bool] = False
 
     def get_extended_db_entry(self):
         recommendation = asdict(self)

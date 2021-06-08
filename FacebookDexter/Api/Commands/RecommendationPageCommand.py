@@ -14,6 +14,7 @@ class RecommendationPageCommandMapping(MapperBase):
     level = fields.String(required=False)
     priorities = fields.List(fields.String(), required=False)
     structure_ids = fields.List(fields.String(), required=False)
+    is_labs = fields.Boolean(required=False)
 
     class Meta:
         # Include unknown fields in the deserialized output
@@ -28,6 +29,7 @@ class RecommendationPageCommand:
     level: Optional[str] = None
     priorities: Optional[List[str]] = None
     structure_ids: Optional[List[str]] = field(default_factory=list)
+    is_labs: Optional[bool] = False
 
 
 class NumberOfPagesCommandMapping(MapperBase):
@@ -36,6 +38,7 @@ class NumberOfPagesCommandMapping(MapperBase):
     priorities = fields.List(fields.String(), required=False)
     structure_ids = fields.List(fields.String(), required=False)
     page_size = fields.Integer(required=True, validate=Range(min=1))
+    is_labs = fields.Boolean(required=False)
 
     class Meta:
         # Include unknown fields in the deserialized output
@@ -49,3 +52,4 @@ class NumberOfPagesCommand:
     level: Optional[str] = None
     priorities: Optional[List[str]] = None
     structure_ids: Optional[List[str]] = field(default_factory=list)
+    is_labs: Optional[bool] = False
