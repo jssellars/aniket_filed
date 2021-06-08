@@ -24,7 +24,8 @@ class WooCommerce(Ecommerce):
     WOOCOMMERCE_API_SECRET = os.environ.get('CONSUMER_API_SECRET')
 
     # endpoints
-    __callback_url = "https://httpbin.org/anything"
+    __callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/woocommerce/install"
+    __callback_url_local = "https://ae0618ff6ce1.ngrok.io/api/v1/oauth/woocommerce/install"
     __install_endpoint = "/wc-auth/v1/authorize"
     __install_return_url = "https://ecommerce.filed.com/#/catalog/ecommerce"
     __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress"
@@ -63,7 +64,7 @@ class WooCommerce(Ecommerce):
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
             "return_url": cls.__install_return_url,
-            "callback_url": cls.__callback_url
+            "callback_url": cls.__callback_url_local
         }
         query_string = urlencode(params)
         redirect_url = "%s%s?%s" % (shop, cls.__install_endpoint, query_string)
@@ -83,6 +84,7 @@ class WooCommerce(Ecommerce):
         @return: Ecommerce URL
         """
         data = request.args
+        print(data)
         token_data = decode_jwt_from_headers()
         shop_url = data.get("shop")
         user_id = token_data["user_filed_id"]
@@ -91,7 +93,8 @@ class WooCommerce(Ecommerce):
         key_permissions = data.get("key_permissions")
 
         mongo_db = EcommerceMongoRepository()
-        data = mongo_db.get_first_by_key("shop", shop_url)
+        data_db = mongo_db.get_first_by_key("shop", shop_url)
+        print(data)
 
         details = {
             "shop": shop_url,
