@@ -1,4 +1,5 @@
 import json
+
 from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant
 from FiledEcommerce.Api.utils.tools.json_serializer import ResponseSerializer
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
@@ -12,10 +13,10 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
         ep_cols = ep.c
         query = (
             select([ep_cols.Id, ep_cols.CreatedByFirstName, ep_cols.CreatedByLastName])
-                .select_from(ep.join(platforms, ep_cols.PlatformId == pl.Id, isouter=True))
-                .where(pl.Value == platform)
-                .where(ext_plat_cols.CreatedById == user_id)
-                .limit(1)
+            .select_from(ep.join(platforms, ep_cols.PlatformId == pl.Id, isouter=True))
+            .where(pl.Value == platform)
+            .where(ext_plat_cols.CreatedById == user_id)
+            .limit(1)
         )
         for row in conn.execute(query):
             row_li = list(row)
@@ -40,17 +41,19 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 Sku=product.sku or 0,
                 Vendor=product.vendor,
                 Tags=product.tags,
+                Availability=product.availability,
+                Brand=product.brand,
                 StateId=default_state,
-                FiledProductCatalogId=filed_product_catalog_id
-                )
+                FiledProductCatalogId=filed_product_catalog_id,
+            )
             result = conn.execute(fp_ins)
             filed_product_id = result.inserted_primary_key
 
             fp_conn_ins = filed_product_conns.insert().values(
                 IdInPlatform=product.product_id,
                 ExternalPlatformId=external_platform_id,
-                FiledProductId=filed_product_id
-                )
+                FiledProductId=filed_product_id,
+            )
             conn.execute(fp_conn_ins)
 
             for variant in product.variants:
@@ -58,31 +61,30 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 variant.filed_product_id = filed_product_id
 
                 fv_ins = filed_variants.insert().values(
-                        UpdatedAt=variant.updated_at,
-                        CreatedAt=variant.created_at,
-                        ImportedAt=variant.imported_at,
-                        CreatedByFirstName=user_first_name,
-                        CreatedByLastName=user_last_name,
-                        ImageUrl=variant.image_url,
-                        Name=variant.display_name,
-                        FiledProductId=variant.filed_product_id,
-                        ShortDescription=variant.description[:128] + "...",
-                        InventoryQuantity=variant.inventory_quantity or 0,
-                        Sku=variant.sku or 0,
-                        Url=variant.url,
-                        Barcode=variant.barcode,
-                        Price=variant.price or 0,
-                        CompareAtPrice=variant.compare_at_price or 0,
-                        Availability=variant.availability,
-                        Tags=variant.tags,
-                        Material=variant.material,
-                        Condition=variant.condition,
-                        Brand=variant.brand,
-                        Color=variant.color,
-                        Size=variant.size,
-                        CurrencyId=18,  # TODO: Currencies Mapping
-                        StateId=default_state
-                    )
+                    UpdatedAt=variant.updated_at,
+                    CreatedAt=variant.created_at,
+                    ImportedAt=variant.imported_at,
+                    CreatedByFirstName=user_first_name,
+                    CreatedByLastName=user_last_name,
+                    ImageUrl=variant.image_url,
+                    Name=variant.display_name,
+                    FiledProductId=variant.filed_product_id,
+                    ShortDescription=variant.description[:128] + "...",
+                    InventoryQuantity=variant.inventory_quantity or 0,
+                    Sku=variant.sku or 0,
+                    Url=variant.url,
+                    Barcode=variant.barcode,
+                    Price=variant.price or 0,
+                    CompareAtPrice=variant.compare_at_price or 0,
+                    Availability=variant.availability,
+                    Tags=variant.tags,
+                    Material=variant.material,
+                    Condition=variant.condition,
+                    Color=variant.color,
+                    Size=variant.size,
+                    CurrencyId=18,  # TODO: Currencies Mapping
+                    StateId=default_state,
+                )
                 fv_result = conn.execute(fv_ins)
 
                 filed_variant_id = fv_result.inserted_primary_key
@@ -90,15 +92,14 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 fv_conn_ins = filed_variant_conns.insert().values(
                     IdInPlatform=variant.variant_id,
                     ExternalPlatformId=external_platform_id,
-                    FiledVariantId=filed_variant_id
-                    )
+                    FiledVariantId=filed_variant_id,
+                )
                 conn.execute(fv_conn_ins)
 
                 if variant.custom_props is not None:
                     custom_properties_ins = custom_properties.insert().values(
-                        FiledVariantId=filed_variant_id,
-                        Properties=json.dumps(variant.custom_props['properties'])
-                        )
+                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props["properties"])
+                    )
                     conn.execute(custom_properties_ins)
 
     return ResponseSerializer.get_response(f"data saved")

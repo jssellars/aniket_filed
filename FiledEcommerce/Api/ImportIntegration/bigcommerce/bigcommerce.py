@@ -1,17 +1,19 @@
 import http.client
+import json
 from dataclasses import asdict
 from datetime import datetime, timezone
+
 import humps
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
-from FiledEcommerce.Api.ImportIntegration.bigcommerce.graphql import Query
-from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant, FiledCustomProperties
-import json
-from sgqlc.operation import Operation
 from flask import request
+from sgqlc.operation import Operation
+
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
+from FiledEcommerce.Api.ImportIntegration.bigcommerce.graphql import Query
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
+from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
+
 
 class BigCommerce(Ecommerce):
     client_id = "gzmqgnkolrpn1ymywjzrsbr9z8jnbxw"
@@ -68,11 +70,7 @@ class BigCommerce(Ecommerce):
         }
         flag = 0
         with engine.connect() as conn:
-            query = (
-                select([cols.Name])
-                        .where(cols.FiledBusinessOwnerId==user_id)
-                        .limit(1)        
-            )
+            query = select([cols.Name]).where(cols.FiledBusinessOwnerId == user_id).limit(1)
             for row in conn.execute(query):
                 try:
                     user_name = row[0]
@@ -94,8 +92,8 @@ class BigCommerce(Ecommerce):
                 CreatedByLastName=user_last_name,
                 FiledBusinessOwnerId=user_id,
                 PlatformId=4,
-                Details=json.dumps(deets)
-                )
+                Details=json.dumps(deets),
+            )
             result = conn.execute(ins)
 
         return cls.__filed_ecom_url
@@ -174,23 +172,19 @@ class BigCommerce(Ecommerce):
         with engine.connect() as conn:
             query = (
                 select([ext_plat_cols.Details])
-                        .where(ext_plat_cols.FiledBusinessOwnerId==user_id)
-                        .where(ext_plat_cols.PlatformId==4)
-                        .limit(1)        
+                .where(ext_plat_cols.FiledBusinessOwnerId == user_id)
+                .where(ext_plat_cols.PlatformId == 4)
+                .limit(1)
             )
             for record in conn.execute(query):
                 details = record["Details"]
-
 
         print(details)
         data = json.loads(details)
         token = data["storefront_token"]
         store_hash = data["store_hash"]
 
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {token}'
-        }
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
         after = None
         conn = http.client.HTTPSConnection(f"store-{store_hash}.mybigcommerce.com")
@@ -214,7 +208,7 @@ class BigCommerce(Ecommerce):
     @classmethod
     def mapper(cls, data, mapping):
         products_list = []
-        imported_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + 'Z'
+        imported_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + "Z"
 
         edge = data["data"]["site"]["products"]["edges"]
 
@@ -233,17 +227,17 @@ class BigCommerce(Ecommerce):
                 description=node["plain_text_description"],
                 tags=",".join([tag["node"]["name"] for tag in node["categories"]["edges"]]),
                 sku=node["sku"],
+                brand=node["brand"],
+                availability=True,
                 image_url=node["default_image"]["url"],
                 created_at=imported_at,
                 updated_at=imported_at,
                 imported_at=imported_at,
-                variants=[]
+                variants=[],
             )
 
             for variant in node["variants"]["edges"]:
-                vdf = {
-                    "custom_fields": {}
-                }
+                vdf = {"custom_fields": {}}
                 vnode = variant["node"]
                 for _map in mapping.get("variant"):
                     if _map["filed_key"] in FiledProduct.__annotations__:
@@ -271,12 +265,11 @@ class BigCommerce(Ecommerce):
                     imported_at=imported_at,
                     material="",
                     condition="",
-                    brand=node["brand"],
                     color="",
                     size="",
-                    custom_props=FiledCustomProperties(
-                        properties=vdf["custom_fields"]
-                    )if vdf["custom_fields"] else None
+                    custom_props=FiledCustomProperties(properties=vdf["custom_fields"])
+                    if vdf["custom_fields"]
+                    else None,
                 )
                 pr.variants.append(vr)
 

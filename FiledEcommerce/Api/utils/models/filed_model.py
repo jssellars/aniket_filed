@@ -27,7 +27,6 @@ class FiledVariant:
     imported_at: str
     material: str = None
     condition: str = None
-    brand: str = None
     color: str = None
     size: str = None
     custom_props: FiledCustomProperties = None
@@ -40,11 +39,13 @@ class FiledProduct:
     product_type: str
     vendor: str
     description: str
-    tags: str                  # for SQL Server, store this as a csv string
+    tags: str  # for SQL Server, store this as a csv string
     sku: str
     image_url: str
+    availability: bool
     created_at: str
     updated_at: str
     imported_at: str
     variants: List[FiledVariant]
+    brand: str = None
     custom_props: FiledCustomProperties = None
