@@ -6,11 +6,13 @@ from urllib.parse import urlencode
 import requests
 from flask import request
 from woocommerce import API
+
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import engine, ext_plat_cols, cols, external_platforms
+
 
 class WooCommerce(Ecommerce):
     # Runtime Constants
@@ -25,8 +27,8 @@ class WooCommerce(Ecommerce):
     # endpoints
     __callback_url = "https://httpbin.org/anything"
     __install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop",
-    __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress",
+    __install_return_url = "https://filedwoocommerce.000webhostapp.com/shop"
+    __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress"
     __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
 
     @staticmethod
@@ -103,8 +105,8 @@ class WooCommerce(Ecommerce):
         with engine.connect() as conn:
             query = (
                 select([cols.Name])
-                        .where(cols.FiledBusinessOwnerId==user_id)
-                        .limit(1)        
+                    .where(cols.FiledBusinessOwnerId == user_id)
+                    .limit(1)
             )
             for row in conn.execute(query):
                 try:
@@ -128,7 +130,7 @@ class WooCommerce(Ecommerce):
                 FiledBusinessOwnerId=user_id,
                 PlatformId=6,
                 Details=json.dumps(details)
-                )
+            )
             result = conn.execute(ins)
 
         return cls.__install_redirect_url
@@ -162,14 +164,14 @@ class WooCommerce(Ecommerce):
         with engine.connect() as conn:
             query = (
                 select([ext_plat_cols.Details])
-                        .where(ext_plat_cols.FiledBusinessOwnerId==user_id)
-                        .where(ext_plat_cols.PlatformId==6)
-                        .limit(1)        
+                    .where(ext_plat_cols.FiledBusinessOwnerId == user_id)
+                    .where(ext_plat_cols.PlatformId == 6)
+                    .limit(1)
             )
             for row in conn.execute(query):
                 try:
                     details = json.loads(row["Details"])
-                    shop = details.get("shop") 
+                    shop = details.get("shop")
                     flag = 1
                 except Exception as e:
                     raise e
@@ -300,9 +302,9 @@ class WooCommerce(Ecommerce):
         with engine.connect() as conn:
             query = (
                 select([ext_plat_cols.Details])
-                        .where(ext_plat_cols.FiledBusinessOwnerId==user_id)
-                        .where(ext_plat_cols.PlatformId==6)
-                        .limit(1)        
+                    .where(ext_plat_cols.FiledBusinessOwnerId == user_id)
+                    .where(ext_plat_cols.PlatformId == 6)
+                    .limit(1)
             )
             for row in conn.execute(query):
                 if not row:
