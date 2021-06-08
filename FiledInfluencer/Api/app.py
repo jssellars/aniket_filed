@@ -14,7 +14,6 @@ import flask_restful
 from FiledInfluencer.Api import routers
 from FiledInfluencer.Api.startup import config
 
-
 app = flask.Flask(__name__)
 app.url_map.strict_slashes = False
 cors = flask_cors.CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -25,6 +24,7 @@ router_route_pairs = (
     (routers.Version, "version"),
     (routers.InfluencerProfiles, "influencer-profiles"),
     (routers.EmailTemplates, "email-templates/<string:user_id>"),
+    (routers.MailSender, "sendmail"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
