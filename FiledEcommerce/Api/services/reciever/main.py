@@ -1,6 +1,6 @@
 from datetime import datetime
 from Core.Web.Security.JWTTools import extract_user_filed_id, decode_jwt_from_headers
-from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider import IntegrationProvider
+from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider import ImportIntegrationProvider
 from FiledEcommerce.Api.utils.tools.json_serializer import ResponseSerializer, RequestSerializer
 from FiledEcommerce.Api.services.publisher.main import publisher_lambda
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
@@ -52,7 +52,7 @@ def receiver_lambda(request, platform):
         conn.execute(filed_product_catalogs_permissions_ins)
 
 
-    store = IntegrationProvider.get_instance(platform)
+    store = ImportIntegrationProvider.get_instance(platform)
     for idx, data in enumerate(store.get_products(request)):
         mapped_data = store.mapper(data, mapping)
         publisher_lambda(user_id, filed_product_catalog_id, platform, mapped_data)
