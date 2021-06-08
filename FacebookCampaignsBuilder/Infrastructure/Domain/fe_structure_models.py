@@ -119,7 +119,7 @@ class CreateAds:
         )
 
     @classmethod
-    def get_tracking_specs(cls, request):
+    def get_tracking_specs(cls, request: Dict) -> List:
         # Actions prepended by app_custom_event come from mobile app events and actions
         # prepended by offsite_conversion come from the Facebook Pixel.
         # Source: https://developers.facebook.com/docs/marketing-api/reference/ads-action-stats/

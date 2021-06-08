@@ -1,5 +1,5 @@
 import urllib
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import requests
 from facebook_business.adobjects.ad import Ad
@@ -22,38 +22,44 @@ from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from FacebookCampaignsBuilder.Infrastructure.Domain.fe_structure_models import CreateAds
 
 
-def build_ads(ad_account_id: str, step_two: Dict, step_three: Dict, objective: str = None):
+def build_ads(ad_account_id: str, step_two: Dict, step_threes: List[Dict], objective: str = None) -> List:
     ads = []
-    ad_creative_facebook_id = get_ad_creative_id(
-        int(step_three["ad_format_type"]), ad_account_id, step_two, step_three, objective
-    )
 
-    adverts = CreateAds.build_ad_param(
-        name=step_three["ad_name"],
-        creative={"creative_id": ad_creative_facebook_id},
-        status=Ad.Status.paused,
-        effective_status=Ad.EffectiveStatus.paused,
-        request=step_three,
-    )
+    for step_three in step_threes:
+        adverts = step_three.get("adverts", None)
+        if not adverts:
+            continue
+        ad_creative_facebook_id = get_ad_creative_id(
+            int(step_three["ad_format_type"]), ad_account_id, step_two, adverts, objective
+        )
 
-    ads.append(adverts)
+        adverts = CreateAds.build_ad_param(
+            name=step_three["ad_name"],
+            creative={"creative_id": ad_creative_facebook_id},
+            status=Ad.Status.paused,
+            effective_status=Ad.EffectiveStatus.paused,
+            request=step_three,
+        )
+
+        ads.append(adverts)
     return ads
 
 
-def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict, step_three: Dict, objective: str):
+def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict, adverts: Dict, objective: str) -> str:
+    if not adverts:
+        return None
+
     ad_creative = None
     ad_account = AdAccount(ad_account_id)
-    if "adverts" not in step_three:
-        return
 
     if ad_creative_type == FiledAdFormatEnum.IMAGE.value:
-        ad_creative = build_image_ad_creative(step_two, step_three["adverts"], ad_account, objective)
+        ad_creative = build_image_ad_creative(step_two, adverts, ad_account, objective)
     elif ad_creative_type == FiledAdFormatEnum.VIDEO.value:
-        ad_creative = build_video_ad_creative(step_two, step_three["adverts"], ad_account, objective)
+        ad_creative = build_video_ad_creative(step_two, adverts, ad_account, objective)
     elif ad_creative_type == FiledAdFormatEnum.CAROUSEL.value:
-        ad_creative = build_carousel_ad_creative(step_two, step_three["adverts"], ad_account, objective)
+        ad_creative = build_carousel_ad_creative(step_two, adverts, ad_account, objective)
     elif ad_creative_type == FiledAdFormatEnum.EXISTING_POST.value:
-        ad_creative = build_existing_ad_creative(ad_account, step_three["adverts"]["post_id"])
+        ad_creative = build_existing_ad_creative(ad_account, adverts["post_id"])
 
     ad_creative_facebook_id = ad_creative.get_id()
     return ad_creative_facebook_id

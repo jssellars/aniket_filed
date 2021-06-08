@@ -10,7 +10,7 @@ class SmartCreatePublishRequest:
     template_id: int
     step_one_details: Dict[str, Any]
     step_two_details: Dict[str, Any]
-    step_three_details: Dict[str, Any]
+    step_three_details: List[Dict[str, Any]]
     step_four_details: Dict[str, Any]
 
 

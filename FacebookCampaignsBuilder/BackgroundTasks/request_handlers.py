@@ -741,7 +741,7 @@ class SmartEditPublish:
                     ad_creative_type=int(ad["ad_format_type"]),
                     ad_account_id=ad_account_id,
                     step_two=ad,
-                    step_three=ad,
+                    adverts=ad["adverts"],
                     objective=Optional[None],
                 )
                 param[FacebookEditField.Ad.ad_creative.value] = {"creative_id": ad_creative_id}
@@ -1190,7 +1190,7 @@ class AddStructuresToParent:
         # TODO: Modify build_ads function to accept a single argument for necessary fields
         #  as opposed to per step fields
 
-        ads = ad_builder.build_ads(ad_account_id, ad_request, ad_request)
+        ads = ad_builder.build_ads(ad_account_id, ad_request, [ad_request])
 
         structure_ids = {
             "ad_ids": []
