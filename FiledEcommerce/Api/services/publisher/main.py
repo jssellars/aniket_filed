@@ -39,7 +39,8 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 ProductType=product.product_type,
                 Description=product.description,
                 Sku=product.sku or 0,
-                Vendor=product.vendor,
+                # TODO: Add Vendor to FiledProducts Table, otherwise this insert should stay commented out
+                # Vendor=product.vendor,
                 Tags=product.tags,
                 Availability=product.availability,
                 Brand=product.brand,
