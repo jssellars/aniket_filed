@@ -1,6 +1,7 @@
 import logging
 
 import flask_restful
+import humps
 from flask import redirect, request
 
 from Core.flask_extensions import log_request
@@ -8,6 +9,7 @@ from Core.logging_config import request_as_log_dict
 from FiledEcommerce.Api.Dtos.ImportIntegrationMappingDto import ImportIntegrationMappingDto
 from FiledEcommerce.Api.Dtos.ImportIntegrationModelDto import ImportIntegrationModelDto
 from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider import ImportIntegrationProvider
+from FiledEcommerce.Api.services.reciever.main import receiver_lambda
 
 logger = logging.getLogger(__name__)
 
@@ -52,3 +54,15 @@ class OAuth(Resource):
             return {"url": url}
         else:
             return redirect(url)
+
+
+class Receiver(Resource):
+    def post(self, platform):
+        request_json = humps.depascalize(request.get_json(force=True))
+        try:
+            receiver_lambda(request_json, platform)
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": "Failed to save products to db."}, 400
+        else:
+            return {"message": "saved"}, 200

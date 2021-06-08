@@ -1,9 +1,13 @@
 import http.client
+from dataclasses import asdict
+from datetime import datetime, timezone
+import humps
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
+from FiledEcommerce.Api.ImportIntegration.bigcommerce.graphql import Query
+from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant, FiledCustomProperties
 import json
-from datetime import datetime
-
+from sgqlc.operation import Operation
 from flask import request
-
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
@@ -142,3 +146,140 @@ class BigCommerce(Ecommerce):
         response = json.loads(data.decode("utf-8"))
 
         return response["data"]["token"]
+
+    @classmethod
+    def get_query(cls, after: str):
+        query = Operation(Query)
+        query.site.products(first=10, after=after)
+        query.site.products.__fields__()
+        query.site.products.edges.node.__fields__()
+        query.site.products.edges.node.options.edges.node.__fields__()
+        query.site.products.edges.node.categories.edges.node.__fields__()
+        query.site.products.edges.node.customFields.edges.node.__fields__()
+        query.site.products.edges.node.brand.__fields__()
+        query.site.products.edges.node.defaultImage.url(width=1280)
+        query.site.products.edges.node.brand.defaultImage.url(width=1280)
+        query.site.products.edges.node.categories.edges.node.defaultImage.url(width=1280)
+        query.site.products.edges.node.variants.edges.node.defaultImage.url(width=1280)
+        query.site.products.edges.node.variants.edges.node.__fields__()
+        query.site.products.edges.node.variants.edges.node.options.edges.node.__fields__()
+        query.site.products.edges.node.variants.edges.node.inventory.byLocation.edges.node.__fields__()
+        query.site.products.edges.node.variants.edges.node.inventory.__fields__()
+        return query
+
+    @classmethod
+    def get_products(cls, body):
+        user_id = body.get("user_filed_id")
+
+        with engine.connect() as conn:
+            query = (
+                select([ext_plat_cols.Details])
+                        .where(ext_plat_cols.FiledBusinessOwnerId==user_id)
+                        .where(ext_plat_cols.PlatformId==4)
+                        .limit(1)        
+            )
+            for record in conn.execute(query):
+                details = record["Details"]
+
+
+        print(details)
+        data = json.loads(details)
+        token = data["storefront_token"]
+        store_hash = data["store_hash"]
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {token}'
+        }
+
+        after = None
+        conn = http.client.HTTPSConnection(f"store-{store_hash}.mybigcommerce.com")
+
+        while True:
+            query = cls.get_query(after=after)
+            payload = {"query": str(query)}
+
+            conn.request("POST", "/graphql", json.dumps(payload), headers)
+            res = conn.getresponse()
+            data = res.read()
+
+            json_data = json.loads(data.decode("utf-8"))
+            print(json_data)
+            if not json_data["data"]["site"]["products"]["pageInfo"]["hasNextPage"]:
+                break
+
+            after = json_data["data"]["site"]["products"]["pageInfo"]["endCursor"]
+            yield humps.decamelize(json_data)
+
+    @classmethod
+    def mapper(cls, data, mapping):
+        products_list = []
+        imported_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + 'Z'
+
+        edge = data["data"]["site"]["products"]["edges"]
+
+        for product in edge:
+            df = {}
+            node = product["node"]
+            for _map in mapping.get("product"):
+                if _map["filed_key"] in FiledProduct.__annotations__:
+                    df[_map["filed_key"]] = node[_map["mapped_to"]]
+
+            pr = FiledProduct(
+                product_id=node["entity_id"],
+                title=node["name"],
+                product_type=node["type"],
+                vendor="Dummy-BC-Shop",
+                description=node["plain_text_description"],
+                tags=",".join([tag["node"]["name"] for tag in node["categories"]["edges"]]),
+                sku=node["sku"],
+                image_url=node["default_image"]["url"],
+                created_at=imported_at,
+                updated_at=imported_at,
+                imported_at=imported_at,
+                variants=[]
+            )
+
+            for variant in node["variants"]["edges"]:
+                vdf = {
+                    "custom_fields": {}
+                }
+                vnode = variant["node"]
+                for _map in mapping.get("variant"):
+                    if _map["filed_key"] in FiledProduct.__annotations__:
+                        vdf[_map["filed_key"]] = node[_map["mapped_to"]]
+                    else:
+                        custom = {_map["filed_key"]: node.get(_map["mapped_to"])}
+                        vdf["custom_fields"].update(custom)
+
+                vr = FiledVariant(
+                    variant_id=vnode["entity_id"],
+                    filed_product_id="",
+                    display_name=node["name"],
+                    price=vnode["prices"]["price"]["value"],  # Change to sale price
+                    compare_at_price=vnode["prices"]["price"]["value"],  # Change to base price
+                    availability=True,
+                    url=node["add_to_cart_url"],
+                    image_url=node["default_image"]["url"],
+                    sku=vnode["sku"],
+                    barcode="",
+                    inventory_quantity=vnode["inventory"],
+                    tags=",".join([tag["node"]["name"] for tag in node["categories"]["edges"]]),
+                    description=node["plain_text_description"],
+                    created_at=imported_at,
+                    updated_at=imported_at,
+                    imported_at=imported_at,
+                    material="",
+                    condition="",
+                    brand=node["brand"],
+                    color="",
+                    size="",
+                    custom_props=FiledCustomProperties(
+                        properties=vdf["custom_fields"]
+                    )if vdf["custom_fields"] else None
+                )
+                pr.variants.append(vr)
+
+            products_list.append(asdict(pr))
+
+        return {"products": products_list}
