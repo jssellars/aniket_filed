@@ -275,7 +275,7 @@ class Magento(Ecommerce):
         mapped_ob = mapping["product"]
         variant_mapped_ob = mapping["variant"]
         mapped_data = cls.map_data(mapped_ob, variant_mapped_ob, data)
-        return mapped_data
+        return {"products": mapped_data}
 
     @classmethod
     def get_products(cls, body):
