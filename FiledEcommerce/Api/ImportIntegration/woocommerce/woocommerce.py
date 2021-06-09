@@ -24,11 +24,19 @@ class WooCommerce(Ecommerce):
     WOOCOMMERCE_API_SECRET = os.environ.get('CONSUMER_API_SECRET')
 
     # endpoints
-    __callback_url = "https://httpbin.org/anything"
-    __install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://ecommerce.filed.com/#/catalog/ecommerce"
-    __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress"
-    __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
+    __callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/woocommerce/install"
+    __callback_url_local = "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
+    __pre_install_endpoint = "/wc-auth/v1/authorize"
+    __install_return_url = "https://filedwoocommerce.000webhostapp.com"
+    __install_redirect_url = "https://filedwoocommerce.000webhostapp.com/shop"
+
+    @classmethod
+    def get_redirect_url(cls):
+        return (
+            "https://localhost:4200/#/catalog/ecommerce"
+            if request.host.startswith("localhost")
+            else "https://ecommerce.filed.com/#/catalog/ecommerce"
+        )
 
     @staticmethod
     def is_valid_shop(shop: str):
@@ -62,11 +70,11 @@ class WooCommerce(Ecommerce):
             "app_name": "Filed",
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
-            "return_url": cls.__install_return_url,
-            "callback_url": cls.__callback_url
+            "return_url": "https://ecommerce.filed.com/#/catalog/ecommerce",
+            "callback_url": "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
         }
         query_string = urlencode(params)
-        redirect_url = "%s%s?%s" % (shop, cls.__install_endpoint, query_string)
+        redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
 
         mongo_db = EcommerceMongoRepository()
         mongo_db.add_one({"userId": user_id, "shop": shop})
@@ -82,16 +90,14 @@ class WooCommerce(Ecommerce):
         @param data:
         @return: Ecommerce URL
         """
-        data = request.args
-        token_data = decode_jwt_from_headers()
-        shop_url = data.get("shop")
-        user_id = token_data["user_filed_id"]
+        data = request.get_json()
+        user_id = data.get("user_id")
+        mongo_db = EcommerceMongoRepository()
+        record = mongo_db.get_first_by_key("userId", user_id)
+        shop_url = record.get("shop")
         consumer_key = data.get("consumer_key")
         consumer_secret = data.get("consumer_secret")
         key_permissions = data.get("key_permissions")
-
-        mongo_db = EcommerceMongoRepository()
-        data = mongo_db.get_first_by_key("shop", shop_url)
 
         details = {
             "shop": shop_url,
@@ -100,19 +106,20 @@ class WooCommerce(Ecommerce):
             "consumer_secret": consumer_secret,
             "key_permissions": key_permissions,
         }
+        # cls.write_token_to_db(details, data)
         flag = 0
         with engine.connect() as conn:
             query = (
                 select([cols.Name])
-                    .where(cols.FiledBusinessOwnerId == user_id)
-                    .limit(1)
+                .where(cols.FiledBusinessOwnerId == user_id)
+                .limit(1)
             )
             for row in conn.execute(query):
                 try:
                     user_name = row[0]
                     flag = 1
-                except Exception:
-                    raise cls.RESPONSE_ERROR_MESSAGE_NOT_FOUND
+                except Exception as e:
+                    raise e
         if flag == 1:
             temp_nl = user_name.split(" ", 1)
             if len(temp_nl) == 2:
@@ -187,8 +194,8 @@ class WooCommerce(Ecommerce):
         @param mapping: list of products with the right mapping
         @return:
         """
-        body = data[1]
-        data = data[0]
+        token_data = decode_jwt_from_headers()
+        body = token_data.get("user_filed_id")
         filed_product_list = []
         imported_at = datetime.now(timezone.utc).replace(
             microsecond=0).isoformat()[:-6] + 'Z'
@@ -234,6 +241,10 @@ class WooCommerce(Ecommerce):
                     if v_map["filed_key"] in FiledVariant.__annotations__:
                         variant_map[v_map["mapped_to"]] = variant[v_map["name"]]
                         variant_map[v_map["filed_key"]] = variant_map[v_map["mapped_to"]]
+                    else:
+                        variant_map[v_map["mapped_to"]] = variant[v_map["name"]]
+                        custom = {v_map["filed_key"]: variant_map[v_map["mapped_to"]]}
+                        variant_map["custom_fields"].update(custom)
 
                 # map the product to Filed's Variant model
                 filed_variant = FiledVariant(
@@ -288,7 +299,7 @@ class WooCommerce(Ecommerce):
         )
         json_data = wcapi.get("products").json()
 
-        return json_data, body
+        return json_data
 
     @staticmethod
     def read_credentials_from_db(user_id):
@@ -319,8 +330,7 @@ class WooCommerce(Ecommerce):
         @param p_id: product ID
         @return: list of product variations
         """
-        user_id = body.get("user_filed_id")
-        data = cls.read_credentials_from_db(user_id)
+        data = cls.read_credentials_from_db(body)
         shop_url = data[0]
         consumer_key = data[1]
         consumer_secret = data[2]
