@@ -20,9 +20,15 @@ class BigCommerce(Ecommerce):
     client_secret = "75ff5362495a9a720f4de0e737092cd5be4aaf2efdf1751c263c73cb8bcc5bb9"
     # callback_url = "http://localhost:47650/api/v1/oauth/bigcommerce/install"
     callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/bigcommerce/install"
-
     __marketplace_url = "https://store-pzuk9w46gs.mybigcommerce.com/manage/marketplace/apps/my-apps/drafts"
-    __filed_ecom_url = "https://localhost:4200/#/catalog/ecommerce"
+
+    @classmethod
+    def get_redirect_url(cls):
+        return (
+            "https://localhost:4200/#/catalog/ecommerce"
+            if request.host.startswith("localhost")
+            else "https://ecommerce.filed.com/#/catalog/ecommerce"
+        )
 
     @classmethod
     def pre_install(cls):
@@ -90,7 +96,7 @@ class BigCommerce(Ecommerce):
             )
             result = conn.execute(ins)
 
-        return cls.__filed_ecom_url
+        return cls.get_redirect_url()
 
     @classmethod
     def app_load(cls):

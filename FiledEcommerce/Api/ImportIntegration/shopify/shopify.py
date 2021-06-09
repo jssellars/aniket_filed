@@ -47,6 +47,14 @@ class Shopify(Ecommerce):
     __install_redirect_url = "https://localhost:4200/#/catalog/ecommerce"
 
     @classmethod
+    def get_redirect_url(cls):
+        return (
+            "https://localhost:4200/#/catalog/ecommerce"
+            if request.host.startswith("localhost")
+            else "https://ecommerce.filed.com/#/catalog/ecommerce"
+        )
+
+    @classmethod
     def generate_hmac_hex(cls, data: bytes) -> str:
         return hmac.new(cls.SHOPIFY_API_SECRET.encode("utf-8"), data, hashlib.sha256).hexdigest()
 
@@ -236,7 +244,7 @@ class Shopify(Ecommerce):
         cls.create_webhook(shop=shop, address=webhook_url, topic="app/uninstalled")
 
         # Now we redirect client back to our platform for catalog mapping
-        return cls.__install_redirect_url
+        return cls.get_redirect_url()
 
     @classmethod
     def app_uninstall(
