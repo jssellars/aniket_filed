@@ -25,11 +25,10 @@ class WooCommerce(Ecommerce):
 
     # endpoints
     __callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/woocommerce/install"
-    __callback_url_local = "https://ae0618ff6ce1.ngrok.io/api/v1/oauth/woocommerce/install"
-    __install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://ecommerce.filed.com/#/catalog/ecommerce"
-    __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress"
-    __install_redirect_url = "https://httpbin.org/anything"
+    __callback_url_local = "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
+    __pre_install_endpoint = "/wc-auth/v1/authorize"
+    __install_return_url = "https://filedwoocommerce.000webhostapp.com"
+    __install_redirect_url = "https://filedwoocommerce.000webhostapp.com/shop"
 
     @classmethod
     def get_redirect_url(cls):
@@ -71,11 +70,11 @@ class WooCommerce(Ecommerce):
             "app_name": "Filed",
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
-            "return_url": cls.__install_return_url,
-            "callback_url": cls.__callback_url_local
+            "return_url": "https://ecommerce.filed.com/#/catalog/ecommerce",
+            "callback_url": "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
         }
         query_string = urlencode(params)
-        redirect_url = "%s%s?%s" % (shop, cls.__install_endpoint, query_string)
+        redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
 
         mongo_db = EcommerceMongoRepository()
         mongo_db.add_one({"userId": user_id, "shop": shop})
@@ -91,7 +90,6 @@ class WooCommerce(Ecommerce):
         @param data:
         @return: Ecommerce URL
         """
-        # print(request.get_json())
         data = request.get_json()
         user_id = data.get("user_id")
         mongo_db = EcommerceMongoRepository()
@@ -101,10 +99,6 @@ class WooCommerce(Ecommerce):
         consumer_secret = data.get("consumer_secret")
         key_permissions = data.get("key_permissions")
 
-        # mongo_db = EcommerceMongoRepository()
-        # data_db = mongo_db.get_first_by_key("shop", shop_url)
-        # print(data)
-
         details = {
             "shop": shop_url,
             "user_id": user_id,
@@ -112,19 +106,20 @@ class WooCommerce(Ecommerce):
             "consumer_secret": consumer_secret,
             "key_permissions": key_permissions,
         }
+        # cls.write_token_to_db(details, data)
         flag = 0
         with engine.connect() as conn:
             query = (
                 select([cols.Name])
-                    .where(cols.FiledBusinessOwnerId == user_id)
-                    .limit(1)
+                .where(cols.FiledBusinessOwnerId == user_id)
+                .limit(1)
             )
             for row in conn.execute(query):
                 try:
                     user_name = row[0]
                     flag = 1
-                except Exception:
-                    raise cls.RESPONSE_ERROR_MESSAGE_NOT_FOUND
+                except Exception as e:
+                    raise e
         if flag == 1:
             temp_nl = user_name.split(" ", 1)
             if len(temp_nl) == 2:
@@ -144,7 +139,7 @@ class WooCommerce(Ecommerce):
             )
             result = conn.execute(ins)
 
-        return cls.get_redirect_url()
+        return cls.__install_redirect_url
 
     @classmethod
     def app_load(cls):
@@ -199,8 +194,6 @@ class WooCommerce(Ecommerce):
         @param mapping: list of products with the right mapping
         @return:
         """
-        # print(data)
-        # print(mapping)
         token_data = decode_jwt_from_headers()
         body = token_data.get("user_filed_id")
         filed_product_list = []
@@ -299,21 +292,14 @@ class WooCommerce(Ecommerce):
         consumer_secret = data[2]
         wcapi = API(
             url=shop_url,
-            consumer_key="ck_591077e9acefa43a98abe71741b914adf9f4a972",
-            consumer_secret="cs_ebca36fc5fba93fda82cf81fa9d37ad33fb29b73",
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
             wp_api=True,
             version=cls.WOOCOMMERCE_API_VERSION
         )
-        lst = []
         json_data = wcapi.get("products").json()
-        # print(body)
-        # d = dict()
-        # d['str'] = json_data
-        # d['x'] = body
-        # return {"json_data": json_data, "body": body}
+
         return json_data
-        # return d
-        # return json_data.append
 
     @staticmethod
     def read_credentials_from_db(user_id):
@@ -346,8 +332,8 @@ class WooCommerce(Ecommerce):
         """
         data = cls.read_credentials_from_db(body)
         shop_url = data[0]
-        consumer_key = "ck_591077e9acefa43a98abe71741b914adf9f4a972"
-        consumer_secret = "cs_ebca36fc5fba93fda82cf81fa9d37ad33fb29b73"
+        consumer_key = data[1]
+        consumer_secret = data[2]
         wcapi = API(
             url=shop_url,
             consumer_key=consumer_key,
