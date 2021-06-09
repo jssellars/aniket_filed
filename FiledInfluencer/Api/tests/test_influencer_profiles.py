@@ -5,6 +5,8 @@ from typing import List, Optional, Union, Dict
 import pytest
 from flask.testing import FlaskClient
 
+from FiledInfluencer.Api.schemas import InfluencersResponse
+
 
 @dataclass
 class ResponseParameterize:
@@ -58,11 +60,10 @@ end_points: List[ResponseParameterize] = [
 ]
 
 
-@dataclass
 class Default:
     last_influencer_id = 0
     page_size = 100
-    response_dict_len = 6
+    response_dict_len = len(InfluencersResponse.__fields__)
 
 
 @pytest.fixture(params=end_points, scope="session")
@@ -94,7 +95,7 @@ def response_json(response) -> Dict:
 
 
 @pytest.mark.usefixtures("response")
-class TestInfluencerProfileInfiniteScrollv2:
+class TestInfluencerProfileInfiniteScroll:
     """
     Test influencer-profiles
 
@@ -114,7 +115,7 @@ class TestInfluencerProfileInfiniteScrollv2:
         for response in response_json:
             assert isinstance(response, dict)
 
-    def test_dict_in_list_has_length_six(self, response_json):
+    def test_dict_in_list_has_required_length(self, response_json):
         for response in response_json:
             assert len(response) == Default.response_dict_len
 
