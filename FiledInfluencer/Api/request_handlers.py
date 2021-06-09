@@ -34,6 +34,7 @@ class InfluencerProfilesHandler:
             Followers=influencer.Followers,
             MinEngagementPerPost=influencer.MinEngagementPerPost,
             MaxEngagementPerPost=influencer.MaxEngagementPerPost,
+            Email=details.get('email_id'),
         )
         return humps.camelize(pydantic_influencer.dict())
 
