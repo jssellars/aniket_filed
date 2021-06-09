@@ -1,35 +1,20 @@
-import copy
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import AnyStr, List, MutableMapping
-
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.adset import AdSet
-from facebook_business.adobjects.customaudience import CustomAudience
+from typing import List
 
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
 from Core.Dexter.Infrastructure.Domain.DexterJournalEnums import RunStatusDexterEngineJournal
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
-from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.mongo_adapter import MongoRepositoryBase
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_and_map_structures
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import EffectiveStatusEnum
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.Web.FacebookGraphAPI.Tools import Tools
 from FacebookDexter.BackgroundTasks.Strategies.DexterLabsStrategyBase import DexterLabsStrategyBase
 from FacebookDexter.BackgroundTasks.Strategies.LookalikeStrategy import LookalikeStrategy
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyDataMongoRepository import StrategyDataMongoRepository
 from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import StrategyJournalMongoRepository
-from FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIFields import (
-    GraphAPIPixelCustomAudienceFields,
-    GraphAPIPixelFields,
-)
-from FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelCustomAudienceDto import GraphAPIPixelCustomAudienceDto
-from FacebookPixels.Infrastructure.GraphAPIDtos.GraphAPIPixelDto import GraphAPIPixelDto
-from FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPIMappingBase import GraphAPIPixelCustomAudienceMapping
-from FacebookPixels.Infrastructure.GraphAPIMappings.GraphAPIPixelMapping import GraphAPIPixelMapping
 
 
 class DexterLabsStrategiesEnum(Enum):
