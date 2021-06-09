@@ -31,6 +31,14 @@ class WooCommerce(Ecommerce):
     __load_redirect_url = "http://82940f3e58e4.ngrok.io/wordpress"
     __install_redirect_url = "https://httpbin.org/anything"
 
+    @classmethod
+    def get_redirect_url(cls):
+        return (
+            "https://localhost:4200/#/catalog/ecommerce"
+            if request.host.startswith("localhost")
+            else "https://ecommerce.filed.com/#/catalog/ecommerce"
+        )
+
     @staticmethod
     def is_valid_shop(shop: str):
         """
@@ -136,7 +144,7 @@ class WooCommerce(Ecommerce):
             )
             result = conn.execute(ins)
 
-        return cls.__install_redirect_url
+        return cls.get_redirect_url()
 
     @classmethod
     def app_load(cls):
