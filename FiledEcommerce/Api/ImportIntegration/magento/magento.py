@@ -405,41 +405,42 @@ class Magento(Ecommerce):
             )
 
             if item["__typename"] == "ConfigurableProduct":
-                for variant_item in item["variants"]["product"]:
-                    vdf = {"custom_fields": {}}
-                    for _map in variants_mapper:
-                        if _map["filed_key"] in FiledProduct.__annotations__:
-                            vdf[_map["filed_key"]] = variant_item[_map["mapped_to"]]
-                        else:
-                            custom = {_map["filed_key"]: variant_item.get(_map["mapped_to"])}
-                            vdf["custom_fields"].update(custom)
-
-                    vr = FiledVariant(
-                        variant_id=variant_item["id"],
-                        filed_product_id=item["id"],
-                        display_name=variant_item["name"],
-                        price=variant_item["price"]["regularPrice"]["amount"]["value"],
-                        compare_at_price="",
-                        availability=True if variant_item["stock_status"] == "IN_STOCK" else False,
-                        url=variant_item["canonical_url"],
-                        image_url=variant_item["image"]["url"],
-                        sku=variant_item["sku"],
-                        barcode="",
-                        inventory_quantity="",
-                        tags=variant_item["meta_keyword"],
-                        description=variant_item["description"]["html"],
-                        created_at=variant_item["created_at"],
-                        updated_at=variant_item["updated_at"],
-                        imported_at=imported_at,
-                        material="",
-                        condition="",
-                        color="",
-                        size="",
-                        custom_props=FiledCustomProperties(properties=vdf["custom_fields"])
-                        if vdf["custom_fields"]
-                        else None,
-                    )
-                    pr.variants.append(vr)
+                vdf = {"custom_fields": {}}
+                for _map in variants_mapper:
+                    if _map["filed_key"] in FiledProduct.__annotations__:
+                        vdf[_map["filed_key"]] = item[_map["mapped_to"]]
+                    else:
+                        custom = {_map["filed_key"]: item.get(_map["mapped_to"])}
+                        vdf["custom_fields"].update(custom)
+                for variant_item in item["variants"]:
+                    color_flg = 0 
+                    for variant_attribute in variant_item["attributes"]:
+                        if variant_attribute["code"] == "color":
+                            color_flg = 1                         
+                        vr = FiledVariant(
+                            variant_id=variant_item["product"]["id"],
+                            filed_product_id=item["id"],
+                            display_name=variant_item["product"]["name"],
+                            price=item["price"]["regularPrice"]["amount"]["value"],
+                            compare_at_price="",
+                            availability=True if variant_item["product"]["stock_status"] == "IN_STOCK" else False,
+                            url=variant_item["product"]["canonical_url"],
+                            image_url=item["image"]["url"],
+                            sku=variant_item["product"]["sku"],
+                            barcode="",
+                            inventory_quantity="",
+                            tags=item["meta_keyword"],
+                            description=item["description"]["html"],
+                            created_at=variant_item["product"]["created_at"],
+                            updated_at=variant_item["product"]["updated_at"],
+                            imported_at=imported_at,
+                            material="",
+                            condition="",
+                            color= variant_attribute["label"],
+                            size="",
+                            custom_props= None,
+                        )
+                        pr.variants.append(vr.__dict__)
             filed_product_list.append(pr.__dict__)
         return filed_product_list
       
