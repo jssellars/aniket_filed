@@ -21,6 +21,7 @@ class InfluencersResponse(BaseModel):
     AccountType: str
     IsVerified: str
     Followers: int
+    Email: Optional[str]
 
     class Config:
         orm_mode = True
