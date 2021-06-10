@@ -150,7 +150,7 @@ class WooCommerce(Ecommerce):
         token_data = decode_jwt_from_headers()
         user_id = token_data["user_filed_id"]
         if cls.read_shop_from_db(user_id) != "":
-            return cls.__install_redirect_url
+            return cls.get_redirect_url()
         else:
             return cls.RESPONSE_ERROR_MESSAGE
 
