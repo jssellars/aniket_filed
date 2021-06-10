@@ -22,6 +22,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (
     get_next_page_cursor,
     get_sdk_insights_page,
     get_sdk_structures,
+    LEVEL_TO_STRUCTURE_FIELDS
 )
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields, FacebookParametersStrings
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.StructureStatusEnum import StructureStatusEnum
@@ -97,6 +98,14 @@ class GraphAPIInsightsHandler:
 
         # Initiate AdAccount Class.
         ad_account = AdAccount(ad_account_id)
+
+        try:
+            # When Level is Ad & Results is requested then extend the fields to get adset_ids [Ref: Line 212, SdkGetStructures]
+            if level == "ad":
+                fields.extend([x.name for x in LEVEL_TO_STRUCTURE_FIELDS[level]])
+        except (AttributeError, ValueError, IndexError):
+            pass
+
         # Get Insights.
         insights = ad_account.get_insights(fields=fields, params=parameters)
 
