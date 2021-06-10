@@ -38,7 +38,7 @@ class SendGridMailer:
         response = sg.send(message)
 
         # Restore ssl check after task is done
-        ssl._create_default_https_context = ssl._create_default_https_context
+        ssl._create_default_https_context = tempfunc
 
         return {
             "status_code": response.status_code,
