@@ -5,7 +5,7 @@ from io import StringIO
 import pandas
 
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
-from FiledEcommerce.Api.utils.models.filed_model import FiledVariant, FiledProduct, FiledCustomProperties
+from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
 
 
 class ImportCsv(Ecommerce):
@@ -45,7 +45,7 @@ class ImportCsv(Ecommerce):
                          "compare_at_price", "availability", "url", "image_url",
                          "sku", "barcode", "inventory_quantity", "tags",
                          "description", "created_at", "updated_at", "imported_at",
-                         "material", "condition", "color", "size"]
+                         "material", "condition", "brand", "color", "size"]
         # get a list of custom properties
         custom_fields = [
             attr
@@ -63,18 +63,18 @@ class ImportCsv(Ecommerce):
                 vendor=getattr(row, 'vendor', ""),
                 tags=getattr(row, 'tags', ""),
                 image_url=getattr(row, 'image_url', ""),
+                availability=getattr(row, 'image_url', ""),
                 sku="",
                 created_at=getattr(row, 'created_at', imported_at),
                 updated_at="",
                 imported_at=imported_at,
-                brand=getattr(row, 'brand', ""),
-                availability=True,
+                brand="",
                 variants=[]
             )
 
             variant_attrs = FiledVariant(
                 variant_id=getattr(row, 'variant_id', ""),
-                filed_product_id=getattr(row, 'filed_product_it', ""),
+                filed_product_id=getattr(row, 'filed_product_id', ""),
                 price=getattr(row, 'price', 0),
                 compare_at_price=getattr(row, 'compare_at_price', 0),
                 availability=getattr(row, 'availability', ""),
