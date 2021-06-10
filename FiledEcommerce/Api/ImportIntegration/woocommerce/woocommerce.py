@@ -27,8 +27,7 @@ class WooCommerce(Ecommerce):
     __callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/woocommerce/install"
     __callback_url_local = "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
     __pre_install_endpoint = "/wc-auth/v1/authorize"
-    __install_return_url = "https://filedwoocommerce.000webhostapp.com"
-    __install_redirect_url = "https://filedwoocommerce.000webhostapp.com/shop"
+
 
     @classmethod
     def get_redirect_url(cls):
@@ -70,8 +69,8 @@ class WooCommerce(Ecommerce):
             "app_name": "Filed",
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
-            "return_url": "https://ecommerce.filed.com/#/catalog/ecommerce",
-            "callback_url": "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
+            "return_url": cls.get_redirect_url,
+            "callback_url": cls.__callback_url
         }
         query_string = urlencode(params)
         redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
@@ -139,7 +138,7 @@ class WooCommerce(Ecommerce):
             )
             result = conn.execute(ins)
 
-        return cls.__install_redirect_url
+        return cls.get_redirect_url
 
     @classmethod
     def app_load(cls):
