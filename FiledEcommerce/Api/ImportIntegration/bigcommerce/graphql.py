@@ -9,8 +9,9 @@ class BigCommercePrice(Type):
 
 class BigCommercePriceEdge(Type):
     price = Field(BigCommercePrice)
-
-
+    basePrice = Field(BigCommercePrice)
+    salePrice = Field(BigCommercePrice)
+    
 class BigCommerceImage(Type):
     url = Field(String, args={
         "width": Int
