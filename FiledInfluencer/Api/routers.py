@@ -1,17 +1,16 @@
 import logging
-from typing import Any
 
 import flask_restful
 import humps
 from flask import request
-from flask_restful import inputs, reqparse
+from typing import Any
 
+from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
-from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledInfluencer.Api.Integrations.mail_sendgrid import SendGridMailer
-from FiledInfluencer.Api.request_handlers import EmailTemplateHandler, InfluencerProfilesHandler
-from FiledInfluencer.Api.startup import config, fixtures
+from FiledInfluencer.Api.request_handlers import InfluencerProfilesHandler, EmailTemplateHandler, DocumentHandler
+from FiledInfluencer.Api.startup import config
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +150,41 @@ class EmailTemplates(Resource):
             return {"message": "An error occurred while inserting the item."}, 500
 
         return email_template, 200
+
+
+class Documents(Resource):
+    parser = DocumentHandler.document_parser()
+
+    def post(self):
+        request_data = Documents.parser.parse_args()
+
+        size_in_limit = DocumentHandler.max_document_size(request_data["documents"][0])
+        if not size_in_limit:
+            return "File size limit exceeds the max size", 413
+
+        result = DocumentHandler.upload_document(request_data)
+        if not result:
+            return result, 400
+
+        return result, 200
+
+    def get(self):
+        key = request.args.get("key")
+
+        result = DocumentHandler.download_document(key)
+        if not result:
+            return result, 400
+
+        return result, 200
+
+    def delete(self):
+        key = request.args.get("key")
+
+        result = DocumentHandler.delete_document(key)
+        if not result:
+            return result, 400
+
+        return result, 200
 
 
 class MailSender(Resource):

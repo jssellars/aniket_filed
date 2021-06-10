@@ -125,3 +125,25 @@ class InfluencerPosts(Base):
 
     def __repr__(self):
         return f"<InfluencerPost(name={self.PostContent})>"
+
+
+class Documents(Base):
+    __tablename__ = 'Documents'
+
+    Id = Column(BIGINT, primary_key=True)
+    UpdatedAt = Column(DATETIME2(precision=7))
+    UpdatedById = Column(BIGINT)
+    UpdatedByFirstName = Column(NVARCHAR(length=128))
+    UpdatedByLastName = Column(NVARCHAR(length=128))
+    CreatedAt = Column(DATETIME2(precision=7))
+    CreatedById = Column(BIGINT)
+    CreatedByFirstName = Column(NVARCHAR(length=128))
+    CreatedByLastName = Column(NVARCHAR(length=128))
+    Name = Column(NVARCHAR(length=128))
+    Extension = Column(NVARCHAR(length=128))
+    Location = Column(NVARCHAR(length=128))
+    IsContract = Column(INTEGER)
+    CampaignId = Column(BIGINT)
+
+    def __repr__(self):
+        return f"<Documents(name={self.Name}')>"

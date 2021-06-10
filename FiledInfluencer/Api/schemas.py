@@ -23,6 +23,7 @@ class InfluencersResponse(BaseModel):
     Followers: int
     Email: Optional[str]
 
+
     class Config:
         orm_mode = True
 
@@ -49,6 +50,23 @@ class EmailTemplateResponse(BaseModel):
     CampaignId: int
     CreatedById: int
     CreatedAt: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class DocumentsResponse(BaseModel):
+
+    Id: int
+    CreatedAt: datetime
+    CreatedById: int
+    CreatedByFirstName: str
+    CreatedByLastName: str
+    Name: str
+    Extension: str
+    Location: str
+    IsContract: int
+    CampaignId: int
 
     class Config:
         orm_mode = True

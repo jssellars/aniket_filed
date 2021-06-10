@@ -24,6 +24,7 @@ router_route_pairs = (
     (routers.Version, "version"),
     (routers.InfluencerProfiles, "influencer-profiles"),
     (routers.EmailTemplates, "email-templates/<string:user_id>"),
+    (routers.Documents, "documents"),
     (routers.MailSender, "sendmail"),
 )
 for router, route in router_route_pairs:
