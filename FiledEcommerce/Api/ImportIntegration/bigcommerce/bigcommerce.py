@@ -95,7 +95,7 @@ class BigCommerce(Ecommerce):
                 Details=json.dumps(deets),
             )
             result = conn.execute(ins)
-
+        mongo_db.delete_many({"email": email})
         return cls.get_redirect_url()
 
     @classmethod
@@ -244,8 +244,8 @@ class BigCommerce(Ecommerce):
                     variant_id=vnode["entity_id"],
                     filed_product_id="",
                     display_name=node["name"],
-                    price=vnode["prices"]["price"]["value"],  # Change to sale price
-                    compare_at_price=vnode["prices"]["price"]["value"],  # Change to base price
+                    price=vnode["prices"]["salePrice"]["value"],  # Changed to sale_price
+                    compare_at_price=vnode["prices"]["basePrice"]["value"],  # Changed to base_price
                     availability=True,
                     url=node["add_to_cart_url"],
                     image_url=node["default_image"]["url"],

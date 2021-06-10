@@ -1,16 +1,16 @@
 import logging
+from typing import Any
 
 import flask_restful
 import humps
 from flask import request
-from typing import Any
 
-from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
+from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledInfluencer.Api.Integrations.mail_sendgrid import SendGridMailer
-from FiledInfluencer.Api.request_handlers import InfluencerProfilesHandler, EmailTemplateHandler, DocumentHandler
-from FiledInfluencer.Api.startup import config
+from FiledInfluencer.Api.request_handlers import DocumentHandler, EmailTemplateHandler, InfluencerProfilesHandler
+from FiledInfluencer.Api.startup import config, fixtures
 
 logger = logging.getLogger(__name__)
 
@@ -188,11 +188,12 @@ class Documents(Resource):
 
 
 class MailSender(Resource):
+    @fixtures.authorize_jwt
     def post(self):
         try:
             token_data = decode_jwt_from_headers()
             user_id = token_data["user_filed_id"]
-            # TODO: integrate user auth
+            # TODO: jwt verified but may need added checking and permissions
 
             message_json = humps.depascalize(request.get_json(force=True))
             if (

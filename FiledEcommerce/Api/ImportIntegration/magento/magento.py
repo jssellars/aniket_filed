@@ -113,6 +113,7 @@ class Magento(Ecommerce):
                 data = mongo_db.get_first_by_key("host_url", host_url)
                 deets = {"token": token, "store_code": store_code, "host_url": host_url}
                 cls.write_token_to_db(deets, data)
+                mongo_db.delete_many({"host_url": host_url})
                 return cls.get_redirect_url()
         except Exception as e:
             raise e
@@ -145,6 +146,7 @@ class Magento(Ecommerce):
                 data = mongo_db.get_first_by_key("host_url", host_url)
                 deets = {"token": token, "store_code": store_code, "host_url": host_url}
                 cls.write_token_to_db(deets, data)
+                mongo_db.delete_many({"host_url": host_url})
                 return cls.get_redirect_url()
         except Exception as e:
             raise e
@@ -421,10 +423,12 @@ class Magento(Ecommerce):
                         custom = {_map["filed_key"]: item.get(_map["mapped_to"])}
                         vdf["custom_fields"].update(custom)
                 for variant_item in item["variants"]:
-                    color_flg = 0
+                    color_flg, size_flg = 0, 0
                     for variant_attribute in variant_item["attributes"]:
                         if variant_attribute["code"] == "color":
                             color_flg = 1
+                        elif variant_attribute["code"] == "size":
+                            size_flg = 1
                         vr = FiledVariant(
                             variant_id=variant_item["product"]["id"],
                             filed_product_id=item["id"],
@@ -444,8 +448,8 @@ class Magento(Ecommerce):
                             imported_at=imported_at,
                             material="",
                             condition="",
-                            color=variant_attribute["label"],
-                            size="",
+                            color=variant_attribute["label"] if color_flg==1 else "",
+                            size=variant_attribute["label"] if size_flg==1 else "",
                             custom_props=None,
                         )
                         pr.variants.append(vr.__dict__)

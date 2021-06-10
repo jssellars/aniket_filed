@@ -138,6 +138,7 @@ class WooCommerce(Ecommerce):
             )
             result = conn.execute(ins)
 
+        mongo_db.delete_many({"userId" : user_id})
         return cls.get_redirect_url
 
     @classmethod
