@@ -11,6 +11,22 @@ from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, F
 class ImportCsv(Ecommerce):
 
     @classmethod
+    def pre_install(cls):
+        pass
+
+    @classmethod
+    def app_install(cls):
+        pass
+
+    @classmethod
+    def app_load(cls):
+        pass
+
+    @classmethod
+    def app_uninstall(cls):
+        pass
+
+    @classmethod
     def mapper(cls, data, mapping):
         """
         Mapping of csv data to Filed's models

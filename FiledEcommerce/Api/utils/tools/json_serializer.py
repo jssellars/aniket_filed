@@ -11,14 +11,16 @@ class RequestSerializer:
         self.event = event
 
     def get_body(self):
+
         try:
             return humps.decamelize(json.loads(self.event.get("body")))
-        except Exception:
-            byte_body = io.BytesIO(self.event['body'].encode('utf-8'))
-            byte_headers = cgi.parse_header(self.event['headers']['Content-Type'])[1]
+        except AttributeError:
+            byte_body = io.BytesIO(self.event.data)
+            byte_headers = cgi.parse_header(self.event.headers['Content-Type'])[1]
+            # print(byte_headers)
             if 'boundary' in byte_headers:
                 byte_headers['boundary'] = byte_headers['boundary'].encode('utf-8')
-            byte_headers['CONTENT-LENGTH'] = len(self.event['body'])
+            byte_headers['Content-Length'] = len(self.event.data)
             form_data = cgi.parse_multipart(byte_body, byte_headers)
             return {
                 "mapping": humps.decamelize(json.loads(form_data['mapping'][0])),
