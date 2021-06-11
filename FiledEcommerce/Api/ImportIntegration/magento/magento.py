@@ -88,6 +88,8 @@ class Magento(Ecommerce):
         token_data = decode_jwt_from_headers()
         user_id = token_data["user_filed_id"]
         host_url = data.get("host_url")
+        if not cls.host_url_validator(host_url):
+            return {"message": "Url Validation Error"}
         username = data.get("username")
         password = data.get("password")
         mongo_db = EcommerceMongoRepository()
@@ -348,6 +350,9 @@ class Magento(Ecommerce):
         query.products.items.thumbnail.__fields__()
         query.products.items.__as__(ConfigurableProduct).configurable_options()
         query.products.items.__as__(ConfigurableProduct).variants()
+        query.products.items.__as__(ConfigurableProduct).variants().__fields__()
+        query.products.items.__as__(ConfigurableProduct).variants.product.__fields__()
+        query.products.items.__as__(ConfigurableProduct).variants.product.price.__fields__()
         query.products.page_info.__fields__()
         # print(str(query))
         return str(query)
@@ -433,16 +438,16 @@ class Magento(Ecommerce):
                             variant_id=variant_item["product"]["id"],
                             filed_product_id=item["id"],
                             display_name=variant_item["product"]["name"],
-                            price=item["price"]["regularPrice"]["amount"]["value"],
+                            price=variant_item["product"]["price"]["regularPrice"]["amount"]["value"],
                             compare_at_price="",
                             availability=True if variant_item["product"]["stock_status"] == "IN_STOCK" else False,
                             url=variant_item["product"]["canonical_url"],
-                            image_url=item["image"]["url"],
+                            image_url=variant_item["product"]["image"]["url"],
                             sku=variant_item["product"]["sku"],
                             barcode="",
                             inventory_quantity="",
                             tags=item["meta_keyword"],
-                            description=item["description"]["html"],
+                            description=variant_item["product"]["description"]["html"],
                             created_at=variant_item["product"]["created_at"],
                             updated_at=variant_item["product"]["updated_at"],
                             imported_at=imported_at,
@@ -477,3 +482,10 @@ class Magento(Ecommerce):
                 if not row:
                     return ""
             return json.loads(row["Details"])
+
+    @staticmethod
+    def host_url_validator(cls, host_url):
+        pattern = "([\w-]+(\.[\w-]+)+\.+(\w+)+?(:\d+)?)"
+        if not re.search(pattern, host_url):
+            return False
+        return True

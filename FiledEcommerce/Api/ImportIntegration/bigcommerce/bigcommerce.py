@@ -151,6 +151,8 @@ class BigCommerce(Ecommerce):
         query.site.products.edges.node.variants.edges.node.options.edges.node.__fields__()
         query.site.products.edges.node.variants.edges.node.inventory.byLocation.edges.node.__fields__()
         query.site.products.edges.node.variants.edges.node.inventory.__fields__()
+        query.site.products.edges.node.variants.edges.node.prices.salePrice.__fields__()
+        query.site.products.edges.node.variants.edges.node.prices.basePrice.__fields__()
         return query
 
     @classmethod
@@ -244,8 +246,8 @@ class BigCommerce(Ecommerce):
                     variant_id=vnode["entity_id"],
                     filed_product_id="",
                     display_name=node["name"],
-                    price=vnode["prices"]["salePrice"]["value"],  # Changed to sale_price
-                    compare_at_price=vnode["prices"]["basePrice"]["value"],  # Changed to base_price
+                    price=vnode["prices"]["sale_price"]["value"] if vnode["prices"]["sale_price"] is not None else None,  # Changed to sale_price
+                    compare_at_price=vnode["prices"]["base_price"]["value"] if vnode["prices"]["base_price"]["value"] is not None else None,  # Changed to base_price
                     availability=True,
                     url=node["add_to_cart_url"],
                     image_url=node["default_image"]["url"],
