@@ -159,9 +159,9 @@ class WooCommerce(Ecommerce):
     def mapper(cls, data, mapping):
         """
         Mapping of platform's data to Filed's models
-        @param data:
-        @param mapping: list of products with the right mapping
-        @return:
+        @param data: list of products
+        @param mapping: dict of mapping
+        @return: dict of mapped products
         """
         token_data = decode_jwt_from_headers()
         body = token_data.get("user_filed_id")
