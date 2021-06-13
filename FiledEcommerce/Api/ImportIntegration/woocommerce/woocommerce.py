@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 
+import humps
 import requests
 from flask import request
 from woocommerce import API
@@ -176,7 +177,7 @@ class WooCommerce(Ecommerce):
                 if p_map["filed_key"] in FiledProduct.__annotations__:
                     df[p_map['filed_key']] = wcp[p_map["mapped_to"]]
 
-        # map the product to Filed's Product model
+            # map the product to Filed's Product model
             filed_product = FiledProduct(
                 product_id=wcp["id"],
                 title=wcp["name"],
@@ -202,44 +203,50 @@ class WooCommerce(Ecommerce):
 
                 # loop through the variants
                 for variant in variants_lst:
-                    variant_map = {
-                        "custom_fields": {}
-                    }
-                    # process the mapping to get only mapped products
-                    for v_map in mapping["variant"]:
-                        if v_map["filed_key"] in FiledVariant.__annotations__:
-                            variant_map[v_map["filed_key"]] = variant[v_map["mapped_to"]]
-                        else:
-                            custom = {v_map["filed_key"]: variant.get(v_map["mapped_to"])}
-                            variant_map["custom_fields"].update(custom)
+                    color_flg, size_flg = 0, 0
+                    for variant_attribute in variant["attributes"]:
+                        if variant_attribute["name"] == "color":
+                            color_flg = 1
+                        elif variant_attribute["name"] == "size":
+                            size_flg = 1
+                        variant_map = {
+                            "custom_fields": {}
+                        }
+                        # process the mapping to get only mapped products
+                        for v_map in mapping["variant"]:
+                            if v_map["filed_key"] in FiledVariant.__annotations__:
+                                variant_map[v_map["filed_key"]] = variant[v_map["mapped_to"]]
+                            else:
+                                custom = {v_map["filed_key"]: variant.get(v_map["mapped_to"])}
+                                variant_map["custom_fields"].update(custom)
 
-                    # map the product to Filed's Variant model
-                    filed_variant = FiledVariant(
-                        variant_id=variant["id"],
-                        filed_product_id="",
-                        display_name=filed_product.title,
-                        price=variant["sale_price"],
-                        compare_at_price=variant["price"],
-                        availability=variant["purchasable"],
-                        url=variant["permalink"],
-                        image_url=variant["image"].get("src"),
-                        sku=variant["sku"],
-                        barcode="",
-                        inventory_quantity=variant["stock_quantity"],
-                        tags=filed_product.tags,
-                        description=variant["description"],
-                        created_at=variant.get("date_created", imported_at),
-                        updated_at=variant["date_modified"],
-                        imported_at=imported_at,
-                        material="",
-                        condition="",
-                        color="",
-                        size="",
-                        custom_props=FiledCustomProperties(
-                            properties=variant_map["custom_fields"]
-                        ) if variant_map["custom_fields"] else None,
-                    )
-                    filed_product.variants.append(filed_variant.__dict__)
+                        # map the product to Filed's Variant model
+                        filed_variant = FiledVariant(
+                            variant_id=variant["id"],
+                            filed_product_id="",
+                            display_name=filed_product.title,
+                            price=variant["sale_price"],
+                            compare_at_price=variant["price"],
+                            availability=variant["purchasable"],
+                            url=variant["permalink"],
+                            image_url=variant["image"].get("src"),
+                            sku=variant["sku"],
+                            barcode="",
+                            inventory_quantity=variant["stock_quantity"],
+                            tags=filed_product.tags,
+                            description=variant["description"],
+                            created_at=variant.get("date_created", imported_at),
+                            updated_at=variant["date_modified"],
+                            imported_at=imported_at,
+                            material="",
+                            condition="",
+                            color=variant_attribute["option"] if color_flg == 1 else "",
+                            size=variant_attribute["option"] if size_flg == 1 else "",
+                            custom_props=FiledCustomProperties(
+                                properties=variant_map["custom_fields"]
+                            ) if variant_map["custom_fields"] else None,
+                        )
+                        filed_product.variants.append(filed_variant.__dict__)
             filed_product_list.append(filed_product.__dict__)
 
         return {"products": filed_product_list}
@@ -266,7 +273,7 @@ class WooCommerce(Ecommerce):
         )
         json_data = wcapi.get("products").json()
 
-        yield json_data
+        yield humps.decamelize(json_data)
 
     @staticmethod
     def read_credentials_from_db(user_id):
