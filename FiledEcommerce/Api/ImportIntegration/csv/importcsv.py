@@ -3,9 +3,11 @@ from datetime import datetime, timezone
 from io import StringIO
 
 import pandas
+from sqlalchemy import select
 
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import engine, cols, external_platforms
 
 
 class ImportCsv(Ecommerce):
@@ -143,5 +145,44 @@ class ImportCsv(Ecommerce):
         df = pandas.read_csv(data)
         df.dropna(axis='columns', how='all', inplace=True)
         product_list = df.to_dict('records')
+        details = {}
+        data = body
+        cls.write_to_db(details, data)
 
         yield product_list
+
+    @staticmethod
+    def write_to_db(details: dict, data):
+        user_id = data.get("user_filed_id")
+        flag = 0
+        with engine.connect() as conn:
+            query = (
+                select([cols.Name])
+                .where(cols.FiledBusinessOwnerId == user_id)
+                .limit(1)
+            )
+            for row in conn.execute(query):
+                try:
+                    user_name = row[0]
+                    flag = 1
+                except Exception as e:
+                    raise e
+        if flag == 1:
+            temp_nl = user_name.split(" ", 1)
+            if len(temp_nl) == 2:
+                user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+            else:
+                user_first_name, user_last_name = temp_nl[0], ""
+
+        with engine.connect() as conn:
+            ins = external_platforms.insert().values(
+                CreatedAt=datetime.now(),
+                CreatedById=user_id,
+                CreatedByFirstName=user_first_name,
+                CreatedByLastName=user_last_name,
+                FiledBusinessOwnerId=user_id,
+                PlatformId=7,
+                Details=json.dumps(details),
+            )
+            result = conn.execute(ins)
+
