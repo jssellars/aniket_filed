@@ -68,9 +68,9 @@ class Receiver(Resource):
         else:
             request_json = humps.depascalize(request.get_json(force=True))
         try:
-            receiver_lambda(request_json, platform)
+            response = receiver_lambda(request_json, platform)
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
             return {"message": "Failed to save products to db."}, 400
         else:
-            return {"message": "saved"}, 200
+            return response, 200

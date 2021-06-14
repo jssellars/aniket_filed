@@ -20,6 +20,7 @@ from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.ImportIntegration.shopify.graphql import shopify_schema
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
 from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
+from FiledEcommerce.Infrastructure.CurrencyEnum import CurrencyEnum
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 
@@ -75,7 +76,7 @@ class Shopify(Ecommerce):
 
     @classmethod
     def verify_api_call(cls, request_query_params: dict) -> int:
-        """ Verify if a call is genuine by checking the HMAC hex """
+        """Verify if a call is genuine by checking the HMAC hex"""
 
         received_hmac: str = request_query_params["hmac"]
         shop: str = request_query_params["shop"]
@@ -99,7 +100,7 @@ class Shopify(Ecommerce):
     def verify_webhook_call(
         cls, encoded_shopify_hmac: str, request_body: bytes, received_topic: str, desired_topic: str
     ) -> int:
-        """ Verify if a webhook call is genuine by checking the HMAC hex """
+        """Verify if a webhook call is genuine by checking the HMAC hex"""
 
         hmac_hex = base64.b64decode(encoded_shopify_hmac).hex()
 
@@ -116,7 +117,7 @@ class Shopify(Ecommerce):
 
     @classmethod
     def get_access_token(cls, shop: str, code: str) -> tuple:
-        """ Retrieve the access token from Shopify Admin OAuth. """
+        """Retrieve the access token from Shopify Admin OAuth."""
 
         url = f"https://{shop}/admin/oauth/access_token"
         payload = {"client_id": cls.SHOPIFY_API_KEY, "client_secret": cls.SHOPIFY_API_SECRET, "code": code}
@@ -168,7 +169,7 @@ class Shopify(Ecommerce):
 
     @classmethod
     def app_load(cls) -> str:
-        """ From Shopify, new (or registered) user opens our app. Redirect them to Filed Platform to Sign Up/In. """
+        """From Shopify, new (or registered) user opens our app. Redirect them to Filed Platform to Sign Up/In."""
 
         # First we verify the call
         verification_status = cls.verify_api_call(request.args)
@@ -293,24 +294,24 @@ class Shopify(Ecommerce):
     # https://shopify.dev/tutorials/add-gdpr-webhooks-to-your-app
     @classmethod
     def customer_redact(cls):
-        """ Webhook Processing for "customers/redact" Topic."""
+        """Webhook Processing for "customers/redact" Topic."""
         pass
 
     @classmethod
     def shop_redact(cls):
-        """ Webhook Processing for "shop/redact" Topic."""
+        """Webhook Processing for "shop/redact" Topic."""
         pass
 
     @classmethod
     def customer_data_req(cls):
-        """ Webhook Processing for "customers/data_request" Topic."""
+        """Webhook Processing for "customers/data_request" Topic."""
         pass
 
     @classmethod
     def authenticated_shopify_call(
         cls, shop: str, endpoint: str, params: dict = None, payload: dict = None, headers: dict = {}, query: str = ""
     ) -> dict:
-        """ Make an authenticated Shopify Admin API call """
+        """Make an authenticated Shopify Admin API call"""
 
         cls.__base_url = f"https://{shop}/admin/api/{cls.SHOPIFY_API_VERSION}"
         url = f"{cls.__base_url}/{endpoint}.json"
@@ -335,7 +336,7 @@ class Shopify(Ecommerce):
 
     @classmethod
     def create_webhook(cls, shop: str, address: str, topic: str) -> dict:
-        """ Create a webhook in Shopify user shop """
+        """Create a webhook in Shopify user shop"""
 
         endpoint = "webhooks"
         payload = {"webhook": {"topic": topic, "address": address, "format": "json"}}
@@ -375,6 +376,9 @@ class Shopify(Ecommerce):
                         already_mapped_fields.append(_map["mapped_to"])
 
             imported_at = get_utc_aware_date()
+            currency_code = (
+                node["price_range_v2"]["max_variant_price"]["currency_code"] if node.get("price_range_v2") else None
+            )
 
             # first we process the products
             filed_product = FiledProduct(
@@ -444,6 +448,7 @@ class Shopify(Ecommerce):
                     created_at=pv.get("created_at", imported_at),
                     updated_at=pv.get("updated_at"),
                     imported_at=imported_at,
+                    currency_id=CurrencyEnum[currency_code].value,
                     material=pv.get("material"),
                     condition=pv.get("condition"),
                     color=pv.get("color"),

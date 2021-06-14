@@ -86,7 +86,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                     Condition=variant.condition,
                     Color=variant.color,
                     Size=variant.size,
-                    CurrencyId=18,  # TODO: Currencies Mapping
+                    CurrencyId=variant.currency_id,
                     StateId=default_state,
                     FiledProductCatalogId=filed_product_catalog_id[0],
                 )
@@ -103,7 +103,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
 
                 if variant.custom_props is not None:
                     custom_properties_ins = custom_properties.insert().values(
-                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props.properties)
+                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props["properties"])
                     )
                     conn.execute(custom_properties_ins)
         filed_set_ins = filed_sets.insert().values(
@@ -123,5 +123,4 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
         fs_results = conn.execute(filed_set_ins)
         filed_set_id = fs_results.inserted_primary_key
 
-
-    return ResponseSerializer.get_response(f"data saved")
+    return {"filedSetId": filed_set_id}
