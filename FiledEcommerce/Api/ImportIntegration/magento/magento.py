@@ -455,7 +455,7 @@ class Magento(Ecommerce):
                             condition="",
                             color=variant_attribute["label"] if color_flg==1 else "",
                             size=variant_attribute["label"] if size_flg==1 else "",
-                            custom_props=None,
+                            custom_props=FiledCustomProperties(properties=vdf["custom_fields"]) if vdf["custom_fields"] else None,
                         )
                         pr.variants.append(vr.__dict__)
             filed_product_list.append(pr.__dict__)
