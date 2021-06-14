@@ -28,6 +28,8 @@ filed_product_conns = Table('FiledProductConnections', metadata, autoload=True, 
 filed_variant_conns = Table('FiledVariantConnections', metadata, autoload=True, autoload_with=engine)
 custom_properties = Table('CustomProperties', metadata, autoload=True, autoload_with=engine)
 fpc_permissions = Table('FiledProductCatalogPermissions', metadata, autoload=True, autoload_with=engine)
+filed_sets = Table('FiledSets', metadata, autoload=True, autoload_with=engine)
+filed_set_variants = Table('FiledSetVariants', metadata, autoload=True, autoload_with=engine)
 
 #columns for FiledBusinessOwners
 cols = filed_business_owners.c

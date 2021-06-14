@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime
 from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant
 from FiledEcommerce.Api.utils.tools.json_serializer import ResponseSerializer
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
@@ -7,7 +7,7 @@ from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model impor
 
 def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
     products_response = products["products"]
-
+    
     with engine.connect() as conn:
         ep = external_platforms.alias("ep")
         ep_cols = ep.c
@@ -73,6 +73,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                     Name=variant.display_name,
                     FiledProductId=variant.filed_product_id,
                     ShortDescription=variant.description[:128],
+                    Description=variant.description,
                     InventoryQuantity=variant.inventory_quantity or 0,
                     Sku=variant.sku or 0,
                     Url=variant.url,
@@ -105,5 +106,22 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                         FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props["properties"])
                     )
                     conn.execute(custom_properties_ins)
+        filed_set_ins = filed_sets.insert().values(
+            UpdatedAt= datetime.now(),
+            UpdatedById=user_id,
+            UpdatedByFirstName=user_first_name,
+            UpdatedByLastName=user_last_name,
+            CreatedAt=datetime.now(),
+            CreatedById=user_id,
+            CreatedByFirstName=user_first_name,
+            CreatedByLastName=user_last_name,
+            FiledProductCatalogId=filed_product_catalog_id,
+            Name=f"{platform} Products Set",
+            StateId=1,
+            ImportedAt=datetime.now(),
+        )
+        fs_results = conn.execute(filed_set_ins)
+        filed_set_id = fs_results.inserted_primary_key
+
 
     return ResponseSerializer.get_response(f"data saved")
