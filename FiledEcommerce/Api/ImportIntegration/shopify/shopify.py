@@ -30,6 +30,7 @@ class Shopify(Ecommerce):
     SHOPIFY_API_VERSION = "2021-04"
     SHOPIFY_API_SCOPES = "read_products"
     RESPONSE_ERROR_MESSAGE = "Something went wrong!"
+    RESPONSE_ERROR_MESSAGE_DB = "Already Have this app!"
 
     # ENVIRONMENT Constants
     SHOPIFY_API_KEY = "5cab30a1fb0bd39a4704a39dbca7dce3"
@@ -135,8 +136,19 @@ class Shopify(Ecommerce):
         """
         token_data = decode_jwt_from_headers()
         shop: str = request.args.get("shop")
+        user_id = token_data["user_filed_id"]
+        with engine.connect() as conn:
+            query = (
+                select([ext_plat_cols.FiledBusinessOwnerId])
+                .where(ext_plat_cols.FiledBusinessOwnerId == user_id)
+                .where(ext_plat_cols.PlatformId == 2)
+                .limit(1)
+            )
+            for row in conn.execute(query):
+                if row:
+                    return cls.RESPONSE_ERROR_MESSAGE_DB
+                    
         if cls.is_valid_shop(shop):
-            user_id = token_data["user_filed_id"]
             # NONCE is a single-use random value we send to Shopify so we know the next call from Shopify is valid.
             # https://en.wikipedia.org/wiki/Cryptographic_nonce
             nonce = uuid.uuid4().hex
@@ -153,8 +165,6 @@ class Shopify(Ecommerce):
             mongo_db.add_one({"userId": user_id, "nonce": nonce, "shop": shop})
 
             return redirect_url
-        else:
-            return cls.RESPONSE_ERROR_MESSAGE
 
     @classmethod
     def app_load(cls) -> str:
@@ -543,7 +553,7 @@ class Shopify(Ecommerce):
         return str(_op)
 
     @staticmethod
-    def read_credentials_from_db(user_id: str):
+    def read_credentials_from_db(user_id):
         with engine.connect() as conn:
             query = (
                 select([ext_plat_cols.Details])

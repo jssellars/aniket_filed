@@ -38,6 +38,7 @@ def receiver_lambda(request, platform):
             FiledBusinessOwnerId=user_id,
             Name=f"{platform} catalog",
             StateId=1,
+            LastImportAt=datetime.now(),
         )
         result = conn.execute(filed_product_catalogs_ins)
         filed_product_catalog_id = result.inserted_primary_key
