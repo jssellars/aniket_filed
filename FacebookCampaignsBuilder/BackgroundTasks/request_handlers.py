@@ -506,20 +506,29 @@ class SmartEditPublish:
         db_updater_thread = Thread(target=SmartEditPublish.update_db, args=())
         db_updater_thread.start()
 
-        campaign_tree = SmartEditPublish.process_structures_concurrently(
-            SmartEditPublish.edit_campaigns, campaigns, Level.CAMPAIGN.value
-        )
-        adset_tree = SmartEditPublish.process_structures_concurrently(
-            SmartEditPublish.edit_adsets, adsets, Level.ADSET.value
-        )
-        ad_tree = SmartEditPublish.update_ads(ads, ad_account)
+        structures = {}
+
+        try:
+            structures["campaign_tree"] = SmartEditPublish.process_structures_concurrently(
+                SmartEditPublish.edit_campaigns, campaigns, Level.CAMPAIGN.value
+            )
+            structures["adset_tree"] = SmartEditPublish.process_structures_concurrently(
+                SmartEditPublish.edit_adsets, adsets, Level.ADSET.value
+            )
+            structures["ad_tree"] = SmartEditPublish.update_ads(ads, ad_account)
+        except FacebookRequestError as e:
+            error_message = e.body().get("error", {}).get("error_user_msg") or e.get_message()
+            SmartEditPublish.feedback_data["error"] = error_message
+            SmartEditPublish.feedback_data["publish_status"] = PublishStatus.FAILED.value
+            SmartEditPublish.queue.put(SmartEditPublish.feedback_data)
+            SmartEditPublish.update_feedback_database(SmartEditPublish.feedback_data)
 
         response = list()
-        response.append({"campaigns": campaign_tree})
-        response.append({"ad_sets": adset_tree})
-        response.append({"ads": ad_tree})
+        response.append({"campaigns": structures.get("campaign_tree")})
+        response.append({"ad_sets": structures.get("adset_tree")})
+        response.append({"ads": structures.get("ad_tree")})
 
-        edit_event = SmartEditPublish.build_edit_event(request.ad_account_id, business_owner_id, campaign_tree)
+        edit_event = SmartEditPublish.build_edit_event(request.ad_account_id, business_owner_id, structures.get("campaign_tree"))
         SmartCreateOperations.publish(publish_response, edit_event)
 
         return response
@@ -807,12 +816,17 @@ class SmartEditPublish:
             "publish_status": feedback_data.get("publish_status"),
         }
 
+        if "error" in feedback_data:
+            update_fields["error"] = feedback_data.get("error")
+
         query = {MongoOperator.SET.value: update_fields}
 
         SmartEditPublish.feedback_repository.update_many({"user_filed_id": feedback_data["user_filed_id"]}, query)
 
     @staticmethod
     def build_edit_event(ad_account_id: str, business_owner_id: str, structure_tree: List[Dict]) -> Dict:
+        if not structure_tree:
+            return {}
         mapper = StructureEditedEventMapping(target=StructureEditedEvent)
         response = mapper.load(structure_tree)
         response.business_owner_id = business_owner_id
