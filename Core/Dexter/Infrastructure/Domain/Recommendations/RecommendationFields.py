@@ -55,6 +55,14 @@ class RecommendationField(Enum):
     STRATEGY = "strategy"
 
 
+class StructureTreeField(Enum):
+    CAMPAIGN_ID = "campaign_id"
+    CAMPAIGN_NAME = "campaign_name"
+    ADSET_ID = "Adset_id"
+    ADSET_NAME = "Adset_name"
+    ADSETS = "adsets"
+
+
 class RecommendationFieldInsidersEnum(Enum):
     DISPLAY_NAME = "display_name"
     NAME = "name"
