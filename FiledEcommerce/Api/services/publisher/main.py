@@ -103,7 +103,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
 
                 if variant.custom_props is not None:
                     custom_properties_ins = custom_properties.insert().values(
-                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props["properties"])
+                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props.properties)
                     )
                     conn.execute(custom_properties_ins)
         filed_set_ins = filed_sets.insert().values(

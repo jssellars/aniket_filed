@@ -70,7 +70,7 @@ class WooCommerce(Ecommerce):
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
             "return_url": cls.get_redirect_url(),
-            "callback_url": cls.__callback_url_local
+            "callback_url": cls.__callback_url
         }
         query_string = urlencode(params)
         redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
