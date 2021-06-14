@@ -1,10 +1,10 @@
 from io import BytesIO
+from typing import Union
 
 import boto3
 import botocore
-from typing import Union
 
-from FiledInfluencer.Api.influencer_dataclass import DocumentDetails
+from FiledInfluencer.Api.AWSDocuments.aws_dataclass import DocumentDetails
 
 
 class AwsUtils:
