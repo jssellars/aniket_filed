@@ -365,8 +365,12 @@ class Shopify(Ecommerce):
 
             for _map in mapping["product"]:
                 if _map["filed_key"] in FiledProduct.__annotations__:
-                    product_map[_map["filed_key"]] = node[_map["mapped_to"]]
-                    already_mapped_fields.append(_map["mapped_to"])
+                    try:
+                        product_map[_map["filed_key"]] = node[_map["mapped_to"]]
+                    except KeyError:
+                        continue
+                    else:
+                        already_mapped_fields.append(_map["mapped_to"])
 
             imported_at = get_utc_aware_date()
 

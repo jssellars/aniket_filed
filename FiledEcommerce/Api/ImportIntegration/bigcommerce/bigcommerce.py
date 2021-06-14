@@ -225,8 +225,12 @@ class BigCommerce(Ecommerce):
             node = product["node"]
             for _map in mapping.get("product"):
                 if _map["filed_key"] in FiledProduct.__annotations__:
-                    df[_map["filed_key"]] = node[_map["mapped_to"]]
-                    already_mapped_fields.add(_map["mapped_to"])
+                    try:
+                        df[_map["filed_key"]] = node[_map["mapped_to"]]
+                    except KeyError:
+                        continue
+                    else:
+                        already_mapped_fields.add(_map["mapped_to"])
 
             pr = FiledProduct(
                 product_id=df["product_id"],
@@ -259,7 +263,10 @@ class BigCommerce(Ecommerce):
                     if filed_key in {"price", "compare_at_price"}:
                         vdf[filed_key] = vnode["prices"][mapped_to]
                     elif filed_key in FiledVariant.__annotations__:
-                        vdf[filed_key] = vnode[mapped_to]
+                        try:
+                            vdf[filed_key] = vnode[mapped_to]
+                        except KeyError:
+                            continue
                     else:
                         custom = {filed_key: vnode.get(mapped_to)}
                         vdf["custom_fields"].update(custom)
