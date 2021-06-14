@@ -6,8 +6,6 @@ from pydantic.class_validators import validator
 from pydantic.fields import Field
 from typing import Optional
 
-from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
-
 
 class ObjectId(bson.ObjectId):
     """
@@ -40,4 +38,4 @@ class MessageModel(BaseModel):
 
     @validator("timestamp", pre=True, always=True)
     def set_timestamp(cls, _):
-        return get_utc_aware_date()
+        return datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + "Z"

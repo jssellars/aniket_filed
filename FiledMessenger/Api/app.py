@@ -2,8 +2,8 @@
 import os
 import sys
 
-from FiledMessaging.Api import routers
-from FiledMessaging.Api.startup import config
+from FiledMessenger.Api import routers
+from FiledMessenger.Api.startup import config
 
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:

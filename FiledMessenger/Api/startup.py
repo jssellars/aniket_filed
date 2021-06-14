@@ -1,6 +1,6 @@
 from Core import fixtures
 from Core import logging_config
-from FiledMessaging.Api import settings
+from FiledMessenger.Api import settings
 
 config = settings.core.get_settings(settings, settings.core.get_environment())
 fixtures = fixtures.Fixtures(config)

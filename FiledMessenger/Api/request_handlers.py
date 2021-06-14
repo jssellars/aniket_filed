@@ -1,8 +1,8 @@
 from typing import List, Optional, Dict
 
 from Core.mongo_adapter import MongoRepositoryBase
-from FiledMessaging.Api.model import MessageModel
-from FiledMessaging.Api.startup import config
+from FiledMessenger.Api.model import MessageModel
+from FiledMessenger.Api.startup import config
 
 
 class MessageHandler:

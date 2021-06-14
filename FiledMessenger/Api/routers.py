@@ -4,8 +4,8 @@ import flask_restful
 from flask import request
 
 from Core.flask_extensions import log_request
-from FiledMessaging.Api.request_handlers import MessageHandler
-from FiledMessaging.Api.startup import config
+from FiledMessenger.Api.request_handlers import MessageHandler
+from FiledMessenger.Api.startup import config
 
 logger = logging.getLogger(__name__)
 

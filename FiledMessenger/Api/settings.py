@@ -6,7 +6,7 @@ env = core.get_environment()
 
 class Default:
     # WARNING: this must not inherit BaseModel and must be name "Default"
-    name = core.Name(domain="filed", name="message", kind="api")
+    name = core.Name(domain="filed", name="messenger", kind="api")
     port = 47734
     mongo = core.replace_in_class(
         get_env_model(env, "mongo"),
