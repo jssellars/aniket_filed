@@ -20,6 +20,7 @@ from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
 from Core.facebook.sdk_adapter.smart_create import ad_builder, adset_builder, campaign_builder, mappings
 from Core.facebook.sdk_adapter.smart_create.ad_builder import get_ad_creative_id
+from Core.facebook.sdk_adapter.smart_create.adset_builder import get_placement_positions
 from Core.facebook.sdk_adapter.smart_create.structures import CampaignSplit
 from Core.facebook.sdk_adapter.smart_create.targeting import FlexibleTargeting, Location, Targeting
 from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
@@ -649,13 +650,14 @@ class SmartEditPublish:
             if request_user_device:
                 adset_targeting.user_device = request_user_device
 
-        publisher_platforms, positions = SmartEditPublish.get_platform_positions(adset)
+        placements = adset.get("placements")
+        publisher_platforms, platform_positions = get_placement_positions(placements)
 
         adset_targeting.publisher_platforms = publisher_platforms
 
-        if positions:
-            for key, value in positions.items():
-                adset_targeting.__setattr__(key, value)
+        if platform_positions:
+            for platform_position, positions in platform_positions.items():
+                adset_targeting.__setattr__(platform_position, positions)
 
         params[AdSet.Field.targeting] = asdict(adset_targeting)
 
@@ -1235,10 +1237,11 @@ class AddStructuresToParent:
         included_interests, excluded_interests, narrow_interests = adset_builder.extract_interests(targeting_request)
         included_custom_audiences, excluded_custom_audiences = adset_builder.extract_custom_audiences(targeting_request)
 
+        placements = request.get("placements")
         (
             publisher_platforms,
             positions,
-        ) = SmartEditPublish.get_platform_positions(request)
+        ) = get_placement_positions(placements)
 
         flexible_spec = [FlexibleTargeting(included_interests)]
         # TODO: check if this is valid, maybe we should include the narrow interests into the

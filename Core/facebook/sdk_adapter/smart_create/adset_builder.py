@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from copy import deepcopy
 from dataclasses import asdict
 from typing import Dict, List, Optional, Tuple
@@ -18,6 +19,7 @@ from Core.facebook.sdk_adapter.smart_create.targeting import (
     Targeting,
 )
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, Gender
+from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
 
 FACEBOOK_DEFAULT_KEY = "FACEBOOK"
 INSTAGRAM_DEFAULT_KEY = "INSTAGRAM"
@@ -66,7 +68,7 @@ def build_base_ad_sets(
     ad_set_template[AdSet.Field.optimization_goal] = opt_and_delivery["optimization_goal"]
     ad_set_template[AdSet.Field.billing_event] = opt_and_delivery["billing_event"]
 
-    # TODO: This might change depening on step 4 where every adset has it's budget
+    # TODO: This might change depending on step 4 where every adset has it's budget
     if not is_using_cbo:
         budget_opt = step_two["budget_optimization"]
         amount = int(budget_opt["amount"]) * 100
@@ -144,11 +146,9 @@ def split_ad_sets(ad_set_template, step_two, step_four):
     gender_groups = split_genders(is_split_by_gender_selected, targeting_request.get("gender"))
 
     (
-        facebook_positions,
-        instragram_positions,
-        audience_network_positions,
         publisher_platforms,
-    ) = add_placement_positions(step_two)
+        platform_positions
+    ) = get_placement_positions(step_two.get("placements"))
 
     for age_group in age_groups:
         for gender_group in gender_groups:
@@ -165,12 +165,13 @@ def split_ad_sets(ad_set_template, step_two, step_four):
                 excluded_custom_audiences=excluded_custom_audiences,
                 exclusions=FlexibleTargeting(interests=excluded_interests),
                 locales=languages,
-                facebook_positions=facebook_positions,
-                instagram_positions=instragram_positions,
-                audience_network_positions=audience_network_positions,
                 publisher_platforms=publisher_platforms,
                 device_platforms=[x.name_sdk for x in DevicePlatform.contexts[Contexts.SMART_CREATE].items],
             )
+
+            if platform_positions:
+                for platform_position, positions in platform_positions.items():
+                    targeting.__setattr__(platform_position, positions)
 
             ad_set_element = deepcopy(ad_set_template)
             set_split_fields_and_name(
@@ -287,27 +288,39 @@ def extract_custom_audiences(targeting):
     return included_custom_audiences, excluded_custom_audiences
 
 
-def add_placement_positions(step_two: Dict) -> Tuple[List, List, List, List]:
-    facebook_positions = []
-    instagram_positions = []
-    audience_network_positions = []
+def get_placement_positions(placements: List[Dict]) -> Optional[Tuple[List[str], Dict]]:
+    """
+
+    """
+    if not placements:
+        return
     publisher_platforms = []
+    platform_positions = defaultdict(list)
 
-    if "placements" in step_two and step_two["placements"]:
-        for placement in step_two["placements"]:
-            if placement["name"] == FACEBOOK_DEFAULT_KEY:
-                facebook_positions = DEFAULT_PLACEMENT_POSITIONS[placement["name"]]
-                publisher_platforms.append(Platform.FACEBOOK.value.name_sdk.lower())
+    for placement in placements:
+        # # Commented out because some enum values from facebook are not valid
+        # platform_enum = Platform.as_dict()[placement["name"]]
+        # platform_name = platform_enum["name"].lower()
+        # publisher_platforms.append(platform_name)
+        # for position in placement.get("positions", []):
+        #     # Bad fix
+        #     placement_enum = Placement.as_dict()[position]["items"]
+        #     position_enum, = [position_enum for position_enum in placement_enum.values() if position_enum["kind"] == "Position"]
+        #     position_name = position_enum["name"].lower()
+        #     platform_positions[platform_name].append(position_name)
 
-            if placement["name"] == INSTAGRAM_DEFAULT_KEY:
-                instagram_positions = DEFAULT_PLACEMENT_POSITIONS[placement["name"]]
-                publisher_platforms.append(Platform.INSTAGRAM.value.name_sdk.lower())
+        for platform, positions in PLATFORM_X_POSITIONS.items():
+            if placement["name"] != platform.name:
+                continue
+            publisher_platforms.append(platform.value.name_sdk.lower())
+            for request_position in placement.get("positions", []):
+                for key, value in positions.items():
+                    if isinstance(key, str):
+                        continue
+                    if request_position == key.name:
+                        platform_positions[f"{platform.name.lower()}_positions"].append(value)
 
-            if placement["name"] == AUDIENCE_NETWORK_DEFAULT_KEY:
-                audience_network_positions = DEFAULT_PLACEMENT_POSITIONS[placement["name"]]
-                publisher_platforms.append(Platform.AUDIENCE_NETWORK.value.name_sdk.lower())
-
-    return facebook_positions, instagram_positions, audience_network_positions, publisher_platforms
+    return publisher_platforms, platform_positions
 
 
 def map_custom_audiences(custom_audiences):
