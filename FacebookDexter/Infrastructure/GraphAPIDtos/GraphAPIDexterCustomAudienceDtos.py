@@ -7,3 +7,4 @@ class GraphAPIDexterCustomAudienceDto:
     name: str = None
     pixel_id: str = None
     rule: dict = None
+    lookalike_spec: dict = None

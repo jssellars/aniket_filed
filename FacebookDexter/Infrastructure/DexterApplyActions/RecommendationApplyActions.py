@@ -1,10 +1,18 @@
 import logging
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, ClassVar, Dict, List, Optional
 
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData
 
 logger = logging.getLogger(__name__)
+
+
+class ApplyButtonType(Enum):
+    DEFAULT = 0
+    BEST_PERFORMING = 1
+    CHOOSE_OTHER = 2
+    NEW = 3
 
 
 @dataclass
@@ -25,7 +33,7 @@ class RecommendationAction:
 
     APPLY_TOOLTIP: ClassVar[str] = ""
 
-    def process_action(self, recommendation: Dict, headers: str):
+    def process_action(self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None):
         raise NotImplementedError
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:

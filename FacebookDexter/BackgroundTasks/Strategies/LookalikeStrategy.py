@@ -1,12 +1,10 @@
-import copy
 import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import AnyStr, ClassVar, Dict, List, MutableMapping
+from typing import ClassVar, Dict
 
-from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.customaudience import CustomAudience
 
 from Core.Dexter.Infrastructure.Domain.ChannelEnum import ChannelEnum
@@ -22,17 +20,14 @@ from FacebookDexter.Infrastructure.GraphAPIDtos.GraphAPIDexterCustomAudienceDtos
 from FacebookDexter.Infrastructure.GraphAPIMappings.GraphAPIDexterCustomAudienceMapping import (
     GraphAPIDexterCustomAudienceMapping,
 )
-from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import (
-    RecommendationEntryModel,
-    ReportRecommendationDataModel,
-)
+from FacebookDexter.Infrastructure.PersistanceLayer.StrategyJournalMongoRepository import RecommendationEntryModel
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class LookalikeStrategy(DexterLabsStrategyBase):
-    ALGORITHM: ClassVar[str] = "Labs_Lookalike_Algorithm"
+    ALGORITHM: ClassVar[str] = "labs_lookalike_strategy"
     dexter_output: Enum = DexterLabsTemplate.LOOKALIKE_AUDIENCE
 
     def generate_recommendation(
@@ -52,20 +47,44 @@ class LookalikeStrategy(DexterLabsStrategyBase):
 
         adsets = get_and_map_structures(f"act_{account_id}", level, filtering)
 
+        # calculate most frequent country targeted from all adsets' geo targeting.
+        # If no specific country found, ignore campaign.
+        most_frequent_country = DexterLabsStrategyBase.get_most_frequent_country(adsets)
+        if not most_frequent_country:
+            logger.info("No specific country to target in this campaign, ignoring recommendation")
+            return
+
+        # get audiences from all adsets
         adset_audiences = [adset["details"].get("targeting", {}).get("custom_audiences") for adset in adsets]
 
         audience_ids = [
             audience["id"] for audiences in adset_audiences if audiences is not None for audience in audiences
         ]
 
+        # custom audience mapper
         custom_audience_mapper = GraphAPIDexterCustomAudienceMapping(target=GraphAPIDexterCustomAudienceDto)
+
+        # get all custom audiences for all adsets in campaigns
         custom_audiences = [
-            CustomAudience(audience_id).api_get(fields=["name", "rule"]) for audience_id in audience_ids
+            CustomAudience(audience_id).api_get(fields=["name", "rule", "lookalike_spec"])
+            for audience_id in audience_ids
         ]
         custom_audiences = custom_audience_mapper.load(custom_audiences, many=True)
 
+        # get origin custom audience from lookalike audiences
+        for custom_audience in list(custom_audiences):
+            if custom_audience.lookalike_spec:
+                origin_id = custom_audience.lookalike_spec.get("origin", {})[0].get("id")
+                original_custom_audience = CustomAudience(origin_id).api_get(fields=["name", "rule"])
+                custom_audiences.remove(custom_audience)
+                custom_audiences.append(custom_audience_mapper.load(original_custom_audience, many=False))
+
+        # check if Purchase rule exists in any custom audience
         if LookalikeStrategy.is_rule_exists(custom_audiences):
-            pixel_id = LookalikeStrategy.get_pixel_id(account_id)
+            pixel_id = self.get_pixel_id(account_id)
+            best_adset_id, best_adset_name = DexterLabsStrategyBase.get_best_adset(
+                campaign["campaign_id"], f"act_{account_id}"
+            )
 
             structure_data, reports_data = DexterLabsStrategyBase.get_structure_and_reports_data(
                 business_owner, account_id, campaign, LevelEnum.CAMPAIGN, pixel_id
@@ -84,13 +103,22 @@ class LookalikeStrategy(DexterLabsStrategyBase):
                 structure_data=structure_data,
                 reports_data=reports_data,
                 algorithm_type=self.ALGORITHM,
-                apply_parameters={"pixel_id": pixel_id},
+                apply_parameters={
+                    "pixel_id": pixel_id,
+                    "best_adset_id": best_adset_id,
+                    "best_adset_name": best_adset_name,
+                    "most_frequent_country": most_frequent_country,
+                },
                 is_labs=True,
             )
 
             dexter_recommendation.process_output(
                 recommendations_repository, recommendation_entry_model=entry.get_extended_db_entry()
             )
+
+        logger.info(
+            f"Completed Dexter Labs {self.ALGORITHM} for Campaign: {campaign['campaign_id']} ad account: {account_id}, business owner: {business_owner}"
+        )
 
     @staticmethod
     def is_rule_exists(custom_audiences, rule_value="Purchase"):
@@ -107,13 +135,6 @@ class LookalikeStrategy(DexterLabsStrategyBase):
                                     if filter.get("value") == rule_value:
                                         return False
             except Exception as e:
-                logger.exception("No rule present in custom_audience")
+                logger.info("Failed to parse audience")
 
         return True
-
-    @staticmethod
-    def get_pixel_id(ad_account_id):
-        ad_account_id = "act_" + ad_account_id
-        ad_account = AdAccount(ad_account_id)
-        pixels = ad_account.get_ads_pixels()
-        return pixels[0].get_id()

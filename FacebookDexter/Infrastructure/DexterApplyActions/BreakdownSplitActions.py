@@ -31,6 +31,7 @@ from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     make_ad_copies,
 )
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
+    ApplyButtonType,
     ApplyParameters,
     RecommendationAction,
 )
@@ -62,7 +63,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         "that the under-performing age/gender combinations will be avoided"
     )
 
-    def process_action(self, recommendation: Dict, headers: str):
+    def process_action(self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict=None):
 
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
         level = recommendation.get(RecommendationField.LEVEL.value)

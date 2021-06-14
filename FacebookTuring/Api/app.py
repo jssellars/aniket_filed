@@ -49,7 +49,7 @@ router_route_pairs = (
     (routers.AdsManagerReportsBreakdowns, "get-breakdowns"),
     (routers.AdsManagerAgGridStructuresPerformance, "ag-grid-structures-performance/<string:level>"),
     (routers.AdsManagerAgGridStructuresPerformanceViews, "ag-grid-structures-performance-views/<string:level>"),
-    (routers.LabsHiddenInterestsBase, "labs/hidden-interests/<string:ad_account_id>/<string:adset_id>"),
+    (routers.LabsHiddenInterests, "labs/hidden-interests"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")

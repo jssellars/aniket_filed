@@ -9,11 +9,11 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.Dexter.PersistanceLayer.DexterRecommendationsMongoRepository import DexterRecommendationsMongoRepository
 from Core.mongo_adapter import MongoOperator
 from FacebookDexter.BackgroundTasks.startup import config, fixtures
-from FacebookDexter.BackgroundTasks.Strategies.EmailNotificationsSystem import send_email
-from FacebookDexter.BackgroundTasks.Strategies.LabsStrategyMaster import (
+from FacebookDexter.BackgroundTasks.Strategies.DexterLabsStrategyMaster import (
     DexterLabsStrategiesEnum,
     DexterLabsStrategyMaster,
 )
+from FacebookDexter.BackgroundTasks.Strategies.EmailNotificationsSystem import send_email
 from FacebookDexter.BackgroundTasks.Strategies.StrategyMaster import DexterStrategiesEnum, DexterStrategyMaster
 from FacebookDexter.Infrastructure.IntegrationEvents.FacebookTuringDataSyncCompletedEvent import (
     FacebookTuringDataSyncCompletedEvent,

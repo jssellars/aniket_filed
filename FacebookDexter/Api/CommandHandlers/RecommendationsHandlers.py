@@ -13,6 +13,7 @@ from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 from FacebookDexter.Api.Commands.RecommendationPageCommand import NumberOfPagesCommand, RecommendationPageCommand
 from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyTypes import get_apply_action
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import ApplyButtonType
 from FacebookDexter.Infrastructure.DexterRules.BreakdownAndAudiencesTemplates import HIDDEN_INTERESTS_MESSAGE
 from FacebookDexter.Infrastructure.DexterRules.DexterOuputFormat import get_formatted_message, get_output_enum
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendTemplates import RecommendationPriority
@@ -24,6 +25,8 @@ RECOMMENDATION_FIELDS = [
     RecommendationField.ACCOUNT_ID,
     RecommendationField.STRUCTURE_ID,
     RecommendationField.STRUCTURE_NAME,
+    RecommendationField.CAMPAIGN_ID,
+    RecommendationField.CAMPAIGN_NAME,
     RecommendationField.METRICS,
     RecommendationField.LEVEL,
     RecommendationField.PRIORITY,
@@ -36,6 +39,7 @@ RECOMMENDATION_FIELDS = [
     RecommendationField.APPLY_PARAMETERS,
     RecommendationField.IS_LABS,
     RecommendationField.PIXEL_ID,
+    RecommendationField.ALGORITHM_TYPE,
 ]
 
 UNUSED_FE_FIELDS = [
@@ -66,7 +70,7 @@ def dismiss_recommendation(recommendation_id: str):
     return
 
 
-def apply_recommendation(recommendation_id: str, business_owner_id: str, headers: str):
+def apply_recommendation(recommendation_id: str, business_owner_id: str, headers: str, command: dict):
     recommendation_repository = MongoRepositoryBase(
         config=config.mongo,
         database_name=config.mongo.recommendations_database_name,
@@ -93,8 +97,8 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
 
     template_key = recommendation.get(RecommendationField.TEMPLATE.value)
 
-    if not allow_structure_changes(recommendation[RecommendationField.ACCOUNT_ID.value].replace("act_", ""), config):
-        raise {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}
+    # if not allow_structure_changes(recommendation[RecommendationField.ACCOUNT_ID.value].replace("act_", ""), config):
+    #     raise {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}
 
     output_enum = get_output_enum(template_key)
 
@@ -102,6 +106,7 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
         raise Exception("Recommendation template key not valid")
 
     dexter_output = output_enum[template_key].value
+    apply_button_type = ApplyButtonType(command.apply_button_type)
 
     permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
@@ -109,7 +114,7 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
 
     # Get the specific action instance and let it deal with the action
     apply_action = get_apply_action(dexter_output.apply_action_type, config, fixtures)
-    apply_action.process_action(recommendation, headers)
+    apply_action.process_action(recommendation, headers, apply_button_type, command=command.hidden_interests_data)
 
     # In the end, mark the recommendation as applied
     query = {
@@ -236,6 +241,11 @@ def _get_recommendations_query(
     if command.structure_ids:
         query[MongoOperator.AND.value].append(
             {RecommendationField.STRUCTURE_ID.value: {MongoOperator.IN.value: command.structure_ids}}
+        )
+
+    if command.labs_filter:
+        query[MongoOperator.AND.value].append(
+            {RecommendationField.ALGORITHM_TYPE.value: {MongoOperator.IN.value: command.labs_filter}}
         )
 
     return query

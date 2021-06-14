@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import ClassVar, Dict, Optional
 
@@ -5,15 +6,19 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.customaudience import CustomAudience
 
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
+    ApplyButtonType,
     ApplyParameters,
     RecommendationAction,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -31,38 +36,60 @@ class CreateLookalike(RecommendationAction):
         """
         return {}
 
-    def process_action(self, recommendation: Dict, headers: str):
+    def process_action(
+        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+    ):
         """
         Applies the action for the recommendation based on the context saved into the DB
 
         :param recommendation: The database entry
         :param headers: Required for cross-service-called
+        :apply_button_type: determine which type of action to apply: best performing adset, existing adset, new adset
         :return:
         """
         ad_account = AdAccount(recommendation[RecommendationField.ACCOUNT_ID.value])
 
-        initial_adset = AdSet(recommendation[RecommendationField.STRUCTURE_ID.value])
-        initial_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
+        best_adset_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][
+            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
+        ]
+        best_adset_name = recommendation[RecommendationField.APPLY_PARAMETERS.value][
+            RecommendationField.BEST_ADSET_NAME_LOOKALIKE.value
+        ]
+        best_adset = AdSet(best_adset_id)
+        best_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
-        promoted_object = initial_adset.get(GraphAPIInsightsFields.promoted_object)
-        if not promoted_object:
-            return
-
-        pixel_id = promoted_object.get(GraphAPIInsightsFields.facebook_pixel_structure)
+        pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
         generic_pixel_audience = get_existing_generic_audience(ad_account, pixel_id)
-        lookalike = get_lookalike(ad_account, initial_adset, generic_pixel_audience, pixel_id)
+        lookalike = get_lookalike(
+            ad_account,
+            best_adset,
+            generic_pixel_audience,
+            pixel_id,
+            recommendation[RecommendationField.STRUCTURE_NAME.value],
+            recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.MOST_FREQUENT_COUNTRY.value],
+        )
 
         if not lookalike:
+            logger.info(f"Lookalike audience creation failed.")
             return
 
-        new_adset_id = duplicate_fb_adset(recommendation, self.fixtures)
+        suffix = f" Lookalike {pixel_id} - copy"
+        prefix = "Dexter "
+        new_adset_id = duplicate_fb_adset(
+            recommendation, self.fixtures, LevelEnum.ADSET.value, best_adset_id, suffix, prefix
+        )
         new_adset = AdSet(new_adset_id)
         new_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
         targeting = new_adset.get(GraphAPIInsightsFields.targeting)
         targeting["custom_audiences"] = [{CustomAudience.Field.id: lookalike.get(CustomAudience.Field.id)}]
         new_adset.api_update(params={"targeting": targeting})
+
+        logger.info(
+            f"Creating lookalike audience {lookalike.get(CustomAudience.Field.id)} for new adset {new_adset_id} "
+            f"was a success."
+        )
 
 
 def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
@@ -80,7 +107,10 @@ def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
                 {
                     "event_sources": [{"type": "pixel", "id": pixel_id}],
                     "retention_seconds": no_of_days * 24 * 3600,
-                    "filter": {"operator": "and", "filters": [{"field": "url", "operator": "i_contains", "value": ""}]},
+                    "filter": {
+                        "operator": "and",
+                        "filters": [{"field": "event", "operator": "=", "value": "Purchase"}],
+                    },
                     "template": "ALL_VISITORS",
                 }
             ],
@@ -122,7 +152,12 @@ def get_existing_generic_audience(ad_account: AdAccount, pixel_id: str) -> Custo
 
 
 def get_lookalike(
-    ad_account: AdAccount, initial_adset: AdSet, existing_audience: CustomAudience, pixel_id: str
+    ad_account: AdAccount,
+    best_adset: AdSet,
+    existing_audience: CustomAudience,
+    pixel_id: str,
+    structure_name: str,
+    most_frequent_country: str,
 ) -> CustomAudience:
     """
     Return the lookalike audience if it exists, else create it and return it
@@ -158,22 +193,51 @@ def get_lookalike(
             break
 
     if not lookalike:
+        lookalike_params = {
+            CustomAudience.Field.name: f"Dexter Audience - {structure_name} - Lookalike {pixel_id}",
+            CustomAudience.Field.subtype: CustomAudience.Subtype.lookalike,
+            CustomAudience.Field.origin_audience_id: existing_audience.get_id(),
+        }
 
-        targeting = initial_adset.get(GraphAPIInsightsFields.targeting)
+        targeting = best_adset.get(GraphAPIInsightsFields.targeting)
         if targeting:
             targeting = targeting.export_all_data()
 
-        lookalike_params = {
-            CustomAudience.Field.name: f"Filed Pixel {pixel_id} Lookalike",
-            CustomAudience.Field.subtype: CustomAudience.Subtype.lookalike,
-            CustomAudience.Field.origin_audience_id: existing_audience.get_id(),
+            try:
+                lookalike_params.update(
+                    {
+                        CustomAudience.Field.lookalike_spec: {
+                            "starting_ratio": 0.01,
+                            "ratio": 0.05,
+                            "location_spec": {"geo_locations": targeting.get("geo_locations")},
+                            "conversion_type": "purchases",
+                        },
+                    }
+                )
+                lookalike = ad_account.create_custom_audience(params=lookalike_params)
+
+            except Exception as e:
+                # if source audience of adset is small try again with most frequent country
+                logger.exception("Failed to create lookalike audience, retrying with most frequent country", e)
+                lookalike = create_lookalike_most_frequent_country(ad_account, lookalike_params, most_frequent_country)
+        else:
+            # if there is no retargeting geo location in adset then copy most frequent country
+            logger.info("No targeting found in adset, trying with most frequent country")
+            lookalike = create_lookalike_most_frequent_country(ad_account, lookalike_params, most_frequent_country)
+
+    return lookalike
+
+
+def create_lookalike_most_frequent_country(ad_account, lookalike_params, most_frequent_country):
+    lookalike_params.update(
+        {
             CustomAudience.Field.lookalike_spec: {
                 "starting_ratio": 0.01,
-                "ratio": 0.02,
-                "location_spec": targeting.get("geo_locations"),
+                "ratio": 0.05,
+                "country": most_frequent_country,
                 "conversion_type": "purchases",
             },
         }
-        lookalike = ad_account.create_custom_audience(params=lookalike_params)
-
+    )
+    lookalike = ad_account.create_custom_audience(params=lookalike_params)
     return lookalike

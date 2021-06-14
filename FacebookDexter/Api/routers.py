@@ -2,14 +2,16 @@ import logging
 
 import flask_restful
 import humps
+from flask import Response, request
 
-from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
+from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
 from Core.Web.Security.Permissions import AdsManagerPermissions, OptimizePermissions
 from FacebookDexter.Api.CommandHandlers import (
     DexterApiGetCountsByCategoryCommandHandler,
     DexterApiGetRecommendationsPageCommandHandler,
+    RecommendationsHandlers,
 )
 from FacebookDexter.Api.CommandHandlers.DexterApiApplyRecommendationCommandHandler import (
     DexterApiApplyRecommendationCommandHandler,
@@ -17,11 +19,18 @@ from FacebookDexter.Api.CommandHandlers.DexterApiApplyRecommendationCommandHandl
 from FacebookDexter.Api.CommandHandlers.DexterApiDismissRecommendationCommandHandler import (
     DexterApiDismissRecommendationCommandHandler,
 )
-from FacebookDexter.Api.CommandHandlers import RecommendationsHandlers
 from FacebookDexter.Api.Commands.DexterApiApplyRecommendationCommand import DexterApiApplyRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiDismissRecommendationCommand import DexterApiDismissRecommendationCommand
 from FacebookDexter.Api.Commands.DexterApiGetCountsByCategoryCommand import DexterApiGetCountsByCategoryCommand
 from FacebookDexter.Api.Commands.DexterApiGetRecommendationsPageCommand import DexterApiGetRecommendationsPageCommand
+from FacebookDexter.Api.Commands.RecommendationPageCommand import (
+    ApplyRecommendationCommand,
+    ApplyRecommendationMapping,
+    NumberOfPagesCommand,
+    NumberOfPagesCommandMapping,
+    RecommendationPageCommand,
+    RecommendationPageCommandMapping,
+)
 from FacebookDexter.Api.CommandValidators.DexterApiApplyRecommendationCommandValidator import (
     DexterApiApplyRecommendationCommandValidator,
 )
@@ -34,16 +43,9 @@ from FacebookDexter.Api.CommandValidators.DexterApiGetCountsByCategoryCommandVal
 from FacebookDexter.Api.CommandValidators.DexterApiGetRecommendationsPageCommandValidator import (
     DexterApiRecommendationsPageCommandValidator,
 )
-from FacebookDexter.Api.Commands.RecommendationPageCommand import (
-    RecommendationPageCommand,
-    RecommendationPageCommandMapping,
-    NumberOfPagesCommandMapping,
-    NumberOfPagesCommand,
-)
 from FacebookDexter.Api.QueryParamsValidators import DexterApiGetCampaignsQueryValidator
 from FacebookDexter.Api.startup import config, fixtures
 from FacebookDexter.Infrastructure.PersistanceLayer.RecommendationsRepository import RecommendationsRepository
-from flask import Response, request
 
 logger = logging.getLogger(__name__)
 
@@ -278,13 +280,21 @@ class ApplyRecommendation(Resource):
     def put(self, recommendation_id: str):
 
         try:
+            # Todo: Refactor in the Future.
+            data = humps.decamelize(request.get_json())
+            data = {} if data == "none" else data
+            mapping = ApplyRecommendationMapping(target=ApplyRecommendationCommand)
+            command = mapping.load(data)
+
             business_owner_id = extract_business_owner_facebook_id()
             return (
-                RecommendationsHandlers.apply_recommendation(recommendation_id, business_owner_id, request.headers),
+                RecommendationsHandlers.apply_recommendation(
+                    recommendation_id, business_owner_id, request.headers, command
+                ),
                 200,
             )
 
         except Exception as e:
             logger.exception(f"Failed to apply recommendation || {repr(e)}")
-            
+
             return {"message": "Failed to apply recommendation"}, 400

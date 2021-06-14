@@ -2,206 +2,334 @@
 Labs Hidden Interests Command Handlers
 
 """
+import logging
+
 # Standard Imports.
-from typing import Dict, AnyStr, List
+from typing import AnyStr, Dict, List
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.targetingsearch import TargetingSearch
+from facebook_business.exceptions import FacebookRequestError
+
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 
 # Core Imports.
-from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import get_and_map_structures  # for structures
-from Core.Web.FacebookGraphAPI.Tools import Tools  # for utility.
+from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import (  # for structures
+    create_facebook_filter,
+    get_and_map_structures,
+)
 
 # for filtering.
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.FacebookToTuringStatusMapping import EffectiveStatusEnum
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
+from Core.Web.FacebookGraphAPI.Tools import Tools  # for utility.
+
+# Local Imports.
+from FacebookTuring.Api.CommandsHandlers.LabsHiddenInterests.LabsHiddenInterestsCommandHandlersBase import (
+    LabsHiddenInterestsCommandHandlersBase,
+)
+
+# Logger Init.
+logger = logging.getLogger(__name__)
 
 
-class GetInterestsHandler:
-    def handle(self, ad_account_id: AnyStr = None, adset_id: AnyStr = None):
+class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
+    def __init__(self):
+        self.ad_account = None
+        self.adset_structure_details = None
+
+    def handle(self, query_json: Dict, business_owner_id: AnyStr):
         """
-        Parses & Returns Interests for the specified Adset.
+        Parses & Returns Source, Suggested, & Hidden Interests for the Adset.
+
         Parameters
         ----------
-        ad_account_id: str, default = None
-            Ad Account ID
-        adset_id: str, default=None
-            Adset ID associated with Facebook Ad Account ID
+        query_json: Dict
+            Query Json
+
+        business_owner_id: str, default = None
+            Facebook Business Owner ID
+
         Returns
         -------
-        # todo: Add Returns & Returns Typing.
+        interests: list[dict]
+            Returns Source, Suggested, & Hidden Interests for specified Adset
+
         """
+        # Grab fields from Payload.
+        adset_id = query_json["adset_id"]
+        account_id = query_json["account_id"]
+        interests_type = query_json["interests_type"]
+        limit = query_json["limit"]
+        interests_list = query_json["interests_list"]
 
-        filtering = {
-            "field": FieldsMetadata.effective_status.name,
-            "operator": AgGridFacebookOperator.IN.name,
-            "value": [EffectiveStatusEnum.ACTIVE.value]
-        }
-
-        structures = get_and_map_structures(
-            ad_account_id=ad_account_id,
-            level=LevelEnum.ADSET,
-            filtering=filtering
+        # Grab Structure for the specified Adset.
+        filtering = create_facebook_filter(
+            field=FieldsMetadata.adset_id.name.replace("_", "."), operator=AgGridFacebookOperator.EQUAL, value=adset_id
         )
-        for structure in structures:
-            if structure["adset_id"] == adset_id:
-                adset_structure = structure
 
+        adset_structure = get_and_map_structures(ad_account_id=account_id, level=LevelEnum.ADSET, filtering=filtering)
+        adset_structure = adset_structure[0]
         adset_structure_details = adset_structure.get("details")
+        self.adset_structure_details = adset_structure_details
+
         targeting_spec = adset_structure_details["targeting"]
-        flexible_spec_interests = targeting_spec["flexible_spec"][0]["interests"]
+        flexible_spec = targeting_spec["flexible_spec"][0]["interests"]
 
-        source_interests = self.get_interests(ad_account_id=ad_account_id,
-                                              flexible_spec_interests=flexible_spec_interests)
+        # init AdAccount.
+        ad_account = AdAccount(fbid=account_id)
+        self.ad_account = ad_account
 
-        response = {
-            "source_interests": source_interests
-        }
+        # Find Source Interests.
+        if interests_type == "source":
+            source_interests = self.get_source_interests(flexible_spec=flexible_spec)
 
-        return response
+            return source_interests
 
-    def get_interests(self, ad_account_id: AnyStr, flexible_spec_interests: List[Dict]):
+        # Find Suggested Interests.
+        elif interests_type == "suggested":
+            suggested_interests = self.get_suggested_interests(interests_list=interests_list, limit=limit)
+            return suggested_interests
+
+        # Find Hidden Interests.
+        elif interests_type == "hidden":
+            hidden_interests = self.get_hidden_interests(interests_list=interests_list, limit=limit)
+            return hidden_interests
+
+        # Find Overlap.
+        elif interests_type == "overlap":
+            audience_overlap_percent = self.get_audience_overlap_percent(interests_list=interests_list)
+
+            return audience_overlap_percent
+
+    def get_source_interests(self, flexible_spec: list):
         """
-        Returns Source, Suggested, and Hidden Interests.
+        Returns Source Interests for a Specified Adset.
+
         Parameters
         ----------
-        ad_account_id: str
-            Facebook Ad Account ID
-        flexible_spec_interests: list[dict]
-            Interests List from Flexible Spec of Targeting for the specified Adset
+        flexible_spec: list[dict]
+            Flexible Spec with Interests Filtered defined for the Adset
+
         Returns
         -------
-        interests_list: list[dict]
-            List of Hidden & Suggested Interest for Source Interests
+        source_interests: list[dict]
+            Source Interests for the Specified Adset
+
         """
-        ad_account = AdAccount(fbid=ad_account_id)
+        source_interests_list = []
+        targeting_search_response = None
 
-        interests_list = []
-        for interests in flexible_spec_interests:
-            interests_response = ad_account.get_by_ids(ids=[interests["id"]])
-            interests_response = Tools.convert_to_json(interests_response[0])
-            suggested_interests = self.get_suggested_interests(interest_list=[interests["name"]],
-                                                               ad_account=ad_account)
-            hidden_interests = self.get_hidden_interests(interest_list=[interests["name"]])
+        for interest in flexible_spec:
+            params = {"q": interest.get("name"), "type": TargetingSearch.TargetingSearchTypes.interest}
+            try:
+                targeting_search_response = self.ad_account.get_targeting_search(params=params)
+            except FacebookRequestError:
+                logger.info(
+                    f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
+                )
 
-            source_interests = {
-                "id": interests_response["id"],
-                "name": interests_response["name"],
-                "audience_size": interests_response["audience_size"],
-                "suggested_interests": suggested_interests,
-                "hidden_interests": hidden_interests
-            }
-            interests_list.append(source_interests)
+            if targeting_search_response:
+                interests_response = [Tools.convert_to_json(targeting_search_response[0])][0]
+                source_interests_list.append(
+                    {
+                        "name": interests_response.get("name"),
+                        "id": interests_response.get("id"),
+                        "audience_size": interests_response.get("audience_size"),
+                    }
+                )
+            else:
+                source_interests_list.append(
+                    {"name": interest.get("name"), "id": interest.get("id"), "audience_size": 0}
+                )
+        return {"source_interests": source_interests_list}
 
-        return interests_list
+    def get_suggested_interests(self, interests_list: list, limit: int = 5):
+        """
+        Returns Suggested Interests for each Interests.
 
-    @staticmethod
-    def get_hidden_interests(interest_list: List[Dict], limit: int = 5) -> List[Dict]:
+        Parameters
+        ----------
+        interests_list: list
+            Interests List
+        limit: int
+            Limit on Number of Suggested Interests
+
+        Returns
+        -------
+        suggested_interests_list: list[dict]
+            Suggested Interests
+        """
+        suggested_interests_list = []
+        targeting_search_response = None
+
+        for interest in interests_list:
+            params = {"q": interest, "limit": limit, "type": TargetingSearch.TargetingSearchTypes.interest}
+
+            try:
+                targeting_search_response = self.ad_account.get_targeting_search(params=params)
+            except FacebookRequestError:
+                logger.info(
+                    f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
+                )
+
+            suggested_interests = [
+                Tools.convert_to_json(suggested_interest) for suggested_interest in targeting_search_response
+            ]
+
+            if len(suggested_interests) > 0:
+                for suggested_interest in suggested_interests:
+                    suggested_interest.pop("type", None)
+                    suggested_interest.pop("path", None)
+                    suggested_interest.pop("description", None)
+
+            suggested_interests_list.append(
+                {"name": interest, "suggested_interests": suggested_interests if len(suggested_interests) > 0 else None}
+            )
+
+        return suggested_interests_list
+
+    def get_hidden_interests(
+        self,
+        interests_list: List[Dict],
+        limit: int = 5,
+    ) -> List[Dict]:
         """
         Returns Hidden Interests for each Interest List.
+
         Parameters
         ----------
-        interest_list: list[dict]
+        interests_list: list[dict]
             Interests with Name & ID
         limit: int, default=5
             Hidden Interests Limit
+
         Returns
         -------
         hidden_interests: list[dict]
             Hidden Interests Associated with Particular Interest
         """
-        # Suggested Interests.
-        targeting_search_params = {
-            "interest_list": interest_list,
-            "type": TargetingSearch.TargetingSearchTypes.interest_suggestion,
-            "limit": limit
-        }
+        # init Targeting.
+        targeting_spec = self.adset_structure_details["targeting"]
+        hidden_interests_list = []
+        hidden_interests_response = None
 
-        hidden_interests = TargetingSearch.search(params=targeting_search_params)
-        hidden_interests = [Tools.convert_to_json(suggested_interest) for suggested_interest in
-                            hidden_interests]
-        hidden_interests = sorted(hidden_interests, key=lambda x: x["audience_size"], reverse=True)
+        # For Each Interests.
+        for interests in interests_list:
 
-        return hidden_interests
+            # Grab Targeting Search Parameters set = Age & Location.
+            targeting_search_params = {
+                "interest_list": [interests],
+                "type": TargetingSearch.TargetingSearchTypes.interest_suggestion,
+                "age_max": targeting_spec["age_max"],
+                "age_min": targeting_spec["age_min"],
+                "geo_locations": targeting_spec["geo_locations"],
+                "limit": limit,
+            }
 
-    @staticmethod
-    def get_suggested_interests(interest_list: List[Dict], limit: int = 5, ad_account: AdAccount = None) -> List[Dict]:
-        """
-        Returns Suggested Interests for each Interest List.
-        Parameters
-        ----------
-        interest_list: list[dict]
-            Interests with Name & ID
-        limit: int, default=5
-            Hidden Interests Limit
-        ad_account: AdAccount, default=None
-            SDK AdAccount Instance
-        Returns
-        -------
-        suggested_interests: list[dict]
-            Suggested Interests Associated with Particular Interest
-        """
-        # Suggested Interests.
-        targeting_search_params = {
-            "q": interest_list,
-            "type": TargetingSearch.TargetingSearchTypes.interest,
-            "limit": limit
-        }
-        suggested_interests_responses = ad_account.get_targeting_suggestions(
-            params=targeting_search_params
-        )
-        suggested_interests = []
+            # Obtain Hidden Interests.
+            try:
+                hidden_interests_response = TargetingSearch.search(params=targeting_search_params)
+            except FacebookRequestError:
+                logger.info(
+                    f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
+                )
 
-        for suggested_interests_response in suggested_interests_responses:
-            suggested_interests_json = Tools.convert_to_json(suggested_interests_response)
-            suggested_interests.append(
-                {
-                    "id": suggested_interests_json["id"],
-                    "name": suggested_interests_json["name"],
-                    "audience_size": suggested_interests_json["audience_size"]
-                }
+            hidden_interests = [
+                Tools.convert_to_json(suggested_interest) for suggested_interest in hidden_interests_response
+            ]
+            hidden_interests = sorted(hidden_interests, key=lambda x: x["audience_size"], reverse=True)
+
+            hidden_interests_list.append(
+                {"name": interests, "hidden_interests": hidden_interests if len(hidden_interests) > 0 else None}
             )
 
-        return suggested_interests
+        return hidden_interests_list
 
-
-class GetAudienceOverlapHandler:
-    def handle(self, query_json: Dict, ad_account_id: AnyStr = None, adset_id: AnyStr = None):
+    def get_audience_overlap_percent(self, interests_list: List):
         """
-        Parses & Returns Audience Overlap for the specified Adset.
+        Returns Audience Overlap Percentage
+
         Parameters
         ----------
-        query_json: dict
-            Payload From the POST Request
-        ad_account_id: str, default = None
-            Ad Account ID
-        adset_id: str, default=None
-            Adset ID associated with Facebook Ad Account ID
+        interests_list: list
+            Interests List from the Payload
+
         Returns
         -------
-        # todo: Add Returns & Returns Typing.
+        audience_overlap_percent: dict
+            Percentage of Audience Overlap
+
         """
-        x = int(query_json["source_interests"]["audience_size"])
-        y = int(query_json["hidden_interests"]["audience_size"])
+        audience_size_x_y = 0
+        for interests in interests_list:
+            audience_size_x_y += interests.get("audience_size")
 
-        interest_list = [query_json["source_interests"]["name"], query_json["hidden_interests"]["name"]]
+        overlap_audience_size_z = self.get_overlap_audience_size(interests_list=interests_list)
 
-        self.get_overlap_audience_size(interest_list=interest_list,
-                                       ad_account_id=ad_account_id)
+        # Computing Audience Overlap Percent, a = x + y - z
+        if overlap_audience_size_z:
+            intersection_a = audience_size_x_y - overlap_audience_size_z
+            audience_overlap_percent = 100 * (intersection_a / overlap_audience_size_z)
 
-        return "Hello World"
+            audience_overlap_percent_response = {
+                "audience_overlap_percent": 100
+                if audience_overlap_percent >= 100
+                else round(audience_overlap_percent, 4)
+            }
+            return audience_overlap_percent_response
 
-    @staticmethod
-    def get_overlap_audience_size(interest_list: List, ad_account_id, limit: int = 5):
-        # Suggested Interests.
-        targeting_search_params = {
-            "interests": interest_list,
-            "type": TargetingSearch.TargetingSearchTypes.interest,
-            "limit": limit
+        else:
+
+            audience_overlap_percent_response = {"audience_overlap_percent": None}
+            return audience_overlap_percent_response
+
+    def get_overlap_audience_size(self, interests_list: List):
+        """
+        Returns Overlapping Audience Size Estimate for Multiple Interests.
+
+        Parameters
+        ----------
+        interests_list: list
+            Interests List from the Payload
+
+        Returns
+        -------
+        overlap_audience_size: int
+            Overlapping Audience Size Estimate for Multiple Interests
+
+        """
+        overlap_audience_size_response = None
+
+        # init Targeting.
+        targeting_spec = self.adset_structure_details["targeting"]
+        optimization_goal = self.adset_structure_details.get("optimization_goal")
+
+        # Remove audience_size & source for inputting to facebook api.
+        params_interests = interests_list.copy()
+        for interest in params_interests:
+            interest.pop("audience_size", None)
+
+        # Grab Targeting Spec Parameters.
+        targeting_spec_params = {
+            "age_max": targeting_spec["age_max"],
+            "age_min": targeting_spec["age_min"],
+            "geo_locations": targeting_spec["geo_locations"],
+            "flexible_spec": [{"interests": params_interests}],
         }
-        overlap_audience_size = TargetingSearch.search(
-            params=targeting_search_params
-        )
-        pass
+        try:
+            overlap_audience_size_response = self.ad_account.get_delivery_estimate(
+                fields=["estimate_mau"],
+                params={"targeting_spec": targeting_spec_params, "optimization_goal": optimization_goal},
+            )
+        except FacebookRequestError:
+            logger.info(
+                f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
+            )
+
+        if overlap_audience_size_response:
+            response = Tools.convert_to_json(overlap_audience_size_response[0])
+            overlap_audience_size = response.get("estimate_mau", None)
+            return overlap_audience_size
+        else:
+            return None

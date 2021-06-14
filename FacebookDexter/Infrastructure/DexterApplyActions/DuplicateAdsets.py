@@ -7,6 +7,7 @@ from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     update_turing_structure,
 )
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
+    ApplyButtonType,
     ApplyParameters,
     RecommendationAction,
 )
@@ -22,7 +23,7 @@ class DuplicateAdset(RecommendationAction):
 
         return action_details
 
-    def process_action(self, recommendation: Dict, headers: str):
+    def process_action(self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict=None):
 
         update_turing_structure(self.config, recommendation, headers)
         duplicate_fb_adset(recommendation, self.fixtures)
