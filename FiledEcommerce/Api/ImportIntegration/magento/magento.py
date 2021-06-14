@@ -484,7 +484,7 @@ class Magento(Ecommerce):
             return json.loads(row["Details"])
 
     @staticmethod
-    def host_url_validator(cls, host_url):
+    def host_url_validator(host_url):
         pattern = "([\w-]+(\.[\w-]+)+\.+(\w+)+?(:\d+)?)"
         if not re.search(pattern, host_url):
             return False

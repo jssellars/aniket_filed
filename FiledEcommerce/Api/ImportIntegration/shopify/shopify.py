@@ -146,7 +146,7 @@ class Shopify(Ecommerce):
             )
             for row in conn.execute(query):
                 if row:
-                    return cls.RESPONSE_ERROR_MESSAGE_DB
+                    return cls.get_redirect_url()
                     
         if cls.is_valid_shop(shop):
             # NONCE is a single-use random value we send to Shopify so we know the next call from Shopify is valid.
@@ -285,7 +285,9 @@ class Shopify(Ecommerce):
         # NOTE the shop ACCESS_TOKEN is now void!
         # TODO: We need a SQL DELETE operation here to delete relevant credential record
         # cls.write_token_to_db(webhook_payload["domain"], "")
-
+        with engine.connect() as conn:
+            query = external_platforms.delete().where(ext_plat_cols.FiledBusinessOwnerId == 105).where(ext_plat_cols.PlatformId == 2).limit(1)
+            conn.execute(query)
         return "OK", 200
 
     # https://shopify.dev/tutorials/add-gdpr-webhooks-to-your-app
