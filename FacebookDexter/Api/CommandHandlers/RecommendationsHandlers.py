@@ -4,9 +4,12 @@ from typing import Dict, Union
 import humps
 from bson import ObjectId
 
-from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelIdKeyEnum
+from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum, LevelIdKeyEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationEnums import RecommendationStatusEnum
-from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
+from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import (
+    RecommendationField,
+    StructureTreeField,
+)
 from Core.mongo_adapter import MongoOperator, MongoProjectionState, MongoRepositoryBase
 from Core.Web.FacebookGraphAPI.AccountAlteringRestrictions import allow_structure_changes
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
@@ -164,9 +167,26 @@ def read_recommendations_page(command: RecommendationPageCommand, business_owner
         sort_query=[(RecommendationField.PRIORITY.value, -1)],
     )
 
-    result = [_convert_db_entry_to_recommendation(entry) for entry in result]
+    recommendations = [_convert_db_entry_to_recommendation(entry) for entry in result]
 
-    return dict(recommendations=humps.camelize(result))
+    if command.structure_filter:
+        command.structure_filter = None
+
+        query = _get_recommendations_query(command, business_owner_id)
+        result = recommendation_repository.get_data_slice(
+            query=query,
+            projection={m.value: MongoProjectionState.ON.value for m in RECOMMENDATION_FIELDS},
+            limit=command.page_size,
+            skip=skipped_entries,
+            sort_query=[(RecommendationField.PRIORITY.value, -1)],
+        )
+
+    recommendations_structure_tree = _get_recommendations_structure_tree(result)
+
+    return dict(
+        recommendations=humps.camelize(recommendations),
+        recommendations_structure_tree=humps.camelize(recommendations_structure_tree),
+    )
 
 
 def _convert_db_entry_to_recommendation(entry: Dict) -> Dict:
@@ -217,6 +237,51 @@ def _pop_ununsed_fields(entry: Dict) -> None:
         entry.pop(field.value, None)
 
 
+def _get_recommendations_structure_tree(recommendations: list):
+    structure_tree = []
+    for recommendation in recommendations:
+        parent_index = next(
+            (
+                i
+                for i, structure in enumerate(structure_tree)
+                if structure[StructureTreeField.CAMPAIGN_ID.value]
+                == recommendation[RecommendationField.CAMPAIGN_ID.value]
+            ),
+            None,
+        )
+
+        if recommendation[RecommendationField.LEVEL.value] == LevelEnum.CAMPAIGN.value:
+            if not parent_index:
+                structure_tree.append(_create_campaign_node(recommendation))
+
+        elif recommendation[RecommendationField.LEVEL.value] == LevelEnum.ADSET.value:
+            if parent_index:
+                structure_tree[parent_index][StructureTreeField.ADSETS.value].append(_create_adset_node(recommendation))
+            else:
+                structure_tree.append(_create_campaign_node(recommendation, _create_adset_node(recommendation)))
+
+    return structure_tree
+
+
+def _create_campaign_node(recommendation, adsets=None):
+    if adsets is None:
+        adsets = []
+    else:
+        adsets = [adsets]
+    return {
+        StructureTreeField.CAMPAIGN_ID.value: recommendation[RecommendationField.CAMPAIGN_ID.value],
+        StructureTreeField.CAMPAIGN_NAME.value: recommendation[RecommendationField.CAMPAIGN_NAME.value],
+        StructureTreeField.ADSETS.value: adsets,
+    }
+
+
+def _create_adset_node(recommendation):
+    return {
+        StructureTreeField.ADSET_ID.value: recommendation[RecommendationField.STRUCTURE_ID.value],
+        StructureTreeField.ADSET_NAME.value: recommendation[RecommendationField.STRUCTURE_NAME.value],
+    }
+
+
 def _get_recommendations_query(
     command: Union[NumberOfPagesCommand, RecommendationPageCommand], business_owner_id: str
 ) -> Dict:
@@ -247,5 +312,15 @@ def _get_recommendations_query(
         query[MongoOperator.AND.value].append(
             {RecommendationField.ALGORITHM_TYPE.value: {MongoOperator.IN.value: command.labs_filter}}
         )
+
+    if command.structure_filter:
+        if command.structure_filter["structure_level"] == LevelEnum.CAMPAIGN.value:
+            query[MongoOperator.AND.value].append(
+                {RecommendationField.CAMPAIGN_ID.value: command.structure_filter["structure_id"]}
+            )
+        elif command.structure_filter["structure_level"] == LevelEnum.ADSET.value:
+            query[MongoOperator.AND.value].append(
+                {RecommendationField.STRUCTURE_ID.value: command.structure_filter["structure_id"]}
+            )
 
     return query

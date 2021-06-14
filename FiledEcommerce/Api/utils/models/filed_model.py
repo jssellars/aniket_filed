@@ -25,6 +25,7 @@ class FiledVariant:
     created_at: str
     updated_at: str
     imported_at: str
+    currency_id: int = 1    # Default: 1: USD
     material: str = None
     condition: str = None
     color: str = None

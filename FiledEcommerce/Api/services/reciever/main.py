@@ -51,6 +51,6 @@ def receiver_lambda(request, platform):
     store = ImportIntegrationProvider.get_instance(platform)
     for idx, data in enumerate(store.get_products(request)):
         mapped_data = store.mapper(data, mapping)
-        publisher_lambda(user_id, filed_product_catalog_id, platform, mapped_data)
+        response = publisher_lambda(user_id, filed_product_catalog_id, platform, mapped_data)
 
-    return ResponseSerializer.get_response("Saved")
+    return response
