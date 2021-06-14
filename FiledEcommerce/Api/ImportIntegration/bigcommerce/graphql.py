@@ -11,7 +11,8 @@ class BigCommercePriceEdge(Type):
     price = Field(BigCommercePrice)
     basePrice = Field(BigCommercePrice)
     salePrice = Field(BigCommercePrice)
-    
+
+
 class BigCommerceImage(Type):
     url = Field(String, args={
         "width": Int
@@ -171,6 +172,10 @@ class BigCommerceProduct(Node):
     gtin = String
 
 
+class BigCommerceSettings(Node):
+    storeName = String
+
+
 class BigCommerceProductEdges(Type):
     node = Field(BigCommerceProduct)
 
@@ -183,6 +188,7 @@ class BigCommerceSite(Type):
     products = Field(BigCommerceProductConnection, args={
         **connection_args()
     })
+    settings = Field(BigCommerceSettings)
 
 
 class Query(Type):

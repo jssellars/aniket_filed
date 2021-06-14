@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import datetime
 
 import humps
 import requests
@@ -11,6 +11,7 @@ from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.bigcommerce.graphql import Query
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
+from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 
@@ -153,6 +154,7 @@ class BigCommerce(Ecommerce):
         query.site.products.edges.node.variants.edges.node.inventory.__fields__()
         query.site.products.edges.node.variants.edges.node.prices.salePrice.__fields__()
         query.site.products.edges.node.variants.edges.node.prices.basePrice.__fields__()
+        query.site.settings.storeName()
         return query
 
     @classmethod
@@ -169,7 +171,6 @@ class BigCommerce(Ecommerce):
             for record in conn.execute(query):
                 details = record["Details"]
 
-        print(details)
         data = json.loads(details)
         token = data["storefront_token"]
         store_hash = data["store_hash"]
@@ -195,74 +196,95 @@ class BigCommerce(Ecommerce):
     @classmethod
     def mapper(cls, data, mapping):
         products_list = []
-        imported_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + "Z"
+        imported_at = get_utc_aware_date()
+
+        def _get_tags(mapped_data):
+            if isinstance(mapped_data, dict):
+                # tags is mapped to categories object as default
+                return ",".join([tag["node"]["name"] for tag in mapped_data["tags"]["edges"]])
+            elif isinstance(mapped_data, str):
+                return mapped_data
+            elif isinstance(mapped_data, list):
+                return ",".join(mapped_data)
+            else:
+                return ""
+
+        def _get_store_name(data: dict):
+            try:
+                store_name = data["data"]["site"]["settings"]["store_name"]
+            except (KeyError, TypeError):
+                return ""
+            else:
+                return store_name
 
         edge = data["data"]["site"]["products"]["edges"]
+        already_mapped_fields = {"variants"}
 
         for product in edge:
             df = {}
             node = product["node"]
             for _map in mapping.get("product"):
-                if _map["filed_key"] == "tags":
-                    continue
                 if _map["filed_key"] in FiledProduct.__annotations__:
                     df[_map["filed_key"]] = node[_map["mapped_to"]]
+                    already_mapped_fields.add(_map["mapped_to"])
 
             pr = FiledProduct(
-                product_id=node["entity_id"],
-                title=node["name"],
-                product_type=node["type"],
-                vendor="Dummy-BC-Shop",
-                description=node["plain_text_description"],
-                tags=",".join([tag["node"]["name"] for tag in node["categories"]["edges"]]),
-                sku=node["sku"],
-                brand=node["brand"]["name"] if node["brand"] is not None else None,
+                product_id=df["product_id"],
+                title=df["title"],
+                product_type=df["product_type"],
+                vendor=_get_store_name(data),
+                description=df["description"],
+                tags=_get_tags(df) if df.get("tags") else "",
+                sku=df["sku"],
+                brand=df["brand"]["name"] if df.get("brand") else None,
                 availability=True,
-                image_url=node["default_image"]["url"],
+                image_url=df["image_url"]["url"] if df.get("image_url") else None,
                 created_at=imported_at,
                 updated_at=imported_at,
                 imported_at=imported_at,
                 variants=[],
+                custom_props=FiledCustomProperties(
+                    {field: value for field, value in node.items() if field not in already_mapped_fields}
+                ),
             )
 
             for variant in node["variants"]["edges"]:
                 vdf = {"custom_fields": {}}
                 vnode = variant["node"]
                 for _map in mapping.get("variant"):
-                    if (
-                        _map["filed_key"] == "tags"
-                        or _map["filed_key"] == "display_name"
-                        or _map["filed_key"] == "description"
-                        or _map["filed_key"] == "url"
-                    ):
+                    filed_key = _map["filed_key"]
+                    mapped_to = _map["mapped_to"]
+                    if filed_key in {"tags", "display_name", "description", "url"}:
                         continue
-                    if _map["filed_key"] in FiledVariant.__annotations__:
-                        vdf[_map["filed_key"]] = vnode[_map["mapped_to"]]
+                    if filed_key in {"price", "compare_at_price"}:
+                        vdf[filed_key] = vnode["prices"][mapped_to]
+                    elif filed_key in FiledVariant.__annotations__:
+                        vdf[filed_key] = vnode[mapped_to]
                     else:
-                        custom = {_map["filed_key"]: vnode.get(_map["mapped_to"])}
+                        custom = {filed_key: vnode.get(mapped_to)}
                         vdf["custom_fields"].update(custom)
 
                 vr = FiledVariant(
-                    variant_id=vnode["entity_id"],
+                    variant_id=vdf["variant_id"],
                     filed_product_id="",
                     display_name=node["name"],
-                    price=vnode["prices"]["sale_price"]["value"] if vnode["prices"]["sale_price"] is not None else None,  # Changed to sale_price
-                    compare_at_price=vnode["prices"]["base_price"]["value"] if vnode["prices"]["base_price"]["value"] is not None else None,  # Changed to base_price
+                    price=vdf["price"],
+                    compare_at_price=vdf["compare_at_price"],
                     availability=True,
                     url=node["add_to_cart_url"],
-                    image_url=node["default_image"]["url"],
+                    image_url=vdf["image_url"]["url"] if vdf.get("image_url") else None,
                     sku=vnode["sku"],
                     barcode="",
                     inventory_quantity=vnode["inventory"],
-                    tags=",".join([tag["node"]["name"] for tag in node["categories"]["edges"]]),
-                    description=node["plain_text_description"],
+                    tags=_get_tags(df) if df.get("tags") else "",
+                    description=df["description"],
                     created_at=imported_at,
                     updated_at=imported_at,
                     imported_at=imported_at,
-                    material="",
-                    condition="",
-                    color="",
-                    size="",
+                    material=vdf.get("material", ""),
+                    condition=vdf.get("condition", ""),
+                    color=vdf.get("color", ""),
+                    size=vdf.get("size", ""),
                     custom_props=FiledCustomProperties(properties=vdf["custom_fields"])
                     if vdf["custom_fields"]
                     else None,

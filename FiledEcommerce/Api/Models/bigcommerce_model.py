@@ -9,7 +9,8 @@ class BigCommerceVariant:
     height: int
     width: int
     depth: int
-    prices: float
+    basePrice: float
+    salePrice: float
     Image: str
     inventory: int
     upc: int

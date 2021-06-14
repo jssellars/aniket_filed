@@ -326,7 +326,6 @@ class Shopify(Ecommerce):
                 response = requests.get(url, params=params, json=payload, headers=headers)
 
             response.raise_for_status()
-            logging.debug(f"authenticated_shopify_call response:\n{json.dumps(response.json(), indent=4)}")
             return response.json()
         except HTTPError as ex:
             logging.exception(ex)
@@ -480,16 +479,12 @@ class Shopify(Ecommerce):
             next_page = res.get("data").get("products").get("pageInfo").get("hasNextPage")
             call_count += 1
 
-        print(call_count)
-
         # Now we get each product info
         for p in product_list:
             query = cls.query_get_product_info(p["node"]["id"])
             res = cls.authenticated_shopify_call(shop=shop, endpoint="graphql", query=query)
             p["node"] = res.get("data").get("product")
             call_count += 1
-
-        print(call_count)
 
         yield humps.decamelize(product_list)
 
@@ -525,6 +520,7 @@ class Shopify(Ecommerce):
             "title",
             "updated_at",
             "vendor",
+            "price_range_v2",
         )
         _op_products.featured_image.__fields__("original_src")
 
