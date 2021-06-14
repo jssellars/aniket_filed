@@ -2,13 +2,32 @@ import json
 from datetime import datetime, timezone
 from io import StringIO
 
+import numpy as np
 import pandas
+from sqlalchemy import select
 
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
-from FiledEcommerce.Api.utils.models.filed_model import FiledVariant, FiledProduct, FiledCustomProperties
+from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import engine, cols, external_platforms
 
 
 class ImportCsv(Ecommerce):
+
+    @classmethod
+    def pre_install(cls):
+        pass
+
+    @classmethod
+    def app_install(cls):
+        pass
+
+    @classmethod
+    def app_load(cls):
+        pass
+
+    @classmethod
+    def app_uninstall(cls):
+        pass
 
     @classmethod
     def mapper(cls, data, mapping):
@@ -16,103 +35,72 @@ class ImportCsv(Ecommerce):
         Mapping of csv data to Filed's models
         @param data: products from csv file
         @param mapping: mapped headers from FE
-        @return: list of prodcuts with correct mapping
+        @return: list of products with correct mapping
         """
-        csv_product_list = []
+        filed_product_list = []
         imported_at = datetime.now(timezone.utc).replace(
             microsecond=0).isoformat()[:-6] + 'Z'
 
-        # fetch the respective headers for product and variant
-        product_lst = [p['name'] for p in mapping['mapping']['product']]
-        variant_lst = [v['name'] for v in mapping['mapping']['variant']]
-        product_lst.extend(variant_lst)
+        for csv_p in data:
+            df = {}
+            for p_map in mapping["mapping"].get('product'):
+                if p_map["filed_key"] in FiledProduct.__annotations__:
+                    df[p_map['filed_key']] = csv_p[p_map["mapped_to"]]
 
-        df = pandas.DataFrame.from_records(data)
-
-        # get a dict of the csv column name and the mapping key
-        product_dict = {dict_map["name"]: dict_map["mapped_to"] for dict_map in mapping["mapping"]['product']}
-        variant_dict = {res_dict["name"]: res_dict["mapped_to"] for res_dict in mapping["mapping"]['variant']}
-        merge_pv_dict = {**product_dict, **variant_dict}
-
-        # rename the csv headers with filed model fields
-        new_df = df.rename(index=str, columns=merge_pv_dict)
-        # drop empty columns
-        new_df.dropna(axis='columns', how='all', inplace=True)
-        # fill empty rows with data of previous row based on the id. Replace NaN with ""
-        new_df.update(new_df.groupby('product_id').ffill().fillna(""))
-
-        variant_attrs = ["variant_id", "filed_product_id", "display_name", "price",
-                         "compare_at_price", "availability", "url", "image_url",
-                         "sku", "barcode", "inventory_quantity", "tags",
-                         "description", "created_at", "updated_at", "imported_at",
-                         "material", "condition", "color", "size"]
-        # get a list of custom properties
-        custom_fields = [
-            attr
-            for attr in mapping["mapping"]["variant"]
-            if attr["filed_key"] not in variant_attrs
-        ]
-
-        # loop through the df and update the model
-        for row in new_df.itertuples(index=False, name='FiledTuple'):
-            product_attrs = FiledProduct(
-                product_id=getattr(row, 'product_id', ""),
-                title=getattr(row, 'title', ""),
-                product_type=getattr(row, 'product_type', ""),
-                description=getattr(row, 'description', ""),
-                vendor=getattr(row, 'vendor', ""),
-                tags=getattr(row, 'tags', ""),
-                image_url=getattr(row, 'image_url', ""),
-                sku="",
-                created_at=getattr(row, 'created_at', imported_at),
-                updated_at="",
+            filed_product = FiledProduct(
+                product_id=df.get("product_id"),
+                title=df.get("title"),
+                product_type=df.get("product_type"),
+                vendor=df.get("vendor"),
+                description=df.get("description"),
+                tags=", ".join([df.get("tags")]) if df["tags"] != 0 else "",
+                sku=df.get("sku"),
+                image_url=df.get("image_url"),
+                created_at=csv_p.get("created_at", imported_at),
+                updated_at=csv_p.get("updated_at", imported_at),
                 imported_at=imported_at,
-                brand=getattr(row, 'brand', ""),
-                availability=True,
-                variants=[]
+                variants=[],
+                brand=df.get("brand"),
+                availability=df.get("availability", ""),
             )
 
-            variant_attrs = FiledVariant(
-                variant_id=getattr(row, 'variant_id', ""),
-                filed_product_id=getattr(row, 'filed_product_it', ""),
-                price=getattr(row, 'price', 0),
-                compare_at_price=getattr(row, 'compare_at_price', 0),
-                availability=getattr(row, 'availability', ""),
-                url=getattr(row, 'url', ""),
-                display_name=getattr(row, 'display_name', ""),
-                image_url=getattr(row, 'image_url', ""),
-                sku=getattr(row, 'sku', ""),
-                barcode=getattr(row, 'barcode', ""),
-                inventory_quantity=getattr(row, 'inventory_quantity', ""),
-                tags=getattr(row, 'tags', ""),
-                description=getattr(row, 'description', ""),
-                created_at=getattr(row, 'created_at', imported_at),
-                updated_at="",
+            variant_map = {"custom_fields": {}}
+            for v_map in mapping["mapping"].get('variant'):
+                if v_map["filed_key"] in FiledVariant.__annotations__:
+                    variant_map[v_map['filed_key']] = csv_p[v_map["mapped_to"]]
+                else:
+                    custom = {v_map["filed_key"]: csv_p.get(v_map["mapped_to"])}
+                    variant_map["custom_fields"].update(custom)
+
+            filed_variant = FiledVariant(
+                variant_id=variant_map.get("variant_id", ""),
+                filed_product_id="",
+                display_name=filed_product.title,
+                price=variant_map.get("price", ""),
+                compare_at_price=variant_map.get("compare_at_price", ""),
+                availability=variant_map.get("availability", ""),
+                url=variant_map.get("url", ""),
+                image_url=variant_map.get("url", ""),
+                sku=variant_map.get("sku", ""),
+                barcode=variant_map.get("barcode", ""),
+                inventory_quantity=variant_map.get("inventory_quantity", ""),
+                tags=filed_product.tags,
+                description=variant_map.get("description", ""),
+                created_at=csv_p.get("created_at", imported_at),
+                updated_at=csv_p.get("updated_at", imported_at),
                 imported_at=imported_at,
-                material=getattr(row, 'material', ""),
-                condition=getattr(row, 'condition', ""),
-                color=getattr(row, 'color', ""),
-                size=getattr(row, 'size', ""),
+                material="",
+                condition="",
+                color="",
+                size="",
                 custom_props=FiledCustomProperties(
-                    properties={}
-                )
+                    properties=variant_map["custom_fields"]
+                ) if variant_map["custom_fields"] else None,
             )
+            filed_product.variants.append(filed_variant.__dict__)
+            filed_product_list.append(filed_product.__dict__)
 
-            if custom_fields:
-                custom_attrs = FiledCustomProperties(
-                    properties={},
-                )
-            for field in custom_fields:
-                custom_attrs.properties[field["name"]] = row._asdict()[
-                    field["filed_key"]]
-            # convert to 'str' from main
-            custom_attrs = json.dumps(custom_attrs.__dict__)
-
-            variant_attrs.custom_props = custom_attrs
-            product_attrs.variants.append(variant_attrs.__dict__)
-            csv_product_list.append(product_attrs.__dict__)
-
-        return {"products": csv_product_list}
+        return {"products": filed_product_list}
 
     @classmethod
     def get_products(cls, body):
@@ -122,10 +110,51 @@ class ImportCsv(Ecommerce):
         @return: <generator>
         """
         file = body["file"]
+        user_id = body["user_filed_id"]
         file_decode = b''.join(file).decode('utf-8')
         data = StringIO(file_decode)
         df = pandas.read_csv(data)
-        df.dropna(axis='columns', how='all', inplace=True)
-        product_list = df.to_dict('records')
+        # df.dropna(axis='columns', how='all', inplace=True)
+        df1 = df.replace(np.nan, '', regex=True)
+        product_list = df1.to_dict('records')
+        details = {
+            "user_id": user_id
+        }
+        cls.write_to_db(details, body)
 
         yield product_list
+
+    @staticmethod
+    def write_to_db(details: dict, data):
+        user_id = data.get("user_filed_id")
+        flag = 0
+        with engine.connect() as conn:
+            query = (
+                select([cols.Name])
+                    .where(cols.FiledBusinessOwnerId == user_id)
+                    .limit(1)
+            )
+            for row in conn.execute(query):
+                try:
+                    user_name = row[0]
+                    flag = 1
+                except Exception as e:
+                    raise e
+        if flag == 1:
+            temp_nl = user_name.split(" ", 1)
+            if len(temp_nl) == 2:
+                user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+            else:
+                user_first_name, user_last_name = temp_nl[0], ""
+
+        with engine.connect() as conn:
+            ins = external_platforms.insert().values(
+                CreatedAt=datetime.now(),
+                CreatedById=user_id,
+                CreatedByFirstName=user_first_name,
+                CreatedByLastName=user_last_name,
+                FiledBusinessOwnerId=user_id,
+                PlatformId=7,
+                Details=json.dumps(details),
+            )
+            result = conn.execute(ins)

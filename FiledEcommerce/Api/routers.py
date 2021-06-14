@@ -10,6 +10,7 @@ from FiledEcommerce.Api.Dtos.ImportIntegrationMappingDto import ImportIntegratio
 from FiledEcommerce.Api.Dtos.ImportIntegrationModelDto import ImportIntegrationModelDto
 from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider import ImportIntegrationProvider
 from FiledEcommerce.Api.services.reciever.main import receiver_lambda
+from FiledEcommerce.Api.utils.tools.json_serializer import RequestSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,11 @@ class OAuth(Resource):
 
 class Receiver(Resource):
     def post(self, platform):
-        request_json = humps.depascalize(request.get_json(force=True))
+        if platform == 'csv':
+            json_data = RequestSerializer(event=request)
+            request_json = json_data.get_body()
+        else:
+            request_json = humps.depascalize(request.get_json(force=True))
         try:
             receiver_lambda(request_json, platform)
         except Exception as e:

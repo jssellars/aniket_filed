@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 
+import humps
 import requests
 from flask import request
 from woocommerce import API
@@ -25,9 +26,8 @@ class WooCommerce(Ecommerce):
 
     # endpoints
     __callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/woocommerce/install"
-    __callback_url_local = "https://3a8c92293e9e.ngrok.io/api/v1/oauth/woocommerce/install"
+    __callback_url_local = "https://20cba55562e2.ngrok.io/api/v1/oauth/woocommerce/install"
     __pre_install_endpoint = "/wc-auth/v1/authorize"
-
 
     @classmethod
     def get_redirect_url(cls):
@@ -69,8 +69,8 @@ class WooCommerce(Ecommerce):
             "app_name": "Filed",
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
-            "return_url": cls.get_redirect_url,
-            "callback_url": cls.__callback_url
+            "return_url": cls.get_redirect_url(),
+            "callback_url": cls.__callback_url_local
         }
         query_string = urlencode(params)
         redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
@@ -105,41 +105,10 @@ class WooCommerce(Ecommerce):
             "consumer_secret": consumer_secret,
             "key_permissions": key_permissions,
         }
-        # cls.write_token_to_db(details, data)
-        flag = 0
-        with engine.connect() as conn:
-            query = (
-                select([cols.Name])
-                .where(cols.FiledBusinessOwnerId == user_id)
-                .limit(1)
-            )
-            for row in conn.execute(query):
-                try:
-                    user_name = row[0]
-                    flag = 1
-                except Exception as e:
-                    raise e
-        if flag == 1:
-            temp_nl = user_name.split(" ", 1)
-            if len(temp_nl) == 2:
-                user_first_name, user_last_name = temp_nl[0], temp_nl[1]
-            else:
-                user_first_name, user_last_name = temp_nl[0], ""
+        cls.write_to_db(details, data)
 
-        with engine.connect() as conn:
-            ins = external_platforms.insert().values(
-                CreatedAt=datetime.now(),
-                CreatedById=user_id,
-                CreatedByFirstName=user_first_name,
-                CreatedByLastName=user_last_name,
-                FiledBusinessOwnerId=user_id,
-                PlatformId=6,
-                Details=json.dumps(details)
-            )
-            result = conn.execute(ins)
-
-        mongo_db.delete_many({"userId" : user_id})
-        return cls.get_redirect_url
+        mongo_db.delete_many({"userId": user_id})
+        return cls.get_redirect_url()
 
     @classmethod
     def app_load(cls):
@@ -151,7 +120,7 @@ class WooCommerce(Ecommerce):
         token_data = decode_jwt_from_headers()
         user_id = token_data["user_filed_id"]
         if cls.read_shop_from_db(user_id) != "":
-            return cls.__install_redirect_url
+            return cls.get_redirect_url()
         else:
             return cls.RESPONSE_ERROR_MESSAGE
 
@@ -190,90 +159,95 @@ class WooCommerce(Ecommerce):
     def mapper(cls, data, mapping):
         """
         Mapping of platform's data to Filed's models
-        @param data:
-        @param mapping: list of products with the right mapping
-        @return:
+        @param data: list of products
+        @param mapping: dict of mapping
+        @return: dict of mapped products
         """
         token_data = decode_jwt_from_headers()
         body = token_data.get("user_filed_id")
         filed_product_list = []
         imported_at = datetime.now(timezone.utc).replace(
             microsecond=0).isoformat()[:-6] + 'Z'
-
         product_id = []
-        df = {}
+
         # process the mapping to get only mapped products
-        for p_map in mapping["product"]:
-            df[p_map["mapped_to"]] = data[p_map["name"]]
-            df[p_map["filed_key"]] = df[p_map["mapped_to"]]
+        for wcp in data:
+            df = {}
+            for p_map in mapping.get("product"):
+                if p_map["filed_key"] in FiledProduct.__annotations__:
+                    df[p_map['filed_key']] = wcp[p_map["mapped_to"]]
 
-        # map the product to Filed's Product model
-        filed_product = FiledProduct(
-            product_id=df["product_id"],
-            title=df["title"],
-            product_type=df["product_type"],
-            vendor="",
-            description=df["description"],
-            tags=",".join(df["tags"]),
-            sku="",
-            image_url=",".join(img["src"] for img in data["images"]),
-            created_at=data["date_created"],
-            updated_at=data["date_modified"],
-            imported_at=imported_at,
-            variants=[],
-            brand="",
-            availability=True
-        )
+            # map the product to Filed's Product model
+            filed_product = FiledProduct(
+                product_id=wcp["id"],
+                title=wcp["name"],
+                product_type=wcp["type"],
+                vendor="",
+                description=wcp["description"],
+                tags=", ".join([tag["name"] for tag in wcp["tags"]]),
+                sku=wcp["sku"],
+                image_url=", ".join([img["src"] for img in wcp["images"]]),
+                created_at=wcp["date_created"],
+                updated_at=wcp["date_modified"],
+                imported_at=imported_at,
+                variants=[],
+                brand="",
+                availability=wcp["purchasable"]
+            )
 
-        if len(data.get("variations")) != 0:
-            # get the product_id, variation_id, and make a call to the variant endpoint
-            product_id.append(data["id"])
-            for p_id in product_id:
-                variants_lst = cls.get_product_variants(body, p_id)
+            if len(wcp.get("variations")) != 0:
+                # get the product_id, variation_id, and make a call to the variant endpoint
+                product_id.append(wcp["id"])
+                for p_id in product_id:
+                    variants_lst = cls.get_product_variants(body, p_id)
 
-            # loop through the variants
-            for variant in variants_lst:
-                variant_map = {
-                    "custom_fields": {}
-                }
-                # process the mapping to get only mapped products
-                for v_map in mapping["variant"]:
-                    if v_map["filed_key"] in FiledVariant.__annotations__:
-                        variant_map[v_map["mapped_to"]] = variant[v_map["name"]]
-                        variant_map[v_map["filed_key"]] = variant_map[v_map["mapped_to"]]
-                    else:
-                        variant_map[v_map["mapped_to"]] = variant[v_map["name"]]
-                        custom = {v_map["filed_key"]: variant_map[v_map["mapped_to"]]}
-                        variant_map["custom_fields"].update(custom)
+                # loop through the variants
+                for variant in variants_lst:
+                    color_flg, size_flg = 0, 0
+                    for variant_attribute in variant["attributes"]:
+                        if variant_attribute["name"] == "color":
+                            color_flg = 1
+                        elif variant_attribute["name"] == "size":
+                            size_flg = 1
+                        variant_map = {
+                            "custom_fields": {}
+                        }
+                        # process the mapping to get only mapped products
+                        for v_map in mapping["variant"]:
+                            if v_map["filed_key"] in FiledVariant.__annotations__:
+                                variant_map[v_map["filed_key"]] = variant[v_map["mapped_to"]]
+                            else:
+                                custom = {v_map["filed_key"]: variant.get(v_map["mapped_to"])}
+                                variant_map["custom_fields"].update(custom)
 
-                # map the product to Filed's Variant model
-                filed_variant = FiledVariant(
-                    variant_id="",
-                    filed_product_id="",
-                    display_name="",
-                    price=variant_map["price"],
-                    compare_at_price=variant_map["compare_at_price"],
-                    availability=variant_map["availability"],
-                    url=variant_map["url"],
-                    image_url="",
-                    sku=variant_map["sku"],
-                    barcode="",
-                    inventory_quantity=variant_map["inventory_quantity"],
-                    tags="",
-                    description=variant_map["description"],
-                    created_at=variant.get("created_at", imported_at),
-                    updated_at=variant["date_modified"],
-                    imported_at=imported_at,
-                    material="",
-                    condition="",
-                    color="",
-                    size="",
-                    custom_props=FiledCustomProperties(
-                        properties=variant_map["custom_fields"]
-                    ) if variant_map["custom_fields"] else None
-                )
-                filed_product.variants.append(filed_variant.__dict__)
-        filed_product_list.append(filed_product.__dict__)
+                        # map the product to Filed's Variant model
+                        filed_variant = FiledVariant(
+                            variant_id=variant["id"],
+                            filed_product_id="",
+                            display_name=filed_product.title,
+                            price=variant["sale_price"],
+                            compare_at_price=variant["price"],
+                            availability=variant["purchasable"],
+                            url=variant["permalink"],
+                            image_url=variant["image"].get("src"),
+                            sku=variant["sku"],
+                            barcode="",
+                            inventory_quantity=variant["stock_quantity"],
+                            tags=filed_product.tags,
+                            description=variant["description"],
+                            created_at=variant.get("date_created", imported_at),
+                            updated_at=variant["date_modified"],
+                            imported_at=imported_at,
+                            material="",
+                            condition="",
+                            color=variant_attribute["option"] if color_flg == 1 else "",
+                            size=variant_attribute["option"] if size_flg == 1 else "",
+                            custom_props=FiledCustomProperties(
+                                properties=variant_map["custom_fields"]
+                            ) if variant_map["custom_fields"] else None,
+                        )
+                        filed_product.variants.append(filed_variant.__dict__)
+            filed_product_list.append(filed_product.__dict__)
 
         return {"products": filed_product_list}
 
@@ -299,7 +273,7 @@ class WooCommerce(Ecommerce):
         )
         json_data = wcapi.get("products").json()
 
-        return json_data
+        yield humps.decamelize(json_data)
 
     @staticmethod
     def read_credentials_from_db(user_id):
@@ -314,11 +288,12 @@ class WooCommerce(Ecommerce):
                     .where(ext_plat_cols.FiledBusinessOwnerId == user_id)
                     .where(ext_plat_cols.PlatformId == 6)
                     .limit(1)
+                    .order_by(ext_plat_cols.CreatedAt.desc())
             )
             for record in conn.execute(query):
                 row = record["Details"]
-
             details = json.loads(row)
+
             return details["shop"], details["consumer_key"], details["consumer_secret"]
 
     @classmethod
@@ -340,4 +315,46 @@ class WooCommerce(Ecommerce):
             consumer_secret=consumer_secret,
             version=cls.WOOCOMMERCE_API_VERSION
         )
+
         return wcapi.get("products/%s/variations" % p_id).json()
+
+    @staticmethod
+    def write_to_db(details: dict, data):
+        """
+        Helper method to save details to the db
+        @param details: dict- e.g username, key, url, etc
+        @param data: needed to fetch user_id
+        @return: none
+        """
+        user_id = user_id = data.get("user_id")
+        flag = 0
+        with engine.connect() as conn:
+            query = (
+                select([cols.Name])
+                    .where(cols.FiledBusinessOwnerId == user_id)
+                    .limit(1)
+            )
+            for row in conn.execute(query):
+                try:
+                    user_name = row[0]
+                    flag = 1
+                except Exception as e:
+                    raise e
+        if flag == 1:
+            temp_nl = user_name.split(" ", 1)
+            if len(temp_nl) == 2:
+                user_first_name, user_last_name = temp_nl[0], temp_nl[1]
+            else:
+                user_first_name, user_last_name = temp_nl[0], ""
+
+        with engine.connect() as conn:
+            ins = external_platforms.insert().values(
+                CreatedAt=datetime.now(),
+                CreatedById=user_id,
+                CreatedByFirstName=user_first_name,
+                CreatedByLastName=user_last_name,
+                FiledBusinessOwnerId=user_id,
+                PlatformId=6,
+                Details=json.dumps(details)
+            )
+            result = conn.execute(ins)
