@@ -26,7 +26,7 @@ class WooCommerce(Ecommerce):
 
     # endpoints
     __callback_url = "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/oauth/woocommerce/install"
-    __callback_url_local = "https://20cba55562e2.ngrok.io/api/v1/oauth/woocommerce/install"
+    __callback_url_local = "https://5adf3e1102af.ngrok.io/api/v1/oauth/woocommerce/install"
     __pre_install_endpoint = "/wc-auth/v1/authorize"
 
     @classmethod
@@ -70,7 +70,7 @@ class WooCommerce(Ecommerce):
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
             "return_url": cls.get_redirect_url(),
-            "callback_url": cls.__callback_url
+            "callback_url": cls.__callback_url_local
         }
         query_string = urlencode(params)
         redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
