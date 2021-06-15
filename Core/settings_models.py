@@ -107,8 +107,9 @@ class Mongo(BaseModel):
     structures_database_name: Optional[str]
     publish_feedback_database_name: Optional[str]
     publish_feedback_collection_name: Optional[str]
-    message_collection_name: Optional[str]
     message_database_name: Optional[str]
+    message_collection_name: Optional[str]
+    conversation_collection_name: Optional[str]
     ecommerce_database_name: Optional[str]
 
     @property

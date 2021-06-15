@@ -11,5 +11,6 @@ class Default:
     mongo = core.replace_in_class(
         get_env_model(env, "mongo"),
         message_collection_name="messages",
+        conversation_collection_name="conversations",
         message_database_name="message_db",
     )
