@@ -13,11 +13,11 @@ class MessageHandler:
     )
 
     @staticmethod
-    def convert_to_pydantic(object: Dict) -> MessageModel:
+    def convert_to_pydantic(dict_object: Dict) -> MessageModel:
         """
         Convert dict to pydantic model
         """
-        return MessageModel.parse_obj(object)
+        return MessageModel.parse_obj(dict_object)
 
     @classmethod
     def add_message(cls, sender, recipient, message) -> MessageModel:
@@ -50,11 +50,11 @@ class ConversationHandler:
     )
 
     @staticmethod
-    def convert_to_pydantic(object: Dict) -> MessageModel:
+    def convert_to_pydantic(dict_object: Dict) -> MessageModel:
         """
         Convert dict to pydantic model
         """
-        return MessageModel.parse_obj(object)
+        return MessageModel.parse_obj(dict_object)
 
     @classmethod
     def get_conversation(cls, sender, recipient) -> Optional[List[MessageModel]]:
