@@ -39,3 +39,13 @@ class MessageModel(BaseModel):
     @validator("timestamp", pre=True, always=True)
     def set_timestamp(cls, _):
         return datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + "Z"
+
+
+class ConversationIDModel(BaseModel):
+    id: Optional[ObjectId] = Field(alias="_id")
+    sender: str
+    recipient: str
+    conversation_id: str
+
+    class Config:
+        json_encoders = {ObjectId: str}
