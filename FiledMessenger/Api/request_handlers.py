@@ -41,7 +41,7 @@ class MessageHandler:
         return [result.json() for result in results]
 
 
-# TODO: remove duplicacy
+# TODO: remove duplicates
 class ConversationHandler:
     messages = MongoRepositoryBase(
         config=config.mongo,
