@@ -1,0 +1,2 @@
+class MessengerSocket:
+    socketio = None

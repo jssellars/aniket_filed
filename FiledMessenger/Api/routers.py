@@ -1,9 +1,17 @@
 import logging
 
 import flask_restful
-from flask import request
+from flask import (
+    request,
+    render_template,
+    session,
+    copy_current_request_context,
+    make_response,
+)
+from flask_socketio import emit, disconnect
 
 from Core.flask_extensions import log_request
+from FiledMessenger.Api import MessengerSocket
 from FiledMessenger.Api.request_handlers import (
     MessageHandler,
     ConversationHandler,
@@ -67,3 +75,57 @@ class ConversationID(Resource):
 
         response = ConversationIDHandler.add_conversation_id(sender, recipient)
         return response, 201
+
+
+socketio = MessengerSocket.socketio
+
+
+class Chat(Resource):
+    """
+    Return HTML for testing in web browser
+
+    Code referred from
+    https://medium.com/swlh/implement-a-websocket-using-flask-and-socket-io-python-76afa5bbeae1
+    https://stackoverflow.com/questions/19315567/returning-rendered-template-with-flask-restful-shows-html-in-browser/19316089#19316089
+    """
+
+    def get(self):
+        headers = {"Content-Type": "text/html"}
+        return make_response(
+            render_template(
+                "index.html",
+                async_mode=socketio.async_mode,
+            ),
+            200,
+            headers,
+        )
+
+
+@socketio.on("my_event", namespace="/test")
+def test_message(message):
+    session["receive_count"] = session.get("receive_count", 0) + 1
+    emit("my_response", {"data": message["data"], "count": session["receive_count"]})
+
+
+@socketio.on("my_broadcast_event", namespace="/test")
+def test_broadcast_message(message):
+    session["receive_count"] = session.get("receive_count", 0) + 1
+    emit(
+        "my_response",
+        {"data": message["data"], "count": session["receive_count"]},
+        broadcast=True,
+    )
+
+
+@socketio.on("disconnect_request", namespace="/test")
+def disconnect_request():
+    @copy_current_request_context
+    def can_disconnect():
+        disconnect()
+
+    session["receive_count"] = session.get("receive_count", 0) + 1
+    emit(
+        "my_response",
+        {"data": "Disconnected!", "count": session["receive_count"]},
+        callback=can_disconnect,
+    )
