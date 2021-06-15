@@ -34,7 +34,7 @@ class SmartCreatePublishRequest(MapperBase):
     template_id = fields.Int()
     step_one_details = fields.Dict()
     step_two_details = fields.Dict()
-    step_three_details = fields.List(fields.Dict())
+    step_three_details = fields.Dict()
     step_four_details = fields.Dict()
 
     class Meta:

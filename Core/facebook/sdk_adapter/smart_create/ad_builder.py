@@ -22,10 +22,11 @@ from Core.Tools.Misc.FiledAdFormatEnum import FiledAdFormatEnum
 from FacebookCampaignsBuilder.Infrastructure.Domain.fe_structure_models import CreateAds
 
 
-def build_ads(ad_account_id: str, step_two: Dict, step_threes: List[Dict], objective: str = None) -> List:
+def build_ads(ad_account_id: str, step_two: Dict, step_threes: Dict[str, Any], objective: str = None) -> List:
     ads = []
 
-    for step_three in step_threes:
+    for step_three in step_threes.get("ads", []):
+
         adverts = step_three.get("adverts", None)
         if not adverts:
             continue
@@ -47,7 +48,7 @@ def build_ads(ad_account_id: str, step_two: Dict, step_threes: List[Dict], objec
 
 def get_ad_creative_id(ad_creative_type: int, ad_account_id: str, step_two: Dict, adverts: Dict, objective: str) -> str:
     if not adverts:
-        return None
+        return ""
 
     ad_creative = None
     ad_account = AdAccount(ad_account_id)

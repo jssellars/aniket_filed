@@ -5,7 +5,7 @@ from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider im
 from FiledEcommerce.Api.services.publisher.main import publisher_lambda
 from FiledEcommerce.Api.utils.tools.json_serializer import ResponseSerializer
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
-
+from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
 
 def receiver_lambda(request, platform):
     token_data = decode_jwt_from_headers()
@@ -31,14 +31,14 @@ def receiver_lambda(request, platform):
                 user_first_name, user_last_name = temp_nl[0], ""
 
         filed_product_catalogs_ins = filed_product_cat.insert().values(
-            CreatedAt=datetime.now(),
+            CreatedAt=get_utc_aware_date(),
             CreatedById=user_id,
             CreatedByFirstName=user_first_name,
             CreatedByLastName=user_last_name,
             FiledBusinessOwnerId=user_id,
             Name=f"{platform} catalog",
             StateId=1,
-            LastImportAt=datetime.now(),
+            LastImportAt=get_utc_aware_date(),
         )
         result = conn.execute(filed_product_catalogs_ins)
         filed_product_catalog_id = result.inserted_primary_key

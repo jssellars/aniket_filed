@@ -19,9 +19,9 @@ class SmartEditPublishRequest:
     user_filed_id: int
     business_owner_facebook_id: str
     ad_account_id: str
-    campaigns: List[Dict]
-    adsets: List[Dict]
-    ads: List[Dict]
+    campaigns: Optional[List[Dict]] = field(default_factory=list)
+    adsets: Optional[List[Dict]] = field(default_factory=list)
+    ads: Optional[List[Dict]] = field(default_factory=list)
 
 
 @dataclass

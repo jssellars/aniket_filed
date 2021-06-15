@@ -6,9 +6,16 @@ from flask import redirect, request
 
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
-from FiledEcommerce.Api.Dtos.ImportIntegrationMappingDto import ImportIntegrationMappingDto
+from FiledEcommerce.Api.Dtos.ImportIntegrationMappingDto import (
+    ImportIntegrationMappingDto,
+)
+from FiledEcommerce.Api.Dtos.ExportIntegrationMappingDto import (
+    ExportIntegrationMappingDto,
+)
+from FiledEcommerce.Api.Dtos.ExportIntegrationModelDto import ExportIntegrationModelDto
 from FiledEcommerce.Api.Dtos.ImportIntegrationModelDto import ImportIntegrationModelDto
 from FiledEcommerce.Api.ImportIntegration.interface.ImportIntegrationProvider import ImportIntegrationProvider
+from FiledEcommerce.Api.ExportIntegration.interface.ExportIntegrationProvider import ExportIntegrationProvider
 from FiledEcommerce.Api.services.reciever.main import receiver_lambda
 from FiledEcommerce.Api.utils.tools.json_serializer import RequestSerializer
 
@@ -35,6 +42,33 @@ class ImportIntegrationMapping(Resource):
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
             return {"message": "Failed to retrieve mapping."}, 400
+
+
+class ExportIntegrationModel(Resource):
+    def get(self, platform):
+        try:
+            return ExportIntegrationModelDto.get(platform=platform), 200
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": "Failed to retrieve model."}, 400
+
+
+class ExportIntegrationMapping(Resource):
+    def get(self, platform):
+        try:
+            return ExportIntegrationMappingDto.get(platform=platform)
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": "Failed to retrieve mapping."}, 400
+
+class ExportFiledProductSet(Resource):
+    def post(self, platform):
+        try:
+            ExportIntegrationProvider.get_instance(platform).export(request)
+            return {"message": "push products catalog pushed successfully"}, 200
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": "Failed to push products catalog"}, 400
 
 
 class OAuth(Resource):

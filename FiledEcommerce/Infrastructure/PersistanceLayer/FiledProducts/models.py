@@ -13,22 +13,22 @@ Base = declarative_base()
 class Currencies(Base):
     __tablename__ = "Currencies"
     Id = Column(BIGINT, primary_key=True)
-    Name = Column(NVARCHAR(length=128))
-    Value = Column(NVARCHAR(length=256))
+    Name = Column(NVARCHAR())
+    Value = Column(NVARCHAR())
 
 
 class States(Base):
     __tablename__ = "States"
     Id = Column(BIGINT, primary_key=True)
-    Name = Column(NVARCHAR(length=128))
-    Value = Column(NVARCHAR(length=256))
+    Name = Column(NVARCHAR())
 
 
 class CustomProperties(Base):
     __tablename__ = "CustomProperties"
     Id = Column(BIGINT, primary_key=True)
     FiledVariantId = Column(BIGINT, ForeignKey("FiledVariants.Id"))
-    Properties = Column(NVARCHAR(length=512))
+    Properties = Column(NVARCHAR())
+
 
 
 class FiledSetVariants(Base):
@@ -41,26 +41,26 @@ class FiledVariantConnections(Base):
     __tablename__ = "FiledVariantConnections"
     FiledVariantId = Column(BIGINT, ForeignKey("FiledVariants.Id"), primary_key=True)
     ExternalPlatformId = Column(BIGINT, ForeignKey("ExternalPlatforms.Id"), primary_key=True)
-    IdInPlatform = Column(NVARCHAR(length=512))
+    IdInPlatform = Column(NVARCHAR())
 
 class FiledProductConnections(Base):
     __tablename__ = "FiledProductConnections"
     
     FiledVariantId = Column(BIGINT, ForeignKey("FiledVariants.Id"), primary_key=True)
     ExternalPlatformId = Column(BIGINT, ForeignKey("ExternalPlatforms.Id"), primary_key=True)
-    IdInPlatform = Column(NVARCHAR(length=512))
+    IdInPlatform = Column(NVARCHAR())
 
 class FiledSetConnections(Base):
     __tablename__ = "FiledSetConnections"
     FiledSetId = Column(BIGINT, ForeignKey("FiledSets.Id"), primary_key=True)
     ExternalPlatformId = Column(BIGINT, ForeignKey("ExternalPlatforms.Id"), primary_key=True)
-    IdInPlatform = Column(NVARCHAR(length=512))
+    IdInPlatform = Column(NVARCHAR())
 
 class FiledSmartSetConnections(Base):
     __tablename__ = "FiledSmartSetConnections"
     FiledSmartSetId = Column(BIGINT, ForeignKey("FiledSmartSets.Id"), primary_key=True)
     ExternalPlatformId = Column(BIGINT, ForeignKey("ExternalPlatforms.Id"), primary_key=True)
-    IdInPlatform = Column(NVARCHAR(length=512))
+    IdInPlatform = Column(NVARCHAR())
 
 class FiledSets(Base):
     __tablename__ = "FiledSets"
@@ -68,19 +68,19 @@ class FiledSets(Base):
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
     UpdatedById = Column(BIGINT)
-    UpdatedByFirstName = Column(NVARCHAR(length=128))
-    UpdatedByLastName = Column(NVARCHAR(length=128))
+    UpdatedByFirstName = Column(NVARCHAR())
+    UpdatedByLastName = Column(NVARCHAR())
     CreatedAt = Column(DATETIME2(precision=7))
     CreatedById = Column(BIGINT)
-    CreatedByFirstName = Column(NVARCHAR(length=128))
-    CreatedByLastName = Column(NVARCHAR(length=128))
-    Name = Column(NVARCHAR(length=256))
+    CreatedByFirstName = Column(NVARCHAR())
+    CreatedByLastName = Column(NVARCHAR())
+    Name = Column(NVARCHAR())
 
     FiledProductCatalogId = Column(BIGINT, ForeignKey("FiledProductCatalogs.Id"))
-    Filter = Column(NVARCHAR(length=256))
     StateId = Column(BIGINT, ForeignKey("States.Id"))
     ImportedAt =  Column(DATETIME2(precision=7))
 
+    FiledProductCatalogs = relationship("FiledProductCatalogs", backref="FiledSets")
 
 class FiledSmartSets(Base):
     __tablename__ = "FiledSmartSets"
@@ -88,18 +88,19 @@ class FiledSmartSets(Base):
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
     UpdatedById = Column(BIGINT)
-    UpdatedByFirstName = Column(NVARCHAR(length=128))
-    UpdatedByLastName = Column(NVARCHAR(length=128))
+    UpdatedByFirstName = Column(NVARCHAR())
+    UpdatedByLastName = Column(NVARCHAR())
     CreatedAt = Column(DATETIME2(precision=7))
     CreatedById = Column(BIGINT)
-    CreatedByFirstName = Column(NVARCHAR(length=128))
-    CreatedByLastName = Column(NVARCHAR(length=128))
-    Name = Column(NVARCHAR(length=256))
+    CreatedByFirstName = Column(NVARCHAR())
+    CreatedByLastName = Column(NVARCHAR())
+    Name = Column(NVARCHAR())
 
     FiledProductCatalogId = Column(BIGINT, ForeignKey("FiledProductCatalogs.Id"))
-    Filter = Column(NVARCHAR(length=256))
     StateId = Column(BIGINT, ForeignKey("States.Id"))
     ImportedAt =  Column(DATETIME2(precision=7))
+
+    FiledProductCatalogs = relationship("FiledProductCatalogs", backref="FiledSmartSets")
 
 class FiledProducts(Base):
     __tablename__ = "FiledProducts"
@@ -107,24 +108,23 @@ class FiledProducts(Base):
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
     UpdatedById = Column(BIGINT)
-    UpdatedByFirstName = Column(NVARCHAR(length=128))
-    UpdatedByLastName = Column(NVARCHAR(length=128))
+    UpdatedByFirstName = Column(NVARCHAR())
+    UpdatedByLastName = Column(NVARCHAR())
     CreatedAt = Column(DATETIME2(precision=7))
     CreatedById = Column(BIGINT)
-    CreatedByFirstName = Column(NVARCHAR(length=128))
-    CreatedByLastName = Column(NVARCHAR(length=128))
-    Name = Column(NVARCHAR(length=256))
+    CreatedByFirstName = Column(NVARCHAR())
+    CreatedByLastName = Column(NVARCHAR())
+    Name = Column(NVARCHAR())
 
     FiledProductCatalogId = Column(BIGINT, ForeignKey("FiledProductCatalogs.Id"))
     GoogleProductCategoryId = Column(BIGINT)
-    ProductType = Column(NVARCHAR(length=128))
-    Sku = Column(NVARCHAR(length=128))
-    Issues = Column(NVARCHAR(length=128))
-    Vendor = Column(NVARCHAR(length=128))
-    Tags = Column(NVARCHAR(length=128))
+    ProductType = Column(NVARCHAR())
+    Sku = Column(NVARCHAR())
+    Issues = Column(NVARCHAR())
+    Tags = Column(NVARCHAR())
     StateId = Column(BIGINT, ForeignKey("States.Id"))
-    Description = Column(NVARCHAR(length=128))
-    ImageUrl = Column(NVARCHAR(length=128))
+    Description = Column(NVARCHAR())
+    ImageUrl = Column(NVARCHAR())
     ImportedAt = Column(DATETIME2(precision=7))
 
     FiledVariants = relationship("FiledVariants", backref="FiledProducts")
@@ -140,34 +140,34 @@ class FiledVariants(Base):
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
     UpdatedById = Column(BIGINT)
-    UpdatedByFirstName = Column(NVARCHAR(length=128))
-    UpdatedByLastName = Column(NVARCHAR(length=128))
+    UpdatedByFirstName = Column(NVARCHAR())
+    UpdatedByLastName = Column(NVARCHAR())
     CreatedAt = Column(DATETIME2(precision=7))
     CreatedById = Column(BIGINT)
-    CreatedByFirstName = Column(NVARCHAR(length=128))
-    CreatedByLastName = Column(NVARCHAR(length=128))
-    Name = Column(NVARCHAR(length=256))
+    CreatedByFirstName = Column(NVARCHAR())
+    CreatedByLastName = Column(NVARCHAR())
+    Name = Column(NVARCHAR())
 
     FiledProductId = Column(BIGINT, ForeignKey("FiledProducts.Id"))
     CurrencyId = Column(BIGINT, ForeignKey("Currencies.Id"))
-    Sku = Column(NVARCHAR(length=128))
-    Color = Column(NVARCHAR(length=128))
-    Condition = Column(NVARCHAR(length=128))
-    Size = Column(BIGINT)
-    Material = Column(NVARCHAR(length=128))
-    Barcode = Column(NVARCHAR(length=128))
+    Sku = Column(NVARCHAR())
+    Color = Column(NVARCHAR())
+    Condition = Column(NVARCHAR())
+    Size = Column(NVARCHAR())
+    Material = Column(NVARCHAR())
+    Barcode = Column(NVARCHAR())
     InventoryQuantity = Column(BIGINT)
     Price = Column(DECIMAL)
     CompareAtPrice = Column(DECIMAL)
-    Url = Column(NVARCHAR(length=128))
-    ImageUrl = Column(NVARCHAR(length=128))
+    Url = Column(NVARCHAR())
+    ImageUrl = Column(NVARCHAR())
     ImportedAt = Column(DATETIME2(precision=7))
-    CustomImages = Column(NVARCHAR(length=128))
+    CustomImages = Column(NVARCHAR())
     Availability = Column(BIGINT)
-    Issues = Column(NVARCHAR(length=128))
-    Tags = Column(NVARCHAR(length=128))
+    Issues = Column(NVARCHAR())
+    Tags = Column(NVARCHAR())
     StateId = Column(BIGINT, ForeignKey("States.Id"))
-    ShortDescription = Column(NVARCHAR(length=128))
+    ShortDescription = Column(NVARCHAR())
     FiledProductCatalogId = Column(BIGINT, ForeignKey("FiledProductCatalogs.Id"))
 
     FiledVariantConnection = relationship(
@@ -187,13 +187,13 @@ class FiledProductCatalogs(Base):
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
     UpdatedById = Column(BIGINT)
-    UpdatedByFirstName = Column(NVARCHAR(length=128))
-    UpdatedByLastName = Column(NVARCHAR(length=128))
+    UpdatedByFirstName = Column(NVARCHAR())
+    UpdatedByLastName = Column(NVARCHAR())
     CreatedAt = Column(DATETIME2(precision=7))
     CreatedById = Column(BIGINT)
-    CreatedByFirstName = Column(NVARCHAR(length=128))
-    CreatedByLastName = Column(NVARCHAR(length=128))
-    Name = Column(NVARCHAR(length=256))
+    CreatedByFirstName = Column(NVARCHAR())
+    CreatedByLastName = Column(NVARCHAR())
+    Name = Column(NVARCHAR())
     FiledBusinessOwnerId =Column(BIGINT, ForeignKey("FiledBusinessOwners.FiledBusinessOwnerId"))
     StateId = Column(BIGINT, ForeignKey("States.Id"))
 
@@ -204,14 +204,14 @@ class BusinessOwnerStates(Base):
     __tablename__ = "BusinessOwnerStates"
 
     Id = Column(BIGINT, primary_key=True)
-    Name = Column(NVARCHAR(length=256))
-    Value = Column(NVARCHAR(length=256))
+    Name = Column(NVARCHAR())
+    Value = Column(NVARCHAR())
 
 class FiledBusinessOwners(Base):
     __tablename__ = "FiledBusinessOwners"
 
     FiledBusinessOwnerId = Column(BIGINT, primary_key=True)
-    Name = Column(NVARCHAR(length=256))
+    Name = Column(NVARCHAR())
     BusinessOwnerStateId = Column(BIGINT, ForeignKey("BusinessOwnerStates.Id"))
 
 class FiledProductCatalogPermissions(Base):
@@ -225,8 +225,8 @@ class Platforms(Base):
     __tablename__ = "Platforms"
 
     Id = Column(BIGINT, primary_key=True)
-    Name = Column(NVARCHAR(length=256))
-    Value = Column(NVARCHAR(length=256))
+    Name = Column(NVARCHAR())
+    Value = Column(NVARCHAR())
 
 class ExternalPlatforms(Base):
     __tablename__ = "ExternalPlatforms"
@@ -234,15 +234,16 @@ class ExternalPlatforms(Base):
     Id = Column(BIGINT, primary_key=True)
     UpdatedAt = Column(DATETIME2(precision=7))
     UpdatedById = Column(BIGINT)
-    UpdatedByFirstName = Column(NVARCHAR(length=128))
-    UpdatedByLastName = Column(NVARCHAR(length=128))
+    UpdatedByFirstName = Column(NVARCHAR())
+    UpdatedByLastName = Column(NVARCHAR())
     CreatedAt = Column(DATETIME2(precision=7))
     CreatedById = Column(BIGINT)
-    CreatedByFirstName = Column(NVARCHAR(length=128))
-    CreatedByLastName = Column(NVARCHAR(length=128))
-    Name = Column(NVARCHAR(length=256))
+    CreatedByFirstName = Column(NVARCHAR())
+    CreatedByLastName = Column(NVARCHAR())
+    Name = Column(NVARCHAR())
 
     FiledBusinessOwnerId = Column(BIGINT, ForeignKey("FiledBusinessOwners.FiledBusinessOwnerId"))
     PlatformId = Column(BIGINT, ForeignKey("Platforms.Id"))
-    MappingPreferences = Column(NVARCHAR(length=1024))
-    Details = Column(NVARCHAR(length=1024))
+    MappingPreferences = Column(NVARCHAR())
+    Details = Column(NVARCHAR())
+

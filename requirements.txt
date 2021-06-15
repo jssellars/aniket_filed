@@ -45,7 +45,7 @@ python-dateutil==2.8.1
 pytz==2019.3
 requests==2.23.0
 six==1.14.0
-SQLAlchemy==1.3.15
+SQLAlchemy==1.3.16
 sqlparse==0.3.1
 sshtunnel==0.1.5
 typing==3.7.4.1
@@ -76,3 +76,4 @@ google-api-python-client~=2.1.0
 WooCommerce==3.0.0
 sendgrid==6.7.0
 sgqlc~=13.0
+pydantic-sqlalchemy==0.0.9
