@@ -62,7 +62,7 @@ def build_base_ad_sets(
 
     set_statuses(ad_set_template)
     set_date_interval(ad_set_template, step_one, step_two)
-    ad_set_template[AdSet.Field.promoted_object] = set_promoted_object(is_using_conversions, step_three, step_two)
+    ad_set_template[AdSet.Field.promoted_object] = set_promoted_object(is_using_conversions, step_three.get("ads")[0], step_two)
 
     opt_and_delivery = step_two["optimization_and_delivery"]
     ad_set_template[AdSet.Field.optimization_goal] = opt_and_delivery["optimization_goal"]

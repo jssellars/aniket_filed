@@ -1206,7 +1206,7 @@ class AddStructuresToParent:
         # TODO: Modify build_ads function to accept a single argument for necessary fields
         #  as opposed to per step fields
 
-        ads = ad_builder.build_ads(ad_account_id, ad_request, [ad_request])
+        ads = ad_builder.build_ads(ad_account_id, ad_request, {"ads": [ad_request]})
 
         structure_ids = {
             "ad_ids": []
