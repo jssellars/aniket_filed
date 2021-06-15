@@ -82,7 +82,7 @@ def session_scope() -> ContextManager[Session]:
         session.commit()
 
     # intentional wide scope to rollback session
-    except:
+    except Exception:
         session.rollback()
         raise
     finally:

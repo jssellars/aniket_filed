@@ -12,6 +12,7 @@ from FiledEcommerce.Api.ImportIntegration.bigcommerce.graphql import Query
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
 from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
+from FiledEcommerce.Infrastructure.CurrencyEnum import CurrencyEnum
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 
@@ -232,6 +233,8 @@ class BigCommerce(Ecommerce):
                     else:
                         already_mapped_fields.add(_map["mapped_to"])
 
+            currency_code = next(money["currency_code"] for money in node["prices"].values() if money)
+
             pr = FiledProduct(
                 product_id=df["product_id"],
                 title=df["title"],
@@ -288,6 +291,7 @@ class BigCommerce(Ecommerce):
                     created_at=imported_at,
                     updated_at=imported_at,
                     imported_at=imported_at,
+                    currency_id=CurrencyEnum[currency_code].value,
                     material=vdf.get("material", ""),
                     condition=vdf.get("condition", ""),
                     color=vdf.get("color", ""),
