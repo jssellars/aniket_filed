@@ -23,6 +23,9 @@ api = flask_restful.Api(app)
 router_route_pairs = (
     (routers.ImportIntegrationModel, "/model/<string:platform>"),
     (routers.ImportIntegrationMapping, "/mapping/<string:platform>"),
+    (routers.ExportIntegrationModel, "/export/model/<string:platform>"),
+    (routers.ExportIntegrationMapping, "/export/mapping/<string:platform>"),
+    (routers.ExportFiledProductSet, "/export/products/<string:platform>"),
     (routers.OAuth, "/oauth/<string:platform>/<string:action>"),
     (routers.Receiver, "/receiver/<string:platform>")
 )
