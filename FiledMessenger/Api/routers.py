@@ -4,7 +4,11 @@ import flask_restful
 from flask import request
 
 from Core.flask_extensions import log_request
-from FiledMessenger.Api.request_handlers import MessageHandler, ConversationHandler
+from FiledMessenger.Api.request_handlers import (
+    MessageHandler,
+    ConversationHandler,
+    ConversationIDHandler,
+)
 from FiledMessenger.Api.startup import config
 
 logger = logging.getLogger(__name__)
@@ -47,3 +51,19 @@ class Conversation(Resource):
 
         response = ConversationHandler.get_conversation(sender, recipient)
         return response, 200
+
+
+class ConversationID(Resource):
+    def get(self):
+        sender = request.args.get("sender")
+        recipient = request.args.get("recipient")
+
+        response = ConversationIDHandler.get_conversation_id(sender, recipient)
+        return response, 200
+
+    def post(self):
+        sender = request.args.get("sender")
+        recipient = request.args.get("recipient")
+
+        response = ConversationIDHandler.add_conversation_id(sender, recipient)
+        return response, 201

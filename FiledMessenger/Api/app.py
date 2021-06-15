@@ -24,6 +24,7 @@ router_route_pairs = (
     (routers.Version, "version"),
     (routers.Message, "message"),
     (routers.Conversation, "conversation"),
+    (routers.ConversationID, "conversation-id"),
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
