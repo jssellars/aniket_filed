@@ -52,7 +52,7 @@ class Shopify(Ecommerce):
     def get_redirect_url(cls):
         return (
             "https://localhost:4200/#/catalog/ecommerce"
-            if request.host.startswith("localhost")
+            if request.host.startswith("localhost") or request.host.startswith("127.0.0.1")
             else "https://ecommerce.filed.com/#/catalog/ecommerce"
         )
 
