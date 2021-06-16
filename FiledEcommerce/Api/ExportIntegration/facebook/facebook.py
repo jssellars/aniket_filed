@@ -25,8 +25,7 @@ from facebook_business.adobjects.productcatalog import ProductCatalog
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPISdkBase import GraphAPISdkBase
 
 from Core.Web.Security.JWTTools import extract_business_owner_facebook_id
-from FiledEcommerce.Api.startup import config
-from FacebookAccounts.Api.startup import fixtures  
+from FiledEcommerce.Api.startup import config, fb_fixtures
 from facebook_business.adobjects.business import Business
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 from FiledEcommerce.Infrastructure.PersistanceLayer.FiledProducts.FiledProductsSQLRepo import FiledProductsSQLRepo
@@ -42,7 +41,7 @@ class Facebook(Ecommerce):
     def handle(cls, request: request):
         cls.request_json = request.get_json(force=True)
         cls.facebook_buisness_id = extract_business_owner_facebook_id()
-        permanent_token = fixtures.business_owner_repository.get_permanent_token(
+        permanent_token = fb_fixtures.business_owner_repository.get_permanent_token(
             cls.facebook_buisness_id
         )
         _ = GraphAPISdkBase(config.facebook, permanent_token)
@@ -52,7 +51,7 @@ class Facebook(Ecommerce):
     def create_facebook_catalog(cls, catalog_name):
         fb_catalog = None
         try:
-            business = Business(fbid=cls.faceebook_buisness_id).get_business_users()
+            business = Business(fbid=cls.facebook_buisness_id).get_business_users()
             fb_catalog = Business(fbid=str(business[0]['business']['id'])).create_owned_product_catalog(
                 params={"name": catalog_name}
             )
