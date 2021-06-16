@@ -78,3 +78,5 @@ sendgrid==6.7.0
 sgqlc~=13.0
 pydantic-sqlalchemy==0.0.9
 Flask-SocketIO==5.1.0
+eventlet==0.31.0
+kafka-python==2.0.2

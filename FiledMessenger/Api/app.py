@@ -2,11 +2,6 @@
 import os
 import sys
 
-from flask_socketio import SocketIO
-
-from FiledMessenger.Api import MessengerSocket
-from FiledMessenger.Api.startup import config
-
 path = os.environ.get("PYTHON_SOLUTION_PATH")
 if path:
     sys.path.append(path)
@@ -15,16 +10,18 @@ if path:
 import flask
 import flask_cors
 import flask_restful
+import flask_socketio
+
+from Core.logging_config import request_as_log_dict
+from FiledMessenger.Api import MessengerSocket, routers
+from FiledMessenger.Api.startup import config
 
 app = flask.Flask(__name__)
 app.url_map.strict_slashes = False
 cors = flask_cors.CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = flask_restful.Api(app)
 async_mode = None
-MessengerSocket.socketio = SocketIO(
-    app, async_mode=async_mode, cors_allowed_origins="*"
-)
-from FiledMessenger.Api import routers
+MessengerSocket.socketio = flask_socketio.SocketIO(app, async_mode=async_mode, cors_allowed_origins="*")
 
 router_route_pairs = (
     (routers.HealthCheck, "healthcheck"),
@@ -36,6 +33,16 @@ router_route_pairs = (
 )
 for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
+
+namespace_chat = f"{config.base_url.lower()}/chat"
+MessengerSocket.socketio.on_namespace(routers.SocketChat(namespace_chat))
+
+
+# Unfortunately, namespace based error handling is not available, yet :)
+@MessengerSocket.socketio.on_error(namespace=namespace_chat)
+def chat_error_handler(e):
+    routers.logger.exception(repr(e), extra=request_as_log_dict(flask.request))
+
 
 if __name__ == "__main__":
     MessengerSocket.socketio.run(

@@ -1,28 +1,20 @@
 import logging
 
-import flask_restful
-from flask import (
-    request,
-    render_template,
-    session,
-    copy_current_request_context,
-    make_response,
-)
-from flask_socketio import emit, disconnect
+from flask import copy_current_request_context, make_response, render_template, request, session
+from flask_restful import Resource
+from flask_socketio import Namespace, disconnect, emit
 
 from Core.flask_extensions import log_request
-from FiledMessenger.Api import MessengerSocket
-from FiledMessenger.Api.request_handlers import (
-    MessageHandler,
-    ConversationHandler,
-    ConversationIDHandler,
-)
+
+# from Core.logging_config import request_as_log_dict
+# from FiledMessenger.Api import MessengerSocket
+from FiledMessenger.Api.request_handlers import ConversationHandler, ConversationIDHandler, MessageHandler
 from FiledMessenger.Api.startup import config
 
 logger = logging.getLogger(__name__)
 
 
-class Resource(flask_restful.Resource):
+class Resource(Resource):
     method_decorators = [log_request(logger)]
 
 
@@ -77,9 +69,6 @@ class ConversationID(Resource):
         return response, 201
 
 
-socketio = MessengerSocket.socketio
-
-
 class Chat(Resource):
     """
     Return HTML for testing in web browser
@@ -92,40 +81,42 @@ class Chat(Resource):
     def get(self):
         headers = {"Content-Type": "text/html"}
         return make_response(
-            render_template(
-                "index.html",
-                async_mode=socketio.async_mode,
-            ),
+            render_template("index.html"),
             200,
             headers,
         )
 
 
-@socketio.on("my_event", namespace="/test")
-def test_message(message):
-    session["receive_count"] = session.get("receive_count", 0) + 1
-    emit("my_response", {"data": message["data"], "count": session["receive_count"]})
+class SocketChat(Namespace):
+    def on_connect(self):
+        print(f"{request.sid} connected.")
+        emit("my_response", {"data": "Connected"})
 
+    def on_disconnect(self):
+        # don't do emit on disconnect. disconnect means client cannot see
+        # any more updates here. we need to update the userid:[socketIds] list
+        # and remove this socket id from any connected rooms.
+        print(f"Client {request.sid} disconnected")
 
-@socketio.on("my_broadcast_event", namespace="/test")
-def test_broadcast_message(message):
-    session["receive_count"] = session.get("receive_count", 0) + 1
-    emit(
-        "my_response",
-        {"data": message["data"], "count": session["receive_count"]},
-        broadcast=True,
-    )
+        @copy_current_request_context
+        def can_disconnect():
+            disconnect()
 
+        session["receive_count"] = session.get("receive_count", 0) + 1
+        emit(
+            "my_response",
+            {"data": "Disconnected!", "count": session["receive_count"]},
+            callback=can_disconnect,
+        )
 
-@socketio.on("disconnect_request", namespace="/test")
-def disconnect_request():
-    @copy_current_request_context
-    def can_disconnect():
-        disconnect()
+    def on_my_event(self, message):
+        session["receive_count"] = session.get("receive_count", 0) + 1
+        emit("my_response", {"data": message["data"], "count": session["receive_count"]})
 
-    session["receive_count"] = session.get("receive_count", 0) + 1
-    emit(
-        "my_response",
-        {"data": "Disconnected!", "count": session["receive_count"]},
-        callback=can_disconnect,
-    )
+    def on_my_broadcast_event(self, message):
+        session["receive_count"] = session.get("receive_count", 0) + 1
+        emit(
+            "my_response",
+            {"data": message["data"], "count": session["receive_count"]},
+            broadcast=True,
+        )
