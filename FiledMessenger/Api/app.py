@@ -21,7 +21,9 @@ app.url_map.strict_slashes = False
 cors = flask_cors.CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = flask_restful.Api(app)
 async_mode = None
-MessengerSocket.socketio = SocketIO(app, async_mode=async_mode)
+MessengerSocket.socketio = SocketIO(
+    app, async_mode=async_mode, cors_allowed_origins="*"
+)
 from FiledMessenger.Api import routers
 
 router_route_pairs = (
