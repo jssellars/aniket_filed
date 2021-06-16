@@ -259,7 +259,10 @@ class AgeGenderBreakdownSplit(RecommendationAction):
                 "campaign_id": recommendation.get(RecommendationField.CAMPAIGN_ID.value),
                 "deep_copy": False,
                 "status_option": AdSet.StatusOption.inherited_from_source,
-                "rename_options": {"rename_suffix": f"{adset_split.min_age}-{adset_split.max_age} - {gender}"},
+                "rename_options": {
+                    "rename_prefix": "Dexter - ",
+                    "rename_suffix": f" {adset_split.min_age}-{adset_split.max_age} - {gender}"
+                },
             }
         )
 

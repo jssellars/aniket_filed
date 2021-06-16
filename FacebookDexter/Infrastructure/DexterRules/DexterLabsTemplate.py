@@ -6,7 +6,7 @@ from FacebookDexter.Infrastructure.DexterRules.DexterOutput import DexterRecomme
 
 class DexterLabsTemplate(Enum):
     LOOKALIKE_AUDIENCE = DexterRecommendationOutput(
-        analysis="We have identified a lookalike audience based on your most active users using (pixel {pixel_id}) for campaign: {campaign_name}",
+        analysis="We have identified a lookalike audience based on your most active users using (pixel {pixel_id})",
         priority=RecommendationPriority.HIGH,
         title="Create a lookalike audience",
         subtext="Consider building a lookalike audience based of your most active users.",

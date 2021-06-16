@@ -26,4 +26,4 @@ class DuplicateAdset(RecommendationAction):
     def process_action(self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict=None):
 
         update_turing_structure(self.config, recommendation, headers)
-        duplicate_fb_adset(recommendation, self.fixtures)
+        duplicate_fb_adset(recommendation, self.fixtures, name_suffix="Dexter - ", name_prefix=" - Duplicate")
