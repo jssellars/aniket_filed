@@ -660,13 +660,14 @@ class SmartEditPublish:
                 adset_targeting.user_device = request_user_device
 
         placements = adset.get("placements")
-        publisher_platforms, platform_positions = get_placement_positions(placements)
+        if placements:
+            publisher_platforms, platform_positions = get_placement_positions(placements)
 
-        adset_targeting.publisher_platforms = publisher_platforms
+            adset_targeting.publisher_platforms = publisher_platforms
 
-        if platform_positions:
-            for platform_position, positions in platform_positions.items():
-                adset_targeting.__setattr__(platform_position, positions)
+            if platform_positions:
+                for platform_position, positions in platform_positions.items():
+                    adset_targeting.__setattr__(platform_position, positions)
 
         params[AdSet.Field.targeting] = asdict(adset_targeting)
 
