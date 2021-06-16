@@ -278,7 +278,7 @@ class DismissRecommendation(Resource):
 class ApplyRecommendation(Resource):
     @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
     def put(self, recommendation_id: str):
-
+        dexter_output = None
         try:
             # Todo: Refactor in the Future.
             data = humps.decamelize(request.get_json())
@@ -287,14 +287,32 @@ class ApplyRecommendation(Resource):
             command = mapping.load(data)
 
             business_owner_id = extract_business_owner_facebook_id()
-            return (
-                RecommendationsHandlers.apply_recommendation(
-                    recommendation_id, business_owner_id, request.headers, command
-                ),
-                200,
+            (
+                recommendation,
+                recommendation_repository,
+                query_filter,
+                dexter_output,
+            ) = RecommendationsHandlers.apply_recommendation(recommendation_id, business_owner_id)
+
+            success_feedback = RecommendationsHandlers.perform_recommendation_action(
+                recommendation,
+                recommendation_repository,
+                query_filter,
+                business_owner_id,
+                request.headers,
+                dexter_output,
+                command,
             )
+
+            if success_feedback:
+                return {"message": success_feedback}, 200
+            else:
+                return {"message": dexter_output.apply_action_type.value.SUCCESS_FEEDBACK}, 200
 
         except Exception as e:
             logger.exception(f"Failed to apply recommendation || {repr(e)}")
 
-            return {"message": "Failed to apply recommendation"}, 400
+            if dexter_output:
+                return {"message": dexter_output.apply_action_type.value.FAILURE_FEEDBACK}, 400
+            else:
+                return {"message": "Failed to apply recommendation"}, 400

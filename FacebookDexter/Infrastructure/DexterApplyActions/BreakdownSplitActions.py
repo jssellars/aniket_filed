@@ -63,7 +63,14 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         "that the under-performing age/gender combinations will be avoided"
     )
 
-    def process_action(self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict=None):
+    SUCCESS_FEEDBACK: ClassVar[str] = "Dexter successfully removed underperforming breakdown"
+    FAILURE_FEEDBACK: ClassVar[
+        str
+    ] = "Overall Failure (due to error): Dexter was unsuccessful in removing the underperforming breakdown."
+
+    def process_action(
+        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+    ):
 
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
         level = recommendation.get(RecommendationField.LEVEL.value)
@@ -121,6 +128,25 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         ]
 
         self._publish_message_and_pause_structure(new_created_structures, recommendation, headers)
+        self._create_success_message(len(new_adset_ids), len(ad_ids), len(new_ad_ids))
+
+        return self.SUCCESS_FEEDBACK
+
+    def _create_success_message(self, number_new_adset, number_ad, number_new_ad):
+
+        if number_new_ad == number_ad:
+            self.SUCCESS_FEEDBACK = (
+                f"Success: Dexter successfully duplicated {number_new_ad}"
+                f"out of {number_ad} live ads in this AdSet, removing the underperforming breakdown."
+                f"{number_new_adset} Adsets were created to do this."
+            )
+        else:
+            self.SUCCESS_FEEDBACK = (
+                f"Failure of specific Ads (due to IOS 14 privacy restrictions): Dexter could only duplicate "
+                f"{number_new_ad} out of {number_ad} live ads in this AdSet,"
+                f" removing the underperforming breakdown. "
+                f"{number_new_adset} Adsets were created to do this."
+            )
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         existing_breakdowns = defaultdict(list)
@@ -261,7 +287,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
                 "status_option": AdSet.StatusOption.inherited_from_source,
                 "rename_options": {
                     "rename_prefix": "Dexter - ",
-                    "rename_suffix": f" {adset_split.min_age}-{adset_split.max_age} - {gender}"
+                    "rename_suffix": f" {adset_split.min_age}-{adset_split.max_age} - {gender}",
                 },
             }
         )

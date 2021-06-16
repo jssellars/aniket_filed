@@ -73,7 +73,7 @@ def dismiss_recommendation(recommendation_id: str):
     return
 
 
-def apply_recommendation(recommendation_id: str, business_owner_id: str, headers: str, command: dict):
+def apply_recommendation(recommendation_id: str, business_owner_id: str):
     recommendation_repository = MongoRepositoryBase(
         config=config.mongo,
         database_name=config.mongo.recommendations_database_name,
@@ -109,15 +109,28 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
         raise Exception("Recommendation template key not valid")
 
     dexter_output = output_enum[template_key].value
-    apply_button_type = ApplyButtonType(command.apply_button_type)
 
+    return (
+        recommendation,
+        recommendation_repository,
+        query_filter,
+        dexter_output,
+    )
+
+
+def perform_recommendation_action(
+    recommendation, recommendation_repository, query_filter, business_owner_id, headers, dexter_output, command
+):
+    apply_button_type = ApplyButtonType(command.apply_button_type)
     permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
     _ = GraphAPISdkBase(config.facebook, permanent_token)
 
     # Get the specific action instance and let it deal with the action
     apply_action = get_apply_action(dexter_output.apply_action_type, config, fixtures)
-    apply_action.process_action(recommendation, headers, apply_button_type, command=command.hidden_interests_data)
+    success_feedback = apply_action.process_action(
+        recommendation, headers, apply_button_type, command=command.hidden_interests_data
+    )
 
     # In the end, mark the recommendation as applied
     query = {
@@ -127,7 +140,7 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
     }
     recommendation_repository.update_one(query_filter, query)
 
-    return None
+    return success_feedback
 
 
 def get_number_of_pages(command: NumberOfPagesCommand, business_owner_id: str):

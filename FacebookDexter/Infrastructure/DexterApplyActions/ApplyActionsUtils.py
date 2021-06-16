@@ -38,7 +38,7 @@ def _does_budget_exist(structure_details: Dict) -> bool:
 
 
 def _get_budget_value_and_type(
-        structure_details: Dict,
+    structure_details: Dict,
 ) -> Tuple[Optional[int], Optional[str]]:
     if not _does_budget_exist(structure_details):
         return None, None
@@ -118,13 +118,13 @@ def _duplicate_ads_on_adset(ad_id, adset_id, retry=0):
 
 
 def duplicate_fb_adset(
-        recommendation: Dict,
-        fixtures: Any,
-        level: str = None,
-        best_adset_id: str = None,
-        name_suffix: str = None,
-        name_prefix: str = None,
-) -> str:
+    recommendation: Dict,
+    fixtures: Any,
+    level: str = None,
+    best_adset_id: str = None,
+    name_suffix: str = None,
+    name_prefix: str = None,
+) -> Tuple[str, int, int]:
     if not best_adset_id:
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
     else:
@@ -170,12 +170,12 @@ def duplicate_fb_adset(
     response = mapper.load(asdict(new_created_structures_event))
     RecommendationAction.publish_response(response, fixtures)
 
-    return new_adset_id
+    return new_adset_id, len(new_ad_ids), len(ad_ids)
 
 
 def duplicate_fb_adset_for_hidden_interests(
-        recommendation: Dict, fixtures: Any, adset_name: str = None, level: str = None, adset_id: str = None
-) -> str:
+    recommendation: Dict, fixtures: Any, adset_name: str = None, level: str = None, adset_id: str = None
+) -> Tuple[str, int, int]:
     """
     Duplicate Facebook Adset For Hidden Interests.
 
@@ -243,4 +243,4 @@ def duplicate_fb_adset_for_hidden_interests(
     response = mapper.load(asdict(new_created_structures_event))
     RecommendationAction.publish_response(response, fixtures)
 
-    return new_adset_id
+    return new_adset_id, len(new_ad_ids), len(ad_ids)

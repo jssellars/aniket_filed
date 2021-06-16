@@ -27,6 +27,13 @@ class CreateLookalike(RecommendationAction):
         str
     ] = "Selecting apply with create a new adset with a new lookalike audience as custom audience"
 
+    SUCCESS_FEEDBACK: str = (
+        "Dexter successfully applied lookalike audience of customers who have purchased from you recently to Adset."
+    )
+    FAILURE_FEEDBACK: ClassVar[
+        str
+    ] = "Failure (due to error): Dexter was unsuccessful in creating the lookalike audience"
+
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         """
         Save the db context needed to apply recommendation
@@ -72,13 +79,17 @@ class CreateLookalike(RecommendationAction):
 
         if not lookalike:
             logger.info(f"Lookalike audience creation failed.")
-            return
 
         suffix = f" Lookalike {pixel_id} - copy"
         prefix = "Dexter "
-        new_adset_id = duplicate_fb_adset(
+        new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
             recommendation, self.fixtures, LevelEnum.ADSET.value, best_adset_id, suffix, prefix
         )
+        if not new_adset_id:
+            logger.info(f"Adset duplication failed.")
+
+        lookalike.api_get(fields=[GraphAPIInsightsFields.name])
+
         new_adset = AdSet(new_adset_id)
         new_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
@@ -90,6 +101,23 @@ class CreateLookalike(RecommendationAction):
             f"Creating lookalike audience {lookalike.get(CustomAudience.Field.id)} for new adset {new_adset_id} "
             f"was a success."
         )
+
+        self._create_success_message(number_ad, number_new_ad, lookalike.get(CustomAudience.Field.name))
+        return self.SUCCESS_FEEDBACK
+
+    def _create_success_message(self, number_ad, number_new_ad, lookalike_name):
+
+        if number_new_ad == number_ad:
+            self.SUCCESS_FEEDBACK = (
+                f"Success: Dexter successfully duplicated {number_new_ad} out of {number_ad} live ads in this AdSet, "
+                f"using the lookalike audience - {lookalike_name} of customers who have purchased from you recently."
+            )
+        else:
+            self.SUCCESS_FEEDBACK = (
+                f"Failure of specific Ads (due to IOS 14 privacy restrictions): Dexter could only duplicate "
+                f"{number_new_ad} out of {number_ad} live ads in this AdSet, "
+                f"using the lookalike audience - {lookalike_name} of customers who have purchased from you recently."
+            )
 
 
 def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
