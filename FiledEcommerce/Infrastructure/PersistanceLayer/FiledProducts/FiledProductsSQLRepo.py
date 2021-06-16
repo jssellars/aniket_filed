@@ -18,6 +18,11 @@ class FiledProductsSQLRepo:
             if smart_set and smart_set.FiledProductCatalogs:
                 return smart_set.FiledProductCatalogs.FiledVariants, str(smart_set.Name)
             return [], None
+
+    @staticmethod
+    def getCurrencies():
+        with session_scope() as session:
+            return session.query(Currencies).all()
     
     # @staticmethod
     # def getFiledProductCatalogById(id):

@@ -6,7 +6,7 @@ facebook_mapping = {
             {
                 "name": "ID",
                 "filedKey": "Id",
-                "mappedTo": FacebookProductItem.Field.id,
+                "mappedTo": "retailer_id",
                 "type": "string",
                 "disabled": False
             },
@@ -53,8 +53,8 @@ facebook_mapping = {
                 "disabled": False
             },
             {
-                "name": "ProductType",
-                "filedKey": "ProductType",
+                "name": "product Group",
+                "filedKey": "product_group",
                 "mappedTo": FacebookProductItem.Field.product_group,
                 "type": "string",
                 "disabled": False
@@ -67,8 +67,8 @@ facebook_mapping = {
                 "disabled": False,
             },
                    {
-                "name": "ProductType",
-                "filedKey": "ProductType",
+                "name": "Product Type",
+                "filedKey": "product_type",
                 "mappedTo": FacebookProductItem.Field.product_type,
                 "type": "string",
                 "disabled": False,

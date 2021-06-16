@@ -174,6 +174,7 @@ class FiledVariants(Base):
         "FiledVariantConnections", backref="FiledVariants"
     )
     FiledSetVariants = relationship("FiledSetVariants", backref="FiledVariants")
+    Currencies = relationship("Currencies", backref="FiledVariants")
     CustomProperties = relationship("CustomProperties", backref="FiledVariants")
     FiledProductCatalogs = relationship("FiledProductCatalogs", backref="FiledVariants")
 

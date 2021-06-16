@@ -54,15 +54,12 @@ class Facebook(Ecommerce):
         cls.facebook_buisness_id = extract_business_owner_facebook_id()
         # cls.facebook_buisness_id = cls.request_json["buisness_id"]
         permanent_token = cls.get_permanent_token(
-            config.facebook.api_version,
+            config.facebook.app_id,
             config.facebook.app_secret,
             cls.request_json["access_token"],
         )
         print(permanent_token)
-        #we will refactor this later, once everything is up and running
-        # permanent_token = fb_fixtures.business_owner_repository.get_permanent_token(
-        #     cls.facebook_buisness_id
-        # )
+
         _ = GraphAPISdkBase(config.facebook, permanent_token)
         cls.mappings = cls.request_json["mappings"]
 
@@ -81,7 +78,11 @@ class Facebook(Ecommerce):
     @classmethod
     def mapper(cls):
         PydanticFiledVariants = sqlalchemy_to_pydantic(FiledVariants)
-        PydanticFiledCurrencies = sqlalchemy_to_pydantic(Currencies)
+
+        Currencies = FiledProductsSQLRepo.getCurrencies()
+        currency_map = {}
+        for currency in Currencies:
+            currency_map[currency.Id] = currency.Name
 
         products = []
         filed_set_id = cls.request_json["filed_set_id"]
@@ -98,7 +99,7 @@ class Facebook(Ecommerce):
                 pyndantic_variant_keys = pyndantic_variant.keys()
                 if filedKey in pyndantic_variant_keys:
                     single_product[mappedTo] = pyndantic_variant[filedKey]
-                    if mappedTo == "price":
+                    if mappedTo == FacebookProductItem.Field.price:
                         single_product[mappedTo] = int(pyndantic_variant[filedKey])
 
                     if filedKey == "Availability":
@@ -107,16 +108,18 @@ class Facebook(Ecommerce):
                         else:
                             single_product["availability"] = "out of stock"
 
-                if mappedTo == FacebookProductItem.Field.Condition:
+                if mappedTo == FacebookProductItem.Field.condition:
                     single_product[mappedTo] = pyndantic_variant[filedKey] or "new"
 
                 if mappedTo == FacebookProductItem.Field.brand:
                     single_product[
                         mappedTo
-                    ] = "Facebook"  # we don't have brand field in filed variants
-            single_product[
-                FacebookProductItem.Field.currency
-            ] = PydanticFiledCurrencies["Name"]
+                    ] = "None"  # we don't have brand field in filed variants
+            single_product[FacebookProductItem.Field.currency] = currency_map[
+                variant.CurrencyId
+            ]
+
+            single_product[FacebookProductItem.Field.category] = "None"
 
             products.append(single_product)
         return products, set_name
