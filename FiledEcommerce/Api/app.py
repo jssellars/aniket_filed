@@ -27,6 +27,7 @@ router_route_pairs = (
     (routers.ExportIntegrationMapping, "/export/mapping/<string:platform>"),
     (routers.ExportFiledProductSet, "/export/products/<string:platform>"),
     (routers.OAuth, "/oauth/<string:platform>/<string:action>"),
+    (routers.ExportOAuth, "/export/oauth/<string:platform>/<string:action>"),
     (routers.Receiver, "/receiver/<string:platform>")
 )
 

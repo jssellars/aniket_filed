@@ -70,6 +70,27 @@ class ExportFiledProductSet(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
             return {"message": "Failed to push products catalog"}, 400
 
+class ExportOAuth(Resource):
+    def get(self, platform, action):
+        store = ExportIntegrationProvider.get_instance(platform)
+        if action == "preinstall":
+            url = store.pre_install(request)
+        elif action == "install":
+            url = store.app_install(request)
+        elif action == "load":
+            url = store.app_load(request)
+        elif action == "uninstall":
+            url = store.app_uninstall(request)
+        else:
+            url = "Invalid action"  # Redirect to error page
+
+        if action == "preinstall":
+            return {"url": url}
+        else:
+            return redirect(url)
+
+    def post(self, platform, action):
+        return self.get(platform, action)
 
 class OAuth(Resource):
     def get(self, platform, action):

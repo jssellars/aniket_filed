@@ -6,7 +6,7 @@ facebook_mapping = {
             {
                 "name": "ID",
                 "filedKey": "Id",
-                "mappedTo": FacebookProductItem.Field.id,
+                "mappedTo": "retailer_id",
                 "type": "string",
                 "disabled": False
             },
@@ -53,8 +53,8 @@ facebook_mapping = {
                 "disabled": False
             },
             {
-                "name": "ProductType",
-                "filedKey": "ProductType",
+                "name": "product Group",
+                "filedKey": "product_group",
                 "mappedTo": FacebookProductItem.Field.product_group,
                 "type": "string",
                 "disabled": False
@@ -67,8 +67,8 @@ facebook_mapping = {
                 "disabled": False,
             },
                    {
-                "name": "ProductType",
-                "filedKey": "ProductType",
+                "name": "Product Type",
+                "filedKey": "product_type",
                 "mappedTo": FacebookProductItem.Field.product_type,
                 "type": "string",
                 "disabled": False,
@@ -81,8 +81,8 @@ facebook_mapping = {
                 "disabled": False
             },
             # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
+            #     "name": "Custom Data",
+            #     "filedKey": "CustomProperties",
             #     "mappedTo": FacebookProductItem.Field.custom_data,
             #     "type": "string",
             #     "disabled": False
@@ -95,30 +95,30 @@ facebook_mapping = {
                 "disabled": False
             },
             {
-                "name": "Tags",
-                "filedKey": "Tags",
+                "name": "custom_label_1",
+                "filedKey": "custom_label_1",
                 "mappedTo": FacebookProductItem.Field.custom_label_1,
                 "type": "string",
                 "disabled": False
             },
             {
-                "name": "Tags",
-                "filedKey": "Tags",
+                "name": "custom_label_2",
+                "filedKey": "custom_label_2",
                 "mappedTo":  FacebookProductItem.Field.custom_label_2,
                 "type": "string",
                 "disabled": False
             },
 
             {
-                "name": "Tags",
-                "filedKey": "Tags",
+                "name": "custom_label_3",
+                "filedKey": "custom_label_3",
                 "mappedTo":  FacebookProductItem.Field.custom_label_3,
                 "type": "string",
                 "disabled": False
             },
             {
-                "name": "Tags",
-                "filedKey": "Tags",
+                "name": "custom_label_4",
+                "filedKey": "custom_label_4",
                 "mappedTo":  FacebookProductItem.Field.custom_label_4,
                 "type": "string",
                 "disabled": False
@@ -130,20 +130,20 @@ facebook_mapping = {
                 "type": "string",
                 "disabled": False
             },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo":  FacebookProductItem.Field.additional_variant_attributes,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo":   FacebookProductItem.Field.age_group,
-            #     "type": "string",
-            #     "disabled": False
-            # },
+            {
+                "name": "additional_variant_attributes",
+                "filedKey": "additional_variant_attributes",
+                "mappedTo":  FacebookProductItem.Field.additional_variant_attributes,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "age group",
+                "filedKey": "age_group",
+                "mappedTo":   FacebookProductItem.Field.age_group,
+                "type": "string",
+                "disabled": False
+            },
             {
                 "name": "ImageUrl",
                 "filedKey": "ImageUrl",
@@ -165,13 +165,13 @@ facebook_mapping = {
                 "type": "string",
                 "disabled": False
             },
-            # {
-            #     "name": "Brand",
-            #     "filedKey": "Brand",
-            #     "mappedTo":  FacebookProductItem.Field.brand,
-            #     "type": "string",
-            #     "disabled": False
-            # },
+            {
+                "name": "Brand",
+                "filedKey": "Brand",
+                "mappedTo":  FacebookProductItem.Field.brand,
+                "type": "string",
+                "disabled": False
+            },
             {
                 "name": "Color",
                 "filedKey": "Color",
@@ -186,13 +186,13 @@ facebook_mapping = {
                 "type": "string",
                 "disabled": False
             },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.expiration_date,
-            #     "type": "string",
-            #     "disabled": False
-            # },
+            {
+                "name": "Expiration date",
+                "filedKey": "expiration_date",
+                "mappedTo": FacebookProductItem.Field.expiration_date,
+                "type": "string",
+                "disabled": False
+            },
             {
                 "name": "InventoryQuantity",
                 "filedKey": "InventoryQuantity",
@@ -208,69 +208,69 @@ facebook_mapping = {
                 "disabled": False
             },
 
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo":FacebookProductItem.Field.pattern,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.retailer_product_group_id,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.review_status,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.review_rejection_reasons,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.sale_price,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.sale_price_end_date,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.sale_price_start_date,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.shipping_weight_unit,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.shipping_weight_value,
-            #     "type": "string",
-            #     "disabled": False
-            # },
+            {
+                "name": "pattern",
+                "filedKey": "pattern",
+                "mappedTo":FacebookProductItem.Field.pattern,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "retailer_product_group_id",
+                "filedKey": "retailer_product_group_id",
+                "mappedTo": FacebookProductItem.Field.retailer_product_group_id,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "review_status",
+                "filedKey": "review_status",
+                "mappedTo": FacebookProductItem.Field.review_status,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "review_rejection_reasons",
+                "filedKey": "review_rejection_reasons",
+                "mappedTo": FacebookProductItem.Field.review_rejection_reasons,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "sale price",
+                "filedKey": "sale_price",
+                "mappedTo": FacebookProductItem.Field.sale_price,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "sale price end date",
+                "filedKey": "sale_price_end_date",
+                "mappedTo": FacebookProductItem.Field.sale_price_end_date,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "sale price start date",
+                "filedKey": "sale price start date",
+                "mappedTo": FacebookProductItem.Field.sale_price_start_date,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "shipping weight unit",
+                "filedKey": "shipping weight unit",
+                "mappedTo": FacebookProductItem.Field.shipping_weight_unit,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "shipping weight value",
+                "filedKey": "shipping_weight_value",
+                "mappedTo": FacebookProductItem.Field.shipping_weight_value,
+                "type": "string",
+                "disabled": False
+            },
             {
                 "name": "Size",
                 "filedKey": "Size",
@@ -278,27 +278,27 @@ facebook_mapping = {
                 "type": "string",
                 "disabled": False
             },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.offer_price_amount,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.offer_price_end_date,
-            #     "type": "string",
-            #     "disabled": False
-            # },
-            # {
-            #     "name": "SKU",
-            #     "filedKey": "sku",
-            #     "mappedTo": FacebookProductItem.Field.offer_price_start_date,
-            #     "type": "string",
-            #     "disabled": False
-            # },
+            {
+                "name": "offer price amount",
+                "filedKey": "offer price amount",
+                "mappedTo": FacebookProductItem.Field.offer_price_amount,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "offer price end date",
+                "filedKey": "offer_price_end_date",
+                "mappedTo": FacebookProductItem.Field.offer_price_end_date,
+                "type": "string",
+                "disabled": False
+            },
+            {
+                "name": "offer_price_start_date",
+                "filedKey": "offer_price_start_date",
+                "mappedTo": FacebookProductItem.Field.offer_price_start_date,
+                "type": "string",
+                "disabled": False
+            },
         ],
     }
 }
