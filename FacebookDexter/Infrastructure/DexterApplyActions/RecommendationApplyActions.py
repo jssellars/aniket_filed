@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, ClassVar, Dict, List, Optional
 
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,13 @@ class RecommendationAction:
 
     APPLY_TOOLTIP: ClassVar[str] = ""
 
-    def process_action(self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None):
+    def process_action(
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
+    ):
         raise NotImplementedError
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:

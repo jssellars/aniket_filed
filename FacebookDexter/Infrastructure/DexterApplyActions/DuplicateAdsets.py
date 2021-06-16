@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import ClassVar, Dict, Optional
 
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     duplicate_fb_adset,
     update_turing_structure,
@@ -27,7 +28,11 @@ class DuplicateAdset(RecommendationAction):
         return action_details
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
 
         update_turing_structure(self.config, recommendation, headers)

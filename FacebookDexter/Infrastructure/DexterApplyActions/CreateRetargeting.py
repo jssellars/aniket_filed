@@ -11,7 +11,8 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset, get_adset_id
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyButtonType,
     ApplyParameters,
@@ -44,7 +45,11 @@ class CreateRetargeting(RecommendationAction):
         return {}
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
         """
         Applies the action for the recommendation based on the context saved into the DB
@@ -54,12 +59,9 @@ class CreateRetargeting(RecommendationAction):
         :return:
         """
         ad_account = AdAccount(recommendation[RecommendationField.ACCOUNT_ID.value])
-        best_adset_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
-        ]
-        best_adset_name = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_NAME_LOOKALIKE.value
-        ]
+
+        initial_adset_id = get_adset_id(recommendation, apply_button_type, command.adset_id)
+
         strategy = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.STRATEGY.value]
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
@@ -70,9 +72,8 @@ class CreateRetargeting(RecommendationAction):
 
         suffix = f" Retargeting {pixel_id} {strategy} - copy"
         prefix = "Dexter "
-        new_adset_name = f"Dexter  {best_adset_name} Retargeting {pixel_id} {strategy} copy "
         new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
-            recommendation, self.fixtures, LevelEnum.ADSET.value, best_adset_id, suffix, prefix
+            recommendation, self.fixtures, LevelEnum.ADSET.value, initial_adset_id, suffix, prefix
         )
 
         if not new_adset_id:
@@ -99,7 +100,7 @@ class CreateRetargeting(RecommendationAction):
         if number_new_ad == number_ad:
             self.SUCCESS_FEEDBACK = (
                 f"Success: Dexter successfully duplicated {number_new_ad} out of {number_ad} live ads in this AdSet, "
-                f"using the lookalike audience - {retargeting_name} of customers that are more likely to convert."
+                f"using the custom audience ({retargeting_name}) of customers that are more likely to convert."
             )
         else:
             self.SUCCESS_FEEDBACK = (

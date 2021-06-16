@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import ClassVar, Dict, Optional
 
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     _does_budget_exist,
     _get_budget_value_and_type,
@@ -19,7 +20,11 @@ BUDGET_DECREASE_PERCENTAGE = 0.20
 @dataclass
 class BudgetAlterAction(RecommendationAction):
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
         update_turing_structure(self.config, recommendation, headers)
         return None

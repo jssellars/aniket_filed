@@ -128,9 +128,7 @@ def perform_recommendation_action(
 
     # Get the specific action instance and let it deal with the action
     apply_action = get_apply_action(dexter_output.apply_action_type, config, fixtures)
-    success_feedback = apply_action.process_action(
-        recommendation, headers, apply_button_type, command=command.hidden_interests_data
-    )
+    success_feedback = apply_action.process_action(recommendation, headers, apply_button_type, command=command)
 
     # In the end, mark the recommendation as applied
     query = {

@@ -11,7 +11,8 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset, get_adset_id
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyButtonType,
     ApplyParameters,
@@ -44,7 +45,11 @@ class CreateLookalike(RecommendationAction):
         return {}
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
         """
         Applies the action for the recommendation based on the context saved into the DB
@@ -56,21 +61,17 @@ class CreateLookalike(RecommendationAction):
         """
         ad_account = AdAccount(recommendation[RecommendationField.ACCOUNT_ID.value])
 
-        best_adset_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
-        ]
-        best_adset_name = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_NAME_LOOKALIKE.value
-        ]
-        best_adset = AdSet(best_adset_id)
-        best_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
+        initial_adset_id = get_adset_id(recommendation, apply_button_type, command.adset_id)
+
+        initial_adset = AdSet(initial_adset_id)
+        initial_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
         generic_pixel_audience = get_existing_generic_audience(ad_account, pixel_id)
         lookalike = get_lookalike(
             ad_account,
-            best_adset,
+            initial_adset,
             generic_pixel_audience,
             pixel_id,
             recommendation[RecommendationField.STRUCTURE_NAME.value],
@@ -83,7 +84,7 @@ class CreateLookalike(RecommendationAction):
         suffix = f" Lookalike {pixel_id} - copy"
         prefix = "Dexter "
         new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
-            recommendation, self.fixtures, LevelEnum.ADSET.value, best_adset_id, suffix, prefix
+            recommendation, self.fixtures, LevelEnum.ADSET.value, initial_adset_id, suffix, prefix
         )
         if not new_adset_id:
             logger.info(f"Adset duplication failed.")
@@ -116,7 +117,7 @@ class CreateLookalike(RecommendationAction):
             self.SUCCESS_FEEDBACK = (
                 f"Failure of specific Ads (due to IOS 14 privacy restrictions): Dexter could only duplicate "
                 f"{number_new_ad} out of {number_ad} live ads in this AdSet, "
-                f"using the lookalike audience - {lookalike_name} of customers who have purchased from you recently."
+                f"using the lookalike audience ({lookalike_name}) of customers who have purchased from you recently."
             )
 
 
@@ -181,7 +182,7 @@ def get_existing_generic_audience(ad_account: AdAccount, pixel_id: str) -> Custo
 
 def get_lookalike(
     ad_account: AdAccount,
-    best_adset: AdSet,
+    initial_adset: AdSet,
     existing_audience: CustomAudience,
     pixel_id: str,
     structure_name: str,
@@ -227,7 +228,7 @@ def get_lookalike(
             CustomAudience.Field.origin_audience_id: existing_audience.get_id(),
         }
 
-        targeting = best_adset.get(GraphAPIInsightsFields.targeting)
+        targeting = initial_adset.get(GraphAPIInsightsFields.targeting)
         if targeting:
             targeting = targeting.export_all_data()
 

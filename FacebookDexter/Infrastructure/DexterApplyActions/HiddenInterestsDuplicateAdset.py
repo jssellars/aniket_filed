@@ -14,6 +14,7 @@ from facebook_business.adobjects.adset import AdSet
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset_for_hidden_interests
 
 # Local Imports.
@@ -59,7 +60,11 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
         return {}
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
         """
         Applies the action for the Recommendation.
@@ -75,18 +80,16 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
         apply_button_type: ApplyButtonType
             Default Apply Button
 
-        command: Dict
-            Hidden Interests Data from the Payload.
+        command: ApplyRecommendationCommand
+           Contains Hidden Interests Data from the Payload.
         """
-        # Grab Adset ID & Name from Apply Parameters.
-        adset_id = recommendation[RecommendationField.APPLY_PARAMETERS.value]["adset_id"]
-        adset_name = recommendation[RecommendationField.APPLY_PARAMETERS.value]["adset_name"]
+        # Grab Adset ID & Name based on apply button type
+        adset_id = self.get_adset_id(recommendation, apply_button_type, command.adset_id)
 
         # Generate Duplicates.
         new_adset_id, number_new_ad, number_ad = duplicate_fb_adset_for_hidden_interests(
             recommendation=recommendation,
             fixtures=self.fixtures,
-            adset_name=adset_name,
             level=LevelEnum.ADSET.value,
             adset_id=adset_id,
         )
@@ -97,10 +100,10 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
         targeting = new_adset.get(GraphAPIInsightsFields.targeting)
 
         # Update Flexible Spec to the Interests selected by the user.
-        targeting["flexible_spec"] = {"interests": command["interests"]}
+        targeting["flexible_spec"] = {"interests": command.hidden_interests_data["interests"]}
         new_adset.api_update(params={"targeting": targeting})
 
-        logger.info(f"Creating Adset with Hidden Interests for New adset {adset_name}: {new_adset_id} was a success.")
+        logger.info(f"Creating Adset with Hidden Interests for New adset {adset_id}: {new_adset_id} was a success.")
         self._create_success_message(number_ad, number_new_ad)
         return self.SUCCESS_FEEDBACK
 
@@ -117,3 +120,11 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
                 f"{number_new_ad} out of {number_ad} live ads in this AdSet, "
                 f"using the hidden interest targeting that may result in cheaper conversions."
             )
+
+    def get_adset_id(self, recommendation, apply_button_type, adset_id):
+        if apply_button_type in [ApplyButtonType.BEST_PERFORMING, ApplyButtonType.DEFAULT]:
+            return recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.ADSET_ID.value]
+        elif apply_button_type in [ApplyButtonType.NEW] and adset_id:
+            return adset_id
+        else:
+            raise ValueError("invalid apply button or adset id")

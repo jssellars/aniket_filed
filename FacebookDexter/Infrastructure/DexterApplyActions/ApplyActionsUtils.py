@@ -12,7 +12,10 @@ from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import RecommendationAction
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
+    ApplyButtonType,
+    RecommendationAction,
+)
 from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import FacebookBudgetTypeEnum
 from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresHandler import (
     DexterCreatedEventMapping,
@@ -174,7 +177,7 @@ def duplicate_fb_adset(
 
 
 def duplicate_fb_adset_for_hidden_interests(
-    recommendation: Dict, fixtures: Any, adset_name: str = None, level: str = None, adset_id: str = None
+    recommendation: Dict, fixtures: Any, level: str = None, adset_id: str = None
 ) -> Tuple[str, int, int]:
     """
     Duplicate Facebook Adset For Hidden Interests.
@@ -244,3 +247,14 @@ def duplicate_fb_adset_for_hidden_interests(
     RecommendationAction.publish_response(response, fixtures)
 
     return new_adset_id, len(new_ad_ids), len(ad_ids)
+
+
+def get_adset_id(recommendation: Dict, apply_button_type: ApplyButtonType, adset_id: str = None):
+    if apply_button_type in [ApplyButtonType.BEST_PERFORMING, ApplyButtonType.DEFAULT]:
+        return recommendation[RecommendationField.APPLY_PARAMETERS.value][
+            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
+        ]
+    elif apply_button_type in [ApplyButtonType.NEW, ApplyButtonType.CHOOSE_OTHER] and adset_id:
+        return adset_id
+    else:
+        raise ValueError("invalid apply button or adset id")

@@ -47,6 +47,7 @@ class RecommendationField(Enum):
     APPLY_TOOLTIP = "apply_tooltip"
     IS_LABS = "is_labs"
     PIXEL_ID = "pixel_id"
+    ADSET_ID = "adset_id"
     BEST_ADSET_ID_LOOKALIKE = "best_adset_id"
     BEST_ADSET_NAME_LOOKALIKE = "best_adset_name"
     ALGORITHM_TYPE = "algorithm_type"

@@ -22,6 +22,7 @@ from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler 
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
 from Core.Web.FacebookGraphAPI.Tools import Tools
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     INVALID_METRIC_VALUE,
     TOTAL_KEY,
@@ -69,7 +70,11 @@ class AgeGenderBreakdownSplit(RecommendationAction):
     ] = "Overall Failure (due to error): Dexter was unsuccessful in removing the underperforming breakdown."
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
 
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
