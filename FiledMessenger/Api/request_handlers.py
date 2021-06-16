@@ -78,7 +78,7 @@ class ConversationHandler:
         return [result.json() for result in results]
 
 
-def create_conversation():
+def create_conversation() -> str:
     len_string = 10
     random_string = "".join(
         random.choices(string.ascii_uppercase + string.digits, k=len_string)
