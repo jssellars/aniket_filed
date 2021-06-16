@@ -54,13 +54,13 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
             fp_conn_ins = filed_product_conns.insert().values(
                 IdInPlatform=product.product_id,
                 ExternalPlatformId=external_platform_id,
-                FiledProductId=filed_product_id,
+                FiledProductId=filed_product_id[0],
             )
             conn.execute(fp_conn_ins)
 
             for variant in product.variants:
                 variant = FiledVariant(**variant)
-                variant.filed_product_id = filed_product_id
+                variant.filed_product_id = filed_product_id[0]
 
                 fv_ins = filed_variants.insert().values(
                     UpdatedAt=variant.updated_at,
@@ -97,13 +97,13 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 fv_conn_ins = filed_variant_conns.insert().values(
                     IdInPlatform=variant.variant_id,
                     ExternalPlatformId=external_platform_id,
-                    FiledVariantId=filed_variant_id,
+                    FiledVariantId=filed_variant_id[0],
                 )
                 conn.execute(fv_conn_ins)
 
                 if variant.custom_props is not None:
                     custom_properties_ins = custom_properties.insert().values(
-                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props.properties)
+                        FiledVariantId=filed_variant_id[0], Properties=json.dumps(variant.custom_props.properties)
                     )
                     conn.execute(custom_properties_ins)
         filed_set_ins = filed_sets.insert().values(
@@ -115,7 +115,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
             CreatedById=user_id,
             CreatedByFirstName=user_first_name,
             CreatedByLastName=user_last_name,
-            FiledProductCatalogId=filed_product_catalog_id,
+            FiledProductCatalogId=filed_product_catalog_id[0],
             Name=f"{platform} Products Set",
             StateId=1,
             ImportedAt=datetime.now(),
@@ -123,4 +123,4 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
         fs_results = conn.execute(filed_set_ins)
         filed_set_id = fs_results.inserted_primary_key
 
-    return {"filedSetId": filed_set_id}
+    return {"filedSetId": filed_set_id[0]}

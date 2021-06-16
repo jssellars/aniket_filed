@@ -453,9 +453,7 @@ class Shopify(Ecommerce):
                     condition=pv.get("condition"),
                     color=pv.get("color"),
                     size=pv.get("size"),
-                    custom_props=FiledCustomProperties(properties=variant_map["custom_fields"])
-                    if variant_map["custom_fields"]
-                    else None,
+                    custom_props=None, #TODO: CHANGE THIS MAPPING FIX  ERROR: dict' object has no attribute 'properties'
                 )
 
                 filed_product.variants.append(filed_variant)

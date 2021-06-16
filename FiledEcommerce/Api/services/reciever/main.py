@@ -44,7 +44,7 @@ def receiver_lambda(request, platform):
         filed_product_catalog_id = result.inserted_primary_key
 
         filed_product_catalogs_permissions_ins = fpc_permissions.insert().values(
-            FiledProductCatalogId=filed_product_catalog_id, FiledUserId=user_id, FiledBusinessOwnerId=user_id
+            FiledProductCatalogId=filed_product_catalog_id[0], FiledUserId=user_id, FiledBusinessOwnerId=user_id
         )
         conn.execute(filed_product_catalogs_permissions_ins)
 
