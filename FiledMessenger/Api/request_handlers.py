@@ -1,6 +1,5 @@
 import random
 import string
-
 from typing import List, Optional, Dict
 
 from Core.mongo_adapter import MongoRepositoryBase, MongoOperator
@@ -23,7 +22,7 @@ class MessageHandler:
         return MessageModel.parse_obj(dict_object)
 
     @classmethod
-    def add_message(cls, sender, recipient, message) -> MessageModel:
+    def add_message(cls, sender: str, recipient: str, message: str) -> str:
         msg = MessageModel(
             sender=sender,
             recipient=recipient,
@@ -34,7 +33,7 @@ class MessageHandler:
         return msg.json()
 
     @classmethod
-    def get_message(cls, sender, recipient) -> Optional[List[MessageModel]]:
+    def get_message(cls, sender: str, recipient: str) -> Optional[List[str]]:
         msgs = cls.messages.get({"sender": sender, "recipient": recipient})
 
         if not msgs:
@@ -60,7 +59,7 @@ class ConversationHandler:
         return MessageModel.parse_obj(dict_object)
 
     @classmethod
-    def get_conversation(cls, sender, recipient) -> Optional[List[MessageModel]]:
+    def get_conversation(cls, sender: str, recipient: str) -> Optional[List[str]]:
         query = {
             MongoOperator.OR.value: [
                 {"sender": sender, "recipient": recipient},
@@ -103,7 +102,7 @@ class ConversationIDHandler:
         return ConversationIDModel.parse_obj(dict_object)
 
     @classmethod
-    def get_conversation_id(cls, sender, recipient) -> Optional[ConversationIDModel]:
+    def get_conversation_id(cls, sender: str, recipient: str) -> Optional[str]:
         msg = cls.query_conversation_id(recipient, sender)
 
         if not msg:
@@ -112,7 +111,9 @@ class ConversationIDHandler:
         return msg.json()
 
     @classmethod
-    def query_conversation_id(cls, recipient, sender) -> Optional[ConversationIDModel]:
+    def query_conversation_id(
+        cls, recipient: str, sender: str
+    ) -> Optional[ConversationIDModel]:
         query = {
             MongoOperator.OR.value: [
                 {"sender": sender, "recipient": recipient},
@@ -127,7 +128,7 @@ class ConversationIDHandler:
         return cls.convert_to_pydantic(msgs[0])
 
     @classmethod
-    def add_conversation_id(cls, sender, recipient) -> ConversationIDModel:
+    def add_conversation_id(cls, sender: str, recipient: str) -> str:
         msg = cls.query_conversation_id(recipient, sender)
 
         if not msg:
