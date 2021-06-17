@@ -69,12 +69,17 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
         )
 
         adset_structure = get_and_map_structures(ad_account_id=account_id, level=LevelEnum.ADSET, filtering=filtering)
-        adset_structure = adset_structure[0]
+        try:
+            adset_structure = adset_structure[0]
+        except IndexError:
+            return {"message": "Oops, Adset might've been Deleted or Archived"}, 400
+
         adset_structure_details = adset_structure.get("details")
         self.adset_structure_details = adset_structure_details
 
+        # Grab Targeting & Flexible Specs.
         targeting_spec = adset_structure_details["targeting"]
-        flexible_spec = targeting_spec["flexible_spec"][0]["interests"]
+        flexible_spec = self.get_flexible_spec(targeting_spec=targeting_spec)
 
         # init AdAccount.
         ad_account = AdAccount(fbid=account_id)
@@ -101,6 +106,31 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
             audience_overlap_percent = self.get_audience_overlap_percent(interests_list=interests_list)
 
             return audience_overlap_percent
+
+    @staticmethod
+    def get_flexible_spec(targeting_spec: List):
+        """
+        Get Flexible Spec from Targeting Spec.
+
+        Parameters
+        ----------
+        targeting_spec: list[dict]
+            Targeting Spec
+
+        Returns
+        -------
+        flexible_spec: list[dict]
+            Flexible Spec with Interests.
+
+        """
+        # Finding Interests in flexible_spec.
+        flexible_spec = []
+        if len(targeting_spec["flexible_spec"]) > 0:
+            for specs in targeting_spec["flexible_spec"]:
+                if "interests" in specs:
+                    flexible_spec = specs["interests"]
+
+        return flexible_spec
 
     def get_source_interests(self, flexible_spec: list):
         """
@@ -261,15 +291,16 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
             Percentage of Audience Overlap
 
         """
-        audience_size_x_y = 0
+        audience_size_x_y: int = 0
         for interests in interests_list:
-            audience_size_x_y += interests.get("audience_size")
+            each_interests_audience_size = self.get_audience_size(interests_list=[interests])
+            audience_size_x_y += each_interests_audience_size
 
-        overlap_audience_size_z = self.get_overlap_audience_size(interests_list=interests_list)
+        overlap_audience_size_z = self.get_audience_size(interests_list=interests_list)
 
         # Computing Audience Overlap Percent, a = x + y - z
         if overlap_audience_size_z:
-            intersection_a = audience_size_x_y - overlap_audience_size_z
+            intersection_a = abs(audience_size_x_y - overlap_audience_size_z)
             audience_overlap_percent = 100 * (intersection_a / overlap_audience_size_z)
 
             audience_overlap_percent_response = {
@@ -284,7 +315,7 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
             audience_overlap_percent_response = {"audience_overlap_percent": None}
             return audience_overlap_percent_response
 
-    def get_overlap_audience_size(self, interests_list: List):
+    def get_audience_size(self, interests_list: List):
         """
         Returns Overlapping Audience Size Estimate for Multiple Interests.
 
