@@ -25,10 +25,10 @@ class BigCommerce(Ecommerce):
     __marketplace_url = "https://store-pzuk9w46gs.mybigcommerce.com/manage/marketplace/apps/my-apps/drafts"
 
     @classmethod
-    def get_redirect_url(cls):
+    def get_redirect_url(cls, test_flg):
         return (
             "https://localhost:4200/#/catalog/ecommerce"
-            if request.host.startswith("localhost") or request.host.startswith("127.0.0.1")
+            if test_flg == 1
             else "https://ecommerce.filed.com/#/catalog/ecommerce"
         )
 
@@ -38,11 +38,14 @@ class BigCommerce(Ecommerce):
         token_data = decode_jwt_from_headers()
         email = data.get("email")
         user_id = token_data.get("user_filed_id")
-
+        if request.host.startswith("localhost") or request.host.startswith("127.0.0.1"):
+            test_flg = 1 
+        else: 
+            test_flg = 0
         mongo_db = EcommerceMongoRepository()
-        mongo_db.add_one({"email": email, "user_id": user_id})
+        mongo_db.add_one({"email": email, "user_id": user_id, "test": test_flg})
 
-        return cls.__marketplace_url
+        return "true" , cls.__marketplace_url
 
     @classmethod
     def app_install(cls):
@@ -97,8 +100,9 @@ class BigCommerce(Ecommerce):
                 Details=json.dumps(deets),
             )
             result = conn.execute(ins)
+        test_flg = data.get("test")
         mongo_db.delete_many({"email": email})
-        return cls.get_redirect_url()
+        return cls.get_redirect_url(test_flg)
 
     @classmethod
     def app_load(cls):
@@ -106,7 +110,10 @@ class BigCommerce(Ecommerce):
 
     @classmethod
     def app_uninstall(cls):
-        pass
+        with engine.connect() as conn:
+            query = external_platforms.delete().where(ext_plat_cols.FiledBusinessOwnerId == 105).where(ext_plat_cols.PlatformId == 4).limit(1)
+            conn.execute(query) #TODO: change 105 to user_id
+        return 200
 
     @classmethod
     def get_access_token(cls, code, context, scope):

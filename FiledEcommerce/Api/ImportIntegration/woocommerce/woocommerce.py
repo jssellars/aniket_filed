@@ -30,10 +30,10 @@ class WooCommerce(Ecommerce):
     __pre_install_endpoint = "/wc-auth/v1/authorize"
 
     @classmethod
-    def get_redirect_url(cls):
+    def get_redirect_url(cls, test_flg):
         return (
             "https://localhost:4200/#/catalog/ecommerce"
-            if request.host.startswith("localhost") or request.host.startswith("127.0.0.1")
+            if test_flg == 1
             else "https://ecommerce.filed.com/#/catalog/ecommerce"
         )
 
@@ -65,20 +65,24 @@ class WooCommerce(Ecommerce):
         if not cls.is_valid_shop(shop):
             return cls.RESPONSE_ERROR_MESSAGE
         user_id = token_data["user_filed_id"]
+        if request.host.startswith("localhost") or request.host.startswith("127.0.0.1"):
+            test_flg = 1 
+        else: 
+            test_flg = 0
         params = {
             "app_name": "Filed",
             "scope": cls.WOOCOMMERCE_API_SCOPES,
             "user_id": user_id,
-            "return_url": cls.get_redirect_url(),
+            "return_url": cls.get_redirect_url(test_flg),
             "callback_url": cls.__callback_url_local
         }
         query_string = urlencode(params)
         redirect_url = "%s%s?%s" % (shop, cls.__pre_install_endpoint, query_string)
 
         mongo_db = EcommerceMongoRepository()
-        mongo_db.add_one({"userId": user_id, "shop": shop})
+        mongo_db.add_one({"userId": user_id, "shop": shop, "test": test_flg})
 
-        return redirect_url
+        return "true", redirect_url
 
     @classmethod
     def app_install(cls):
@@ -94,6 +98,7 @@ class WooCommerce(Ecommerce):
         mongo_db = EcommerceMongoRepository()
         record = mongo_db.get_first_by_key("userId", user_id)
         shop_url = record.get("shop")
+        test_flg = record.get("test")
         consumer_key = data.get("consumer_key")
         consumer_secret = data.get("consumer_secret")
         key_permissions = data.get("key_permissions")
@@ -108,7 +113,7 @@ class WooCommerce(Ecommerce):
         cls.write_to_db(details, data)
 
         mongo_db.delete_many({"userId": user_id})
-        return cls.get_redirect_url()
+        return cls.get_redirect_url(test_flg)
 
     @classmethod
     def app_load(cls):
@@ -120,13 +125,16 @@ class WooCommerce(Ecommerce):
         token_data = decode_jwt_from_headers()
         user_id = token_data["user_filed_id"]
         if cls.read_shop_from_db(user_id) != "":
-            return cls.get_redirect_url()
+            return cls.get_redirect_url(test_flg=1)
         else:
             return cls.RESPONSE_ERROR_MESSAGE
 
     @classmethod
     def app_uninstall(cls):
-        pass
+        with engine.connect() as conn:
+            query = external_platforms.delete().where(ext_plat_cols.FiledBusinessOwnerId == 105).where(ext_plat_cols.PlatformId == 6).limit(1)
+            conn.execute(query) #TODO: change 105 to user_id
+        return 200        
 
     @staticmethod
     def read_shop_from_db(user_id):

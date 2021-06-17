@@ -44,10 +44,10 @@ class Magento(Ecommerce):
     __filed_ecom_url = "https://localhost:4200/#/catalog/ecommerce"
 
     @classmethod
-    def get_redirect_url(cls):
+    def get_redirect_url(cls, test_flg):
         return (
             "https://localhost:4200/#/catalog/ecommerce"
-            if request.host.startswith("localhost") or request.host.startswith("127.0.0.1")
+            if test_flg == 1
             else "https://ecommerce.filed.com/#/catalog/ecommerce"
         )
 
@@ -92,8 +92,12 @@ class Magento(Ecommerce):
             return {"message": "Url Validation Error"}
         username = data.get("username")
         password = data.get("password")
+        if request.host.startswith("localhost") or request.host.startswith("127.0.0.1"):
+            test_flg = 1 
+        else: 
+            test_flg = 0
         mongo_db = EcommerceMongoRepository()
-        mongo_db.add_one({"host_url": host_url, "email": email, "user_id": user_id})
+        mongo_db.add_one({"host_url": host_url, "email": email, "user_id": user_id, "test": test_flg})
         body = {"host_url": host_url, "username": username, "password": password}
         return cls.app_install_helper(body)
 
@@ -108,17 +112,18 @@ class Magento(Ecommerce):
             token = cls.get_token(host_url, username, password)
             store_response = cls.store_info_resolver(host_url, token)
             if not store_response:
-                return "Sorry! No Store Found"
+                return  "false" , "Sorry! No Store Found"
             else:
                 store_code = "default"
                 mongo_db = EcommerceMongoRepository()
                 data = mongo_db.get_first_by_key("host_url", host_url)
                 deets = {"token": token, "store_code": store_code, "host_url": host_url}
                 cls.write_token_to_db(deets, data)
+                test_flg = data.get("test")
                 mongo_db.delete_many({"host_url": host_url})
-                return cls.get_redirect_url()
+                return "true" ,cls.get_redirect_url(test_flg)
         except Exception as e:
-            raise e
+            return "false", "Something went Wrong"
 
     @classmethod
     def app_install(cls):
@@ -148,15 +153,18 @@ class Magento(Ecommerce):
                 data = mongo_db.get_first_by_key("host_url", host_url)
                 deets = {"token": token, "store_code": store_code, "host_url": host_url}
                 cls.write_token_to_db(deets, data)
+                test_flg = data.get("test")
                 mongo_db.delete_many({"host_url": host_url})
-                return cls.get_redirect_url()
+                return "true", cls.get_redirect_url(test_flg)
         except Exception as e:
-            raise e
+            return "false", "Something went wrong"
 
     @classmethod
     def app_uninstall(cls):
-        # Delete Token from the db
-        pass
+        with engine.connect() as conn:
+            query = external_platforms.delete().where(ext_plat_cols.FiledBusinessOwnerId == 105).where(ext_plat_cols.PlatformId == 5).limit(1)
+            conn.execute(query) #TODO: change 105 to user_id
+        return 200
 
     @classmethod
     def store_info_resolver(cls, host_url: str, token: str):
