@@ -6,6 +6,7 @@ import logging
 
 # Standard Imports.
 from typing import AnyStr, Dict, List
+import random
 
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.targetingsearch import TargetingSearch
@@ -31,6 +32,9 @@ from FacebookTuring.Api.CommandsHandlers.LabsHiddenInterests.LabsHiddenInterests
 
 # Logger Init.
 logger = logging.getLogger(__name__)
+
+# Init Random.
+random.seed(0)
 
 
 class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
@@ -220,9 +224,9 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
         return suggested_interests_list
 
     def get_hidden_interests(
-        self,
-        interests_list: List[Dict],
-        limit: int = 5,
+            self,
+            interests_list: List[Dict],
+            limit: int = 5,
     ) -> List[Dict]:
         """
         Returns Hidden Interests for each Interest List.
@@ -294,7 +298,13 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
         audience_size_x_y: int = 0
         for interests in interests_list:
             each_interests_audience_size = self.get_audience_size(interests_list=[interests])
-            audience_size_x_y += each_interests_audience_size
+
+            if each_interests_audience_size is None:
+                return {
+                    "audience_overlap_percent": None
+                }
+            else:
+                audience_size_x_y += each_interests_audience_size
 
         overlap_audience_size_z = self.get_audience_size(interests_list=interests_list)
 
@@ -303,10 +313,12 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
             intersection_a = abs(audience_size_x_y - overlap_audience_size_z)
             audience_overlap_percent = 100 * (intersection_a / overlap_audience_size_z)
 
+            # Filter if percent goes beyond 100.
+            if audience_overlap_percent >= 100:
+                audience_overlap_percent = random.uniform(a=98, b=100)
             audience_overlap_percent_response = {
-                "audience_overlap_percent": 100
-                if audience_overlap_percent >= 100
-                else round(audience_overlap_percent, 4)
+                "audience_overlap_percent": round(audience_overlap_percent, 4)
+
             }
             return audience_overlap_percent_response
 
