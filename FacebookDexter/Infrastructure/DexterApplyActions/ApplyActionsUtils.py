@@ -219,7 +219,7 @@ def duplicate_fb_adset_for_hidden_interests(
     }
 
     # Update Adset Name to the New name: {adset_name}: Dexter - {adset_name} Hidden Interests - copy"
-    params.update({"rename_options": {"rename_prefix": "Dexter - ", "rename_suffix": f" - Hidden Interests - copy"}})
+    params.update({"rename_options": {"rename_prefix": "Dexter - ", "rename_suffix": f" - Hidden Interests"}})
 
     new_structure = structure.create_copy(params=params)
     new_adset_id = new_structure[FacebookMiscFields.copied_adset_id]

@@ -65,13 +65,15 @@ class CreateRetargeting(RecommendationAction):
         strategy = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.STRATEGY.value]
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
-        retargeting = create_retargeting_audience(ad_account, strategy, pixel_id)
+        retargeting = create_retargeting_audience(
+            ad_account, strategy, pixel_id, recommendation[RecommendationField.STRUCTURE_NAME]
+        )
 
         if not retargeting:
             logger.info(f"Retargeting audience creation failed.")
 
-        suffix = f" Retargeting {pixel_id} {strategy} - copy"
-        prefix = "Dexter "
+        suffix = f" - {pixel_id} - Retargeting - {strategy}"
+        prefix = "Dexter - "
         new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
             recommendation, self.fixtures, LevelEnum.ADSET.value, initial_adset_id, suffix, prefix
         )
@@ -150,7 +152,9 @@ def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
     }
 
 
-def create_retargeting_audience(ad_account: AdAccount, strategy: str, pixel_id: str) -> CustomAudience:
+def create_retargeting_audience(
+    ad_account: AdAccount, strategy: str, pixel_id: str, structure_name: str
+) -> CustomAudience:
     """
     Returns the generic pixel audience if exists, else create it and return it
 
@@ -159,7 +163,7 @@ def create_retargeting_audience(ad_account: AdAccount, strategy: str, pixel_id: 
     :return: The new generic custom audience based on the pixel
     """
     params = {
-        CustomAudience.Field.name: f"Filed Pixel {pixel_id} Strategy  {strategy} Custom Audience",
+        CustomAudience.Field.name: f"Dexter Audience - {structure_name} - {pixel_id} - Retargeting - {strategy}",
         CustomAudience.Field.rule: create_pixel_rule(pixel_id, 30),
     }
 

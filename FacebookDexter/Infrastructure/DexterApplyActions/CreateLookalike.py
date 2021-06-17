@@ -81,8 +81,8 @@ class CreateLookalike(RecommendationAction):
         if not lookalike:
             logger.info(f"Lookalike audience creation failed.")
 
-        suffix = f" Lookalike {pixel_id} - copy"
-        prefix = "Dexter "
+        suffix = f" - Lookalike - {pixel_id}"
+        prefix = "Dexter - "
         new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
             recommendation, self.fixtures, LevelEnum.ADSET.value, initial_adset_id, suffix, prefix
         )

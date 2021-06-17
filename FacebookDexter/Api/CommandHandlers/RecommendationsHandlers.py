@@ -222,7 +222,9 @@ def _convert_db_entry_to_recommendation(entry: Dict) -> Dict:
 
     entry[RecommendationField.TITLE.value] = output_value.title
     entry[RecommendationField.SUBTEXT.value] = output_value.subtext
-    entry[RecommendationField.QUOTE.value] = output_value.quote
+    entry[RecommendationField.QUOTE.value] = output_value.quote.format(
+        pixel_id=entry.get(RecommendationField.PIXEL_ID.value)
+    )
     entry[RecommendationField.AD_ACCOUNT_ID.value] = entry[RecommendationField.ACCOUNT_ID.value]
     entry[RecommendationField.RECOMMENDATION_ID.value] = str(entry[RecommendationField.OBJECT_ID.value])
     entry[RecommendationField.IS_APPLICABLE.value] = RecommendationField.APPLY_PARAMETERS.value in entry
