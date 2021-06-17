@@ -269,7 +269,18 @@ def _get_recommendations_structure_tree(recommendations: list):
 
         elif recommendation[RecommendationField.LEVEL.value] == LevelEnum.ADSET.value:
             if parent_index:
-                structure_tree[parent_index][StructureTreeField.ADSETS.value].append(_create_adset_node(recommendation))
+                adset_child_list = structure_tree[parent_index][StructureTreeField.ADSETS.value]
+                adset_index = next(
+                    (
+                        i
+                        for i, adset in enumerate(adset_child_list)
+                        if adset[StructureTreeField.ADSET_ID.value]
+                        == recommendation[RecommendationField.STRUCTURE_ID.value]
+                    ),
+                    None,
+                )
+                if not adset_index:
+                    adset_child_list.append(_create_adset_node(recommendation))
             else:
                 structure_tree.append(_create_campaign_node(recommendation, _create_adset_node(recommendation)))
 
