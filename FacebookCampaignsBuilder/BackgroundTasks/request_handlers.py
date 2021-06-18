@@ -515,7 +515,8 @@ class SmartEditPublish:
             structures["adset_tree"] = SmartEditPublish.process_structures_concurrently(
                 SmartEditPublish.edit_adsets, adsets, Level.ADSET.value
             )
-            structures["ad_tree"] = SmartEditPublish.update_ads(ads, ad_account)
+            structures["ad_tree"] = SmartEditPublish.process_structures_concurrently(
+                SmartEditPublish.edit_ads, ads, Level.AD.value)
         except FacebookRequestError as e:
             error_message = e.body().get("error", {}).get("error_user_msg") or e.get_message()
             SmartEditPublish.feedback_data["error"] = error_message
@@ -768,6 +769,61 @@ class SmartEditPublish:
         else:
             adset_budget_template[Campaign.Field.daily_budget] = amount
         return None
+
+    @staticmethod
+    def edit_ads(ad: Dict) -> Dict:
+        ad_response = {"ad_id": None}
+
+        try:
+            facebook_ad = SmartEditPublish.update_ad(ad)
+            # Add updated ad to response
+            ad_facebook_id = facebook_ad.get_id()
+            ad_response["ad_id"] = ad_facebook_id
+        except FacebookRequestError as e:
+            raise e
+        except Exception:
+            raise
+
+        return ad_response
+
+    @staticmethod
+    def update_ad(ad: Dict) -> Ad:
+        facebook_ad = Ad(ad.get("ad_id"))
+        params = {
+            Ad.Field.name: ad.get("ad_name"),
+        }
+
+        for key in ad:
+            if key in FacebookEditField.Ad.__members__:
+                params[FacebookEditField.Ad[key].value] = ad[key]
+
+        if "adverts" in ad:
+            facebook_ad.api_get(fields=[Ad.Field.campaign, Ad.Field.account_id])
+            facebook_campaign = facebook_ad.get(Ad.Field.campaign)
+            objective = facebook_campaign.api_get(fields=[Campaign.Field.objective]).get(Campaign.Field.objective)
+            ad_creative_id = get_ad_creative_id(
+                ad_creative_type=int(ad["ad_format_type"]),
+                ad_account_id=f"act_{facebook_ad.get(Ad.Field.account_id)}",
+                step_two=ad,
+                adverts=ad["adverts"],
+                objective=objective
+            )
+            params[FacebookEditField.Ad.ad_creative.value] = {"creative_id": ad_creative_id}
+
+        if "pixel_id" in ad or "pixel_app_event_id" in ad:
+            ad = [asdict(tracking_spec) for tracking_spec in CreateAds.get_tracking_specs(ad)]
+
+            # Facebook requires "action.type" instead of "action_type"
+            [tracking_spec.update({"action.type": tracking_spec.pop("action_type")}) for tracking_spec in ad]
+            # Removing null fields
+            ad = [{k: v for k, v in tracking_spec.items() if v is not None} for tracking_spec in ad]
+
+            params[FacebookEditField.Ad.tracking_specs.value] = ad
+
+        facebook_ad.api_update(params=params)
+
+        return facebook_ad
+
     @staticmethod
     def update_ads(ads: Dict, ad_account_id: str) -> List[Dict]:
         updated_ads = []
