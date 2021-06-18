@@ -70,6 +70,7 @@ class OverTimeTrendTemplate(Enum):
         "Reduce Budget",
         "Fewer people are clicking on your ad(s) and interacting with your landing page.",
         ("Dexter recommends reducing your budget by 20%. Click apply and I’ll do this for you!"),
+        apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
 
     RESULTS_DOWN_CR_DOWN_CPR_UP = DexterRecommendationOutput(
