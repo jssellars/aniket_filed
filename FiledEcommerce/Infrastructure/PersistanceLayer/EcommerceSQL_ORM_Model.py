@@ -56,7 +56,7 @@ from Core import fixtures, logging_config
 from FiledEcommerce.Api import settings
 from sqlalchemy.orm import Session
 
-config = settings.core.get_settings(settings, settings.core.get_environment())
+config = settings.core.get_settings(settings, 'dev3')
 fixtures = fixtures.Fixtures(config)
 
 logging_config.init(config)

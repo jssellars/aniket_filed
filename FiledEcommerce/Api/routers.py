@@ -64,17 +64,17 @@ class ExportIntegrationMapping(Resource):
 class ExportFiledProductSet(Resource):
     def post(self, platform):
         try:
-            ExportIntegrationProvider.get_instance(platform).export(request)
-            return {"message": "push products catalog pushed successfully"}, 200
+            catalog_id = ExportIntegrationProvider.get_instance(platform).export(request)
+            return {"message": f"pushed filed products to {platform}", "catalog_id": catalog_id}, 200
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
-            return {"message": "Failed to push products catalog"}, 400
+            return {"message": f"failed to push products to {platform}"}, 400
 
 class ExportOAuth(Resource):
     def get(self, platform, action):
         store = ExportIntegrationProvider.get_instance(platform)
         if action == "preinstall":
-            url = store.pre_install(request)
+            url, token = store.pre_install(request)
         elif action == "install":
             url = store.app_install(request)
         elif action == "load":
@@ -85,7 +85,9 @@ class ExportOAuth(Resource):
             url = "Invalid action"  # Redirect to error page
 
         if action == "preinstall":
-            return {"url": url}
+            return {"url": url, 'token': token}
+        elif action == 'install':
+            return {"message": "app installed successfully"} if url else {"message" :"something went wrong, try again"}
         else:
             return redirect(url)
 

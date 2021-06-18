@@ -241,7 +241,7 @@ class ExternalPlatforms(Base):
     CreatedById = Column(BIGINT)
     CreatedByFirstName = Column(NVARCHAR())
     CreatedByLastName = Column(NVARCHAR())
-    Name = Column(NVARCHAR())
+    # Name = Column(NVARCHAR())
 
     FiledBusinessOwnerId = Column(BIGINT, ForeignKey("FiledBusinessOwners.FiledBusinessOwnerId"))
     PlatformId = Column(BIGINT, ForeignKey("Platforms.Id"))
