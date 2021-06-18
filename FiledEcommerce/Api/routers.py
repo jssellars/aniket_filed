@@ -96,7 +96,7 @@ class OAuth(Resource):
     def get(self, platform, action):
         store = ImportIntegrationProvider.get_instance(platform)
         if action == "preinstall":
-            url = store.pre_install()
+            status, url = store.pre_install()
         elif action == "install":
             url = store.app_install()
         elif action == "load":
@@ -107,7 +107,7 @@ class OAuth(Resource):
             url = "Invalid action"  # Redirect to error page
 
         if action == "preinstall":
-            return {"url": url}
+            return {"status": status, "url": url}
         else:
             return redirect(url)
 

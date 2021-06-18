@@ -1,19 +1,16 @@
 import logging
+from typing import Dict
 
 import flask_restful
 import humps
 from flask import request
-from typing import Dict
 
-from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from Core.flask_extensions import log_request
 from Core.logging_config import request_as_log_dict
+from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledInfluencer.Api.AWSDocuments.request_handler import DocumentHandler, DocumentParser
 from FiledInfluencer.Api.EmailTemplate.request_handler import EmailTemplateHandler
-from FiledInfluencer.Api.InfluencerProfile.request_handler import (
-    InfluencerProfilesHandler,
-    InfluencerParser,
-)
+from FiledInfluencer.Api.InfluencerProfile.request_handler import InfluencerParser, InfluencerProfilesHandler
 from FiledInfluencer.Api.Integrations.mail_sendgrid import SendGridMailer
 from FiledInfluencer.Api.startup import config, fixtures
 
@@ -35,7 +32,6 @@ class Version(Resource):
 
 
 class InfluencerProfiles(Resource):
-
     @fixtures.authorize_jwt
     def get(self):
         """
@@ -55,9 +51,7 @@ class InfluencerProfiles(Resource):
                 return profile, 400
 
             # Get profiles based on filters
-            response = InfluencerProfilesHandler.get_profiles(
-                profile
-            )
+            response = InfluencerProfilesHandler.get_profiles(profile)
             return response, 200
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
@@ -109,7 +103,6 @@ class EmailTemplates(Resource):
 
 
 class Documents(Resource):
-
     @fixtures.authorize_jwt
     def post(self):
         """
@@ -187,6 +180,12 @@ class Documents(Resource):
 class MailSender(Resource):
     @fixtures.authorize_jwt
     def post(self):
+        """
+        Parse request body and send a mail to the correct recipients.
+        :return:    if OK then 200 with mail_id
+                    else if third party error then response message with status code
+                    else 400 with an error message
+        """
         try:
             token_data = decode_jwt_from_headers()
             user_id = token_data["user_filed_id"]
@@ -201,7 +200,7 @@ class MailSender(Resource):
                 response = SendGridMailer.send_mail(
                     to_emails=message_json["to_emails"],
                     subject=message_json["subject"],
-                    plain_text_content=message_json["text_body"],
+                    html_content=message_json["text_body"],
                     cc_emails=message_json["cc_emails"] if isinstance(message_json["cc_emails"], list) else None,
                 )
                 if response["status_code"] == 202:

@@ -65,10 +65,12 @@ class NumberOfPagesCommand:
 
 class ApplyRecommendationMapping(MapperBase):
     apply_button_type = fields.Integer(required=False)
+    adset_id = fields.String(required=False)
     hidden_interests_data = fields.Dict(required=False)
 
 
 @dataclass
 class ApplyRecommendationCommand:
     apply_button_type: Optional[int] = 0
+    adset_id: Optional[str] = None
     hidden_interests_data: Optional[Dict] = None

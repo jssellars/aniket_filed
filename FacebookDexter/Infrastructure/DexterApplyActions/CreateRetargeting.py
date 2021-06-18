@@ -11,7 +11,8 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset, get_adset_id
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyButtonType,
     ApplyParameters,
@@ -25,7 +26,14 @@ logger = logging.getLogger(__name__)
 class CreateRetargeting(RecommendationAction):
     APPLY_TOOLTIP: ClassVar[
         str
-    ] = "Selecting apply with create a new adset with a new lookalike audience as custom audience"
+    ] = "Selecting apply with create a new adset with a new retargeting audience as custom audience"
+
+    SUCCESS_FEEDBACK: ClassVar[
+        str
+    ] = "Dexter successfully applied retargeting audience of customers that are more likely to convert."
+    FAILURE_FEEDBACK: ClassVar[
+        str
+    ] = "Failure (due to error): Dexter was unsuccessful in creating the retargeting audience"
 
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         """
@@ -37,7 +45,11 @@ class CreateRetargeting(RecommendationAction):
         return {}
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
         """
         Applies the action for the recommendation based on the context saved into the DB
@@ -47,32 +59,57 @@ class CreateRetargeting(RecommendationAction):
         :return:
         """
         ad_account = AdAccount(recommendation[RecommendationField.ACCOUNT_ID.value])
-        best_adset_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
-        ]
-        best_adset_name = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_NAME_LOOKALIKE.value
-        ]
+
+        initial_adset_id = get_adset_id(recommendation, apply_button_type, command.adset_id)
+
         strategy = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.STRATEGY.value]
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
-        retargeting = create_retargeting_audience(ad_account, strategy, pixel_id)
+        retargeting = create_retargeting_audience(
+            ad_account, strategy, pixel_id, recommendation[RecommendationField.STRUCTURE_NAME]
+        )
 
         if not retargeting:
-            return
+            logger.info(f"Retargeting audience creation failed.")
 
-        suffix = f" Retargeting {pixel_id} {strategy} - copy"
-        prefix = "Dexter "
-        new_adset_name = f"Dexter  {best_adset_name} Retargeting {pixel_id} {strategy} copy "
-        new_adset_id = duplicate_fb_adset(
-            recommendation, self.fixtures, LevelEnum.ADSET.value, best_adset_id, suffix, prefix
+        suffix = f" - {pixel_id} - Retargeting - {strategy}"
+        prefix = "Dexter - "
+        new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
+            recommendation, self.fixtures, LevelEnum.ADSET.value, initial_adset_id, suffix, prefix
         )
+
+        if not new_adset_id:
+            logger.info(f"Adset duplication failed.")
+
+        retargeting.api_get(fields=[GraphAPIInsightsFields.name])
+
         new_adset = AdSet(new_adset_id)
         new_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
         targeting = new_adset.get(GraphAPIInsightsFields.targeting)
         targeting["custom_audiences"] = [{CustomAudience.Field.id: retargeting.get(CustomAudience.Field.id)}]
         new_adset.api_update(params={"targeting": targeting})
+
+        logger.info(
+            f"Creating lookalike audience {retargeting.get(CustomAudience.Field.id)} for new adset {new_adset_id} "
+            f"was a success."
+        )
+        self._create_success_message(number_ad, number_new_ad, retargeting.get(CustomAudience.Field.name))
+        return self.SUCCESS_FEEDBACK
+
+    def _create_success_message(self, number_ad, number_new_ad, retargeting_name):
+
+        if number_new_ad == number_ad:
+            self.SUCCESS_FEEDBACK = (
+                f"Success: Dexter successfully duplicated {number_new_ad} out of {number_ad} live ads in this AdSet, "
+                f"using the custom audience ({retargeting_name}) of customers that are more likely to convert."
+            )
+        else:
+            self.SUCCESS_FEEDBACK = (
+                f"Failure of specific Ads (due to IOS 14 privacy restrictions): Dexter could only duplicate "
+                f"{number_new_ad} out of {number_ad} live ads in this AdSet, "
+                f"using the custom audience - {retargeting_name} of customers that are more likely to convert."
+            )
 
 
 def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
@@ -115,7 +152,9 @@ def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
     }
 
 
-def create_retargeting_audience(ad_account: AdAccount, strategy: str, pixel_id: str) -> CustomAudience:
+def create_retargeting_audience(
+    ad_account: AdAccount, strategy: str, pixel_id: str, structure_name: str
+) -> CustomAudience:
     """
     Returns the generic pixel audience if exists, else create it and return it
 
@@ -124,7 +163,7 @@ def create_retargeting_audience(ad_account: AdAccount, strategy: str, pixel_id: 
     :return: The new generic custom audience based on the pixel
     """
     params = {
-        CustomAudience.Field.name: f"Filed Pixel {pixel_id} Strategy  {strategy} Custom Audience",
+        CustomAudience.Field.name: f"Dexter Audience - {structure_name} - {pixel_id} - Retargeting - {strategy}",
         CustomAudience.Field.rule: create_pixel_rule(pixel_id, 30),
     }
 

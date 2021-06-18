@@ -11,7 +11,8 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset
+from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
+from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset, get_adset_id
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyButtonType,
     ApplyParameters,
@@ -27,6 +28,13 @@ class CreateLookalike(RecommendationAction):
         str
     ] = "Selecting apply with create a new adset with a new lookalike audience as custom audience"
 
+    SUCCESS_FEEDBACK: str = (
+        "Dexter successfully applied lookalike audience of customers who have purchased from you recently to Adset."
+    )
+    FAILURE_FEEDBACK: ClassVar[
+        str
+    ] = "Failure (due to error): Dexter was unsuccessful in creating the lookalike audience"
+
     def get_action_parameters(self, apply_parameters: ApplyParameters, structure_details: Dict) -> Optional[Dict]:
         """
         Save the db context needed to apply recommendation
@@ -37,7 +45,11 @@ class CreateLookalike(RecommendationAction):
         return {}
 
     def process_action(
-        self, recommendation: Dict, headers: str, apply_button_type: ApplyButtonType, command: Dict = None
+        self,
+        recommendation: Dict,
+        headers: str,
+        apply_button_type: ApplyButtonType,
+        command: ApplyRecommendationCommand = None,
     ):
         """
         Applies the action for the recommendation based on the context saved into the DB
@@ -49,21 +61,17 @@ class CreateLookalike(RecommendationAction):
         """
         ad_account = AdAccount(recommendation[RecommendationField.ACCOUNT_ID.value])
 
-        best_adset_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
-        ]
-        best_adset_name = recommendation[RecommendationField.APPLY_PARAMETERS.value][
-            RecommendationField.BEST_ADSET_NAME_LOOKALIKE.value
-        ]
-        best_adset = AdSet(best_adset_id)
-        best_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
+        initial_adset_id = get_adset_id(recommendation, apply_button_type, command.adset_id)
+
+        initial_adset = AdSet(initial_adset_id)
+        initial_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
         generic_pixel_audience = get_existing_generic_audience(ad_account, pixel_id)
         lookalike = get_lookalike(
             ad_account,
-            best_adset,
+            initial_adset,
             generic_pixel_audience,
             pixel_id,
             recommendation[RecommendationField.STRUCTURE_NAME.value],
@@ -72,13 +80,17 @@ class CreateLookalike(RecommendationAction):
 
         if not lookalike:
             logger.info(f"Lookalike audience creation failed.")
-            return
 
-        suffix = f" Lookalike {pixel_id} - copy"
-        prefix = "Dexter "
-        new_adset_id = duplicate_fb_adset(
-            recommendation, self.fixtures, LevelEnum.ADSET.value, best_adset_id, suffix, prefix
+        suffix = f" - Lookalike - {pixel_id}"
+        prefix = "Dexter - "
+        new_adset_id, number_new_ad, number_ad = duplicate_fb_adset(
+            recommendation, self.fixtures, LevelEnum.ADSET.value, initial_adset_id, suffix, prefix
         )
+        if not new_adset_id:
+            logger.info(f"Adset duplication failed.")
+
+        lookalike.api_get(fields=[GraphAPIInsightsFields.name])
+
         new_adset = AdSet(new_adset_id)
         new_adset.api_get(fields=[GraphAPIInsightsFields.promoted_object, GraphAPIInsightsFields.targeting])
 
@@ -90,6 +102,23 @@ class CreateLookalike(RecommendationAction):
             f"Creating lookalike audience {lookalike.get(CustomAudience.Field.id)} for new adset {new_adset_id} "
             f"was a success."
         )
+
+        self._create_success_message(number_ad, number_new_ad, lookalike.get(CustomAudience.Field.name))
+        return self.SUCCESS_FEEDBACK
+
+    def _create_success_message(self, number_ad, number_new_ad, lookalike_name):
+
+        if number_new_ad == number_ad:
+            self.SUCCESS_FEEDBACK = (
+                f"Success: Dexter successfully duplicated {number_new_ad} out of {number_ad} live ads in this AdSet, "
+                f"using the lookalike audience - {lookalike_name} of customers who have purchased from you recently."
+            )
+        else:
+            self.SUCCESS_FEEDBACK = (
+                f"Failure of specific Ads (due to IOS 14 privacy restrictions): Dexter could only duplicate "
+                f"{number_new_ad} out of {number_ad} live ads in this AdSet, "
+                f"using the lookalike audience ({lookalike_name}) of customers who have purchased from you recently."
+            )
 
 
 def create_pixel_rule(pixel_id: str, no_of_days: int) -> Dict:
@@ -153,7 +182,7 @@ def get_existing_generic_audience(ad_account: AdAccount, pixel_id: str) -> Custo
 
 def get_lookalike(
     ad_account: AdAccount,
-    best_adset: AdSet,
+    initial_adset: AdSet,
     existing_audience: CustomAudience,
     pixel_id: str,
     structure_name: str,
@@ -199,7 +228,7 @@ def get_lookalike(
             CustomAudience.Field.origin_audience_id: existing_audience.get_id(),
         }
 
-        targeting = best_adset.get(GraphAPIInsightsFields.targeting)
+        targeting = initial_adset.get(GraphAPIInsightsFields.targeting)
         if targeting:
             targeting = targeting.export_all_data()
 

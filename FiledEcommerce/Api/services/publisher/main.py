@@ -3,7 +3,7 @@ from datetime import datetime
 from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant
 from FiledEcommerce.Api.utils.tools.json_serializer import ResponseSerializer
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
-
+from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
 
 def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
     products_response = products["products"]
@@ -24,6 +24,22 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
 
         # ALL MAPPED PRODUCTS SHOULD BE ACTIVE BY DEFAULT
         default_state = 1
+        filed_set_ins = filed_sets.insert().values(
+            UpdatedAt= get_utc_aware_date(),
+            UpdatedById=user_id,
+            UpdatedByFirstName=user_first_name,
+            UpdatedByLastName=user_last_name,
+            CreatedAt=get_utc_aware_date(),
+            CreatedById=user_id,
+            CreatedByFirstName=user_first_name,
+            CreatedByLastName=user_last_name,
+            FiledProductCatalogId=filed_product_catalog_id[0],
+            Name=f"{platform} Products Set",
+            StateId=1,
+            ImportedAt=get_utc_aware_date(),
+        )
+        fs_results = conn.execute(filed_set_ins)
+        filed_set_id = fs_results.inserted_primary_key
 
         for product in products_response:
             product = FiledProduct(**product)
@@ -54,13 +70,13 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
             fp_conn_ins = filed_product_conns.insert().values(
                 IdInPlatform=product.product_id,
                 ExternalPlatformId=external_platform_id,
-                FiledProductId=filed_product_id,
+                FiledProductId=filed_product_id[0],
             )
             conn.execute(fp_conn_ins)
 
             for variant in product.variants:
                 variant = FiledVariant(**variant)
-                variant.filed_product_id = filed_product_id
+                variant.filed_product_id = filed_product_id[0]
 
                 fv_ins = filed_variants.insert().values(
                     UpdatedAt=variant.updated_at,
@@ -97,30 +113,20 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 fv_conn_ins = filed_variant_conns.insert().values(
                     IdInPlatform=variant.variant_id,
                     ExternalPlatformId=external_platform_id,
-                    FiledVariantId=filed_variant_id,
+                    FiledVariantId=filed_variant_id[0],
                 )
                 conn.execute(fv_conn_ins)
 
                 if variant.custom_props is not None:
                     custom_properties_ins = custom_properties.insert().values(
-                        FiledVariantId=filed_variant_id, Properties=json.dumps(variant.custom_props.properties)
+                        FiledVariantId=filed_variant_id[0], Properties=json.dumps(variant.custom_props.properties)
                     )
                     conn.execute(custom_properties_ins)
-        filed_set_ins = filed_sets.insert().values(
-            UpdatedAt= datetime.now(),
-            UpdatedById=user_id,
-            UpdatedByFirstName=user_first_name,
-            UpdatedByLastName=user_last_name,
-            CreatedAt=datetime.now(),
-            CreatedById=user_id,
-            CreatedByFirstName=user_first_name,
-            CreatedByLastName=user_last_name,
-            FiledProductCatalogId=filed_product_catalog_id,
-            Name=f"{platform} Products Set",
-            StateId=1,
-            ImportedAt=datetime.now(),
-        )
-        fs_results = conn.execute(filed_set_ins)
-        filed_set_id = fs_results.inserted_primary_key
+                
+                filed_sets_variants_ins = filed_set_variants.insert().values(
+                    FiledVariantId=filed_variant_id[0],
+                    FiledSetId=filed_set_id[0],
+                )
+                conn.execute(filed_sets_variants_ins)
 
-    return {"filedSetId": filed_set_id}
+    return {"filedSetId": filed_set_id[0]}

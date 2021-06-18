@@ -73,7 +73,7 @@ def dismiss_recommendation(recommendation_id: str):
     return
 
 
-def apply_recommendation(recommendation_id: str, business_owner_id: str, headers: str, command: dict):
+def apply_recommendation(recommendation_id: str, business_owner_id: str):
     recommendation_repository = MongoRepositoryBase(
         config=config.mongo,
         database_name=config.mongo.recommendations_database_name,
@@ -109,15 +109,26 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
         raise Exception("Recommendation template key not valid")
 
     dexter_output = output_enum[template_key].value
-    apply_button_type = ApplyButtonType(command.apply_button_type)
 
+    return (
+        recommendation,
+        recommendation_repository,
+        query_filter,
+        dexter_output,
+    )
+
+
+def perform_recommendation_action(
+    recommendation, recommendation_repository, query_filter, business_owner_id, headers, dexter_output, command
+):
+    apply_button_type = ApplyButtonType(command.apply_button_type)
     permanent_token = fixtures.business_owner_repository.get_permanent_token(business_owner_id)
 
     _ = GraphAPISdkBase(config.facebook, permanent_token)
 
     # Get the specific action instance and let it deal with the action
     apply_action = get_apply_action(dexter_output.apply_action_type, config, fixtures)
-    apply_action.process_action(recommendation, headers, apply_button_type, command=command.hidden_interests_data)
+    success_feedback = apply_action.process_action(recommendation, headers, apply_button_type, command=command)
 
     # In the end, mark the recommendation as applied
     query = {
@@ -127,7 +138,7 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str, headers
     }
     recommendation_repository.update_one(query_filter, query)
 
-    return None
+    return success_feedback
 
 
 def get_number_of_pages(command: NumberOfPagesCommand, business_owner_id: str):
@@ -211,7 +222,9 @@ def _convert_db_entry_to_recommendation(entry: Dict) -> Dict:
 
     entry[RecommendationField.TITLE.value] = output_value.title
     entry[RecommendationField.SUBTEXT.value] = output_value.subtext
-    entry[RecommendationField.QUOTE.value] = output_value.quote
+    entry[RecommendationField.QUOTE.value] = output_value.quote.format(
+        pixel_id=entry.get(RecommendationField.PIXEL_ID.value)
+    )
     entry[RecommendationField.AD_ACCOUNT_ID.value] = entry[RecommendationField.ACCOUNT_ID.value]
     entry[RecommendationField.RECOMMENDATION_ID.value] = str(entry[RecommendationField.OBJECT_ID.value])
     entry[RecommendationField.IS_APPLICABLE.value] = RecommendationField.APPLY_PARAMETERS.value in entry
@@ -256,7 +269,18 @@ def _get_recommendations_structure_tree(recommendations: list):
 
         elif recommendation[RecommendationField.LEVEL.value] == LevelEnum.ADSET.value:
             if parent_index:
-                structure_tree[parent_index][StructureTreeField.ADSETS.value].append(_create_adset_node(recommendation))
+                adset_child_list = structure_tree[parent_index][StructureTreeField.ADSETS.value]
+                adset_index = next(
+                    (
+                        i
+                        for i, adset in enumerate(adset_child_list)
+                        if adset[StructureTreeField.ADSET_ID.value]
+                        == recommendation[RecommendationField.STRUCTURE_ID.value]
+                    ),
+                    None,
+                )
+                if not adset_index:
+                    adset_child_list.append(_create_adset_node(recommendation))
             else:
                 structure_tree.append(_create_campaign_node(recommendation, _create_adset_node(recommendation)))
 

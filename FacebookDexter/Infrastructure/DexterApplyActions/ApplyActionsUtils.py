@@ -12,7 +12,10 @@ from Core.settings_models import Model
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import RecommendationAction
+from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
+    ApplyButtonType,
+    RecommendationAction,
+)
 from FacebookDexter.Infrastructure.Domain.Actions.ActionEnums import FacebookBudgetTypeEnum
 from FacebookDexter.Infrastructure.IntegrationEvents.DexterNewCreatedStructuresHandler import (
     DexterCreatedEventMapping,
@@ -38,7 +41,7 @@ def _does_budget_exist(structure_details: Dict) -> bool:
 
 
 def _get_budget_value_and_type(
-        structure_details: Dict,
+    structure_details: Dict,
 ) -> Tuple[Optional[int], Optional[str]]:
     if not _does_budget_exist(structure_details):
         return None, None
@@ -118,13 +121,13 @@ def _duplicate_ads_on_adset(ad_id, adset_id, retry=0):
 
 
 def duplicate_fb_adset(
-        recommendation: Dict,
-        fixtures: Any,
-        level: str = None,
-        best_adset_id: str = None,
-        name_suffix: str = None,
-        name_prefix: str = None,
-) -> str:
+    recommendation: Dict,
+    fixtures: Any,
+    level: str = None,
+    best_adset_id: str = None,
+    name_suffix: str = None,
+    name_prefix: str = None,
+) -> Tuple[str, int, int]:
     if not best_adset_id:
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)
     else:
@@ -170,12 +173,12 @@ def duplicate_fb_adset(
     response = mapper.load(asdict(new_created_structures_event))
     RecommendationAction.publish_response(response, fixtures)
 
-    return new_adset_id
+    return new_adset_id, len(new_ad_ids), len(ad_ids)
 
 
 def duplicate_fb_adset_for_hidden_interests(
-        recommendation: Dict, fixtures: Any, adset_name: str = None, level: str = None, adset_id: str = None
-) -> str:
+    recommendation: Dict, fixtures: Any, level: str = None, adset_id: str = None
+) -> Tuple[str, int, int]:
     """
     Duplicate Facebook Adset For Hidden Interests.
 
@@ -216,7 +219,7 @@ def duplicate_fb_adset_for_hidden_interests(
     }
 
     # Update Adset Name to the New name: {adset_name}: Dexter - {adset_name} Hidden Interests - copy"
-    params.update({"rename_options": {"rename_prefix": "Dexter - ", "rename_suffix": f" - Hidden Interests - copy"}})
+    params.update({"rename_options": {"rename_prefix": "Dexter - ", "rename_suffix": f" - Hidden Interests"}})
 
     new_structure = structure.create_copy(params=params)
     new_adset_id = new_structure[FacebookMiscFields.copied_adset_id]
@@ -243,4 +246,15 @@ def duplicate_fb_adset_for_hidden_interests(
     response = mapper.load(asdict(new_created_structures_event))
     RecommendationAction.publish_response(response, fixtures)
 
-    return new_adset_id
+    return new_adset_id, len(new_ad_ids), len(ad_ids)
+
+
+def get_adset_id(recommendation: Dict, apply_button_type: ApplyButtonType, adset_id: str = None):
+    if apply_button_type in [ApplyButtonType.BEST_PERFORMING, ApplyButtonType.DEFAULT]:
+        return recommendation[RecommendationField.APPLY_PARAMETERS.value][
+            RecommendationField.BEST_ADSET_ID_LOOKALIKE.value
+        ]
+    elif apply_button_type in [ApplyButtonType.NEW, ApplyButtonType.CHOOSE_OTHER] and adset_id:
+        return adset_id
+    else:
+        raise ValueError("invalid apply button or adset id")
