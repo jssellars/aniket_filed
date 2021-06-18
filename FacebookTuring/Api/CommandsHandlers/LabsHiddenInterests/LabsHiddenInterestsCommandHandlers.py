@@ -207,18 +207,23 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
                     f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
                 )
 
-            suggested_interests = [
-                Tools.convert_to_json(suggested_interest) for suggested_interest in targeting_search_response
+            fb_suggested = [
+                Tools.convert_to_json(response) for response in targeting_search_response
             ]
 
-            if len(suggested_interests) > 0:
-                for suggested_interest in suggested_interests:
-                    suggested_interest.pop("type", None)
-                    suggested_interest.pop("path", None)
-                    suggested_interest.pop("description", None)
+            # Filter "Interests" only from Interests suggested by facebook.
+            suggested_interests = []
+
+            if fb_suggested:
+                for suggested in fb_suggested:
+                    if suggested.get("type") == "interests":
+                        suggested.pop("type", None)
+                        suggested.pop("path", None)
+                        suggested.pop("description", None)
+                        suggested_interests.append(suggested)
 
             suggested_interests_list.append(
-                {"name": interest, "suggested_interests": suggested_interests if len(suggested_interests) > 0 else None}
+                {"name": interest, "suggested_interests": suggested_interests}
             )
 
         return suggested_interests_list
@@ -269,13 +274,17 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
                     f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
                 )
 
-            hidden_interests = [
-                Tools.convert_to_json(suggested_interest) for suggested_interest in hidden_interests_response
-            ]
-            hidden_interests = sorted(hidden_interests, key=lambda x: x["audience_size"], reverse=True)
+            # Hidden Interests Response.
+            hidden_interests = []
+
+            if hidden_interests_response:
+                hidden_interests = [
+                    Tools.convert_to_json(suggested_interest) for suggested_interest in hidden_interests_response
+                ]
+                hidden_interests = sorted(hidden_interests, key=lambda x: x["audience_size"], reverse=True)
 
             hidden_interests_list.append(
-                {"name": interests, "hidden_interests": hidden_interests if len(hidden_interests) > 0 else None}
+                {"name": interests, "hidden_interests": hidden_interests}
             )
 
         return hidden_interests_list
@@ -342,7 +351,7 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
             Overlapping Audience Size Estimate for Multiple Interests
 
         """
-        overlap_audience_size_response = None
+        audience_size_response = None
 
         # init Targeting.
         targeting_spec = self.adset_structure_details["targeting"]
@@ -361,7 +370,7 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
             "flexible_spec": [{"interests": params_interests}],
         }
         try:
-            overlap_audience_size_response = self.ad_account.get_delivery_estimate(
+            audience_size_response = self.ad_account.get_delivery_estimate(
                 fields=["estimate_mau"],
                 params={"targeting_spec": targeting_spec_params, "optimization_goal": optimization_goal},
             )
@@ -370,8 +379,8 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
                 f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
             )
 
-        if overlap_audience_size_response:
-            response = Tools.convert_to_json(overlap_audience_size_response[0])
+        if audience_size_response:
+            response = Tools.convert_to_json(audience_size_response[0])
             overlap_audience_size = response.get("estimate_mau", None)
             return overlap_audience_size
         else:
