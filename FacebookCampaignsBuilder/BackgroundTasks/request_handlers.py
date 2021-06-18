@@ -731,11 +731,43 @@ class SmartEditPublish:
         if budget:
             campaign_builder.set_budget_optimization(params, budget)
 
+        budget_optimization = campaign.get("budget_optimization")
+        if budget_optimization:
+            SmartEditPublish.disable_cbo(budget_optimization, params)
+
         facebook_campaign = Campaign(fbid=campaign.get("campaign_id"))
         facebook_campaign.api_update(params=params)
 
         return facebook_campaign
 
+    @staticmethod
+    def disable_cbo(budget_optimization: Dict, params: Dict) -> None:
+        adset_budgets = budget_optimization.get("adset_budget_amounts")
+        if adset_budgets:
+            adset_budgets_templates = list()
+            for adset in adset_budgets:
+                adset_budget_template = {"adset_id": adset.get("ad_set_id")}
+                SmartEditPublish.set_budget_optimization(adset_budget_template, adset)
+                adset_budgets_templates.append(adset_budget_template)
+            params["adset_budgets"] = adset_budgets_templates
+
+        adset_bids = budget_optimization.get("adset_bid_amounts")
+        if adset_bids:
+            params["bid_strategy"] = Campaign.BidStrategy.lowest_cost_with_bid_cap
+            params["adset_bid_amoumts"] = adset_bids
+        else:
+            params["bid_strategy"] = Campaign.BidStrategy.lowest_cost_without_cap
+
+        return None
+
+    @staticmethod
+    def set_budget_optimization(adset_budget_template: Dict, budget_opt: Dict) -> None:
+        amount = int(budget_opt["amount"]) * 100
+        if budget_opt["budget_allocated_type_id"] == 0:
+            adset_budget_template[Campaign.Field.lifetime_budget] = amount
+        else:
+            adset_budget_template[Campaign.Field.daily_budget] = amount
+        return None
     @staticmethod
     def update_ads(ads: Dict, ad_account_id: str) -> List[Dict]:
         updated_ads = []
