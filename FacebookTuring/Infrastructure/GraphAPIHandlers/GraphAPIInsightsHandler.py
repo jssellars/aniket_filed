@@ -325,7 +325,7 @@ class GraphAPIInsightsHandler:
                         break
                     data[FieldsMetadata.campaign_name.name] = cls._get_campaign_name(campaign_id)
 
-            if level == FieldsMetadata.ad.name:
+            if level == FieldsMetadata.ad.name and FieldsMetadata.ad_image in requested_fields:
 
                 for data in response:
                     ad_id = data.get("ad_id")
