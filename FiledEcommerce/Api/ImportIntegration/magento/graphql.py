@@ -135,7 +135,8 @@ class ProductInterface(Type):
         'short_description', 
         'small_image', 
         'stock_status', 
-        'thumbnail'
+        'thumbnail',
+        'only_x_left_in_stock'
     )
     id = Field(non_null(Int), graphql_name='id')
     name = Field(non_null(String), graphql_name='name')
@@ -156,6 +157,7 @@ class ProductInterface(Type):
     small_image = Field(ProductImage, graphql_name='small_image')
     stock_status = Field(ProductStockStatus, graphql_name='stock_status')
     thumbnail = Field(ProductImage, graphql_name='thumbnail')
+    only_x_left_in_stock = Field(Float, graphql_name='only_x_left_in_stock')
 
 class Attributes(Type):
     __schema__ = magento_schema

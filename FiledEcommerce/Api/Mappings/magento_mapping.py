@@ -3,6 +3,7 @@ magento_mapping = {
         "product": [
             {"name": "ID", "filedKey": "product_id", "mappedTo": "id", "type": "string", "disabled": True},
             {"name": "Title", "filedKey": "title", "mappedTo": "name", "type": "string", "disabled": True},
+            {"name": "SKU", "filedKey": "sku", "mappedTo": "name", "sku": "string", "disabled": True},
             {
                 "name": "Image URL",
                 "filedKey": "image_url",
@@ -50,6 +51,13 @@ magento_mapping = {
                 "name": "Availability",
                 "filedKey": "availability",
                 "mappedTo": "stock_status",
+                "type": "string",
+                "disabled": False,
+            },
+            {
+                "name": "Inventory Quantity",
+                "filedKey": "inventory_quantity",
+                "mappedTo": "only_x_left_in_stock",
                 "type": "string",
                 "disabled": False,
             },

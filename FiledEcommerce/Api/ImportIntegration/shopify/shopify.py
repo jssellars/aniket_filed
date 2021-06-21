@@ -404,7 +404,7 @@ class Shopify(Ecommerce):
                 imported_at=imported_at,
                 variants=[],
                 custom_props=FiledCustomProperties(
-                    {field: value for field, value in node.items() if field not in already_mapped_fields}
+                    properties={field: value for field, value in node.items() if field not in already_mapped_fields}
                 ),
             )
 
@@ -443,7 +443,7 @@ class Shopify(Ecommerce):
                     availability=variant_map["availability"],
                     url=variant_map["url"],
                     display_name=variant_map["display_name"],
-                    image_url=pv["image"]["original_src"] if pv["image"] else node["featured_image"]["original_src"],
+                    image_url=pv["image"]["original_src"] if pv["image"] else filed_product.image_url,
                     sku=variant_map["sku"],
                     barcode=variant_map["barcode"],
                     inventory_quantity=variant_map["inventory_quantity"],
@@ -457,8 +457,11 @@ class Shopify(Ecommerce):
                     condition=pv.get("condition"),
                     color=pv.get("color"),
                     size=pv.get("size"),
-                    custom_props=None, #TODO: CHANGE THIS MAPPING FIX  ERROR: dict' object has no attribute 'properties'
+                    custom_props=FiledCustomProperties(properties=variant_map.get("custom_fields")),
                 )
+                # Set image_url of product to variant if no product image
+                if not filed_product.image_url:
+                    filed_product.image_url = filed_variant.image_url
 
                 filed_product.variants.append(filed_variant)
 
@@ -570,8 +573,12 @@ class Shopify(Ecommerce):
                 .where(ext_plat_cols.PlatformId == 2)
                 .limit(1)
             )
-            for record in conn.execute(query):
-                row = record["Details"]
+            # Get 1 record from query
+            record = next(conn.execute(query))
+            user_details = record["Details"]
 
-            details = json.loads(row)
-            return details["shop_name"], details["access_token"]
+            if user_details:
+                details = json.loads(user_details)
+                return details["shop_name"], details["access_token"]
+            else:
+                raise Exception("User has no record in database")

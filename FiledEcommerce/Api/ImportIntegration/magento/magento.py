@@ -1,39 +1,18 @@
-import base64
-import hashlib
-import http.client
 import json
-import logging
 import re
-from datetime import datetime, timezone
-from urllib.parse import urlparse
+from dataclasses import asdict
+from datetime import datetime
 
-import jwt
 import requests
 from flask import request
-from requests.exceptions import HTTPError
 from sgqlc.operation import Operation
-from sgqlc.types import (
-    Arg,
-    ArgDict,
-    Boolean,
-    Enum,
-    Field,
-    Float,
-    Input,
-    Int,
-    Interface,
-    Schema,
-    String,
-    Type,
-    Union,
-    list_of,
-    non_null,
-)
 
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ImportIntegration.interface.ecommerce import Ecommerce
 from FiledEcommerce.Api.ImportIntegration.magento.graphql import ConfigurableProduct, MagentoQuery
 from FiledEcommerce.Api.utils.models.filed_model import FiledCustomProperties, FiledProduct, FiledVariant
+from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
+from FiledEcommerce.Infrastructure.CurrencyEnum import CurrencyEnum
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceMongoRepository import EcommerceMongoRepository
 from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 
@@ -93,8 +72,8 @@ class Magento(Ecommerce):
         username = data.get("username")
         password = data.get("password")
         if request.host.startswith("localhost") or request.host.startswith("127.0.0.1"):
-            test_flg = 1 
-        else: 
+            test_flg = 1
+        else:
             test_flg = 0
         mongo_db = EcommerceMongoRepository()
         mongo_db.add_one({"host_url": host_url, "email": email, "user_id": user_id, "test": test_flg})
@@ -103,7 +82,7 @@ class Magento(Ecommerce):
 
     @classmethod
     def app_install_helper(cls, body):
-        """"""
+        """Returns redirect_url after validating user and store"""
         host_url = body.get("host_url")
         username = body.get("username")
         password = body.get("password")
@@ -112,7 +91,7 @@ class Magento(Ecommerce):
             token = cls.get_token(host_url, username, password)
             store_response = cls.store_info_resolver(host_url, token)
             if not store_response:
-                return  "false" , "Sorry! No Store Found"
+                return "false", "Sorry! No Store Found"
             else:
                 store_code = "default"
                 mongo_db = EcommerceMongoRepository()
@@ -121,7 +100,7 @@ class Magento(Ecommerce):
                 cls.write_token_to_db(deets, data)
                 test_flg = data.get("test")
                 mongo_db.delete_many({"host_url": host_url})
-                return "true" ,cls.get_redirect_url(test_flg)
+                return "true", cls.get_redirect_url(test_flg)
         except Exception as e:
             return "false", "Something went Wrong"
 
@@ -162,8 +141,13 @@ class Magento(Ecommerce):
     @classmethod
     def app_uninstall(cls):
         with engine.connect() as conn:
-            query = external_platforms.delete().where(ext_plat_cols.FiledBusinessOwnerId == 105).where(ext_plat_cols.PlatformId == 5).limit(1)
-            conn.execute(query) #TODO: change 105 to user_id
+            query = (
+                external_platforms.delete()
+                .where(ext_plat_cols.FiledBusinessOwnerId == 105)
+                .where(ext_plat_cols.PlatformId == 5)
+                .limit(1)
+            )
+            conn.execute(query)  # TODO: change 105 to user_id
         return 200
 
     @classmethod
@@ -400,7 +384,9 @@ class Magento(Ecommerce):
         Returns:
             filed_ob_list (List[FiledProduct]): list of data as FiledProduct.
         """
-        imported_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()[:-6] + "Z"
+        imported_at = get_utc_aware_date()
+
+        already_mapped_fields = set()
         filed_product_list = []
         products = data  # one page of products
         for item in products["data"]["products"]["items"]:
@@ -408,65 +394,79 @@ class Magento(Ecommerce):
             # print(item)
             for _map in mapper:
                 if _map["filed_key"] in FiledProduct.__annotations__:
-                    df[_map["filed_key"]] = item[_map["mapped_to"]]
+                    try:
+                        df[_map["filed_key"]] = item[_map["mapped_to"]]
+                    except KeyError:
+                        continue
+                    else:
+                        already_mapped_fields.add(_map["mapped_to"])
 
             pr = FiledProduct(
-                product_id=item["id"],
-                title=item["name"],
-                product_type=", ".join([category["name"] for category in item["categories"]]),
-                vendor="Dummy-Magento-Shop",
-                description=item["description"]["html"],
-                tags=item["meta_keyword"],
-                sku=item["sku"],
-                image_url=item["image"]["url"],
-                created_at=item["created_at"],
-                updated_at=item["updated_at"],
+                product_id=df.get("product_id"),
+                title=df.get("title"),
+                product_type=", ".join([category["name"] for category in df["product_type"]]),
+                # Magento Product Interface does not support a vendor field
+                # As discussed with PM, vendor isn't critical to Product Catalog
+                vendor="",
+                description=df["description"]["html"] if df.get("description") else "",
+                tags=df.get("tags"),
+                sku=df.get("sku"),
+                image_url=df["image_url"]["url"] if df.get("image_url") else "",
+                created_at=df.get("created_at", imported_at),
+                updated_at=df.get("updated_at", imported_at),
                 imported_at=imported_at,
-                brand="",
+                brand=df.get("brand"),
                 availability=True if item["stock_status"] == "IN_STOCK" else False,
                 variants=[],
             )
 
+            # Only ConfigurableProducts have variants attributes
             if item["__typename"] == "ConfigurableProduct":
-                vdf = {"custom_fields": {}}
-                for _map in variants_mapper:
-                    if _map["filed_key"] in FiledProduct.__annotations__:
-                        vdf[_map["filed_key"]] = item[_map["mapped_to"]]
-                    else:
-                        custom = {_map["filed_key"]: item.get(_map["mapped_to"])}
-                        vdf["custom_fields"].update(custom)
                 for variant_item in item["variants"]:
-                    color_flg, size_flg = 0, 0
+                    pv = variant_item["product"]
+                    variant_map = {"custom_fields": {}}
+                    for _map in variants_mapper:
+                        if _map["filed_key"] in FiledVariant.__annotations__:
+                            variant_map[_map["filed_key"]] = pv.get(_map["mapped_to"], item.get(_map["mapped_to"]))
+                        else:
+                            custom = {_map["filed_key"]: pv.get(_map["mapped_to"])}
+                            variant_map["custom_fields"].update(custom)
+
+                    vr = FiledVariant(
+                        variant_id=variant_map.get("variant_id"),
+                        filed_product_id="",
+                        display_name=variant_map.get("display_name"),
+                        price=variant_map["price"]["regularPrice"]["amount"]["value"],
+                        compare_at_price=variant_map["price"]["minimalPrice"]["amount"]["value"],
+                        availability=True if variant_item["product"]["stock_status"] == "IN_STOCK" else False,
+                        url=variant_map.get("url"),
+                        image_url=variant_map["image_url"]["url"] if variant_map.get("image_url") else pr.image_url,
+                        sku=variant_map.get("sku"),
+                        barcode="",
+                        inventory_quantity=item.get("inventory_quantity"),
+                        tags=variant_map.get("tags"),
+                        description=variant_map["description"]["html"] if variant_map.get("description") else None,
+                        created_at=variant_item["product"]["created_at"],
+                        updated_at=variant_item["product"]["updated_at"],
+                        imported_at=imported_at,
+                        material="",
+                        condition="",
+                        color="",
+                        size="",
+                        currency_id=CurrencyEnum[variant_map["price"]["regularPrice"]["amount"]["currency"]].value,
+                        custom_props=FiledCustomProperties(properties=variant_map.get("custom_fields")),
+                    )
+
+                    # Set image_url of product to variant if no product image
+                    if not pr.image_url:
+                        pr.image_url = vr.image_url
+
                     for variant_attribute in variant_item["attributes"]:
-                        if variant_attribute["code"] == "color":
-                            color_flg = 1
-                        elif variant_attribute["code"] == "size":
-                            size_flg = 1
-                        vr = FiledVariant(
-                            variant_id=variant_item["product"]["id"],
-                            filed_product_id=item["id"],
-                            display_name=variant_item["product"]["name"],
-                            price=variant_item["product"]["price"]["regularPrice"]["amount"]["value"],
-                            compare_at_price="",
-                            availability=True if variant_item["product"]["stock_status"] == "IN_STOCK" else False,
-                            url=variant_item["product"]["canonical_url"],
-                            image_url=variant_item["product"]["image"]["url"],
-                            sku=variant_item["product"]["sku"],
-                            barcode="",
-                            inventory_quantity="",
-                            tags=item["meta_keyword"],
-                            description=variant_item["product"]["description"]["html"],
-                            created_at=variant_item["product"]["created_at"],
-                            updated_at=variant_item["product"]["updated_at"],
-                            imported_at=imported_at,
-                            material="",
-                            condition="",
-                            color=variant_attribute["label"] if color_flg==1 else "",
-                            size=variant_attribute["label"] if size_flg==1 else "",
-                            custom_props=FiledCustomProperties(properties=vdf["custom_fields"]) if vdf["custom_fields"] else None,
-                        )
-                        pr.variants.append(vr.__dict__)
-            filed_product_list.append(pr.__dict__)
+                        if variant_attribute["code"] in {"material", "condition", "color", "size"}:
+                            setattr(vr, variant_attribute["code"], variant_attribute["label"])
+
+                    pr.variants.append(asdict(vr))
+            filed_product_list.append(asdict(pr))
         return filed_product_list
 
     @staticmethod

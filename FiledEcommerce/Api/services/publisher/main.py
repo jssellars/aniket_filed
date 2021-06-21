@@ -1,13 +1,14 @@
 import json
-from datetime import datetime
+
+from FiledEcommerce.Api.Models.filed_model import FiledCustomProperties
 from FiledEcommerce.Api.utils.models.filed_model import FiledProduct, FiledVariant
-from FiledEcommerce.Api.utils.tools.json_serializer import ResponseSerializer
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
 from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import *
+
 
 def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
     products_response = products["products"]
-    
+
     with engine.connect() as conn:
         ep = external_platforms.alias("ep")
         ep_cols = ep.c
@@ -25,7 +26,7 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
         # ALL MAPPED PRODUCTS SHOULD BE ACTIVE BY DEFAULT
         default_state = 1
         filed_set_ins = filed_sets.insert().values(
-            UpdatedAt= get_utc_aware_date(),
+            UpdatedAt=get_utc_aware_date(),
             UpdatedById=user_id,
             UpdatedByFirstName=user_first_name,
             UpdatedByLastName=user_last_name,
@@ -117,12 +118,17 @@ def publisher_lambda(user_id, filed_product_catalog_id, platform, products):
                 )
                 conn.execute(fv_conn_ins)
 
-                if variant.custom_props is not None:
-                    custom_properties_ins = custom_properties.insert().values(
-                        FiledVariantId=filed_variant_id[0], Properties=json.dumps(variant.custom_props.properties)
-                    )
-                    conn.execute(custom_properties_ins)
-                
+                if isinstance(variant.custom_props, dict):
+                    custom_props = variant.custom_props["properties"]
+                elif isinstance(variant.custom_props, FiledCustomProperties):
+                    custom_props = variant.custom_props.properties
+                else:
+                    custom_props = None
+                custom_properties_ins = custom_properties.insert().values(
+                    FiledVariantId=filed_variant_id, Properties=json.dumps(custom_props)
+                )
+                conn.execute(custom_properties_ins)
+
                 filed_sets_variants_ins = filed_set_variants.insert().values(
                     FiledVariantId=filed_variant_id[0],
                     FiledSetId=filed_set_id[0],

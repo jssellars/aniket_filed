@@ -258,7 +258,7 @@ class BigCommerce(Ecommerce):
                 imported_at=imported_at,
                 variants=[],
                 custom_props=FiledCustomProperties(
-                    {field: value for field, value in node.items() if field not in already_mapped_fields}
+                    properties={field: value for field, value in node.items() if field not in already_mapped_fields}
                 ),
             )
 
@@ -289,7 +289,7 @@ class BigCommerce(Ecommerce):
                     compare_at_price=vdf["compare_at_price"]["value"] if vdf.get("compare_at_price") else None,
                     availability=True,
                     url=node["add_to_cart_url"],
-                    image_url=vdf["image_url"]["url"] if vdf.get("image_url") else None,
+                    image_url=vdf["image_url"]["url"] if vdf.get("image_url") else pr.image_url,
                     sku=vnode["sku"],
                     barcode="",
                     inventory_quantity=vnode["inventory"],
@@ -303,12 +303,13 @@ class BigCommerce(Ecommerce):
                     condition=vdf.get("condition", ""),
                     color=vdf.get("color", ""),
                     size=vdf.get("size", ""),
-                    custom_props=FiledCustomProperties(properties=vdf["custom_fields"])
-                    if vdf["custom_fields"]
-                    else None,
+                    custom_props=FiledCustomProperties(properties=vdf.get("custom_fields")),
                 )
-                pr.variants.append(vr)
+                # Set image_url of product to variant if no product image
+                if not pr.image_url:
+                    pr.image_url = vr.image_url
 
+                pr.variants.append(vr)
             products_list.append(asdict(pr))
 
         return {"products": products_list}
