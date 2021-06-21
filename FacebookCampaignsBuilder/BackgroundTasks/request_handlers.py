@@ -755,7 +755,7 @@ class SmartEditPublish:
         adset_bids = budget_optimization.get("adset_bid_amounts")
         if adset_bids:
             params["bid_strategy"] = Campaign.BidStrategy.lowest_cost_with_bid_cap
-            params["adset_bid_amoumts"] = adset_bids
+            params["adset_bid_amounts"] = adset_bids
         else:
             params["bid_strategy"] = Campaign.BidStrategy.lowest_cost_without_cap
 
@@ -1221,8 +1221,8 @@ class AddStructuresToParent:
     @staticmethod
     def _create_adset_for_campaign(ad_account_id: str, adset_request: dict, campaign_id: str) -> dict:
         """
-        Take a ad set request object, and create an ad set in the parent campaign.
-        Finally return the dictionary of 1. created ad set id, and 2. list of ad ids (if any).
+        Take an adset request object, and create an adset in the parent campaign.
+        Finally return the dictionary of 1. created adset id, and 2. list of ad ids (if any).
         NOTE: If Parent Campaign CBO is on, Adset budget will not be set.
         """
         ad_account = AdAccount(fbid=ad_account_id)
@@ -1241,9 +1241,9 @@ class AddStructuresToParent:
             adset_builder.set_statuses_dto(ad_set_template)
             adset_builder.set_date_interval_dto(ad_set_template, adset_request["date"])
             # TODO: Check if conversions is required here!
-            is_using_conversions = adset_request.get("objective") == "CONVERSIONS"
+            objective = adset_request.get("objective")
             ad_set_template.set_promoted_object_fields(
-                adset_builder.set_promoted_object(is_using_conversions, adset_request, adset_request)
+                adset_builder.get_promoted_object(objective, adset_request, adset_request.get("facebook_page_id"))
             )
 
             # Fetch Parent Campaign CBO information to check

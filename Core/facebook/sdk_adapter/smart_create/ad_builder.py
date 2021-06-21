@@ -13,7 +13,6 @@ from facebook_business.adobjects.adcreativeobjectstoryspec import AdCreativeObje
 from facebook_business.adobjects.adcreativephotodata import AdCreativePhotoData
 from facebook_business.adobjects.adcreativevideodata import AdCreativeVideoData
 from facebook_business.adobjects.adimage import AdImage
-from facebook_business.adobjects.conversionactionquery import ConversionActionQuery
 from werkzeug.datastructures import FileStorage
 
 from Core.facebook.sdk_adapter.ad_objects.ad_campaign_delivery_estimate import OptimizationGoal
@@ -115,8 +114,8 @@ def remove_image_url(ad_creative, step_two):
     video_data = ad_creative["object_story_spec"]["video_data"].export_all_data()
     video_data.pop("image_url")
     object_story_spec_data = {
-        AdCreativeObjectStorySpec.Field.page_id: step_two["facebook_page_id"],
-        AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two["instagram_page_id"],
+        AdCreativeObjectStorySpec.Field.page_id: step_two.get("facebook_page_id"),
+        AdCreativeObjectStorySpec.Field.instagram_actor_id: step_two.get("instagram_page_id"),
         AdCreativeObjectStorySpec.Field.video_data: video_data,
     }
     object_story_spec = build_object_story_spec(object_story_spec_data)

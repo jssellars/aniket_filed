@@ -5,8 +5,9 @@ from dataclasses import asdict
 from typing import Dict, List, Optional, Tuple
 
 from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.campaign import Campaign
 
-from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement, Platform
+from Core.facebook.sdk_adapter.ad_objects.content_delivery_report import Placement
 from Core.facebook.sdk_adapter.ad_objects.targeting import DevicePlatform
 from Core.facebook.sdk_adapter.catalog_models import Contexts
 from Core.facebook.sdk_adapter.smart_create.constants import FB_MAX_AGE
@@ -18,7 +19,10 @@ from Core.facebook.sdk_adapter.smart_create.targeting import (
     Interest,
     Targeting,
 )
-from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookGender, Gender
+from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import (
+    FacebookGender,
+    Gender,
+)
 from Core.facebook.sdk_adapter.validations import PLATFORM_X_POSITIONS
 
 FACEBOOK_DEFAULT_KEY = "FACEBOOK"
@@ -40,16 +44,36 @@ DEFAULT_PLACEMENTS = [
 ]
 
 
-def build_ad_sets(step_one, step_two, step_three, step_four, is_using_cbo, is_using_conversions, destination_type):
+def build_ad_sets(
+    step_one,
+    step_two,
+    step_three,
+    step_four,
+    is_using_cbo,
+    is_using_conversions,
+    destination_type,
+):
     ad_set_template = {}
     build_base_ad_sets(
-        ad_set_template, step_one, step_two, step_three, is_using_cbo, is_using_conversions, destination_type
+        ad_set_template,
+        step_one,
+        step_two,
+        step_three,
+        is_using_cbo,
+        is_using_conversions,
+        destination_type,
     )
     return split_ad_sets(ad_set_template, step_two, step_four)
 
 
 def build_base_ad_sets(
-    ad_set_template, step_one, step_two, step_three, is_using_cbo, is_using_conversions, destination_type
+    ad_set_template: Dict,
+    step_one: Dict,
+    step_two: Dict,
+    step_three: Dict,
+    is_using_cbo: bool,
+    objective: str,
+    destination_type: str,
 ):
     # TODO: this is not specified - maybe some default ?
     if AdSet.Field.tune_for_category in step_two:
@@ -62,7 +86,9 @@ def build_base_ad_sets(
 
     set_statuses(ad_set_template)
     set_date_interval(ad_set_template, step_one, step_two)
-    ad_set_template[AdSet.Field.promoted_object] = set_promoted_object(is_using_conversions, step_three.get("ads")[0], step_two)
+    ad_set_template[AdSet.Field.promoted_object] = get_promoted_object(
+        objective, step_three.get("ads")[0], step_two.get("facebook_page_id")
+    )
 
     opt_and_delivery = step_two["optimization_and_delivery"]
     ad_set_template[AdSet.Field.optimization_goal] = opt_and_delivery["optimization_goal"]
@@ -109,21 +135,39 @@ def set_date_interval_dto(ad_set_template, date_interval):
     ad_set_template.end_time = date_interval["end_date"]
 
 
-def set_promoted_object(is_using_conversions, step_three, step_two):
-    if is_using_conversions:
-        # If you provide "pixel_id", then you MUST provide "custom_event_type"
-        # See https://developers.facebook.com/docs/marketing-api/reference/ad-promoted-object/
-        promoted_object = dict(pixel_id=step_three["pixel_id"])
-        promoted_object["custom_event_type"] = step_three["custom_event_type"]
+def extract_pixel_data(request: Dict) -> Dict:
+    pixel_data = dict()
 
-        pixel_rule = step_three.get("pixel_rule")
+    pixel_id = request.get("pixel_id")
+    custom_event_type = request.get("custom_event_type")
 
+    if pixel_id and custom_event_type:
+        pixel_data.update(pixel_id=pixel_id, custom_event_type=custom_event_type)
+
+        pixel_rule = request.get("pixel_rule")
         if isinstance(pixel_rule, str):
             pixel_rule = json.loads(pixel_rule.replace("\\", ""))
-
-            promoted_object["pixel_rule"] = pixel_rule
+            pixel_data["pixel_rule"] = pixel_rule
     else:
-        promoted_object = dict(page_id=step_two["facebook_page_id"])
+        # If you provide "pixel_id", then you MUST provide "custom_event_type"
+        # See https://developers.facebook.com/docs/marketing-api/reference/ad-promoted-object/
+        raise ValueError("Pixel ID and Custom Event Type are required for conversions")
+
+    return pixel_data
+
+
+def get_promoted_object(objective: str, adset_request: Dict = None, page_id: str = None) -> Dict:
+    promoted_object = dict()
+
+    if objective == Campaign.Objective.conversions:
+        pixel_data = extract_pixel_data(adset_request)
+        promoted_object.update(pixel_data)
+
+    elif objective == Campaign.Objective.reach:
+        # Reach requires a facebook page to promote
+        if not page_id:
+            raise ValueError("Reach objective needs a facebook page to be supplied")
+        promoted_object["page_id"] = page_id
 
     return promoted_object
 
@@ -145,10 +189,7 @@ def split_ad_sets(ad_set_template, step_two, step_four):
     age_groups = split_age_groups(is_split_age_range_selected, targeting_request.get("age_range"))
     gender_groups = split_genders(is_split_by_gender_selected, targeting_request.get("gender"))
 
-    (
-        publisher_platforms,
-        platform_positions
-    ) = get_placement_positions(step_two.get("placements"))
+    (publisher_platforms, platform_positions) = get_placement_positions(step_two.get("placements"))
 
     for age_group in age_groups:
         for gender_group in gender_groups:
@@ -241,7 +282,10 @@ def split_genders(is_split_by_gender_selected: bool, gender: int) -> List[Option
 
     gender = Gender(gender)
     if is_split_by_gender_selected and gender == Gender.ALL:
-        return [GenderGroup(genders=[FacebookGender.MEN]), GenderGroup(genders=[FacebookGender.WOMEN])]
+        return [
+            GenderGroup(genders=[FacebookGender.MEN]),
+            GenderGroup(genders=[FacebookGender.WOMEN]),
+        ]
 
     else:
         if gender == Gender.WOMEN:
@@ -271,7 +315,6 @@ def map_interests(interests):
 
 
 def extract_custom_audiences(targeting):
-
     audience_type = targeting.get("type", None)
 
     if audience_type == 2:
@@ -289,9 +332,7 @@ def extract_custom_audiences(targeting):
 
 
 def get_placement_positions(placements: List[Dict]) -> Optional[Tuple[List[str], Dict]]:
-    """
-
-    """
+    """ """
     if not placements:
         return
     publisher_platforms = []
