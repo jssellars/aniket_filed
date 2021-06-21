@@ -1,9 +1,6 @@
 import json
-from dataclasses import asdict
-from datetime import datetime, timezone
 from copy import deepcopy
 from Core.Web.FacebookGraphAPI.Tools import Tools
-import humps
 import requests
 from flask import request
 import urllib.parse
@@ -32,6 +29,9 @@ from FiledEcommerce.Infrastructure.PersistanceLayer.FiledProducts.FiledConstants
 )
 from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
 from facebook_business.adobjects.user import User
+from FiledEcommerce.Api.Dtos.ExportIntegrationMappingDto import (
+    ExportIntegrationMappingDto,
+)
 
 
 class Facebook(Ecommerce):
@@ -42,6 +42,7 @@ class Facebook(Ecommerce):
     request_json = {}
     _redirect_uri = urllib.parse.quote("https://dev3.filed.com")
     filed_business_id = None
+
     @classmethod
     def get_temporary_access_token_url(cls, config):
         return (
@@ -56,15 +57,26 @@ class Facebook(Ecommerce):
             cls.filed_business_id, PlatformsEnum.FACEBOOK.value[1]
         )
         return external_platform
+
+    @classmethod
+    def get_mappings(cls, request: request, platform: str):
+        externalPlatform = cls._get_external_platform()
+        if externalPlatform and externalPlatform.MappingPreferences:
+            return json.loads(externalPlatform.MappingPreferences)
+        return ExportIntegrationMappingDto.get(platform=platform)
+
     @classmethod
     def handle(cls, request: request):
         cls.request_json = request.get_json(force=True)
         cls.facebook_buisness_id = extract_business_owner_facebook_id()
         # cls.facebook_buisness_id = cls.request_json["buisness_id"]
         external_platform = cls._get_external_platform()
-        permanent_token = json.loads(external_platform.Details)["permanent_access_token"]
+        permanent_token = json.loads(external_platform.Details)[
+            "permanent_access_token"
+        ]
         _ = GraphAPISdkBase(config.facebook, permanent_token)
-        cls.mappings = cls.request_json["mapping"]
+        mapping_preference = json.loads(external_platform.MappingPreferences)
+        cls.mappings = mapping_preference if mapping_preference else None
 
     @classmethod
     def create_facebook_catalog(cls, catalog_name):
@@ -105,7 +117,7 @@ class Facebook(Ecommerce):
             single_product = {}
             pyndantic_variant = PydanticFiledVariants.from_orm(variant).dict()
             cls.filed_business_id = int(extract_user_filed_id())
-            if pyndantic_variant['CreatedById'] != cls.filed_business_id:
+            if pyndantic_variant["CreatedById"] != cls.filed_business_id:
                 raise Exception("Filed set is not created by this account")
             for mapping in cls.mappings["variants"]:
                 mapping = dict(mapping)
@@ -148,15 +160,22 @@ class Facebook(Ecommerce):
             ProductCatalog(fbid=fb_catalog_id["id"]).create_product(params=product)
             for product in products
         ]
-        
-        return fb_catalog_id["id"] if len(pushed_products) else f"Catalog created with id {fb_catalog_id['id']} but no products pushed to catalog"
+
+        return (
+            fb_catalog_id["id"]
+            if len(pushed_products)
+            else f"Catalog created with id {fb_catalog_id['id']} but no products pushed to catalog"
+        )
 
     @classmethod
     def pre_install(cls, request: request):
         from facebook_business.exceptions import FacebookRequestError
+
         external_platform = cls._get_external_platform()
         if external_platform:
-            permanent_token = json.loads(external_platform.Details)["permanent_access_token"]
+            permanent_token = json.loads(external_platform.Details)[
+                "permanent_access_token"
+            ]
             try:
                 _ = GraphAPISdkBase(config.facebook, permanent_token)
                 User("me").api_get()
@@ -167,7 +186,7 @@ class Facebook(Ecommerce):
         return cls.get_temporary_access_token_url(config), None
 
     @classmethod
-    def app_install(cls, request):
+    def app_install(cls, request: request):
         cls.request_json = request.get_json(force=True)
         access_token = None
         try:
@@ -181,31 +200,44 @@ class Facebook(Ecommerce):
                 access_token,
             )
             details = {"permanent_access_token": permanent_token}
-            now = get_utc_aware_date()
-            user_id = extract_user_filed_id()
-            platform_id =  PlatformsEnum.FACEBOOK.value[1]
-            jwt_data = decode_jwt_from_headers()
-            user_firstname = jwt_data.get("user_firstname")
-            user_lastname = jwt_data.get("user_lastname")
-            externalPlatform = ExternalPlatforms(
-                CreatedByFirstName=user_firstname,
-                CreatedByLastName=user_lastname,
-                CreatedById=user_id,
-                CreatedAt=now,
-                FiledBusinessOwnerId=user_id,
-                PlatformId=platform_id,
-                Details=details,
-            )
+            externalPlatform = cls._create_external_platform()
+            externalPlatform.Details = details
             return FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
-        return 'app already installed'
+        return "app already installed"
 
     @classmethod
-    def app_load(cls, request):
+    def app_load(cls, request: request):
         pass
 
     @classmethod
-    def app_uninstall(cls, request):
+    def app_uninstall(cls, request: request):
         pass
+
+    @classmethod
+    def _create_external_platform(cls):
+        now = get_utc_aware_date()
+        user_id = extract_user_filed_id()
+        platform_id = PlatformsEnum.FACEBOOK.value[1]
+        jwt_data = decode_jwt_from_headers()
+        user_firstname = jwt_data.get("user_firstname")
+        user_lastname = jwt_data.get("user_lastname")
+        externalPlatform = ExternalPlatforms(
+            CreatedByFirstName=user_firstname,
+            CreatedByLastName=user_lastname,
+            CreatedById=user_id,
+            CreatedAt=now,
+            FiledBusinessOwnerId=user_id,
+            PlatformId=platform_id,
+        )
+        return externalPlatform
+
+    @classmethod
+    def save_mappings(cls, request: request):
+        cls.request_json = request.get_json(force=True)
+        mapping = cls.request_json.get("mapping")
+        externalPlatform = cls._create_external_platform()
+        externalPlatform.MappingPreferences = json.dumps(mapping)
+        return FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
 
     @classmethod
     def get_permanent_token(cls, app_id, app_secret, fb_exchange_token):

@@ -64,12 +64,15 @@ class FiledProductsSQLRepo:
                     if key == 'Id': continue
                     if key  == 'Details':
                         detail = {}
-                        for details_key, details_value in json.loads(value).items():
-                            if details_key in externalPlatform[key].keys():
-                                detail[details_key] = externalPlatform[key][details_key]
-                            else:
-                                detail[details_key] = details_value
-                        temp_external_platform[key] = json.dumps(detail)
+                        if key in externalPlatform.keys():
+                            for details_key, details_value in json.loads(value).items():
+                                if details_key in externalPlatform[key].keys():
+                                    detail[details_key] = externalPlatform[key][details_key]
+                                else:
+                                    detail[details_key] = details_value
+                            temp_external_platform[key] = json.dumps(detail)
+                        else:
+                            temp_external_platform[key] = value
                     else:
                         temp_external_platform[key] =  externalPlatform[key] if key in externalPlatform_keys else value
                 
