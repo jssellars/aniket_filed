@@ -71,10 +71,9 @@ class FiledProductsSQLRepo:
                 temp_external_platform = {}
                 externalPlatform = externalPlatform.__dict__
                 externalPlatform.pop("_sa_instance_state", None)
-                externalPlatform_keys = externalPlatform.keys()
 
-                PydanticExternalPlatforms = sqlalchemy_to_pydantic(ExternalPlatforms)
-                pyndantic_external_platform = PydanticExternalPlatforms.from_orm(
+                pydanticExternalPlatforms = sqlalchemy_to_pydantic(ExternalPlatforms)
+                pyndantic_external_platform = pydanticExternalPlatforms.from_orm(
                     external_platforms_row_from_db
                 ).dict()
                 # this is to make sure we only patch the value.. we should not update the values
@@ -82,24 +81,13 @@ class FiledProductsSQLRepo:
                     if key == "Id":
                         continue
                     if key == "Details":
-                        detail = {}
-                        if key in externalPlatform.keys():
-                            for details_key, details_value in json.loads(value).items():
-                                detail[details_key] = details_value
-
+                        detail = value
+                        if key in externalPlatform:
+                            detail = json.loads(value) if value else {}
                             # updating or adding new keys in details column
-                            for details_key, details_value in externalPlatform[key].items():
-                                detail[details_key] = details_value
-
-                            temp_external_platform[key] = json.dumps(detail)
-                        else:
-                            temp_external_platform[key] = value
-                    else:
-                        temp_external_platform[key] = (
-                            externalPlatform[key]
-                            if key in externalPlatform_keys
-                            else value
-                        )
+                            detail.update(externalPlatform[key])
+                        externalPlatform[key] = json.dumps(detail)
+                    temp_external_platform[key] = externalPlatform.get(key, value)
 
                 temp_external_platform["UpdatedAt"] = get_utc_aware_date()
                 temp_external_platform["UpdatedById"] = temp_external_platform[

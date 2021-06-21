@@ -46,7 +46,7 @@ class Facebook(Ecommerce):
     _callback_url:str = urlparse.quote(
         "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/export/oauth/facebook/install/"
     )
-    filed_business_id:str = None
+    filed_user_id:str = None
 
     @classmethod
     def get_temporary_access_token_url(
@@ -59,9 +59,9 @@ class Facebook(Ecommerce):
 
     @classmethod
     def _get_external_platform(cls):
-        cls.filed_business_id = int(extract_user_filed_id())
+        cls.filed_user_id = int(extract_user_filed_id())
         external_platform = FiledProductsSQLRepo.getExternalPlatformByFiledBussinessId(
-            cls.filed_business_id,
+            cls.filed_user_id,
             FiledProductsSQLRepo.getPlatformByValue(PlatformsEnum.FACEBOOK.value).Id,
         )
         return external_platform
@@ -124,8 +124,8 @@ class Facebook(Ecommerce):
         for variant in variants:
             single_product = {}
             pydantic_variant = PydanticFiledVariants.from_orm(variant).dict()
-            cls.filed_business_id = int(extract_user_filed_id())
-            if pydantic_variant["CreatedById"] != cls.filed_business_id:
+            cls.filed_user_id = int(extract_user_filed_id())
+            if pydantic_variant["CreatedById"] != cls.filed_user_id:
                 raise Exception("Filed set is not created by this account")
             for mapping in cls.mappings["variants"]:
                 mapping = dict(mapping)
@@ -183,7 +183,7 @@ class Facebook(Ecommerce):
         request_json = request.get_json()
         redirect_url = request_json.get("redirect_url")
         details = {"redirect_url": redirect_url, "state": state}
-        if external_platform:
+        if external_platform and False:
             external_platform_details = json.loads(external_platform.Details)
             if "permanent_access_token" in external_platform_details.keys():
                 permanent_token = external_platform_details["permanent_access_token"]
