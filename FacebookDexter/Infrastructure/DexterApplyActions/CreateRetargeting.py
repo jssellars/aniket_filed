@@ -11,7 +11,6 @@ from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields impo
 from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOperator
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset, get_adset_id
 from FacebookDexter.Infrastructure.DexterApplyActions.RecommendationApplyActions import (
     ApplyButtonType,
@@ -49,7 +48,7 @@ class CreateRetargeting(RecommendationAction):
         recommendation: Dict,
         headers: str,
         apply_button_type: ApplyButtonType,
-        command: ApplyRecommendationCommand = None,
+        command: dict = None,
     ):
         """
         Applies the action for the recommendation based on the context saved into the DB
@@ -60,7 +59,7 @@ class CreateRetargeting(RecommendationAction):
         """
         ad_account = AdAccount(recommendation[RecommendationField.ACCOUNT_ID.value])
 
-        initial_adset_id = get_adset_id(recommendation, apply_button_type, command.adset_id)
+        initial_adset_id = get_adset_id(recommendation, apply_button_type, command["adset_id"])
 
         strategy = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.STRATEGY.value]
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]

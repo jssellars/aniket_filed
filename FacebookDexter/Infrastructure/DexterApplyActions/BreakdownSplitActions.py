@@ -19,10 +19,8 @@ from Core.Tools.QueryBuilder.QueryBuilderLogicalOperator import AgGridFacebookOp
 from Core.Web.FacebookGraphAPI.GraphAPI.SdkGetStructures import create_facebook_filter, get_and_map_structures
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.FacebookMiscFields import FacebookBreakdownGender, FacebookMiscFields
 from Core.Web.FacebookGraphAPI.GraphAPIHandlers.GraphAPIBudgetValidationHandler import GraphAPIBudgetValidationHandler
-from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import Level, LevelToGraphAPIStructure
+from Core.Web.FacebookGraphAPI.GraphAPIMappings.LevelMapping import LevelToGraphAPIStructure
 from Core.Web.FacebookGraphAPI.Models.FieldsMetadata import FieldsMetadata
-from Core.Web.FacebookGraphAPI.Tools import Tools
-from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import (
     INVALID_METRIC_VALUE,
     TOTAL_KEY,
@@ -74,7 +72,7 @@ class AgeGenderBreakdownSplit(RecommendationAction):
         recommendation: Dict,
         headers: str,
         apply_button_type: ApplyButtonType,
-        command: ApplyRecommendationCommand = None,
+        command: dict = None,
     ):
 
         facebook_id = recommendation.get(RecommendationField.STRUCTURE_ID.value)

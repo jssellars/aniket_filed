@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, ClassVar, Dict, List, Optional
 
-from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterRules.OverTimeTrendBuckets.BreakdownGroupedData import BreakdownGroupedData
 
 logger = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ class RecommendationAction:
         recommendation: Dict,
         headers: str,
         apply_button_type: ApplyButtonType,
-        command: ApplyRecommendationCommand = None,
+        command: dict = None,
     ):
         raise NotImplementedError
 

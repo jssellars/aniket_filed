@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from math import ceil
 from typing import Dict, Union
 
@@ -100,8 +101,8 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str):
 
     template_key = recommendation.get(RecommendationField.TEMPLATE.value)
 
-    # if not allow_structure_changes(recommendation[RecommendationField.ACCOUNT_ID.value].replace("act_", ""), config):
-    #     raise {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}
+    if not allow_structure_changes(recommendation[RecommendationField.ACCOUNT_ID.value].replace("act_", ""), config):
+        raise {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}
 
     output_enum = get_output_enum(template_key)
 
@@ -128,7 +129,7 @@ def perform_recommendation_action(
 
     # Get the specific action instance and let it deal with the action
     apply_action = get_apply_action(dexter_output.apply_action_type, config, fixtures)
-    success_feedback = apply_action.process_action(recommendation, headers, apply_button_type, command=command)
+    success_feedback = apply_action.process_action(recommendation, headers, apply_button_type, command=asdict(command))
 
     # In the end, mark the recommendation as applied
     query = {

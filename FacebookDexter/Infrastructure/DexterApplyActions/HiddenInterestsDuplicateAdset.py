@@ -14,7 +14,6 @@ from facebook_business.adobjects.adset import AdSet
 from Core.Dexter.Infrastructure.Domain.LevelEnums import LevelEnum
 from Core.Dexter.Infrastructure.Domain.Recommendations.RecommendationFields import RecommendationField
 from Core.Web.FacebookGraphAPI.GraphAPIDomain.GraphAPIInsightsFields import GraphAPIInsightsFields
-from FacebookDexter.Api.Commands.RecommendationPageCommand import ApplyRecommendationCommand
 from FacebookDexter.Infrastructure.DexterApplyActions.ApplyActionsUtils import duplicate_fb_adset_for_hidden_interests
 
 # Local Imports.
@@ -64,7 +63,7 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
         recommendation: Dict,
         headers: str,
         apply_button_type: ApplyButtonType,
-        command: ApplyRecommendationCommand = None,
+        command: dict = None,
     ):
         """
         Applies the action for the Recommendation.
@@ -80,11 +79,11 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
         apply_button_type: ApplyButtonType
             Default Apply Button
 
-        command: ApplyRecommendationCommand
+        command: Dict
            Contains Hidden Interests Data from the Payload.
         """
         # Grab Adset ID & Name based on apply button type
-        adset_id = self.get_adset_id(recommendation, apply_button_type, command.adset_id)
+        adset_id = self.get_adset_id(recommendation, apply_button_type, command["adset_id"])
 
         # Generate Duplicates.
         new_adset_id, number_new_ad, number_ad = duplicate_fb_adset_for_hidden_interests(
@@ -100,7 +99,7 @@ class HiddenInterestsDuplicateAdset(RecommendationAction):
         targeting = new_adset.get(GraphAPIInsightsFields.targeting)
 
         # Update Flexible Spec to the Interests selected by the user.
-        targeting["flexible_spec"] = {"interests": command.hidden_interests_data["interests"]}
+        targeting["flexible_spec"] = {"interests": command["hidden_interests_data"]["interests"]}
         new_adset.api_update(params={"targeting": targeting})
 
         logger.info(f"Creating Adset with Hidden Interests for New adset {adset_id}: {new_adset_id} was a success.")
