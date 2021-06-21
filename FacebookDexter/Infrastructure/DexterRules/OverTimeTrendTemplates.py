@@ -8,7 +8,7 @@ class OverTimeTrendTemplate(Enum):
     CR_DOWN_CTR_DOWN_CPC_UP = DexterRecommendationOutput(
         (
             "Your cost per click is increasing and your click-through rate is decreasing. Over the last {no_of_days}"
-            " it's become {trigger_variance:.2f}% more expensive to run your ad(s)."
+            " days it's become {trigger_variance:.2f}% more expensive to run your ad(s)."
         ),
         RecommendationPriority.HIGH,
         "Improve Ad Copy & Creatives",
@@ -21,36 +21,37 @@ class OverTimeTrendTemplate(Enum):
 
     CR_DOWN_CPM_UP = DexterRecommendationOutput(
         (
-            "Your cost per impression is increasing. Over the last {no_of_days}"
-            " your results have also decreased by {trigger_variance:.2f}%"
+            "Your cost per impression is increasing. Over the last {no_of_days} days your results have also decreased "
+            "by {trigger_variance:.2f}%"
         ),
         RecommendationPriority.HIGH,
         "Change Interest Targeting",
         "Fewer people are viewing your ad(s).",
         (
-            "Dexter recommends changing the interests that you're targeting. Head over to Dexter Labs to try some hidden interests."
-            " These aren't available on Facebook Ads Manager and so may be cheaper to target."
+            "Dexter recommends changing the interests that you're targeting. Head over to Dexter Labs to try some "
+            "hidden interests. These aren't available on Facebook Ads Manager and so may be cheaper to target."
         ),
     )
 
     RESULTS_DOWN_CPM_UP_CR_DOWN = DexterRecommendationOutput(
         (
-            "Your cost per impression is increasing."
-            " Over the last {no_of_days} your results have also decreased by {trigger_variance:.2f}%"
+            "Your cost per impression is increasing. Over the last {no_of_days} days your results have also "
+            "decreased by {trigger_variance:.2f}%"
         ),
         RecommendationPriority.MEDIUM,
         "Change Interest Targeting",
         "Fewer people are viewing your ad(s) and results are decreasing.",
         (
-            "Dexter recommends changing the interests that you’re targeting. Head over to Dexter Labs to try some hidden interests."
-            " These interests aren't available on Facebook Ads Manager and so may be cheaper to target."
+            "Dexter recommends changing the interests that you’re targeting. Head over to Dexter Labs to try some "
+            "hidden interests. These interests aren't available on Facebook Ads Manager and so may be "
+            "cheaper to target."
         ),
     )
 
     RESULTS_DOWN_CPC_UP_CTR_UP = DexterRecommendationOutput(
         (
             "Your cost per click is increasing and your click-through rate is increasing."
-            " However, over the last {no_of_days} your results have decreased by {trigger_variance:.2f}%."
+            " However, over the last {no_of_days} days your results have decreased by {trigger_variance:.2f}%."
         ),
         RecommendationPriority.MEDIUM,
         "Launch AB Testing",
@@ -64,32 +65,34 @@ class OverTimeTrendTemplate(Enum):
     RESULTS_DOWN_CPC_UP_CTR_DOWN = DexterRecommendationOutput(
         (
             "Your cost per click is increasing and your click-through rate is decreasing."
-            " Over the last {no_of_days} your results have decreased by {trigger_variance:.2f}%."
+            " Over the last {no_of_days} days your results have decreased by {trigger_variance:.2f}%."
         ),
         RecommendationPriority.HIGH,
         "Reduce Budget",
         "Fewer people are clicking on your ad(s) and interacting with your landing page.",
-        ("Dexter recommends reducing your budget by 20%. Click apply and I’ll do this for you!"),
+        "Dexter recommends reducing your budget by 20%. Click apply and I’ll do this for you!",
         apply_action_type=ApplyActionType.BUDGET_DECREASE,
     )
 
     RESULTS_DOWN_CR_DOWN_CPR_UP = DexterRecommendationOutput(
         (
-            "Your cost per result is increasing and your conversion rate is decreasing."
-            " Over the last {no_of_days} your results have decreased by {trigger_variance:.2f}%."
+            "Your cost per result is increasing and your conversion rate is decreasing. Over the last {no_of_days} days"
+            " your results have decreased by {trigger_variance:.2f}%."
         ),
         RecommendationPriority.HIGH,
         "New Interest Targeting",
         "Fewer people are converting and it’s becoming more expensive to target them",
         (
-            "Dexter recommends changing the interests that you’re targeting. Head over to Dexter Labs to try some hidden interests."
-            " These interests aren't available on Facebook Ads Manager and so may be cheaper to target."
+            "Dexter recommends changing the interests that you’re targeting. Head over to Dexter Labs to try "
+            "some hidden interests. These interests aren't available on Facebook Ads Manager and so may be "
+            "cheaper to target."
         ),
     )
 
     RESULTS_DOWN_UNIQUE_CTR_UP = DexterRecommendationOutput(
         (
-            "Your results have fallen by {trigger_variance:.2f}% over the last {no_of_days} days but your click-through rate has increased."
+            "Your results have fallen by {trigger_variance:.2f}% over the last {no_of_days} days but your "
+            "click-through rate has increased."
         ),
         RecommendationPriority.MEDIUM,
         "Launch AB Testing",
@@ -103,7 +106,8 @@ class OverTimeTrendTemplate(Enum):
 
     RESULTS_DOWN_UNIQUE_CTR_DOWN = DexterRecommendationOutput(
         (
-            "Your results have decreased by {trigger_variance:.2f}% over the last {no_of_days} days and your click-through rate has decreased as well."
+            "Your results have decreased by {trigger_variance:.2f}% over the last {no_of_days} days and your "
+            "click-through rate has decreased as well."
         ),
         RecommendationPriority.HIGH,
         "Improve Ad Copy & Creatives",
@@ -128,7 +132,8 @@ class OverTimeTrendTemplate(Enum):
 
     RESULTS_DOWN_CPR_UP_CPC_UP = DexterRecommendationOutput(
         (
-            "Your cost per click and cost per result have increased causing your results to decrease by {trigger_variance:.2f}% over the last {no_of_days} days."
+            "Your cost per click and cost per result have increased causing your results to decrease by "
+            "{trigger_variance:.2f}% over the last {no_of_days} days."
         ),
         RecommendationPriority.HIGH,
         "Reduce Budget",
@@ -138,17 +143,24 @@ class OverTimeTrendTemplate(Enum):
     )
 
     RESULTS_UP_UNIQUE_CLICKS_UP = DexterRecommendationOutput(
-        "Your unique clicks are increasing and your results have increased by {trigger_variance:.2f}% over the last {no_of_days} days.",
+        (
+            "Your unique clicks are increasing and your results have increased by "
+            "{trigger_variance:.2f}% over the last {no_of_days} days."
+        ),
         RecommendationPriority.HIGH,
         "Create a lookalike audience",
         "More people are clicking on your ads!",
-        "Well done, your campaign is performing well. Dexter recommends creating a lookalike audience to take advantage of this. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends creating a lookalike audience "
+            "to take advantage of this. Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.CREATE_LOOKALIKE,
     )
 
     RESULTS_UP_UNIQUE_CTR_DOWN = DexterRecommendationOutput(
         (
-            "Your click-through rate has decreased but results have increased by {trigger_variance:.2f}% over the last {no_of_days} days."
+            "Your click-through rate has decreased but results have increased by {trigger_variance:.2f}% "
+            "over the last {no_of_days} days."
         ),
         RecommendationPriority.LOW,
         "Improve Ad Copy & Creatives",
@@ -167,7 +179,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "More people are clicking on your ad(s) and interacting with your landing page",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -179,7 +194,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "More people are viewing and clicking on your ad(s)",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -191,7 +209,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "More people are viewing and clicking on your ad(s) as well as interacting with your landing page.",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -203,7 +224,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "More people are viewing and clicking on your ad(s)",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -215,20 +239,25 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "More people are viewing your ads making conversions cheaper",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
     CTR_DOWN_CPM_UP_CPC_UP = DexterRecommendationOutput(
         (
-            "Your cost per impression and your cost per click have increased whilst your click-through rate has decreased."
+            "Your cost per impression and your cost per click have increased whilst your click-through rate has "
+            "decreased."
         ),
         RecommendationPriority.MEDIUM,
         "New Interest Targeting",
         "Fewer people are viewing and clicking on your ad(s)",
         (
-            "Your audience has become more competitive to target. Dexter recommends changing the interests that you’re targeting."
-            " Head over to Dexter Labs to try some hidden interests. These interests aren't available on Facebook Ads Manager and so may be cheaper to target."
+            "Your audience has become more competitive to target. Dexter recommends changing the interests that "
+            "you’re targeting. Head over to Dexter Labs to try some hidden interests. These interests aren't available "
+            "on Facebook Ads Manager and so may be cheaper to target."
         ),
     )
 
@@ -249,7 +278,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "More people are viewing and clicking on your ad(s) as well as interacting with your landing page.",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -261,7 +293,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
         "Fewer people are viewing your ad(s) but they are interacting with your landing page.",
-        "Dexter recommends trying a new Ad Copy and Creative. Try aligning your Ad Copy with your landing page and making sure the call to actions are clear.",
+        (
+            "Dexter recommends trying a new Ad Copy and Creative. "
+            "Try aligning your Ad Copy with your landing page and making sure the call to actions are clear."
+        ),
     )
 
     CPM_UP_RESULTS_DOWN_CPR_UP = DexterRecommendationOutput(
@@ -281,7 +316,10 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
         "Fewer people are clicking on your ad(s)",
-        "Dexter recommends trying a new Ad Copy and Creative. Try aligning your Ad Copy with your landing page and making sure the call to actions are clear.",
+        (
+            "Dexter recommends trying a new Ad Copy and Creative. Try aligning your Ad Copy with your landing page and "
+            "making sure the call to actions are clear."
+        ),
     )
 
     CLICKS_DOWN_CPM_UP = DexterRecommendationOutput(
@@ -301,12 +339,15 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.LOW,
         "Increase Budget",
         "More people are viewing and clicking on your ad(s) and people are interacting with your landing page.",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
     AMOUNT_SPENT_DOWN_CPR_UP = DexterRecommendationOutput(
-        ("Your cost per result has increased by {trigger_variance:.2f} % over the last {no_of_days} days."),
+        "Your cost per result has increased by {trigger_variance:.2f} % over the last {no_of_days} days.",
         RecommendationPriority.MEDIUM,
         "Improve Ad Copy & Creatives",
         "Conversions are getting more expensive.",
@@ -321,16 +362,22 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Conversions are getting cheaper",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
     AMOUNT_SPENT_DOWN_RESULTS_UP = DexterRecommendationOutput(
-        ("Your results have increased by {trigger_variance:.2f} % over the last {no_of_days} days."),
+        "Your results have increased by {trigger_variance:.2f} % over the last {no_of_days} days.",
         RecommendationPriority.MEDIUM,
         "Increase Budget",
         "Your results have increased",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
@@ -342,21 +389,30 @@ class OverTimeTrendTemplate(Enum):
         RecommendationPriority.MEDIUM,
         "Increase Budget",
         "Your amount spent and cost per result have increased. Consider increasing the budget!",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%."
+            " Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
     AMOUNT_SPENT_UP_CPR_DOWN = DexterRecommendationOutput(
-        ("Your cost per result has decreased by {trigger_variance:.2f} % over the last {no_of_days} days."),
+        "Your cost per result has decreased by {trigger_variance:.2f} % over the last {no_of_days} days.",
         RecommendationPriority.HIGH,
         "Increase Budget",
         "Conversions are becoming cheaper",
-        "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. Click apply and I’ll do this for you!",
+        (
+            "Well done, your campaign is performing well. Dexter recommends increasing your budget by 20%. "
+            "Click apply and I’ll do this for you!"
+        ),
         apply_action_type=ApplyActionType.BUDGET_INCREASE,
     )
 
     CPR_UP_IMPRESSIONS_DOWN = DexterRecommendationOutput(
-        "Your impressions have decreased and your cost per result has increased by {trigger_variance:.2f} % over the last {no_of_days} days.",
+        (
+            "Your impressions have decreased and your cost per result has increased by {trigger_variance:.2f} % "
+            "over the last {no_of_days} days."
+        ),
         RecommendationPriority.HIGH,
         "Improve Ad Copy & Creatives",
         "Fewer people are seeing your ad(s) and conversions are getting more expensive.",

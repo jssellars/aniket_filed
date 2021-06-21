@@ -158,6 +158,7 @@ def duplicate_fb_adset(
 
     # publish copies of ads to all new adsets
     new_ad_ids = make_ad_copies(ad_ids, [new_adset_id])
+    new_ad_ids = list(filter(None, new_ad_ids))
 
     new_created_structures_event = DexterNewCreatedStructureEvent(
         recommendation.get(RecommendationField.BUSINESS_OWNER_ID.value),
@@ -230,6 +231,7 @@ def duplicate_fb_adset_for_hidden_interests(
 
     # Publish copies of ads to all new adsets
     new_ad_ids = make_ad_copies(ad_ids, [new_adset_id])
+    new_ad_ids = list(filter(None, new_ad_ids))
 
     new_created_structures_event = DexterNewCreatedStructureEvent(
         recommendation.get(RecommendationField.BUSINESS_OWNER_ID.value),
