@@ -82,7 +82,7 @@ class ExportOAuth(Resource):
     def get(self, platform, action):
         store = ExportIntegrationProvider.get_instance(platform)
         if action == "preinstall":
-            url, token = store.pre_install(request)
+            url = store.pre_install(request)
         elif action == "install":
             url = store.app_install(request)
         elif action == "load":
@@ -93,11 +93,8 @@ class ExportOAuth(Resource):
             url = "Invalid action"  # Redirect to error page
 
         if action == "preinstall":
-            return {"url": url, 'token': token}
-        elif action == 'install':
-            return {"message": "app installed successfully"} if url else {"message" :"something went wrong, try again"}
-        else:
-            return redirect(url)
+            return {"url": url}
+        return redirect(url)
 
     def post(self, platform, action):
         return self.get(platform, action)

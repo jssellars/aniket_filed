@@ -1,23 +1,27 @@
 from FiledEcommerce.Infrastructure.PersistanceLayer.FiledProducts.models import *
-from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import session_scope
+from FiledEcommerce.Infrastructure.PersistanceLayer.EcommerceSQL_ORM_Model import (
+    session_scope,
+)
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 import json
 from FiledEcommerce.Api.utils.tools.date_utils import get_utc_aware_date
 
-class FiledProductsSQLRepo:
 
+class FiledProductsSQLRepo:
     @staticmethod
-    def getFiledVariantsByFiledSetId(id:int):
+    def getFiledVariantsByFiledSetId(id: int):
         with session_scope() as session:
-            filed_set =  session.query(FiledSets).filter(FiledSets.Id == id).first()
+            filed_set = session.query(FiledSets).filter(FiledSets.Id == id).first()
             if filed_set and filed_set.FiledProductCatalogs:
                 return filed_set.FiledProductCatalogs.FiledVariants, str(filed_set.Name)
             return [], None
 
     @staticmethod
-    def getFiledVariantsByFiledSmartSetId(id:int):
+    def getFiledVariantsByFiledSmartSetId(id: int):
         with session_scope() as session:
-            smart_set = session.query(FiledSmartSets).filter(FiledSmartSets.Id == id).first()
+            smart_set = (
+                session.query(FiledSmartSets).filter(FiledSmartSets.Id == id).first()
+            )
             if smart_set and smart_set.FiledProductCatalogs:
                 return smart_set.FiledProductCatalogs.FiledVariants, str(smart_set.Name)
             return [], None
@@ -36,51 +40,84 @@ class FiledProductsSQLRepo:
     def getPlatformByValue(value):
         with session_scope() as session:
             return session.query(Platforms).filter(Platforms.Value == value).first()
-    
+
     @staticmethod
     def getExternalPlatformByFiledBussinessId(FiledBusinessOwnerId, platformId):
         with session_scope() as session:
-            return session.query(ExternalPlatforms).filter(ExternalPlatforms.FiledBusinessOwnerId == FiledBusinessOwnerId, ExternalPlatforms.PlatformId == platformId).first()
+            return (
+                session.query(ExternalPlatforms)
+                .filter(
+                    ExternalPlatforms.FiledBusinessOwnerId == FiledBusinessOwnerId,
+                    ExternalPlatforms.PlatformId == platformId,
+                )
+                .first()
+            )
 
     @staticmethod
     def createExternalPlatform(externalPlatform):
         with session_scope() as session:
             return session.add(externalPlatform)
+            
 
     @staticmethod
     def createOrupdateExternalPlatform(externalPlatform: ExternalPlatforms):
-        external_platforms_row_from_db = FiledProductsSQLRepo.getExternalPlatformByFiledBussinessId(externalPlatform.FiledBusinessOwnerId, externalPlatform.PlatformId)
+        external_platforms_row_from_db = (
+            FiledProductsSQLRepo.getExternalPlatformByFiledBussinessId(
+                externalPlatform.FiledBusinessOwnerId, externalPlatform.PlatformId
+            )
+        )
         if external_platforms_row_from_db:
             with session_scope() as session:
                 temp_external_platform = {}
                 externalPlatform = externalPlatform.__dict__
-                externalPlatform.pop('_sa_instance_state', None)
+                externalPlatform.pop("_sa_instance_state", None)
                 externalPlatform_keys = externalPlatform.keys()
 
                 PydanticExternalPlatforms = sqlalchemy_to_pydantic(ExternalPlatforms)
-                pyndantic_external_platform = PydanticExternalPlatforms.from_orm(external_platforms_row_from_db).dict()
+                pyndantic_external_platform = PydanticExternalPlatforms.from_orm(
+                    external_platforms_row_from_db
+                ).dict()
                 # this is to make sure we only patch the value.. we should not update the values
                 for key, value in pyndantic_external_platform.items():
-                    if key == 'Id': continue
-                    if key  == 'Details':
+                    if key == "Id":
+                        continue
+                    if key == "Details":
                         detail = {}
                         if key in externalPlatform.keys():
                             for details_key, details_value in json.loads(value).items():
-                                if details_key in externalPlatform[key].keys():
-                                    detail[details_key] = externalPlatform[key][details_key]
-                                else:
-                                    detail[details_key] = details_value
+                                detail[details_key] = details_value
+
+                            # updating or adding new keys in details column
+                            for details_key, details_value in externalPlatform[key].items():
+                                detail[details_key] = details_value
+
                             temp_external_platform[key] = json.dumps(detail)
                         else:
                             temp_external_platform[key] = value
                     else:
-                        temp_external_platform[key] =  externalPlatform[key] if key in externalPlatform_keys else value
-                
-                temp_external_platform['UpdatedAt'] =  get_utc_aware_date()
-                temp_external_platform['UpdatedById'] =  temp_external_platform['CreatedById']
-                temp_external_platform['UpdatedByFirstName'] =  temp_external_platform['CreatedByFirstName']
-                temp_external_platform['UpdatedByLastName'] =  temp_external_platform['CreatedByLastName']
-                
-                return session.query(ExternalPlatforms).filter(ExternalPlatforms.Id == external_platforms_row_from_db.Id).update(dict(temp_external_platform)) #update a new entry in database if not present
+                        temp_external_platform[key] = (
+                            externalPlatform[key]
+                            if key in externalPlatform_keys
+                            else value
+                        )
 
-        return FiledProductsSQLRepo.createExternalPlatform(externalPlatform) #create a new entry in database if not present
+                temp_external_platform["UpdatedAt"] = get_utc_aware_date()
+                temp_external_platform["UpdatedById"] = temp_external_platform[
+                    "CreatedById"
+                ]
+                temp_external_platform["UpdatedByFirstName"] = temp_external_platform[
+                    "CreatedByFirstName"
+                ]
+                temp_external_platform["UpdatedByLastName"] = temp_external_platform[
+                    "CreatedByLastName"
+                ]
+
+                return (
+                    session.query(ExternalPlatforms)
+                    .filter(ExternalPlatforms.Id == external_platforms_row_from_db.Id)
+                    .update(dict(temp_external_platform))
+                )  # update a new entry in database if not present
+
+        return FiledProductsSQLRepo.createExternalPlatform(
+            externalPlatform
+        )  # create a new entry in database if not present

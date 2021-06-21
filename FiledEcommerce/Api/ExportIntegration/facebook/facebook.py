@@ -1,9 +1,12 @@
 import json
+import secrets
 from copy import deepcopy
+
 from Core.Web.FacebookGraphAPI.Tools import Tools
 import requests
 from flask import request
-import urllib.parse
+import urllib.parse as urlparse
+
 from Core.Web.Security.JWTTools import decode_jwt_from_headers
 from FiledEcommerce.Api.ExportIntegration.interface.ecommerce import Ecommerce
 
@@ -36,25 +39,30 @@ from FiledEcommerce.Api.Dtos.ExportIntegrationMappingDto import (
 
 class Facebook(Ecommerce):
 
-    facebook_buisness_id = None
-    errors = []
-    mappings = {}
-    request_json = {}
-    _redirect_uri = urllib.parse.quote("https://dev3.filed.com")
-    filed_business_id = None
+    facebook_buisness_id:str = None
+    errors:dict = []
+    mappings:dict = {}
+    request_json:dict = {}
+    _callback_url:str = urlparse.quote(
+        "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/export/oauth/facebook/install/"
+    )
+    filed_business_id:str = None
 
     @classmethod
-    def get_temporary_access_token_url(cls, config):
+    def get_temporary_access_token_url(
+        cls, config: config, state: str
+    ):
         return (
             f"https://www.facebook.com/{config.facebook.api_version}/dialog/oauth?client_id={config.facebook.app_id}"
-            f"&redirect_uri={cls._redirect_uri}&state=abc&response_type=token"
+            f"&redirect_uri={cls._callback_url}&state={state}&response_type=token"
         )
 
     @classmethod
     def _get_external_platform(cls):
         cls.filed_business_id = int(extract_user_filed_id())
         external_platform = FiledProductsSQLRepo.getExternalPlatformByFiledBussinessId(
-            cls.filed_business_id, PlatformsEnum.FACEBOOK.value[1]
+            cls.filed_business_id,
+            FiledProductsSQLRepo.getPlatformByValue(PlatformsEnum.FACEBOOK.value).Id,
         )
         return external_platform
 
@@ -115,28 +123,28 @@ class Facebook(Ecommerce):
 
         for variant in variants:
             single_product = {}
-            pyndantic_variant = PydanticFiledVariants.from_orm(variant).dict()
+            pydantic_variant = PydanticFiledVariants.from_orm(variant).dict()
             cls.filed_business_id = int(extract_user_filed_id())
-            if pyndantic_variant["CreatedById"] != cls.filed_business_id:
+            if pydantic_variant["CreatedById"] != cls.filed_business_id:
                 raise Exception("Filed set is not created by this account")
             for mapping in cls.mappings["variants"]:
                 mapping = dict(mapping)
                 filedKey = mapping.get("filedKey")
                 mappedTo = mapping.get("mappedTo")
-                pyndantic_variant_keys = pyndantic_variant.keys()
-                if filedKey in pyndantic_variant_keys:
-                    single_product[mappedTo] = pyndantic_variant[filedKey]
+                pydantic_variant_keys = pydantic_variant.keys()
+                if filedKey in pydantic_variant_keys:
+                    single_product[mappedTo] = pydantic_variant[filedKey]
                     if mappedTo == FacebookProductItem.Field.price:
-                        single_product[mappedTo] = int(pyndantic_variant[filedKey])
+                        single_product[mappedTo] = int(pydantic_variant[filedKey])
 
                     if filedKey == "Availability":
-                        if int(pyndantic_variant[filedKey]) == 1:
+                        if int(pydantic_variant[filedKey]) == 1:
                             single_product["availability"] = "in stock"
                         else:
                             single_product["availability"] = "out of stock"
 
                 if mappedTo == FacebookProductItem.Field.condition:
-                    single_product[mappedTo] = pyndantic_variant[filedKey] or "new"
+                    single_product[mappedTo] = pydantic_variant[filedKey] or "new"
 
                 if mappedTo == FacebookProductItem.Field.brand:
                     single_product[
@@ -161,39 +169,45 @@ class Facebook(Ecommerce):
             for product in products
         ]
 
-        return (
-            fb_catalog_id["id"]
-            if len(pushed_products)
-            else f"Catalog created with id {fb_catalog_id['id']} but no products pushed to catalog"
-        )
+        if len(pushed_products):
+            return fb_catalog_id["id"]
+        else:
+            raise Exception(f"Catalog created with id {fb_catalog_id['id']} but no products pushed to catalog")
 
     @classmethod
     def pre_install(cls, request: request):
         from facebook_business.exceptions import FacebookRequestError
 
+        state = secrets.token_hex(nbytes=8)
         external_platform = cls._get_external_platform()
+        request_json = request.get_json()
+        redirect_url = request_json.get("redirect_url")
+        details = {"redirect_url": redirect_url, "state": state}
         if external_platform:
-            permanent_token = json.loads(external_platform.Details)[
-                "permanent_access_token"
-            ]
-            try:
-                _ = GraphAPISdkBase(config.facebook, permanent_token)
-                User("me").api_get()
-                return None, permanent_token
-            except FacebookRequestError:
-                pass  # return the url to get the token in the last line
-
-        return cls.get_temporary_access_token_url(config), None
+            external_platform_details = json.loads(external_platform.Details)
+            if "permanent_access_token" in external_platform_details.keys():
+                permanent_token = external_platform_details["permanent_access_token"]
+                try:
+                    _ = GraphAPISdkBase(config.facebook, permanent_token)
+                    User("me").api_get()
+                    return None
+                except FacebookRequestError:
+                    pass  # return the url to get the token in the last line
+        else:
+            externalPlatform = cls._create_external_platform()
+            externalPlatform.Details = details
+            FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
+        return cls.get_temporary_access_token_url(config, state)
 
     @classmethod
     def app_install(cls, request: request):
         cls.request_json = request.get_json(force=True)
-        access_token = None
-        try:
-            access_token = cls.request_json["access_token"]
-        except:
-            pass  # skip if we already have permanent token
-        if access_token:
+        data = request.args
+        state = data.get("state")
+        access_token = data.get("access_token")
+        external_platform = cls._get_external_platform()
+        external_platform_details = json.loads(external_platform.Details)
+        if access_token and external_platform_details["state"] == state:
             permanent_token = cls.get_permanent_token(
                 config.facebook.app_id,
                 config.facebook.app_secret,
@@ -202,8 +216,9 @@ class Facebook(Ecommerce):
             details = {"permanent_access_token": permanent_token}
             externalPlatform = cls._create_external_platform()
             externalPlatform.Details = details
-            return FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
-        return "app already installed"
+            FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
+            return external_platform_details["redirect_url"]
+        return None
 
     @classmethod
     def app_load(cls, request: request):
@@ -217,7 +232,9 @@ class Facebook(Ecommerce):
     def _create_external_platform(cls):
         now = get_utc_aware_date()
         user_id = extract_user_filed_id()
-        platform_id = PlatformsEnum.FACEBOOK.value[1]
+        platform_id = FiledProductsSQLRepo.getPlatformByValue(
+            PlatformsEnum.FACEBOOK.value
+        ).Id
         jwt_data = decode_jwt_from_headers()
         user_firstname = jwt_data.get("user_firstname")
         user_lastname = jwt_data.get("user_lastname")

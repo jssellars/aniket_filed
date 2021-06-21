@@ -1,17 +1,17 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class PlatformsEnum(Enum):
-    FILED = ('Filed', 1)
-    SHOPIFY = ('shopify', 2)
-    FACEBOOK = ('facebook', 3)
-    BIGCOMMERCE = ('bigcommerce', 4)
-    MAGENTO = ('magento', 5)
-    WOOCOMMERCE = ('woocommerce', 6)
-    CSV = ('csv', 7)
-    GOOGLE = ('google', 8)
-    AMAZON = ('amazon', 9)
-    SNAPCHAT = ('snapchat', 19)
+    FILED = 'filed'
+    SHOPIFY = 'shopify'
+    FACEBOOK = 'facebook'
+    BIGCOMMERCE = 'bigcommerce'
+    MAGENTO = 'magento'
+    WOOCOMMERCE = 'woocommerce'
+    CSV = 'csv'
+    GOOGLE = 'google'
+    AMAZON = 'amazon'
+    SNAPCHAT = 'snapchat'
 
 
 
