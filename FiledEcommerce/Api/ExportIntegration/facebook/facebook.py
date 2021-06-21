@@ -183,7 +183,7 @@ class Facebook(Ecommerce):
         request_json = request.get_json()
         redirect_url = request_json.get("redirect_url")
         details = {"redirect_url": redirect_url, "state": state}
-        if external_platform and False:
+        if external_platform:
             external_platform_details = json.loads(external_platform.Details)
             if "permanent_access_token" in external_platform_details.keys():
                 permanent_token = external_platform_details["permanent_access_token"]
