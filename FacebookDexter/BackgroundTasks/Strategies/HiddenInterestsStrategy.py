@@ -132,10 +132,10 @@ class HiddenInterestsStrategy(DexterLabsStrategyBase):
         valid_adset_structures = []
 
         for adset_structure in adset_structures:
-            if "flexible_spec" in adset_structure["details"]["targeting"]:
-                if len(adset_structure["details"]["targeting"]["flexible_spec"]) > 0:
-                    for specs in adset_structure["details"]["targeting"]["flexible_spec"]:
-                        if "interests" in specs:
-                            valid_adset_structures.append(adset_structure)
+            targeting = adset_structure.get("details", {}).get("targeting", {})
+            if "flexible_spec" in targeting:
+                for specs in targeting.get("flexible_spec"):
+                    if "interests" in specs:
+                        valid_adset_structures.append(adset_structure)
 
         return valid_adset_structures
