@@ -35,4 +35,5 @@ for router, route in router_route_pairs:
     api.add_resource(router, f"{config.base_url.lower()}/{route}")
 
 if __name__ == "__main__":
+    
     app.run(debug=config.logger_level == "DEBUG", host="localhost", port=config.port)

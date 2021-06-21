@@ -32,3 +32,13 @@ class Ecommerce(ABC):
     @abstractmethod
     def app_uninstall(cls, request):
         pass
+
+    @classmethod
+    @abstractmethod
+    def save_mappings(cls, request):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def get_mappings(cls, request, platform):
+        pass

@@ -56,19 +56,27 @@ class ExportIntegrationModel(Resource):
 class ExportIntegrationMapping(Resource):
     def get(self, platform):
         try:
-            return ExportIntegrationMappingDto.get(platform=platform)
+            return ExportIntegrationProvider.get_instance(platform).get_mappings(request=request, platform=platform)
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
             return {"message": "Failed to retrieve mapping."}, 400
+    
+    def post(self, platform):
+        try:
+            ExportIntegrationProvider.get_instance(platform).save_mappings(request)
+            return {"message": "Mapping Preferences saved successfully"}, 200
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+            return {"message": "failed to save mappings to the database"}, 400
 
 class ExportFiledProductSet(Resource):
     def post(self, platform):
         try:
-            ExportIntegrationProvider.get_instance(platform).export(request)
-            return {"message": "push products catalog pushed successfully"}, 200
+            catalog_id = ExportIntegrationProvider.get_instance(platform).export(request)
+            return {"message": f"pushed filed products to {platform}", "catalog_id": catalog_id}, 200
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
-            return {"message": "Failed to push products catalog"}, 400
+            return {"message": f"failed to push products to {platform}"}, 400
 
 class ExportOAuth(Resource):
     def get(self, platform, action):
@@ -86,8 +94,7 @@ class ExportOAuth(Resource):
 
         if action == "preinstall":
             return {"url": url}
-        else:
-            return redirect(url)
+        return redirect(url)
 
     def post(self, platform, action):
         return self.get(platform, action)
