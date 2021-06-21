@@ -1058,7 +1058,7 @@ class AddStructuresToParent:
                 for adset_id in child_ids:
                     new_adset_id = AddStructuresToParent._duplicate_structure_on_facebook(
                         parent_level, child_level, adset_id, campaign_id
-                    )
+                    )["adset_ids"][0]
 
                     orig_fb_adset = AdSet(fbid=adset_id)
                     ad_ids = [ad.get_id() for ad in (orig_fb_adset.get_ads(fields=["id"]))]
@@ -1104,7 +1104,7 @@ class AddStructuresToParent:
                     )
 
             for future in concurrent.futures.as_completed(futures):
-                new_copies.append(future.result())
+                new_copies.extend(future.result()[f"{child_level}_ids"])
                 AddStructuresToParent.create_queue(child_level)
 
             return new_copies
