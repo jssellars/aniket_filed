@@ -165,13 +165,15 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
 
             if targeting_search_response:
                 interests_response = [Tools.convert_to_json(targeting_search_response[0])][0]
-                source_interests_list.append(
-                    {
-                        "name": interests_response.get("name"),
-                        "id": interests_response.get("id"),
-                        "audience_size": interests_response.get("audience_size"),
-                    }
-                )
+
+                if interests_response.get("type", None) == "interests":
+                    source_interests_list.append(
+                        {
+                            "name": interests_response.get("name"),
+                            "id": interests_response.get("id"),
+                            "audience_size": interests_response.get("audience_size"),
+                        }
+                    )
             else:
                 source_interests_list.append(
                     {"name": interest.get("name"), "id": interest.get("id"), "audience_size": 0}
@@ -206,15 +208,15 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
                 logger.info(
                     f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
                 )
-
-            fb_suggested = [
-                Tools.convert_to_json(response) for response in targeting_search_response
-            ]
-
             # Filter "Interests" only from Interests suggested by facebook.
             suggested_interests = []
 
-            if fb_suggested:
+            if targeting_search_response:
+
+                fb_suggested = [
+                    Tools.convert_to_json(response) for response in targeting_search_response
+                ]
+
                 for suggested in fb_suggested:
                     if suggested.get("type") == "interests":
                         suggested.pop("type", None)
