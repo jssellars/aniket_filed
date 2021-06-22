@@ -1,8 +1,12 @@
+from collections import defaultdict
 from datetime import datetime
 
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.campaign import Campaign
+from typing import Optional
+
+from facebook_business.exceptions import FacebookRequestError
 
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientBase import GraphAPIClientBase
 from Core.Web.FacebookGraphAPI.GraphAPI.GraphAPIClientConfig import GraphAPIClientBaseConfig
@@ -181,6 +185,130 @@ class AdsManagerDuplicateStructureCommandHandler:
             return self.__duplicate_adset_parameters(parent_id)
         elif level == Level.AD.value:
             return self.__duplicate_ad_parameters(parent_id)
+        else:
+            raise ValueError(f"Unknown level supplied: {level}. Please try again using campaign, adset, or ad")
+
+    @staticmethod
+    def __duplicate_campaign_parameters():
+        parameters = {"deep_copy": False, "status_option": Campaign.StatusOption.paused}
+        return parameters
+
+    @staticmethod
+    def __duplicate_adset_parameters(parent_id):
+        parameters = {"campaign_id": parent_id, "deep_copy": False, "status_option": AdSet.StatusOption.paused}
+        return parameters
+
+    @staticmethod
+    def __duplicate_ad_parameters(parent_id):
+        parameters = {"adset_id": parent_id, "status_option": Ad.StatusOption.paused}
+        return parameters
+
+
+class AdsDuplicateStructureCommandHandler:
+    @staticmethod
+    def handle(level, facebook_id, business_owner_facebook_id):
+        # get business owner permanent Facebook token
+        business_owner_permanent_token = fixtures.business_owner_repository.get_permanent_token(
+            business_owner_facebook_id
+        )
+
+        # Create a Facebook API client
+        _ = GraphAPISdkBase(config.facebook, business_owner_permanent_token)
+
+        parent_id = AdsDuplicateStructureCommandHandler.__get_parent_id(level, facebook_id)
+        try:
+            return AdsDuplicateStructureCommandHandler.__duplicate_structure(
+                level,
+                facebook_id,
+                parent_id,
+            )
+        except FacebookRequestError as e:
+            raise Exception(f"Facebook error: {e}")
+        except Exception as e:
+            raise Exception(f"Py Error: {e}")
+
+    @staticmethod
+    def __get_parent_id(level: str, facebook_id: str) -> Optional[str]:
+        if level == Level.CAMPAIGN.value:
+            return None
+        elif level == Level.ADSET.value:
+            fb_structure = AdSet(facebook_id)
+            parent_id = fb_structure.api_get(fields=[AdSet.Field.campaign_id]).get(AdSet.Field.campaign_id)
+        elif level == Level.AD.value:
+            fb_structure = Ad(facebook_id)
+            parent_id = fb_structure.api_get(fields=[Ad.Field.adset_id]).get(Ad.Field.adset_id)
+        else:
+            raise ValueError(f"Unknown level supplied: {level}. Please try again using campaign, adset, or ad")
+        return parent_id
+
+    @staticmethod
+    def __duplicate_structure(level, facebook_id, parent_id):
+        response = defaultdict(list)
+
+        if level == Level.CAMPAIGN.value:
+            AdsDuplicateStructureCommandHandler.__duplicate_campaign(response, facebook_id)
+        elif level == Level.ADSET.value:
+            AdsDuplicateStructureCommandHandler.__duplicate_adset(response, facebook_id, parent_id)
+        elif level == Level.AD.value:
+            AdsDuplicateStructureCommandHandler.__duplicate_ad(response, facebook_id, parent_id)
+        else:
+            raise ValueError(f"Unknown level supplied: {level}. Please try again using campaign, adset, or ad")
+
+        return response
+
+    @staticmethod
+    def __duplicate_campaign(response: defaultdict, campaign_id: str) -> None:
+        new_campaign_facebook_id = AdsDuplicateStructureCommandHandler.__duplicate_structure_on_facebook(
+            Level.CAMPAIGN.value,
+            campaign_id,
+            None,
+        )
+        response[Level.CAMPAIGN.value].append(new_campaign_facebook_id)
+
+        fb_campaign = Campaign(campaign_id)
+        adsets = fb_campaign.get_ad_sets()
+        for adset in adsets:
+            AdsDuplicateStructureCommandHandler.__duplicate_adset(
+                response, adset[AdSet.Field.id], new_campaign_facebook_id
+            )
+
+    @staticmethod
+    def __duplicate_adset(response: defaultdict, adset_id: str, parent_id: str) -> None:
+        new_adset_facebook_id = AdsDuplicateStructureCommandHandler.__duplicate_structure_on_facebook(
+            Level.ADSET.value,
+            adset_id,
+            parent_id,
+        )
+        response[Level.ADSET.value].append(new_adset_facebook_id)
+        fb_adset = AdSet(adset_id)
+        ads = fb_adset.get_ads()
+        for ad in ads:
+            AdsDuplicateStructureCommandHandler.__duplicate_ad(response, ad[Ad.Field.id], new_adset_facebook_id)
+
+    @staticmethod
+    def __duplicate_ad(response: defaultdict, ad_id: str, parent_id: str) -> None:
+        new_ad_facebook_id = AdsDuplicateStructureCommandHandler.__duplicate_structure_on_facebook(
+            Level.AD.value,
+            ad_id,
+            parent_id,
+        )
+        response[Level.AD.value].append(new_ad_facebook_id)
+
+    @staticmethod
+    def __duplicate_structure_on_facebook(level, facebook_id, parent_id=None) -> str:
+        structure = LevelToGraphAPIStructure.get(level, facebook_id)
+        params = AdsDuplicateStructureCommandHandler.__create_duplicate_parameters(level, parent_id)
+        new_structure = structure.create_copy(params=params)
+        return new_structure[f"copied_{level}_id"]
+
+    @staticmethod
+    def __create_duplicate_parameters(level, parent_id=None):
+        if level == Level.CAMPAIGN.value:
+            return AdsDuplicateStructureCommandHandler.__duplicate_campaign_parameters()
+        elif level == Level.ADSET.value:
+            return AdsDuplicateStructureCommandHandler.__duplicate_adset_parameters(parent_id)
+        elif level == Level.AD.value:
+            return AdsDuplicateStructureCommandHandler.__duplicate_ad_parameters(parent_id)
         else:
             raise ValueError(f"Unknown level supplied: {level}. Please try again using campaign, adset, or ad")
 

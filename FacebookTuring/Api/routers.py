@@ -21,10 +21,9 @@ from Core.Web.Security.Permissions import (
 from FacebookTuring.Api.Commands.AdsManagerDuplicateStructureCommand import AdsManagerDuplicateStructureCommand
 from FacebookTuring.Api.Commands.AdsManagerFilteredStructuresCommand import AdsManagerFilteredStructuresCommand
 from FacebookTuring.Api.Commands.AdsManagerUpdateStructureCommand import AdsManagerUpdateStructureCommand
-from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import (
-    AdsManagerDeleteStructureCommandHandler,
-)
+from FacebookTuring.Api.CommandsHandlers.AdsManagerDeleteStructureCommandHandler import AdsDeleteStructureCommandHandler
 from FacebookTuring.Api.CommandsHandlers.AdsManagerDuplicateStructureCommandHandler import (
+    AdsDuplicateStructureCommandHandler,
     AdsManagerDuplicateStructureCommandHandler,
     AdsManagerDuplicateStructureCommandHandlerException,
 )
@@ -383,10 +382,7 @@ class AdsManager(Resource):
     def delete(self, level, facebook_id):
         business_owner_facebook_id = extract_business_owner_facebook_id()
         try:
-            response = AdsManagerDeleteStructureCommandHandler.handle(level, facebook_id, business_owner_facebook_id)
-
-            if not response:
-                return {"message": f"Missing structure {facebook_id}."}, 400
+            AdsDeleteStructureCommandHandler.handle(level, facebook_id, business_owner_facebook_id)
 
             return None, 204
 
@@ -419,6 +415,19 @@ class AdsManagerDuplicateStructure(Resource):
             logger.exception(repr(e), extra=request_as_log_dict(request))
 
             return {"message": f"Could not find structure {facebook_id} tree."}, 404
+
+        except Exception as e:
+            logger.exception(repr(e), extra=request_as_log_dict(request))
+
+            return {"message": f"Failed to duplicate structure {facebook_id}."}, 400
+
+    @fixtures.authorize_permission(permission=AdsManagerPermissions.ADS_MANAGER_EDIT)
+    def get(self, level, facebook_id):
+        try:
+            business_owner_facebook_id = extract_business_owner_facebook_id()
+            response = AdsDuplicateStructureCommandHandler().handle(level, facebook_id, business_owner_facebook_id)
+
+            return response, 200
 
         except Exception as e:
             logger.exception(repr(e), extra=request_as_log_dict(request))
