@@ -101,8 +101,8 @@ def apply_recommendation(recommendation_id: str, business_owner_id: str):
 
     template_key = recommendation.get(RecommendationField.TEMPLATE.value)
 
-    if not allow_structure_changes(recommendation[RecommendationField.ACCOUNT_ID.value].replace("act_", ""), config):
-        raise {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}
+    # if not allow_structure_changes(recommendation[RecommendationField.ACCOUNT_ID.value].replace("act_", ""), config):
+    #     raise {"message": "CannotAlterStructureForCurrentEnvironmentAndAdAccount"}
 
     output_enum = get_output_enum(template_key)
 
