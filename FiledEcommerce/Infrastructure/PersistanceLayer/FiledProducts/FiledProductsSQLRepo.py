@@ -79,15 +79,17 @@ class FiledProductsSQLRepo:
         )
         if filed_product_catalog_connection_from_db:
             with session_scope() as session:
+                catalog_connections = filedProductCatalogConnections.__dict__
+                catalog_connections.pop("_sa_instance_state", None)
                 return (
                     session.query(FiledProductCatalogConnections)
                     .filter(
                         FiledProductCatalogConnections.FiledProductCatalogId
                         == filed_product_catalog_connection_from_db.FiledProductCatalogId,
-                        filedProductCatalogConnections.ExternalPlatformId
+                        FiledProductCatalogConnections.ExternalPlatformId
                         == filed_product_catalog_connection_from_db.ExternalPlatformId,
                     )
-                    .update(filedProductCatalogConnections)
+                    .update(catalog_connections)
                 )
 
         return FiledProductsSQLRepo.createFiledProductCatalogConnections(

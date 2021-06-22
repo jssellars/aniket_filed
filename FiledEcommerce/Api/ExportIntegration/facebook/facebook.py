@@ -205,7 +205,7 @@ class Facebook(Ecommerce):
 
         filed_catalog_id = cls.request_json.get("filed_catalog_id")
         filed_product_connection = FiledProductCatalogConnections(
-            FiledProductCatalogId=filed_catalog_id, ExternalPlatformId=external_platform.Id
+            FiledProductCatalogId=filed_catalog_id, ExternalPlatformId=external_platform.Id, IdInPlatform=""
         )
         FiledProductsSQLRepo.createOrUpdateFiledProductCatalogConnections(
             filed_product_connection
