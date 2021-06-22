@@ -152,32 +152,41 @@ class GetInterestsHandler(LabsHiddenInterestsCommandHandlersBase):
 
         """
         source_interests_list = []
-        targeting_search_response = None
+        interests_response = None
 
-        for interest in flexible_spec:
-            params = {"q": interest.get("name"), "type": TargetingSearch.TargetingSearchTypes.interest}
+        # Grab the interests set in flexible spec.
+        for interests in flexible_spec:
             try:
-                targeting_search_response = self.ad_account.get_targeting_search(params=params)
+                interests_response = self.ad_account.get_by_ids([interests["id"]])
             except FacebookRequestError:
                 logger.info(
                     f"Facebook Request Error: Facebook Graph API Failed for Adset ID {self.adset_structure_details['adset_id']}"
                 )
 
-            if targeting_search_response:
-                interests_response = [Tools.convert_to_json(targeting_search_response[0])][0]
+            if interests_response:
 
-                if interests_response.get("type", None) == "interests":
-                    source_interests_list.append(
-                        {
-                            "name": interests_response.get("name"),
-                            "id": interests_response.get("id"),
-                            "audience_size": interests_response.get("audience_size"),
-                        }
-                    )
+                source_interests = [
+                    Tools.convert_to_json(response) for response in interests_response
+                ]
+                source_interests = source_interests[0]
+
+                # Add to Source Interests List.
+                source_interests_list.append(
+                    {
+                        "name": source_interests["name"],
+                        "id": source_interests["id"],
+                        "audience_size": source_interests["audience_size"]
+                    }
+                )
             else:
                 source_interests_list.append(
-                    {"name": interest.get("name"), "id": interest.get("id"), "audience_size": 0}
+                    {
+                        "name": interests["name"],
+                        "id": interests["id"],
+                        "audience_size": 0
+                    }
                 )
+
         return {"source_interests": source_interests_list}
 
     def get_suggested_interests(self, interests_list: list, limit: int = 5):
