@@ -54,10 +54,50 @@ class FiledProductsSQLRepo:
             )
 
     @staticmethod
-    def createExternalPlatform(externalPlatform):
+    def getFiledProductCatalogConnection(catalogId: int, externalPlatformId: int):
+        with session_scope() as session:
+            return session.query(FiledProductCatalogConnections).filter(
+                FiledProductCatalogConnections.FiledProductCatalogId == catalogId,
+                FiledProductCatalogConnections.ExternalPlatformId == externalPlatformId,
+            ).first()
+
+    @staticmethod
+    def createFiledProductCatalogConnections(
+        filedProductCatalogConnections: FiledProductCatalogConnections,
+    ):
+        with session_scope() as session:
+            return session.add(filedProductCatalogConnections)
+
+    def createOrUpdateFiledProductCatalogConnections(
+        filedProductCatalogConnections: FiledProductCatalogConnections,
+    ):
+        filed_product_catalog_connection_from_db = (
+            FiledProductsSQLRepo.getFiledProductCatalogConnection(
+                filedProductCatalogConnections.FiledProductCatalogId,
+                filedProductCatalogConnections.ExternalPlatformId,
+            )
+        )
+        if filed_product_catalog_connection_from_db:
+            with session_scope() as session:
+                return (
+                    session.query(FiledProductCatalogConnections)
+                    .filter(
+                        FiledProductCatalogConnections.FiledProductCatalogId
+                        == filed_product_catalog_connection_from_db.FiledProductCatalogId,
+                        filedProductCatalogConnections.ExternalPlatformId
+                        == filed_product_catalog_connection_from_db.ExternalPlatformId,
+                    )
+                    .update(filedProductCatalogConnections)
+                )
+
+        return FiledProductsSQLRepo.createFiledProductCatalogConnections(
+            filedProductCatalogConnections
+        )
+
+    @staticmethod
+    def createExternalPlatform(externalPlatform: ExternalPlatforms):
         with session_scope() as session:
             return session.add(externalPlatform)
-            
 
     @staticmethod
     def createOrupdateExternalPlatform(externalPlatform: ExternalPlatforms):

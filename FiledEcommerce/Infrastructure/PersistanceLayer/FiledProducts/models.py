@@ -1,10 +1,6 @@
 ''' SQl Alchmemy model for filed product '''
-
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
-
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.mssql import BIGINT, DATETIME2, DECIMAL, NVARCHAR
+from sqlalchemy.dialects.mssql import BIGINT, DATETIME2, DECIMAL, NVARCHAR, BIT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -241,10 +237,17 @@ class ExternalPlatforms(Base):
     CreatedById = Column(BIGINT)
     CreatedByFirstName = Column(NVARCHAR())
     CreatedByLastName = Column(NVARCHAR())
-    # Name = Column(NVARCHAR())
+    IsSource = Column(BIGINT())
 
     FiledBusinessOwnerId = Column(BIGINT, ForeignKey("FiledBusinessOwners.FiledBusinessOwnerId"))
     PlatformId = Column(BIGINT, ForeignKey("Platforms.Id"))
     MappingPreferences = Column(NVARCHAR())
     Details = Column(NVARCHAR())
+
+class FiledProductCatalogConnections(Base):
+    __tablename__ = "FiledProductCatalogConnections"
+
+    FiledProductCatalogId = Column(BIGINT, ForeignKey("FiledProductCatalogs.Id"), primary_key=True)
+    ExternalPlatformId = Column(BIGINT, ForeignKey("ExternalPlatforms.Id"), primary_key=True)
+    IdInPlatform = Column(NVARCHAR(), default="")
 

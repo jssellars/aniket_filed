@@ -2,7 +2,7 @@ from facebook_business.adobjects.productitem import ProductItem as FacebookProdu
                  
 facebook_mapping = {
     "mapping": {
-        "variants": [
+        "variant": [
             {
                 "name": "ID",
                 "filedKey": "Id",
