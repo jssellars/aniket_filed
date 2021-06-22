@@ -65,7 +65,7 @@ class CreateRetargeting(RecommendationAction):
         pixel_id = recommendation[RecommendationField.APPLY_PARAMETERS.value][RecommendationField.PIXEL_ID.value]
 
         retargeting = create_retargeting_audience(
-            ad_account, strategy, pixel_id, recommendation[RecommendationField.STRUCTURE_NAME]
+            ad_account, strategy, pixel_id, recommendation[RecommendationField.STRUCTURE_NAME.value]
         )
 
         if not retargeting:
@@ -178,7 +178,7 @@ def create_retargeting_audience(
     )
 
     if not existing_audience:
-        # If there is no generic lookalike audience, create one
+        # If there is no generic retargeting audience, create one
         try:
             existing_audience = ad_account.create_custom_audience(params=params)
         except Exception as e:
