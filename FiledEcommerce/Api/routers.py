@@ -84,7 +84,7 @@ class ExportOAuth(Resource):
         if action == "preinstall":
             url = store.pre_install(request)
         elif action == "install":
-            url = store.app_install(request)
+            status = store.app_install(request)
         elif action == "load":
             url = store.app_load(request)
         elif action == "uninstall":
@@ -94,6 +94,8 @@ class ExportOAuth(Resource):
 
         if action == "preinstall":
             return {"url": url}
+        if action == "install":
+            return {"status": status}
         return redirect(url)
 
     def post(self, platform, action):

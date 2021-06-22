@@ -43,9 +43,9 @@ class Facebook(Ecommerce):
     errors:dict = []
     mappings:dict = {}
     request_json:dict = {}
-    _callback_url:str = urlparse.quote(
-        "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/export/oauth/facebook/install/"
-    )
+    # _callback_url:str = urlparse.quote(
+    #     "https://py-filed-ecommerce-api.dev3.filed.com/api/v1/export/oauth/facebook/install/"
+    # )
     filed_user_id:str = None
 
     @classmethod
@@ -54,7 +54,7 @@ class Facebook(Ecommerce):
     ):
         return (
             f"https://www.facebook.com/{config.facebook.api_version}/dialog/oauth?client_id={config.facebook.app_id}"
-            f"&redirect_uri={cls._callback_url}&state={state}&response_type=token"
+            f"&redirect_uri={cls.redirect_url}&state={state}&response_type=token"
         )
 
     @classmethod
@@ -178,11 +178,11 @@ class Facebook(Ecommerce):
     def pre_install(cls, request: request):
         from facebook_business.exceptions import FacebookRequestError
 
-        state = secrets.token_hex(nbytes=8)
+        state = secrets.token_hex(nbytes=10)
         external_platform = cls._get_external_platform()
         request_json = request.get_json()
-        redirect_url = request_json.get("redirect_url")
-        details = {"redirect_url": redirect_url, "state": state}
+        cls.redirect_url = urlparse.quote(request_json.get("redirect_url"))
+        details = {"redirect_url": cls.redirect_url, "state": state}
         if external_platform:
             external_platform_details = json.loads(external_platform.Details)
             if "permanent_access_token" in external_platform_details.keys():
@@ -195,16 +195,15 @@ class Facebook(Ecommerce):
                     pass  # return the url to get the token in the last line
         else:
             externalPlatform = cls._create_external_platform()
-            externalPlatform.Details = details
+            externalPlatform.Details = json.dumps(details)
             FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
         return cls.get_temporary_access_token_url(config, state)
 
     @classmethod
     def app_install(cls, request: request):
         cls.request_json = request.get_json(force=True)
-        data = request.args
-        state = data.get("state")
-        access_token = data.get("access_token")
+        state = cls.request_json.get("state")
+        access_token = cls.request_json.get("access_token")
         external_platform = cls._get_external_platform()
         external_platform_details = json.loads(external_platform.Details)
         if access_token and external_platform_details["state"] == state:
@@ -215,10 +214,10 @@ class Facebook(Ecommerce):
             )
             details = {"permanent_access_token": permanent_token}
             externalPlatform = cls._create_external_platform()
-            externalPlatform.Details = details
+            externalPlatform.Details = json.dumps(details)
             FiledProductsSQLRepo.createOrupdateExternalPlatform(externalPlatform)
-            return external_platform_details["redirect_url"]
-        return None
+            return True
+        return False
 
     @classmethod
     def app_load(cls, request: request):

@@ -85,7 +85,7 @@ class FiledProductsSQLRepo:
                         if key in externalPlatform:
                             detail = json.loads(value) if value else {}
                             # updating or adding new keys in details column
-                            detail.update(externalPlatform[key])
+                            detail.update(json.loads(externalPlatform[key]))
                         externalPlatform[key] = json.dumps(detail)
                     temp_external_platform[key] = externalPlatform.get(key, value)
 
