@@ -68,7 +68,8 @@ class Facebook(Ecommerce):
     def get_mappings(cls, request: request, platform: str):
         externalPlatform = cls._get_external_platform()
         if externalPlatform and externalPlatform.MappingPreferences:
-            return json.loads(externalPlatform.MappingPreferences)
+            mapping = {'mapping':json.loads(externalPlatform.MappingPreferences)}
+            return mapping
         return ExportIntegrationMappingDto.get(platform=platform)
 
     @classmethod
@@ -187,7 +188,7 @@ class Facebook(Ecommerce):
             try:
                 _ = GraphAPISdkBase(config.facebook, permanent_token)
                 User("me").api_get()
-                return None
+                return True
             except Exception:
                 pass  # return the url to get the token in the last line
 

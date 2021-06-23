@@ -123,9 +123,8 @@ class FiledProductsSQLRepo:
                     if key == "Id":
                         continue
                     if key == "Details":
-                        detail = value
+                        detail = json.loads(value) if value else {}
                         if key in externalPlatform:
-                            detail = json.loads(value) if value else {}
                             # updating or adding new keys in details column
                             detail.update(json.loads(externalPlatform[key]))
                         externalPlatform[key] = json.dumps(detail)
